@@ -70,7 +70,7 @@ src/app/
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn
+- yarn
 
 ### Installation
 
@@ -82,12 +82,12 @@ src/app/
 
 2. **Install dependencies**
    ```bash
-   npm install
+   yarn install
    ```
 
 3. **Start development server**
    ```bash
-   npm run dev
+   yarn dev
    ```
 
 4. **Open the application**
@@ -97,10 +97,10 @@ src/app/
 
 ```bash
 # Build the application
-npm run build
+yarn build
 
 # Start production server
-npm start
+yarn start
 ```
 
 ## 📱 User Interface
@@ -164,10 +164,10 @@ The main dashboard provides:
 
 ### Scripts
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
+yarn dev          # Start development server
+yarn build        # Build for production
+yarn start        # Start production server
+yarn lint         # Run ESLint
 ```
 
 ## 📝 Documentation
