@@ -1,36 +1,199 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VectorVerify
 
-## Getting Started
+VectorVerify is a role-aware web application for monthly data quality control of mosquito-surveillance data. Built with Next.js 15, it provides Master Vector Control Officers (VCOs) with comprehensive tools to review KPIs, inspect data tables, resolve discrepancies, approve clean snapshots, and complete monthly image-annotation assignments.
 
-First, run the development server:
+## 🎯 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Data Review & Quality Control
+- **District-Month Review**: Open any district and month to review KPIs and data quality
+- **Session/Specimen Inspection**: Detailed tables for collection data analysis
+- **Discrepancy Resolution**: Identify and resolve data inconsistencies
+- **Workflow Management**: Clear progression from Draft → In Review → Approved → Exported
+- **Approval System**: Approve clean data snapshots for export
+
+### Image Annotation
+- **Monthly Assignments**: Complete 50-200 specimen classifications per month
+- **Fast Labeling UI**: Keyboard shortcuts and streamlined interface for rapid annotation
+- **Species Classification**: Identify mosquito species with confidence scoring
+- **Progress Tracking**: Monitor completion rates and accuracy metrics
+
+### Export & Reporting
+- **Ministry of Health Exports**: Generate reproducible data bundles
+- **Job Status Monitoring**: Track export progress and completion
+- **Audit Trail**: Complete changelog of all system activities
+- **Data Integrity**: Checksums and digital signatures for exported packages
+
+### Administration
+- **Role-based Access**: Master VCOs can access any district/month
+- **System Monitoring**: Real-time job status and performance metrics
+- **Comprehensive Logging**: Full audit trail of data changes and user actions
+
+## 🏗️ Architecture
+
+### Framework
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for responsive design
+- **React** for interactive components
+
+### Page Structure
+```
+src/app/
+├── layout.tsx                          # Root layout
+├── page.tsx                            # Dashboard
+├── auth/                               # Authentication
+│   ├── login/page.tsx
+│   └── logout/page.tsx
+├── review/                             # Data Review
+│   ├── page.tsx                        # Review tasks list
+│   └── [district]/[month]/
+│       ├── page.tsx                    # Review overview
+│       ├── kpis/page.tsx               # KPI dashboard
+│       ├── sessions/page.tsx           # Session data
+│       ├── specimens/page.tsx          # Specimen data
+│       └── discrepancies/page.tsx      # Issue resolution
+├── annotation/                         # Image Annotation
+│   ├── page.tsx                        # Assignment list
+│   └── [month]/
+│       ├── page.tsx                    # Monthly overview
+│       └── labeling/page.tsx           # Fast labeling UI
+├── exports/                            # Export Management
+│   ├── page.tsx                        # Export history
+│   └── [exportId]/page.tsx             # Export details
+├── admin/                              # Administration
+│   ├── jobs/page.tsx                   # Job monitoring
+│   └── changelog/page.tsx              # Audit trail
+└── profile/page.tsx                    # User settings
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation
 
-## Learn More
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/vci-developers/vector-verify.git
+   cd vector-verify
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Open the application**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Deploy on Vercel
+### Build for Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Build the application
+npm run build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start production server
+npm start
+```
+
+## 📱 User Interface
+
+### Dashboard
+The main dashboard provides:
+- Recent Review Tasks with status indicators
+- Recent Annotation Tasks with progress tracking
+- Quick access district-month picker
+- Navigation to all major features
+
+### Data Review Interface
+- **KPI Dashboard**: Metrics, trends, and quality indicators
+- **Data Tables**: Filterable and sortable session/specimen data
+- **Discrepancy Management**: Issue tracking and resolution
+- **Workflow Status**: Visual progress through approval stages
+
+### Fast Labeling Interface
+- **Keyboard Shortcuts**: Numbers 1-8 for species selection
+- **Navigation**: Arrow keys for specimen browsing
+- **Confidence Scoring**: Adjustable confidence levels
+- **Progress Tracking**: Real-time completion status
+
+### Export Management
+- **Status Monitoring**: Track export job progress
+- **Package Details**: Content verification and download
+- **Integrity Checking**: Checksums and digital signatures
+- **Audit Trail**: Complete export history
+
+## 🔐 Security & Authentication
+
+- **Role-based Access Control**: Only authenticated VCOs can access features
+- **Session Management**: Secure login/logout handling
+- **Data Integrity**: Cryptographic checksums for exports
+- **Audit Logging**: Complete record of all system activities
+
+## 📊 Data Workflow
+
+1. **Collection**: Mosquito surveillance data collection in field
+2. **Import**: Data imported into VectorVerify system
+3. **Review**: VCOs review KPIs, sessions, and specimens
+4. **Quality Control**: Discrepancies identified and resolved
+5. **Annotation**: Monthly specimen classification assignments
+6. **Approval**: Clean data snapshots approved for export
+7. **Export**: Reproducible bundles delivered to Ministry of Health
+8. **Audit**: Complete changelog maintained for accountability
+
+## 🛠️ Development
+
+### Code Structure
+- **Feature-based Organization**: Each major feature in its own directory
+- **TypeScript**: Full type safety with strict configuration
+- **Component Reusability**: Shared UI components across features
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+
+### Key Design Principles
+- **Scalability**: Easy to add new districts, months, and features
+- **Intuitive Navigation**: Clear hierarchy and breadcrumb navigation
+- **Performance**: Server-side rendering for data-heavy pages
+- **Accessibility**: WCAG compliance with semantic HTML
+
+### Scripts
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+```
+
+## 📝 Documentation
+
+- [Page Structure Guide](docs/PAGE_STRUCTURE.md) - Detailed page organization
+- [API Documentation](docs/API.md) - Backend integration points
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏥 Acknowledgments
+
+- Ministry of Health for surveillance data requirements
+- Vector Control Officers for field testing and feedback
+- Public Health Institute for domain expertise
+
+---
+
+**VectorVerify** - Ensuring data quality in mosquito surveillance for public health protection.
