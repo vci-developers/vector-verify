@@ -1,9 +1,9 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/inpu";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/butto";
+import { Checkbox } from "@/components/ui/checkbo";
 import { Fragment } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
