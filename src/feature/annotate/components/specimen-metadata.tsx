@@ -19,7 +19,7 @@ export function SpecimenMetadata({
     : "Unknown";
 
   return (
-    <div className="grid grid-cols-2 gap-4 w-full text-sm">
+    <div className="grid grid-cols-2 gap-y-9 px-3 w-full text-sm">
       <div>
         <Label className="text-sm text-muted-foreground">Location:</Label>
         <p>{location}</p>

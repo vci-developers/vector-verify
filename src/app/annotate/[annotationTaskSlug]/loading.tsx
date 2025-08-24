@@ -35,7 +35,7 @@ export default function Loading() {
         </CardContent>
 
         <CardFooter className="border-t py-4.5 px-4">
-          <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="grid grid-cols-2 gap-y-9 px-3 w-full">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i}>
                 <Skeleton className="h-3 w-20 mb-1" />
