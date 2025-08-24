@@ -93,11 +93,15 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
   const goToNext = () =>
     currentIndex < totalSpecimens - 1 && setCurrentIndex(currentIndex + 1);
 
-  const handleAnnotationFormSubmit = async (values: AnnotationFormOutput) => {
+  const handleAnnotationFormSubmit = async (
+    formOutput: AnnotationFormOutput
+  ) => {
     console.log("Saving annotation data:", {
       specimenId: currentSpecimen?.specimenId,
-      ...values,
+      ...formOutput,
     });
+
+    setTimeout(() => {}, 2000);
 
     if (currentIndex < totalSpecimens - 1) {
       goToNext();
@@ -187,6 +191,8 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
                   src={currentSpecimen.imageUrl}
                   alt="Specimen"
                   fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain pointer-events-none"
                   draggable={false}
                 />

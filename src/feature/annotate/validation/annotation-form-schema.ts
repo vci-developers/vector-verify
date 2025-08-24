@@ -4,7 +4,7 @@ export const AnnotationBase = z.object({
   species: z.string().optional(),
   sex: z.string().optional(),
   abdomenStatus: z.string().optional(),
-  notes: z.string().min(2).max(1000).optional(),
+  notes: z.string().optional(),
   flagged: z.boolean().default(false),
 });
 
@@ -54,5 +54,5 @@ export const AnnotationFormSchema = AnnotationBase.superRefine(
   }
 );
 
-export type AnnotationFormInput  = z.input<typeof AnnotationFormSchema>;
+export type AnnotationFormInput = z.input<typeof AnnotationFormSchema>;
 export type AnnotationFormOutput = z.output<typeof AnnotationFormSchema>;

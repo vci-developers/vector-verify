@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Flag, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toDomId } from "@/lib/id-utils";
 
 interface AnnotationFormProps {
   onSubmit: (values: AnnotationFormOutput) => Promise<void> | void;
@@ -129,7 +130,7 @@ export default function AnnotationForm({
             name="species"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Species</FormLabel>
+                <FormLabel htmlFor={toDomId(field.name)}>Species</FormLabel>
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Species"
@@ -149,7 +150,7 @@ export default function AnnotationForm({
             name="sex"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sex</FormLabel>
+                <FormLabel htmlFor={toDomId(field.name)}>Sex</FormLabel>
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Sex"
@@ -169,7 +170,9 @@ export default function AnnotationForm({
             name="abdomenStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Abdomen Status</FormLabel>
+                <FormLabel htmlFor={toDomId(field.name)}>
+                  Abdomen Status
+                </FormLabel>
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Abdomen Status"
@@ -189,7 +192,7 @@ export default function AnnotationForm({
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel htmlFor={toDomId(field.name)}>
                   Notes{" "}
                   {currentFlagged && (
                     <span className="text-destructive">(Required)*</span>
@@ -197,11 +200,8 @@ export default function AnnotationForm({
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder={
-                      currentFlagged
-                        ? "Required when flagged…"
-                        : "Add observations…"
-                    }
+                    id={toDomId(field.name)}
+                    placeholder="Add observations..."
                     className="min-h-[80px] resize-none text-sm"
                     {...field}
                   />

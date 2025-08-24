@@ -6,6 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toDomId } from "@/lib/id-utils";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 
@@ -32,6 +33,7 @@ export default function MorphIdDropdownMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          id={toDomId(label)}
           variant="outline"
           className={cn(
             "w-full justify-between",
@@ -39,10 +41,14 @@ export default function MorphIdDropdownMenu({
           )}
           disabled={!enabled}
         >
-          {selectedMorphId ? (
-            <span>{selectedMorphId}</span>
+          {enabled ? (
+            selectedMorphId ? (
+              <span>{selectedMorphId}</span>
+            ) : (
+              <span className="text-muted-foreground">Select {label}...</span>
+            )
           ) : (
-            <span className="text-muted-foreground">Select {label}...</span>
+            <span className="text-muted-foreground">Not Applicable</span>
           )}
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
