@@ -5,7 +5,7 @@ export const SPECIES_LABELS = [
   "Culex",
   "Aedes",
   "Mansonia",
-  "Non mosquito",
+  "Non Mosquito",
 ];
 
 export const SEX_LABELS = ["Male", "Female"];

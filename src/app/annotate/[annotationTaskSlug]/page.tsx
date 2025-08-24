@@ -7,37 +7,23 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
-import { Toggle } from "@/components/ui/toggle";
-import { SpecimenMetadata } from "@/features/annotate/components/SpecimenMetadata";
-import { useImageZoom } from "@/features/annotate/hooks/useImageZoom";
+import AnnotationForm from "@/feature/annotate/components/annotation-panel/annotation-form";
+import { SpecimenMetadata } from "@/feature/annotate/components/specimen-metadata";
+import { useImageZoom } from "@/feature/annotate/hooks/useImageZoom";
+import { AnnotationFormOutput } from "@/feature/annotate/validation/annotation-form-schema";
 import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-annotation-tasks";
 import { getProgressStats } from "@/lib/image-utils";
-import {
-  ABDOMEN_STATUS_LABELS,
-  SEX_LABELS,
-  SPECIES_LABELS,
-} from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Calendar,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
   FileCheck,
-  Flag,
   ImageIcon,
   RotateCcw,
-  Save,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -51,16 +37,12 @@ interface AnnotationPageProps {
 export default function AnnotationPage({ params }: AnnotationPageProps) {
   const { annotationTaskSlug } = use(params);
   const task = DUMMY_ANNOTATION_TASKS.find(
-    (t) => t.id === parseInt(annotationTaskSlug)
+    (t) => t.id === parseInt(annotationTaskSlug, 10)
   );
 
   // State
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedSpecies, setSelectedSpecies] = useState("");
-  const [selectedSex, setSelectedSex] = useState("");
-  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState("");
-  const [isFlagged, setIsFlagged] = useState(false);
-  const [notes, setNotes] = useState("");
+
   const [activeNavButton, setActiveNavButton] = useState<
     "left" | "right" | null
   >(null);
@@ -111,24 +93,12 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
   const goToNext = () =>
     currentIndex < totalSpecimens - 1 && setCurrentIndex(currentIndex + 1);
 
-  const handleSubmit = () => {
+  const handleAnnotationFormSubmit = async (values: AnnotationFormOutput) => {
     console.log("Saving annotation data:", {
       specimenId: currentSpecimen?.specimenId,
-      species: selectedSpecies,
-      sex: selectedSex,
-      abdomenStatus: selectedAbdomenStatus,
-      isFlagged,
-      notes,
+      ...values,
     });
 
-    // Reset form
-    setSelectedSpecies("");
-    setSelectedSex("");
-    setSelectedAbdomenStatus("");
-    setIsFlagged(false);
-    setNotes("");
-
-    // Navigate to next or show completion
     if (currentIndex < totalSpecimens - 1) {
       goToNext();
     } else {
@@ -158,41 +128,6 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
       window.removeEventListener("keyup", handleKeyUp);
     };
   }, [currentIndex, totalSpecimens]);
-
-  // UI components for dropdown selectors
-  const renderDropdown = (
-    label: string,
-    value: string,
-    placeholder: string,
-    options: string[],
-    onSelect: (value: string) => void
-  ) => (
-    <div>
-      <h3 className="text-sm font-medium mb-2">{label}</h3>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
-            {value ? (
-              <span>{value}</span>
-            ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
-            )}
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="w-[var(--radix-dropdown-menu-trigger-width)]"
-        >
-          {options.map((option) => (
-            <DropdownMenuItem key={option} onSelect={() => onSelect(option)}>
-              {option}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
 
   // Status card component
   const StatusCard = ({
@@ -309,6 +244,8 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
               value={completedPercent}
               className="bg-secondary-foreground/10 h-1.5"
               aria-label="annotation progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
               aria-valuenow={completedPercent}
             />
           </div>
@@ -341,73 +278,7 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
               </div>
             </div>
 
-            {/* Dropdowns */}
-            <div className="space-y-2.5">
-              {renderDropdown(
-                "Species",
-                selectedSpecies,
-                "Select species...",
-                SPECIES_LABELS,
-                setSelectedSpecies
-              )}
-
-              {renderDropdown(
-                "Sex",
-                selectedSex,
-                "Select sex...",
-                SEX_LABELS,
-                setSelectedSex
-              )}
-
-              {renderDropdown(
-                "Abdomen Status",
-                selectedAbdomenStatus,
-                "Select abdomen status...",
-                ABDOMEN_STATUS_LABELS,
-                setSelectedAbdomenStatus
-              )}
-            </div>
-
-            {/* Notes */}
-            <div>
-              <h3 className="text-sm font-medium mb-1.5">Notes</h3>
-              <Textarea
-                placeholder="Add observations..."
-                className="min-h-[80px] resize-none text-sm"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-            </div>
-
-            {/* Action buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Toggle
-                pressed={isFlagged}
-                onPressedChange={setIsFlagged}
-                className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-md border transition-colors",
-                  "data-[state=on]:bg-destructive/20 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/30 motion-safe:data-[state=on]:animate-pulse",
-                  "data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent"
-                )}
-              >
-                <Flag
-                  className={cn(
-                    "h-4 w-4",
-                    isFlagged && "text-destructive fill-current"
-                  )}
-                />
-                <span>{isFlagged ? "Remove Flag" : "Flag"}</span>
-              </Toggle>
-
-              <Button
-                variant="default"
-                className="flex items-center justify-center gap-1.5"
-                onClick={handleSubmit}
-              >
-                <Save className="h-4 w-4" />
-                Submit
-              </Button>
-            </div>
+            <AnnotationForm onSubmit={handleAnnotationFormSubmit} />
           </div>
         </CardContent>
 
