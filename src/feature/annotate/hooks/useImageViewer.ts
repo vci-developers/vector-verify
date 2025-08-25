@@ -1,4 +1,8 @@
-import { useRef, useState, useMemo, useCallback } from "react";
+"use client";
+
+import { useCallback, useMemo, useRef, useState } from "react";
+
+type Point = { x: number; y: number };
 
 interface UseImageViewer {
   zoom: number;
@@ -16,8 +20,6 @@ interface UseImageViewer {
   };
   transformStyle: React.CSSProperties;
 }
-
-type Point = { x: number; y: number };
 
 export function useImageViewer(maxZoom = 3): UseImageViewer {
   const viewerRef = useRef<HTMLDivElement>(null);
