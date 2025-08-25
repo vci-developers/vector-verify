@@ -8,26 +8,15 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import AnnotationForm from "@/feature/annotate/components/annotation-panel/annotation-form";
-import { SpecimenMetadata } from "@/feature/annotate/components/specimen-metadata";
-import { useImageZoom } from "@/feature/annotate/hooks/useImageZoom";
+import AnnotationForm from "@/feature/annotate/components/annotation-panel/annotation-form/annotation-form";
+import AnnotationStatus from "@/feature/annotate/components/annotation-panel/annotation-status/annotation-status";
+import { SpecimenMetadata } from "@/feature/annotate/components/specimen-panel/specimen-metadata";
+import { SpecimenImageViewer } from "@/feature/annotate/components/specimen-panel/specimen-image-viewer";
 import { AnnotationFormOutput } from "@/feature/annotate/validation/annotation-form-schema";
 import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-annotation-tasks";
 import { getProgressStats } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
-import {
-  AlertCircle,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  FileCheck,
-  ImageIcon,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
-import Image from "next/image";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { use, useEffect, useState } from "react";
 
 interface AnnotationPageProps {
@@ -59,33 +48,6 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
   const { completedPercent, annotated, flagged, unannotated } = task
     ? getProgressStats(task.images)
     : { completedPercent: 0, annotated: 0, flagged: 0, unannotated: 0 };
-
-  // Zoom functionality
-  const {
-    viewerRef,
-    zoom,
-    offset,
-    isDragging,
-    startDrag,
-    doDrag,
-    endDrag,
-    adjustZoom,
-    resetView,
-  } = useImageZoom();
-
-  const cursorClass =
-    zoom > 1
-      ? isDragging
-        ? "cursor-grabbing"
-        : "cursor-grab"
-      : "cursor-default";
-  const imageTransform = {
-    transform: `scale(${zoom}) translate(${offset.x / zoom}px, ${
-      offset.y / zoom
-    }px)`,
-    transition: isDragging ? "none" : "transform 0.2s ease-out",
-    transformOrigin: "center",
-  };
 
   // Navigation handlers
   const goToPrevious = () =>
@@ -174,55 +136,7 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
         </CardHeader>
 
         <CardContent className="p-2 px-6 pt-0.5 pb-0.5">
-          <div
-            ref={viewerRef}
-            className={cn(
-              "bg-muted/50 rounded-md overflow-hidden select-none h-[380px] w-full",
-              cursorClass
-            )}
-            onMouseDown={startDrag}
-            onMouseMove={doDrag}
-            onMouseUp={endDrag}
-            onMouseLeave={endDrag}
-          >
-            {currentSpecimen?.imageUrl ? (
-              <div className="relative w-full h-full" style={imageTransform}>
-                <Image
-                  src={currentSpecimen.imageUrl}
-                  alt="Specimen"
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-contain pointer-events-none"
-                  draggable={false}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-center gap-2 mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => adjustZoom(0.25)}
-            >
-              <ZoomIn className="h-4 w-4 mr-1" /> Zoom In
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => adjustZoom(-0.25)}
-            >
-              <ZoomOut className="h-4 w-4 mr-1" /> Zoom Out
-            </Button>
-            <Button variant="outline" size="sm" onClick={resetView}>
-              <RotateCcw className="h-4 w-4 mr-1" /> Reset
-            </Button>
-          </div>
+          <SpecimenImageViewer imageUrl={currentSpecimen?.imageUrl} />
         </CardContent>
 
         <CardFooter className="border-t py-0.5 px-4">
@@ -259,30 +173,11 @@ export default function AnnotationPage({ params }: AnnotationPageProps) {
 
         <CardContent className="px-6 pt-1 overflow-y-auto flex-grow">
           <div className="space-y-3">
-            {/* Status breakdown */}
-            <div className="flex flex-col gap-1.5">
-              <h3 className="text-sm font-medium">Status Breakdown</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <StatusCard
-                  icon={<FileCheck className="h-4 w-4 text-primary" />}
-                  color="primary"
-                  label="Completed"
-                  count={annotated}
-                />
-                <StatusCard
-                  icon={<Clock className="h-4 w-4 text-amber-500" />}
-                  color="amber-500"
-                  label="Pending"
-                  count={unannotated}
-                />
-                <StatusCard
-                  icon={<AlertCircle className="h-4 w-4 text-destructive" />}
-                  color="destructive"
-                  label="Flagged"
-                  count={flagged}
-                />
-              </div>
-            </div>
+            <AnnotationStatus
+              annotated={annotated}
+              pending={unannotated}
+              flagged={flagged}
+            />
 
             <AnnotationForm onSubmit={handleAnnotationFormSubmit} />
           </div>

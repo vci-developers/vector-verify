@@ -1,5 +1,3 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -8,7 +6,7 @@ import {
   type AnnotationFormOutput,
   isSexEnabled,
   isAbdomenStatusEnabled,
-} from "../../validation/annotation-form-schema";
+} from "../../../validation/annotation-form-schema";
 import {
   Form,
   FormControl,
@@ -18,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import MorphIdDropdownMenu from "../morph-id-dropdown-menu";
+import MorphIdDropdownMenu from "./morph-id-dropdown-menu";
 import {
   ABDOMEN_STATUS_LABELS,
   SEX_LABELS,
@@ -202,7 +200,7 @@ export default function AnnotationForm({
                   <Textarea
                     id={toDomId(field.name)}
                     placeholder="Add observations..."
-                    className="min-h-[80px] resize-none text-sm"
+                    className="h-[70px] resize-none text-sm overflow-y-auto"
                     {...field}
                   />
                 </FormControl>

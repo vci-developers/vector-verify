@@ -28,9 +28,9 @@ export default function Loading() {
 
           {/* Zoom controls */}
           <div className="flex justify-center gap-2 mt-2">
-            <Skeleton className="h-9 w-24 rounded-md" />
-            <Skeleton className="h-9 w-24 rounded-md" />
-            <Skeleton className="h-9 w-24 rounded-md" />
+            <Skeleton className="h-9 w-24 rounded-md flex-1" />
+            <Skeleton className="h-9 w-24 rounded-md flex-1" />
+            <Skeleton className="h-9 w-24 rounded-md flex-1" />
           </div>
         </CardContent>
 
