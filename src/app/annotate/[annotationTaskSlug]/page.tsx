@@ -16,17 +16,14 @@ import { AnnotationFormOutput } from "@/feature/annotate/validation/annotation-f
 import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-annotation-tasks";
 import { getProgressStats } from "@/lib/image-utils";
 import { Calendar } from "lucide-react";
-import { use, useState } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
-interface AnnotationPageProps {
-  params: Promise<{ annotationTaskSlug: string }>;
-}
+export default function AnnotationPage() {
+  const { annotationTaskSlug } = useParams<{ annotationTaskSlug: string }>();
+  const taskId = Number(annotationTaskSlug);
 
-export default function AnnotationPage({ params }: AnnotationPageProps) {
-  const { annotationTaskSlug } = use(params);
-  const task = DUMMY_ANNOTATION_TASKS.find(
-    (t) => t.id === parseInt(annotationTaskSlug, 10)
-  );
+  const task = DUMMY_ANNOTATION_TASKS.find((t) => t.id === taskId);
 
   // State
   const [currentSpecimenImageIndex, setCurrentSpecimenImageIndex] = useState(0);
