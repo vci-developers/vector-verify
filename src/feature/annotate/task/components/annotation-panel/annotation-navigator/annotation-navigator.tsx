@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useKeyboardNavigation } from "@/feature/annotate/hooks/useKeyboardNavigation";
+import { useKeyboardNavigation } from "@/feature/annotate/task/hooks/useKeyboardNavigation";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 

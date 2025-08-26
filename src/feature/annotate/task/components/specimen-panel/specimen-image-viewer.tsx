@@ -48,7 +48,12 @@ export function SpecimenImageViewer({
         <Button variant="outline" size="sm" className="flex-1" onClick={zoomIn}>
           <ZoomIn className="h-4 w-4 mr-1" /> Zoom In
         </Button>
-        <Button variant="outline" size="sm" className="flex-1" onClick={zoomOut}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={zoomOut}
+        >
           <ZoomOut className="h-4 w-4 mr-1" /> Zoom Out
         </Button>
         <Button variant="outline" size="sm" className="flex-1" onClick={reset}>

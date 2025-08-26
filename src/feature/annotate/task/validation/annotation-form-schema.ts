@@ -1,16 +1,29 @@
+import {
+  AbdomenStatusLabels,
+  SexLabels,
+  SpeciesLabels,
+} from "@/lib/domain/reference/labels";
 import { z } from "zod";
 
+const SPECIES_VALUES = Object.values(SpeciesLabels) as [string, ...string[]];
+const SEX_VALUES = Object.values(SexLabels) as [string, ...string[]];
+const ABDOMEN_STATUS_VALUES = Object.values(AbdomenStatusLabels) as [
+  string,
+  ...string[]
+];
+
 export const AnnotationBase = z.object({
-  species: z.string().optional(),
-  sex: z.string().optional(),
-  abdomenStatus: z.string().optional(),
+  species: z.enum(SPECIES_VALUES).optional(),
+  sex: z.enum(SEX_VALUES).optional(),
+  abdomenStatus: z.enum(ABDOMEN_STATUS_VALUES).optional(),
   notes: z.string().optional(),
   flagged: z.boolean().default(false),
 });
 
-export const isSexEnabled = (species?: string) => species !== "Non Mosquito";
+export const isSexEnabled = (species?: string) =>
+  species !== SpeciesLabels.NON_MOSQUITO;
 export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
-  isSexEnabled(species) && sex !== "Male";
+  isSexEnabled(species) && sex !== SexLabels.MALE;
 
 export const AnnotationFormSchema = AnnotationBase.superRefine(
   (formFields, context) => {

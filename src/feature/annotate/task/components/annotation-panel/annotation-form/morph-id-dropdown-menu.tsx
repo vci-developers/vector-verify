@@ -12,7 +12,7 @@ import { ChevronDown } from "lucide-react";
 
 interface MorphIdDropdownMenuProps {
   label: string;
-  morphIds: string[];
+  morphIds: readonly string[];
   selectedMorphId: string | undefined;
   onMorphIdSelected: (morphId?: string) => void;
   enabled?: boolean;

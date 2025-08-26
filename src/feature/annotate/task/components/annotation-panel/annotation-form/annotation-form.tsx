@@ -17,11 +17,7 @@ import {
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import MorphIdDropdownMenu from "./morph-id-dropdown-menu";
-import {
-  ABDOMEN_STATUS_LABELS,
-  SEX_LABELS,
-  SPECIES_LABELS,
-} from "@/lib/labels";
+import { SpeciesLabels, SexLabels, AbdomenStatusLabels } from "@/lib/domain/reference/labels";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Flag, Save } from "lucide-react";
@@ -132,7 +128,7 @@ export default function AnnotationForm({
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Species"
-                    morphIds={SPECIES_LABELS}
+                    morphIds={Object.values(SpeciesLabels)}
                     selectedMorphId={field.value}
                     onMorphIdSelected={handleSpeciesSelect}
                     enabled
@@ -152,7 +148,7 @@ export default function AnnotationForm({
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Sex"
-                    morphIds={SEX_LABELS}
+                    morphIds={Object.values(SexLabels)}
                     selectedMorphId={field.value}
                     onMorphIdSelected={handleSexSelect}
                     enabled={sexEnabled}
@@ -174,7 +170,7 @@ export default function AnnotationForm({
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Abdomen Status"
-                    morphIds={ABDOMEN_STATUS_LABELS}
+                    morphIds={Object.values(AbdomenStatusLabels)}
                     selectedMorphId={field.value}
                     onMorphIdSelected={handleAbdomenStatusSelect}
                     enabled={abdomenStatusEnabled}
