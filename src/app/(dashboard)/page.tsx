@@ -1,18 +1,14 @@
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { formatDate } from "@/lib/date-utils";
-import { Calendar, ImageIcon } from "lucide-react";
-import Link from "next/link";
-import { getAnnotationTaskListAction } from "../annotate/actions";
-import { notFound } from "next/navigation";
+import { Calendar, ImageIcon } from 'lucide-react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { formatDate } from '@/lib/date-utils';
+
+import { getAnnotationTaskListAction } from '../annotate/actions';
 
 export default async function DashboardPage() {
   const annotationTaskListResult = await getAnnotationTaskListAction();
@@ -26,11 +22,11 @@ export default async function DashboardPage() {
         let annotated = 0;
         let flagged = 0;
         let pending = 0;
-        
+
         for (const entry of task.entries) {
           const s = entry.annotation.status;
-          if (s === "ANNOTATED") annotated++;
-          else if (s === "FLAGGED") flagged++;
+          if (s === 'ANNOTATED') annotated++;
+          else if (s === 'FLAGGED') flagged++;
           else pending++;
         }
 

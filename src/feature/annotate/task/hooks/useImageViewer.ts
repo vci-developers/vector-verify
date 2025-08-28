@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 type Point = { x: number; y: number };
 
-interface UseImageViewer {
+type UseImageViewer = {
   zoom: number;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -19,7 +19,7 @@ interface UseImageViewer {
     className: string;
   };
   transformStyle: React.CSSProperties;
-}
+};
 
 export function useImageViewer(maxZoom = 3): UseImageViewer {
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -47,13 +47,11 @@ export function useImageViewer(maxZoom = 3): UseImageViewer {
     (delta: number) => {
       setZoom((previousZoom) => {
         const nextZoom = Math.min(Math.max(previousZoom + delta, 1), maxZoom);
-        setPanOffset((previousOffset) =>
-          clampPanOffset(previousOffset, nextZoom)
-        );
+        setPanOffset((previousOffset) => clampPanOffset(previousOffset, nextZoom));
         return nextZoom;
       });
     },
-    [clampPanOffset, maxZoom]
+    [clampPanOffset, maxZoom],
   );
 
   const resetImageView = useCallback(() => {
@@ -74,7 +72,7 @@ export function useImageViewer(maxZoom = 3): UseImageViewer {
       };
       event.preventDefault();
     },
-    [zoom, panOffset]
+    [zoom, panOffset],
   );
 
   const onPointerMove = useCallback(
@@ -86,11 +84,11 @@ export function useImageViewer(maxZoom = 3): UseImageViewer {
             x: event.clientX - dragOriginRef.current.x,
             y: event.clientY - dragOriginRef.current.y,
           },
-          zoom
-        )
+          zoom,
+        ),
       );
     },
-    [clampPanOffset, zoom]
+    [clampPanOffset, zoom],
   );
 
   const endPan = useCallback((event: React.PointerEvent) => {
@@ -100,21 +98,15 @@ export function useImageViewer(maxZoom = 3): UseImageViewer {
 
   const transformStyle = useMemo<React.CSSProperties>(() => {
     return {
-      transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${
-        panOffset.y / zoom
-      }px)`,
-      transition: isDraggingRef.current ? "none" : "transform 0.2s ease-out",
-      transformOrigin: "center",
+      transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+      transition: isDraggingRef.current ? 'none' : 'transform 0.2s ease-out',
+      transformOrigin: 'center',
     };
   }, [zoom, panOffset]);
 
   const getViewerProps = useCallback(() => {
     const cursorClasses =
-      zoom > 1
-        ? isDraggingRef.current
-          ? "cursor-grabbing"
-          : "cursor-grab"
-        : "cursor-default";
+      zoom > 1 ? (isDraggingRef.current ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-default';
 
     return {
       ref: viewerRef,

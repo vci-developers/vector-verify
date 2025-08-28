@@ -1,4 +1,4 @@
-import { AnnotationStatus } from "@/lib/domain/reference/annotation-status";
+import { AnnotationStatus } from '@/lib/domain/reference/annotation-status';
 
 export type AnnotationDto = {
   id: number;

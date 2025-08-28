@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Link from "next/link";
-import { ArrowLeft, User } from "lucide-react";
+import type { Metadata } from 'next';
+
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { ArrowLeft, User } from 'lucide-react';
+import Link from 'next/link';
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -10,22 +12,21 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+} from '@/components/ui/navigation-menu';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "VectorVerify",
-  description:
-    "Role-aware web app for monthly data quality control of mosquito-surveillance data",
+  title: 'VectorVerify',
+  description: 'Role-aware web app for monthly data quality control of mosquito-surveillance data',
 };
 
 export default function RootLayout({

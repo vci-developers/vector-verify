@@ -1,13 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { useKeyboardNavigation } from "@/feature/annotate/task/hooks/useKeyboardNavigation";
-import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface AnnotationNavigatorProps {
+import { Button } from '@/components/ui/button';
+import { useKeyboardNavigation } from '@/feature/annotate/task/hooks/useKeyboardNavigation';
+import { cn } from '@/lib/utils';
+
+type AnnotationNavigatorProps = {
   currentSpecimenImageIndex: number;
   totalSpecimenImages: number;
   onSpecimenImageIndexChanged: (newIndex: number) => void;
-}
+};
 
 export function AnnotationNavigator({
   currentSpecimenImageIndex,
@@ -20,15 +21,13 @@ export function AnnotationNavigator({
   const onNavigatePrevious = () =>
     onSpecimenImageIndexChanged(Math.max(0, currentSpecimenImageIndex - 1));
   const onNavigateNext = () =>
-    onSpecimenImageIndexChanged(
-      Math.min(totalSpecimenImages - 1, currentSpecimenImageIndex + 1)
-    );
+    onSpecimenImageIndexChanged(Math.min(totalSpecimenImages - 1, currentSpecimenImageIndex + 1));
 
   const { activeNavigationDirection } = useKeyboardNavigation(
     canNavigatePrevious,
     canNavigateNext,
     onNavigatePrevious,
-    onNavigateNext
+    onNavigateNext,
   );
 
   return (
@@ -37,9 +36,8 @@ export function AnnotationNavigator({
         variant="ghost"
         size="sm"
         className={cn(
-          "flex items-center gap-1",
-          activeNavigationDirection === "previous" &&
-            "bg-accent text-accent-foreground"
+          'flex items-center gap-1',
+          activeNavigationDirection === 'previous' && 'bg-accent text-accent-foreground',
         )}
         onClick={onNavigatePrevious}
         disabled={!canNavigatePrevious}
@@ -52,18 +50,16 @@ export function AnnotationNavigator({
         <p>Use keyboard</p>
         <kbd
           className={cn(
-            "bg-muted px-1 py-0.5 rounded",
-            activeNavigationDirection === "previous" &&
-              "bg-accent text-accent-foreground"
+            'bg-muted px-1 py-0.5 rounded',
+            activeNavigationDirection === 'previous' && 'bg-accent text-accent-foreground',
           )}
         >
           ←
         </kbd>
         <kbd
           className={cn(
-            "bg-muted px-1 py-0.5 rounded",
-            activeNavigationDirection === "next" &&
-              "bg-accent text-accent-foreground"
+            'bg-muted px-1 py-0.5 rounded',
+            activeNavigationDirection === 'next' && 'bg-accent text-accent-foreground',
           )}
         >
           →
@@ -75,9 +71,8 @@ export function AnnotationNavigator({
         variant="ghost"
         size="sm"
         className={cn(
-          "flex items-center gap-1",
-          activeNavigationDirection === "next" &&
-            "bg-accent text-accent-foreground"
+          'flex items-center gap-1',
+          activeNavigationDirection === 'next' && 'bg-accent text-accent-foreground',
         )}
         onClick={onNavigateNext}
         disabled={!canNavigateNext}

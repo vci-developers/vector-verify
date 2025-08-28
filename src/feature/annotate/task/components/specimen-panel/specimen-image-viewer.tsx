@@ -1,28 +1,26 @@
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { useImageViewer } from "../../hooks/useImageViewer";
-import { Button } from "@/components/ui/button";
-import { ImageIcon, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { ImageIcon, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import Image from 'next/image';
 
-interface SpecimenImageViewerProps {
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+import { useImageViewer } from '../../hooks/useImageViewer';
+
+type SpecimenImageViewerProps = {
   imageUrl?: string;
   className?: string;
-}
+};
 
-export function SpecimenImageViewer({
-  imageUrl,
-  className,
-}: SpecimenImageViewerProps) {
-  const { zoom, zoomIn, zoomOut, reset, viewerProps, transformStyle } =
-    useImageViewer();
+export function SpecimenImageViewer({ imageUrl, className }: SpecimenImageViewerProps) {
+  const { zoom, zoomIn, zoomOut, reset, viewerProps, transformStyle } = useImageViewer();
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn('w-full', className)}>
       <div
         {...viewerProps}
         className={cn(
-          "bg-muted/50 rounded-md overflow-hidden select-none w-full h-[380px]",
-          viewerProps.className
+          'bg-muted/50 rounded-md overflow-hidden select-none w-full h-[380px]',
+          viewerProps.className,
         )}
       >
         {imageUrl ? (
@@ -48,12 +46,7 @@ export function SpecimenImageViewer({
         <Button variant="outline" size="sm" className="flex-1" onClick={zoomIn}>
           <ZoomIn className="h-4 w-4 mr-1" /> Zoom In
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={zoomOut}
-        >
+        <Button variant="outline" size="sm" className="flex-1" onClick={zoomOut}>
           <ZoomOut className="h-4 w-4 mr-1" /> Zoom Out
         </Button>
         <Button variant="outline" size="sm" className="flex-1" onClick={reset}>

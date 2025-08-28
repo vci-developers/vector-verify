@@ -1,22 +1,23 @@
-import { Button } from "@/components/ui/button";
+import { ChevronDown } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toDomId } from "@/lib/id-utils";
-import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { toDomId } from '@/lib/id-utils';
+import { cn } from '@/lib/utils';
 
-interface MorphIdDropdownMenuProps {
+type MorphIdDropdownMenuProps = {
   label: string;
   morphIds: readonly string[];
   selectedMorphId: string | undefined;
   onMorphIdSelected: (morphId?: string) => void;
   enabled?: boolean;
-}
+};
 
 export default function MorphIdDropdownMenu({
   label,
@@ -35,10 +36,7 @@ export default function MorphIdDropdownMenu({
         <Button
           id={toDomId(label)}
           variant="outline"
-          className={cn(
-            "w-full justify-between",
-            !enabled && "cursor-not-allowed opacity-50"
-          )}
+          className={cn('w-full justify-between', !enabled && 'cursor-not-allowed opacity-50')}
           disabled={!enabled}
         >
           {enabled ? (
@@ -53,15 +51,9 @@ export default function MorphIdDropdownMenu({
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-[var(--radix-dropdown-menu-trigger-width)]"
-      >
+      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
         {morphIds.map((morphId) => (
-          <DropdownMenuItem
-            key={morphId}
-            onSelect={() => morphIdSelectedHandler(morphId)}
-          >
+          <DropdownMenuItem key={morphId} onSelect={() => morphIdSelectedHandler(morphId)}>
             {morphId}
           </DropdownMenuItem>
         ))}
@@ -72,8 +64,8 @@ export default function MorphIdDropdownMenu({
           disabled={selectedMorphId === undefined}
           onSelect={() => onMorphIdSelected(undefined)}
           className={cn(
-            "text-destructive focus:text-destructive focus:bg-destructive/10",
-            selectedMorphId === undefined && "opacity-50 cursor-not-allowed"
+            'text-destructive focus:text-destructive focus:bg-destructive/10',
+            selectedMorphId === undefined && 'opacity-50 cursor-not-allowed',
           )}
         >
           Clear selection

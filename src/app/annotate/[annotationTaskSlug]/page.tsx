@@ -1,17 +1,16 @@
-import { AnnotationTaskClient } from "@/feature/annotate/task/components/annotation-task-client";
-import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-data";
-import { notFound } from "next/navigation";
-import { getAnnotationTaskAction, resolveTaskIdFromSlugAction } from "../actions";
+import { notFound } from 'next/navigation';
 
-interface AnnotationTaskPageProps {
+import { AnnotationTaskClient } from '@/feature/annotate/task/components/annotation-task-client';
+
+import { getAnnotationTaskAction, resolveTaskIdFromSlugAction } from '../actions';
+
+type AnnotationTaskPageProps = {
   params: Promise<{
     annotationTaskSlug: string;
   }>;
-}
+};
 
-export default async function AnnotationTaskPage({
-  params,
-}: AnnotationTaskPageProps) {
+export default async function AnnotationTaskPage({ params }: AnnotationTaskPageProps) {
   const { annotationTaskSlug } = await params;
   const taskIdResult = await resolveTaskIdFromSlugAction(annotationTaskSlug);
   if (!taskIdResult.ok) notFound();

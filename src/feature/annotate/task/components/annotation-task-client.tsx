@@ -1,31 +1,25 @@
-"use client";
+'use client';
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { formatDate } from "@/lib/date-utils";
-import { Calendar } from "lucide-react";
-import { useMemo, useState } from "react";
-import { AnnotationFormOutput } from "../validation/annotation-form-schema";
-import AnnotationForm from "./annotation-panel/annotation-form/annotation-form";
-import { AnnotationNavigator } from "./annotation-panel/annotation-navigator/annotation-navigator";
-import AnnotationStatus from "./annotation-panel/annotation-status/annotation-status";
-import { SpecimenImageViewer } from "./specimen-panel/specimen-image-viewer";
-import { SpecimenMetadata } from "./specimen-panel/specimen-metadata";
-import { Progress } from "@/components/ui/progress";
-import { AnnotationTask } from "@/lib/domain/model/annotation-task";
-import { AnnotationTaskWithEntriesDto } from "@/lib/data/dto/composites/annotation-task-with-entries-dto";
+import { Calendar } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-interface AnnotationTaskClientProps {
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { type AnnotationTaskWithEntriesDto } from '@/lib/data/dto/composites/annotation-task-with-entries-dto';
+import { formatDate } from '@/lib/date-utils';
+
+import { type AnnotationFormOutput } from '../validation/annotation-form-schema';
+import AnnotationForm from './annotation-panel/annotation-form/annotation-form';
+import { AnnotationNavigator } from './annotation-panel/annotation-navigator/annotation-navigator';
+import AnnotationStatus from './annotation-panel/annotation-status/annotation-status';
+import { SpecimenImageViewer } from './specimen-panel/specimen-image-viewer';
+import { SpecimenMetadata } from './specimen-panel/specimen-metadata';
+
+type AnnotationTaskClientProps = {
   taskWithEntries: AnnotationTaskWithEntriesDto;
-}
+};
 
-export function AnnotationTaskClient({
-  taskWithEntries,
-}: AnnotationTaskClientProps) {
+export function AnnotationTaskClient({ taskWithEntries }: AnnotationTaskClientProps) {
   const [currentSpecimenImageIndex, setCurrentSpecimenImageIndex] = useState(0);
 
   const { monthYear } = formatDate(taskWithEntries.createdAt);
@@ -33,37 +27,30 @@ export function AnnotationTaskClient({
   const totalEntries = taskWithEntries.entries.length ?? 0;
   const currentEntry =
     totalEntries > 0
-      ? taskWithEntries.entries[
-          Math.min(currentSpecimenImageIndex, totalEntries - 1)
-        ]
+      ? taskWithEntries.entries[Math.min(currentSpecimenImageIndex, totalEntries - 1)]
       : undefined;
 
-  const { annotatedCount, flaggedCount, pendingCount, completedPercent } =
-    useMemo(() => {
-      let annotatedCount = 0;
-      let flaggedCount = 0;
-      let pendingCount = 0;
+  const { annotatedCount, flaggedCount, pendingCount, completedPercent } = useMemo(() => {
+    let annotatedCount = 0;
+    let flaggedCount = 0;
+    let pendingCount = 0;
 
-      for (const entry of taskWithEntries.entries ?? []) {
-        const s = entry.annotation.status;
-        if (s === "ANNOTATED") annotatedCount++;
-        else if (s === "FLAGGED") flaggedCount++;
-        else pendingCount++;
-      }
+    for (const entry of taskWithEntries.entries ?? []) {
+      const s = entry.annotation.status;
+      if (s === 'ANNOTATED') annotatedCount++;
+      else if (s === 'FLAGGED') flaggedCount++;
+      else pendingCount++;
+    }
 
-      const total = annotatedCount + flaggedCount + pendingCount;
-      const completedPercent =
-        total === 0
-          ? 0
-          : Math.round(((annotatedCount + flaggedCount) / total) * 100);
+    const total = annotatedCount + flaggedCount + pendingCount;
+    const completedPercent =
+      total === 0 ? 0 : Math.round(((annotatedCount + flaggedCount) / total) * 100);
 
-      return { annotatedCount, flaggedCount, pendingCount, completedPercent };
-    }, [taskWithEntries.entries]);
+    return { annotatedCount, flaggedCount, pendingCount, completedPercent };
+  }, [taskWithEntries.entries]);
 
-  const handleAnnotationFormSubmit = async (
-    formOutput: AnnotationFormOutput
-  ) => {
-    console.log("Saving annotation data:", {
+  const handleAnnotationFormSubmit = async (formOutput: AnnotationFormOutput) => {
+    console.log('Saving annotation data:', {
       annotationId: currentEntry?.annotation.id,
       specimenNumericId: currentEntry?.specimen.id,
       specimenPublicId: currentEntry?.specimen.specimenId,
@@ -82,7 +69,7 @@ export function AnnotationTaskClient({
             <h2 className="text-base font-medium">
               {totalEntries > 0
                 ? `${Math.min(currentSpecimenImageIndex, totalEntries - 1) + 1} of ${totalEntries}`
-                : "No specimens"}
+                : 'No specimens'}
             </h2>
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 mr-1" />
@@ -90,7 +77,7 @@ export function AnnotationTaskClient({
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            ID: {currentEntry?.specimen.specimenId ?? "Unknown"}
+            ID: {currentEntry?.specimen.specimenId ?? 'Unknown'}
           </p>
         </CardHeader>
 

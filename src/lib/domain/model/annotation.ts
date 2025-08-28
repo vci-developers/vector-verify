@@ -1,4 +1,4 @@
-import { AnnotationStatus } from "../reference/annotation-status";
+import { AnnotationStatus } from '../reference/annotation-status';
 
 export type Annotation = {
   id: number;

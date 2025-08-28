@@ -1,5 +1,6 @@
-import { SessionType } from "@/lib/domain/reference/session-type";
-import { UUID } from "crypto";
+import { type UUID } from 'crypto';
+
+import { SessionType } from '@/lib/domain/reference/session-type';
 
 export type SessionDto = {
   sessionId: number;
