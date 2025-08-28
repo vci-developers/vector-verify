@@ -1,30 +1,31 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva, type VariantProps } from "class-variance-authority";
 
-const annotationStatusCardVariants = cva('p-1.5 rounded-md', {
+const annotationStatusCardVariants = cva("p-1.5 rounded-md", {
   variants: {
     variant: {
-      primary: 'bg-primary/20 text-primary',
-      warning: 'bg-warning/20 text-warning',
-      destructive: 'bg-destructive/20 text-destructive',
+      primary: "bg-primary/20 text-primary",
+      warning: "bg-warning/20 text-warning",
+      destructive: "bg-destructive/20 text-destructive",
     },
   },
   defaultVariants: {
-    variant: 'primary',
+    variant: "primary",
   },
 });
 
-type AnnotationStatusCardProps = {
+interface AnnotationStatusCardProps {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   count: number;
-};
+}
 
 export default function AnnotationStatusCard({
   icon: Icon,
   variant,
   label,
   count,
-}: AnnotationStatusCardProps & VariantProps<typeof annotationStatusCardVariants>) {
+}: AnnotationStatusCardProps &
+  VariantProps<typeof annotationStatusCardVariants>) {
   return (
     <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
       <div className={annotationStatusCardVariants({ variant })}>

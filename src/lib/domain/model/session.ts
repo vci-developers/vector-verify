@@ -1,6 +1,5 @@
-import { type UUID } from 'crypto';
-
-import { SessionType } from '../reference/session-type';
+import { UUID } from "crypto";
+import { SessionType } from "../reference/session-type";
 
 export type Session = {
   sessionId: number;

@@ -4,25 +4,25 @@ export function formatDate(timestamp: number) {
   // Create an object with all possible date formats/components
   return {
     // Combined formats
-    monthYear: date.toLocaleString('default', {
-      month: 'long',
-      year: 'numeric',
+    monthYear: date.toLocaleString("default", {
+      month: "long",
+      year: "numeric",
     }),
-    shortMonthYear: date.toLocaleString('default', {
-      month: 'short',
-      year: 'numeric',
+    shortMonthYear: date.toLocaleString("default", {
+      month: "short",
+      year: "numeric",
     }),
     fullDate: date.toLocaleDateString(),
     fullDateTime: date.toLocaleString(),
 
     // Individual components
-    month: date.toLocaleString('default', { month: 'long' }),
-    shortMonth: date.toLocaleString('default', { month: 'short' }),
+    month: date.toLocaleString("default", { month: "long" }),
+    shortMonth: date.toLocaleString("default", { month: "short" }),
     numericMonth: date.getMonth() + 1,
     year: date.getFullYear(),
     day: date.getDate(),
-    weekday: date.toLocaleString('default', { weekday: 'long' }),
-    shortWeekday: date.toLocaleString('default', { weekday: 'short' }),
+    weekday: date.toLocaleString("default", { weekday: "long" }),
+    shortWeekday: date.toLocaleString("default", { weekday: "short" }),
 
     // Time components
     time: date.toLocaleTimeString(),

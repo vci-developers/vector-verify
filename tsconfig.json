@@ -1,66 +1,27 @@
 {
   "compilerOptions": {
-    // Modern baseline for Node/Next runtimes
-    "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    // TypeScript hygiene
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "incremental": true,
-    // Interop & ESM correctness for bundlers
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
-    // Project structure + DX
-    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@/app/*": [
-        "src/app/*"
-      ],
-      "@/features/*": [
-        "src/features/*"
-      ],
-      "@/entities/*": [
-        "src/entities/*"
-      ],
-      "@/shared/*": [
-        "src/shared/*"
-      ]
-    },
-    // Safer typing
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
-    // Next.js plugin
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
-    // Optional: declare ambient types here if/when needed
-    // "types": ["node", "jest"]
-    ,
-    "allowJs": true
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

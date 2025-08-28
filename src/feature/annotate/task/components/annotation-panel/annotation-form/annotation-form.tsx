@@ -1,8 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Flag, Save } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-
-import { Button } from '@/components/ui/button';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AnnotationFormSchema,
+  type AnnotationFormInput,
+  type AnnotationFormOutput,
+  isSexEnabled,
+  isAbdomenStatusEnabled,
+} from "../../../validation/annotation-form-schema";
 import {
   Form,
   FormControl,
@@ -10,28 +14,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
-import { Toggle } from '@/components/ui/toggle';
-import { SpeciesLabels, SexLabels, AbdomenStatusLabels } from '@/lib/domain/reference/labels';
-import { toDomId } from '@/lib/id-utils';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/form";
+import { cn } from "@/lib/utils";
+import MorphIdDropdownMenu from "./morph-id-dropdown-menu";
+import { SpeciesLabels, SexLabels, AbdomenStatusLabels } from "@/lib/domain/reference/labels";
+import { Textarea } from "@/components/ui/textarea";
+import { Toggle } from "@/components/ui/toggle";
+import { Flag, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toDomId } from "@/lib/id-utils";
 
-import MorphIdDropdownMenu from './morph-id-dropdown-menu';
-import {
-  AnnotationFormSchema,
-  type AnnotationFormInput,
-  type AnnotationFormOutput,
-  isSexEnabled,
-  isAbdomenStatusEnabled,
-} from '../../../validation/annotation-form-schema';
-
-type AnnotationFormProps = {
+interface AnnotationFormProps {
   onSubmit: (values: AnnotationFormOutput) => Promise<void> | void;
   className?: string;
-};
+}
 
-export default function AnnotationForm({ onSubmit, className }: AnnotationFormProps) {
+export default function AnnotationForm({
+  onSubmit,
+  className,
+}: AnnotationFormProps) {
   const annotationForm = useForm<AnnotationFormInput>({
     resolver: zodResolver(AnnotationFormSchema),
     defaultValues: {
@@ -41,59 +42,65 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
       notes: undefined,
       flagged: false,
     },
-    mode: 'onSubmit',
+    mode: "onSubmit",
   });
 
-  const currentSpecies = annotationForm.watch('species');
-  const currentSex = annotationForm.watch('sex');
+  const currentSpecies = annotationForm.watch("species");
+  const currentSex = annotationForm.watch("sex");
 
   const sexEnabled = isSexEnabled(currentSpecies);
-  const abdomenStatusEnabled = isAbdomenStatusEnabled(currentSpecies, currentSex);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(
+    currentSpecies,
+    currentSex
+  );
 
-  const currentFlagged = annotationForm.watch('flagged');
+  const currentFlagged = annotationForm.watch("flagged");
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue('species', newSpecies, { shouldDirty: true });
+    annotationForm.setValue("species", newSpecies, { shouldDirty: true });
     if (!isSexEnabled(newSpecies)) {
-      annotationForm.setValue('sex', undefined, {
+      annotationForm.setValue("sex", undefined, {
         shouldDirty: true,
         shouldValidate: false,
       });
-      annotationForm.setValue('abdomenStatus', undefined, {
+      annotationForm.setValue("abdomenStatus", undefined, {
         shouldDirty: true,
         shouldValidate: false,
       });
-      annotationForm.clearErrors(['sex', 'abdomenStatus']);
+      annotationForm.clearErrors(["sex", "abdomenStatus"]);
     }
-    annotationForm.clearErrors('species');
+    annotationForm.clearErrors("species");
   };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue('sex', newSex, { shouldDirty: true });
+    annotationForm.setValue("sex", newSex, { shouldDirty: true });
     if (!isAbdomenStatusEnabled(currentSpecies, newSex)) {
-      annotationForm.setValue('abdomenStatus', undefined, {
+      annotationForm.setValue("abdomenStatus", undefined, {
         shouldDirty: true,
         shouldValidate: false,
       });
-      annotationForm.clearErrors('abdomenStatus');
+      annotationForm.clearErrors("abdomenStatus");
     }
-    annotationForm.clearErrors('sex');
+    annotationForm.clearErrors("sex");
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue('abdomenStatus', newAbdomenStatus, {
+    annotationForm.setValue("abdomenStatus", newAbdomenStatus, {
       shouldDirty: true,
     });
-    annotationForm.clearErrors('abdomenStatus');
+    annotationForm.clearErrors("abdomenStatus");
   };
 
-  const handleFlaggedChange = (newFlagged: boolean, updateFormValue: (value: boolean) => void) => {
+  const handleFlaggedChange = (
+    newFlagged: boolean,
+    updateFormValue: (value: boolean) => void
+  ) => {
     updateFormValue(newFlagged);
 
     if (newFlagged) {
-      annotationForm.clearErrors(['species', 'sex', 'abdomenStatus']);
+      annotationForm.clearErrors(["species", "sex", "abdomenStatus"]);
     } else {
-      annotationForm.clearErrors('notes');
+      annotationForm.clearErrors("notes");
     }
   };
 
@@ -106,9 +113,12 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
     <Form {...annotationForm}>
       <form
         onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
-        className={cn('space-y-3', className)}
+        className={cn("space-y-3", className)}
       >
-        <fieldset disabled={annotationForm.formState.isSubmitting} className="space-y-3">
+        <fieldset
+          disabled={annotationForm.formState.isSubmitting}
+          className="space-y-3"
+        >
           <FormField
             control={annotationForm.control}
             name="species"
@@ -154,7 +164,9 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
             name="abdomenStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor={toDomId(field.name)}>Abdomen Status</FormLabel>
+                <FormLabel htmlFor={toDomId(field.name)}>
+                  Abdomen Status
+                </FormLabel>
                 <FormControl>
                   <MorphIdDropdownMenu
                     label="Abdomen Status"
@@ -175,7 +187,10 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor={toDomId(field.name)}>
-                  Notes {currentFlagged && <span className="text-destructive">(Required)*</span>}
+                  Notes{" "}
+                  {currentFlagged && (
+                    <span className="text-destructive">(Required)*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
                   <Textarea
@@ -203,18 +218,22 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
                         handleFlaggedChange(newFlagged, field.onChange)
                       }
                       className={cn(
-                        'flex items-center justify-center gap-1.5 rounded-md border transition-colors',
-                        'data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/20 motion-safe:data-[state=on]:animate-pulse',
-                        'data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-foreground',
+                        "flex items-center justify-center gap-1.5 rounded-md border transition-colors",
+                        "data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/20 motion-safe:data-[state=on]:animate-pulse",
+                        "data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-foreground"
                       )}
                     >
                       <Flag
                         className={cn(
-                          'h-4 w-4',
-                          field.value ? 'text-destructive fill-current' : 'text-foreground',
+                          "h-4 w-4",
+                          field.value
+                            ? "text-destructive fill-current"
+                            : "text-foreground"
                         )}
                       />
-                      <span>{field.value ? 'Remove Flag' : 'Flag Specimen'}</span>
+                      <span>
+                        {field.value ? "Remove Flag" : "Flag Specimen"}
+                      </span>
                     </Toggle>
                   </FormControl>
                   <FormMessage />
@@ -228,7 +247,9 @@ export default function AnnotationForm({ onSubmit, className }: AnnotationFormPr
               className="flex items-center justify-center gap-1.5"
             >
               <Save className="h-4 w-4" />
-              {annotationForm.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+              {annotationForm.formState.isSubmitting
+                ? "Submitting..."
+                : "Submit"}
             </Button>
           </div>
         </fieldset>

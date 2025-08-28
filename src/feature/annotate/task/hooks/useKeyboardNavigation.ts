@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-type NavigationDirection = 'previous' | 'next' | null;
+type NavigationDirection = "previous" | "next" | null;
 
-type UseKeyboardNavigation = {
+interface UseKeyboardNavigation {
   activeNavigationDirection: NavigationDirection;
-};
+}
 
 export function useKeyboardNavigation(
   canNavigatePrevious: boolean,
   canNavigateNext: boolean,
   onNavigatePrevious: () => void,
-  onNavigateNext: () => void,
+  onNavigateNext: () => void
 ): UseKeyboardNavigation {
   const [activeNavigationDirection, setActiveNavigationDirection] =
     useState<NavigationDirection>(null);
@@ -41,37 +41,40 @@ export function useKeyboardNavigation(
 
     const tag = target.tagName;
     return (
-      target.isContentEditable === true || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+      target.isContentEditable === true ||
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT"
     );
   };
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!isEventFromEditableTarget(event)) {
-      if (event.key === 'ArrowLeft' && canNavigatePreviousRef.current) {
+      if (event.key === "ArrowLeft" && canNavigatePreviousRef.current) {
         event.preventDefault();
-        setActiveNavigationDirection('previous');
+        setActiveNavigationDirection("previous");
         onNavigatePreviousRef.current();
-      } else if (event.key === 'ArrowRight' && canNavigateNextRef.current) {
+      } else if (event.key === "ArrowRight" && canNavigateNextRef.current) {
         event.preventDefault();
-        setActiveNavigationDirection('next');
+        setActiveNavigationDirection("next");
         onNavigateNextRef.current();
       }
     }
   }, []);
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       setActiveNavigationDirection(null);
     }
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    if (typeof window === "undefined") return;
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
   }, [handleKeyDown, handleKeyUp]);
 

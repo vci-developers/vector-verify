@@ -1,6 +1,6 @@
 export type Specimen = {
-  id: number;
-  specimenId: string;
-  thumbnailUrl: string;
-  thumbnailImageId: number;
-};
+    id: number;
+    specimenId: string;
+    thumbnailUrl: string;
+    thumbnailImageId: number;
+}
