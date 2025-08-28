@@ -1,7 +1,7 @@
 import { AnnotationTaskClient } from "@/feature/annotate/task/components/annotation-task-client";
-import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-annotation-tasks";
+import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-data";
 import { notFound } from "next/navigation";
-import { resolveTaskIdFromSlugAction } from "../actions";
+import { getAnnotationTaskAction, resolveTaskIdFromSlugAction } from "../actions";
 
 interface AnnotationTaskPageProps {
   params: Promise<{
@@ -13,11 +13,15 @@ export default async function AnnotationTaskPage({
   params,
 }: AnnotationTaskPageProps) {
   const { annotationTaskSlug } = await params;
-  const result = await resolveTaskIdFromSlugAction(annotationTaskSlug);
-  if (!result.ok) notFound();
+  const taskIdResult = await resolveTaskIdFromSlugAction(annotationTaskSlug);
+  if (!taskIdResult.ok) notFound();
 
-  const task = DUMMY_ANNOTATION_TASKS.find((t) => t.id === result.data.taskId);
-  if (!task) notFound();
+  const taskId = taskIdResult.data.taskId;
+  const taskWithEntriesResult = await getAnnotationTaskAction(taskId);
+  if (!taskWithEntriesResult.ok) notFound();
 
-  return <AnnotationTaskClient task={task} />;
+  const taskWithEntries = taskWithEntriesResult.data.taskWithEntries;
+  if (!taskWithEntries) notFound();
+
+  return <AnnotationTaskClient taskWithEntries={taskWithEntries} />;
 }

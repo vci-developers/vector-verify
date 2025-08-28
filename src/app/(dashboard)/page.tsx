@@ -9,18 +9,36 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { formatDate } from "@/lib/date-utils";
-import { getProgressStats } from "@/lib/image-utils";
 import { Calendar, ImageIcon } from "lucide-react";
 import Link from "next/link";
-import { DUMMY_ANNOTATION_TASKS } from "@/lib/dummy-annotation-tasks";
+import { getAnnotationTaskListAction } from "../annotate/actions";
+import { notFound } from "next/navigation";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const annotationTaskListResult = await getAnnotationTaskListAction();
+  if (!annotationTaskListResult.ok) return notFound();
+
+  const annotationTaskList = annotationTaskListResult.data.taskWithEntriesList;
+
   return (
     <div className="grid gap-6 p-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {DUMMY_ANNOTATION_TASKS.map((task) => {
-        const { completedPercent, annotated, flagged, unannotated, total } =
-          getProgressStats(task.images);
-        const { monthYear } = formatDate(task.timestamp);
+      {annotationTaskList.map((task) => {
+        let annotated = 0;
+        let flagged = 0;
+        let pending = 0;
+        
+        for (const entry of task.entries) {
+          const s = entry.annotation.status;
+          if (s === "ANNOTATED") annotated++;
+          else if (s === "FLAGGED") flagged++;
+          else pending++;
+        }
+
+        const total = annotated + flagged + pending;
+        const completedPercent =
+          total === 0 ? 0 : Math.round(((annotated + flagged) / total) * 100);
+
+        const { monthYear } = formatDate(task.createdAt);
 
         return (
           <Link
@@ -74,7 +92,7 @@ export default function DashboardPage() {
 
                   <Label className="text-xs font-normal">
                     <span className="size-2 rounded-full bg-secondary-foreground/10" />
-                    {unannotated} pending
+                    {pending} pending
                   </Label>
                 </div>
               </CardFooter>

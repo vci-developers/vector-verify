@@ -1,6 +1,6 @@
 import "server-only";
 
-const API_BASE_URL = "https://test.api.vectorcam.org/";
+export const API_BASE_URL = "https://api.vectorcam.org/";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type QueryValue = string | number | boolean | Array<string | number | boolean>;
@@ -13,6 +13,8 @@ type ApiRequestOptions = {
   auth?: { token?: string | null };
   headers?: Record<string, string>;
   timeoutMs?: number;
+  cache?: RequestCache;
+  next?: { revalidate?: number; tags?: string[] };
 };
 
 function constructUrl(path: string): string {
@@ -61,7 +63,7 @@ function isBinaryResponse(response: Response): boolean {
 
 export async function apiRequest<T>(
   path: string,
-  { method, body, query, auth, headers, timeoutMs = 30_000 }: ApiRequestOptions
+  { method, body, query, auth, headers, timeoutMs = 30_000, cache, next }: ApiRequestOptions
 ): Promise<T> {
   const absoluteUrl = appendQueryParameters(constructUrl(path), query);
 
@@ -82,13 +84,17 @@ export async function apiRequest<T>(
   const abortController = new AbortController();
   const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
 
+  const useNext = method === "GET" ? next : undefined;
+  const cacheSettings = cache ?? (useNext ? "force-cache" : "no-store");
+
   let response: Response;
   try {
     response = await fetch(absoluteUrl, {
       method,
       headers: requestHeaders,
       body: requestBody,
-      cache: "no-store",
+      cache: cacheSettings,
+      next: useNext,
       signal: abortController.signal,
     });
   } catch (error: any) {
@@ -106,7 +112,10 @@ export async function apiRequest<T>(
 
   if (isBinaryResponse(response)) {
     const blob = await response.blob();
-    if (!response.ok) throw new Error(`API ${response.status} ${response.statusText} at ${path}`);
+    if (!response.ok)
+      throw new Error(
+        `API ${response.status} ${response.statusText} at ${path}`
+      );
     return blob as unknown as T;
   }
 
@@ -115,7 +124,7 @@ export async function apiRequest<T>(
   if (!response.ok) {
     throw new Error(
       `API ${response.status} ${response.statusText} at ${path}${
-        responseText ? ` – ${responseText}` : ""
+        responseText ? ` - ${responseText}` : ""
       }`
     );
   }

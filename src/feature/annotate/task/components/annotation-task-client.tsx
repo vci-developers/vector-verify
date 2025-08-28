@@ -1,42 +1,72 @@
 "use client";
 
 import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/date-utils";
 import { Calendar } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnnotationFormOutput } from "../validation/annotation-form-schema";
 import AnnotationForm from "./annotation-panel/annotation-form/annotation-form";
 import { AnnotationNavigator } from "./annotation-panel/annotation-navigator/annotation-navigator";
 import AnnotationStatus from "./annotation-panel/annotation-status/annotation-status";
 import { SpecimenImageViewer } from "./specimen-panel/specimen-image-viewer";
 import { SpecimenMetadata } from "./specimen-panel/specimen-metadata";
-import { getProgressStats } from "@/lib/image-utils";
 import { Progress } from "@/components/ui/progress";
+import { AnnotationTask } from "@/lib/domain/model/annotation-task";
+import { AnnotationTaskWithEntriesDto } from "@/lib/data/dto/composites/annotation-task-with-entries-dto";
 
 interface AnnotationTaskClientProps {
-  task: any; // TODO: CHANGE AFTER DEFINING ACTUAL MODEL
+  taskWithEntries: AnnotationTaskWithEntriesDto;
 }
 
-export function AnnotationTaskClient({ task }: AnnotationTaskClientProps) {
+export function AnnotationTaskClient({
+  taskWithEntries,
+}: AnnotationTaskClientProps) {
   const [currentSpecimenImageIndex, setCurrentSpecimenImageIndex] = useState(0);
 
-  const { monthYear } = formatDate(task.timestamp);
+  const { monthYear } = formatDate(taskWithEntries.createdAt);
 
-  const totalSpecimenImages = task.images?.length ?? 0;
-  const currentSpecimen = task.images?.[currentSpecimenImageIndex];
-  const { completedPercent, annotated, flagged, unannotated } =
-    getProgressStats(task.images);
-    
+  const totalEntries = taskWithEntries.entries.length ?? 0;
+  const currentEntry =
+    totalEntries > 0
+      ? taskWithEntries.entries[
+          Math.min(currentSpecimenImageIndex, totalEntries - 1)
+        ]
+      : undefined;
+
+  const { annotatedCount, flaggedCount, pendingCount, completedPercent } =
+    useMemo(() => {
+      let annotatedCount = 0;
+      let flaggedCount = 0;
+      let pendingCount = 0;
+
+      for (const entry of taskWithEntries.entries ?? []) {
+        const s = entry.annotation.status;
+        if (s === "ANNOTATED") annotatedCount++;
+        else if (s === "FLAGGED") flaggedCount++;
+        else pendingCount++;
+      }
+
+      const total = annotatedCount + flaggedCount + pendingCount;
+      const completedPercent =
+        total === 0
+          ? 0
+          : Math.round(((annotatedCount + flaggedCount) / total) * 100);
+
+      return { annotatedCount, flaggedCount, pendingCount, completedPercent };
+    }, [taskWithEntries.entries]);
+
   const handleAnnotationFormSubmit = async (
     formOutput: AnnotationFormOutput
   ) => {
     console.log("Saving annotation data:", {
-      specimenId: currentSpecimen?.specimenId,
+      annotationId: currentEntry?.annotation.id,
+      specimenNumericId: currentEntry?.specimen.id,
+      specimenPublicId: currentEntry?.specimen.specimenId,
       ...formOutput,
     });
 
@@ -50,10 +80,8 @@ export function AnnotationTaskClient({ task }: AnnotationTaskClientProps) {
         <CardHeader className="py-1.5 px-6 pb-0">
           <div className="flex justify-between items-center">
             <h2 className="text-base font-medium">
-              {totalSpecimenImages > 0
-                ? `Specimen ${
-                    currentSpecimenImageIndex + 1
-                  } of ${totalSpecimenImages}`
+              {totalEntries > 0
+                ? `${Math.min(currentSpecimenImageIndex, totalEntries - 1) + 1} of ${totalEntries}`
                 : "No specimens"}
             </h2>
             <div className="flex items-center text-sm text-muted-foreground">
@@ -62,20 +90,20 @@ export function AnnotationTaskClient({ task }: AnnotationTaskClientProps) {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            ID: {currentSpecimen?.specimenId ?? "Unknown"}
+            ID: {currentEntry?.specimen.specimenId ?? "Unknown"}
           </p>
         </CardHeader>
 
         <CardContent className="p-2 px-6 pt-0.5 pb-0.5">
-          <SpecimenImageViewer imageUrl={currentSpecimen?.imageUrl} />
+          <SpecimenImageViewer imageUrl={currentEntry?.specimen.thumbnailUrl} />
         </CardContent>
 
         <CardFooter className="border-t py-0.5 px-4">
           <SpecimenMetadata
-            location={task?.district}
-            collectionMethod={currentSpecimen?.specimenId}
-            collectionDate={task?.timestamp}
-            condition={task?.status}
+            location={currentEntry?.session.houseNumber}
+            collectionMethod={currentEntry?.session.collectionMethod}
+            collectionDate={currentEntry?.session.collectionDate}
+            condition={currentEntry?.session.specimenCondition}
           />
         </CardFooter>
       </Card>
@@ -101,9 +129,9 @@ export function AnnotationTaskClient({ task }: AnnotationTaskClientProps) {
             />
 
             <AnnotationStatus
-              annotated={annotated}
-              pending={unannotated}
-              flagged={flagged}
+              annotated={annotatedCount}
+              pending={pendingCount}
+              flagged={flaggedCount}
             />
           </div>
         </CardHeader>
@@ -115,7 +143,7 @@ export function AnnotationTaskClient({ task }: AnnotationTaskClientProps) {
         <CardFooter className="py-0.5 px-4 flex-shrink-0">
           <AnnotationNavigator
             currentSpecimenImageIndex={currentSpecimenImageIndex}
-            totalSpecimenImages={totalSpecimenImages}
+            totalSpecimenImages={totalEntries}
             onSpecimenImageIndexChanged={setCurrentSpecimenImageIndex}
           />
         </CardFooter>

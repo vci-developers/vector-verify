@@ -14,6 +14,8 @@ export type SessionDto = {
   completedAt?: number;
   submittedAt?: number;
   notes: string;
+  siteId: number;
+  deviceId: number;
   latitude?: number;
   longitude?: number;
   type: SessionType;

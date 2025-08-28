@@ -2,7 +2,8 @@ import { AnnotationStatus } from "@/lib/domain/reference/annotation-status";
 
 export type AnnotationDto = {
   id: number;
-  imageId: number;
+  specimenId: number;
+  taskId: number;
   morphSpecies?: string;
   morphSex?: string;
   morphAbdomenStatus?: string;
