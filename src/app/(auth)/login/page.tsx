@@ -1,15 +1,10 @@
-import LoginHeader from "@/feature/auth/login/components/login-header";
-import LoginForm from "@/feature/auth/login/components/login-form";
-import LoginFooter from "@/feature/auth/login/components/login-footer";
+import { loginAction } from '@/lib/auth/actions';
+import { LoginForm } from '@/components/auth/login-form';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
-      <div className="w-full max-w-md space-y-8">
-        <LoginHeader />
-        <LoginForm />
-        <LoginFooter />
-      </div>
+    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-6 py-10">
+      <LoginForm onLogin={loginAction} />
     </div>
   );
 }
