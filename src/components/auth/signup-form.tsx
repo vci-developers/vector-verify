@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface SignupFormProps {
   onSignup: (formData: FormData) => Promise<AuthActionResult>;
@@ -46,19 +47,27 @@ export function SignupForm({ onSignup }: SignupFormProps) {
   const rootError = form.formState.errors.root?.message;
 
   async function signupHandler(values: SignupFormData) {
-    const formData = new FormData();
-    formData.set('email', values.email);
-    formData.set('password', values.password);
+    try {
+      const formData = new FormData();
+      formData.set('email', values.email);
+      formData.set('password', values.password);
 
-    startTransition(async () => {
-      const response = await onSignup(formData);
-      if (!response.ok) {
-        form.setError('root', { message: response.error ?? 'Signup failed' });
-      } else {
-        router.push('/');
-        router.refresh();
-      }
-    });
+      startTransition(async () => {
+        const response = await onSignup(formData);
+        if (!response.ok) {
+          form.setError('root', { message: response.error ?? 'Signup failed' });
+        } else {
+          router.push('/');
+          router.refresh();
+        }
+      });
+    } catch (error) {
+      const description =
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong. Please try again.';
+      toast.error("Couldn't create your account", { description });
+    }
   }
 
   return (

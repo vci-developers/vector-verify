@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface LoginFormProps {
   onLogin: (formData: FormData) => Promise<AuthActionResult>;
@@ -52,12 +53,20 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     formData.set('password', data.password);
 
     startTransition(async () => {
-      const response = await onLogin(formData);
-      if (!response.ok) {
-        form.setError('root', { message: response.error ?? 'Login failed' });
-      } else {
-        router.push('/');
-        router.refresh();
+      try {
+        const response = await onLogin(formData);
+        if (!response.ok) {
+          form.setError('root', { message: response.error ?? 'Login failed' });
+        } else {
+          router.push('/');
+          router.refresh();
+        }
+      } catch (error) {
+        const description =
+          error instanceof Error
+            ? error.message
+            : 'Something went wrong. Please try again.';
+        toast.error("Couldn't log you in", { description });
       }
     });
   }
