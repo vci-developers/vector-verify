@@ -3,4 +3,5 @@ export interface UserDto {
   email: string;
   privilege: number;
   isActive: boolean;
+  isWhitelisted: boolean;
 }

@@ -3,4 +3,5 @@ export interface User {
   email: string;
   privilege: number;
   isActive: boolean;
+  isWhitelisted: boolean;
 }

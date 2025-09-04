@@ -28,8 +28,8 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={logoutHandler}>
-      {isPending ? 'Logging out…' : 'Log out'}
+    <Button variant="outline" size="sm" onClick={logoutHandler} disabled={isPending}>
+      {isPending ? 'Logging out...' : 'Log out'}
     </Button>
   );
 }
