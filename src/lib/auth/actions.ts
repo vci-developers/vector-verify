@@ -1,8 +1,6 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { ENV } from '@/lib/env';
-import { COOKIE, COOKIE_AGE, BASE_COOKIE_OPTIONS } from '@/lib/auth/cookies';
 import { LoginSchema, SignupSchema } from '@/lib/auth/schema';
 import type {
   LoginRequestDto,
@@ -12,34 +10,12 @@ import type {
 } from '@/lib/dto/auth';
 import { mapUserDtoToDomain } from '@/lib/mappers/user.mapper';
 import type { User } from '@/lib/domain/user';
-import { ErrorResponseDto } from '../dto/error';
+import { parseApiError } from '@/lib/api/parse-api-error';
+import { clearAuthCookies, setAuthCookies } from './cookies.server';
 
 export type AuthActionResult =
   | { ok: true; user: User; message?: string }
   | { ok: false; error: string; status?: number };
-
-async function setAuthCookies(accessToken: string, refreshToken: string) {
-  const cookieJar = await cookies();
-  cookieJar.set({
-    name: COOKIE.ACCESS,
-    value: accessToken,
-    ...BASE_COOKIE_OPTIONS,
-    maxAge: COOKIE_AGE.ACCESS,
-  });
-
-  cookieJar.set({
-    name: COOKIE.REFRESH,
-    value: refreshToken,
-    ...BASE_COOKIE_OPTIONS,
-    maxAge: COOKIE_AGE.REFRESH,
-  });
-}
-
-async function clearAuthCookies() {
-  const cookieJar = await cookies();
-  cookieJar.delete(COOKIE.ACCESS);
-  cookieJar.delete(COOKIE.REFRESH);
-}
 
 export async function loginAction(
   formData: FormData,
@@ -62,12 +38,8 @@ export async function loginAction(
   });
 
   if (!response.ok) {
-    let message = response.statusText || `HTTP ${response.status}`;
-    try {
-      const body = (await response.json()) as Partial<ErrorResponseDto>;
-      if (typeof body.error === 'string' && body.error) message = body.error;
-    } catch {}
-    return { ok: false, error: message, status: response.status };
+    const errorMessage = await parseApiError(response);
+    return { ok: false, error: errorMessage, status: response.status };
   }
 
   const data: LoginResponseDto = await response.json();
@@ -101,12 +73,8 @@ export async function signupAction(
   });
 
   if (!response.ok) {
-    let message = response.statusText || `HTTP ${response.status}`;
-    try {
-      const body = (await response.json()) as Partial<ErrorResponseDto>;
-      if (typeof body.error === 'string' && body.error) message = body.error;
-    } catch {}
-    return { ok: false, error: message, status: response.status };
+    const errorMessage = await parseApiError(response);
+    return { ok: false, error: errorMessage, status: response.status };
   }
 
   const data: SignupResponseDto = await response.json();

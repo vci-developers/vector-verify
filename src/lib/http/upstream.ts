@@ -1,31 +1,22 @@
 import { cookies } from 'next/headers';
 import { ENV } from '@/lib/env';
-import { COOKIE, COOKIE_AGE, BASE_COOKIE_OPTIONS } from '@/lib/auth/cookies';
+import { COOKIE } from '@/lib/auth/cookies';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/dto/auth';
+import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies.server';
 
 type QueryInput =
   | string
   | URLSearchParams
   | Record<string, string | number | boolean | null | undefined>;
 
-async function setAccessTokenCookie(token: string) {
-  const cookieJar = await cookies();
-  cookieJar.set({
-    name: COOKIE.ACCESS,
-    value: token,
-    ...BASE_COOKIE_OPTIONS,
-    maxAge: COOKIE_AGE.ACCESS,
-  });
-}
-
 export function buildUpstreamUrl(path: string, query?: QueryInput) {
-  const base = ENV.API_BASE_URL.replace(/\/+$/, "");
-  const cleanPath = path.replace(/^\/+/, "");
+  const base = ENV.API_BASE_URL.replace(/\/+$/, '');
+  const cleanPath = path.replace(/^\/+/, '');
 
-  let search = "";
+  let search = '';
   if (query) {
-    if (typeof query === "string") {
-      search = query ? (query.startsWith("?") ? query : `?${query}`) : "";
+    if (typeof query === 'string') {
+      search = query ? (query.startsWith('?') ? query : `?${query}`) : '';
     } else {
       const params =
         query instanceof URLSearchParams
@@ -33,10 +24,10 @@ export function buildUpstreamUrl(path: string, query?: QueryInput) {
           : new URLSearchParams(
               Object.entries(query)
                 .filter(([, value]) => value !== undefined && value !== null)
-                .map(([key, value]) => [key, String(value)])
+                .map(([key, value]) => [key, String(value)]),
             );
       const queryString = params.toString();
-      search = queryString ? `?${queryString}` : "";
+      search = queryString ? `?${queryString}` : '';
     }
   }
 
@@ -53,6 +44,8 @@ export function forwardRequestHeaders(request: Request): Headers {
         'content-length',
         'cookie',
         'authorization',
+        'transfer-encoding',
+        'accept-encoding',
       ].includes(key.toLowerCase())
     )
       return;
@@ -64,7 +57,11 @@ export function forwardRequestHeaders(request: Request): Headers {
 export function forwardResponseHeaders(response: Response): Headers {
   const headers = new Headers();
   response.headers.forEach((value, key) => {
-    if (['transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase()))
+    if (
+      ['transfer-encoding', 'content-encoding', 'content-length'].includes(
+        key.toLowerCase(),
+      )
+    )
       return;
     headers.set(key, value);
   });
@@ -76,16 +73,16 @@ export async function upstreamFetch(
   init?: RequestInit & { bodyBuffer?: ArrayBuffer | null; query?: QueryInput },
 ): Promise<Response> {
   const cookieJar = await cookies();
+  const url = buildUpstreamUrl(path, init?.query);
+  const method = (init?.method ?? 'GET').toUpperCase();
+
   const accessToken = cookieJar.get(COOKIE.ACCESS)?.value ?? null;
   const refreshToken = cookieJar.get(COOKIE.REFRESH)?.value ?? null;
 
-  const method = (init?.method ?? 'GET').toUpperCase();
   const headers = new Headers(init?.headers);
-  if (!headers.has("authorization") && accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+  if (!headers.has('authorization') && accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
   }
-
-  const url = buildUpstreamUrl(path, init?.query);
 
   let response = await fetch(url, {
     method,
@@ -105,7 +102,7 @@ export async function upstreamFetch(
 
     if (refreshResponse.ok) {
       const data: RefreshResponseDto = await refreshResponse.json();
-      await setAccessTokenCookie(data.accessToken);
+      await setAuthCookies(data.accessToken, refreshToken);
 
       const retryHeaders = new Headers(init?.headers);
       retryHeaders.set('Authorization', `Bearer ${data.accessToken}`);
@@ -118,8 +115,7 @@ export async function upstreamFetch(
         redirect: 'manual',
       });
     } else {
-        cookieJar.delete(COOKIE.ACCESS);
-        cookieJar.delete(COOKIE.REFRESH);
+      await clearAuthCookies();
     }
   }
 

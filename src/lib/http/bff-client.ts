@@ -1,4 +1,4 @@
-import { ErrorResponseDto } from '../dto/error';
+import { parseApiError } from '@/lib/api/parse-api-error'; 
 
 export async function bff<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/bff/${path.replace(/^\/+/, '')}`, {
@@ -7,10 +7,9 @@ export async function bff<T>(path: string, init?: RequestInit): Promise<T> {
     cache: 'no-store',
   });
 
-  const contentType = response.headers.get('content-type') ?? '';
   if (!response.ok) {
-    const { error } = (await response.json()) as ErrorResponseDto;
-    throw new Error(error);
+    const errorMessage = await parseApiError(response);
+    throw new Error(errorMessage);
   }
 
   if (
@@ -21,6 +20,7 @@ export async function bff<T>(path: string, init?: RequestInit): Promise<T> {
     return undefined as T;
   }
 
+  const contentType = response.headers.get('content-type') ?? '';
   if (contentType.includes('application/json')) {
     return (await response.json()) as T;
   }

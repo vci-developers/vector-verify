@@ -13,14 +13,14 @@ async function readBodyBuffer(
   return await request.arrayBuffer();
 }
 
-async function handleRequest(request: NextRequest, params: { path: string[] }) {
+async function handleProxy(request: NextRequest, params: { path: string[] }) {
   const path = params.path.join('/');
   const bodyBuffer = await readBodyBuffer(request);
-  const headers = forwardRequestHeaders(request);
+  const requestHeaders = forwardRequestHeaders(request);
 
   const upstreamResponse = await upstreamFetch(path, {
     method: request.method,
-    headers,
+    headers: requestHeaders,
     bodyBuffer,
     query: request.nextUrl.searchParams,
   });
@@ -36,29 +36,29 @@ export async function GET(
   request: NextRequest,
   context: { params: { path: string[] } },
 ) {
-  return handleRequest(request, context.params);
+  return handleProxy(request, context.params);
 }
 export async function POST(
   request: NextRequest,
   context: { params: { path: string[] } },
 ) {
-  return handleRequest(request, context.params);
+  return handleProxy(request, context.params);
 }
 export async function PUT(
   request: NextRequest,
   context: { params: { path: string[] } },
 ) {
-  return handleRequest(request, context.params);
+  return handleProxy(request, context.params);
 }
 export async function PATCH(
   request: NextRequest,
   context: { params: { path: string[] } },
 ) {
-  return handleRequest(request, context.params);
+  return handleProxy(request, context.params);
 }
 export async function DELETE(
   request: NextRequest,
   context: { params: { path: string[] } },
 ) {
-  return handleRequest(request, context.params);
+  return handleProxy(request, context.params);
 }

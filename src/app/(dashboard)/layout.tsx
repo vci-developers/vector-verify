@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   const hasAccessToken = !!cookieJar.get(COOKIE.ACCESS)?.value;
   const hasRefreshToken = !!cookieJar.get(COOKIE.REFRESH)?.value;
 
-  if (!hasAccessToken || !hasRefreshToken) {
+  if (!hasAccessToken && !hasRefreshToken) {
     redirect('/login');
   }
 

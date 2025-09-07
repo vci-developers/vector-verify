@@ -1,6 +1,12 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { showErrorToast } from '@/lib/ui/show-error-toast';
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 interface ProvidersProps {
@@ -15,6 +21,12 @@ const queryClient = new QueryClient({
       retry: 1,
     },
   },
+  queryCache: new QueryCache({
+    onError: error => showErrorToast(error),
+  }),
+  mutationCache: new MutationCache({
+    onError: error => showErrorToast(error),
+  }),
 });
 
 export default function Providers({ children }: ProvidersProps) {
