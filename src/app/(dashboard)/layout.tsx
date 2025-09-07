@@ -1,21 +1,25 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { COOKIE } from '@/lib/auth/cookies';
 import { Fragment } from 'react';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { upstreamFetch } from '@/lib/http/upstream';
+import { mapUserDtoToDomain } from '@/lib/mappers/user.mapper';
+import type { UserProfileResponseDto } from '@/lib/dto/user';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function DashboardLayout({
-  children,
-}: DashboardLayoutProps) {
-  const cookieJar = await cookies();
-  const hasAccessToken = !!cookieJar.get(COOKIE.ACCESS)?.value;
-  const hasRefreshToken = !!cookieJar.get(COOKIE.REFRESH)?.value;
+export default async function DashboardLayout({ children }: DashboardLayoutProps) {
+  const response = await upstreamFetch('users/profile', { method: 'GET' });
 
-  if (!hasAccessToken && !hasRefreshToken) {
+  if (!response.ok) {
+    redirect('/login');
+  }
+
+  const data = (await response.json()) as UserProfileResponseDto;
+  const user = mapUserDtoToDomain(data.user);
+
+  if (!user) {
     redirect('/login');
   }
 

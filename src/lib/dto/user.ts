@@ -5,3 +5,8 @@ export interface UserDto {
   isActive: boolean;
   isWhitelisted: boolean;
 }
+
+export interface UserProfileResponseDto {
+  message: string;
+  user: UserDto;
+}

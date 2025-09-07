@@ -12,8 +12,8 @@ type QueryInput =
 export function buildUpstreamUrl(path: string, query?: QueryInput) {
   const base = ENV.API_BASE_URL.replace(/\/+$/, '');
   const cleanPath = path.replace(/^\/+/, '');
-
   let search = '';
+
   if (query) {
     if (typeof query === 'string') {
       search = query ? (query.startsWith('?') ? query : `?${query}`) : '';
@@ -57,12 +57,9 @@ export function forwardRequestHeaders(request: Request): Headers {
 export function forwardResponseHeaders(response: Response): Headers {
   const headers = new Headers();
   response.headers.forEach((value, key) => {
-    if (
-      ['transfer-encoding', 'content-encoding', 'content-length'].includes(
-        key.toLowerCase(),
-      )
-    )
+    if (['transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
       return;
+    }
     headers.set(key, value);
   });
   return headers;
@@ -92,7 +89,8 @@ export async function upstreamFetch(
     redirect: 'manual',
   });
 
-  if (response.status === 401 && refreshToken) {
+  // Handle missing/expired token
+  if (response.status === 401 && refreshToken && !path.startsWith('auth/refresh')) {
     const refreshResponse = await fetch(buildUpstreamUrl('auth/refresh'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

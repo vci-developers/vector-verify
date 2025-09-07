@@ -4,7 +4,7 @@ export const COOKIE = {
 } as const;
 
 export const COOKIE_AGE = {
-  ACCESS: 60 * 60 * 24,
+  ACCESS: 30 * 60,
   REFRESH: 60 * 60 * 24 * 28,
 } as const;
 
