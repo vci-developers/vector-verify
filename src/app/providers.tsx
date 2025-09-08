@@ -1,6 +1,4 @@
 'use client';
-
-import { useSessionRefresh } from '@/lib/auth/hooks/use-session-refresh';
 import { showErrorToast } from '@/lib/shared/ui/toast';
 import {
   MutationCache,
@@ -31,8 +29,7 @@ const queryClient = new QueryClient({
 });
 
 export default function Providers({ children }: ProvidersProps) {
-  useSessionRefresh();
-
+  
   return (
     <QueryClientProvider client={queryClient}>
       {children}

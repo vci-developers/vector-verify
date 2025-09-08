@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 import { Fragment } from 'react';
+import { SessionRefreshMount } from './session-refresh-mount';
 import { LogoutButton } from '@/components/auth/logout-button';
-import { upstreamFetch } from '@/lib/http/upstream-fetch';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import type { UserProfileResponseDto } from '@/lib/user/dto';
+import { upstreamFetch } from '@/lib/http/upstream-fetch';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
   return (
     <Fragment>
+      <SessionRefreshMount />
       <header className="flex items-center justify-end p-4">
         <LogoutButton />
       </header>
