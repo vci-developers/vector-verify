@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  upstreamFetch,
-  forwardRequestHeaders,
-  forwardResponseHeaders,
-} from '@/lib/http/upstream';
+import { upstreamFetch } from '@/lib/http/upstream-fetch';
+import { forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/headers';
 
 async function readBodyBuffer(
   request: NextRequest,

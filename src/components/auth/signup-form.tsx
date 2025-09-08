@@ -20,12 +20,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import type { AuthActionResult } from '@/lib/auth/actions';
-import { SignupSchema, type SignupFormData } from '@/lib/auth/schema';
+import { SignupSchema, type SignupFormData } from '@/lib/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import * as React from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -35,8 +35,8 @@ interface SignupFormProps {
 
 export function SignupForm({ onSignup }: SignupFormProps) {
   const router = useRouter();
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [isPending, startTransition] = React.useTransition();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),

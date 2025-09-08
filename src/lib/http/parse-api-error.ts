@@ -1,4 +1,4 @@
-import type { ErrorResponseDto } from '@/lib/dto/error';
+import type { ErrorResponseDto } from '@/lib/shared/dto/error';
 
 export async function parseApiError(response: Response): Promise<string> {
   try {

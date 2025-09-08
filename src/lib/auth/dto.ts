@@ -1,5 +1,5 @@
-import { AuthTokens } from '@/lib/auth/types';
-import { UserDto } from '@/lib/dto/user';
+import { AuthTokens } from '@/lib/auth/tokens/types';
+import { UserDto } from '@/lib/user/dto';
 
 export interface LoginRequestDto {
   email: string;

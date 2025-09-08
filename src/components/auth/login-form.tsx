@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import type { AuthActionResult } from '@/lib/auth/actions';
-import { type LoginFormData, LoginSchema } from '@/lib/auth/schema';
+import { type LoginFormData, LoginSchema } from '@/lib/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';

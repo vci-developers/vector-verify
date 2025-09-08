@@ -1,4 +1,4 @@
-import { parseApiError } from '@/lib/api/parse-api-error'; 
+import { parseApiError } from '@/lib/http/parse-api-error';
 
 export async function bff<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/bff/${path.replace(/^\/+/, '')}`, {

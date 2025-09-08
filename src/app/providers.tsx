@@ -1,6 +1,7 @@
 'use client';
 
-import { showErrorToast } from '@/lib/ui/show-error-toast';
+import { useSessionRefresh } from '@/lib/auth/hooks/use-session-refresh';
+import { showErrorToast } from '@/lib/shared/ui/toast';
 import {
   MutationCache,
   QueryCache,
@@ -8,7 +9,6 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useSessionRefresh } from '@/lib/auth/use-session-refresh';
 
 interface ProvidersProps {
   children: React.ReactNode;

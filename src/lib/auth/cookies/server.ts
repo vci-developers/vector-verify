@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
-import { COOKIE, BASE_COOKIE_OPTIONS, COOKIE_AGE } from "./cookies";
+import { cookies } from 'next/headers';
+import { COOKIE, BASE_COOKIE_OPTIONS, COOKIE_AGE } from './constants';
 
 export async function setAuthCookies(accessToken: string, refreshToken: string) {
   const cookieJar = await cookies();

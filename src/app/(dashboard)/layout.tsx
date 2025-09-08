@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import { Fragment } from 'react';
 import { LogoutButton } from '@/components/auth/logout-button';
-import { upstreamFetch } from '@/lib/http/upstream';
-import { mapUserDtoToDomain } from '@/lib/mappers/user.mapper';
-import type { UserProfileResponseDto } from '@/lib/dto/user';
+import { upstreamFetch } from '@/lib/http/upstream-fetch';
+import { mapUserDtoToDomain } from '@/lib/user/mapper';
+import type { UserProfileResponseDto } from '@/lib/user/dto';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

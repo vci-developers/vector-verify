@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { ENV } from '@/lib/env';
-import { COOKIE } from '@/lib/auth/cookies';
-import type { RefreshResponseDto } from '@/lib/dto/auth';
-import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies.server';
-import { parseApiError } from '@/lib/api/parse-api-error';
+import { ENV } from '@/lib/config/env';
+import { COOKIE } from '@/lib/auth/cookies/constants';
+import type { RefreshResponseDto } from '@/lib/auth/dto';
+import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies/server';
+import { parseApiError } from '@/lib/http/parse-api-error';
 
 export async function POST(_req: NextRequest) {
   const cookieJar = await cookies();
@@ -29,9 +29,8 @@ export async function POST(_req: NextRequest) {
 
   const data: RefreshResponseDto = await upstreamResponse.json();
   const newAccessToken = data.accessToken;
-  const newRefreshToken = (data as any).refreshToken ?? refreshToken;
 
-  await setAuthCookies(newAccessToken, newRefreshToken);
+  await setAuthCookies(newAccessToken, refreshToken);
 
   return NextResponse.json(
     { message: data.message ?? 'Session refreshed successfully.' },
