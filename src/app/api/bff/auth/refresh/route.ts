@@ -4,7 +4,8 @@ import { ENV } from '@/lib/config/env';
 import { COOKIE } from '@/lib/auth/cookies/constants';
 import type { RefreshResponseDto } from '@/lib/auth/dto';
 import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies/server';
-import { parseApiError } from '@/lib/http/parse-api-error';
+import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
 
 export async function POST(_req: NextRequest) {
   const cookieJar = await cookies();
@@ -14,7 +15,7 @@ export async function POST(_req: NextRequest) {
     return NextResponse.json({ error: 'No refresh token available.' }, { status: 401 });
   }
 
-  const upstreamResponse = await fetch(`${ENV.API_BASE_URL}/auth/refresh`, {
+  const upstreamResponse = await fetchWithTimeout(`${ENV.API_BASE_URL}/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),

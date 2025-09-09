@@ -4,9 +4,10 @@ import { LoginSchema } from '@/lib/auth/validation/schema';
 import type { LoginRequestDto, LoginResponseDto } from '@/lib/auth/dto';
 import type { User } from '@/lib/user/model';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
-import { parseApiError } from '@/lib/http/parse-api-error';
+import { parseApiError } from '@/lib/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/config/env';
+import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
 
 export type AuthActionResult =
   | { ok: true; user: User; message?: string }
@@ -25,7 +26,7 @@ export async function loginAction(
     return { ok: false, error: 'Invalid credentials' };
   }
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${ENV.API_BASE_URL.replace(/\/+$/, '')}/auth/login`,
     {
       method: 'POST',

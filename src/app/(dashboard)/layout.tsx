@@ -4,7 +4,7 @@ import { SessionRefreshMount } from './session-refresh-mount';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import type { UserProfileResponseDto } from '@/lib/user/dto';
-import { upstreamFetch } from '@/lib/http/upstream-fetch';
+import { upstreamFetch } from '@/lib/http/server/upstream';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

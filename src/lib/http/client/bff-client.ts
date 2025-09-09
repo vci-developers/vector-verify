@@ -1,7 +1,11 @@
-import { parseApiError } from '@/lib/http/parse-api-error';
+import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
 
-export async function bff<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/bff/${path.replace(/^\/+/, '')}`, {
+export async function bff<T>(
+  path: string,
+  init?: RequestInit & { timeoutMs?: number },
+): Promise<T> {
+  const response = await fetchWithTimeout(`/api/bff/${path.replace(/^\/+/, '')}`, {
     ...init,
     credentials: 'include',
     cache: 'no-store',

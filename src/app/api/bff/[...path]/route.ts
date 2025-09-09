@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { upstreamFetch } from '@/lib/http/upstream-fetch';
-import { forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/headers';
+import { upstreamFetch } from '@/lib/http/server/upstream';
+import { forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/server/headers';
 
 async function readBodyBuffer(
   request: NextRequest,
@@ -14,12 +14,14 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
   const path = params.path.join('/');
   const bodyBuffer = await readBodyBuffer(request);
   const requestHeaders = forwardRequestHeaders(request);
-
+  const isSSE = (request.headers.get('accept') || '').includes('text/event-stream');
   const upstreamResponse = await upstreamFetch(path, {
     method: request.method,
     headers: requestHeaders,
     bodyBuffer,
     query: request.nextUrl.searchParams,
+    // Disable timeout for server-sent events or long-lived streams
+    timeoutMs: isSSE ? 0 : undefined,
   });
 
   const responseHeaders = forwardResponseHeaders(upstreamResponse);
@@ -31,31 +33,36 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  return handleProxy(request, context.params);
+  const { path } = await context.params;
+  return handleProxy(request, { path });
 }
 export async function POST(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  return handleProxy(request, context.params);
+  const { path } = await context.params;
+  return handleProxy(request, { path });
 }
 export async function PUT(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  return handleProxy(request, context.params);
+  const { path } = await context.params;
+  return handleProxy(request, { path });
 }
 export async function PATCH(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  return handleProxy(request, context.params);
+  const { path } = await context.params;
+  return handleProxy(request, { path });
 }
 export async function DELETE(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  return handleProxy(request, context.params);
+  const { path } = await context.params;
+  return handleProxy(request, { path });
 }

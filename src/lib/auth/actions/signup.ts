@@ -3,10 +3,11 @@
 import { SignupSchema } from '@/lib/auth/validation/schema';
 import type { SignupRequestDto, SignupResponseDto } from '@/lib/auth/dto';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
-import { parseApiError } from '@/lib/http/parse-api-error';
+import { parseApiError } from '@/lib/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/config/env';
 import type { AuthActionResult } from './login';
+import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
 
 export async function signupAction(
   formData: FormData,
@@ -21,7 +22,7 @@ export async function signupAction(
     return { ok: false, error: 'Invalid credentials' };
   }
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${ENV.API_BASE_URL.replace(/\/+$/, '')}/auth/signup`,
     {
       method: 'POST',
