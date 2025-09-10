@@ -1,11 +1,7 @@
 'use client';
+
 import { showErrorToast } from '@/lib/shared/ui/toast';
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 interface ProvidersProps {
@@ -29,7 +25,6 @@ const queryClient = new QueryClient({
 });
 
 export default function Providers({ children }: ProvidersProps) {
-  
   return (
     <QueryClientProvider client={queryClient}>
       {children}

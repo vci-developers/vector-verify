@@ -27,7 +27,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { showErrorToast } from '@/lib/shared/ui/toast';
 
 interface LoginFormProps {
   onLogin: (formData: FormData) => Promise<AuthActionResult>;
@@ -56,17 +56,21 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       try {
         const response = await onLogin(formData);
         if (!response.ok) {
-          form.setError('root', { message: response.error ?? 'Login failed' });
-        } else {
-          router.push('/');
-          router.refresh();
+          const status = response.status ?? 0;
+          if (status === 400 || status === 401) {
+            form.setError('root', {
+              message: response.error || 'Invalid email or password',
+            });
+          } else {
+            showErrorToast(response.error || "Couldn't log you in");
+          }
+          return;
         }
+
+        router.push('/');
+        router.refresh();
       } catch (error) {
-        const description =
-          error instanceof Error
-            ? error.message
-            : 'Something went wrong. Please try again.';
-        toast.error("Couldn't log you in", { description });
+        showErrorToast(error, "Couldn't log you in");
       }
     });
   }

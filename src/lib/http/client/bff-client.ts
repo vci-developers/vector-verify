@@ -1,19 +1,27 @@
 import { parseApiError } from '@/lib/http/core/parse-api-error';
 import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
+import { HttpError } from '@/lib/http/core/http-error';
 
 export async function bff<T>(
   path: string,
   init?: RequestInit & { timeoutMs?: number },
 ): Promise<T> {
-  const response = await fetchWithTimeout(`/api/bff/${path.replace(/^\/+/, '')}`, {
-    ...init,
-    credentials: 'include',
-    cache: 'no-store',
-  });
+  const url = `/api/bff/${path.replace(/^\/+/, '')}`;
+
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(url, {
+      ...init,
+      credentials: 'include',
+      cache: 'no-store',
+    });
+  } catch {
+    throw new HttpError('Network error. Please try again.', 0);
+  }
 
   if (!response.ok) {
     const errorMessage = await parseApiError(response);
-    throw new Error(errorMessage);
+    throw new HttpError(errorMessage, response.status);
   }
 
   if (

@@ -27,7 +27,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { showErrorToast } from '@/lib/shared/ui/toast';
 
 interface SignupFormProps {
   onSignup: (formData: FormData) => Promise<AuthActionResult>;
@@ -55,18 +55,22 @@ export function SignupForm({ onSignup }: SignupFormProps) {
       startTransition(async () => {
         const response = await onSignup(formData);
         if (!response.ok) {
-          form.setError('root', { message: response.error ?? 'Signup failed' });
-        } else {
-          router.push('/');
-          router.refresh();
+          const status = response.status ?? 0;
+          if (status === 400 || status === 409) {
+            form.setError('root', {
+              message: response.error || 'Please check your details and try again',
+            });
+          } else {
+            showErrorToast(response.error || "Couldn't create your account");
+          }
+          return;
         }
+
+        router.push('/');
+        router.refresh();
       });
     } catch (error) {
-      const description =
-        error instanceof Error
-          ? error.message
-          : 'Something went wrong. Please try again.';
-      toast.error("Couldn't create your account", { description });
+      showErrorToast(error, "Couldn't create your account");
     }
   }
 

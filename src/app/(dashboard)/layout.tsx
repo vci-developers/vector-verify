@@ -11,16 +11,20 @@ interface DashboardLayoutProps {
 }
 
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
-  const response = await upstreamFetch('users/profile', { method: 'GET' });
+  try {
+    const response = await upstreamFetch('users/profile', { method: 'GET' });
 
-  if (!response.ok) {
-    redirect('/login');
-  }
+    if (!response.ok) {
+      redirect('/login');
+    }
 
-  const data = (await response.json()) as UserProfileResponseDto;
-  const user = mapUserDtoToDomain(data.user);
+    const data = (await response.json()) as UserProfileResponseDto;
+    const user = mapUserDtoToDomain(data.user);
 
-  if (!user) {
+    if (!user) {
+      redirect('/login');
+    }
+  } catch {
     redirect('/login');
   }
 

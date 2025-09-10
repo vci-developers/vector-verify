@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/lib/auth/actions';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { toast } from 'sonner';
+import { showErrorToast } from '@/lib/shared/ui/toast';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -19,11 +19,7 @@ export function LogoutButton() {
         router.refresh();
       });
     } catch (error) {
-      const description =
-        error instanceof Error
-          ? error.message
-          : 'Something went wrong. Please try again.';
-      toast.error("Couldn't log you out", { description });
+      showErrorToast(error, "Couldn't log you out");
     }
   }
 

@@ -26,27 +26,33 @@ export async function loginAction(
     return { ok: false, error: 'Invalid credentials' };
   }
 
-  const response = await fetchWithTimeout(
-    `${ENV.API_BASE_URL.replace(/\/+$/, '')}/auth/login`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-      body: JSON.stringify(payload),
-    },
-  );
+  try {
+    const response = await fetchWithTimeout(
+      `${ENV.API_BASE_URL.replace(/\/+$/, '')}/auth/login`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify(payload),
+      },
+    );
 
-  if (!response.ok) {
-    const errorMessage = await parseApiError(response);
-    return { ok: false, error: errorMessage, status: response.status };
+    if (!response.ok) {
+      const errorMessage = await parseApiError(response);
+      return { ok: false, error: errorMessage, status: response.status };
+    }
+
+    const data: LoginResponseDto = await response.json();
+    await setAuthCookies(data.tokens.accessToken, data.tokens.refreshToken);
+
+    return {
+      ok: true,
+      user: mapUserDtoToDomain(data.user),
+      message: data.message,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unable to login. Please try again.';
+    return { ok: false, error: message };
   }
-
-  const data: LoginResponseDto = await response.json();
-  await setAuthCookies(data.tokens.accessToken, data.tokens.refreshToken);
-
-  return {
-    ok: true,
-    user: mapUserDtoToDomain(data.user),
-    message: data.message,
-  };
 }
