@@ -1,4 +1,4 @@
-import { AuthTokens } from '@/lib/auth/tokens/types';
+import { AuthTokens } from '@/lib/auth/types';
 import { UserDto } from '@/lib/user/dto';
 
 export interface LoginRequestDto {

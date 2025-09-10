@@ -1,8 +1,12 @@
 import { Fragment } from 'react';
 import { redirect } from 'next/navigation';
-import { HydrationBoundary, dehydrate, QueryClient } from '@tanstack/react-query';
-import { parseApiError } from '@/lib/http/core';
-import { upstreamFetch } from '@/lib/http/server';
+import {
+  HydrationBoundary,
+  dehydrate,
+  QueryClient,
+} from '@tanstack/react-query';
+import { parseApiError } from '@/lib/shared/http/core';
+import { upstreamFetch } from '@/lib/shared/http/server';
 import { withRouteError } from '@/lib/shared/ui/route-error';
 import type { UserProfileResponseDto } from '@/lib/user';
 import { mapUserDtoToDomain } from '@/lib/user';
@@ -12,7 +16,9 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function DashboardLayout({ children }: DashboardLayoutProps) {
+export default async function DashboardLayout({
+  children,
+}: DashboardLayoutProps) {
   try {
     const response = await upstreamFetch('users/profile', { method: 'GET' });
     if (!response.ok) {

@@ -3,11 +3,11 @@
 import { SignupSchema } from '@/lib/auth/validation/schema';
 import type { SignupRequestDto, SignupResponseDto } from '@/lib/auth/dto';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
-import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
-import { ENV } from '@/lib/config/env';
+import { ENV } from '@/lib/shared/config/env';
 import type { AuthActionResult } from './login';
-import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
+import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 
 export async function signupAction(
   formData: FormData,

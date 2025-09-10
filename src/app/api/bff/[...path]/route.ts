@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { upstreamFetch, forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/server';
+import {
+  upstreamFetch,
+  forwardRequestHeaders,
+  forwardResponseHeaders,
+} from '@/lib/shared/http/server';
 
-async function readBodyBuffer(request: NextRequest): Promise<ArrayBuffer | null> {
+async function readBodyBuffer(
+  request: NextRequest,
+): Promise<ArrayBuffer | null> {
   const method = request.method.toUpperCase();
   if (method === 'GET' || method === 'HEAD') return null;
   try {
@@ -16,7 +22,9 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
     const path = params.path.join('/');
     const bodyBuffer = await readBodyBuffer(request);
     const requestHeaders = forwardRequestHeaders(request);
-    const isSSE = (request.headers.get('accept') || '').includes('text/event-stream');
+    const isSSE = (request.headers.get('accept') || '').includes(
+      'text/event-stream',
+    );
     const upstreamResponse = await upstreamFetch(path, {
       method: request.method,
       headers: requestHeaders,

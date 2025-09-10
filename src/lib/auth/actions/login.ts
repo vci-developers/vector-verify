@@ -4,10 +4,10 @@ import { LoginSchema } from '@/lib/auth/validation/schema';
 import type { LoginRequestDto, LoginResponseDto } from '@/lib/auth/dto';
 import type { User } from '@/lib/user/model';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
-import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
-import { ENV } from '@/lib/config/env';
-import { fetchWithTimeout } from '@/lib/http/core/fetch-with-timeout';
+import { ENV } from '@/lib/shared/config/env';
+import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 
 export type AuthActionResult =
   | { ok: true; user: User; message?: string }
@@ -52,7 +52,9 @@ export async function loginAction(
     };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Unable to login. Please try again.';
+      error instanceof Error
+        ? error.message
+        : 'Unable to login. Please try again.';
     return { ok: false, error: message };
   }
 }

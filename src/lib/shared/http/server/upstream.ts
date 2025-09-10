@@ -1,10 +1,12 @@
-
 import { cookies } from 'next/headers';
 import { COOKIE } from '@/lib/auth/cookies/constants';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/auth/dto';
 import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies/server';
-import { ENV } from '@/lib/config/env';
-import { fetchWithTimeout, DEFAULT_FETCH_TIMEOUT_MS } from '@/lib/http/core/fetch-with-timeout';
+import { ENV } from '@/lib/shared/config/env';
+import {
+  fetchWithTimeout,
+  DEFAULT_FETCH_TIMEOUT_MS,
+} from '@/lib/shared/http/core/fetch-with-timeout';
 
 export type QueryInput =
   | string
@@ -40,7 +42,10 @@ export function buildUpstreamUrl(path: string, query?: QueryInput): string {
   return `${base}/${cleanPath}${search}`;
 }
 
-export async function upstreamFetch(path: string, init: UpstreamInit = {}): Promise<Response> {
+export async function upstreamFetch(
+  path: string,
+  init: UpstreamInit = {},
+): Promise<Response> {
   const cookieJar = await cookies();
   const access = cookieJar.get(COOKIE.ACCESS)?.value ?? null;
   const refresh = cookieJar.get(COOKIE.REFRESH)?.value ?? null;
@@ -61,12 +66,15 @@ export async function upstreamFetch(path: string, init: UpstreamInit = {}): Prom
   if (response.status !== 401 || !refresh) {
     return response;
   }
-  // attempt refresh
+  
   const refreshUrl = buildUpstreamUrl('auth/refresh');
   const refreshPayload: RefreshRequestDto = { refreshToken: refresh };
   const refreshRes = await fetchWithTimeout(refreshUrl, {
     method: 'POST',
-    headers: new Headers({ accept: 'application/json', 'content-type': 'application/json' }),
+    headers: new Headers({
+      accept: 'application/json',
+      'content-type': 'application/json',
+    }),
     body: JSON.stringify(refreshPayload),
     cache: 'no-store',
     redirect: 'manual',

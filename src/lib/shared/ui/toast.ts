@@ -1,7 +1,10 @@
 import { toast } from 'sonner';
-import { HttpError } from '@/lib/http/core/http-error';
+import { HttpError } from '@/lib/shared/http/core/http-error';
 
-export function showErrorToast(error: unknown, fallback = 'Something went wrong.') {
+export function showErrorToast(
+  error: unknown,
+  fallback = 'Something went wrong.',
+) {
   if (error instanceof HttpError) {
     if (error.isUnauthorized) {
       toast.error('Your session has expired. Please sign in again.');

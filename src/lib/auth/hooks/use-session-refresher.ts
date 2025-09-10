@@ -11,7 +11,7 @@ const ACCESS_MS = COOKIE_AGE.ACCESS * 1000;
 const BUFFER_MS = 30 * 60 * 1000;
 const INTERVAL_MS = Math.max(30_000, ACCESS_MS - BUFFER_MS);
 
-export function useSessionRefresher(
+export function useSessionRefresherQuery(
   opts: { enabled?: boolean; suppressToast?: boolean } = {},
 ) {
   const { enabled = true, suppressToast = false } = opts;

@@ -1,7 +1,9 @@
-
-import { parseApiError } from '@/lib/http/core/parse-api-error';
-import { fetchWithTimeout, DEFAULT_FETCH_TIMEOUT_MS } from '@/lib/http/core/fetch-with-timeout';
-import { HttpError } from '@/lib/http/core/http-error';
+import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
+import {
+  fetchWithTimeout,
+  DEFAULT_FETCH_TIMEOUT_MS,
+} from '@/lib/shared/http/core/fetch-with-timeout';
+import { HttpError } from '@/lib/shared/http/core/http-error';
 
 export type BffInit = RequestInit & { timeoutMs?: number };
 
