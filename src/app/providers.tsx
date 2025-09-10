@@ -17,7 +17,13 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: error => showErrorToast(error),
+    onError: (error, query) => {
+      // Allow per-query suppression via meta
+      // tanstack exposes meta on the query; typing for meta can be lax
+      const meta = (query as unknown as { meta?: Record<string, unknown> })?.meta;
+      if (meta && meta.suppressErrorToast) return;
+      showErrorToast(error);
+    },
   }),
   mutationCache: new MutationCache({
     onError: error => showErrorToast(error),

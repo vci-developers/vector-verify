@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '@/styles/globals.css';
 import Providers from './providers';
 import { Toaster } from '@/components/ui/sonner';
+import { RouteErrorToaster } from '@/components/shared/route-error-toaster';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,8 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
       >
-        <Providers>{children}</Providers>
         <Toaster richColors position="top-center" />
+        <Providers>
+          <RouteErrorToaster />
+          {children}
+        </Providers>
       </body>
     </html>
   );

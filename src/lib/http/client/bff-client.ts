@@ -29,7 +29,7 @@ export async function bff<T>(
     response.status === 205 ||
     response.headers.get('content-length') === '0'
   ) {
-    return undefined as T;
+    return null as unknown as T;
   }
 
   const contentType = response.headers.get('content-type') ?? '';

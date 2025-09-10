@@ -1,10 +1,12 @@
-import { redirect } from 'next/navigation';
 import { Fragment } from 'react';
-import { SessionRefreshMount } from './session-refresh-mount';
-import { LogoutButton } from '@/components/auth/logout-button';
-import { mapUserDtoToDomain } from '@/lib/user/mapper';
+import { redirect } from 'next/navigation';
+import { HydrationBoundary, dehydrate, QueryClient } from '@tanstack/react-query';
+import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { withRouteError } from '@/lib/shared/ui/route-error';
 import type { UserProfileResponseDto } from '@/lib/user/dto';
+import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import { upstreamFetch } from '@/lib/http/server/upstream';
+import { DashboardHeader } from './dashboard-header';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,28 +15,29 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
   try {
     const response = await upstreamFetch('users/profile', { method: 'GET' });
-
     if (!response.ok) {
-      redirect('/login');
+      const message = await parseApiError(response);
+      redirect(withRouteError('/login', { message, status: response.status }));
     }
-
     const data = (await response.json()) as UserProfileResponseDto;
     const user = mapUserDtoToDomain(data.user);
-
     if (!user) {
       redirect('/login');
     }
-  } catch {
-    redirect('/login');
-  }
 
-  return (
-    <Fragment>
-      <SessionRefreshMount />
-      <header className="flex items-center justify-end p-4">
-        <LogoutButton />
-      </header>
-      {children}
-    </Fragment>
-  );
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(['user', 'profile'], user);
+    const dehydratedState = dehydrate(queryClient);
+
+    return (
+      <HydrationBoundary state={dehydratedState}>
+        <Fragment>
+          <DashboardHeader />
+          {children}
+        </Fragment>
+      </HydrationBoundary>
+    );
+  } catch {
+    redirect(withRouteError('/login', 'Failed to load your profile.'));
+  }
 }
