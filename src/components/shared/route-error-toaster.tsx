@@ -11,10 +11,9 @@ export function RouteErrorToaster() {
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (!errorParam) return;
-    const message = decodeURIComponent(errorParam);
+    const message = errorParam.trim();
     if (!message) return;
 
-    // Prefer friendly messages for common statuses if provided
     const statusParam = searchParams.get('status');
     const status = statusParam ? Number(statusParam) : undefined;
     const friendly =

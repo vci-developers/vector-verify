@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { upstreamFetch } from '@/lib/http/server/upstream';
-import { forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/server/headers';
+import { upstreamFetch, forwardRequestHeaders, forwardResponseHeaders } from '@/lib/http/server';
 
 async function readBodyBuffer(request: NextRequest): Promise<ArrayBuffer | null> {
   const method = request.method.toUpperCase();

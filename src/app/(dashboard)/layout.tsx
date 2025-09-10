@@ -1,12 +1,12 @@
 import { Fragment } from 'react';
 import { redirect } from 'next/navigation';
 import { HydrationBoundary, dehydrate, QueryClient } from '@tanstack/react-query';
-import { parseApiError } from '@/lib/http/core/parse-api-error';
+import { parseApiError } from '@/lib/http/core';
+import { upstreamFetch } from '@/lib/http/server';
 import { withRouteError } from '@/lib/shared/ui/route-error';
-import type { UserProfileResponseDto } from '@/lib/user/dto';
-import { mapUserDtoToDomain } from '@/lib/user/mapper';
-import { upstreamFetch } from '@/lib/http/server/upstream';
-import { DashboardHeader } from './dashboard-header';
+import type { UserProfileResponseDto } from '@/lib/user';
+import { mapUserDtoToDomain } from '@/lib/user';
+import { DashboardHeader } from '@/components/dashboard/header';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
