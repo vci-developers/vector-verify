@@ -12,7 +12,7 @@ export function buildErrorParams(input: RouteErrorOptions | string): URLSearchPa
   const { message, status } =
     typeof input === 'string' ? { message: input, status: undefined } : input;
   const params = new URLSearchParams();
-  params.set('error', encodeURIComponent(sanitizeMessage(message)));
+  params.set('error', sanitizeMessage(message));
   if (typeof status === 'number' && Number.isFinite(status)) {
     params.set('status', String(status));
   }
@@ -32,4 +32,3 @@ export function withRouteError(href: string, input: RouteErrorOptions | string):
     return `${href}${sep}${params}`;
   }
 }
-

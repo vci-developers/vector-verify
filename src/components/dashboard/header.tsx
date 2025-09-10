@@ -1,10 +1,9 @@
 'use client';
 
 import { LogoutButton } from '@/components/auth/logout-button';
-import { useSessionRefresher } from '@/lib/auth/hooks/use-session-refresher';
+import { useSessionRefresher } from '@/lib/auth';
 
 export function DashboardHeader() {
-  // Keep session alive quietly in the background
   useSessionRefresher({ suppressToast: false });
   return (
     <header className="flex items-center justify-end p-4">

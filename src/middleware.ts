@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { COOKIE } from '@/lib/auth/cookies/constants';
 
 const AUTH_ROUTES = new Set(['/login', '/signup']);
 
@@ -12,8 +13,8 @@ function isApiRoute(pathname: string): boolean {
 
 function isAuthenticated(req: NextRequest): boolean {
   const cookies = req.cookies;
-  const hasAccess = Boolean(cookies.get('vc_access')?.value);
-  const hasRefresh = Boolean(cookies.get('vc_refresh')?.value);
+  const hasAccess = Boolean(cookies.get(COOKIE.ACCESS)?.value);
+  const hasRefresh = Boolean(cookies.get(COOKIE.REFRESH)?.value);
   return hasAccess && hasRefresh;
 }
 
