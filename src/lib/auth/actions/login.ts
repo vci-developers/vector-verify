@@ -2,16 +2,12 @@
 
 import { LoginSchema } from '@/lib/auth/validation/schema';
 import type { LoginRequestDto, LoginResponseDto } from '@/lib/auth/dto';
-import type { User } from '@/lib/user/model';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
-
-export type AuthActionResult =
-  | { ok: true; user: User; message?: string }
-  | { ok: false; error: string; status?: number };
+import type { AuthActionResult } from './types';
 
 export async function loginAction(
   formData: FormData,

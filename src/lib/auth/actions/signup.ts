@@ -6,7 +6,7 @@ import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
 import { setAuthCookies } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
-import type { AuthActionResult } from './login';
+import type { AuthActionResult } from './types';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 
 export async function signupAction(
