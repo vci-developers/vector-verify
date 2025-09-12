@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIE, BASE_COOKIE_OPTIONS, COOKIE_AGE } from './constants';
 
-export async function setAuthCookies(accessToken: string, refreshToken: string) {
+export async function setAccessCookie(accessToken: string) {
   const cookieJar = await cookies();
   cookieJar.set({
     name: COOKIE.ACCESS,
@@ -9,7 +9,10 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
     ...BASE_COOKIE_OPTIONS,
     maxAge: COOKIE_AGE.ACCESS,
   });
+}
 
+export async function setRefreshCookie(refreshToken: string) {
+  const cookieJar = await cookies();
   cookieJar.set({
     name: COOKIE.REFRESH,
     value: refreshToken,

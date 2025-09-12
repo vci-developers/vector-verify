@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIE } from '@/lib/auth/cookies/constants';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/auth/dto';
-import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies/server';
+import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
 import {
   fetchWithTimeout,
@@ -49,6 +49,7 @@ export async function upstreamFetch(
   const cookieJar = await cookies();
   const access = cookieJar.get(COOKIE.ACCESS)?.value ?? null;
   const refresh = cookieJar.get(COOKIE.REFRESH)?.value ?? null;
+  
   const url = buildUpstreamUrl(path, init.query);
   const headers = new Headers(init.headers ?? {});
   if (!headers.has('accept')) headers.set('accept', 'application/json');
@@ -66,7 +67,7 @@ export async function upstreamFetch(
   if (response.status !== 401 || !refresh) {
     return response;
   }
-  
+
   const refreshUrl = buildUpstreamUrl('auth/refresh');
   const refreshPayload: RefreshRequestDto = { refreshToken: refresh };
   const refreshRes = await fetchWithTimeout(refreshUrl, {
@@ -84,9 +85,9 @@ export async function upstreamFetch(
     await clearAuthCookies();
     return response;
   }
-  const refreshData = (await refreshRes.json()) as RefreshResponseDto;
-  await setAuthCookies(refreshData.accessToken, refresh);
-  // retry
+  const refreshData: RefreshResponseDto = await refreshRes.json();
+  await setAccessCookie(refreshData.accessToken);
+
   const retryHeaders = new Headers(headers);
   retryHeaders.set('authorization', `Bearer ${refreshData.accessToken}`);
   const retryRes = await fetchWithTimeout(url, {

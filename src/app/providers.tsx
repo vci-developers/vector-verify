@@ -1,7 +1,12 @@
 'use client';
 
-import { showErrorToast } from '@/lib/shared/ui/toast';
-import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 interface ProvidersProps {
@@ -20,7 +25,8 @@ const queryClient = new QueryClient({
     onError: (error, query) => {
       // Allow per-query suppression via meta
       // tanstack exposes meta on the query; typing for meta can be lax
-      const meta = (query as unknown as { meta?: Record<string, unknown> })?.meta;
+      const meta = (query as unknown as { meta?: Record<string, unknown> })
+        ?.meta;
       if (meta && meta.suppressErrorToast) return;
       showErrorToast(error);
     },

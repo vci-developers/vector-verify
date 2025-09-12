@@ -1,4 +1,4 @@
-export interface RouteErrorOptions {
+interface RouteErrorOptions {
   message: string;
   status?: number;
 }

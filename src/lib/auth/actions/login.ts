@@ -4,7 +4,7 @@ import { LoginSchema } from '@/lib/auth/validation/schema';
 import type { LoginRequestDto, LoginResponseDto } from '@/lib/auth/dto';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
-import { setAuthCookies } from '@/lib/auth/cookies/server';
+import { setAccessCookie, setRefreshCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 import type { AuthActionResult } from './types';
@@ -39,7 +39,8 @@ export async function loginAction(
     }
 
     const data: LoginResponseDto = await response.json();
-    await setAuthCookies(data.tokens.accessToken, data.tokens.refreshToken);
+    await setAccessCookie(data.tokens.accessToken);
+    await setRefreshCookie(data.tokens.refreshToken);
 
     return {
       ok: true,

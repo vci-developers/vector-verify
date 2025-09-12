@@ -19,6 +19,7 @@ async function readBodyBuffer(
 
 async function handleProxy(request: NextRequest, params: { path: string[] }) {
   try {
+    // users/profile
     const path = params.path.join('/');
     const bodyBuffer = await readBodyBuffer(request);
     const requestHeaders = forwardRequestHeaders(request);

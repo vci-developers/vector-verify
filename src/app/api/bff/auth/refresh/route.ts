@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { ENV } from '@/lib/shared/config/env';
 import { COOKIE } from '@/lib/auth/cookies/constants';
 import type { RefreshResponseDto } from '@/lib/auth/dto';
-import { clearAuthCookies, setAuthCookies } from '@/lib/auth/cookies/server';
+import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { parseApiError, fetchWithTimeout } from '@/lib/shared/http/core';
 
 export async function POST() {
@@ -39,8 +39,7 @@ export async function POST() {
 
     const data: RefreshResponseDto = await upstreamResponse.json();
     const newAccessToken = data.accessToken;
-
-    await setAuthCookies(newAccessToken, refreshToken);
+    await setAccessCookie(newAccessToken);
 
     return NextResponse.json(
       { message: data.message ?? 'Session refreshed successfully.' },

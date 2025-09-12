@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { authActions } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { showErrorToast } from '@/lib/shared/ui/toast';
+import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -24,7 +24,12 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={logoutHandler} disabled={isPending}>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={logoutHandler}
+      disabled={isPending}
+    >
       {isPending ? 'Logging out...' : 'Log out'}
     </Button>
   );
