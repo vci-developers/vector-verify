@@ -3,10 +3,7 @@ import { COOKIE } from '@/lib/auth/cookies/constants';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/auth/dto';
 import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
-import {
-  fetchWithTimeout,
-  DEFAULT_FETCH_TIMEOUT_MS,
-} from '@/lib/shared/http/core/fetch-with-timeout';
+import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 
 export type QueryInput =
   | string
@@ -22,24 +19,24 @@ export type UpstreamInit = RequestInit & {
 export function buildUpstreamUrl(path: string, query?: QueryInput): string {
   const base = ENV.API_BASE_URL.replace(/\/+$/, '');
   const cleanPath = path.replace(/^\/+/, '');
-  let search = '';
-  if (query) {
-    if (typeof query === 'string') {
-      search = query.startsWith('?') ? query : `?${query}`;
-    } else if (query instanceof URLSearchParams) {
-      const q = query.toString();
-      search = q ? `?${q}` : '';
-    } else if (typeof query === 'object') {
-      const params = new URLSearchParams();
-      for (const [k, v] of Object.entries(query)) {
-        if (v === null || typeof v === 'undefined') continue;
-        params.set(k, String(v));
-      }
-      const q = params.toString();
-      search = q ? `?${q}` : '';
+
+  if (!query) return `${base}/${cleanPath}`;
+
+  let params: URLSearchParams;
+
+  if (typeof query === 'string') {
+    params = new URLSearchParams(query);
+  } else if (query instanceof URLSearchParams) {
+    params = query;
+  } else {
+    params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null) params.set(key, String(value));
     }
   }
-  return `${base}/${cleanPath}${search}`;
+
+  const search = params.toString();
+  return `${base}/${cleanPath}${search ? `?${search}` : ''}`;
 }
 
 export async function upstreamFetch(
@@ -47,30 +44,32 @@ export async function upstreamFetch(
   init: UpstreamInit = {},
 ): Promise<Response> {
   const cookieJar = await cookies();
-  const access = cookieJar.get(COOKIE.ACCESS)?.value ?? null;
-  const refresh = cookieJar.get(COOKIE.REFRESH)?.value ?? null;
-  
+  const accessToken = cookieJar.get(COOKIE.ACCESS)?.value ?? null;
+  const refreshToken = cookieJar.get(COOKIE.REFRESH)?.value ?? null;
+
   const url = buildUpstreamUrl(path, init.query);
+
   const headers = new Headers(init.headers ?? {});
   if (!headers.has('accept')) headers.set('accept', 'application/json');
-  if (access && !headers.has('authorization')) {
-    headers.set('authorization', `Bearer ${access}`);
+  if (accessToken && !headers.has('authorization')) {
+    headers.set('authorization', `Bearer ${accessToken}`);
   }
+
   let response = await fetchWithTimeout(url, {
     ...init,
     headers,
     body: init.bodyBuffer ?? init.body ?? undefined,
     cache: 'no-store',
     redirect: 'manual',
-    timeoutMs: init.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS,
+    timeoutMs: init.timeoutMs,
   });
-  if (response.status !== 401 || !refresh) {
+  if (response.status !== 401 || !refreshToken) {
     return response;
   }
 
   const refreshUrl = buildUpstreamUrl('auth/refresh');
-  const refreshPayload: RefreshRequestDto = { refreshToken: refresh };
-  const refreshRes = await fetchWithTimeout(refreshUrl, {
+  const refreshPayload: RefreshRequestDto = { refreshToken };
+  const refreshResponse = await fetchWithTimeout(refreshUrl, {
     method: 'POST',
     headers: new Headers({
       accept: 'application/json',
@@ -79,26 +78,27 @@ export async function upstreamFetch(
     body: JSON.stringify(refreshPayload),
     cache: 'no-store',
     redirect: 'manual',
-    timeoutMs: init.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS,
+    timeoutMs: init.timeoutMs,
   });
-  if (!refreshRes.ok) {
+  if (!refreshResponse.ok) {
     await clearAuthCookies();
     return response;
   }
-  const refreshData: RefreshResponseDto = await refreshRes.json();
+
+  const refreshData: RefreshResponseDto = await refreshResponse.json();
   await setAccessCookie(refreshData.accessToken);
 
   const retryHeaders = new Headers(headers);
   retryHeaders.set('authorization', `Bearer ${refreshData.accessToken}`);
-  const retryRes = await fetchWithTimeout(url, {
+  const retryResponse = await fetchWithTimeout(url, {
     ...init,
     headers: retryHeaders,
     body: init.bodyBuffer ?? init.body ?? undefined,
     cache: 'no-store',
     redirect: 'manual',
-    timeoutMs: init.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS,
+    timeoutMs: init.timeoutMs,
   });
-  return retryRes;
+  return retryResponse;
 }
 
 export default upstreamFetch;

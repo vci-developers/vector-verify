@@ -1,15 +1,12 @@
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
-import {
-  fetchWithTimeout,
-  DEFAULT_FETCH_TIMEOUT_MS,
-} from '@/lib/shared/http/core/fetch-with-timeout';
+import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
 import { HttpError } from '@/lib/shared/http/core/http-error';
 
-export type BffInit = RequestInit & { timeoutMs?: number };
+type BffInit = RequestInit & { timeoutMs?: number };
 
 export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
   const url = `/api/bff/${path.replace(/^\/+/, '')}`;
-  const { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS, ...rest } = init;
+  const { timeoutMs, ...rest } = init;
   let response: Response;
   try {
     response = await fetchWithTimeout(url, {

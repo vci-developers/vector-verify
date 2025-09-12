@@ -26,7 +26,6 @@ export function withRouteError(href: string, input: RouteErrorOptions | string):
     params.forEach((value, key) => url.searchParams.set(key, value));
     return url.pathname + (url.search ? url.search : '');
   } catch {
-    // Fallback if URL construction fails; append raw query
     const params = buildErrorParams(input).toString();
     const sep = href.includes('?') ? '&' : '?';
     return `${href}${sep}${params}`;

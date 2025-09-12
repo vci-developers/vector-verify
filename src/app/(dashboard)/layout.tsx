@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { parseApiError } from '@/lib/shared/http/core';
 import { upstreamFetch } from '@/lib/shared/http/server';
-import { withRouteError } from '@/lib/shared/http/core/route-error';
+import { withRouteError } from '@/lib/shared/http/core';
 import type { UserProfileResponseDto } from '@/lib/user';
 import { mapUserDtoToDomain } from '@/lib/user';
 import { DashboardHeader } from '@/components/dashboard/header';
