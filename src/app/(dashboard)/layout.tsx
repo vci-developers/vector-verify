@@ -39,7 +39,11 @@ export default async function DashboardLayout({
       <HydrationBoundary state={dehydratedState}>
         <Fragment>
           <DashboardHeader />
-          {children}
+          {user.isWhitelisted ? (
+            children
+          ) : (
+            <p>You need to be whitelisted to access this content.</p>
+          )}
         </Fragment>
       </HydrationBoundary>
     );

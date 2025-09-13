@@ -3,14 +3,6 @@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   Form,
   FormControl,
   FormField,
@@ -23,7 +15,6 @@ import type { AuthActionResult } from '@/lib/auth/actions';
 import { type LoginFormData, LoginSchema } from '@/lib/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
@@ -80,125 +71,100 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   }
 
   return (
-    <Card className="border-border/60 w-full rounded-2xl border shadow-lg">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl tracking-tight">Welcome back</CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Sign in to continue to your dashboard.
-        </CardDescription>
-      </CardHeader>
+    <div className="grid gap-5">
+      {rootError ? (
+        <Alert
+          variant="destructive"
+          className="border-destructive/30 bg-destructive/10 mb-1"
+        >
+          <AlertDescription>{rootError}</AlertDescription>
+        </Alert>
+      ) : null}
 
-      <CardContent className="grid gap-5">
-        {rootError ? (
-          <Alert
-            variant="destructive"
-            className="border-destructive/30 bg-destructive/10 mb-1"
-          >
-            <AlertDescription>{rootError}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(loginHandler)}
-            className="space-y-5"
-            noValidate
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground text-sm">
-                    Email
-                  </FormLabel>
-                  <div className="relative">
-                    <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(loginHandler)}
+          className="space-y-5"
+          noValidate
+        >
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground text-sm">Email</FormLabel>
+                <div className="relative">
+                  <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <FormControl>
                       <Input
                         {...field}
                         type="email"
                         autoComplete="email"
                         placeholder="you@example.com"
-                        className="focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
+                        className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
                       />
                     </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground text-sm">
-                    Password
-                  </FormLabel>
-                  <div className="relative">
-                    <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground text-sm">
+                  Password
+                </FormLabel>
+                <div className="relative">
+                  <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <FormControl>
                       <Input
                         {...field}
                         type={showPassword ? 'text' : 'password'}
                         autoComplete="current-password"
                         placeholder="••••••••"
-                        className="focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
+                        className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
                       />
                     </FormControl>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      aria-label={
-                        showPassword ? 'Hide password' : 'Show password'
-                      }
-                      onClick={togglePasswordVisibilityHandler}
-                      className="hover:bg-muted absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-2"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
+                    onClick={togglePasswordVisibilityHandler}
+                    className="hover:bg-muted absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-2"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
             <Button
               type="submit"
-              className="h-11 w-full rounded-xl shadow-sm transition-shadow hover:shadow-md"
+              className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
               disabled={isPending}
             >
-              {isPending ? (
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ArrowRight className="mr-2 h-4 w-4" />
-              )}
-              {isPending ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-
-      <CardFooter className="text-muted-foreground mt-1 border-t pt-4 text-sm">
-        <span className="flex w-full items-center justify-between">
-          <span>
-            No account?{' '}
-            <Link
-              href="/signup"
-              className="text-foreground underline underline-offset-4"
-            >
-              Create one
-            </Link>
-          </span>
-        </span>
-      </CardFooter>
-    </Card>
+            {isPending ? (
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowRight className="mr-2 h-4 w-4" />
+            )}
+            {isPending ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }
