@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { authActions } from '@/lib/auth';
+import { logoutAction } from '@/lib/auth/actions';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
@@ -14,7 +14,7 @@ export function LogoutButton() {
   async function logoutHandler() {
     try {
       startTransition(async () => {
-        await authActions.logoutAction();
+        await logoutAction();
         router.push('/login');
         router.refresh();
       });

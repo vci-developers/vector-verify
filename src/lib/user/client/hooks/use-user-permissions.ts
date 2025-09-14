@@ -1,7 +1,9 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getUserPermissions } from '../client/get-user-permissions';
-import { UserPermissions } from '../permissions';
-import { userKeys, type UserPermissionsQueryKey } from '../keys';
+'use client';
+
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { getUserPermissions } from '../get-user-permissions';
+import { type UserPermissions } from '../../permissions';
+import { userKeys, type UserPermissionsQueryKey } from '../../keys';
 
 export function useUserPermissionsQuery(
   options?: Omit<
@@ -20,3 +22,4 @@ export function useUserPermissionsQuery(
     ...(options ?? {}),
   });
 }
+

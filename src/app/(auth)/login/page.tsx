@@ -1,4 +1,4 @@
-import { authActions } from '@/lib/auth';
+import { loginAction } from '@/lib/auth/actions';
 import { LoginForm } from '@/components/auth/login-form';
 import {
   Card,
@@ -25,7 +25,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
-            <LoginForm onLogin={authActions.loginAction} />
+            <LoginForm onLogin={loginAction} />
           </CardContent>
 
           <CardFooter className="text-muted-foreground mt-1 border-t pt-4 text-sm">

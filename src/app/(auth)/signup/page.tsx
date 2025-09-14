@@ -1,5 +1,5 @@
 import { SignupForm } from '@/components/auth/signup-form';
-import { authActions } from '@/lib/auth';
+import { signupAction } from '@/lib/auth/actions';
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ export default function SignupPage() {
           </CardHeader>
 
           <CardContent>
-            <SignupForm onSignup={authActions.signupAction} />
+            <SignupForm onSignup={signupAction} />
           </CardContent>
 
           <CardFooter className="text-muted-foreground mt-1 border-t pt-4 text-sm">

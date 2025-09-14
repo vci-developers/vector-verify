@@ -7,9 +7,8 @@ import {
   userKeys,
   type UserProfileQueryKey,
   type UserPermissionsQueryKey,
-  getServerUserProfile,
-  getServerUserPermissions,
 } from '@/lib/user';
+import { getServerUserProfile, getServerUserPermissions } from '@/lib/user/server';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { dehydrateWithSeed } from '@/lib/shared/react-query/server';
 import {

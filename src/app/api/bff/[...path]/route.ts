@@ -47,36 +47,36 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = context.params;
+  const { path } = await context.params;
   return handleProxy(request, { path });
 }
 export async function POST(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = context.params;
+  const { path } = await context.params;
   return handleProxy(request, { path });
 }
 export async function PUT(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = context.params;
+  const { path } = await context.params;
   return handleProxy(request, { path });
 }
 export async function PATCH(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = context.params;
+  const { path } = await context.params;
   return handleProxy(request, { path });
 }
 export async function DELETE(
   request: NextRequest,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = context.params;
+  const { path } = await context.params;
   return handleProxy(request, { path });
 }

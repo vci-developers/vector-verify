@@ -1,4 +1,4 @@
-import { bff } from '@/lib/shared/http/client';
+import { bff } from '@/lib/shared/http/client/bff-client';
 import type { UserProfileResponseDto } from '@/lib/user/dto';
 import type { User } from '@/lib/user/model';
 import { mapUserDtoToDomain } from '@/lib/user/mapper';
