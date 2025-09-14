@@ -1,3 +1,5 @@
+import { UserPermissions } from "./permissions";
+
 export interface UserDto {
   id: number;
   email: string;
@@ -11,3 +13,7 @@ export interface UserProfileResponseDto {
   user: UserDto;
 }
 
+export interface UserPermissionsResponseDto {
+  message: string;
+  permissions: UserPermissions;
+}

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { refreshSession } from '@/lib/auth/client/refresh-session';
 import { logoutAction } from '@/lib/auth/actions';
 import { COOKIE_AGE } from '@/lib/auth/cookies/constants';
+import { authKeys, type AuthRefreshTimerQueryKey } from '@/lib/auth/keys';
 
 const ACCESS_MS = COOKIE_AGE.ACCESS * 1000;
 const BUFFER_MS = 30 * 60 * 1000;
@@ -18,7 +19,7 @@ export function useSessionRefresherQuery(
   const router = useRouter();
 
   const { isError, isFetching } = useQuery({
-    queryKey: ['auth', 'refresh-timer'],
+    queryKey: authKeys.refreshTimer() as AuthRefreshTimerQueryKey,
     queryFn: refreshSession,
     enabled,
     retry: 0,
@@ -36,7 +37,6 @@ export function useSessionRefresherQuery(
         await logoutAction();
       } finally {
         router.push('/login');
-        router.refresh();
       }
     })();
   }, [isError, isFetching, router]);

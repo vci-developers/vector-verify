@@ -59,7 +59,6 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         }
 
         router.push('/');
-        router.refresh();
       } catch (error) {
         showErrorToast(error, "Couldn't log you in");
       }

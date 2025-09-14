@@ -1,8 +1,7 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import type { User } from '@/lib/user/model';
 import { getUserProfile } from '../client/get-user-profile';
-
-type UserProfileQueryKey = ['user', 'profile'];
+import { userKeys, type UserProfileQueryKey } from '../keys';
 
 export function useUserProfileQuery(
   options?: Omit<
@@ -11,9 +10,8 @@ export function useUserProfileQuery(
   >,
 ) {
   return useQuery({
-    queryKey: ['user', 'profile'] as UserProfileQueryKey,
+    queryKey: userKeys.profile() as UserProfileQueryKey,
     queryFn: getUserProfile,
-    staleTime: 60 * 1000,
     ...(options ?? {}),
   });
 }

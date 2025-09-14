@@ -62,7 +62,6 @@ export function SignupForm({ onSignup }: SignupFormProps) {
         }
 
         router.push('/');
-        router.refresh();
       });
     } catch (error) {
       showErrorToast(error, "Couldn't create your account");
