@@ -1,8 +1,8 @@
 'use server';
 
 import { LoginSchema } from '@/lib/auth/validation/schema';
-import type { LoginRequestDto, LoginResponseDto } from '@/lib/auth/dto';
-import { mapUserDtoToDomain } from '@/lib/user/mapper';
+import type { LoginRequestDto, LoginResponseDto } from '@/lib/entities/auth/dto';
+import { mapUserDtoToDomain } from '@/lib/entities/user/mapper';
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
 import { setAccessCookie, setRefreshCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';

@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { COOKIE } from '@/lib/auth/cookies/constants';
-import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/auth/dto';
+import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/entities/auth/dto';
 import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';

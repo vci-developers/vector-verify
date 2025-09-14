@@ -2,7 +2,7 @@
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { getUserPermissions } from '../get-user-permissions';
-import { type UserPermissions } from '../../permissions';
+import type { UserPermissions } from '@/lib/entities/user/permissions';
 import { userKeys, type UserPermissionsQueryKey } from '../../keys';
 
 export function useUserPermissionsQuery(
@@ -22,4 +22,3 @@ export function useUserPermissionsQuery(
     ...(options ?? {}),
   });
 }
-

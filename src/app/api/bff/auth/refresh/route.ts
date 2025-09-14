@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { ENV } from '@/lib/shared/config/env';
 import { COOKIE } from '@/lib/auth/cookies/constants';
-import type { RefreshResponseDto } from '@/lib/auth/dto';
+import type { RefreshResponseDto } from '@/lib/entities/auth/dto';
 import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { parseApiError, fetchWithTimeout } from '@/lib/shared/http/core';
 

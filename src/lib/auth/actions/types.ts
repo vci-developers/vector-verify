@@ -1,4 +1,4 @@
-import { User } from "@/lib/user";
+import type { User } from "@/lib/entities/user/model";
 
 export type AuthActionResult =
   | { ok: true; user: User; message?: string }

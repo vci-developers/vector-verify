@@ -1,0 +1,44 @@
+import type { SpecimenExpandedDto } from '@/lib/entities/specimen/dto';
+
+export interface AnnotationTaskDto {
+  id: number;
+  userId: number;
+  title: string | null;
+  description: string | null;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AnnotatorDto {
+  id: number;
+  email: string;
+}
+
+export interface AnnotationDto {
+  id: number;
+  annotationTaskId: number;
+  annotatorId: number;
+  specimenId: number;
+  morphSpecies: string | null;
+  morphSex: string | null;
+  morphAbdomenStatus: string | null;
+  notes: string | null;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AnnotationExpandedDto extends AnnotationDto {
+  annotationTask: AnnotationTaskDto;
+  annotator: AnnotatorDto;
+  specimen: SpecimenExpandedDto;
+}
+
+export interface AnnotationsListResponseDto {
+  annotations: AnnotationExpandedDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}

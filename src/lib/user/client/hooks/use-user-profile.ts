@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import type { User } from '@/lib/user/model';
+import type { User } from '@/lib/entities/user/model';
 import { getUserProfile } from '../get-user-profile';
 import { userKeys, type UserProfileQueryKey } from '../../keys';
 
@@ -17,4 +17,3 @@ export function useUserProfileQuery(
     ...(options ?? {}),
   });
 }
-

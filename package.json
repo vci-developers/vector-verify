@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:trace": "NODE_OPTIONS=--trace-warnings next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "start:trace": "NODE_OPTIONS=--trace-warnings next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

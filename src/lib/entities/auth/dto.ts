@@ -1,5 +1,5 @@
-import { AuthTokens } from '@/lib/auth/types';
-import { UserDto } from '@/lib/user/dto';
+import type { AuthTokens } from '@/lib/entities/auth/model';
+import type { UserDto } from '@/lib/entities/user/dto';
 
 export interface LoginRequestDto {
   email: string;
@@ -28,3 +28,4 @@ export interface RefreshResponseDto {
   message: string;
   accessToken: string;
 }
+

@@ -1,4 +1,4 @@
-import { UserPermissions } from "./permissions";
+import type { UserPermissions } from '@/lib/entities/user/permissions';
 
 export interface UserDto {
   id: number;
