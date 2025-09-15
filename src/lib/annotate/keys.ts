@@ -1,11 +1,12 @@
-import type { QueryKey } from "@tanstack/react-query";
+import type { QueryKey } from '@tanstack/react-query';
+import type { AnnotationTaskStatus } from '@/lib/entities/annotation';
 
 export const annotationKeys = {
   root: ['annotations'] as const,
   tasks: (
     page: number,
     limit: number,
-    taskStatus?: string,
+    taskStatus?: AnnotationTaskStatus,
     taskTitle?: string,
   ) =>
     [
@@ -15,4 +16,5 @@ export const annotationKeys = {
     ] as const,
 };
 
-export type AnnotationTasksQueryKey = ReturnType<typeof annotationKeys.tasks> & QueryKey;
+export type AnnotationTasksQueryKey = ReturnType<typeof annotationKeys.tasks> &
+  QueryKey;

@@ -12,10 +12,15 @@ export function canPushSites(permissions: UserPermissions): boolean {
   return permissions.sites.pushSiteMetadata;
 }
 
-export function canAccessSite(permissions: UserPermissions, siteId: number): boolean {
+export function canAccessSite(
+  permissions: UserPermissions,
+  siteId: number,
+): boolean {
   return permissions.sites.canAccessSiteIds.includes(siteId);
 }
 
-export function canViewAndWriteAnnotationTasks(permissions: UserPermissions): boolean {
+export function canViewAndWriteAnnotationTasks(
+  permissions: UserPermissions,
+): boolean {
   return permissions.annotations.viewAndWriteAnnotationTasks;
 }

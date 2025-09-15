@@ -29,4 +29,3 @@ export async function dehydrateWithPrefetch(
   );
   return dehydrate(client);
 }
-

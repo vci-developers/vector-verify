@@ -8,7 +8,10 @@ import {
   type UserProfileQueryKey,
   type UserPermissionsQueryKey,
 } from '@/lib/user';
-import { getServerUserProfile, getServerUserPermissions } from '@/lib/user/server';
+import {
+  getServerUserProfile,
+  getServerUserPermissions,
+} from '@/lib/user/server';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { dehydrateWithSeed } from '@/lib/shared/react-query/server';
 import {
@@ -41,7 +44,10 @@ export default async function DashboardLayout({
 
     const dehydratedState = dehydrateWithSeed([
       { key: userKeys.profile() as UserProfileQueryKey, data: user },
-      { key: userKeys.permissions() as UserPermissionsQueryKey, data: permissions },
+      {
+        key: userKeys.permissions() as UserPermissionsQueryKey,
+        data: permissions,
+      },
     ]);
 
     return (
@@ -91,7 +97,12 @@ export default async function DashboardLayout({
     );
   } catch (error) {
     if (error instanceof HttpError) {
-      redirect(withRouteError('/login', { message: error.message, status: error.status }));
+      redirect(
+        withRouteError('/login', {
+          message: error.message,
+          status: error.status,
+        }),
+      );
     }
     redirect(withRouteError('/login', 'Failed to load your profile.'));
   }

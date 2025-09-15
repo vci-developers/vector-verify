@@ -5,7 +5,7 @@ export const userKeys = {
   profile: () => [...userKeys.root, 'profile'] as const,
   permissions: () => [...userKeys.root, 'permissions'] as const,
 };
-
-export type UserProfileQueryKey = ReturnType<typeof userKeys.profile> & QueryKey;
-export type UserPermissionsQueryKey = ReturnType<typeof userKeys.permissions> & QueryKey;
-
+export type UserProfileQueryKey = ReturnType<typeof userKeys.profile> &
+  QueryKey;
+export type UserPermissionsQueryKey = ReturnType<typeof userKeys.permissions> &
+  QueryKey;

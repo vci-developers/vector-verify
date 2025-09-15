@@ -1,11 +1,15 @@
 import type { SpecimenExpandedDto } from '@/lib/entities/specimen/dto';
+import type {
+  AnnotationStatus,
+  AnnotationTaskStatus,
+} from '@/lib/entities/annotation/status';
 
 export interface AnnotationTaskDto {
   id: number;
   userId: number;
   title: string | null;
   description: string | null;
-  status: string;
+  status: AnnotationTaskStatus;
   createdAt: number;
   updatedAt: number;
 }
@@ -24,7 +28,7 @@ export interface AnnotationDto {
   morphSex: string | null;
   morphAbdomenStatus: string | null;
   notes: string | null;
-  status: string;
+  status: AnnotationStatus;
   createdAt: number;
   updatedAt: number;
 }

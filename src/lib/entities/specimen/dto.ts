@@ -1,5 +1,8 @@
 import type { SpecimenImageDto } from '@/lib/entities/specimen-image/dto';
-import type { SessionDto, SessionWithSiteDto } from '@/lib/entities/session/dto';
+import type {
+  SessionDto,
+  SessionWithSiteDto,
+} from '@/lib/entities/session/dto';
 
 export interface SpecimenDto {
   id: number;

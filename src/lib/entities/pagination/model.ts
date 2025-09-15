@@ -5,4 +5,3 @@ export interface OffsetPage<T> {
   offset: number;
   hasMore: boolean;
 }
-

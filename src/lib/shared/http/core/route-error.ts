@@ -8,7 +8,9 @@ function sanitizeMessage(message: string, max = 300): string {
   return clean.length > max ? `${clean.slice(0, max)}…` : clean;
 }
 
-export function buildErrorParams(input: RouteErrorOptions | string): URLSearchParams {
+export function buildErrorParams(
+  input: RouteErrorOptions | string,
+): URLSearchParams {
   const { message, status } =
     typeof input === 'string' ? { message: input, status: undefined } : input;
   const params = new URLSearchParams();
@@ -19,9 +21,17 @@ export function buildErrorParams(input: RouteErrorOptions | string): URLSearchPa
   return params;
 }
 
-export function withRouteError(href: string, input: RouteErrorOptions | string): string {
+export function withRouteError(
+  href: string,
+  input: RouteErrorOptions | string,
+): string {
   try {
-    const url = new URL(href, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    const url = new URL(
+      href,
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost',
+    );
     const params = buildErrorParams(input);
     params.forEach((value, key) => url.searchParams.set(key, value));
     return url.pathname + (url.search ? url.search : '');

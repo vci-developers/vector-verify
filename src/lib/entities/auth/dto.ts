@@ -28,4 +28,3 @@ export interface RefreshResponseDto {
   message: string;
   accessToken: string;
 }
-

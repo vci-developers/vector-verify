@@ -36,7 +36,9 @@ export function middleware(req: NextRequest) {
   if (!authed && !atAuthRoute) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
-    const next = encodeURIComponent(req.nextUrl.pathname + (req.nextUrl.search || ''));
+    const next = encodeURIComponent(
+      req.nextUrl.pathname + (req.nextUrl.search || ''),
+    );
     url.search = `next=${next}`;
     return NextResponse.redirect(url);
   }

@@ -11,4 +11,3 @@ export class HttpError extends Error {
     return this.status === 401;
   }
 }
-

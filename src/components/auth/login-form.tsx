@@ -94,15 +94,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 <FormLabel className="text-foreground text-sm">Email</FormLabel>
                 <div className="relative">
                   <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
-                      />
-                    </FormControl>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
+                    />
+                  </FormControl>
                 </div>
                 <FormMessage />
               </FormItem>
@@ -119,15 +119,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 </FormLabel>
                 <div className="relative">
                   <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete="current-password"
-                        placeholder="••••••••"
-                        className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
-                      />
-                    </FormControl>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
+                    />
+                  </FormControl>
                   <Button
                     type="button"
                     size="icon"
@@ -150,11 +150,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             )}
           />
 
-            <Button
-              type="submit"
-              className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
-              disabled={isPending}
-            >
+          <Button
+            type="submit"
+            className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
+            disabled={isPending}
+          >
             {isPending ? (
               <Loader className="mr-2 h-4 w-4 animate-spin" />
             ) : (

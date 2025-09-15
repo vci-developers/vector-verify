@@ -5,4 +5,3 @@ export interface User {
   isActive: boolean;
   isWhitelisted: boolean;
 }
-

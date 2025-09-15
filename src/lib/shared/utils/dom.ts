@@ -13,4 +13,3 @@ export function toDomId(label: string, prefix?: string): string {
 
   return prefix ? `${prefix}-${base}` : base;
 }
-

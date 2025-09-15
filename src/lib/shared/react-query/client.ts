@@ -20,7 +20,8 @@ export function createQueryClient(config?: QueryClientConfig): QueryClient {
       onError: (error, query) => {
         const meta = (query as unknown as { meta?: Record<string, unknown> })
           ?.meta;
-        if (meta && (meta as Record<string, unknown>).suppressErrorToast) return;
+        if (meta && (meta as Record<string, unknown>).suppressErrorToast)
+          return;
         showErrorToast(error);
       },
     }),
@@ -29,4 +30,3 @@ export function createQueryClient(config?: QueryClientConfig): QueryClient {
     }),
   });
 }
-

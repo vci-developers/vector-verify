@@ -14,14 +14,14 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 py-10">
       <div className="mx-auto w-full max-w-md">
-        <Card className="border-border/60 bg-card rounded-2xl border shadow-xl overflow-hidden">
+        <Card className="border-border/60 bg-card overflow-hidden rounded-2xl border shadow-xl">
           <CardHeader className="space-y-2 border-b pb-4">
-              <CardTitle className="text-2xl tracking-tight">
-                Welcome back
-              </CardTitle>
-              <CardDescription>
-                Sign in to continue to your dashboard.
-              </CardDescription>
+            <CardTitle className="text-2xl tracking-tight">
+              Welcome back
+            </CardTitle>
+            <CardDescription>
+              Sign in to continue to your dashboard.
+            </CardDescription>
           </CardHeader>
 
           <CardContent>

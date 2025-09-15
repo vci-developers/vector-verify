@@ -7,4 +7,3 @@ export interface SiteDto {
   sentinelSite: string | null;
   healthCenter: string | null;
 }
-

@@ -4,4 +4,3 @@ import type { Site } from '@/lib/entities/site/model';
 export function mapSiteDtoToModel(dto: SiteDto): Site {
   return { ...dto };
 }
-

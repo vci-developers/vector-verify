@@ -45,4 +45,3 @@ export function usePagination({
     slice,
   } as const;
 }
-

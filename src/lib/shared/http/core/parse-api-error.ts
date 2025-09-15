@@ -16,4 +16,3 @@ export async function parseApiError(response: Response): Promise<string> {
     return response.statusText || `HTTP ${response.status}`;
   }
 }
-

@@ -7,4 +7,3 @@ export interface Site {
   sentinelSite: string | null;
   healthCenter: string | null;
 }
-

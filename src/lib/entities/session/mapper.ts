@@ -1,8 +1,13 @@
-import type { SessionDto, SessionWithSiteDto } from '@/lib/entities/session/dto';
+import type {
+  SessionDto,
+  SessionWithSiteDto,
+} from '@/lib/entities/session/dto';
 import type { Session } from '@/lib/entities/session/model';
 import { mapSiteDtoToModel } from '@/lib/entities/site/mapper';
 
-export function mapSessionDtoToModel(dto: SessionDto | SessionWithSiteDto): Session {
+export function mapSessionDtoToModel(
+  dto: SessionDto | SessionWithSiteDto,
+): Session {
   const base: Session = {
     sessionId: dto.sessionId,
     frontendId: dto.frontendId,
@@ -24,4 +29,3 @@ export function mapSessionDtoToModel(dto: SessionDto | SessionWithSiteDto): Sess
   };
   return 'site' in dto ? { ...base, site: mapSiteDtoToModel(dto.site) } : base;
 }
-

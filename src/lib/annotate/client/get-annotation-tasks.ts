@@ -3,7 +3,7 @@ import {
   AnnotationTasksListResponseDto,
   mapAnnotationTasksListResponseDtoToPage,
 } from '@/lib/entities/annotation';
-import { OffsetPage } from '@/lib/entities/pagination';
+import type { OffsetPage } from '@/lib/entities/pagination';
 import bff from '@/lib/shared/http/client/bff-client';
 import type { AnnotationTasksListFilters } from '@/lib/annotate/types';
 

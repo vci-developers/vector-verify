@@ -5,7 +5,10 @@ import type {
   AnnotationTaskDto,
   AnnotationTasksListResponseDto,
 } from '@/lib/entities/annotation/dto';
-import type { Annotation, AnnotationTask } from '@/lib/entities/annotation/model';
+import type {
+  Annotation,
+  AnnotationTask,
+} from '@/lib/entities/annotation/model';
 import { mapSpecimenExpandedDtoToModel } from '@/lib/entities/specimen/mapper';
 import type { OffsetPage } from '@/lib/entities/pagination/model';
 
@@ -45,7 +48,9 @@ export function mapAnnotationsListResponseDtoToPage(
   };
 }
 
-export function mapAnnotationTaskDtoToModel(dto: AnnotationTaskDto): AnnotationTask {
+export function mapAnnotationTaskDtoToModel(
+  dto: AnnotationTaskDto,
+): AnnotationTask {
   return {
     id: dto.id,
     userId: dto.userId,

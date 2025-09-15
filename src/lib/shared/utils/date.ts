@@ -2,8 +2,14 @@ export function formatDate(timestamp: number) {
   const date = new Date(timestamp);
 
   return {
-    monthYear: date.toLocaleString('default', { month: 'long', year: 'numeric' }),
-    shortMonthYear: date.toLocaleString('default', { month: 'short', year: 'numeric' }),
+    monthYear: date.toLocaleString('default', {
+      month: 'long',
+      year: 'numeric',
+    }),
+    shortMonthYear: date.toLocaleString('default', {
+      month: 'short',
+      year: 'numeric',
+    }),
     fullDate: date.toLocaleDateString(),
     fullDateTime: date.toLocaleString(),
     month: date.toLocaleString('default', { month: 'long' }),
@@ -20,4 +26,3 @@ export function formatDate(timestamp: number) {
     dateObject: date,
   };
 }
-

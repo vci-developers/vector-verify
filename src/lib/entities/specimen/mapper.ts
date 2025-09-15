@@ -18,16 +18,22 @@ export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
   };
 }
 
-export function mapSpecimenWithImagesDtoToModel(dto: SpecimenWithImagesDto): Specimen {
+export function mapSpecimenWithImagesDtoToModel(
+  dto: SpecimenWithImagesDto,
+): Specimen {
   const base = mapSpecimenDtoToModel(dto);
   return {
     ...base,
     images: dto.images.map(mapSpecimenImageDtoToModel),
-    thumbnailImage: dto.thumbnailImage ? mapSpecimenImageDtoToModel(dto.thumbnailImage) : null,
+    thumbnailImage: dto.thumbnailImage
+      ? mapSpecimenImageDtoToModel(dto.thumbnailImage)
+      : null,
   };
 }
 
-export function mapSpecimenWithSessionDtoToModel(dto: SpecimenWithSessionDto): Specimen {
+export function mapSpecimenWithSessionDtoToModel(
+  dto: SpecimenWithSessionDto,
+): Specimen {
   const base = mapSpecimenDtoToModel(dto);
   return {
     ...base,
@@ -35,11 +41,12 @@ export function mapSpecimenWithSessionDtoToModel(dto: SpecimenWithSessionDto): S
   };
 }
 
-export function mapSpecimenExpandedDtoToModel(dto: SpecimenExpandedDto): Specimen {
+export function mapSpecimenExpandedDtoToModel(
+  dto: SpecimenExpandedDto,
+): Specimen {
   const withImages = mapSpecimenWithImagesDtoToModel(dto);
   return {
     ...withImages,
     session: mapSessionDtoToModel(dto.session),
   };
 }
-

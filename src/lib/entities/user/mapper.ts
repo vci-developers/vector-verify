@@ -5,4 +5,3 @@ export function mapUserDtoToDomain(userDto: UserDto): User {
   const { id, email, privilege, isActive, isWhitelisted } = userDto;
   return { id, email, privilege, isActive, isWhitelisted };
 }
-

@@ -19,4 +19,3 @@ export function appendQuery(path: string, query?: QueryInput): string {
   const search = params?.toString() ?? '';
   return search ? `${path}${path.includes('?') ? '&' : '?'}${search}` : path;
 }
-
