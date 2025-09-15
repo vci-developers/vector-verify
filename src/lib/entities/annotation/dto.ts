@@ -42,3 +42,11 @@ export interface AnnotationsListResponseDto {
   offset: number;
   hasMore: boolean;
 }
+
+export interface AnnotationTasksListResponseDto {
+  tasks: AnnotationTaskDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}

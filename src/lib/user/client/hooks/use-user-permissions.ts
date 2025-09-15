@@ -3,7 +3,7 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { getUserPermissions } from '../get-user-permissions';
 import type { UserPermissions } from '@/lib/entities/user/permissions';
-import { userKeys, type UserPermissionsQueryKey } from '../../keys';
+import { userKeys, type UserPermissionsQueryKey } from '@/lib/user';
 
 export function useUserPermissionsQuery(
   options?: Omit<

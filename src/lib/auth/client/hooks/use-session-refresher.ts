@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { refreshSession } from '@/lib/auth/client/refresh-session';
+import { refreshSession } from '@/lib/auth/client';
 import { logoutAction } from '@/lib/auth/actions';
 import { COOKIE_AGE } from '@/lib/auth/cookies/constants';
 import { authKeys, type AuthRefreshTimerQueryKey } from '@/lib/auth/keys';

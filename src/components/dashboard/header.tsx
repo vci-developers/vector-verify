@@ -1,7 +1,7 @@
 'use client';
 
 import { LogoutButton } from '@/components/auth/logout-button';
-import { useSessionRefresherQuery } from '@/lib/auth';
+import { useSessionRefresherQuery } from '@/lib/auth/client';
 
 export function DashboardHeader() {
   useSessionRefresherQuery({ suppressToast: false });

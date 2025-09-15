@@ -1,7 +1,5 @@
+import { AnnotatePageClient } from "@/components/annotate/annotate-page-client";
+
 export default function AnnotatePage() {
-  return (
-    <div>
-      <h1>Annotate Page</h1>
-    </div>
-  );
+  return <AnnotatePageClient />;
 }
