@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { refreshSession } from '@/lib/auth/client';
@@ -17,6 +17,7 @@ export function useSessionRefresherQuery(
 ) {
   const { enabled = true, suppressToast = false } = opts;
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { isError, isFetching } = useQuery({
     queryKey: authKeys.refreshTimer() as AuthRefreshTimerQueryKey,
@@ -35,9 +36,10 @@ export function useSessionRefresherQuery(
     (async () => {
       try {
         await logoutAction();
+        queryClient.clear();
       } finally {
         router.push('/login');
       }
     })();
-  }, [isError, isFetching, router]);
+  }, [isError, isFetching, router, queryClient]);
 }
