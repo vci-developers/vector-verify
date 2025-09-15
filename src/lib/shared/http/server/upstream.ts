@@ -4,11 +4,7 @@ import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/entities/auth/
 import { clearAuthCookies, setAccessCookie } from '@/lib/auth/cookies/server';
 import { ENV } from '@/lib/shared/config/env';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
-
-export type QueryInput =
-  | string
-  | URLSearchParams
-  | Record<string, string | number | boolean | null | undefined>;
+import { appendQuery, type QueryInput } from '@/lib/shared/http/core/query';
 
 export type UpstreamInit = RequestInit & {
   bodyBuffer?: ArrayBuffer | null;
@@ -19,24 +15,7 @@ export type UpstreamInit = RequestInit & {
 export function buildUpstreamUrl(path: string, query?: QueryInput): string {
   const base = ENV.API_BASE_URL.replace(/\/+$/, '');
   const cleanPath = path.replace(/^\/+/, '');
-
-  if (!query) return `${base}/${cleanPath}`;
-
-  let params: URLSearchParams;
-
-  if (typeof query === 'string') {
-    params = new URLSearchParams(query);
-  } else if (query instanceof URLSearchParams) {
-    params = query;
-  } else {
-    params = new URLSearchParams();
-    for (const [key, value] of Object.entries(query)) {
-      if (value != null) params.set(key, String(value));
-    }
-  }
-
-  const search = params.toString();
-  return `${base}/${cleanPath}${search ? `?${search}` : ''}`;
+  return appendQuery(`${base}/${cleanPath}`, query);
 }
 
 export async function upstreamFetch(

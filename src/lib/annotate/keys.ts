@@ -1,4 +1,4 @@
-import { QueryKey } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
 
 export const annotationKeys = {
   root: ['annotations'] as const,
@@ -6,11 +6,12 @@ export const annotationKeys = {
     page: number,
     limit: number,
     taskStatus?: string,
+    taskTitle?: string,
   ) =>
     [
       ...annotationKeys.root,
       'tasks',
-      { page, limit, taskStatus },
+      { page, limit, taskStatus, taskTitle },
     ] as const,
 };
 

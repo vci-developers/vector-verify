@@ -26,7 +26,7 @@ export function mapAnnotationDtoToModel(
     updatedAt: dto.updatedAt,
   };
   if ('annotationTask' in dto) {
-    base.annotationTask = { ...dto.annotationTask };
+    base.annotationTask = mapAnnotationTaskDtoToModel(dto.annotationTask);
     base.annotator = { ...dto.annotator };
     base.specimen = mapSpecimenExpandedDtoToModel(dto.specimen);
   }

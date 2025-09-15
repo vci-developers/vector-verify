@@ -5,25 +5,22 @@ import {
 } from '@/lib/entities/annotation';
 import { OffsetPage } from '@/lib/entities/pagination';
 import bff from '@/lib/shared/http/client/bff-client';
+import type { AnnotationTasksListFilters } from '@/lib/annotate/types';
 
-export async function getAnnotationTasks(options: {
-  page?: number;
-  limit?: number;
-  taskTitle?: string;
-  taskStatus?: string;
-}): Promise<OffsetPage<AnnotationTask>> {
-  const search = new URLSearchParams();
-  search.set('page', String(options.page ?? 1));
-  search.set('limit', String(options.limit ?? 20));
-  if (options.taskTitle) search.set('title', options.taskTitle);
-  if (options.taskStatus) search.set('status', options.taskStatus);
+export async function getAnnotationTasks(
+  options: AnnotationTasksListFilters = {},
+): Promise<OffsetPage<AnnotationTask>> {
+  const query = {
+    page: options.page ?? 1,
+    limit: options.limit ?? 20,
+    title: options.taskTitle,
+    status: options.taskStatus,
+  } as const;
 
-  const data = await bff<AnnotationTasksListResponseDto>(
-    `/annotations/task?${search.toString()}`,
-    {
-      method: 'GET',
-    },
-  );
+  const data = await bff<AnnotationTasksListResponseDto>(`/annotations/task`, {
+    method: 'GET',
+    query,
+  });
 
   return mapAnnotationTasksListResponseDtoToPage(data);
 }
