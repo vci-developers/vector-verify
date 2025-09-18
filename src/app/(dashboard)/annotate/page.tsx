@@ -1,5 +1,5 @@
-import { AnnotatePageClient } from '@/components/annotate/annotate-page-client';
+import { AnnotationTasksListPageClient } from '@/components/annotate/tasks-list/page-client';
 
 export default function AnnotatePage() {
-  return <AnnotatePageClient />;
+  return <AnnotationTasksListPageClient />;
 }

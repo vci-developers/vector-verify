@@ -1,8 +1,15 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-export function AnnotateLoadingSkeleton() {
+export function AnnotationTasksListLoadingSkeleton() {
   return (
     <div className="container mx-auto px-4 py-6">
       <Card>
@@ -36,19 +43,19 @@ export function AnnotateLoadingSkeleton() {
             <TableBody>
               {[...Array(5)].map((_, i) => (
                 <TableRow key={i} className="h-16">
-                  <TableCell className="px-4 py-4 align-middle text-center">
+                  <TableCell className="px-4 py-4 text-center align-middle">
                     <Skeleton className="mx-auto h-5 w-52" />
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-middle text-center">
+                  <TableCell className="px-4 py-4 text-center align-middle">
                     <Skeleton className="mx-auto h-6 w-20 rounded-md" />
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-middle text-center">
+                  <TableCell className="px-4 py-4 text-center align-middle">
                     <Skeleton className="mx-auto h-5 w-20" />
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-middle text-center">
+                  <TableCell className="px-4 py-4 text-center align-middle">
                     <Skeleton className="mx-auto h-5 w-40" />
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-middle text-center">
+                  <TableCell className="px-4 py-4 text-center align-middle">
                     <div className="mx-auto flex max-w-[280px] items-center justify-center gap-3">
                       <Skeleton className="h-2 w-full rounded-full" />
                       <Skeleton className="h-4 w-8" />

@@ -16,6 +16,14 @@ export interface AnnotationTask {
   user?: User;
 }
 
+export interface AnnotationTaskProgress {
+  taskId: number;
+  total: number;
+  annotated: number;
+  flagged: number;
+  percent: number;
+}
+
 export interface Annotator {
   id: number;
   email: string;
