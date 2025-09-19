@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/card';
 import { ShieldAlert } from 'lucide-react';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { getAccessToken } from '@/lib/auth/server/tokens';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,6 +34,10 @@ export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      redirect('/login');
+    }
     const [user, permissions] = await Promise.all([
       getServerUserProfile(),
       getServerUserPermissions(),
@@ -72,7 +77,7 @@ export default async function DashboardLayout({
                   <span className="text-foreground font-medium">
                     {user.email}
                   </span>
-                  ) isn't authorized yet. Please contact a member of our
+                  ) isn’t authorized yet. Please contact a member of our
                   technical team to request access.
                 </CardDescription>
               </CardHeader>

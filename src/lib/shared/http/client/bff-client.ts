@@ -7,8 +7,8 @@ type BffInit = RequestInit & { timeoutMs?: number; query?: QueryInput };
 
 export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
   const base = `/api/bff/${path.replace(/^\/+/, '')}`;
-  const url = appendQuery(base, init.query);
-  const { timeoutMs, query: _query, ...rest } = init;
+  const { timeoutMs, query, ...rest } = init;
+  const url = appendQuery(base, query);
   let response: Response;
   try {
     response = await fetchWithTimeout(url, {

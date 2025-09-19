@@ -1,24 +1,22 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { logoutAction } from '@/lib/auth/actions';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useLogoutMutation } from '@/lib/auth/client';
 import { useTransition } from 'react';
 import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
 
 export function LogoutButton() {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [isPending, startTransition] = useTransition();
+  const logoutMutation = useLogoutMutation();
 
   async function logoutHandler() {
     try {
       startTransition(async () => {
-        await logoutAction();
         queryClient.clear();
-        router.push('/login');
+        await logoutMutation.mutateAsync('/login');
       });
     } catch (error) {
       showErrorToast(error, "Couldn't log you out");

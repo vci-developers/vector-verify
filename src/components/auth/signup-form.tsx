@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { AuthActionResult } from '@/lib/auth/actions';
 import {
   SignupSchema,
   type SignupFormData,
@@ -21,16 +20,14 @@ import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
+import { useSignUpMutation, useLoginMutation } from '@/lib/auth/client';
 
-interface SignupFormProps {
-  onSignup: (formData: FormData) => Promise<AuthActionResult>;
-}
-
-export function SignupForm({ onSignup }: SignupFormProps) {
+export function SignupForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const signupMutation = useSignUpMutation();
+  const loginMutation = useLoginMutation();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
@@ -41,31 +38,33 @@ export function SignupForm({ onSignup }: SignupFormProps) {
   const rootError = form.formState.errors.root?.message;
 
   async function signupHandler(values: SignupFormData) {
-    try {
-      const formData = new FormData();
-      formData.set('email', values.email);
-      formData.set('password', values.password);
-
-      startTransition(async () => {
-        const response = await onSignup(formData);
-        if (!response.ok) {
-          const status = response.status ?? 0;
-          if (status === 400 || status === 409) {
-            form.setError('root', {
-              message:
-                response.error || 'Please check your details and try again',
-            });
-          } else {
-            showErrorToast(response.error || "Couldn't create your account");
-          }
+    startTransition(async () => {
+      try {
+        await signupMutation.mutateAsync({
+          email: values.email,
+          password: values.password,
+        });
+        const login = await loginMutation.mutateAsync({
+          email: values.email,
+          password: values.password,
+        });
+        if (!login || login.error) {
+          form.setError('root', {
+            message: login?.error || 'Account created, but auto login failed',
+          });
           return;
         }
-
-        router.push('/');
-      });
-    } catch (error) {
-      showErrorToast(error, "Couldn't create your account");
-    }
+        router.replace('/');
+        router.refresh();
+      } catch (error: unknown) {
+        const msg =
+          typeof (error as Error)?.message === 'string'
+            ? (error as Error).message
+            : "Couldn't create your account";
+        // Handle common validation statuses already surfaced by backend
+        form.setError('root', { message: msg });
+      }
+    });
   }
 
   return (

@@ -2,9 +2,8 @@ import type { QueryKey } from '@tanstack/react-query';
 
 export const authKeys = {
   root: ['auth'] as const,
-  refreshTimer: () => [...authKeys.root, 'refresh-timer'] as const,
+  session: () => [...authKeys.root, 'session'] as const,
 };
-export type AuthRefreshTimerQueryKey = ReturnType<
-  typeof authKeys.refreshTimer
-> &
-  QueryKey;
+
+export type AuthSessionQueryKey = ReturnType<typeof authKeys.session> & QueryKey;
+

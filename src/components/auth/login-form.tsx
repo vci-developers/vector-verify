@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { AuthActionResult } from '@/lib/auth/actions';
 import { type LoginFormData, LoginSchema } from '@/lib/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
@@ -19,16 +18,14 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
+import { useLoginMutation } from '@/lib/auth/client';
 
-interface LoginFormProps {
-  onLogin: (formData: FormData) => Promise<AuthActionResult>;
-}
-
-export function LoginForm({ onLogin }: LoginFormProps) {
+export function LoginForm() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const loginMutation = useLoginMutation();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(LoginSchema),
@@ -39,26 +36,20 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const rootError = form.formState.errors.root?.message;
 
   async function loginHandler(data: LoginFormData) {
-    const formData = new FormData();
-    formData.set('email', data.email);
-    formData.set('password', data.password);
-
     startTransition(async () => {
       try {
-        const response = await onLogin(formData);
-        if (!response.ok) {
-          const status = response.status ?? 0;
-          if (status === 400 || status === 401) {
-            form.setError('root', {
-              message: response.error || 'Invalid email or password',
-            });
-          } else {
-            showErrorToast(response.error || "Couldn't log you in");
-          }
+        const result = await loginMutation.mutateAsync({
+          email: data.email,
+          password: data.password,
+        });
+        if (!result || result.error) {
+          form.setError('root', {
+            message: result?.error || 'Invalid email or password',
+          });
           return;
         }
-
-        router.push('/');
+        router.replace('/');
+        router.refresh();
       } catch (error) {
         showErrorToast(error, "Couldn't log you in");
       }
