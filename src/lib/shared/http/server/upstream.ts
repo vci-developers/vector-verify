@@ -37,7 +37,7 @@ export async function upstreamFetch(
     ...init,
     headers,
     body: init.body ?? undefined,
-    cache: 'no-store',
+    cache: init.cache ?? 'no-store',
     redirect: 'manual',
     timeoutMs: init.timeoutMs,
   });
