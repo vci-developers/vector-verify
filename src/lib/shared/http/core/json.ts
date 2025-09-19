@@ -1,6 +1,8 @@
+import { MEDIA_TYPE } from './media-types';
+
 const BASE_JSON_HEADERS = {
-  'content-type': 'application/json',
-  accept: 'application/json',
+  'content-type': MEDIA_TYPE.JSON,
+  accept: MEDIA_TYPE.JSON,
 } as const;
 
 export function createJsonHeaders(): HeadersInit {

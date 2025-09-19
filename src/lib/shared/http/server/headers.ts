@@ -1,3 +1,5 @@
+import { MEDIA_TYPE } from '@/lib/shared/http/core';
+
 export function forwardRequestHeaders(request: Request): Headers {
   const headers = new Headers();
   const exclude = new Set([
@@ -15,7 +17,7 @@ export function forwardRequestHeaders(request: Request): Headers {
       headers.set(key, value);
     }
   });
-  if (!headers.has('accept')) headers.set('accept', 'application/json');
+  if (!headers.has('accept')) headers.set('accept', MEDIA_TYPE.JSON);
   return headers;
 }
 

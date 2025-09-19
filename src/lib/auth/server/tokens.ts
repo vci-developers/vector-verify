@@ -3,8 +3,11 @@ import { getToken } from 'next-auth/jwt';
 import { headers } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { ENV } from '@/lib/shared/config/env';
-import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
-import { createJsonRequestInit } from '@/lib/shared/http/core/json';
+import {
+  createJsonRequestInit,
+  HttpError,
+  parseApiErrorResponse,
+} from '@/lib/shared/http/core';
 import { upstreamFetch } from '@/lib/shared/http/server/upstream';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/entities/auth/dto';
 
@@ -34,8 +37,8 @@ export async function refreshAccessToken(
     ...createJsonRequestInit(payload),
   });
   if (!response.ok) {
-    const message = await parseApiError(response);
-    throw new Error(message);
+    const error = await parseApiErrorResponse(response);
+    throw new HttpError(error.message, error.status, error.body);
   }
   return (await response.json()) as RefreshResponseDto;
 }

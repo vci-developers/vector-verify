@@ -4,9 +4,13 @@ import {
   forwardRequestHeaders,
   forwardResponseHeaders,
 } from '@/lib/shared/http/server';
-import { HTTP_STATUS } from '@/lib/shared/http/core';
+import {
+  HTTP_STATUS,
+  MEDIA_TYPE,
+  parseApiErrorResponse,
+} from '@/lib/shared/http/core';
 
-async function readBodyBuffer(
+async function readRequestBody(
   request: NextRequest,
 ): Promise<ArrayBuffer | null> {
   const method = request.method.toUpperCase();
@@ -21,18 +25,31 @@ async function readBodyBuffer(
 async function handleProxy(request: NextRequest, params: { path: string[] }) {
   try {
     const path = params.path.join('/');
-    const bodyBuffer = await readBodyBuffer(request);
+    const body = await readRequestBody(request);
     const requestHeaders = forwardRequestHeaders(request);
-    const isSSE = (request.headers.get('accept') || '').includes(
-      'text/event-stream',
-    );
+    const accept = request.headers.get('accept') ?? '';
+    const isSSE = accept.toLowerCase().includes(MEDIA_TYPE.EVENT_STREAM);
     const upstreamResponse = await upstreamFetch(path, {
       method: request.method,
       headers: requestHeaders,
-      bodyBuffer,
+      ...(body !== null ? { body } : {}),
       query: request.nextUrl.searchParams,
       timeoutMs: isSSE ? 0 : undefined,
     });
+
+    if (!upstreamResponse.ok) {
+      const error = await parseApiErrorResponse(upstreamResponse);
+      const headers = forwardResponseHeaders(upstreamResponse);
+      headers.set('content-type', MEDIA_TYPE.JSON);
+      return NextResponse.json(
+        {
+          error: error.message,
+          status: error.status,
+          details: error.body ?? null,
+        },
+        { status: error.status, headers },
+      );
+    }
 
     const responseHeaders = forwardResponseHeaders(upstreamResponse);
     return new NextResponse(upstreamResponse.body, {
@@ -43,8 +60,17 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
     const message =
       error instanceof Error ? error.message : 'Upstream request failed.';
     return NextResponse.json(
-      { error: message },
-      { status: HTTP_STATUS.BAD_GATEWAY },
+      {
+        error: message,
+        status: HTTP_STATUS.BAD_GATEWAY,
+        details: null,
+      },
+      {
+        status: HTTP_STATUS.BAD_GATEWAY,
+        headers: {
+          'content-type': MEDIA_TYPE.JSON,
+        },
+      },
     );
   }
 }

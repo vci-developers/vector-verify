@@ -2,10 +2,13 @@ import 'server-only';
 import { getAccessToken } from '@/lib/auth/server/tokens';
 import { ENV } from '@/lib/shared/config/env';
 import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
-import { appendQuery, type QueryInput } from '@/lib/shared/http/core/query';
+import {
+  appendQuery,
+  MEDIA_TYPE,
+  type QueryInput,
+} from '@/lib/shared/http/core';
 
 export type UpstreamInit = RequestInit & {
-  bodyBuffer?: ArrayBuffer | null;
   query?: QueryInput;
   timeoutMs?: number;
 };
@@ -25,7 +28,7 @@ export async function upstreamFetch(
   const url = buildUpstreamUrl(path, init.query);
 
   const headers = new Headers(init.headers ?? {});
-  if (!headers.has('accept')) headers.set('accept', 'application/json');
+  if (!headers.has('accept')) headers.set('accept', MEDIA_TYPE.JSON);
   if (accessToken && !headers.has('authorization')) {
     headers.set('authorization', `Bearer ${accessToken}`);
   }
@@ -33,7 +36,7 @@ export async function upstreamFetch(
   const response = await fetchWithTimeout(url, {
     ...init,
     headers,
-    body: init.bodyBuffer ?? init.body ?? undefined,
+    body: init.body ?? undefined,
     cache: 'no-store',
     redirect: 'manual',
     timeoutMs: init.timeoutMs,

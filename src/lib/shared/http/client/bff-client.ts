@@ -3,7 +3,8 @@ import {
   fetchWithTimeout,
   HttpError,
   HTTP_STATUS,
-  parseApiError,
+  MEDIA_TYPE,
+  parseApiErrorResponse,
   type QueryInput,
 } from '@/lib/shared/http/core';
 
@@ -26,8 +27,8 @@ export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
-    const message = await parseApiError(response);
-    throw new HttpError(message, response.status);
+    const error = await parseApiErrorResponse(response);
+    throw new HttpError(error.message, error.status, error.body);
   }
 
   if (
@@ -39,7 +40,7 @@ export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
   }
 
   const contentType = response.headers.get('content-type') ?? '';
-  if (contentType.includes('application/json')) {
+  if (contentType.toLowerCase().includes(MEDIA_TYPE.JSON)) {
     return (await response.json()) as T;
   }
 
