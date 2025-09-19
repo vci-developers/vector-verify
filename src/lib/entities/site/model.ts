@@ -7,5 +7,5 @@ export interface Site {
   villageName: string | null;
   houseNumber: string | null;
   healthCenter: string | null;
-  isActive: boolean
+  isActive: boolean;
 }
