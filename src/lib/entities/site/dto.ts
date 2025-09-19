@@ -4,6 +4,8 @@ export interface SiteDto {
   district: string | null;
   subCounty: string | null;
   parish: string | null;
-  sentinelSite: string | null;
+  villageName: string | null;
+  houseNumber: string | null;
   healthCenter: string | null;
+  isActive: boolean;
 }

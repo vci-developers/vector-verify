@@ -3,7 +3,6 @@ import type { SiteDto } from '@/lib/entities/site/dto';
 export interface SessionDto {
   sessionId: number;
   frontendId: string;
-  houseNumber: string | null;
   collectorTitle: string | null;
   collectorName: string | null;
   collectionDate: number | null;

@@ -11,7 +11,6 @@ export function mapSessionDtoToModel(
   const base: Session = {
     sessionId: dto.sessionId,
     frontendId: dto.frontendId,
-    houseNumber: dto.houseNumber,
     collectorTitle: dto.collectorTitle,
     collectorName: dto.collectorName,
     collectionDate: dto.collectionDate,
