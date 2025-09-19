@@ -3,7 +3,6 @@ import type { Site } from '@/lib/entities/site/model';
 export interface Session {
   sessionId: number;
   frontendId: string;
-  houseNumber: string | null;
   collectorTitle: string | null;
   collectorName: string | null;
   collectionDate: number | null;

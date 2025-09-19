@@ -25,6 +25,7 @@ import {
 import { ShieldAlert } from 'lucide-react';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { getAccessToken } from '@/lib/auth/server/tokens';
+import { th } from 'zod/v4/locales';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -38,31 +39,21 @@ export default async function DashboardLayout({
     if (!accessToken) {
       redirect('/login');
     }
-    const [user, permissions] = await Promise.all([
-      getServerUserProfile(),
-      getServerUserPermissions(),
-    ]);
+    const user = await getServerUserProfile();
 
-    if (!user || !permissions) {
+    if (!user) {
       redirect('/login');
     }
 
-    const dehydratedState = dehydrateWithSeed([
+    const baseSeed = [
       { key: userKeys.profile() as UserProfileQueryKey, data: user },
-      {
-        key: userKeys.permissions() as UserPermissionsQueryKey,
-        data: permissions,
-      },
-    ]);
+    ];
 
-    return (
-      <HydrationBoundary state={dehydratedState}>
-        {user.isWhitelisted ? (
-          <Fragment>
-            <DashboardHeader />
-            {children}
-          </Fragment>
-        ) : (
+    if (!user.isWhitelisted) {
+      const dehydratedState = dehydrateWithSeed(baseSeed);
+
+      return (
+        <HydrationBoundary state={dehydratedState}>
           <div className="mx-auto w-full max-w-2xl px-6 py-10">
             <Card className="rounded-2xl border shadow-sm">
               <CardHeader className="space-y-3">
@@ -97,7 +88,30 @@ export default async function DashboardLayout({
               </CardFooter>
             </Card>
           </div>
-        )}
+        </HydrationBoundary>
+      );
+    }
+
+    const permissions = await getServerUserPermissions();
+
+    if (!permissions) {
+      redirect('/login');
+    }
+
+    const dehydratedState = dehydrateWithSeed([
+      ...baseSeed,
+      {
+        key: userKeys.permissions() as UserPermissionsQueryKey,
+        data: permissions,
+      },
+    ]);
+
+    return (
+      <HydrationBoundary state={dehydratedState}>
+        <Fragment>
+          <DashboardHeader />
+          {children}
+        </Fragment>
       </HydrationBoundary>
     );
   } catch (error) {
@@ -109,6 +123,6 @@ export default async function DashboardLayout({
         }),
       );
     }
-    redirect(withRouteError('/login', 'Failed to load your profile.'));
+    redirect(withRouteError('/login', 'Failed to fetch your profile.'));
   }
 }
