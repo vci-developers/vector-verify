@@ -25,7 +25,6 @@ import {
 import { ShieldAlert } from 'lucide-react';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { getAccessToken } from '@/lib/auth/server/tokens';
-import { th } from 'zod/v4/locales';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
