@@ -18,16 +18,16 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSignUpMutation, useLoginMutation } from '@/lib/auth/client';
 
 export function SignupForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const signupMutation = useSignUpMutation();
   const loginMutation = useLoginMutation();
+  const isPending = signupMutation.isPending || loginMutation.isPending;
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
@@ -38,33 +38,31 @@ export function SignupForm() {
   const rootError = form.formState.errors.root?.message;
 
   async function signupHandler(values: SignupFormData) {
-    startTransition(async () => {
-      try {
-        await signupMutation.mutateAsync({
-          email: values.email,
-          password: values.password,
+    form.clearErrors('root');
+    try {
+      await signupMutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+      });
+      const login = await loginMutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+      });
+      if (!login || login.error) {
+        form.setError('root', {
+          message: login?.error || 'Account created, but auto login failed',
         });
-        const login = await loginMutation.mutateAsync({
-          email: values.email,
-          password: values.password,
-        });
-        if (!login || login.error) {
-          form.setError('root', {
-            message: login?.error || 'Account created, but auto login failed',
-          });
-          return;
-        }
-        router.replace('/');
-        router.refresh();
-      } catch (error: unknown) {
-        const msg =
-          typeof (error as Error)?.message === 'string'
-            ? (error as Error).message
-            : "Couldn't create your account";
-        // Handle common validation statuses already surfaced by backend
-        form.setError('root', { message: msg });
+        return;
       }
-    });
+      router.replace('/');
+      router.refresh();
+    } catch (error: unknown) {
+      const msg =
+        typeof (error as Error)?.message === 'string'
+          ? (error as Error).message
+          : "Couldn't create your account";
+      form.setError('root', { message: msg });
+    }
   }
 
   return (

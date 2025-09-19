@@ -3,21 +3,18 @@
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogoutMutation } from '@/lib/auth/client';
-import { useTransition } from 'react';
 import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
 
 export function LogoutButton() {
   const queryClient = useQueryClient();
 
-  const [isPending, startTransition] = useTransition();
   const logoutMutation = useLogoutMutation();
 
   async function logoutHandler() {
     try {
-      startTransition(async () => {
-        queryClient.clear();
-        await logoutMutation.mutateAsync('/login');
-      });
+      if (logoutMutation.isPending) return;
+      queryClient.clear();
+      await logoutMutation.mutateAsync('/login');
     } catch (error) {
       showErrorToast(error, "Couldn't log you out");
     }
@@ -28,9 +25,9 @@ export function LogoutButton() {
       variant="outline"
       size="sm"
       onClick={logoutHandler}
-      disabled={isPending}
+      disabled={logoutMutation.isPending}
     >
-      {isPending ? 'Logging out...' : 'Log out'}
+      {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
     </Button>
   );
 }

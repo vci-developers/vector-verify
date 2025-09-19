@@ -15,7 +15,7 @@ import { type LoginFormData, LoginSchema } from '@/lib/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
 import { useLoginMutation } from '@/lib/auth/client';
@@ -24,7 +24,6 @@ export function LoginForm() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const loginMutation = useLoginMutation();
 
   const form = useForm<LoginFormData>({
@@ -36,24 +35,22 @@ export function LoginForm() {
   const rootError = form.formState.errors.root?.message;
 
   async function loginHandler(data: LoginFormData) {
-    startTransition(async () => {
-      try {
-        const result = await loginMutation.mutateAsync({
-          email: data.email,
-          password: data.password,
+    try {
+      const result = await loginMutation.mutateAsync({
+        email: data.email,
+        password: data.password,
+      });
+      if (!result || result.error) {
+        form.setError('root', {
+          message: result?.error || 'Invalid email or password',
         });
-        if (!result || result.error) {
-          form.setError('root', {
-            message: result?.error || 'Invalid email or password',
-          });
-          return;
-        }
-        router.replace('/');
-        router.refresh();
-      } catch (error) {
-        showErrorToast(error, "Couldn't log you in");
+        return;
       }
-    });
+      router.replace('/');
+      router.refresh();
+    } catch (error) {
+      showErrorToast(error, "Couldn't log you in");
+    }
   }
 
   function togglePasswordVisibilityHandler() {
@@ -144,14 +141,14 @@ export function LoginForm() {
           <Button
             type="submit"
             className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
-            disabled={isPending}
+            disabled={loginMutation.isPending}
           >
-            {isPending ? (
+            {loginMutation.isPending ? (
               <Loader className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <ArrowRight className="mr-2 h-4 w-4" />
             )}
-            {isPending ? 'Signing in…' : 'Sign in'}
+            {loginMutation.isPending ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
       </Form>

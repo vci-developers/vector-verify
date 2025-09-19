@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { ENV } from '@/lib/shared/config/env';
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
+import { createJsonRequestInit } from '@/lib/shared/http/core/json';
 import { upstreamFetch } from '@/lib/shared/http/server/upstream';
 import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/entities/auth/dto';
 
@@ -30,11 +31,7 @@ export async function refreshAccessToken(
   const payload: RefreshRequestDto = { refreshToken };
   const response = await upstreamFetch('auth/refresh', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      accept: 'application/json',
-    },
-    body: JSON.stringify(payload),
+    ...createJsonRequestInit(payload),
   });
   if (!response.ok) {
     const message = await parseApiError(response);
@@ -45,21 +42,13 @@ export async function refreshAccessToken(
 
 export async function getAccessToken(): Promise<string | null> {
   const incomingHeaders = await headers();
-  const requestHeaders: Record<string, string> = {};
-  incomingHeaders.forEach((value, key) => {
-    requestHeaders[key] = value;
-  });
-  const proto =
-    requestHeaders['x-forwarded-proto'] ||
-    requestHeaders['X-Forwarded-Proto'] ||
-    'http';
+  const protocol = incomingHeaders.get('x-forwarded-proto') ?? 'http';
   const host =
-    requestHeaders['x-forwarded-host'] ||
-    requestHeaders['X-Forwarded-Host'] ||
-    requestHeaders['host'] ||
-    requestHeaders['Host'] ||
+    incomingHeaders.get('x-forwarded-host') ??
+    incomingHeaders.get('host') ??
     'localhost';
-  const origin = `${proto}://${host}`;
+  const origin = `${protocol}://${host}`;
+  const requestHeaders = new Headers(incomingHeaders);
   const request = new NextRequest(new Request(origin, { headers: requestHeaders }));
   const token = await getToken({ req: request, secret: ENV.NEXTAUTH_SECRET });
   const accessToken = (token as Record<string, unknown> | null)?.accessToken;

@@ -1,36 +1,26 @@
-import { AnnotationTaskProgress } from '@/lib/entities/annotation';
+import type { AnnotationTaskProgress } from '@/lib/entities/annotation';
 import type { AnnotationsListResponseDto } from '@/lib/entities/annotation/dto';
 import bff from '@/lib/shared/http/client/bff-client';
 
 export async function getAnnotationTaskProgress(
-  taskId: number,
-  options: { statusParam?: string } = {},
+  taskId: number
 ): Promise<AnnotationTaskProgress> {
-  const statusFilterParam = options.statusParam ?? 'status';
-
-  const baseQueryParams = { taskId, limit: 1 } as const;
-  const totalCountQuery = baseQueryParams;
-  const annotatedCountQuery = {
-    ...baseQueryParams,
-    [statusFilterParam]: 'ANNOTATED',
-  } as const;
-  const flaggedCountQuery = {
-    ...baseQueryParams,
-    [statusFilterParam]: 'FLAGGED',
-  } as const;
+  const baseQuery = { taskId, limit: 1 } as const;
+  const annotatedQuery = { ...baseQuery, status: 'ANNOTATED' } as const;
+  const flaggedQuery = { ...baseQuery, status: 'FLAGGED' } as const;
 
   const [totalResponse, annotatedResponse, flaggedResponse] = await Promise.all([
     bff<AnnotationsListResponseDto>('/annotations', {
       method: 'GET',
-      query: totalCountQuery,
+      query: baseQuery,
     }),
     bff<AnnotationsListResponseDto>('/annotations', {
       method: 'GET',
-      query: annotatedCountQuery,
+      query: annotatedQuery,
     }),
     bff<AnnotationsListResponseDto>('/annotations', {
       method: 'GET',
-      query: flaggedCountQuery,
+      query: flaggedQuery,
     }),
   ]);
 
@@ -40,6 +30,7 @@ export async function getAnnotationTaskProgress(
   const completedCount = annotatedCount + flaggedCount;
   const completionPercent =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   return {
     taskId,
     total: totalCount,

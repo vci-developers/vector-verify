@@ -7,6 +7,7 @@ import { getAnnotationTasks } from '@/lib/annotate/client';
 import type { AnnotationTasksListFilters } from '@/lib/annotate/types';
 import type { AnnotationTask } from '@/lib/entities/annotation';
 import type { OffsetPage } from '@/lib/entities/pagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 
 export function useAnnotationTasksQuery(
   filters: AnnotationTasksListFilters = {},
@@ -20,12 +21,19 @@ export function useAnnotationTasksQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
+  const {
+    page = 1,
+    limit = DEFAULT_PAGE_SIZE,
+    taskStatus,
+    taskTitle,
+  } = filters;
+
   return useQuery({
     queryKey: annotationKeys.tasks(
-      filters.page ?? 1,
-      filters.limit ?? 20,
-      filters.taskStatus,
-      filters.taskTitle,
+      page,
+      limit,
+      taskStatus,
+      taskTitle,
     ) as AnnotationTasksQueryKey,
     queryFn: () => getAnnotationTasks(filters),
     ...(options ?? {}),

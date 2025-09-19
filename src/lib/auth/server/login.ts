@@ -1,4 +1,5 @@
 import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
+import { createJsonRequestInit } from '@/lib/shared/http/core/json';
 import { upstreamFetch } from '@/lib/shared/http/server/upstream';
 import type {
   LoginRequestDto,
@@ -12,11 +13,7 @@ export async function loginToBackend(
   const payload: LoginRequestDto = { email, password };
   const response = await upstreamFetch('auth/login', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      accept: 'application/json',
-    },
-    body: JSON.stringify(payload),
+    ...createJsonRequestInit(payload),
   });
   if (!response.ok) {
     const message = await parseApiError(response);
@@ -24,4 +21,3 @@ export async function loginToBackend(
   }
   return (await response.json()) as LoginResponseDto;
 }
-

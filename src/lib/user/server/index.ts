@@ -1,2 +1,2 @@
-export * from '../server/get-user-profile';
-export * from '../server/get-user-permissions';
+export * from './get-user-profile';
+export * from './get-user-permissions';

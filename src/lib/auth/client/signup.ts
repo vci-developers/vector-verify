@@ -3,13 +3,13 @@ import type {
   SignupRequestDto,
   SignupResponseDto,
 } from '@/lib/entities/auth/dto';
+import { createJsonRequestInit } from '@/lib/shared/http/core/json';
 
 export async function signUpWithCredentials(
   input: SignupRequestDto,
 ): Promise<SignupResponseDto> {
   return await bff<SignupResponseDto>('auth/signup', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ email: input.email, password: input.password }),
+    ...createJsonRequestInit({ email: input.email, password: input.password }),
   });
 }
