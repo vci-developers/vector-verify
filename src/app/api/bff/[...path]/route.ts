@@ -4,6 +4,7 @@ import {
   forwardRequestHeaders,
   forwardResponseHeaders,
 } from '@/lib/shared/http/server';
+import { HTTP_STATUS } from '@/lib/shared/http/core';
 
 async function readBodyBuffer(
   request: NextRequest,
@@ -41,7 +42,10 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Upstream request failed.';
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      { error: message },
+      { status: HTTP_STATUS.BAD_GATEWAY },
+    );
   }
 }
 

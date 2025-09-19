@@ -8,8 +8,9 @@ import { createJsonRequestInit } from '@/lib/shared/http/core/json';
 export async function signUpWithCredentials(
   input: SignupRequestDto,
 ): Promise<SignupResponseDto> {
+  const payload: SignupRequestDto = { email: input.email, password: input.password };
   return await bff<SignupResponseDto>('auth/signup', {
     method: 'POST',
-    ...createJsonRequestInit({ email: input.email, password: input.password }),
+    ...createJsonRequestInit(payload),
   });
 }

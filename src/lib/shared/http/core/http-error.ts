@@ -1,3 +1,5 @@
+import { HTTP_STATUS } from './status-codes';
+
 export class HttpError extends Error {
   readonly status: number;
 
@@ -8,6 +10,6 @@ export class HttpError extends Error {
   }
 
   get isUnauthorized(): boolean {
-    return this.status === 401;
+    return this.status === HTTP_STATUS.UNAUTHORIZED;
   }
 }

@@ -38,6 +38,5 @@ export async function upstreamFetch(
     redirect: 'manual',
     timeoutMs: init.timeoutMs,
   });
-  // If upstream 401s, the next request through auth() will attempt refresh.
   return response;
 }

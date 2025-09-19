@@ -1,7 +1,11 @@
-import { parseApiError } from '@/lib/shared/http/core/parse-api-error';
-import { fetchWithTimeout } from '@/lib/shared/http/core/fetch-with-timeout';
-import { HttpError } from '@/lib/shared/http/core/http-error';
-import { appendQuery, type QueryInput } from '@/lib/shared/http/core/query';
+import {
+  appendQuery,
+  fetchWithTimeout,
+  HttpError,
+  HTTP_STATUS,
+  parseApiError,
+  type QueryInput,
+} from '@/lib/shared/http/core';
 
 type BffInit = RequestInit & { timeoutMs?: number; query?: QueryInput };
 
@@ -18,7 +22,7 @@ export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
       timeoutMs,
     });
   } catch {
-    throw new HttpError('Network error. Please try again.', 0);
+    throw new HttpError('Network error. Please try again.', HTTP_STATUS.NETWORK_ERROR);
   }
 
   if (!response.ok) {
@@ -27,8 +31,8 @@ export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
   }
 
   if (
-    response.status === 204 ||
-    response.status === 205 ||
+    response.status === HTTP_STATUS.NO_CONTENT ||
+    response.status === HTTP_STATUS.RESET_CONTENT ||
     response.headers.get('content-length') === '0'
   ) {
     return null as unknown as T;
