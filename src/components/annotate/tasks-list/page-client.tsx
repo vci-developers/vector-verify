@@ -165,8 +165,8 @@ export function AnnotationTasksListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map((pageItem, index) => (
-                  <PaginationItem key={`${pageItem}-${index}`}>
+                {pages.map((pageItem) => (
+                  <PaginationItem key={pageItem}>
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />
                     ) : (
