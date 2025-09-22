@@ -9,7 +9,6 @@ export const LoginSchema = z.object({
 });
 export type LoginFormData = z.infer<typeof LoginSchema>;
 
-// Hi Vincent
 export const SignupSchema = z.object({
   email: z.email('Enter a valid email'),
   password: z
