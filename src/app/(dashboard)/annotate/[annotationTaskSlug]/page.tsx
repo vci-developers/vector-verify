@@ -15,6 +15,7 @@ function extractTaskId(slug: string): number | null {
 export default async function AnnotationTaskPage({
   params,
 }: AnnotationTaskPageProps) {
+  
   const { annotationTaskSlug } = await params;
   const taskId = extractTaskId(annotationTaskSlug);
 
