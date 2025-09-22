@@ -24,7 +24,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
-import { TaskProgressBreakdown } from './task-progress-breakdown';
+import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
+import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -35,7 +36,11 @@ export function AnnotationTaskDetailPageClient({
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
 
-  const { data: annotationsPage, isLoading, isFetching } = useTaskAnnotationsQuery({
+  const {
+    data: annotationsPage,
+    isLoading,
+    isFetching,
+  } = useTaskAnnotationsQuery({
     taskId,
     page,
     limit: 1,
@@ -45,7 +50,10 @@ export function AnnotationTaskDetailPageClient({
 
   const hasMore = Boolean(annotationsPage?.hasMore);
 
-  const currentAnnotation = useMemo(() => annotationsPage?.items?.[0] ?? null, [annotationsPage]);
+  const currentAnnotation = useMemo(
+    () => annotationsPage?.items?.[0] ?? null,
+    [annotationsPage],
+  );
   const imageUrl = useMemo(() => {
     const specimen = currentAnnotation?.specimen;
     if (!specimen) return null;
@@ -90,7 +98,7 @@ export function AnnotationTaskDetailPageClient({
   return (
     <div className="mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]">
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
-        <CardHeader>
+        <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-lg font-semibold">
               Specimen Image{' '}
@@ -129,6 +137,12 @@ export function AnnotationTaskDetailPageClient({
             </p>
           )}
         </CardContent>
+        <CardFooter className="border-border/70 bg-muted/5 mt-auto border-t px-6 py-4">
+          <SpecimenMetadata
+            session={currentAnnotation?.specimen?.session}
+            site={currentAnnotation?.specimen?.session?.site}
+          />
+        </CardFooter>
       </Card>
 
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
