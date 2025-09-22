@@ -28,7 +28,16 @@ export function TaskRow({ task }: { task: AnnotationTask }) {
   const { shortMonthYear: createdAt } = formatDate(task.createdAt);
   const { fullDateTime: updatedAt } = formatDate(task.updatedAt);
   const { data: progressData } = useAnnotationTaskProgressQuery(task.id);
-  const progress = progressData?.percent ?? 0;
+  const {
+    percent = 0,
+    annotated = 0,
+    total = 0,
+    flagged = 0,
+  } = progressData ?? {};
+  const displayPercent = Math.round(percent);
+  const completed = Math.max(0, Math.min(total, annotated + flagged));
+
+  const hasItems = total > 0;
 
   return (
     <TableRow className="hover:bg-accent/30 h-16">
@@ -52,13 +61,20 @@ export function TaskRow({ task }: { task: AnnotationTask }) {
         {updatedAt}
       </TableCell>
       <TableCell className="px-4 py-4 text-center align-middle">
-        <div className="mx-auto flex max-w-[280px] items-center justify-center gap-3">
-          <div className="flex-1">
-            <Progress className="w-full" value={progress} />
+        <div className="mx-auto flex max-w-[360px] flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Progress className="w-full" value={percent} />
+            <span className="text-muted-foreground text-xs font-semibold">
+              {displayPercent}%
+            </span>
           </div>
-          <span className="text-muted-foreground min-w-8 text-center text-xs font-medium">
-            {progress}%
-          </span>
+          <div className="text-muted-foreground text-xs">
+            {hasItems ? (
+              `${completed.toLocaleString()} of ${total.toLocaleString()} images completed`
+            ) : (
+              <span className="italic">No annotations for this task.</span>
+            )}
+          </div>
         </div>
       </TableCell>
     </TableRow>

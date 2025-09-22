@@ -9,14 +9,14 @@ import type { AnnotationTasksListFilters } from '@/lib/annotate/types';
 import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 
 export async function getAnnotationTasks(
-  options: AnnotationTasksListFilters = {},
+  filters: AnnotationTasksListFilters = {},
 ): Promise<OffsetPage<AnnotationTask>> {
   const {
     page = 1,
     limit = DEFAULT_PAGE_SIZE,
     taskTitle,
     taskStatus,
-  } = options;
+  } = filters;
 
   const query = {
     page,

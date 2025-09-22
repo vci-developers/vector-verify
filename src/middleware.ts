@@ -6,6 +6,11 @@ import { ENV } from '@/lib/shared/config/env';
 const AUTH_ROUTES = new Set(['/login', '/signup']);
 const PUBLIC_FILE = /\.(.*)$/;
 
+type AuthToken = {
+  accessToken?: string;
+  accessTokenExpires?: number;
+};
+
 function isStaticRoute(pathname: string): boolean {
   if (pathname.startsWith('/_next')) return true;
   if (pathname.startsWith('/api')) return true;
@@ -17,6 +22,19 @@ function isProtectedRoute(pathname: string): boolean {
   if (AUTH_ROUTES.has(pathname)) return false;
   if (isStaticRoute(pathname)) return false;
   return true;
+}
+
+function hasValidAccessToken(token: AuthToken | null): boolean {
+  if (!token) return false;
+  const accessToken = token.accessToken;
+  if (typeof accessToken !== 'string' || accessToken.length === 0) {
+    return false;
+  }
+  const expiresAt = token.accessTokenExpires;
+  if (typeof expiresAt !== 'number' || !Number.isFinite(expiresAt)) {
+    return true;
+  }
+  return expiresAt > Date.now();
 }
 
 export async function middleware(request: NextRequest) {
@@ -33,11 +51,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req: request, secret: ENV.NEXTAUTH_SECRET });
-  const hasAccessToken = typeof token?.accessToken === 'string';
+  const rawToken = (await getToken({
+    req: request,
+    secret: ENV.NEXTAUTH_SECRET,
+  })) as AuthToken | null;
+  const hasAccessToken = hasValidAccessToken(rawToken);
 
   if (isAuthRoute) {
-    if (!hasAccessToken) {
+    const hasErrorQuery = request.nextUrl.searchParams.has('error');
+    if (!hasAccessToken || hasErrorQuery) {
       return NextResponse.next();
     }
     const redirectUrl = request.nextUrl.clone();
