@@ -9,13 +9,7 @@ import { mapSpecimenImageDtoToModel } from '@/lib/entities/specimen-image/mapper
 import { mapSessionDtoToModel } from '@/lib/entities/session/mapper';
 
 export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
-  return {
-    id: dto.id,
-    specimenId: dto.specimenId,
-    sessionId: dto.sessionId,
-    thumbnailUrl: dto.thumbnailUrl,
-    thumbnailImageId: dto.thumbnailImageId,
-  };
+  return { ...dto };
 }
 
 export function mapSpecimenWithImagesDtoToModel(
@@ -24,10 +18,10 @@ export function mapSpecimenWithImagesDtoToModel(
   const base = mapSpecimenDtoToModel(dto);
   return {
     ...base,
-    images: dto.images.map(mapSpecimenImageDtoToModel),
+    images: dto.images ? dto.images.map(mapSpecimenImageDtoToModel) : undefined,
     thumbnailImage: dto.thumbnailImage
       ? mapSpecimenImageDtoToModel(dto.thumbnailImage)
-      : null,
+      : undefined,
   };
 }
 
@@ -37,16 +31,20 @@ export function mapSpecimenWithSessionDtoToModel(
   const base = mapSpecimenDtoToModel(dto);
   return {
     ...base,
-    session: mapSessionDtoToModel(dto.session),
+    session: dto.session ? mapSessionDtoToModel(dto.session) : undefined,
   };
 }
 
 export function mapSpecimenExpandedDtoToModel(
   dto: SpecimenExpandedDto,
 ): Specimen {
-  const withImages = mapSpecimenWithImagesDtoToModel(dto);
+  const base = mapSpecimenDtoToModel(dto);
   return {
-    ...withImages,
-    session: mapSessionDtoToModel(dto.session),
+    ...base,
+    images: dto.images ? dto.images.map(mapSpecimenImageDtoToModel) : undefined,
+    thumbnailImage: dto.thumbnailImage
+      ? mapSpecimenImageDtoToModel(dto.thumbnailImage)
+      : undefined,
+    session: dto.session ? mapSessionDtoToModel(dto.session) : undefined,
   };
 }
