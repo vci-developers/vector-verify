@@ -43,7 +43,6 @@ export function SignupForm() {
       await signupMutation.mutateAsync({
         email: values.email,
         password: values.password, 
-        confirmPassword: values.confirmPassword
         });
       const login = await loginMutation.mutateAsync({
         email: values.email,

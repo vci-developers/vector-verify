@@ -14,7 +14,6 @@ export interface LoginResponseDto {
 export interface SignupRequestDto {
   email: string;
   password: string;
-  confirmPassword: string;
 }
 export interface SignupResponseDto {
   message: string;
