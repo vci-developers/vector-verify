@@ -22,10 +22,10 @@ import {
   ImageOff,
   Info,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
+import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -120,16 +120,7 @@ export function AnnotationTaskDetailPageClient({
         </CardHeader>
         <CardContent className="flex-1">
           {imageUrl ? (
-            <div className="border-border/60 bg-muted/30 relative flex h-[55vh] min-h-[320px] w-full items-center justify-center overflow-hidden rounded-lg border">
-              <Image
-                src={imageUrl}
-                alt={`Specimen ${currentAnnotation?.specimen?.specimenId ?? currentAnnotation?.specimen?.id ?? ''}`}
-                fill
-                className="object-contain"
-                unoptimized
-                priority
-              />
-            </div>
+            <SpecimenImageViewer imageUrl={imageUrl} />
           ) : (
             <p className="text-muted-foreground border-border/60 bg-muted/30 flex h-[55vh] min-h-[320px] w-full flex-col items-center justify-center gap-2 rounded-lg border text-sm">
               <ImageOff className="h-6 w-6" />
