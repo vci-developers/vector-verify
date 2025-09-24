@@ -31,7 +31,7 @@ export function SignupForm() {
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', confirmPassword: '' },
     mode: 'onSubmit',
   });
 
@@ -42,7 +42,7 @@ export function SignupForm() {
     try {
       await signupMutation.mutateAsync({
         email: values.email,
-        password: values.password,
+        password: values.password, 
       });
       const login = await loginMutation.mutateAsync({
         email: values.email,
@@ -140,6 +140,30 @@ export function SignupForm() {
                       <Eye className="h-4 w-4" />
                     )}
                   </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground text-sm">
+                  Confirm Password
+                </FormLabel>
+                <div className="relative">
+                  <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      placeholder="confirm your password"
+                      className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
+                    />
+                  </FormControl>
                 </div>
                 <FormMessage />
               </FormItem>
