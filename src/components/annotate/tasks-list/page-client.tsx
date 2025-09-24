@@ -26,13 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAnnotationTasksQuery } from '@/lib/annotate/client';
+import {
+  useAnnotationTasksQuery,
+  useAnnotationTaskYearsQuery,
+} from '@/lib/annotate/client';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
+  const [year, setYear] = useState<number | 'all'>('all');
   const pagination = usePagination({});
   const {
     setTotal,
@@ -45,9 +49,12 @@ export function AnnotationTasksListPageClient() {
     range: pages,
   } = pagination;
 
+  const { data: years = [] } = useAnnotationTaskYearsQuery();
+
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
     limit: pageSize,
+    taskYear: year === 'all' ? undefined : year,
   });
 
   const tasks = data?.items ?? [];
@@ -61,6 +68,11 @@ export function AnnotationTasksListPageClient() {
 
   function handleRowsPerPageChange(value: string) {
     setPageSizeAndReset(Number(value));
+  }
+
+  function handleYearChange(value: string) {
+    setPage(1);
+    setYear(value === 'all' ? 'all' : Number(value));
   }
 
   function handleNavigateToPreviousPage(
@@ -97,6 +109,19 @@ export function AnnotationTasksListPageClient() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>My Annotation Tasks</CardTitle>
           <div className="flex items-center gap-2">
+            <Select value={String(year)} onValueChange={handleYearChange}>
+              <SelectTrigger size="sm">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All years</SelectItem>
+                {years.map(y => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select
               value={String(pageSize)}
               onValueChange={handleRowsPerPageChange}
@@ -165,7 +190,7 @@ export function AnnotationTasksListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map((pageItem) => (
+                {pages.map(pageItem => (
                   <PaginationItem key={pageItem}>
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />

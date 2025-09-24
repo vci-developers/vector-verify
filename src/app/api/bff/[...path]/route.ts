@@ -9,6 +9,56 @@ import {
   MEDIA_TYPE,
   parseApiErrorResponse,
 } from '@/lib/shared/http/core';
+import type { AnnotationTasksListResponseDto } from '@/lib/entities/annotation';
+
+async function handleGetTaskYears(): Promise<NextResponse> {
+  // Aggregate distinct years from all tasks' createdAt/updatedAt fields
+  const years = new Set<number>();
+
+  let page = 1;
+  const limit = 50; // use conservative batch size to satisfy upstream limits
+  // Loop pages until hasMore is false
+  // If upstream doesn't support pagination this still works for the first page
+  // and will exit when hasMore is falsy/undefined
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const res = await upstreamFetch('annotations/task', {
+      method: 'GET',
+      query: { page, limit },
+    });
+
+    if (!res.ok) {
+      const error = await parseApiErrorResponse(res);
+      const headers = forwardResponseHeaders(res);
+      headers.set('content-type', MEDIA_TYPE.JSON);
+      return NextResponse.json(
+        {
+          error: error.message,
+          status: error.status,
+          details: error.body ?? null,
+        },
+        { status: error.status, headers },
+      );
+    }
+
+    const data = (await res.json()) as AnnotationTasksListResponseDto;
+    for (const task of data.tasks ?? []) {
+      if (typeof task.createdAt === 'number') {
+        years.add(new Date(task.createdAt).getFullYear());
+      }
+      if (typeof task.updatedAt === 'number') {
+        years.add(new Date(task.updatedAt).getFullYear());
+      }
+    }
+
+    const hasMore = Boolean((data as any).hasMore);
+    if (!hasMore) break;
+    page += 1;
+  }
+
+  const list = Array.from(years).sort((a, b) => b - a);
+  return NextResponse.json(list, { status: HTTP_STATUS.OK });
+}
 
 async function readRequestBody(
   request: NextRequest,
@@ -25,6 +75,13 @@ async function readRequestBody(
 async function handleProxy(request: NextRequest, params: { path: string[] }) {
   try {
     const path = params.path.join('/');
+    // Custom BFF endpoint: aggregate years for tasks
+    if (
+      request.method.toUpperCase() === 'GET' &&
+      path === 'annotations/task/years'
+    ) {
+      return handleGetTaskYears();
+    }
     const body = await readRequestBody(request);
     const requestHeaders = forwardRequestHeaders(request);
     const accept = request.headers.get('accept') ?? '';

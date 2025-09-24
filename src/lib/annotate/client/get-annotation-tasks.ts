@@ -16,6 +16,7 @@ export async function getAnnotationTasks(
     limit = DEFAULT_PAGE_SIZE,
     taskTitle,
     taskStatus,
+    taskYear,
   } = filters;
 
   const query = {
@@ -23,6 +24,7 @@ export async function getAnnotationTasks(
     limit,
     title: taskTitle,
     status: taskStatus,
+    year: taskYear,
   };
 
   const data = await bff<AnnotationTasksListResponseDto>('/annotations/task', {

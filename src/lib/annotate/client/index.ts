@@ -5,3 +5,5 @@ export * from './hooks/use-annotation-task-progress';
 export * from './get-annotations';
 export * from './hooks/use-annotations';
 export * from '../types';
+export * from './get-annotation-task-years';
+export * from './hooks/use-annotation-task-years';

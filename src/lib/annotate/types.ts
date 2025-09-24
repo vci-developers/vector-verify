@@ -1,10 +1,14 @@
-import type { AnnotationStatus, AnnotationTaskStatus } from '@/lib/entities/annotation';
+import type {
+  AnnotationStatus,
+  AnnotationTaskStatus,
+} from '@/lib/entities/annotation';
 
 export interface AnnotationTasksListFilters {
   page?: number;
   limit?: number;
   taskTitle?: string;
   taskStatus?: AnnotationTaskStatus;
+  taskYear?: number;
 }
 
 export interface AnnotationsListFilters {
@@ -13,4 +17,3 @@ export interface AnnotationsListFilters {
   limit?: number;
   status?: AnnotationStatus;
 }
-
