@@ -15,5 +15,14 @@ export const SignupSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password is too long'),
-});
+
+  confirmPassword: z
+    .string()
+    .min(1, 'Passwords must match')
+})
+.refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+})
+
 export type SignupFormData = z.infer<typeof SignupSchema>;
