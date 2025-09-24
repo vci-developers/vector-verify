@@ -160,26 +160,10 @@ export function SignupForm() {
                       {...field}
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder="min 8 characters"
+                      placeholder="confirm your password"
                       className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
                     />
                   </FormControl>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    aria-label={
-                      showPassword ? 'Hide password' : 'Show password'
-                    }
-                    onClick={() => setShowPassword(v => !v)}
-                    className="hover:bg-muted absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-2"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
                 <FormMessage />
               </FormItem>
