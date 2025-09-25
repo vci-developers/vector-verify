@@ -1,6 +1,7 @@
 'use client';
 
 import { AnnotationTasksListLoadingSkeleton } from '@/components/annotate/tasks-list/loading-skeleton';
+import { DateRangeFilter } from '@/components/annotate/tasks-list/date-range-filter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Pagination,
@@ -29,25 +30,28 @@ import {
 import { useAnnotationTasksQuery } from '@/lib/annotate/client';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
+import { useDateRangeFilter } from '@/lib/shared/hooks/use-date-range-filter';
+import { useUrlPagination } from '@/lib/shared/hooks/use-url-pagination';
 import { useEffect } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
-  const pagination = usePagination({});
-  const {
-    setTotal,
-    page,
-    setPage,
-    pageSize,
-    setPageSizeAndReset,
-    canPrev,
-    canNext,
-    range: pages,
-  } = pagination;
+  const { page, pageSize, updatePage, updatePageSize } = useUrlPagination();
+  const pagination = usePagination({
+    initialPage: page,
+    initialPageSize: pageSize,
+  });
+  const { setTotal, canPrev, canNext, range: pages } = pagination;
+
+  const { dateRange, updateDateRange, getDateRangeParams } =
+    useDateRangeFilter();
+  const { fromDate, toDate } = getDateRangeParams();
 
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
     limit: pageSize,
+    fromDate,
+    toDate,
   });
 
   const tasks = data?.items ?? [];
@@ -60,21 +64,21 @@ export function AnnotationTasksListPageClient() {
   const isPagingDisabled = isLoading || isFetching;
 
   function handleRowsPerPageChange(value: string) {
-    setPageSizeAndReset(Number(value));
+    updatePageSize(Number(value));
   }
 
   function handleNavigateToPreviousPage(
     event: React.MouseEvent<HTMLAnchorElement>,
   ) {
     event.preventDefault();
-    if (!isPagingDisabled && canPrev) setPage(page - 1);
+    if (!isPagingDisabled && canPrev) updatePage(page - 1);
   }
 
   function handleNavigateToNextPage(
     event: React.MouseEvent<HTMLAnchorElement>,
   ) {
     event.preventDefault();
-    if (!isPagingDisabled && canNext) setPage(page + 1);
+    if (!isPagingDisabled && canNext) updatePage(page + 1);
   }
 
   function handleNavigateToPage(
@@ -82,7 +86,7 @@ export function AnnotationTasksListPageClient() {
     pageNumber: number,
   ) {
     event.preventDefault();
-    if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
+    if (!isPagingDisabled && pageNumber !== page) updatePage(pageNumber);
   }
 
   const isEmpty = !isLoading && !isFetching && tasks.length === 0;
@@ -96,7 +100,12 @@ export function AnnotationTasksListPageClient() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>My Annotation Tasks</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <DateRangeFilter
+              value={dateRange}
+              onValueChange={updateDateRange}
+              disabled={isLoading || isFetching}
+            />
             <Select
               value={String(pageSize)}
               onValueChange={handleRowsPerPageChange}
@@ -165,7 +174,7 @@ export function AnnotationTasksListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map((pageItem) => (
+                {pages.map(pageItem => (
                   <PaginationItem key={pageItem}>
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />

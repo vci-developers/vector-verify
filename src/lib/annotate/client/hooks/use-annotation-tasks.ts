@@ -26,6 +26,8 @@ export function useAnnotationTasksQuery(
     limit = DEFAULT_PAGE_SIZE,
     taskStatus,
     taskTitle,
+    fromDate,
+    toDate,
   } = filters;
 
   return useQuery({
@@ -34,6 +36,8 @@ export function useAnnotationTasksQuery(
       limit,
       taskStatus,
       taskTitle,
+      fromDate,
+      toDate,
     ) as AnnotationTasksQueryKey,
     queryFn: () => getAnnotationTasks(filters),
     ...(options ?? {}),
