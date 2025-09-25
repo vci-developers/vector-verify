@@ -9,8 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toDomId } from "@/lib/shared/utils/dom";
 import { ChevronDown } from "lucide-react";
-import { de } from "zod/v4/locales";
-import { on } from "events";
+
 
 interface SpecimenDropdownMenuProps {
     label: string;
@@ -40,21 +39,43 @@ export default function SpecimenDropdownMenu({
                         "w-full justify-between",
                         !enabled && "pointer-events-none opacity-50"
                     )}
-                    disabled={!enabled}
                 >
-                    {enabled ? (
-                        selectedSpecimenId ?(
-                            <span> {selectedSpecimenId} </span>
-                        ) : (
-                            <span className="text-muted-foreground">Select {label}...</span>
-                        )
+                    {selectedSpecimenId ?(
+                        <span> {selectedSpecimenId} </span>
                     ) : (
-                        <span className="text-muted-foreground"> Not Applicable </span>
+                        <span className="text-muted-foreground">Select {label}...</span>
                     )}
+
                     <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
-            </DropdownMenuTrigger>
 
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                align="start"
+                className = "w-full max-h-60 overflow-y-auto"
+            >
+                {specimenIds.map((specimenId) => (
+                    <DropdownMenuItem
+                        key={specimenId}
+                        onSelect={() => specimenIdSelectHandler(specimenId)}
+                    >
+                        {specimenId}
+                    </DropdownMenuItem>
+
+                ))}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                    disabled={selectedSpecimenId === undefined}
+                    onSelect={() => specimenIdSelectHandler(undefined)}
+                    className={cn(
+                        "text-red-600 hover:bg-red-600/10 focus:bg-red-600/10",
+                        selectedSpecimenId === undefined && "pointer-events-none opacity-50"
+                    )}
+                >
+                    Remove selection
+                </DropdownMenuItem>
+            </DropdownMenuContent>
         </DropdownMenu>
 
     )
