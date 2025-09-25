@@ -1,15 +1,24 @@
 import { Progress } from '@/components/ui/progress';
 import { AnnotationTaskProgress } from '@/lib/entities/annotation';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { Fragment } from 'react';
+import { Fragment, useState, useEffect } from 'react';
+import SpecimenSelectMenu from './specimen-select-menu';
+
+
 
 interface TaskProgressBreakdownProps {
   taskProgress?: AnnotationTaskProgress;
+  specimens?: string[];
+  currentPage?: number;
 }
 
 export function TaskProgressBreakdown({
   taskProgress,
+  currentPage,
 }: TaskProgressBreakdownProps) {
+  const [selectedSpecies, setSelectedSpecies] = useState<string | undefined>(undefined);
+  const [selectedSex, setSelectedSex] = useState<string | undefined>(undefined);
+  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<string | undefined>(undefined);
   const totalCount = taskProgress?.total ?? 0;
   const annotatedCount = taskProgress?.annotated ?? 0;
   const flaggedCount = taskProgress?.flagged ?? 0;
@@ -19,6 +28,11 @@ export function TaskProgressBreakdown({
   );
   const progressPercent = taskProgress?.percent ?? 0;
 
+  useEffect(() => {
+    setSelectedSpecies(undefined);
+    setSelectedSex(undefined);
+    setSelectedAbdomenStatus(undefined);
+  }, [currentPage]);
   return (
     <Fragment>
       <div className="space-y-1">
@@ -71,6 +85,50 @@ export function TaskProgressBreakdown({
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-foreground text-sm font-bold">Species</h3>
+        <SpecimenSelectMenu
+          label="Species"
+          specimenIds={["Anopheles funestus",
+            "Anopheles gambiae", 
+            "Anopheles other", 
+            "Culex",
+            "Aedes",
+            "Mansonia",
+            "Non-Mosquito"
+          ]}
+          selectedSpecimenId={selectedSpecies}
+          onSpecimenSelect={setSelectedSpecies}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-foreground text-sm font-bold">Sex</h3>
+        <SpecimenSelectMenu
+          label="Sex"
+          specimenIds={[
+            "Male", 
+            "Female"
+          ]}
+          selectedSpecimenId={selectedSex}
+          onSpecimenSelect={setSelectedSex}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-foreground text-sm font-bold">Abdomen Status</h3>
+        <SpecimenSelectMenu
+          label="Abdomen Status"
+          specimenIds={["Unfed",
+            "Fully-fed", 
+            "Semi-gravid", 
+            "Gravid"
+          ]}
+          selectedSpecimenId={selectedAbdomenStatus}
+          onSpecimenSelect={setSelectedAbdomenStatus}
+        />
       </div>
     </Fragment>
   );

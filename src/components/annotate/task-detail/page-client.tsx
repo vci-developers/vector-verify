@@ -150,7 +150,10 @@ export function AnnotationTaskDetailPageClient({
           <CardTitle className="text-lg font-semibold">
             Annotation Form
           </CardTitle>
-          <TaskProgressBreakdown taskProgress={taskProgress} />
+          <TaskProgressBreakdown 
+            taskProgress={taskProgress} 
+            currentPage={page}
+          />
         </CardHeader>
         <CardContent className="text-muted-foreground flex flex-col gap-3 text-sm">
           <p className="flex items-center gap-2">
