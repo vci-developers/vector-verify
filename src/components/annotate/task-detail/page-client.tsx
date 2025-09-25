@@ -15,13 +15,7 @@ import {
   useTaskAnnotationsQuery,
 } from '@/lib/annotate/client';
 import { formatDate } from '@/lib/shared/utils/date';
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  ImageOff,
-  Info,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Info } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
@@ -36,11 +30,7 @@ export function AnnotationTaskDetailPageClient({
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
 
-  const {
-    data: annotationsPage,
-    isLoading,
-    isFetching,
-  } = useTaskAnnotationsQuery({
+  const { data: annotationsPage, isFetching } = useTaskAnnotationsQuery({
     taskId,
     page,
     limit: 1,
@@ -54,6 +44,7 @@ export function AnnotationTaskDetailPageClient({
     () => annotationsPage?.items?.[0] ?? null,
     [annotationsPage],
   );
+
   const imageUrl = useMemo(() => {
     const specimen = currentAnnotation?.specimen;
     if (!specimen) return null;
@@ -67,33 +58,20 @@ export function AnnotationTaskDetailPageClient({
   }, [currentAnnotation]);
 
   const handleNext = useCallback(() => {
-    if (hasMore && !isFetching && !isLoading) {
-      setPage(prev => prev + 1);
-    }
-  }, [hasMore, isFetching, isLoading]);
+    if (hasMore) setPage(prev => prev + 1);
+  }, [hasMore]);
 
   const handlePrevious = useCallback(() => {
-    if (page > 1 && !isFetching && !isLoading) {
-      setPage(prev => Math.max(prev - 1, 1));
-    }
-  }, [page, isFetching, isLoading]);
+    if (page > 1) setPage(prev => Math.max(prev - 1, 1));
+  }, [page]);
 
-  const limit = annotationsPage?.limit ?? 1;
-  const totalImages = taskProgress?.total ?? annotationsPage?.total ?? null;
-  const currentIndex = (page - 1) * limit + 1;
+  const createdAt = currentAnnotation?.createdAt ? formatDate(currentAnnotation.createdAt).monthYear : null
+  const totalImages = annotationsPage?.total ?? taskProgress?.total;
+  const specimenId = currentAnnotation?.specimen?.specimenId
 
-  if (isLoading) {
+  if (isFetching) {
     return <AnnotationTaskDetailSkeleton />;
   }
-
-  const createdAt = currentAnnotation?.createdAt
-    ? formatDate(currentAnnotation.createdAt).monthYear
-    : null;
-  const specimenId =
-    currentAnnotation?.specimen?.specimenId ??
-    (currentAnnotation?.specimen?.id
-      ? `#${currentAnnotation.specimen.id}`
-      : null);
 
   return (
     <div className="mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]">
@@ -102,7 +80,7 @@ export function AnnotationTaskDetailPageClient({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-lg font-semibold">
               Specimen Image{' '}
-              {totalImages ? `(${currentIndex} of ${totalImages})` : ''}
+              {totalImages ? `(${page} of ${totalImages})` : ''}
             </CardTitle>
             {createdAt && (
               <Badge
@@ -119,14 +97,7 @@ export function AnnotationTaskDetailPageClient({
           )}
         </CardHeader>
         <CardContent className="flex-1">
-          {imageUrl ? (
-            <SpecimenImageViewer imageUrl={imageUrl} />
-          ) : (
-            <p className="text-muted-foreground border-border/60 bg-muted/30 flex h-[55vh] min-h-[320px] w-full flex-col items-center justify-center gap-2 rounded-lg border text-sm">
-              <ImageOff className="h-6 w-6" />
-              No image available.
-            </p>
-          )}
+          <SpecimenImageViewer imageUrl={imageUrl} />
         </CardContent>
         <CardFooter className="border-border/70 bg-muted/5 mt-auto border-t px-6 py-4">
           <SpecimenMetadata
@@ -159,7 +130,7 @@ export function AnnotationTaskDetailPageClient({
             variant="outline"
             className="min-w-[120px]"
             onClick={handlePrevious}
-            disabled={page === 1 || isFetching || isLoading}
+            disabled={page === 1 || isFetching}
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
@@ -168,7 +139,7 @@ export function AnnotationTaskDetailPageClient({
             variant="outline"
             className="min-w-[120px]"
             onClick={handleNext}
-            disabled={!hasMore || isFetching || isLoading}
+            disabled={!hasMore || isFetching}
           >
             Next <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

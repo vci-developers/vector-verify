@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: 'api.vectorcam.org',
         pathname: '/specimens/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'test.api.vectorcam.org',
+        pathname: '/specimens/**',
+      },
     ],
   },
 };

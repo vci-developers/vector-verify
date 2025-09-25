@@ -100,30 +100,27 @@ export function useImageViewer(maxZoom: number = 3): UseImageViewer {
 
   const transformStyle = useMemo<React.CSSProperties>(() => {
     return {
-      transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${
-        panOffset.y / zoom
-      }px)`,
+      transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
       transition: isDraggingRef.current ? 'none' : 'transform 0.2s ease-out',
       transformOrigin: 'center',
     };
   }, [zoom, panOffset]);
 
-  const getViewerProps = useCallback(() => {
-    const cursorClasses =
+  const viewerProps = useMemo(() => {
+    const className =
       zoom > 1
         ? isDraggingRef.current
           ? 'cursor-grabbing'
           : 'cursor-grab'
         : 'cursor-default';
-
     return {
       ref: viewerRef,
       onPointerDown,
       onPointerMove,
       onPointerUp: endPan,
       onPointerCancel: endPan,
-      className: cursorClasses,
-    };
+      className,
+    } as const;
   }, [onPointerDown, onPointerMove, endPan, zoom]);
 
   return {
@@ -131,7 +128,7 @@ export function useImageViewer(maxZoom: number = 3): UseImageViewer {
     zoomIn: () => applyZoomChange(0.25),
     zoomOut: () => applyZoomChange(-0.25),
     reset: resetImageView,
-    viewerProps: getViewerProps(),
+    viewerProps,
     transformStyle,
   };
 }
