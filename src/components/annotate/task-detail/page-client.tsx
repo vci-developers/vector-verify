@@ -26,6 +26,8 @@ import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
+import MorphIdSelectMenu from './annotation-form-panel/morph-id-select-menu';
+import { MorphIds, SexMorphIds, AbdomenStatusMorphIds } from '@/lib/entities/specimen/morph-ids';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -35,6 +37,10 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | undefined>(undefined);
+  const [selectedSex, setSelectedSex] = useState<string | undefined>(undefined);
+  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<string | undefined>(undefined);
+
 
   const {
     data: annotationsPage,
@@ -49,7 +55,6 @@ export function AnnotationTaskDetailPageClient({
   const { data: taskProgress } = useAnnotationTaskProgressQuery(taskId);
 
   const hasMore = Boolean(annotationsPage?.hasMore);
-
   const currentAnnotation = useMemo(
     () => annotationsPage?.items?.[0] ?? null,
     [annotationsPage],
@@ -60,22 +65,25 @@ export function AnnotationTaskDetailPageClient({
     if (specimen.thumbnailImageId) {
       return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
     }
-    const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
-    if (!relativePath) return null;
-    if (relativePath.startsWith('http')) return relativePath;
-    return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
+    return specimen.thumbnailUrl ?? null;
   }, [currentAnnotation]);
 
   const handleNext = useCallback(() => {
     if (hasMore && !isFetching && !isLoading) {
       setPage(prev => prev + 1);
     }
+    setSelectedSpecies(undefined);
+    setSelectedSex(undefined);
+    setSelectedAbdomenStatus(undefined);
   }, [hasMore, isFetching, isLoading]);
 
   const handlePrevious = useCallback(() => {
     if (page > 1 && !isFetching && !isLoading) {
       setPage(prev => Math.max(prev - 1, 1));
     }
+    setSelectedSpecies(undefined);
+    setSelectedSex(undefined);
+    setSelectedAbdomenStatus(undefined);
   }, [page, isFetching, isLoading]);
 
   const limit = annotationsPage?.limit ?? 1;
@@ -152,19 +160,40 @@ export function AnnotationTaskDetailPageClient({
           </CardTitle>
           <TaskProgressBreakdown 
             taskProgress={taskProgress} 
-            currentPage={page}
           />
         </CardHeader>
-        <CardContent className="text-muted-foreground flex flex-col gap-3 text-sm">
-          <p className="flex items-center gap-2">
-            <Info className="text-primary h-4 w-4" />
-            Use these controls to review specimens sequentially.
-          </p>
-          <aside className="border-warning/30 bg-warning/10 text-warning-foreground flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
-            Tip: keyboard arrows (<strong>←</strong>/<strong>→</strong>) also
-            move between specimens.
-          </aside>
+        <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-foreground text-sm font-bold">Species</h3>
+                <MorphIdSelectMenu
+                  label="Species"
+                  morphIds={Object.values(MorphIds)}
+                  selectedMorphId={selectedSpecies}
+                  onMorphSelect={setSelectedSpecies}
+                />
+              </div>
+        
+              <div className="space-y-2">
+                <h3 className="text-foreground text-sm font-bold">Sex</h3>
+                <MorphIdSelectMenu
+                  label="Sex"
+                  morphIds={Object.values(SexMorphIds)}
+                  selectedMorphId={selectedSex}
+                  onMorphSelect={setSelectedSex}
+                />
+              </div>
+        
+              <div className="space-y-2">
+                <h3 className="text-foreground text-sm font-bold">Abdomen Status</h3>
+                <MorphIdSelectMenu
+                  label="Abdomen Status"
+                  morphIds={Object.values(AbdomenStatusMorphIds)}
+                  selectedMorphId={selectedAbdomenStatus}
+                  onMorphSelect={setSelectedAbdomenStatus}
+                />
+              </div>
         </CardContent>
+
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Button
             type="button"
