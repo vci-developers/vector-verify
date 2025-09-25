@@ -46,7 +46,7 @@ export default function SpecimenDropdownMenu({
                         selectedSpecimenId ?(
                             <span> {selectedSpecimenId} </span>
                         ) : (
-                            <span className="text-muted-foreground">Select {label}</span>
+                            <span className="text-muted-foreground">Select {label}...</span>
                         )
                     ) : (
                         <span className="text-muted-foreground"> Not Applicable </span>
