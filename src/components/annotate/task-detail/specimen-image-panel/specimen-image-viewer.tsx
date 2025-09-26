@@ -5,6 +5,7 @@ import { useImageViewer } from './hooks/use-image-viewer';
 import { ImageOff, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useEffect } from 'react';
 
 interface SpecimenImageViewerProps {
   imageUrl?: string | null;
@@ -13,6 +14,10 @@ interface SpecimenImageViewerProps {
 export function SpecimenImageViewer({ imageUrl }: SpecimenImageViewerProps) {
   const { zoomIn, zoomOut, reset, viewerProps, transformStyle } =
     useImageViewer();
+
+  useEffect(() => {
+    reset();
+  }, [imageUrl, reset]);
 
   return (
     <div className="w-full">
