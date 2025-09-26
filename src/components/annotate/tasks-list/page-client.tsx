@@ -40,7 +40,7 @@ import { TaskRow } from './task-row';
 export function AnnotationTasksListPageClient() {
   // Local state for date range filter
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
-  const { fromDate, toDate } = useDateRangeValues(dateRange);
+  const { createdAfter, createdBefore } = useDateRangeValues(dateRange);
 
   const pagination = usePagination({});
   const {
@@ -57,8 +57,8 @@ export function AnnotationTasksListPageClient() {
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
     limit: pageSize,
-    fromDate,
-    toDate,
+    createdAfter,
+    createdBefore,
   });
 
   const tasks = data?.items ?? [];

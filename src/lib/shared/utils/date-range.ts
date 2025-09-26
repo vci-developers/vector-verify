@@ -8,8 +8,8 @@ export type DateRangeOption =
   | 'all-time';
 
 export interface DateRange {
-  fromDate?: string;
-  toDate: string;
+  createdAfter?: string;
+  createdBefore: string;
 }
 
 export const DATE_RANGE_OPTIONS = [
@@ -22,48 +22,50 @@ export const DATE_RANGE_OPTIONS = [
 
 export function calculateDateRange(option: DateRangeOption): DateRange {
   const now = new Date();
-  const toDate = now.toISOString();
+  const createdBefore = now.toISOString();
 
   if (option === 'all-time') {
-    return { toDate };
+    return { createdBefore };
   }
 
-  const fromDate = new Date(now);
+  const createdAfter = new Date(now);
 
   switch (option) {
     case '1-month':
-      fromDate.setMonth(fromDate.getMonth() - 1);
+      createdAfter.setMonth(createdAfter.getMonth() - 1);
       break;
     case '3-months':
-      fromDate.setMonth(fromDate.getMonth() - 3);
+      createdAfter.setMonth(createdAfter.getMonth() - 3);
       break;
     case '6-months':
-      fromDate.setMonth(fromDate.getMonth() - 6);
+      createdAfter.setMonth(createdAfter.getMonth() - 6);
       break;
     case '1-year':
-      fromDate.setFullYear(fromDate.getFullYear() - 1);
+      createdAfter.setFullYear(createdAfter.getFullYear() - 1);
       break;
   }
 
   return {
-    fromDate: fromDate.toISOString(),
-    toDate,
+    createdAfter: createdAfter.toISOString(),
+    createdBefore,
   };
 }
 
 export function getDateRangeOptionFromDates(
-  fromDate?: string,
-  toDate?: string,
+  createdAfter?: string,
+  createdBefore?: string,
 ): DateRangeOption | null {
-  if (!fromDate || !toDate) {
-    return fromDate === undefined && toDate === undefined ? 'all-time' : null;
+  if (!createdAfter || !createdBefore) {
+    return createdAfter === undefined && createdBefore === undefined
+      ? 'all-time'
+      : null;
   }
 
-  const from = new Date(fromDate);
-  const to = new Date(toDate);
+  const from = new Date(createdAfter);
+  const to = new Date(createdBefore);
   const now = new Date();
 
-  // Check if toDate is close to now (within 1 minute)
+  // Check if createdBefore is close to now (within 1 minute)
   const timeDiff = Math.abs(to.getTime() - now.getTime());
   if (timeDiff > 60000) {
     // More than 1 minute difference
