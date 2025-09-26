@@ -30,9 +30,12 @@ import {
 import { useAnnotationTasksQuery } from '@/lib/annotate/client';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
-import { useDateRangeFilter } from '@/lib/shared/hooks/use-date-range-filter';
 import { useUrlPagination } from '@/lib/shared/hooks/use-url-pagination';
-import { useEffect } from 'react';
+import {
+  useDateRangeValues,
+  type DateRangeOption,
+} from '@/lib/shared/utils/date-range';
+import { useEffect, useState } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
@@ -43,9 +46,9 @@ export function AnnotationTasksListPageClient() {
   });
   const { setTotal, canPrev, canNext, range: pages } = pagination;
 
-  const { dateRange, updateDateRange, getDateRangeParams } =
-    useDateRangeFilter();
-  const { fromDate, toDate } = getDateRangeParams();
+  // Local state for date range filter
+  const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
+  const { fromDate, toDate } = useDateRangeValues(dateRange);
 
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
@@ -65,6 +68,12 @@ export function AnnotationTasksListPageClient() {
 
   function handleRowsPerPageChange(value: string) {
     updatePageSize(Number(value));
+  }
+
+  function handleDateRangeChange(newDateRange: DateRangeOption) {
+    setDateRange(newDateRange);
+    // Reset pagination to page 1 when date range changes
+    updatePage(1);
   }
 
   function handleNavigateToPreviousPage(
@@ -103,7 +112,7 @@ export function AnnotationTasksListPageClient() {
           <div className="flex items-center gap-4">
             <DateRangeFilter
               value={dateRange}
-              onValueChange={updateDateRange}
+              onValueChange={handleDateRangeChange}
               disabled={isLoading || isFetching}
             />
             <Select

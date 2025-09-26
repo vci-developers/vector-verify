@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 export type DateRangeOption =
   | '1-month'
   | '3-months'
@@ -78,4 +80,14 @@ export function getDateRangeOptionFromDates(
   if (monthsDiff <= 12) return '1-year';
 
   return null;
+}
+
+/**
+ * Hook to get memoized ISO date values from a date range option
+ * This keeps react-query caching stable by ensuring consistent date values
+ */
+export function useDateRangeValues(option: DateRangeOption) {
+  return useMemo(() => {
+    return calculateDateRange(option);
+  }, [option]);
 }
