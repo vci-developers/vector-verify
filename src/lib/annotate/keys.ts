@@ -1,5 +1,8 @@
 import type { QueryKey } from '@tanstack/react-query';
-import type { AnnotationStatus, AnnotationTaskStatus } from '@/lib/entities/annotation';
+import type {
+  AnnotationStatus,
+  AnnotationTaskStatus,
+} from '@/lib/entities/annotation';
 
 export const annotationKeys = {
   root: ['annotations'] as const,
@@ -8,11 +11,13 @@ export const annotationKeys = {
     limit?: number,
     taskStatus?: AnnotationTaskStatus,
     taskTitle?: string,
+    createdAfter?: string,
+    createdBefore?: string,
   ) =>
     [
       ...annotationKeys.root,
       'tasks',
-      { page, limit, taskStatus, taskTitle },
+      { page, limit, taskStatus, taskTitle, createdAfter, createdBefore },
     ] as const,
   taskProgress: (taskId: number) =>
     [...annotationKeys.root, 'task-progress', taskId] as const,
