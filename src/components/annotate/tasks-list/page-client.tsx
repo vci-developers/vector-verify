@@ -1,6 +1,7 @@
 'use client';
 
 import { AnnotationTasksListLoadingSkeleton } from '@/components/annotate/tasks-list/loading-skeleton';
+import { DateRangeFilter } from '@/components/annotate/tasks-list/date-range-filter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Pagination,
@@ -29,10 +30,18 @@ import {
 import { useAnnotationTasksQuery } from '@/lib/annotate/client';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
-import { useEffect } from 'react';
+import {
+  useDateRangeValues,
+  type DateRangeOption,
+} from '@/lib/shared/utils/date-range';
+import { useEffect, useState } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
+  // Local state for date range filter
+  const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
+  const { fromDate, toDate } = useDateRangeValues(dateRange);
+
   const pagination = usePagination({});
   const {
     setTotal,
@@ -48,6 +57,8 @@ export function AnnotationTasksListPageClient() {
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
     limit: pageSize,
+    fromDate,
+    toDate,
   });
 
   const tasks = data?.items ?? [];
@@ -61,6 +72,12 @@ export function AnnotationTasksListPageClient() {
 
   function handleRowsPerPageChange(value: string) {
     setPageSizeAndReset(Number(value));
+  }
+
+  function handleDateRangeChange(newDateRange: DateRangeOption) {
+    setDateRange(newDateRange);
+    // Reset pagination to page 1 when date range changes
+    setPage(1);
   }
 
   function handleNavigateToPreviousPage(
@@ -96,7 +113,12 @@ export function AnnotationTasksListPageClient() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>My Annotation Tasks</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <DateRangeFilter
+              value={dateRange}
+              onValueChange={handleDateRangeChange}
+              disabled={isLoading || isFetching}
+            />
             <Select
               value={String(pageSize)}
               onValueChange={handleRowsPerPageChange}
@@ -165,7 +187,7 @@ export function AnnotationTasksListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map((pageItem) => (
+                {pages.map(pageItem => (
                   <PaginationItem key={pageItem}>
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />

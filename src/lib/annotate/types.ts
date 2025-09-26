@@ -5,6 +5,8 @@ export interface AnnotationTasksListFilters {
   limit?: number;
   taskTitle?: string;
   taskStatus?: AnnotationTaskStatus;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface AnnotationsListFilters {

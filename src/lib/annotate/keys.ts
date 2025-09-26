@@ -8,11 +8,13 @@ export const annotationKeys = {
     limit?: number,
     taskStatus?: AnnotationTaskStatus,
     taskTitle?: string,
+    fromDate?: string,
+    toDate?: string,
   ) =>
     [
       ...annotationKeys.root,
       'tasks',
-      { page, limit, taskStatus, taskTitle },
+      { page, limit, taskStatus, taskTitle, fromDate, toDate },
     ] as const,
   taskProgress: (taskId: number) =>
     [...annotationKeys.root, 'task-progress', taskId] as const,
