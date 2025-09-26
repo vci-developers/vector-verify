@@ -23,11 +23,16 @@ import {
   Info,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import MorphIdSelectMenu from './annotation-form-panel/morph-id-select-menu';
-import { SPECIES_MORPH_IDS, SEX_MORPH_IDS, ABDOMEN_STATUS_MORPH_IDS } from '@/lib/entities/specimen/morph-ids';
+import { 
+  SPECIES_MORPH_IDS, 
+  SEX_MORPH_IDS, 
+  ABDOMEN_STATUS_MORPH_IDS 
+} from '@/lib/entities/specimen/morph-ids';
+import { set } from 'zod';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -40,7 +45,20 @@ export function AnnotationTaskDetailPageClient({
   const [selectedSpecies, setSelectedSpecies] = useState<string | undefined>(undefined);
   const [selectedSex, setSelectedSex] = useState<string | undefined>(undefined);
   const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<string | undefined>(undefined);
+  const lockingSpecies = SPECIES_MORPH_IDS.NON_MOSQUITO;
+  const lockingOutFromSpecies = selectedSpecies === lockingSpecies;
+  const lockingSex = SEX_MORPH_IDS.MALE;
+  const lockingOutFromSex = selectedSex === lockingSex;
 
+  useEffect(() => {
+    if (lockingOutFromSpecies) {
+      setSelectedSex(undefined);
+      setSelectedAbdomenStatus(undefined);
+    }
+    if (lockingOutFromSex) {
+      setSelectedAbdomenStatus(undefined);
+    }
+  })
 
   const {
     data: annotationsPage,
@@ -180,6 +198,7 @@ export function AnnotationTaskDetailPageClient({
                   morphIds={Object.values(SEX_MORPH_IDS)}
                   selectedMorphId={selectedSex}
                   onMorphSelect={setSelectedSex}
+                  disabled={lockingOutFromSpecies}
                 />
               </div>
         
@@ -190,6 +209,7 @@ export function AnnotationTaskDetailPageClient({
                   morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
                   selectedMorphId={selectedAbdomenStatus}
                   onMorphSelect={setSelectedAbdomenStatus}
+                  disabled={lockingOutFromSpecies || lockingOutFromSex}
                 />
               </div>
         </CardContent>

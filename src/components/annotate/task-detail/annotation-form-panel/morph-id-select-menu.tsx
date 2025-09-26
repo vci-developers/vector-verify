@@ -8,6 +8,7 @@ interface MorphIdSelectMenuProps {
     morphIds: readonly string[];
     selectedMorphId: string | undefined;
     onMorphSelect: (morphId?: string) => void;
+    disabled?: boolean;
 }
 
 export default function MorphIdSelectMenu({
@@ -15,11 +16,13 @@ export default function MorphIdSelectMenu({
     morphIds,
     selectedMorphId,
     onMorphSelect,
+    disabled,
 }: MorphIdSelectMenuProps) {
     return (
         <Select
             value={selectedMorphId || ""}
             onValueChange={(value) => onMorphSelect(value === "clear" ? undefined : value)}
+            disabled={disabled}
         >
             <SelectTrigger className="w-full" id={toDomId(label)}>
                 <SelectValue
