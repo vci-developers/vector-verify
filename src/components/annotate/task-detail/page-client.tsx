@@ -27,7 +27,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import MorphIdSelectMenu from './annotation-form-panel/morph-id-select-menu';
-import { MorphIds, SexMorphIds, AbdomenStatusMorphIds } from '@/lib/entities/specimen/morph-ids';
+import { SPECIES_MORPH_IDS, SEX_MORPH_IDS, ABDOMEN_STATUS_MORPH_IDS } from '@/lib/entities/specimen/morph-ids';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -167,7 +167,7 @@ export function AnnotationTaskDetailPageClient({
                 <h3 className="text-foreground text-sm font-bold">Species</h3>
                 <MorphIdSelectMenu
                   label="Species"
-                  morphIds={Object.values(MorphIds)}
+                  morphIds={Object.values(SPECIES_MORPH_IDS)}
                   selectedMorphId={selectedSpecies}
                   onMorphSelect={setSelectedSpecies}
                 />
@@ -177,7 +177,7 @@ export function AnnotationTaskDetailPageClient({
                 <h3 className="text-foreground text-sm font-bold">Sex</h3>
                 <MorphIdSelectMenu
                   label="Sex"
-                  morphIds={Object.values(SexMorphIds)}
+                  morphIds={Object.values(SEX_MORPH_IDS)}
                   selectedMorphId={selectedSex}
                   onMorphSelect={setSelectedSex}
                 />
@@ -187,7 +187,7 @@ export function AnnotationTaskDetailPageClient({
                 <h3 className="text-foreground text-sm font-bold">Abdomen Status</h3>
                 <MorphIdSelectMenu
                   label="Abdomen Status"
-                  morphIds={Object.values(AbdomenStatusMorphIds)}
+                  morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
                   selectedMorphId={selectedAbdomenStatus}
                   onMorphSelect={setSelectedAbdomenStatus}
                 />
