@@ -162,16 +162,6 @@ export function AnnotationTaskDetailPageClient({
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="text-muted-foreground flex flex-col gap-3 text-sm">
-            <p className="flex items-center gap-2">
-              <Info className="text-primary h-4 w-4" />
-              Use these controls to review specimens sequentially.
-            </p>
-            <aside className="border-warning/30 bg-warning/10 text-warning-foreground flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
-              Tip: keyboard arrows (<strong>←</strong>/<strong>→</strong>) also move between specimens.
-            </aside>
-          </div>
-
           <div className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-foreground text-sm font-bold">Species</h3>
