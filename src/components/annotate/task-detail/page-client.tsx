@@ -129,7 +129,7 @@ export function AnnotationTaskDetailPageClient({
               Specimen Image{' '}
               {totalImages ? `(${page} of ${totalImages})` : ''}
             </CardTitle>
-            {createdAt ? (
+            {createdAt && (
               <Badge
                 variant="outline"
                 className="flex items-center gap-1 text-sm font-medium"
@@ -137,11 +137,11 @@ export function AnnotationTaskDetailPageClient({
                 <CalendarDays className="h-3.5 w-3.5" />
                 {createdAt}
               </Badge>
-            ) : null}
+            )}
           </div>
-          {specimenId ? (
+          {specimenId && (
             <p className="text-muted-foreground text-sm">ID: {specimenId}</p>
-          ) : null}
+          )}
         </CardHeader>
         <CardContent className="flex-1">
           <SpecimenImageViewer imageUrl={imageUrl} />
