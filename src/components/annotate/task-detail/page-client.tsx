@@ -16,10 +16,16 @@ import {
 } from '@/lib/annotate/client';
 import { formatDate } from '@/lib/shared/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays, Info } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
+import MorphIdSelectMenu from './annotation-form-panel/morph-id-select-menu';
+import {
+  SPECIES_MORPH_IDS,
+  SEX_MORPH_IDS,
+  ABDOMEN_STATUS_MORPH_IDS,
+} from '@/lib/entities/specimen/morph-ids';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -29,8 +35,33 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | undefined>();
+  const [selectedSex, setSelectedSex] = useState<string | undefined>();
+  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<
+    string | undefined
+  >();
 
-  const { data: annotationsPage, isFetching } = useTaskAnnotationsQuery({
+  const lockingSpecies = SPECIES_MORPH_IDS.NON_MOSQUITO;
+  const lockingOutFromSpecies = selectedSpecies === lockingSpecies;
+  const lockingSex = SEX_MORPH_IDS.MALE;
+  const lockingOutFromSex = selectedSex === lockingSex;
+
+  useEffect(() => {
+    if (lockingOutFromSpecies) {
+      if (selectedSex !== undefined) setSelectedSex(undefined);
+      if (selectedAbdomenStatus !== undefined) setSelectedAbdomenStatus(undefined);
+      return;
+    }
+    if (lockingOutFromSex && selectedAbdomenStatus !== undefined) {
+      setSelectedAbdomenStatus(undefined);
+    }
+  }, [lockingOutFromSpecies, lockingOutFromSex, selectedSex, selectedAbdomenStatus]);
+
+  const {
+    data: annotationsPage,
+    isLoading,
+    isFetching,
+  } = useTaskAnnotationsQuery({
     taskId,
     page,
     limit: 1,
@@ -58,18 +89,34 @@ export function AnnotationTaskDetailPageClient({
   }, [currentAnnotation]);
 
   const handleNext = useCallback(() => {
-    if (hasMore) setPage(prev => prev + 1);
-  }, [hasMore]);
+    if (hasMore && !isFetching && !isLoading) {
+      setPage(prev => prev + 1);
+      setSelectedSpecies(undefined);
+      setSelectedSex(undefined);
+      setSelectedAbdomenStatus(undefined);
+    }
+  }, [hasMore, isFetching, isLoading]);
 
   const handlePrevious = useCallback(() => {
-    if (page > 1) setPage(prev => Math.max(prev - 1, 1));
-  }, [page]);
+    if (page > 1 && !isFetching && !isLoading) {
+      setPage(prev => Math.max(prev - 1, 1));
+      setSelectedSpecies(undefined);
+      setSelectedSex(undefined);
+      setSelectedAbdomenStatus(undefined);
+    }
+  }, [page, isFetching, isLoading]);
 
-  const createdAt = currentAnnotation?.createdAt ? formatDate(currentAnnotation.createdAt).monthYear : null
-  const totalImages = annotationsPage?.total ?? taskProgress?.total;
-  const specimenId = currentAnnotation?.specimen?.specimenId
+  const createdAt = currentAnnotation?.createdAt
+    ? formatDate(currentAnnotation.createdAt).monthYear
+    : null;
+  const totalImages = taskProgress?.total ?? annotationsPage?.total ?? null;
+  const specimenId =
+    currentAnnotation?.specimen?.specimenId ??
+    (currentAnnotation?.specimen?.id
+      ? `#${currentAnnotation.specimen.id}`
+      : null);
 
-  if (isFetching) {
+  if (isLoading) {
     return <AnnotationTaskDetailSkeleton />;
   }
 
@@ -82,7 +129,7 @@ export function AnnotationTaskDetailPageClient({
               Specimen Image{' '}
               {totalImages ? `(${page} of ${totalImages})` : ''}
             </CardTitle>
-            {createdAt && (
+            {createdAt ? (
               <Badge
                 variant="outline"
                 className="flex items-center gap-1 text-sm font-medium"
@@ -90,11 +137,11 @@ export function AnnotationTaskDetailPageClient({
                 <CalendarDays className="h-3.5 w-3.5" />
                 {createdAt}
               </Badge>
-            )}
+            ) : null}
           </div>
-          {specimenId && (
+          {specimenId ? (
             <p className="text-muted-foreground text-sm">ID: {specimenId}</p>
-          )}
+          ) : null}
         </CardHeader>
         <CardContent className="flex-1">
           <SpecimenImageViewer imageUrl={imageUrl} />
@@ -114,15 +161,50 @@ export function AnnotationTaskDetailPageClient({
           </CardTitle>
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
-        <CardContent className="text-muted-foreground flex flex-col gap-3 text-sm">
-          <p className="flex items-center gap-2">
-            <Info className="text-primary h-4 w-4" />
-            Use these controls to review specimens sequentially.
-          </p>
-          <aside className="border-warning/30 bg-warning/10 text-warning-foreground flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
-            Tip: keyboard arrows (<strong>←</strong>/<strong>→</strong>) also
-            move between specimens.
-          </aside>
+        <CardContent className="space-y-6">
+          <div className="text-muted-foreground flex flex-col gap-3 text-sm">
+            <p className="flex items-center gap-2">
+              <Info className="text-primary h-4 w-4" />
+              Use these controls to review specimens sequentially.
+            </p>
+            <aside className="border-warning/30 bg-warning/10 text-warning-foreground flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
+              Tip: keyboard arrows (<strong>←</strong>/<strong>→</strong>) also move between specimens.
+            </aside>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-foreground text-sm font-bold">Species</h3>
+              <MorphIdSelectMenu
+                label="Species"
+                morphIds={Object.values(SPECIES_MORPH_IDS)}
+                selectedMorphId={selectedSpecies}
+                onMorphSelect={setSelectedSpecies}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-foreground text-sm font-bold">Sex</h3>
+              <MorphIdSelectMenu
+                label="Sex"
+                morphIds={Object.values(SEX_MORPH_IDS)}
+                selectedMorphId={selectedSex}
+                onMorphSelect={setSelectedSex}
+                disabled={lockingOutFromSpecies}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-foreground text-sm font-bold">Abdomen Status</h3>
+              <MorphIdSelectMenu
+                label="Abdomen Status"
+                morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
+                selectedMorphId={selectedAbdomenStatus}
+                onMorphSelect={setSelectedAbdomenStatus}
+                disabled={lockingOutFromSpecies || lockingOutFromSex}
+              />
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Button
@@ -130,7 +212,7 @@ export function AnnotationTaskDetailPageClient({
             variant="outline"
             className="min-w-[120px]"
             onClick={handlePrevious}
-            disabled={page === 1 || isFetching}
+            disabled={page === 1 || isFetching || isLoading}
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
@@ -139,7 +221,7 @@ export function AnnotationTaskDetailPageClient({
             variant="outline"
             className="min-w-[120px]"
             onClick={handleNext}
-            disabled={!hasMore || isFetching}
+            disabled={!hasMore || isFetching || isLoading}
           >
             Next <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

@@ -3,12 +3,15 @@ import { AnnotationTaskProgress } from '@/lib/entities/annotation';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { Fragment } from 'react';
 
+
+
 interface TaskProgressBreakdownProps {
   taskProgress?: AnnotationTaskProgress;
 }
 
 export function TaskProgressBreakdown({
   taskProgress,
+
 }: TaskProgressBreakdownProps) {
   const totalCount = taskProgress?.total ?? 0;
   const annotatedCount = taskProgress?.annotated ?? 0;
@@ -18,6 +21,7 @@ export function TaskProgressBreakdown({
     totalCount - (annotatedCount + flaggedCount),
   );
   const progressPercent = taskProgress?.percent ?? 0;
+
 
   return (
     <Fragment>
@@ -72,6 +76,7 @@ export function TaskProgressBreakdown({
           </div>
         </div>
       </div>
+
     </Fragment>
   );
 }
