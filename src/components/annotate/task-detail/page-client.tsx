@@ -14,6 +14,8 @@ import {
   useAnnotationTaskProgressQuery,
   useTaskAnnotationsQuery,
 } from '@/lib/annotate/client';
+import { Flag, Save } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/shared/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays, Info } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -194,7 +196,36 @@ export function AnnotationTaskDetailPageClient({
                 disabled={lockingOutFromSpecies || lockingOutFromSex}
               />
             </div>
+            <div className="space-y-2">
+              <h3 className="text-foreground text-sm font-bold">Notes</h3>
+              <Textarea
+                className="h-[70px] resize-none text-sm overflow-y-auto"
+                placeholder="Add observations..."
+              />
+            </div>
+
+            <div className = "flex gap-3 pt-2">
+              <Button 
+                type="button"
+                variant="outline"
+                className="flex-1"
+                disabled={isFetching || isLoading}
+              >
+                <Flag className="mr-2 h-4 w-4" /> Flag Species
+
+              </Button>
+
+              <Button
+                type="button"
+                className="flex-1"
+                disabled={isFetching || isLoading}
+              >
+                <Save className="mr-2 h-4 w-4" /> Save
+
+              </Button>
+            </div>
           </div>
+
         </CardContent>
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Button
