@@ -14,10 +14,11 @@ import {
   useAnnotationTaskProgressQuery,
   useTaskAnnotationsQuery,
 } from '@/lib/annotate/client';
-import { Flag, Save } from 'lucide-react';
+import { Toggle } from '@/components/ui/toggle';
+import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/shared/utils/date';
-import { ArrowLeft, ArrowRight, CalendarDays, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Info, Flag, Save } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
@@ -39,9 +40,9 @@ export function AnnotationTaskDetailPageClient({
   const [page, setPage] = useState(1);
   const [selectedSpecies, setSelectedSpecies] = useState<string | undefined>();
   const [selectedSex, setSelectedSex] = useState<string | undefined>();
-  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<
-    string | undefined
-  >();
+  const [selectedAbdomenStatus, setSelectedAbdomenStatus] = useState<string | undefined>();
+  const [isFlagged, setIsFlagged] = useState(false);
+  const [notes, setNotes] = useState('');
 
   const lockingSpecies = SPECIES_MORPH_IDS.NON_MOSQUITO;
   const lockingOutFromSpecies = selectedSpecies === lockingSpecies;
@@ -89,6 +90,33 @@ export function AnnotationTaskDetailPageClient({
     if (relativePath.startsWith('http')) return relativePath;
     return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
   }, [currentAnnotation]);
+
+  const handleFlagged = useCallback(() => {
+    setIsFlagged(!isFlagged);
+    console.log('Flagging specimen', {
+      specimenId: currentAnnotation?.specimen?.id,
+      flagged: !isFlagged,
+      notes: notes.trim() || "Flagged for review"
+    })
+  }, [isFlagged, currentAnnotation, notes]);
+
+  const handleSave = useCallback(() => {
+    console.log('Saving annotation', {
+      species: selectedSpecies,
+      sex: selectedSex,
+      abdomenStatus: selectedAbdomenStatus,
+      notes: notes.trim() || undefined,
+      specimenId: currentAnnotation?.specimen?.id,
+      flagged: isFlagged,
+    })
+
+    setSelectedSpecies(undefined);
+    setSelectedSex(undefined);
+    setSelectedAbdomenStatus(undefined);
+    setIsFlagged(false);
+    setNotes('');
+    
+  }, [selectedSpecies, selectedSex, selectedAbdomenStatus, notes, isFlagged, currentAnnotation]);
 
   const handleNext = useCallback(() => {
     if (hasMore && !isFetching && !isLoading) {
@@ -201,27 +229,39 @@ export function AnnotationTaskDetailPageClient({
               <Textarea
                 className="h-[70px] resize-none text-sm overflow-y-auto"
                 placeholder="Add observations..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
             </div>
 
-            <div className = "flex gap-3 pt-2">
-              <Button 
-                type="button"
+            <div className="flex gap-3 pt-2">
+              <Toggle
+                pressed={isFlagged}
+                onPressedChange={setIsFlagged}
                 variant="outline"
-                className="flex-1"
                 disabled={isFetching || isLoading}
+                data-state={isFlagged ? 'on' : 'off'}
+                className={cn(
+                  "flex-1", 
+                  "flex items-center justify-center gap-1.5 rounded-md border transition-colors",
+                  "data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/20 motion-safe:data-[state=on]:animate-pulse",
+                  "data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-foreground"
+                )}
               >
-                <Flag className="mr-2 h-4 w-4" /> Flag Species
-
-              </Button>
+                <Flag className={cn(
+                  "h-4 w-4", 
+                  isFlagged ? "text-destructive" : "text-muted-foreground"
+                )} />
+                {isFlagged ? 'Specimen Flagged' : 'Flag Specimen'}
+              </Toggle>
 
               <Button
                 type="button"
-                className="flex-1"
+                className="flex-1 flex items-center justify-center gap-1.5" 
+                onClick={handleSave}
                 disabled={isFetching || isLoading}
               >
-                <Save className="mr-2 h-4 w-4" /> Save
-
+                <Save className="h-4 w-4" /> Save
               </Button>
             </div>
           </div>
