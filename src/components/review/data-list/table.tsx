@@ -20,37 +20,6 @@ interface ReviewTableProps {
   onReview: (district: string, month: string) => void;
 }
 
-// Mock status for demonstration - in real app this would come from backend
-function getMockStatus(summary: MonthlySummary): {
-  status: string;
-  variant: 'default' | 'secondary' | 'destructive' | 'outline';
-} {
-  const statuses = [
-    { status: 'In Review', variant: 'default' as const },
-    { status: 'Draft', variant: 'secondary' as const },
-    { status: 'Needs Attention', variant: 'destructive' as const },
-    { status: 'Approved', variant: 'outline' as const },
-    { status: 'Exported', variant: 'outline' as const },
-  ];
-
-  // Use a simple hash to consistently assign statuses
-  const hash = summary.district.length + summary.month.length;
-  return statuses[hash % statuses.length];
-}
-
-// Mock discrepancies for demonstration
-function getMockDiscrepancies(summary: MonthlySummary): number {
-  const hash = summary.district.length + summary.month.length;
-  return hash % 15; // 0-14 discrepancies
-}
-
-// Mock last updated date
-function getMockLastUpdated(summary: MonthlySummary): string {
-  const date = new Date();
-  date.setDate(date.getDate() - (summary.district.length % 10));
-  return date.toISOString().split('T')[0];
-}
-
 export function ReviewTable({ summaries, onReview }: ReviewTableProps) {
   const router = useRouter();
 
@@ -82,71 +51,63 @@ export function ReviewTable({ summaries, onReview }: ReviewTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {summaries.map((summary, index) => {
-            const statusInfo = getMockStatus(summary);
-            const discrepancies = getMockDiscrepancies(summary);
-            const lastUpdated = getMockLastUpdated(summary);
-
-            return (
-              <TableRow
-                key={`${summary.district}-${summary.month}-${index}`}
-                className="hover:bg-muted/50"
-              >
-                <TableCell className="font-medium">
-                  <div>
-                    <div className="text-foreground font-semibold">
-                      {summary.district}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {summary.month}
-                    </div>
+          {summaries.map((summary, index) => (
+            <TableRow
+              key={`${summary.district}-${summary.month}-${index}`}
+              className="hover:bg-muted/50"
+            >
+              <TableCell className="font-medium">
+                <div>
+                  <div className="text-foreground font-semibold">
+                    {summary.district}
                   </div>
-                </TableCell>
-
-                <TableCell>
-                  <Badge variant={statusInfo.variant} className="text-xs">
-                    {statusInfo.status}
-                  </Badge>
-                </TableCell>
-
-                <TableCell>
-                  <div className="space-y-1 text-sm">
-                    <div>Sessions: {summary.totalSessions}</div>
-                    <div>Specimens: {summary.totalSpecimens}</div>
-                    <div
-                      className={
-                        discrepancies > 0
-                          ? 'text-destructive'
-                          : 'text-green-600'
-                      }
-                    >
-                      Discrepancies: {discrepancies}
-                    </div>
+                  <div className="text-muted-foreground text-sm">
+                    {summary.month}
                   </div>
-                </TableCell>
+                </div>
+              </TableCell>
 
-                <TableCell>
-                  <span className="text-muted-foreground text-sm">
-                    {lastUpdated}
-                  </span>
-                </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="text-xs">
+                  {summary.status || 'Pending'}
+                </Badge>
+              </TableCell>
 
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      handleReview(summary.district, summary.month)
+              <TableCell>
+                <div className="space-y-1 text-sm">
+                  <div>Sessions: {summary.totalSessions}</div>
+                  <div>Specimens: {summary.totalSpecimens}</div>
+                  <div
+                    className={
+                      (summary.discrepancies || 0) > 0
+                        ? 'text-destructive'
+                        : 'text-green-600'
                     }
-                    className="text-primary hover:text-primary/80 h-auto p-0 font-normal"
                   >
-                    Review
-                    <ArrowRight className="ml-1 h-3 w-3" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                    Discrepancies: {summary.discrepancies || 0}
+                  </div>
+                </div>
+              </TableCell>
+
+              <TableCell>
+                <span className="text-muted-foreground text-sm">
+                  {summary.lastUpdated || 'N/A'}
+                </span>
+              </TableCell>
+
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleReview(summary.district, summary.month)}
+                  className="text-primary hover:text-primary/80 h-auto p-0 font-normal"
+                >
+                  Review
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>
