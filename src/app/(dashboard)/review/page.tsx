@@ -1,5 +1,5 @@
-import { ReviewDataPageClient } from '@/components/dashboard/review-data-page-client';
+import { ReviewDataListPageClient } from '@/components/review/data-list/page-client';
 
 export default function ReviewDataPage() {
-  return <ReviewDataPageClient />;
+  return <ReviewDataListPageClient />;
 }
