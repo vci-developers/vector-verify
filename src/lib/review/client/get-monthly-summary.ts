@@ -1,30 +1,45 @@
 import type {
   MonthlySummary,
   MonthlySummaryFilters,
-  MonthlySummaryResponse,
+  MonthlySummaryResponseDto,
 } from '../types';
+import { mapMonthlySummaryResponseDtoToPage } from '../types';
+import type { OffsetPage } from '@/lib/entities/pagination';
 import bff from '@/lib/shared/http/client/bff-client';
+import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 
 export async function getMonthlySummary(
   filters: MonthlySummaryFilters = {},
-): Promise<MonthlySummaryResponse> {
-  const { dateFrom, dateTo, districts } = filters;
+): Promise<{
+  data: OffsetPage<MonthlySummary>;
+  availableDistricts: Array<{ name: string; hasData: boolean }>;
+}> {
+  const {
+    dateFrom,
+    dateTo,
+    district,
+    page = 1,
+    limit = DEFAULT_PAGE_SIZE,
+  } = filters;
 
   const query = {
+    page,
+    limit,
     ...(dateFrom && { dateFrom }),
     ...(dateTo && { dateTo }),
-    ...(districts &&
-      districts.length > 0 && { districts: districts.join(',') }),
+    ...(district && { district }),
   };
 
-  console.log('Fetching monthly summary with query:', query);
+  const response = await bff<MonthlySummaryResponseDto>(
+    '/sessions/monthly-summary',
+    {
+      method: 'GET',
+      query,
+    },
+  );
 
-  const data = await bff<MonthlySummaryResponse>('/sessions/monthly-summary', {
-    method: 'GET',
-    query,
-  });
-
-  console.log('Monthly summary response:', data);
-
-  return data;
+  return {
+    data: mapMonthlySummaryResponseDtoToPage(response),
+    availableDistricts: response.availableDistricts,
+  };
 }

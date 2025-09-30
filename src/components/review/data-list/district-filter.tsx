@@ -12,37 +12,28 @@ import type { DistrictOption } from '@/lib/review/types';
 
 interface DistrictFilterProps {
   districts: DistrictOption[];
-  selectedDistricts: string[];
-  onValueChange: (districts: string[]) => void;
+  selectedDistrict: string | null;
+  onDistrictSelected: (district: string | null) => void;
   disabled?: boolean;
 }
 
 export function DistrictFilter({
   districts,
-  selectedDistricts,
-  onValueChange,
+  selectedDistrict,
+  onDistrictSelected,
   disabled = false,
 }: DistrictFilterProps) {
-  const handleValueChange = (value: string) => {
-    if (value === 'all') {
-      onValueChange([]);
-    } else {
-      onValueChange([value]);
-    }
-  };
-
-  const displayValue =
-    selectedDistricts.length === 0
-      ? 'All Districts'
-      : selectedDistricts.length === 1
-        ? districts.find(d => d.value === selectedDistricts[0])?.label ||
-          'All Districts'
-        : `${selectedDistricts.length} districts selected`;
+  const displayValue = selectedDistrict
+    ? districts.find(d => d.value === selectedDistrict)?.label ||
+      'All Districts'
+    : 'All Districts';
 
   return (
     <Select
-      value={selectedDistricts.length === 0 ? 'all' : selectedDistricts[0]}
-      onValueChange={handleValueChange}
+      value={selectedDistrict || 'all'}
+      onValueChange={value =>
+        onDistrictSelected(value === 'all' ? null : value)
+      }
       disabled={disabled}
     >
       <SelectTrigger className="w-48">

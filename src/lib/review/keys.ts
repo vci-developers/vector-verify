@@ -1,19 +1,22 @@
-import type { MonthlySummaryFilters } from './types';
+import type { QueryKey } from '@tanstack/react-query';
 
 export const reviewKeys = {
-  all: ['review'] as const,
-  monthlySummary: (filters: MonthlySummaryFilters = {}) =>
+  root: ['review'] as const,
+  monthlySummary: (
+    page?: number,
+    limit?: number,
+    dateFrom?: string,
+    dateTo?: string,
+    district?: string,
+  ) =>
     [
-      ...reviewKeys.all,
+      ...reviewKeys.root,
       'monthly-summary',
-      filters.dateFrom,
-      filters.dateTo,
-      filters.districts,
+      { page, limit, dateFrom, dateTo, district },
     ] as const,
-  districts: () => [...reviewKeys.all, 'districts'] as const,
 } as const;
 
 export type MonthlySummaryQueryKey = ReturnType<
   typeof reviewKeys.monthlySummary
->;
-export type DistrictsQueryKey = ReturnType<typeof reviewKeys.districts>;
+> &
+  QueryKey;

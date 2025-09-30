@@ -1,52 +1,6 @@
-// Based on actual API documentation
-export interface SessionDto {
-  sessionId: number;
-  frontendId: string;
-  collectorTitle: string | null;
-  collectorName: string | null;
-  collectionDate: number | null;
-  collectionMethod: string | null;
-  specimenCondition: string | null;
-  createdAt: number | null;
-  completedAt: number | null;
-  submittedAt: number;
-  notes: string | null;
-  siteId: number;
-  deviceId: number;
-  latitude: number | null;
-  longitude: number | null;
-  type: string;
-}
+import type { OffsetPage } from '@/lib/entities/pagination';
 
-export interface SiteDto {
-  siteId: number;
-  programId: number;
-  district: string | null;
-  subCounty: string | null;
-  parish: string | null;
-  villageName: string | null;
-  houseNumber: string;
-  isActive: boolean;
-  healthCenter: string | null;
-}
-
-export interface SessionsResponseDto {
-  sessions: SessionDto[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-}
-
-export interface SitesResponseDto {
-  sites: SiteDto[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-}
-
-// Backend response types
+// Review module types
 export interface MonthlySummary {
   district: string;
   month: string; // "2024-01" format
@@ -59,21 +13,40 @@ export interface MonthlySummary {
   lastUpdated?: string; // ISO date string
 }
 
-export interface MonthlySummaryResponse {
+export interface MonthlySummaryResponseDto {
   monthlySummaries: MonthlySummary[];
   availableDistricts: Array<{
     name: string;
     hasData: boolean;
   }>;
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
 }
 
 export interface MonthlySummaryFilters {
+  page?: number;
+  limit?: number;
   dateFrom?: string; // YYYY-MM-DD format
   dateTo?: string; // YYYY-MM-DD format
-  districts?: string[];
+  district?: string; // Single district selection
 }
 
 export interface DistrictOption {
   value: string;
   label: string;
+}
+
+// Mapper function to convert DTO to OffsetPage (following annotation pattern)
+export function mapMonthlySummaryResponseDtoToPage(
+  data: MonthlySummaryResponseDto,
+): OffsetPage<MonthlySummary> {
+  return {
+    items: data.monthlySummaries,
+    total: data.total,
+    limit: data.limit,
+    offset: data.offset,
+    hasMore: data.hasMore,
+  };
 }
