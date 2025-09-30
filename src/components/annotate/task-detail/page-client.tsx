@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { 
+import {
   annotationFormSchema,
   AnnotationFormOutput,
   AnnotationFormInput,
@@ -25,7 +25,14 @@ import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/shared/utils/date';
-import { ArrowLeft, ArrowRight, CalendarDays, Info, Flag, Save } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Info,
+  Flag,
+  Save,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
@@ -38,11 +45,11 @@ import {
 } from '@/lib/entities/specimen/morph-ids';
 import { toDomId } from '@/lib/shared/utils/dom';
 import {
-  Form,  
+  Form,
   FormField,
-  FormControl, 
-  FormItem, 
-  FormLabel, 
+  FormControl,
+  FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -69,8 +76,8 @@ export function AnnotationTaskDetailPageClient({
       notes: undefined,
       flagged: false,
     },
-    mode: "onSubmit",
-    reValidateMode: "onChange",
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
   const selectedSpecies = annotationForm.watch('species');
   const selectedSex = annotationForm.watch('sex');
@@ -78,41 +85,46 @@ export function AnnotationTaskDetailPageClient({
   const isFlagged = annotationForm.watch('flagged');
 
   const sexEnabled = isSexEnabled(selectedSpecies);
-  const abdomenStatusEnabled = isAbdomenStatusEnabled(selectedSpecies, selectedSex);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(
+    selectedSpecies,
+    selectedSex,
+  );
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue("species", newSpecies, {shouldDirty: true});
+    annotationForm.setValue('species', newSpecies, { shouldDirty: true });
     if (!isSexEnabled(newSpecies)) {
-      annotationForm.setValue("sex", undefined, {
+      annotationForm.setValue('sex', undefined, {
         shouldDirty: true,
-        shouldValidate: false
+        shouldValidate: false,
       });
-      annotationForm.setValue("abdomenStatus", undefined, {
+      annotationForm.setValue('abdomenStatus', undefined, {
         shouldDirty: true,
-        shouldValidate: false
+        shouldValidate: false,
       });
-      annotationForm.clearErrors(["sex", "abdomenStatus"]);
+      annotationForm.clearErrors(['sex', 'abdomenStatus']);
     }
-    annotationForm.clearErrors("species");
-  }
+    annotationForm.clearErrors('species');
+  };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue("sex", newSex, {shouldDirty: true});
+    annotationForm.setValue('sex', newSex, { shouldDirty: true });
     if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
-      annotationForm.setValue("abdomenStatus", undefined, {
+      annotationForm.setValue('abdomenStatus', undefined, {
         shouldDirty: true,
-        shouldValidate: false
+        shouldValidate: false,
       });
-      annotationForm.clearErrors(["abdomenStatus"]);
+      annotationForm.clearErrors(['abdomenStatus']);
     }
-    annotationForm.clearErrors("sex");
-  }
+    annotationForm.clearErrors('sex');
+  };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue("abdomenStatus", newAbdomenStatus, {shouldDirty: true});
-    
-    annotationForm.clearErrors("abdomenStatus");
-  }
+    annotationForm.setValue('abdomenStatus', newAbdomenStatus, {
+      shouldDirty: true,
+    });
+
+    annotationForm.clearErrors('abdomenStatus');
+  };
 
   const {
     data: annotationsPage,
@@ -147,17 +159,16 @@ export function AnnotationTaskDetailPageClient({
 
   const handleFlagged = (
     newFlagged: boolean,
-    updateFormValue: (value: boolean) => void
+    updateFormValue: (value: boolean) => void,
   ) => {
     updateFormValue(newFlagged);
 
     if (newFlagged) {
-      annotationForm.clearErrors(["species", "sex", "abdomenStatus"])
+      annotationForm.clearErrors(['species', 'sex', 'abdomenStatus']);
     } else {
-      annotationForm.clearErrors(["notes"])
+      annotationForm.clearErrors(['notes']);
     }
-  }
-
+  };
 
   const handleNext = useCallback(() => {
     if (hasMore && !isFetching && !isLoading) {
@@ -181,7 +192,6 @@ export function AnnotationTaskDetailPageClient({
     console.warn('onSubmit prop not provided - Data:', validatedFormOutput);
   };
 
-
   const createdAt = currentAnnotation?.createdAt
     ? formatDate(currentAnnotation.createdAt).monthYear
     : null;
@@ -202,8 +212,7 @@ export function AnnotationTaskDetailPageClient({
         <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-lg font-semibold">
-              Specimen Image{' '}
-              {totalImages ? `(${page} of ${totalImages})` : ''}
+              Specimen Image {totalImages ? `(${page} of ${totalImages})` : ''}
             </CardTitle>
             {createdAt && (
               <Badge
@@ -237,168 +246,192 @@ export function AnnotationTaskDetailPageClient({
           </CardTitle>
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
-      <div>
-        <CardContent className = "pt-0">
-          <Form {...annotationForm}>
-            <form
-              onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
-              className={cn("space-y-3", className)}
-            >
-              <fieldset
-                disabled={annotationForm.formState.isSubmitting}
-                className="space-y-3"
+        <div>
+          <CardContent className="pt-0">
+            <Form {...annotationForm}>
+              <form
+                onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
+                className={cn('space-y-3', className)}
               >
-                <FormField
-                  control={annotationForm.control}
-                  name="species"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel htmlFor={toDomId(field.name)} className="m-0">Species</FormLabel>
-                      <FormControl>
-                        <MorphIdSelectMenu
-                          label="species"
-                          morphIds={Object.values(SPECIES_MORPH_IDS)}
-                          selectedMorphId={field.value}
-                          onMorphSelect={handleSpeciesSelect}
-                          inValid={!!fieldState.error}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
+                <fieldset
+                  disabled={annotationForm.formState.isSubmitting}
+                  className="space-y-3"
+                >
+                  <FormField
+                    control={annotationForm.control}
+                    name="species"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={toDomId(field.name)}
+                          className="m-0"
+                        >
+                          Species
+                        </FormLabel>
+                        <FormControl>
+                          <MorphIdSelectMenu
+                            label="species"
+                            morphIds={Object.values(SPECIES_MORPH_IDS)}
+                            selectedMorphId={field.value}
+                            onMorphSelect={handleSpeciesSelect}
+                            inValid={!!fieldState.error}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={annotationForm.control}
-                  name="sex"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel htmlFor={toDomId(field.name)} className="m-0">Sex</FormLabel>
-                      <FormControl>
-                        <MorphIdSelectMenu
-                          label="Sex"
-                          morphIds={Object.values(SEX_MORPH_IDS)}
-                          selectedMorphId={field.value}
-                          onMorphSelect={handleSexSelect}
-                          inValid={!!fieldState.error && sexEnabled}
-                          disabled={!sexEnabled}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={annotationForm.control}
+                    name="sex"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={toDomId(field.name)}
+                          className="m-0"
+                        >
+                          Sex
+                        </FormLabel>
+                        <FormControl>
+                          <MorphIdSelectMenu
+                            label="Sex"
+                            morphIds={Object.values(SEX_MORPH_IDS)}
+                            selectedMorphId={field.value}
+                            onMorphSelect={handleSexSelect}
+                            inValid={!!fieldState.error && sexEnabled}
+                            disabled={!sexEnabled}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={annotationForm.control}
-                  name="abdomenStatus"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel htmlFor={toDomId(field.name)} className="m-0">Abdomen Status</FormLabel>
-                      <FormControl>
-                        <MorphIdSelectMenu
-                          label="Abdomen Status"
-                          morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
-                          selectedMorphId={field.value}
-                          onMorphSelect={handleAbdomenStatusSelect}
-                          inValid={!!fieldState.error && abdomenStatusEnabled}
-                          disabled={!abdomenStatusEnabled}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={annotationForm.control}
+                    name="abdomenStatus"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={toDomId(field.name)}
+                          className="m-0"
+                        >
+                          Abdomen Status
+                        </FormLabel>
+                        <FormControl>
+                          <MorphIdSelectMenu
+                            label="Abdomen Status"
+                            morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
+                            selectedMorphId={field.value}
+                            onMorphSelect={handleAbdomenStatusSelect}
+                            inValid={!!fieldState.error && abdomenStatusEnabled}
+                            disabled={!abdomenStatusEnabled}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
+                  <FormField
+                    control={annotationForm.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={toDomId(field.name)}
+                          className="m-0"
+                        >
+                          Notes
+                          {isFlagged && (
+                            <span className="text-destructive">
+                              (Required)*
+                            </span>
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            id={toDomId(field.name)}
+                            className="h-[70px] resize-none overflow-y-auto text-sm"
+                            placeholder="Add observations..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-3 pt-2">
                     <FormField
                       control={annotationForm.control}
-                      name="notes"
+                      name="flagged"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor={toDomId(field.name)} className="m-0">
-                            Notes
-                            {isFlagged && (
-                              <span className="text-destructive">(Required)*</span>
+                        <Toggle
+                          pressed={field.value}
+                          onPressedChange={newFlagged =>
+                            handleFlagged(newFlagged, field.onChange)
+                          }
+                          variant="outline"
+                          disabled={annotationForm.formState.isSubmitting}
+                          className={cn(
+                            'flex-1',
+                            'flex items-center justify-center gap-1.5 rounded-md border transition-colors',
+                            'data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/20 motion-safe:data-[state=on]:animate-pulse',
+                            'data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-foreground',
+                          )}
+                        >
+                          <Flag
+                            className={cn(
+                              'h-4 w-4',
+                              field.value
+                                ? 'text-destructive'
+                                : 'text-muted-foreground',
                             )}
-                            </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              id={toDomId(field.name)}
-                              className="h-[70px] resize-none text-sm overflow-y-auto"
-                              placeholder="Add observations..."
-                              {...field}
-                              />
-                          </FormControl>
-                          <FormMessage/>
-                        </FormItem>
+                          />
+                          {field.value ? 'Specimen Flagged' : 'Flag Specimen'}
+                        </Toggle>
                       )}
                     />
 
-                    <div className="flex gap-3 pt-2">
-                      <FormField
-                        control={annotationForm.control}
-                        name="flagged"
-                        render={({ field }) => (
-                          <Toggle
-                            pressed={field.value}
-                            onPressedChange={(newFlagged) => handleFlagged(newFlagged, field.onChange)}
-                            variant="outline"
-                            disabled={annotationForm.formState.isSubmitting}
-                            className={cn(
-                              "flex-1", 
-                              "flex items-center justify-center gap-1.5 rounded-md border transition-colors",
-                              "data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive data-[state=on]:hover:bg-destructive/20 motion-safe:data-[state=on]:animate-pulse",
-                              "data-[state=off]:bg-background data-[state=off]:border-input data-[state=off]:hover:bg-accent data-[state=off]:hover:text-accent-foreground"
-                            )}
-                          >
-                            <Flag className={cn(
-                              "h-4 w-4", 
-                              field.value ? "text-destructive" : "text-muted-foreground"
-                            )} />
-                            {field.value ? 'Specimen Flagged' : 'Flag Specimen'}
-                          </Toggle>
-                        )}
-                          
-                      />
-                      
+                    <Button
+                      type="submit"
+                      className="flex flex-1 items-center justify-center gap-1.5"
+                      disabled={annotationForm.formState.isSubmitting}
+                    >
+                      <Save className="h-4 w-4" />
+                      {annotationForm.formState.isSubmitting
+                        ? 'Submitting...'
+                        : 'Submit'}
+                    </Button>
+                  </div>
 
-                      <Button
-                        type="submit"
-                        className="flex-1 flex items-center justify-center gap-1.5" 
-                        disabled={annotationForm.formState.isSubmitting}
-                      >
-                        <Save className="h-4 w-4" /> 
-                        {annotationForm.formState.isSubmitting ? 'Submitting...' : 'Submit'}
-                      </Button>
-                    </div>
-
-                <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-w-[120px]"
-                    onClick={handlePrevious}
-                    disabled={page === 1 || isFetching || isLoading}
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-w-[120px]"
-                    onClick={handleNext}
-                    disabled={!hasMore || isFetching || isLoading}
-                  >
-                    Next <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </fieldset>
-            </form>
-          </Form>
-        </CardContent>
-        
-      </div>
-        
+                  <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-w-[120px]"
+                      onClick={handlePrevious}
+                      disabled={page === 1 || isFetching || isLoading}
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-w-[120px]"
+                      onClick={handleNext}
+                      disabled={!hasMore || isFetching || isLoading}
+                    >
+                      Next <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </fieldset>
+              </form>
+            </Form>
+          </CardContent>
+        </div>
       </Card>
     </div>
   );
