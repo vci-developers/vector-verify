@@ -13,7 +13,9 @@ import {
 import { 
   annotationFormSchema,
   AnnotationFormOutput,
-  AnnotationFormInput
+  AnnotationFormInput,
+  isAbdomenStatusEnabled,
+  isSexEnabled,
 } from './annotation-form-panel/validation/annotation-form-schema';
 import {
   useAnnotationTaskProgressQuery,
@@ -75,24 +77,42 @@ export function AnnotationTaskDetailPageClient({
   const selectedAbdomenStatus = annotationForm.watch('abdomenStatus');
   const isFlagged = annotationForm.watch('flagged');
 
-  const lockingSpecies = SPECIES_MORPH_IDS.NON_MOSQUITO;
-  const lockingOutFromSpecies = selectedSpecies === lockingSpecies;
-  const lockingSex = SEX_MORPH_IDS.MALE;
-  const lockingOutFromSex = selectedSex === lockingSex;
+  const sexEnabled = isSexEnabled(selectedSpecies);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(selectedSpecies, selectedSex);
 
-  useEffect(() => {
-    if (lockingOutFromSpecies) {
-      annotationForm.setValue('sex', undefined);
-      annotationForm.setValue('abdomenStatus', undefined);
-      annotationForm.clearErrors(['sex', 'abdomenStatus']);
-      return;
+  const handleSpeciesSelect = (newSpecies?: string) => {
+    annotationForm.setValue("species", newSpecies, {shouldDirty: true});
+    if (!isSexEnabled(newSpecies)) {
+      annotationForm.setValue("sex", undefined, {
+        shouldDirty: true,
+        shouldValidate: false
+      });
+      annotationForm.setValue("abdomenStatus", undefined, {
+        shouldDirty: true,
+        shouldValidate: false
+      });
+      annotationForm.clearErrors(["sex", "abdomenStatus"]);
     }
-    if (lockingOutFromSex) {
-      annotationForm.setValue('abdomenStatus', undefined);
-      annotationForm.clearErrors(['abdomenStatus']);
-      return;
+    annotationForm.clearErrors("species");
+  }
+
+  const handleSexSelect = (newSex?: string) => {
+    annotationForm.setValue("sex", newSex, {shouldDirty: true});
+    if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
+      annotationForm.setValue("abdomenStatus", undefined, {
+        shouldDirty: true,
+        shouldValidate: false
+      });
+      annotationForm.clearErrors(["abdomenStatus"]);
     }
-  }, [lockingOutFromSpecies, lockingOutFromSex, selectedSex, selectedAbdomenStatus]);
+    annotationForm.clearErrors("sex");
+  }
+
+  const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
+    annotationForm.setValue("abdomenStatus", newAbdomenStatus, {shouldDirty: true});
+    
+    annotationForm.clearErrors("abdomenStatus");
+  }
 
   const {
     data: annotationsPage,
@@ -236,20 +256,19 @@ export function AnnotationTaskDetailPageClient({
                       <FormLabel htmlFor={toDomId(field.name)} className="m-0">Species</FormLabel>
                       <FormControl>
                         <MorphIdSelectMenu
-                          label="Species"
+                          label="species"
                           morphIds={Object.values(SPECIES_MORPH_IDS)}
                           selectedMorphId={field.value}
-                          onMorphSelect={(value) => field.onChange(value)}
+                          onMorphSelect={handleSpeciesSelect}
                           inValid={!!fieldState.error}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
                     </FormItem>
-
                   )}
                 />
 
-                    <FormField
+                <FormField
                   control={annotationForm.control}
                   name="sex"
                   render={({ field, fieldState }) => (
@@ -260,14 +279,13 @@ export function AnnotationTaskDetailPageClient({
                           label="Sex"
                           morphIds={Object.values(SEX_MORPH_IDS)}
                           selectedMorphId={field.value}
-                          onMorphSelect={(value) => field.onChange(value)}
-                          disabled={lockingOutFromSpecies}
-                          inValid={!!fieldState.error && !lockingOutFromSpecies}
+                          onMorphSelect={handleSexSelect}
+                          inValid={!!fieldState.error && sexEnabled}
+                          disabled={!sexEnabled}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
                     </FormItem>
-
                   )}
                 />
 
@@ -282,14 +300,13 @@ export function AnnotationTaskDetailPageClient({
                           label="Abdomen Status"
                           morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
                           selectedMorphId={field.value}
-                          onMorphSelect={(value) => field.onChange(value)}
-                          disabled={lockingOutFromSpecies || lockingOutFromSex}
-                          inValid={!!fieldState.error && !(lockingOutFromSpecies || lockingOutFromSex)}
+                          onMorphSelect={handleAbdomenStatusSelect}
+                          inValid={!!fieldState.error && abdomenStatusEnabled}
+                          disabled={!abdomenStatusEnabled}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
                     </FormItem>
-
                   )}
                 />
 

@@ -3,6 +3,7 @@ import {
     SEX_MORPH_IDS,
     ABDOMEN_STATUS_MORPH_IDS,
 } from '@/lib/entities/specimen/morph-ids';
+import { spec } from 'node:test/reporters';
 
 import { z } from 'zod';
 
@@ -17,6 +18,10 @@ export const AnnotationBase = z.object({
   notes: z.string().optional(),
   flagged: z.boolean().default(false),
 });
+export const isSexEnabled = (species?: string) => 
+    species !== SPECIES_MORPH_IDS.NON_MOSQUITO;
+export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
+    isSexEnabled(species) && sex !== SEX_MORPH_IDS.MALE;
 
 export const annotationFormSchema = AnnotationBase.superRefine(
     (formFields, context) => {
@@ -42,9 +47,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
             return;
         }
 
-        if (formFields.species === undefined) {
-            return;
-        }
+
 
         if (!formFields.sex) {
             context.addIssue({
@@ -60,9 +63,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
             return;
         }
 
-        if (formFields.sex === undefined) {
-            return;
-        }
+ 
 
         if (!formFields.abdomenStatus) {
             context.addIssue({
@@ -72,9 +73,8 @@ export const annotationFormSchema = AnnotationBase.superRefine(
             });
         }
 
-        if (formFields.abdomenStatus === undefined) {
-            return;
-        }
+
+
     }
 )
 
