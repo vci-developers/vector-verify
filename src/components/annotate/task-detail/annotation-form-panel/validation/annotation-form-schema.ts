@@ -47,7 +47,6 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         path: ['species'],
         message: 'Species is required when the specimen is not flagged.',
       });
-      return;
     }
 
     if (isSexEnabled(formFields.species)) {
