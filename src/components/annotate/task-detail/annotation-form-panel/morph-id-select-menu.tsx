@@ -26,11 +26,9 @@ export default function MorphIdSelectMenu({
   disabled,
   inValid,
 }: MorphIdSelectMenuProps) {
-  const value = selectedMorphId || '';
-
   return (
     <Select
-      value={value}
+      value={selectedMorphId}
       onValueChange={value =>
         onMorphSelect(value === 'clear' ? undefined : value)
       }
