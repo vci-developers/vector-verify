@@ -8,6 +8,16 @@ export interface ReviewItemDto {
   sessionCount: number;
 }
 
+// Request DTO for monthly summary
+export interface MonthlySummaryRequestDto {
+  limit: number;
+  offset: number;
+  from?: string; // YYYY-MM-DD format
+  to?: string; // YYYY-MM-DD format
+  district?: string; // Single district selection
+}
+
+// Response DTO for monthly summary
 export interface MonthlySummaryResponseDto {
   reviews: ReviewItemDto[];
   districts: string[];
@@ -28,7 +38,7 @@ export interface MonthlySummary {
 }
 
 export interface MonthlySummaryFilters {
-  page?: number;
+  offset?: number;
   limit?: number;
   from?: string; // YYYY-MM-DD format
   to?: string; // YYYY-MM-DD format

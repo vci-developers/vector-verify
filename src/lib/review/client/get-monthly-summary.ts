@@ -1,6 +1,7 @@
 import type {
   MonthlySummary,
   MonthlySummaryFilters,
+  MonthlySummaryRequestDto,
   MonthlySummaryResponseDto,
 } from '../types';
 import { mapMonthlySummaryResponseDtoToPage } from '../types';
@@ -14,12 +15,9 @@ export async function getMonthlySummary(
   data: OffsetPage<MonthlySummary>;
   availableDistricts: string[];
 }> {
-  const { from, to, district, page = 1, limit = DEFAULT_PAGE_SIZE } = filters;
+  const { from, to, district, offset = 0, limit = DEFAULT_PAGE_SIZE } = filters;
 
-  // Convert page-based pagination to offset-based
-  const offset = (page - 1) * limit;
-
-  const query = {
+  const requestDto: MonthlySummaryRequestDto = {
     limit,
     offset,
     ...(from && { from }),
@@ -31,7 +29,7 @@ export async function getMonthlySummary(
     '/sessions/review/task',
     {
       method: 'GET',
-      query,
+      query: requestDto,
     },
   );
 

@@ -23,11 +23,11 @@ export function useMonthlySummaryQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
-  const { page = 1, limit = DEFAULT_PAGE_SIZE, from, to, district } = filters;
+  const { offset = 0, limit = DEFAULT_PAGE_SIZE, from, to, district } = filters;
 
   return useQuery({
     queryKey: reviewKeys.monthlySummary(
-      page,
+      offset,
       limit,
       from,
       to,

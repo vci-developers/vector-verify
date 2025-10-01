@@ -45,6 +45,7 @@ export function ReviewDataListPageClient() {
     canPrev,
     canNext,
     range: pages,
+    start: offset,
   } = pagination;
 
   // Convert ISO dates to YYYY-MM-DD format for API
@@ -57,7 +58,7 @@ export function ReviewDataListPageClient() {
 
   // Fetch monthly summary data with current filters
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
-    page,
+    offset,
     limit: pageSize,
     from,
     to,

@@ -3,7 +3,7 @@ import type { QueryKey } from '@tanstack/react-query';
 export const reviewKeys = {
   root: ['review'] as const,
   monthlySummary: (
-    page?: number,
+    offset?: number,
     limit?: number,
     from?: string,
     to?: string,
@@ -12,7 +12,7 @@ export const reviewKeys = {
     [
       ...reviewKeys.root,
       'monthly-summary',
-      { page, limit, from, to, district },
+      { offset, limit, from, to, district },
     ] as const,
 } as const;
 
