@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/lib/shared/utils/dom';
-import MorphIdSelectMenu from './morph-id-select-menu';
+import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
 import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
@@ -33,6 +33,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/lib/shared/ui/show-success-toast';
 
 interface AnnotationFormProps {
+  className?: string;
   annotationId: number;
   defaultValues: {
     species?: string;
@@ -44,6 +45,7 @@ interface AnnotationFormProps {
 }
 
 export function AnnotationForm({
+  className = '',
   annotationId,
   defaultValues,
 }: AnnotationFormProps) {
@@ -80,28 +82,28 @@ export function AnnotationForm({
   );
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue('species', newSpecies ?? undefined, { shouldDirty: true });
+    annotationForm.setValue('species', newSpecies || '', { shouldDirty: true });
 
     if (!isSexEnabled(newSpecies)) {
-      annotationForm.setValue('sex', undefined, { shouldDirty: true });
-      annotationForm.setValue('abdomenStatus', undefined, { shouldDirty: true });
+      annotationForm.setValue('sex', '', { shouldDirty: true });
+      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
       annotationForm.clearErrors(['sex', 'abdomenStatus']);
     }
     annotationForm.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue('sex', newSex ?? undefined, { shouldDirty: true });
+    annotationForm.setValue('sex', newSex || '', { shouldDirty: true });
 
     if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
-      annotationForm.setValue('abdomenStatus', undefined, { shouldDirty: true });
+      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
       annotationForm.clearErrors(['abdomenStatus']);
     }
     annotationForm.clearErrors('sex');
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue('abdomenStatus', newAbdomenStatus ?? undefined, {
+    annotationForm.setValue('abdomenStatus', newAbdomenStatus || '', {
       shouldDirty: true,
     });
     annotationForm.clearErrors('abdomenStatus');
@@ -137,7 +139,7 @@ export function AnnotationForm({
     <Form {...annotationForm}>
       <form
         onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
-        className={'space-y-3'}
+        className={cn('space-y-3', className)}
       >
         <fieldset
           disabled={updateAnnotationMutation.isPending}
