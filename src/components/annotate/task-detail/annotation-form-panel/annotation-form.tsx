@@ -33,7 +33,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/lib/shared/ui/show-success-toast';
 
 interface AnnotationFormProps {
-  className?: string;
   annotationId: number;
   defaultValues: {
     species?: string;
@@ -45,7 +44,6 @@ interface AnnotationFormProps {
 }
 
 export function AnnotationForm({
-  className = '',
   annotationId,
   defaultValues,
 }: AnnotationFormProps) {
@@ -54,8 +52,8 @@ export function AnnotationForm({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['annotations'] });
       queryClient.invalidateQueries({ queryKey: ['annotation-task-progress'] });
-      showSuccessToast("Annotation submitted successfully.");
-    }
+      showSuccessToast('Annotation submitted successfully.');
+    },
   });
 
   const annotationForm = useForm<AnnotationFormInput>({
@@ -139,7 +137,7 @@ export function AnnotationForm({
     <Form {...annotationForm}>
       <form
         onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
-        className={cn('space-y-3', className)}
+        className="space-y-3"
       >
         <fieldset
           disabled={updateAnnotationMutation.isPending}
