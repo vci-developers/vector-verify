@@ -26,9 +26,11 @@ export default function MorphIdSelectMenu({
   disabled,
   inValid,
 }: MorphIdSelectMenuProps) {
+  const value = selectedMorphId || '';
+
   return (
     <Select
-      value={selectedMorphId || ''}
+      value={value}
       onValueChange={value =>
         onMorphSelect(value === 'clear' ? undefined : value)
       }
@@ -42,13 +44,7 @@ export default function MorphIdSelectMenu({
             'border-destructive focus:border-destructive focus:ring-destructive',
         )}
       >
-        <SelectValue placeholder={`Select ${label}...`}>
-          {selectedMorphId ? (
-            <span> {selectedMorphId} </span>
-          ) : (
-            <span className="text-muted-foreground">Select {label}...</span>
-          )}
-        </SelectValue>
+        <SelectValue placeholder={`Select ${label}...`} />
       </SelectTrigger>
       <SelectContent align="start" className="max-h-100 w-full overflow-y-auto">
         {morphIds.map(morphId => (
@@ -60,10 +56,10 @@ export default function MorphIdSelectMenu({
         <SelectSeparator />
         <SelectItem
           value="clear"
-          disabled={selectedMorphId === undefined}
+          disabled={!selectedMorphId}
           className={cn(
             'text-destructive focus:text-destructive focus:bg-destructive/10',
-            selectedMorphId === undefined && 'pointer-events-none opacity-50',
+            !selectedMorphId && 'pointer-events-none opacity-50',
           )}
         >
           Remove selection

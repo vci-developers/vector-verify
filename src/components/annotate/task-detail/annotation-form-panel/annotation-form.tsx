@@ -30,11 +30,12 @@ import {
 } from '@/lib/entities/specimen/morph-ids';
 import { useUpdateAnnotationMutation } from '@/lib/annotate/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { showSuccessToast } from '@/lib/shared/ui/show-success-toast';
 
 interface AnnotationFormProps {
   className?: string;
-  annotationId?: number;
-  defaultValues?: {
+  annotationId: number;
+  defaultValues: {
     species?: string;
     sex?: string;
     abdomenStatus?: string;
@@ -51,13 +52,10 @@ export function AnnotationForm({
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
     onSuccess: () => {
-      if (annotationId) {
-        queryClient.invalidateQueries({ queryKey: ['annotations'] });
-        queryClient.invalidateQueries({
-          queryKey: ['annotation-task-progress'],
-        });
-      }
-    },
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
+      queryClient.invalidateQueries({ queryKey: ['annotation-task-progress'] });
+      showSuccessToast("Annotation submitted successfully.");
+    }
   });
 
   const annotationForm = useForm<AnnotationFormInput>({
@@ -77,7 +75,6 @@ export function AnnotationForm({
   const selectedSex = annotationForm.watch('sex');
   const isFlagged = annotationForm.watch('flagged');
 
-  // Calculate enabled states for form fields
   const sexEnabled = isSexEnabled(selectedSpecies);
   const abdomenStatusEnabled = isAbdomenStatusEnabled(
     selectedSpecies,
@@ -85,38 +82,30 @@ export function AnnotationForm({
   );
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue('species', newSpecies, { shouldDirty: true });
+    annotationForm.setValue('species', newSpecies || '', { shouldDirty: true });
+
     if (!isSexEnabled(newSpecies)) {
-      annotationForm.setValue('sex', undefined, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-      annotationForm.setValue('abdomenStatus', undefined, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
+      annotationForm.setValue('sex', '', { shouldDirty: true });
+      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
       annotationForm.clearErrors(['sex', 'abdomenStatus']);
     }
     annotationForm.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue('sex', newSex, { shouldDirty: true });
+    annotationForm.setValue('sex', newSex || '', { shouldDirty: true });
+
     if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
-      annotationForm.setValue('abdomenStatus', undefined, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
+      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
       annotationForm.clearErrors(['abdomenStatus']);
     }
     annotationForm.clearErrors('sex');
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue('abdomenStatus', newAbdomenStatus, {
+    annotationForm.setValue('abdomenStatus', newAbdomenStatus || '', {
       shouldDirty: true,
     });
-
     annotationForm.clearErrors('abdomenStatus');
   };
 
@@ -134,24 +123,16 @@ export function AnnotationForm({
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    if (annotationId) {
-      const status = formInput.flagged ? 'FLAGGED' : 'ANNOTATED';
-      await updateAnnotationMutation.mutateAsync({
-        annotationId,
-        payload: {
-          morphSpecies: formInput.species || null,
-          morphSex: formInput.sex || null,
-          morphAbdomenStatus: formInput.abdomenStatus || null,
-          notes: formInput.notes || null,
-          status,
-        },
-      });
-    } else {
-      console.warn(
-        'No annotationId provided - Cannot submit form data:',
-        formInput,
-      );
-    }
+    await updateAnnotationMutation.mutateAsync({
+      annotationId,
+      payload: {
+        morphSpecies: formInput.species || null,
+        morphSex: formInput.sex || null,
+        morphAbdomenStatus: formInput.abdomenStatus || null,
+        notes: formInput.notes || null,
+        status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
+      },
+    });
   };
 
   return (
@@ -161,10 +142,7 @@ export function AnnotationForm({
         className={cn('space-y-3', className)}
       >
         <fieldset
-          disabled={
-            annotationForm.formState.isSubmitting ||
-            updateAnnotationMutation.isPending
-          }
+          disabled={updateAnnotationMutation.isPending}
           className="space-y-3"
         >
           <FormField
@@ -270,10 +248,7 @@ export function AnnotationForm({
                     handleFlagged(newFlagged, field.onChange)
                   }
                   variant="outline"
-                  disabled={
-                    annotationForm.formState.isSubmitting ||
-                    updateAnnotationMutation.isPending
-                  }
+                  disabled={updateAnnotationMutation.isPending}
                   className={cn(
                     'flex-1',
                     'flex items-center justify-center gap-1.5 rounded-md border transition-colors',
@@ -297,16 +272,10 @@ export function AnnotationForm({
             <Button
               type="submit"
               className="flex flex-1 items-center justify-center gap-1.5"
-              disabled={
-                annotationForm.formState.isSubmitting ||
-                updateAnnotationMutation.isPending
-              }
+              disabled={updateAnnotationMutation.isPending}
             >
               <Save className="h-4 w-4" />
-              {annotationForm.formState.isSubmitting ||
-              updateAnnotationMutation.isPending
-                ? 'Submitting...'
-                : 'Submit'}
+              {updateAnnotationMutation.isPending ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
         </fieldset>

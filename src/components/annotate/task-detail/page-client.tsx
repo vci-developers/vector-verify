@@ -17,6 +17,7 @@ import {
 import { formatDate } from '@/lib/shared/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { notFound } from 'next/navigation';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
@@ -49,19 +50,20 @@ export function AnnotationTaskDetailPageClient({
     () => annotationsPage?.items?.[0] ?? null,
     [annotationsPage],
   );
-  const annotationStatus = currentAnnotation?.status ?? null;
 
   const imageUrl = useMemo(() => {
-    const specimen = currentAnnotation?.specimen;
-    if (!specimen) return null;
+    if (!currentAnnotation?.specimen) return null;
+    
+    const specimen = currentAnnotation.specimen;
     if (specimen.thumbnailImageId) {
       return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
     }
+    
     const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
     if (!relativePath) return null;
     if (relativePath.startsWith('http')) return relativePath;
     return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
-  }, [currentAnnotation]);
+  }, [currentAnnotation?.specimen]);
 
   const handleNext = useCallback(() => {
     if (hasMore && !isFetching && !isLoading) {
@@ -75,19 +77,23 @@ export function AnnotationTaskDetailPageClient({
     }
   }, [page, isFetching, isLoading]);
 
-  const createdAt = currentAnnotation?.createdAt
+  if (isLoading) {
+    return <AnnotationTaskDetailSkeleton />;
+  }
+
+  if (!currentAnnotation) {
+    notFound();
+  }
+
+  const createdAt = currentAnnotation.createdAt
     ? formatDate(currentAnnotation.createdAt).monthYear
     : null;
   const totalImages = taskProgress?.total ?? annotationsPage?.total ?? null;
   const specimenId =
-    currentAnnotation?.specimen?.specimenId ??
-    (currentAnnotation?.specimen?.id
+    currentAnnotation.specimen?.specimenId ??
+    (currentAnnotation.specimen?.id
       ? `#${currentAnnotation.specimen.id}`
       : null);
-
-  if (isLoading) {
-    return <AnnotationTaskDetailSkeleton />;
-  }
 
   return (
     <div className="mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]">
@@ -96,11 +102,9 @@ export function AnnotationTaskDetailPageClient({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-lg font-semibold">
               Specimen Image {totalImages ? `(${page} of ${totalImages})` : ''}
-              {annotationStatus && (
-                <Badge variant="outline" className="ml-5">
-                  {annotationStatus}
-                </Badge>
-              )}
+              <Badge variant="outline" className="ml-5">
+                {currentAnnotation.status}
+              </Badge>
             </CardTitle>
             {createdAt && (
               <Badge
@@ -121,8 +125,8 @@ export function AnnotationTaskDetailPageClient({
         </CardContent>
         <CardFooter className="border-border/70 bg-muted/5 mt-auto border-t px-6 py-4">
           <SpecimenMetadata
-            session={currentAnnotation?.specimen?.session}
-            site={currentAnnotation?.specimen?.session?.site}
+            session={currentAnnotation.specimen?.session}
+            site={currentAnnotation.specimen?.session?.site}
           />
         </CardFooter>
       </Card>
@@ -136,24 +140,17 @@ export function AnnotationTaskDetailPageClient({
         </CardHeader>
 
         <CardContent className="pt-0">
-          {currentAnnotation ? (
-            <AnnotationForm
-              key={`annotation-${currentAnnotation.id}`}
-              annotationId={currentAnnotation.id}
-              defaultValues={{
-                species: currentAnnotation.morphSpecies ?? undefined,
-                sex: currentAnnotation.morphSex ?? undefined,
-                abdomenStatus:
-                  currentAnnotation.morphAbdomenStatus ?? undefined,
-                notes: currentAnnotation.notes ?? undefined,
-                flagged: currentAnnotation.status === 'FLAGGED',
-              }}
-            />
-          ) : (
-            <div className="text-muted-foreground flex h-32 items-center justify-center">
-              Loading annotation...
-            </div>
-          )}
+          <AnnotationForm
+            key={`annotation-${currentAnnotation.id}`}
+            annotationId={currentAnnotation.id}
+            defaultValues={{
+              species: currentAnnotation.morphSpecies ?? undefined,
+              sex: currentAnnotation.morphSex ?? undefined,
+              abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
+              notes: currentAnnotation.notes ?? undefined,
+              flagged: currentAnnotation.status === 'FLAGGED',
+            }}
+          />
         </CardContent>
 
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
