@@ -136,7 +136,24 @@ export function AnnotationTaskDetailPageClient({
         </CardHeader>
 
         <CardContent className="pt-0">
-          <AnnotationForm key={`annotation-form-${page}`} />
+          {currentAnnotation ? (
+            <AnnotationForm
+              key={`annotation-${currentAnnotation.id}`}
+              annotationId={currentAnnotation.id}
+              defaultValues={{
+                species: currentAnnotation.morphSpecies ?? undefined,
+                sex: currentAnnotation.morphSex ?? undefined,
+                abdomenStatus:
+                  currentAnnotation.morphAbdomenStatus ?? undefined,
+                notes: currentAnnotation.notes ?? undefined,
+                flagged: currentAnnotation.status === 'FLAGGED',
+              }}
+            />
+          ) : (
+            <div className="text-muted-foreground flex h-32 items-center justify-center">
+              Loading annotation...
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">

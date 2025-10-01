@@ -28,24 +28,46 @@ import {
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
 } from '@/lib/entities/specimen/morph-ids';
+import { useUpdateAnnotationMutation } from '@/lib/annotate/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AnnotationFormProps {
   className?: string;
-  onSubmit?: (values: AnnotationFormInput) => Promise<void> | void;
+  annotationId?: number;
+  defaultValues?: {
+    species?: string;
+    sex?: string;
+    abdomenStatus?: string;
+    notes?: string;
+    flagged?: boolean;
+  };
 }
 
 export function AnnotationForm({
   className = '',
-  onSubmit,
+  annotationId,
+  defaultValues,
 }: AnnotationFormProps) {
+  const queryClient = useQueryClient();
+  const updateAnnotationMutation = useUpdateAnnotationMutation({
+    onSuccess: () => {
+      if (annotationId) {
+        queryClient.invalidateQueries({ queryKey: ['annotations'] });
+        queryClient.invalidateQueries({
+          queryKey: ['annotation-task-progress'],
+        });
+      }
+    },
+  });
+
   const annotationForm = useForm<AnnotationFormInput>({
     resolver: zodResolver(annotationFormSchema),
     defaultValues: {
-      species: undefined,
-      sex: undefined,
-      abdomenStatus: undefined,
-      notes: undefined,
-      flagged: false,
+      species: defaultValues?.species ?? undefined,
+      sex: defaultValues?.sex ?? undefined,
+      abdomenStatus: defaultValues?.abdomenStatus ?? undefined,
+      notes: defaultValues?.notes ?? undefined,
+      flagged: defaultValues?.flagged ?? false,
     },
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -111,11 +133,25 @@ export function AnnotationForm({
     }
   };
 
-  const handleValidSubmit = (formInput: AnnotationFormInput) => {
-    if (typeof onSubmit === 'function') {
-      return onSubmit(formInput);
+  const handleValidSubmit = async (formInput: AnnotationFormInput) => {
+    if (annotationId) {
+      const status = formInput.flagged ? 'FLAGGED' : 'ANNOTATED';
+      await updateAnnotationMutation.mutateAsync({
+        annotationId,
+        payload: {
+          morphSpecies: formInput.species || null,
+          morphSex: formInput.sex || null,
+          morphAbdomenStatus: formInput.abdomenStatus || null,
+          notes: formInput.notes || null,
+          status,
+        },
+      });
+    } else {
+      console.warn(
+        'No annotationId provided - Cannot submit form data:',
+        formInput,
+      );
     }
-    console.warn('onSubmit prop not provided - Data:', formInput);
   };
 
   return (
@@ -125,7 +161,10 @@ export function AnnotationForm({
         className={cn('space-y-3', className)}
       >
         <fieldset
-          disabled={annotationForm.formState.isSubmitting}
+          disabled={
+            annotationForm.formState.isSubmitting ||
+            updateAnnotationMutation.isPending
+          }
           className="space-y-3"
         >
           <FormField
@@ -231,7 +270,10 @@ export function AnnotationForm({
                     handleFlagged(newFlagged, field.onChange)
                   }
                   variant="outline"
-                  disabled={annotationForm.formState.isSubmitting}
+                  disabled={
+                    annotationForm.formState.isSubmitting ||
+                    updateAnnotationMutation.isPending
+                  }
                   className={cn(
                     'flex-1',
                     'flex items-center justify-center gap-1.5 rounded-md border transition-colors',
@@ -255,10 +297,14 @@ export function AnnotationForm({
             <Button
               type="submit"
               className="flex flex-1 items-center justify-center gap-1.5"
-              disabled={annotationForm.formState.isSubmitting}
+              disabled={
+                annotationForm.formState.isSubmitting ||
+                updateAnnotationMutation.isPending
+              }
             >
               <Save className="h-4 w-4" />
-              {annotationForm.formState.isSubmitting
+              {annotationForm.formState.isSubmitting ||
+              updateAnnotationMutation.isPending
                 ? 'Submitting...'
                 : 'Submit'}
             </Button>

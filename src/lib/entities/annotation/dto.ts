@@ -54,3 +54,16 @@ export interface AnnotationTasksListResponseDto {
   offset: number;
   hasMore: boolean;
 }
+
+export interface AnnotationUpdateRequestDto {
+  morphSpecies?: string | null;
+  morphSex?: string | null;
+  morphAbdomenStatus?: string | null;
+  notes?: string | null;
+  status: AnnotationStatus;
+}
+
+export interface AnnotationUpdateResponseDto {
+  message: string;
+  annotation: AnnotationDto;
+}
