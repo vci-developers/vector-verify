@@ -34,6 +34,7 @@ export function useMonthlySummaryQuery(
       district,
     ) as MonthlySummaryQueryKey,
     queryFn: () => getMonthlySummary(filters),
+    placeholderData: previousData => previousData, // Keep previous data while fetching
     ...(options ?? {}),
   });
 }

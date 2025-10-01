@@ -7,7 +7,7 @@ import { DistrictFilter } from './district-filter';
 import { ReviewTable } from './review-table';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
 import { useDateRangeValues } from '@/lib/shared/utils/date-range';
-import { useMonthlySummaryQuery } from '@/lib/review';
+import { useMonthlySummaryQuery, useAccumulatedDistricts } from '@/lib/review';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import {
@@ -65,11 +65,16 @@ export function ReviewDataListPageClient() {
   });
 
   const summaries = data?.data?.items ?? [];
-  const availableDistricts = data?.availableDistricts ?? [];
-  const totalFromServer = data?.data?.total ?? 0;
+  const totalFromServer = data?.data?.total;
+
+  // Accumulate all unique districts from API responses
+  const allDistricts = useAccumulatedDistricts(data?.availableDistricts);
 
   useEffect(() => {
-    setTotal(totalFromServer);
+    // Only update total when we have actual data to prevent pagination resets
+    if (totalFromServer !== undefined) {
+      setTotal(totalFromServer);
+    }
   }, [totalFromServer, setTotal]);
 
   const isPagingDisabled = isLoading || isFetching;
@@ -113,13 +118,13 @@ export function ReviewDataListPageClient() {
   }
 
   function handleNavigateToReview(district: string, month: string) {
-    // This will be handled by the ReviewTable component
-    console.log('Navigate to review:', district, month);
+    // TODO: Implement navigation to review detail page
+    // Navigate to /review/:district/:month or similar
   }
 
-  const isEmpty = !isLoading && !isFetching && summaries.length === 0;
+  const isEmpty = !isLoading && summaries.length === 0;
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return <ReviewDataListLoadingSkeleton />;
   }
 
@@ -135,7 +140,7 @@ export function ReviewDataListPageClient() {
               disabled={isLoading || isFetching}
             />
             <DistrictFilter
-              districts={availableDistricts.map(d => ({
+              districts={allDistricts.map(d => ({
                 value: d,
                 label: d,
               }))}
@@ -181,8 +186,12 @@ export function ReviewDataListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map(pageItem => (
-                  <PaginationItem key={pageItem}>
+                {pages.map((pageItem, index) => (
+                  <PaginationItem
+                    key={
+                      pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
+                    }
+                  >
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />
                     ) : (

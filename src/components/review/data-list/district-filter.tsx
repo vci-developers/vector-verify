@@ -23,11 +23,6 @@ export function DistrictFilter({
   onDistrictSelected,
   disabled = false,
 }: DistrictFilterProps) {
-  const displayValue = selectedDistrict
-    ? districts.find(d => d.value === selectedDistrict)?.label ||
-      'All Districts'
-    : 'All Districts';
-
   return (
     <Select
       value={selectedDistrict || 'all'}
@@ -37,7 +32,7 @@ export function DistrictFilter({
       disabled={disabled}
     >
       <SelectTrigger className="w-48">
-        <SelectValue placeholder="All Districts">{displayValue}</SelectValue>
+        <SelectValue placeholder="All Districts" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All Districts</SelectItem>
