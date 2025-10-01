@@ -29,13 +29,13 @@ export function ReviewTable({
     <Table>
       <TableHeader>
         <TableRow className="bg-muted/60">
-          <TableHead className="text-muted-foreground w-[40%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
+          <TableHead className="text-muted-foreground w-[35%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
             District / Month
           </TableHead>
           <TableHead className="text-muted-foreground w-[30%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-            Status
+            Sessions
           </TableHead>
-          <TableHead className="text-muted-foreground w-[30%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
+          <TableHead className="text-muted-foreground w-[35%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
             Actions
           </TableHead>
         </TableRow>
@@ -53,7 +53,7 @@ export function ReviewTable({
         ) : (
           summaries.map((summary, index) => (
             <TableRow
-              key={`${summary.district}-${summary.month}-${index}`}
+              key={`${summary.district}-${summary.monthString}-${index}`}
               className="hover:bg-muted/50"
             >
               <TableCell className="px-4 py-4 text-center align-middle font-medium">
@@ -62,15 +62,15 @@ export function ReviewTable({
                     {summary.district}
                   </div>
                   <div className="text-muted-foreground text-sm">
-                    {summary.month}
+                    {summary.monthName}
                   </div>
                 </div>
               </TableCell>
 
               <TableCell className="px-4 py-4 text-center align-middle">
-                <Badge variant="outline" className="text-xs">
-                  {summary.status || 'Pending'}
-                </Badge>
+                <div className="text-foreground font-semibold">
+                  {summary.sessionCount}
+                </div>
               </TableCell>
 
               <TableCell className="px-4 py-4 text-center align-middle">
@@ -78,7 +78,7 @@ export function ReviewTable({
                   variant="ghost"
                   size="sm"
                   onClick={() =>
-                    onNavigateToReview(summary.district, summary.month)
+                    onNavigateToReview(summary.district, summary.monthString)
                   }
                   className="text-primary hover:text-primary/80 h-auto p-0 font-normal"
                 >

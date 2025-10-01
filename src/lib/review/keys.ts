@@ -5,14 +5,14 @@ export const reviewKeys = {
   monthlySummary: (
     page?: number,
     limit?: number,
-    dateFrom?: string,
-    dateTo?: string,
+    from?: string,
+    to?: string,
     district?: string,
   ) =>
     [
       ...reviewKeys.root,
       'monthly-summary',
-      { page, limit, dateFrom, dateTo, district },
+      { page, limit, from, to, district },
     ] as const,
 } as const;
 

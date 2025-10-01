@@ -48,10 +48,10 @@ export function ReviewDataListPageClient() {
   } = pagination;
 
   // Convert ISO dates to YYYY-MM-DD format for API
-  const dateFrom = createdAfter
+  const from = createdAfter
     ? new Date(createdAfter).toISOString().split('T')[0]
     : undefined;
-  const dateTo = createdBefore
+  const to = createdBefore
     ? new Date(createdBefore).toISOString().split('T')[0]
     : undefined;
 
@@ -59,8 +59,8 @@ export function ReviewDataListPageClient() {
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     page,
     limit: pageSize,
-    dateFrom,
-    dateTo,
+    from,
+    to,
     district: selectedDistrict || undefined,
   });
 
@@ -136,8 +136,8 @@ export function ReviewDataListPageClient() {
             />
             <DistrictFilter
               districts={availableDistricts.map(d => ({
-                value: d.name.toLowerCase().replace(/\s+/g, '-'),
-                label: d.name,
+                value: d,
+                label: d,
               }))}
               selectedDistrict={selectedDistrict}
               onDistrictSelected={handleDistrictSelected}

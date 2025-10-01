@@ -11,32 +11,26 @@ export function useMonthlySummaryQuery(
     UseQueryOptions<
       {
         data: OffsetPage<MonthlySummary>;
-        availableDistricts: Array<{ name: string; hasData: boolean }>;
+        availableDistricts: string[];
       },
       Error,
       {
         data: OffsetPage<MonthlySummary>;
-        availableDistricts: Array<{ name: string; hasData: boolean }>;
+        availableDistricts: string[];
       },
       MonthlySummaryQueryKey
     >,
     'queryKey' | 'queryFn'
   >,
 ) {
-  const {
-    page = 1,
-    limit = DEFAULT_PAGE_SIZE,
-    dateFrom,
-    dateTo,
-    district,
-  } = filters;
+  const { page = 1, limit = DEFAULT_PAGE_SIZE, from, to, district } = filters;
 
   return useQuery({
     queryKey: reviewKeys.monthlySummary(
       page,
       limit,
-      dateFrom,
-      dateTo,
+      from,
+      to,
       district,
     ) as MonthlySummaryQueryKey,
     queryFn: () => getMonthlySummary(filters),

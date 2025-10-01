@@ -12,26 +12,23 @@ export async function getMonthlySummary(
   filters: MonthlySummaryFilters = {},
 ): Promise<{
   data: OffsetPage<MonthlySummary>;
-  availableDistricts: Array<{ name: string; hasData: boolean }>;
+  availableDistricts: string[];
 }> {
-  const {
-    dateFrom,
-    dateTo,
-    district,
-    page = 1,
-    limit = DEFAULT_PAGE_SIZE,
-  } = filters;
+  const { from, to, district, page = 1, limit = DEFAULT_PAGE_SIZE } = filters;
+
+  // Convert page-based pagination to offset-based
+  const offset = (page - 1) * limit;
 
   const query = {
-    page,
     limit,
-    ...(dateFrom && { dateFrom }),
-    ...(dateTo && { dateTo }),
+    offset,
+    ...(from && { from }),
+    ...(to && { to }),
     ...(district && { district }),
   };
 
   const response = await bff<MonthlySummaryResponseDto>(
-    '/sessions/monthly-summary',
+    '/sessions/review/task',
     {
       method: 'GET',
       query,
@@ -40,6 +37,6 @@ export async function getMonthlySummary(
 
   return {
     data: mapMonthlySummaryResponseDtoToPage(response),
-    availableDistricts: response.availableDistricts,
+    availableDistricts: response.districts,
   };
 }
