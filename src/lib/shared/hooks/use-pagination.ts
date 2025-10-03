@@ -24,7 +24,12 @@ export function usePagination({
   );
 
   useEffect(() => {
-    setPage(prev => Math.min(Math.max(1, prev), totalPages));
+    // Only adjust page if it exceeds totalPages, don't reset unnecessarily
+    setPage(prev => {
+      const validPage = Math.min(Math.max(1, prev), totalPages);
+      // Only update if the page actually needs to change
+      return prev !== validPage ? validPage : prev;
+    });
   }, [totalPages]);
 
   const start = (page - 1) * pageSize;
