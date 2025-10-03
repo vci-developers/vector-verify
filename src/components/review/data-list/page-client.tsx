@@ -10,6 +10,8 @@ import { useDateRangeValues } from '@/lib/shared/utils/date-range';
 import { useMonthlySummaryQuery, useAccumulatedDistricts } from '@/lib/review';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { PAGE_SIZES } from '@/lib/shared/constants';
+import { useUserProfileQuery } from '@/lib/user/client/hooks/use-user-profile';
+import { useUserPermissionsQuery } from '@/lib/user/client/hooks/use-user-permissions';
 import {
   Select,
   SelectContent,
@@ -35,6 +37,9 @@ export function ReviewDataListPageClient() {
 
   const { createdAfter, createdBefore } = useDateRangeValues(dateRange);
 
+  // Get user data and permissions
+  const { data: user } = useUserProfileQuery();
+  const { data: permissions } = useUserPermissionsQuery();
   const pagination = usePagination({});
   const {
     setTotal,
@@ -148,6 +153,8 @@ export function ReviewDataListPageClient() {
               selectedDistrict={selectedDistrict}
               onDistrictSelected={handleDistrictSelected}
               disabled={isLoading || isFetching}
+              user={user}
+              permissions={permissions}
             />
             <Select
               value={String(pageSize)}
