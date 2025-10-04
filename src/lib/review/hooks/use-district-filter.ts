@@ -5,7 +5,6 @@ import type { DistrictOption } from '@/lib/review/types';
 import {
   getAccessibleDistrictOptions,
   shouldShowDistrictFilter,
-  shouldShowSimplifiedDistrictDisplay,
 } from '@/lib/review/permissions';
 
 interface UseDistrictFilterProps {
@@ -18,8 +17,7 @@ interface UseDistrictFilterProps {
 interface UseDistrictFilterReturn {
   shouldShowFilter: boolean;
   accessibleOptions: DistrictOption[];
-  shouldShowSimplified: boolean;
-  singleDistrict?: DistrictOption;
+  autoSelectedDistrict: string | null;
 }
 
 /**
@@ -33,12 +31,12 @@ export function useDistrictFilter({
   siteDistrictsMap,
 }: UseDistrictFilterProps): UseDistrictFilterReturn {
   return useMemo(() => {
-    // Don't show filter if user data is not available
+    // Early return if user data is not available
     if (!user || !shouldShowDistrictFilter(user)) {
       return {
         shouldShowFilter: false,
         accessibleOptions: [],
-        shouldShowSimplified: false,
+        autoSelectedDistrict: null,
       };
     }
 
@@ -52,22 +50,14 @@ export function useDistrictFilter({
         )
       : districts;
 
-    // Determine if we should show simplified display
-    const shouldShowSimplified = shouldShowSimplifiedDistrictDisplay(
-      user,
-      accessibleOptions,
-    );
-
-    // Get single district for simplified display
-    const singleDistrict = shouldShowSimplified
-      ? accessibleOptions[0]
-      : undefined;
+    // Auto-select single district for restricted users
+    const autoSelectedDistrict =
+      accessibleOptions.length === 1 ? accessibleOptions[0].value : null;
 
     return {
       shouldShowFilter: true,
       accessibleOptions,
-      shouldShowSimplified,
-      singleDistrict,
+      autoSelectedDistrict,
     };
   }, [districts, user, permissions, siteDistrictsMap]);
 }

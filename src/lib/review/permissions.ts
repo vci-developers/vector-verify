@@ -7,15 +7,22 @@ import type { DistrictOption } from '@/lib/review/types';
  * This module handles the business logic for district filtering in the review context
  */
 
+// Constants for privilege levels
+const PRIVILEGE_LEVELS = {
+  SINGLE_DISTRICT_MAX: 1,
+  MULTIPLE_DISTRICTS_MIN: 2,
+} as const;
+
+// Type for user with privilege information
+type UserWithPrivilege = Pick<User, 'privilege'>;
+
 /**
  * Determines if a user can access multiple districts based on their privilege level
  * @param user - User object containing privilege information
- * @returns true if user can access multiple districts (privilege 2), false otherwise
+ * @returns true if user can access multiple districts (privilege 2+), false otherwise
  */
-export function canAccessMultipleDistricts(user: {
-  privilege: number;
-}): boolean {
-  return user.privilege >= 2;
+export function canAccessMultipleDistricts(user: UserWithPrivilege): boolean {
+  return user.privilege >= PRIVILEGE_LEVELS.MULTIPLE_DISTRICTS_MIN;
 }
 
 /**
@@ -23,10 +30,30 @@ export function canAccessMultipleDistricts(user: {
  * @param user - User object containing privilege information
  * @returns true if user is restricted to single district (privilege 0 or 1), false otherwise
  */
-export function isRestrictedToSingleDistrict(user: {
-  privilege: number;
-}): boolean {
-  return user.privilege < 2;
+export function isRestrictedToSingleDistrict(user: UserWithPrivilege): boolean {
+  return user.privilege <= PRIVILEGE_LEVELS.SINGLE_DISTRICT_MAX;
+}
+
+/**
+ * Extracts unique districts from user's accessible sites
+ * @param siteIds - Array of site IDs the user can access
+ * @param siteDistrictsMap - Mapping of site IDs to districts
+ * @returns Set of unique districts from accessible sites
+ */
+function extractDistrictsFromSites(
+  siteIds: number[],
+  siteDistrictsMap: Map<number, string>,
+): Set<string> {
+  const accessibleDistricts = new Set<string>();
+
+  siteIds.forEach(siteId => {
+    const district = siteDistrictsMap.get(siteId);
+    if (district) {
+      accessibleDistricts.add(district);
+    }
+  });
+
+  return accessibleDistricts;
 }
 
 /**
@@ -39,7 +66,7 @@ export function isRestrictedToSingleDistrict(user: {
  */
 export function getAccessibleDistricts(
   allDistricts: string[],
-  user: { privilege: number },
+  user: UserWithPrivilege,
   permissions: UserPermissions,
   siteDistrictsMap?: Map<number, string>,
 ): string[] {
@@ -48,18 +75,14 @@ export function getAccessibleDistricts(
     return allDistricts;
   }
 
-  // For privilege 0/1 users, filter based on their accessible sites
-  if (siteDistrictsMap && permissions.sites.canAccessSiteIds.length > 0) {
-    const accessibleDistricts = new Set<string>();
-
-    // Get unique districts from accessible sites
-    permissions.sites.canAccessSiteIds.forEach(siteId => {
-      const district = siteDistrictsMap.get(siteId);
-      if (district) {
-        accessibleDistricts.add(district);
-      }
-    });
-
+  // For restricted users, filter based on their accessible sites
+  const hasSiteAccess =
+    siteDistrictsMap && permissions.sites.canAccessSiteIds.length > 0;
+  if (hasSiteAccess) {
+    const accessibleDistricts = extractDistrictsFromSites(
+      permissions.sites.canAccessSiteIds,
+      siteDistrictsMap,
+    );
     return Array.from(accessibleDistricts);
   }
 
@@ -73,7 +96,7 @@ export function getAccessibleDistricts(
  * @param user - User object containing privilege information
  * @returns true if district filter should be shown, false otherwise
  */
-export function shouldShowDistrictFilter(user: { privilege: number }): boolean {
+export function shouldShowDistrictFilter(user: UserWithPrivilege): boolean {
   // All users can see the district filter, but the options will be filtered
   return true;
 }
@@ -88,7 +111,7 @@ export function shouldShowDistrictFilter(user: { privilege: number }): boolean {
  */
 export function getAccessibleDistrictOptions(
   districts: DistrictOption[],
-  user: { privilege: number },
+  user: UserWithPrivilege,
   permissions: UserPermissions,
   siteDistrictsMap?: Map<number, string>,
 ): DistrictOption[] {
@@ -103,17 +126,4 @@ export function getAccessibleDistrictOptions(
   return districts.filter(district =>
     accessibleDistricts.includes(district.value),
   );
-}
-
-/**
- * Determines if a user should see a simplified district display instead of a dropdown
- * @param user - User object containing privilege information
- * @param accessibleOptions - Array of accessible district options
- * @returns true if user should see simplified display, false otherwise
- */
-export function shouldShowSimplifiedDistrictDisplay(
-  user: { privilege: number },
-  accessibleOptions: DistrictOption[],
-): boolean {
-  return isRestrictedToSingleDistrict(user) && accessibleOptions.length === 1;
 }

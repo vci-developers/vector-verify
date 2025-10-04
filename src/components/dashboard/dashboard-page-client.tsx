@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ArrowRight, Loader2, PencilLine, Search } from 'lucide-react';
-import { Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 
 export function DashboardPageClient() {

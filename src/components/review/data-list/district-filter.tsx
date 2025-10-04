@@ -12,7 +12,15 @@ import type { DistrictOption } from '@/lib/review/types';
 import type { User } from '@/lib/entities/user/model';
 import type { UserPermissions } from '@/lib/entities/user/permissions';
 import { useDistrictFilter } from '@/lib/review/hooks/use-district-filter';
-import { SimplifiedDistrictDisplay } from './simplified-district-display';
+
+// Constants
+const SELECT_VALUES = {
+  ALL_DISTRICTS: 'all',
+} as const;
+
+const STYLES = {
+  SELECT_WIDTH: 'w-48',
+} as const;
 
 interface DistrictFilterProps {
   districts: DistrictOption[];
@@ -22,6 +30,40 @@ interface DistrictFilterProps {
   user?: User;
   permissions?: UserPermissions;
   siteDistrictsMap?: Map<number, string>;
+}
+
+/**
+ * Handles district selection change by converting 'all' to null
+ */
+function handleDistrictChange(
+  value: string,
+  onDistrictSelected: (district: string | null) => void,
+): void {
+  const district = value === SELECT_VALUES.ALL_DISTRICTS ? null : value;
+  onDistrictSelected(district);
+}
+
+/**
+ * Determines the effective selected district value for the select component
+ */
+function getEffectiveSelectedDistrict(
+  selectedDistrict: string | null,
+  autoSelectedDistrict: string | null,
+): string {
+  return (
+    selectedDistrict || autoSelectedDistrict || SELECT_VALUES.ALL_DISTRICTS
+  );
+}
+
+/**
+ * Renders district options in the select dropdown
+ */
+function renderDistrictOptions(accessibleOptions: DistrictOption[]) {
+  return accessibleOptions.map(district => (
+    <SelectItem key={district.value} value={district.value}>
+      {district.label}
+    </SelectItem>
+  ));
 }
 
 /**
@@ -37,47 +79,38 @@ export function DistrictFilter({
   permissions,
   siteDistrictsMap,
 }: DistrictFilterProps) {
-  const {
-    shouldShowFilter,
-    accessibleOptions,
-    shouldShowSimplified,
-    singleDistrict,
-  } = useDistrictFilter({
-    districts,
-    user,
-    permissions,
-    siteDistrictsMap,
-  });
+  const { shouldShowFilter, accessibleOptions, autoSelectedDistrict } =
+    useDistrictFilter({
+      districts,
+      user,
+      permissions,
+      siteDistrictsMap,
+    });
 
   // Don't show the filter if user data is not available
   if (!shouldShowFilter) {
     return null;
   }
 
-  // Show simplified display for single district users
-  if (shouldShowSimplified && singleDistrict) {
-    return <SimplifiedDistrictDisplay district={singleDistrict} />;
-  }
+  const effectiveSelectedDistrict = getEffectiveSelectedDistrict(
+    selectedDistrict,
+    autoSelectedDistrict,
+  );
 
-  // Show full dropdown for users with multiple accessible districts
   return (
     <Select
-      value={selectedDistrict || 'all'}
-      onValueChange={value =>
-        onDistrictSelected(value === 'all' ? null : value)
-      }
+      value={effectiveSelectedDistrict}
+      onValueChange={value => handleDistrictChange(value, onDistrictSelected)}
       disabled={disabled}
     >
-      <SelectTrigger className="w-48">
+      <SelectTrigger className={STYLES.SELECT_WIDTH}>
         <SelectValue placeholder="All Districts" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All Districts</SelectItem>
-        {accessibleOptions.map(district => (
-          <SelectItem key={district.value} value={district.value}>
-            {district.label}
-          </SelectItem>
-        ))}
+        <SelectItem value={SELECT_VALUES.ALL_DISTRICTS}>
+          All Districts
+        </SelectItem>
+        {renderDistrictOptions(accessibleOptions)}
       </SelectContent>
     </Select>
   );
