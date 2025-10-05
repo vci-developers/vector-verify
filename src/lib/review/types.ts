@@ -9,8 +9,7 @@ export interface ReviewItemDto {
 }
 
 // Request DTO for monthly summary
-export interface MonthlySummaryRequestDto
-  extends Record<string, string | number | boolean | null | undefined> {
+export interface MonthlySummaryRequestDto {
   limit: number;
   offset: number;
   from?: string; // YYYY-MM-DD format
