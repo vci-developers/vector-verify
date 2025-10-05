@@ -9,9 +9,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { DistrictOption } from '@/lib/review/types';
-import type { User } from '@/lib/entities/user/model';
-import type { UserPermissions } from '@/lib/entities/user/permissions';
-import { useDistrictFilter } from '@/lib/review/hooks/use-district-filter';
 
 // Constants
 const SELECT_VALUES = {
@@ -27,9 +24,6 @@ interface DistrictFilterProps {
   selectedDistrict: string | null;
   onDistrictSelected: (district: string | null) => void;
   disabled?: boolean;
-  user?: User;
-  permissions?: UserPermissions;
-  siteDistrictsMap?: Map<number, string>;
 }
 
 /**
@@ -44,22 +38,10 @@ function handleDistrictChange(
 }
 
 /**
- * Determines the effective selected district value for the select component
- */
-function getEffectiveSelectedDistrict(
-  selectedDistrict: string | null,
-  autoSelectedDistrict: string | null,
-): string {
-  return (
-    selectedDistrict || autoSelectedDistrict || SELECT_VALUES.ALL_DISTRICTS
-  );
-}
-
-/**
  * Renders district options in the select dropdown
  */
-function renderDistrictOptions(accessibleOptions: DistrictOption[]) {
-  return accessibleOptions.map(district => (
+function renderDistrictOptions(districts: DistrictOption[]) {
+  return districts.map(district => (
     <SelectItem key={district.value} value={district.value}>
       {district.label}
     </SelectItem>
@@ -67,35 +49,17 @@ function renderDistrictOptions(accessibleOptions: DistrictOption[]) {
 }
 
 /**
- * District filter component with permission-based rendering
- * Uses custom hook to separate business logic from UI concerns
+ * District filter component for selecting districts
+ * Receives pre-filtered districts from parent component
  */
 export function DistrictFilter({
   districts,
   selectedDistrict,
   onDistrictSelected,
   disabled = false,
-  user,
-  permissions,
-  siteDistrictsMap,
 }: DistrictFilterProps) {
-  const { shouldShowFilter, accessibleOptions, autoSelectedDistrict } =
-    useDistrictFilter({
-      districts,
-      user,
-      permissions,
-      siteDistrictsMap,
-    });
-
-  // Don't show the filter if user data is not available
-  if (!shouldShowFilter) {
-    return null;
-  }
-
-  const effectiveSelectedDistrict = getEffectiveSelectedDistrict(
-    selectedDistrict,
-    autoSelectedDistrict,
-  );
+  const effectiveSelectedDistrict =
+    selectedDistrict || SELECT_VALUES.ALL_DISTRICTS;
 
   return (
     <Select
@@ -110,7 +74,7 @@ export function DistrictFilter({
         <SelectItem value={SELECT_VALUES.ALL_DISTRICTS}>
           All Districts
         </SelectItem>
-        {renderDistrictOptions(accessibleOptions)}
+        {renderDistrictOptions(districts)}
       </SelectContent>
     </Select>
   );

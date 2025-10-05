@@ -3,8 +3,8 @@ import type { UserPermissions } from '@/lib/entities/user/permissions';
 import type { DistrictOption } from '@/lib/review/types';
 
 /**
- * Review-specific permission utilities for district access control
- * This module handles the business logic for district filtering in the review context
+ * District access control utilities for review functionality
+ * This module handles business logic for determining which districts a user can access
  */
 
 // Constants for privilege levels

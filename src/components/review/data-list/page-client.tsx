@@ -12,6 +12,7 @@ import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { useUserProfileQuery } from '@/lib/user/client/hooks/use-user-profile';
 import { useUserPermissionsQuery } from '@/lib/user/client/hooks/use-user-permissions';
+import { getAccessibleDistrictOptions } from '@/lib/review/district-access';
 import {
   Select,
   SelectContent,
@@ -75,6 +76,19 @@ export function ReviewDataListPageClient() {
 
   // Accumulate all unique districts from API responses
   const allDistricts = useAccumulatedDistricts(data?.availableDistricts);
+
+  // Filter districts based on user permissions
+  const accessibleDistricts =
+    user && permissions
+      ? getAccessibleDistrictOptions(
+          allDistricts.map(d => ({ value: d, label: d })),
+          user,
+          permissions,
+        )
+      : allDistricts.map(d => ({ value: d, label: d }));
+
+  // Determine if district filter should be disabled (privilege 0/1 users)
+  const isDistrictFilterDisabled = user?.privilege !== 2;
 
   useEffect(() => {
     // Only update total when we have actual data to prevent pagination resets
@@ -146,15 +160,10 @@ export function ReviewDataListPageClient() {
               disabled={isLoading || isFetching}
             />
             <DistrictFilter
-              districts={allDistricts.map(d => ({
-                value: d,
-                label: d,
-              }))}
+              districts={accessibleDistricts}
               selectedDistrict={selectedDistrict}
               onDistrictSelected={handleDistrictSelected}
-              disabled={isLoading || isFetching}
-              user={user}
-              permissions={permissions}
+              disabled={isLoading || isFetching || isDistrictFilterDisabled}
             />
             <Select
               value={String(pageSize)}
