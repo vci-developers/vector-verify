@@ -48,22 +48,24 @@ export function usePagination({
 
   type RangeItem = number | 'ellipsis';
   const range = useMemo<RangeItem[]>(() => {
-    const totalPageNumbers = siblingCount * 2 + 5;
-    if (totalPages <= totalPageNumbers) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    const leftSibling = Math.max(page - siblingCount, 2);
-    const rightSibling = Math.min(page + siblingCount, totalPages - 1);
-    const showLeftEllipsis = leftSibling > 2;
-    const showRightEllipsis = rightSibling < totalPages - 1;
-    const pages: RangeItem[] = [1];
-    if (showLeftEllipsis) pages.push('ellipsis');
-    for (let pageNumber = leftSibling; pageNumber <= rightSibling; pageNumber++)
+    const pages: RangeItem[] = [];
+
+    // Always show current page and its 2 neighbors (current-1, current, current+1)
+    const startPage = Math.max(1, page - 1);
+    const endPage = Math.min(totalPages, page + 1);
+
+    // Add the page numbers
+    for (let pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
       pages.push(pageNumber);
-    if (showRightEllipsis) pages.push('ellipsis');
-    pages.push(totalPages);
+    }
+
+    // Add ellipsis on the right if there are more pages after the neighbors
+    if (endPage < totalPages) {
+      pages.push('ellipsis');
+    }
+
     return pages;
-  }, [page, siblingCount, totalPages]);
+  }, [page, totalPages]);
 
   return {
     total,
