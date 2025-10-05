@@ -119,8 +119,10 @@ export function ReviewDataListPageClient() {
   }
 
   function handleNavigateToReview(district: string, month: string) {
-    // TODO: Implement navigation to review detail page
-    // Navigate to /review/:district/:month or similar
+    // Navigate to the review detail page with encoded parameters
+    const encodedDistrict = encodeURIComponent(district);
+    const encodedMonth = encodeURIComponent(month);
+    window.location.href = `/review/${encodedDistrict}/${encodedMonth}`;
   }
 
   const isEmpty = !isLoading && summaries.length === 0;
