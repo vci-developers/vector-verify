@@ -62,10 +62,13 @@ export function AnnotationTasksListPageClient() {
   });
 
   const tasks = data?.items ?? [];
-  const totalFromServer = data?.total ?? 0;
+  const totalFromServer = data?.total;
 
   useEffect(() => {
-    setTotal(totalFromServer);
+    // Only update total when we have actual data to prevent pagination resets
+    if (totalFromServer !== undefined) {
+      setTotal(totalFromServer);
+    }
   }, [totalFromServer, setTotal]);
 
   const isPagingDisabled = isLoading || isFetching;
@@ -187,8 +190,12 @@ export function AnnotationTasksListPageClient() {
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map(pageItem => (
-                  <PaginationItem key={pageItem}>
+                {pages.map((pageItem, index) => (
+                  <PaginationItem
+                    key={
+                      pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
+                    }
+                  >
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />
                     ) : (

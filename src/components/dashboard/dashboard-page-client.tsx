@@ -45,8 +45,8 @@ export function DashboardPageClient() {
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">No Access Available</h2>
             <p className="text-muted-foreground max-w-md text-sm">
-              You don't currently have access to any features. Please contact
-              your administrator if you believe this is an error.
+              You don&apos;t currently have access to any features. Please
+              contact your administrator if you believe this is an error.
             </p>
           </div>
         </div>

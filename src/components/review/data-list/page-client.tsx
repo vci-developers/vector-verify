@@ -118,16 +118,16 @@ export function ReviewDataListPageClient() {
     if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
   }
 
-  function handleNavigateToReview(district: string, month: string) {
+  function handleNavigateToReview(district: string, monthYear: string) {
     // Navigate to the review detail page with encoded parameters
     const encodedDistrict = encodeURIComponent(district);
-    const encodedMonth = encodeURIComponent(month);
-    window.location.href = `/review/${encodedDistrict}/${encodedMonth}`;
+    const encodedMonthYear = encodeURIComponent(monthYear);
+    window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}`;
   }
 
-  const isEmpty = !isLoading && summaries.length === 0;
+  const isEmpty = !isLoading && !isFetching && summaries.length === 0;
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <ReviewDataListLoadingSkeleton />;
   }
 

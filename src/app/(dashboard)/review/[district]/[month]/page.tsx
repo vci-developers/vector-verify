@@ -1,17 +1,17 @@
-import { ReviewAssignmentPageClient } from '@/components/review/review-assignment';
+import { ReviewDashboardPageClient } from '@/components/review/review-assignment';
 
-interface ReviewAssignmentPageProps {
+interface ReviewDashboardPageProps {
   params: {
     district: string;
-    month: string;
+    month: string; // This will now be in format "2024-01"
   };
 }
 
-export default function ReviewAssignmentPage({
+export default function ReviewDashboardPage({
   params,
-}: ReviewAssignmentPageProps) {
+}: ReviewDashboardPageProps) {
   return (
-    <ReviewAssignmentPageClient
+    <ReviewDashboardPageClient
       district={params.district}
       month={params.month}
     />

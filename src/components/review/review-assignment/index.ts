@@ -1,1 +1,1 @@
-export { ReviewAssignmentPageClient } from './review-assignment-page-client';
+export { ReviewDashboardPageClient } from './review-assignment-page-client';
