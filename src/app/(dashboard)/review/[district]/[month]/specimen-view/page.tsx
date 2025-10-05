@@ -7,8 +7,10 @@ interface SpecimenViewPageProps {
   };
 }
 
-export default function SpecimenViewPage({ params }: SpecimenViewPageProps) {
-  return (
-    <SpecimenViewPageClient district={params.district} month={params.month} />
-  );
+export default async function SpecimenViewPage({
+  params,
+}: SpecimenViewPageProps) {
+  const { district, month } = await params;
+
+  return <SpecimenViewPageClient district={district} month={month} />;
 }

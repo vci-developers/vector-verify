@@ -1,6 +1,7 @@
 import type {
   MonthlySummary,
   MonthlySummaryFilters,
+  MonthlySummaryRequestDto,
   MonthlySummaryResponseDto,
 } from '../types';
 import { mapMonthlySummaryResponseDtoToPage } from '../types';
@@ -16,7 +17,7 @@ export async function getMonthlySummary(
 }> {
   const { from, to, district, offset = 0, limit = DEFAULT_PAGE_SIZE } = filters;
 
-  const requestDto = {
+  const requestDto: MonthlySummaryRequestDto = {
     limit,
     offset,
     ...(from && { from }),

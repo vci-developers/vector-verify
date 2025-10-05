@@ -1,4 +1,4 @@
-import { ReviewDashboardPageClient } from '@/components/review/review-assignment';
+import { ReviewDashboardPageClient } from '@/components/review/review-dashboard';
 
 interface ReviewDashboardPageProps {
   params: {
@@ -7,13 +7,10 @@ interface ReviewDashboardPageProps {
   };
 }
 
-export default function ReviewDashboardPage({
+export default async function ReviewDashboardPage({
   params,
 }: ReviewDashboardPageProps) {
-  return (
-    <ReviewDashboardPageClient
-      district={params.district}
-      month={params.month}
-    />
-  );
+  const { district, month } = await params;
+
+  return <ReviewDashboardPageClient district={district} month={month} />;
 }

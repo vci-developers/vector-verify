@@ -7,8 +7,8 @@ interface Dhis2ViewPageProps {
   };
 }
 
-export default function Dhis2ViewPage({ params }: Dhis2ViewPageProps) {
-  return (
-    <Dhis2ViewPageClient district={params.district} month={params.month} />
-  );
+export default async function Dhis2ViewPage({ params }: Dhis2ViewPageProps) {
+  const { district, month } = await params;
+
+  return <Dhis2ViewPageClient district={district} month={month} />;
 }

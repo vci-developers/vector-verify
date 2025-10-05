@@ -9,7 +9,8 @@ export interface ReviewItemDto {
 }
 
 // Request DTO for monthly summary
-export interface MonthlySummaryRequestDto {
+export interface MonthlySummaryRequestDto
+  extends Record<string, string | number | boolean | null | undefined> {
   limit: number;
   offset: number;
   from?: string; // YYYY-MM-DD format
@@ -75,7 +76,7 @@ export function mapReviewItemToMonthlySummary(
   };
 }
 
-// Mapper function to convert DTO to OffsetPage (following annotation pattern)
+// Mapper function to convert DTO to OffsetPage
 export function mapMonthlySummaryResponseDtoToPage(
   data: MonthlySummaryResponseDto,
 ): OffsetPage<MonthlySummary> {
