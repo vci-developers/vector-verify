@@ -1,4 +1,4 @@
 export * from './types';
 export * from './keys';
 export * from './client';
-export * from './permissions';
+export * from './district-access';
