@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ArrowRight, Loader2, PencilLine, Search } from 'lucide-react';
-import { Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 
 export function DashboardPageClient() {
@@ -37,7 +36,7 @@ export function DashboardPageClient() {
 
   if (!hasAnyAccess) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-2xl items-center justify-center px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="bg-muted inline-flex h-12 w-12 items-center justify-center rounded-full">
             <Search className="text-muted-foreground h-6 w-6" />
@@ -55,8 +54,8 @@ export function DashboardPageClient() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
-      <div className="space-y-6">
+    <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-2xl items-center justify-center px-6">
+      <div className="w-full space-y-16">
         {/* Annotation Card - Only show if user can annotate */}
         {canAnnotate && (
           <Card className="rounded-2xl border shadow-sm">
