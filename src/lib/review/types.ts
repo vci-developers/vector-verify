@@ -75,7 +75,7 @@ export function mapReviewItemToMonthlySummary(
   };
 }
 
-// Mapper function to convert DTO to OffsetPage (following annotation pattern)
+// Mapper function to convert DTO to OffsetPage
 export function mapMonthlySummaryResponseDtoToPage(
   data: MonthlySummaryResponseDto,
 ): OffsetPage<MonthlySummary> {
