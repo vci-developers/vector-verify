@@ -28,9 +28,6 @@ export async function getSpecimens(
   };
 
 
-  console.log('getSpecimens query:', query);
-
-
   const data = await bff<SpecimensListResponseDto>('/specimens', {
     method: 'GET',
     query,

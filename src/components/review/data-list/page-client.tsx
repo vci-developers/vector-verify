@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangeFilter } from '@/components/annotate/tasks-list/date-range-filter';
 import { DistrictFilter } from './district-filter';
@@ -30,7 +29,6 @@ import {
 import type { DateRangeOption } from '@/lib/shared/utils/date-range';
 
 export function ReviewDataListPageClient() {
-  const router = useRouter();
   
   // Local state for filters
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
@@ -137,7 +135,9 @@ export function ReviewDataListPageClient() {
   }
 
   function handleNavigateToReview(district: string, month: string) {
-    router.push(`/review/${encodeURIComponent(district)}${encodeURIComponent(month)}`);
+    const encodedDistrict = encodeURIComponent(district);
+    const encodedMonth = encodeURIComponent(month);
+    window.location.href = `/review/${encodedDistrict}/${encodedMonth}`;
   }
 
   const isEmpty = !isLoading && !isFetching && summaries.length === 0;

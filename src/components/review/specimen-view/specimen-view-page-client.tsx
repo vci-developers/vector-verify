@@ -1,27 +1,40 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SpecimenReviewAccordion } from './specimen-review-accordion';
+import { useSpecimensQuery } from '@/lib/review/client/hooks/use-specimens';
 
 interface SpecimenViewPageClientProps {
   district: string;
-  month: string; // This will now be in format "2024-01"
+  month: string;
 }
 
 export function SpecimenViewPageClient({
   district,
   month,
 }: SpecimenViewPageClientProps) {
-  const formattedMonth = decodeURIComponent(month);
   const formattedDistrict = decodeURIComponent(district);
+  const formattedMonth = decodeURIComponent(month);
 
-  // Parse the month string (format: "2024-01") to display format
-  const [year, monthNum] = formattedMonth.split('-');
-  const monthName = new Date(
-    parseInt(year),
-    parseInt(monthNum) - 1,
-    1,
-  ).toLocaleDateString('en-US', {
+  // Parse month to get start and end dates in YYYY-MM-DD format
+  const [year, monthNum] = formattedMonth.split('-').map(Number);
+  const startOfMonth = new Date(year, monthNum - 1, 1);
+  const endOfMonth = new Date(year, monthNum, 0);
+  
+  const dateFrom = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD
+  const dateTo = endOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  // Fetch specimens for the district with date filters
+  const { data, isLoading, error } = useSpecimensQuery({
+    district: formattedDistrict,
+    dateFrom,
+    dateTo,
+  });
+
+  const specimens = data?.items ?? [];
+
+  // Format month name for display
+  const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
   });
@@ -29,33 +42,25 @@ export function SpecimenViewPageClient({
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-foreground text-2xl font-semibold">
-          Specimen View
+        <h1 className="text-3xl font-bold">
+          {formattedDistrict}
+          <span className="ml-3 text-2xl font-normal text-muted-foreground">
+            {monthName}
+          </span>
         </h1>
-        <p className="text-muted-foreground mt-1">
-          {formattedDistrict} - {monthName}
-        </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Specimen Review Interface</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            This is the specimen review interface for analyzing and reviewing
-            specimen data.
-          </p>
-          <div className="bg-muted mt-4 rounded-lg p-4">
-            <p className="text-muted-foreground text-sm">
-              <strong>District:</strong> {formattedDistrict}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              <strong>Month:</strong> {monthName}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {isLoading && (
+        <div className="p-4 text-muted-foreground">Loading specimens...</div>
+      )}
+
+      {error && (
+        <div className="p-4 text-destructive">Error loading specimens</div>
+      )}
+
+      {!isLoading && !error && (
+        <SpecimenReviewAccordion specimens={specimens} />
+      )}
     </div>
   );
 }

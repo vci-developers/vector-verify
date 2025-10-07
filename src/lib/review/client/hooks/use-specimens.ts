@@ -18,7 +18,7 @@ export function useSpecimensQuery(
   return useQuery({
     queryKey: reviewKeys.specimens(offset, limit, dateFrom, dateTo, district) as SpecimensQueryKey,
     queryFn: () => getSpecimens(filters),
-    enabled: Boolean(district && dateFrom && dateTo), 
+    enabled: Boolean(district && dateFrom && dateTo),
     ...(options ?? {}),
   });
 }

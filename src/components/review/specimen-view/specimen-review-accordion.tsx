@@ -11,13 +11,13 @@ import { useState } from 'react';
 import type { Specimen } from '@/lib/entities/specimen/model';
 import { ImageModal } from './image-modal';
 
-interface DistrictReviewAccordionProps {
+interface SpecimenReviewAccordionProps {
 	specimens: Specimen[];
 }
 
-export function DistrictReviewAccordion({
+export function SpecimenReviewAccordion({
 	specimens,
-}: DistrictReviewAccordionProps) {
+}: SpecimenReviewAccordionProps) {
 	const [openItems, setOpenItems] = useState<string[]>([]);
 	const [selectedImage, setSelectedImage] = useState<{
 		url: string;
