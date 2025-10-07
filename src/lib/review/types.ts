@@ -40,9 +40,18 @@ export interface MonthlySummary {
 export interface MonthlySummaryFilters {
   offset?: number;
   limit?: number;
-  from?: string; // YYYY-MM-DD format
-  to?: string; // YYYY-MM-DD format
-  district?: string; // Single district selection
+  from?: string;
+  to?: string;
+  district?: string;
+}
+
+
+export interface SpecimensListFilters {
+  offset?: number;
+  limit?: number;
+  dateFrom?: string; // YYYY-MM-DD format
+  dateTo?: string;   // YYYY-MM-DD format
+  district?: string;
 }
 
 export interface DistrictOption {

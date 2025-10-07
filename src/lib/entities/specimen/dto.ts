@@ -26,3 +26,14 @@ export interface SpecimenExpandedDto extends SpecimenDto {
   thumbnailImage: SpecimenImageDto | null;
   session: SessionWithSiteDto;
 }
+
+
+
+export interface SpecimensListResponseDto {
+ specimens: SpecimenExpandedDto[];
+ total: number;
+ limit: number;
+ offset: number;
+ hasMore: boolean;
+}
+
