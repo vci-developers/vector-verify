@@ -15,7 +15,7 @@ import type { MonthlySummary } from '@/lib/review/types';
 
 interface ReviewTableProps {
   summaries: MonthlySummary[];
-  onNavigateToReview: (district: string, month: string) => void;
+  onNavigateToReview: (district: string, monthYear: string) => void;
   isEmpty?: boolean;
 }
 

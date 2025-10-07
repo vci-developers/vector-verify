@@ -24,8 +24,8 @@ import {
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  PaginationFirst,
+  PaginationLast,
 } from '@/components/ui/pagination';
 import type { DateRangeOption } from '@/lib/shared/utils/date-range';
 
@@ -47,6 +47,7 @@ export function ReviewDataListPageClient() {
     setPageSizeAndReset,
     canPrev,
     canNext,
+    totalPages,
     range: pages,
     start: offset,
   } = pagination;
@@ -113,6 +114,20 @@ export function ReviewDataListPageClient() {
     if (!isPagingDisabled && canNext) setPage(page + 1);
   }
 
+  function handleNavigateToFirstPage(
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    event.preventDefault();
+    if (!isPagingDisabled && page > 1) setPage(1);
+  }
+
+  function handleNavigateToLastPage(
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    event.preventDefault();
+    if (!isPagingDisabled && page < totalPages) setPage(totalPages);
+  }
+
   function handleNavigateToPage(
     event: React.MouseEvent<HTMLAnchorElement>,
     pageNumber: number,
@@ -125,9 +140,9 @@ export function ReviewDataListPageClient() {
     router.push(`/review/${encodeURIComponent(district)}${encodeURIComponent(month)}`);
   }
 
-  const isEmpty = !isLoading && summaries.length === 0;
+  const isEmpty = !isLoading && !isFetching && summaries.length === 0;
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <ReviewDataListLoadingSkeleton />;
   }
 
@@ -179,13 +194,13 @@ export function ReviewDataListPageClient() {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious
+                  <PaginationFirst
                     className={
-                      isPagingDisabled || !canPrev
+                      isPagingDisabled || page === 1
                         ? 'pointer-events-none opacity-50'
                         : ''
                     }
-                    onClick={handleNavigateToPreviousPage}
+                    onClick={handleNavigateToFirstPage}
                     href="#"
                   />
                 </PaginationItem>
@@ -209,13 +224,13 @@ export function ReviewDataListPageClient() {
                   </PaginationItem>
                 ))}
                 <PaginationItem>
-                  <PaginationNext
+                  <PaginationLast
                     className={
-                      isPagingDisabled || !canNext
+                      isPagingDisabled || page === totalPages
                         ? 'pointer-events-none opacity-50'
                         : ''
                     }
-                    onClick={handleNavigateToNextPage}
+                    onClick={handleNavigateToLastPage}
                     href="#"
                   />
                 </PaginationItem>
