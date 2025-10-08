@@ -23,14 +23,20 @@ export function useMonthlySummaryQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
-  const { offset = 0, limit = DEFAULT_PAGE_SIZE, from, to, district } = filters;
+  const {
+    offset = 0,
+    limit = DEFAULT_PAGE_SIZE,
+    startDate,
+    endDate,
+    district,
+  } = filters;
 
   return useQuery({
     queryKey: reviewKeys.monthlySummary(
       offset,
       limit,
-      from,
-      to,
+      startDate,
+      endDate,
       district,
     ) as MonthlySummaryQueryKey,
     queryFn: () => getMonthlySummary(filters),

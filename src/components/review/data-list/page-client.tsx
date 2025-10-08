@@ -55,10 +55,10 @@ export function ReviewDataListPageClient() {
   } = pagination;
 
   // Convert ISO dates to YYYY-MM-DD format for API
-  const from = createdAfter
+  const startDate = createdAfter
     ? new Date(createdAfter).toISOString().split('T')[0]
     : undefined;
-  const to = createdBefore
+  const endDate = createdBefore
     ? new Date(createdBefore).toISOString().split('T')[0]
     : undefined;
 
@@ -66,8 +66,8 @@ export function ReviewDataListPageClient() {
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     offset,
     limit: pageSize,
-    from,
-    to,
+    startDate,
+    endDate,
     district: selectedDistrict || undefined,
   });
 
