@@ -23,13 +23,13 @@ export async function getMonthlySummary(
     limit = DEFAULT_PAGE_SIZE,
   } = filters;
 
-  const requestDto: MonthlySummaryRequestDto = {
+  const requestDto = {
     limit,
     offset,
     ...(startDate && { startDate }),
     ...(endDate && { endDate }),
     ...(district && { district }),
-  };
+  } satisfies MonthlySummaryRequestDto;
 
   const response = await bff<MonthlySummaryResponseDto>(
     '/sessions/review/task',

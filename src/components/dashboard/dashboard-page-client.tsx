@@ -36,7 +36,7 @@ export function DashboardPageClient() {
 
   if (!hasAnyAccess) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-2xl items-center justify-center px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="bg-muted inline-flex h-12 w-12 items-center justify-center rounded-full">
             <Search className="text-muted-foreground h-6 w-6" />
@@ -44,8 +44,8 @@ export function DashboardPageClient() {
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">No Access Available</h2>
             <p className="text-muted-foreground max-w-md text-sm">
-              You don't currently have access to any features. Please contact
-              your administrator if you believe this is an error.
+              You don&apos;t currently have access to any features. Please
+              contact your administrator if you believe this is an error.
             </p>
           </div>
         </div>
@@ -54,8 +54,8 @@ export function DashboardPageClient() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
-      <div className="space-y-6">
+    <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-2xl items-center justify-center px-6">
+      <div className="w-full space-y-16">
         {/* Annotation Card - Only show if user can annotate */}
         {canAnnotate && (
           <Card className="rounded-2xl border shadow-sm">

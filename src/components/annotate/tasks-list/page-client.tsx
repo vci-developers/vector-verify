@@ -9,8 +9,8 @@ import {
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  PaginationFirst,
+  PaginationLast,
 } from '@/components/ui/pagination';
 import {
   Select,
@@ -51,6 +51,7 @@ export function AnnotationTasksListPageClient() {
     setPageSizeAndReset,
     canPrev,
     canNext,
+    totalPages,
     range: pages,
   } = pagination;
 
@@ -62,10 +63,13 @@ export function AnnotationTasksListPageClient() {
   });
 
   const tasks = data?.items ?? [];
-  const totalFromServer = data?.total ?? 0;
+  const totalFromServer = data?.total;
 
   useEffect(() => {
-    setTotal(totalFromServer);
+    // Only update total when we have actual data to prevent pagination resets
+    if (totalFromServer !== undefined) {
+      setTotal(totalFromServer);
+    }
   }, [totalFromServer, setTotal]);
 
   const isPagingDisabled = isLoading || isFetching;
@@ -92,6 +96,20 @@ export function AnnotationTasksListPageClient() {
   ) {
     event.preventDefault();
     if (!isPagingDisabled && canNext) setPage(page + 1);
+  }
+
+  function handleNavigateToFirstPage(
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    event.preventDefault();
+    if (!isPagingDisabled && page > 1) setPage(1);
+  }
+
+  function handleNavigateToLastPage(
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    event.preventDefault();
+    if (!isPagingDisabled && page < totalPages) setPage(totalPages);
   }
 
   function handleNavigateToPage(
@@ -177,18 +195,22 @@ export function AnnotationTasksListPageClient() {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious
+                  <PaginationFirst
                     className={
-                      isPagingDisabled || !canPrev
+                      isPagingDisabled || page === 1
                         ? 'pointer-events-none opacity-50'
                         : ''
                     }
-                    onClick={handleNavigateToPreviousPage}
+                    onClick={handleNavigateToFirstPage}
                     href="#"
                   />
                 </PaginationItem>
-                {pages.map(pageItem => (
-                  <PaginationItem key={pageItem}>
+                {pages.map((pageItem, index) => (
+                  <PaginationItem
+                    key={
+                      pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
+                    }
+                  >
                     {pageItem === 'ellipsis' ? (
                       <PaginationEllipsis />
                     ) : (
@@ -203,13 +225,13 @@ export function AnnotationTasksListPageClient() {
                   </PaginationItem>
                 ))}
                 <PaginationItem>
-                  <PaginationNext
+                  <PaginationLast
                     className={
-                      isPagingDisabled || !canNext
+                      isPagingDisabled || page === totalPages
                         ? 'pointer-events-none opacity-50'
                         : ''
                     }
-                    onClick={handleNavigateToNextPage}
+                    onClick={handleNavigateToLastPage}
                     href="#"
                   />
                 </PaginationItem>
