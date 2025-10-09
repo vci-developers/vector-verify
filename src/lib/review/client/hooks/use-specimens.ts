@@ -9,16 +9,21 @@ import { reviewKeys, type SpecimensQueryKey } from '@/lib/review/keys';
 export function useSpecimensQuery(
   filters: SpecimensListFilters = {},
   options?: Omit<
-    UseQueryOptions<OffsetPage<Specimen>, Error, OffsetPage<Specimen>, SpecimensQueryKey>,
+    UseQueryOptions<
+    OffsetPage<Specimen>, 
+    Error, 
+    OffsetPage<Specimen>, 
+    SpecimensQueryKey
+    >,
     'queryKey' | 'queryFn'
   >
 ) {
-  const { offset, limit, dateFrom, dateTo, district } = filters;
+  const { offset, limit, startDate, endDate, district, siteId } = filters;
 
   return useQuery({
-    queryKey: reviewKeys.specimens(offset, limit, dateFrom, dateTo, district) as SpecimensQueryKey,
+    queryKey: reviewKeys.specimens(offset, limit, startDate, endDate, district, siteId) as SpecimensQueryKey,
     queryFn: () => getSpecimens(filters),
-    enabled: Boolean(district && dateFrom && dateTo),
+    enabled: Boolean(siteId && district && startDate && endDate), 
     ...(options ?? {}),
   });
 }

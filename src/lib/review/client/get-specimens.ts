@@ -13,18 +13,20 @@ export async function getSpecimens(
   const {
     offset = 0,
     limit = DEFAULT_PAGE_SIZE,
-    dateTo,
-    dateFrom,
+    startDate,
+    endDate,
     district,
+    siteId,
   } = filters;
 
 
   const query = {
     limit,
     offset,
-    ...(dateFrom && { dateFrom }),
-    ...(dateTo && { dateTo }),
+    ...(startDate && { startDate }),
+    ...(endDate && { endDate }),
     ...(district && { district }),
+    ...(siteId && { siteId }),
   };
 
 

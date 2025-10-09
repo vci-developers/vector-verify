@@ -49,9 +49,10 @@ export interface MonthlySummaryFilters {
 export interface SpecimensListFilters {
   offset?: number;
   limit?: number;
-  dateFrom?: string; // YYYY-MM-DD format
-  dateTo?: string;   // YYYY-MM-DD format
+  startDate?: string; // YYYY-MM-DD format
+  endDate?: string;   // YYYY-MM-DD format
   district?: string;
+  siteId?: number;
 }
 
 export interface DistrictOption {

@@ -64,13 +64,13 @@ export function mapSpecimenExpandedDtoToModel(
 }
 
 export function mapSpecimenExpandedDtoToPage(
- dto: SpecimensListResponseDto
+  dto: SpecimensListResponseDto
 ): OffsetPage<Specimen> {
- return {
-   items: dto.specimens.map(mapSpecimenExpandedDtoToModel),
-   total: dto.total,
-   offset: dto.offset,
-   limit: dto.limit,
-   hasMore: dto.hasMore,
- };
+  return {
+    items: dto.specimens.map(mapSpecimenExpandedDtoToModel),
+    total: dto.total,
+    offset: dto.offset,
+    limit: dto.limit,
+    hasMore: dto.hasMore,
+  };
 }

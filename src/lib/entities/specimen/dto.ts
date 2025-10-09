@@ -27,8 +27,6 @@ export interface SpecimenExpandedDto extends SpecimenDto {
   session: SessionWithSiteDto;
 }
 
-
-
 export interface SpecimensListResponseDto {
  specimens: SpecimenExpandedDto[];
  total: number;
