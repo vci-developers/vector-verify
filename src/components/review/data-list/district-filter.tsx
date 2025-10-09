@@ -23,9 +23,11 @@ export function DistrictFilter({
   onDistrictSelected,
   disabled = false,
 }: DistrictFilterProps) {
+  const effectiveSelectedDistrict = selectedDistrict || 'all';
+
   return (
     <Select
-      value={selectedDistrict || 'all'}
+      value={effectiveSelectedDistrict}
       onValueChange={value =>
         onDistrictSelected(value === 'all' ? null : value)
       }
