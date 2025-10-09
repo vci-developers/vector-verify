@@ -12,7 +12,7 @@ import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { useUserProfileQuery } from '@/lib/user/client/hooks/use-user-profile';
 import { useUserPermissionsQuery } from '@/lib/user/client/hooks/use-user-permissions';
-import { getAccessibleDistrictOptions } from '@/lib/review/district-access';
+import { getAccessibleDistricts } from '@/lib/review/district-access';
 import {
   Select,
   SelectContent,
@@ -32,13 +32,11 @@ import {
 import type { DateRangeOption } from '@/lib/shared/utils/date-range';
 
 export function ReviewDataListPageClient() {
-  // Local state for filters
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
 
   const { createdAfter, createdBefore } = useDateRangeValues(dateRange);
 
-  // Get user data and permissions
   const { data: user } = useUserProfileQuery();
   const { data: permissions } = useUserPermissionsQuery();
   const pagination = usePagination({});
@@ -54,7 +52,6 @@ export function ReviewDataListPageClient() {
     start: offset,
   } = pagination;
 
-  // Convert ISO dates to YYYY-MM-DD format for API
   const startDate = createdAfter
     ? new Date(createdAfter).toISOString().split('T')[0]
     : undefined;
@@ -62,7 +59,6 @@ export function ReviewDataListPageClient() {
     ? new Date(createdBefore).toISOString().split('T')[0]
     : undefined;
 
-  // Fetch monthly summary data with current filters
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     offset,
     limit: pageSize,
@@ -74,24 +70,19 @@ export function ReviewDataListPageClient() {
   const summaries = data?.data?.items ?? [];
   const totalFromServer = data?.data?.total;
 
-  // Accumulate all unique districts from API responses
   const allDistricts = useAccumulatedDistricts(data?.availableDistricts);
 
-  // Filter districts based on user permissions
-  const accessibleDistricts =
+  const accessibleDistrictStrings =
     user && permissions
-      ? getAccessibleDistrictOptions(
-          allDistricts.map(d => ({ value: d, label: d })),
-          user,
-          permissions,
-        )
-      : allDistricts.map(d => ({ value: d, label: d }));
+      ? getAccessibleDistricts(allDistricts, user, permissions)
+      : [];
 
-  // District filter should only be disabled during loading, not based on privilege
-  // Privilege 0/1 users still need to see their district in the dropdown
+  const accessibleDistricts = accessibleDistrictStrings.map(d => ({
+    value: d,
+    label: d,
+  }));
 
   useEffect(() => {
-    // Only update total when we have actual data to prevent pagination resets
     if (totalFromServer !== undefined) {
       setTotal(totalFromServer);
     }
@@ -105,13 +96,11 @@ export function ReviewDataListPageClient() {
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
-    // Reset pagination to page 1 when date range changes
     setPage(1);
   }
 
   function handleDistrictSelected(district: string | null) {
     setSelectedDistrict(district);
-    // Reset pagination to page 1 when district changes
     setPage(1);
   }
 
@@ -137,10 +126,7 @@ export function ReviewDataListPageClient() {
     if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
   }
 
-  function handleNavigateToReview(district: string, month: string) {
-    // TODO: Implement navigation to review detail page
-    // Navigate to /review/:district/:month or similar
-  }
+  function handleNavigateToReview(district: string, month: string) {}
 
   const isEmpty = !isLoading && summaries.length === 0;
 

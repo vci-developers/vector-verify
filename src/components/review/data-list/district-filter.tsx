@@ -17,10 +17,6 @@ interface DistrictFilterProps {
   disabled?: boolean;
 }
 
-/**
- * District filter component for selecting districts
- * Receives pre-filtered districts from parent component
- */
 export function DistrictFilter({
   districts,
   selectedDistrict,
