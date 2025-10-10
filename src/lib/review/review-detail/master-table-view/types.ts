@@ -25,3 +25,16 @@ export interface SpecimenCountEntry {
   count: number;
   columnName: string;
 }
+
+export interface ColumnGroup {
+  species: string;
+  columns: {
+    originalName: string;
+    displayName: string;
+  }[];
+}
+
+export interface GroupedColumns {
+  groups: ColumnGroup[];
+  totalColumns: number;
+}
