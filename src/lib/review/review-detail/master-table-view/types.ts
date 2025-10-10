@@ -1,3 +1,5 @@
+import type { SiteDto } from '@/lib/entities/site/dto';
+
 export interface SpecimenCountsFilters {
   district?: string;
   startDate?: string;
@@ -12,17 +14,8 @@ export interface SpecimenCountsResponse {
 
 export interface SpecimenCountsSite {
   siteId: number;
-  siteInfo: SpecimenCountsSiteInfo;
+  siteInfo: SiteDto | null;
   counts: SpecimenCountEntry[];
-}
-
-export interface SpecimenCountsSiteInfo {
-  district?: string | null;
-  subCounty?: string | null;
-  parish?: string | null;
-  villageName?: string | null;
-  houseNumber?: string | null;
-  healthCenter?: string | null;
 }
 
 export interface SpecimenCountEntry {

@@ -18,12 +18,12 @@ import type { SpecimenCountsSite } from '@/lib/review/review-detail/master-table
 
 interface MasterTableViewPageClientProps {
   district: string;
-  monthYear: string; // Format "YYYY-MM"
+  monthYear: string;
 }
 
 function formatMonthLabel(monthYear: string) {
   const [year, month] = monthYear.split('-');
-  return new Date(Number.parseInt(year, 10), Number.parseInt(month, 10) - 1, 1).toLocaleDateString(
+  return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString(
     'en-US',
     {
       month: 'long',
@@ -33,35 +33,38 @@ function formatMonthLabel(monthYear: string) {
 }
 
 function getSiteLabel(site: SpecimenCountsSite) {
-  const info = site.siteInfo ?? {};
+  const info = site.siteInfo;
 
-  const topLineParts = [
+  if (!info) {
+    return {
+      topLine: `Site #${site.siteId}`,
+      bottomLine: null,
+    };
+  }
+
+  const primaryParts = [
     info.villageName,
-    info.houseNumber ? `House ${info.houseNumber}` : null,
-  ].filter(Boolean) as string[];
+    info.houseNumber && `House ${info.houseNumber}`,
+  ].filter(Boolean);
 
-  let topLine = topLineParts.join(' • ');
-  if (!topLine) {
-    topLine =
-      info.healthCenter ??
+  const topLine = primaryParts.length
+    ? primaryParts.join(' • ')
+    : (info.healthCenter ??
       info.parish ??
       info.subCounty ??
       info.district ??
-      `Site #${site.siteId}`;
-  }
+      `Site #${site.siteId}`);
 
-  const bottomLineParts = [
-    info.healthCenter && info.healthCenter !== topLine ? info.healthCenter : null,
-    info.parish && !topLineParts.includes(info.parish) ? info.parish : null,
-    info.subCounty && !topLineParts.includes(info.subCounty) ? info.subCounty : null,
-    info.district && !topLineParts.includes(info.district) ? info.district : null,
-  ].filter(Boolean) as string[];
-
-  const bottomLine = bottomLineParts.length > 0 ? bottomLineParts.join(' • ') : null;
+  const secondaryParts = [
+    info.healthCenter !== topLine && info.healthCenter,
+    !primaryParts.includes(info.parish) && info.parish,
+    !primaryParts.includes(info.subCounty) && info.subCounty,
+    !primaryParts.includes(info.district) && info.district,
+  ].filter(Boolean);
 
   return {
     topLine,
-    bottomLine,
+    bottomLine: secondaryParts.length ? secondaryParts.join(' • ') : null,
   };
 }
 
@@ -69,95 +72,82 @@ export function MasterTableViewPageClient({
   district,
   monthYear,
 }: MasterTableViewPageClientProps) {
-  const formattedMonthYear = decodeURIComponent(monthYear);
-  const formattedDistrict = decodeURIComponent(district);
+  const decodedDistrict = decodeURIComponent(district);
+  const decodedMonthYear = decodeURIComponent(monthYear);
 
-  const dateRange = getMonthDateRange(formattedMonthYear);
-  const startDate = dateRange?.startDate ?? null;
-  const endDate = dateRange?.endDate ?? null;
-
-  const {
-    data: specimenCounts,
-    isLoading,
-    isError,
-    error,
-  } = useSpecimenCountsQuery({
-    district: formattedDistrict,
-    monthYear: formattedMonthYear,
+  const dateRange = getMonthDateRange(decodedMonthYear);
+  const { data: specimenCounts, isLoading } = useSpecimenCountsQuery({
+    district: decodedDistrict,
+    monthYear: decodedMonthYear,
   });
 
   const monthLabel = useMemo(
-    () => formatMonthLabel(formattedMonthYear),
-    [formattedMonthYear],
+    () => formatMonthLabel(decodedMonthYear),
+    [decodedMonthYear],
   );
 
   const tableMeta = useMemo(() => {
-    if (!specimenCounts) {
-      return null;
-    }
+    if (!specimenCounts?.data?.length) return null;
 
-    const rows = specimenCounts.data ?? [];
-    let columns = (specimenCounts.columns ?? []).filter(
-      (column): column is string => Boolean(column),
-    );
+    const sites = specimenCounts.data;
+    const columns = specimenCounts.columns?.filter(Boolean) || [
+      ...new Set(
+        sites.flatMap(site =>
+          site.counts.map(c => c.columnName).filter(Boolean),
+        ),
+      ),
+    ];
 
-    if (columns.length === 0) {
-      const derivedColumns = new Set<string>();
-      rows.forEach(site => {
-        site.counts.forEach(count => {
+    if (!columns.length) return null;
+
+    const rows = sites.map((site, index) => ({
+      key: site.siteId || `site-${index}`,
+      label: getSiteLabel(site),
+      countsByColumn: site.counts.reduce<Record<string, number>>(
+        (acc, count) => {
           if (count.columnName) {
-            derivedColumns.add(count.columnName);
+            acc[count.columnName] =
+              (acc[count.columnName] || 0) + (count.count || 0);
           }
-        });
-      });
-      columns = Array.from(derivedColumns);
-    }
+          return acc;
+        },
+        {},
+      ),
+    }));
 
-    if (columns.length === 0 || rows.length === 0) {
-      return null;
-    }
-
-    const mappedRows = rows.map((site, index) => {
-      const label = getSiteLabel(site);
-      const countsByColumn = site.counts.reduce<Record<string, number>>((acc, count) => {
-        if (!count.columnName) return acc;
-        const value = typeof count.count === 'number' ? count.count : 0;
-        acc[count.columnName] = (acc[count.columnName] ?? 0) + value;
-        return acc;
-      }, {});
-
-      const key = site.siteId ?? `site-${index}`;
-      return { key, label, countsByColumn };
-    });
-
-    const totals = mappedRows.reduce<Record<string, number>>((acc, row) => {
-      columns.forEach(column => {
-        acc[column] = (acc[column] ?? 0) + (row.countsByColumn[column] ?? 0);
+    const totals = rows.reduce<Record<string, number>>((acc, row) => {
+      columns.forEach(col => {
+        acc[col] = (acc[col] || 0) + (row.countsByColumn[col] || 0);
       });
       return acc;
     }, {});
 
-    const minWidth = Math.max(640, 220 + columns.length * 140);
-
-    return { columns, rows: mappedRows, totals, minWidth };
+    return {
+      columns,
+      rows,
+      totals,
+      minWidth: Math.max(640, 220 + columns.length * 140),
+    };
   }, [specimenCounts]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/70 pb-4">
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
+      <header className="flex items-end justify-between gap-4 border-b pb-4">
         <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">DHIS2 Review</p>
-          <h1 className="text-foreground text-3xl font-semibold">{formattedDistrict}</h1>
+          <p className="text-muted-foreground text-xs tracking-wide uppercase">
+            DHIS2 Review
+          </p>
+          <h1 className="text-3xl font-semibold">{decodedDistrict}</h1>
           <p className="text-muted-foreground text-sm">
             {monthLabel}
-            {(startDate || endDate) && (
-              <span>{` • ${startDate ?? '—'} – ${endDate ?? '—'}`}</span>
+            {dateRange && (
+              <span>{` • ${dateRange.startDate ?? '—'} – ${dateRange.endDate ?? '—'}`}</span>
             )}
           </p>
         </div>
         {tableMeta && (
           <div className="text-muted-foreground text-sm">
-            <span className="text-foreground text-2xl font-semibold">
+            <span className="text-2xl font-semibold">
               {tableMeta.rows.length.toLocaleString()}
             </span>{' '}
             site{tableMeta.rows.length === 1 ? '' : 's'} in view
@@ -165,45 +155,41 @@ export function MasterTableViewPageClient({
         )}
       </header>
 
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-foreground text-2xl font-semibold">Specimen Counts</h2>
-            <p className="text-muted-foreground text-sm">
-              Review site-level submissions for the selected district and month.
-            </p>
-          </div>
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold">Specimen Counts</h2>
+          <p className="text-muted-foreground text-sm">
+            Review site-level submissions for the selected district and month.
+          </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="space-y-3">
           {isLoading && (
-            <p className="text-muted-foreground text-sm">Loading specimen counts…</p>
-          )}
-
-          {isError && (
-            <p className="text-destructive text-sm">
-              Failed to load specimen counts: {error?.message ?? 'Unknown error'}
+            <p className="text-muted-foreground text-sm">
+              Loading specimen counts…
             </p>
           )}
-
-          {!isLoading && !isError && specimenCounts == null && (
+          {!isLoading && !specimenCounts && (
             <p className="text-muted-foreground text-sm">
               No specimen count data available for this selection.
             </p>
           )}
 
           {tableMeta && (
-            <div className="max-h-[560px] w-full overflow-auto rounded-xl border border-border/60 bg-background shadow-sm">
-              <Table className="text-sm" style={{ minWidth: tableMeta.minWidth }}>
+            <div className="max-h-[560px] w-full overflow-auto rounded-xl border shadow-sm">
+              <Table
+                className="text-sm"
+                style={{ minWidth: tableMeta.minWidth }}
+              >
                 <TableHeader>
-                  <TableRow className="bg-muted/60">
-                    <TableHead className="sticky left-0 top-0 z-30 min-w-[240px] bg-muted text-xs uppercase tracking-wide">
+                  <TableRow className="bg-muted">
+                    <TableHead className="bg-muted sticky top-0 left-0 z-30 min-w-[240px] text-xs uppercase">
                       Site
                     </TableHead>
                     {tableMeta.columns.map(column => (
                       <TableHead
                         key={column}
-                        className="sticky top-0 z-20 bg-muted text-right text-xs uppercase tracking-wide"
+                        className="bg-muted sticky top-0 z-20 text-right text-xs uppercase"
                       >
                         {column}
                       </TableHead>
@@ -211,42 +197,40 @@ export function MasterTableViewPageClient({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableMeta.rows.map((row, rowIndex) => {
-                    const baseBg = rowIndex % 2 === 0 ? 'bg-background' : 'bg-muted';
-                    const cellBg = baseBg;
-                    return (
-                      <TableRow
-                        key={row.key}
-                        className={`group ${baseBg} hover:bg-muted transition-colors`}
-                      >
+                  {tableMeta.rows.map(row => (
+                    <TableRow key={row.key} className="group">
+                      <TableCell className="bg-background group-hover:bg-muted sticky left-0 z-10 align-top shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
+                        <div className="text-sm font-semibold">
+                          {row.label.topLine}
+                        </div>
+                        {row.label.bottomLine && (
+                          <div className="text-muted-foreground mt-1 text-xs">
+                            {row.label.bottomLine}
+                          </div>
+                        )}
+                      </TableCell>
+                      {tableMeta.columns.map(column => (
                         <TableCell
-                          className={`sticky left-0 z-40 ${baseBg} align-top shadow-[2px_0_4px_-2px_rgba(0,0,0,0.25)] transition-colors group-hover:bg-muted`}
+                          key={column}
+                          className="group-hover:bg-muted text-right tabular-nums"
                         >
-                          <div className="font-semibold text-sm text-foreground">{row.label.topLine}</div>
-                          {row.label.bottomLine && (
-                            <div className="text-muted-foreground mt-1 text-xs">{row.label.bottomLine}</div>
-                          )}
+                          {(row.countsByColumn[column] ?? 0).toLocaleString()}
                         </TableCell>
-                        {tableMeta.columns.map(column => (
-                          <TableCell
-                            key={`${row.key}-${column}`}
-                            className={`text-right tabular-nums ${cellBg} transition-colors group-hover:bg-muted`}
-                          >
-                            {(row.countsByColumn[column] ?? 0).toLocaleString()}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    );
-                  })}
+                      ))}
+                    </TableRow>
+                  ))}
                 </TableBody>
                 <TableFooter>
                   <TableRow className="bg-muted font-semibold">
-                    <TableCell className="sticky left-0 z-20 bg-muted shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)]">
+                    <TableCell className="bg-muted sticky left-0 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                       Total
                     </TableCell>
                     {tableMeta.columns.map(column => (
-                      <TableCell key={`total-${column}`} className="text-right tabular-nums">
-                        {(tableMeta.totals[column] ?? 0).toLocaleString()}
+                      <TableCell
+                        key={column}
+                        className="text-right tabular-nums"
+                      >
+                        {(tableMeta.totals[column] || 0).toLocaleString()}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -255,7 +239,7 @@ export function MasterTableViewPageClient({
             </div>
           )}
 
-          {!tableMeta && !isLoading && !isError && specimenCounts && (
+          {specimenCounts && !tableMeta && (
             <p className="text-muted-foreground text-sm">
               No specimen count data returned for this district and month.
             </p>
