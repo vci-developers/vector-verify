@@ -9,51 +9,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PAGE_SIZES } from '@/lib/shared/constants';
+import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 import { useUserPermissionsQuery } from '@/lib/user/client';
+import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
 
 interface SpecimenViewPageClientProps {
   district: string;
-  month: string;
+  monthYear: string;
 }
 
 export function SpecimenViewPageClient({
   district,
-  month,
+  monthYear,
 }: SpecimenViewPageClientProps) {
   const formattedDistrict = decodeURIComponent(district);
-  const formattedMonth = decodeURIComponent(month);
+  const formattedMonthYear = decodeURIComponent(monthYear);
 
-  const [pageSize, setPageSize] = React.useState(20);
+  const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
 
-  const [year, monthNum] = formattedMonth.split('-').map(Number);
+  const [year, monthNum] = formattedMonthYear.split('-').map(Number);
   const startOfMonth = new Date(year, monthNum - 1, 1);
   const endOfMonth = new Date(year, monthNum, 0);
 
   const startDate = startOfMonth.toISOString().split('T')[0];
   const endDate = endOfMonth.toISOString().split('T')[0];
 
-  // Get user permissions to get siteIds
+  // Get user permissions
   const { data: permissions, isLoading: isLoadingPermissions } = useUserPermissionsQuery();
 
-  // Extract siteIds from permissions for this district
-  const siteIds = useMemo(() => {
+  // Filter sites for this district
+  const districtSites = useMemo(() => {
     if (!permissions?.sites?.canAccessSites) return [];
     
     return permissions.sites.canAccessSites
-      .filter(site => site.district === formattedDistrict)
-      .map(site => site.id);
+      .filter(site => site.district === formattedDistrict);
   }, [permissions?.sites?.canAccessSites, formattedDistrict]);
 
-
-    const houseNumbers = useMemo(() => {
-    if (!permissions?.sites?.canAccessSites) return [];
-    
-    return permissions.sites.canAccessSites
-      .filter(site => site.district === formattedDistrict)
+  const siteIds = useMemo(() => districtSites.map(site => site.id), [districtSites]);
+  const houseNumbers = useMemo(() => 
+    districtSites
       .map(site => site.houseNumber)
-      .filter((houseNumber): houseNumber is string => houseNumber !== null);
-  }, [permissions?.sites?.canAccessSites, formattedDistrict]);
+      .filter((houseNumber): houseNumber is string => houseNumber !== null),
+    [districtSites]
+  );
 
   // Format month name for display
   const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('en-US', {
@@ -95,11 +93,9 @@ export function SpecimenViewPageClient({
         </div>
       </div>
 
-      {isLoadingPermissions && (
-        <div className="p-4 text-muted-foreground">Loading sites...</div>
-      )}
-
-      {!isLoadingPermissions && (
+      {isLoadingPermissions ? (
+        <SpecimenAccordionLoadingSkeleton />
+      ) : (
         <SpecimenReviewAccordion 
           siteIds={siteIds}
           houseNumbers={houseNumbers}

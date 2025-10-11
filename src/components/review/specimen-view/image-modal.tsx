@@ -1,25 +1,39 @@
 'use client';
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import Image from 'next/image';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Specimen } from '@/lib/entities/specimen';
 
 interface ImageModalProps {
-  imageUrl: string;
-  specimenId: number;
+  specimen: Specimen;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function ImageModal({ imageUrl, specimenId, isOpen, onClose }: ImageModalProps) {
+function getImageUrl(specimen: Specimen): string {
+  if (specimen.thumbnailImageId) {
+    return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
+  }
+
+  const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
+  if (!relativePath) return '';
+  if (relativePath.startsWith('http')) return relativePath;
+  return `/api/bff${
+    relativePath.startsWith('/') ? relativePath : `/${relativePath}`
+  }`;
+}
+
+export function ImageModal({ specimen, isOpen, onClose }: ImageModalProps) {
+  const imageUrl = getImageUrl(specimen);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" showCloseButton={false}>
-        <VisuallyHidden>
-          <DialogTitle>Specimen {specimenId} Image</DialogTitle>
-        </VisuallyHidden>
+        <DialogTitle className="px-4 py-3 text-lg font-semibold">
+          Specimen {specimen.specimenId}
+        </DialogTitle>
         <div className="relative h-[95vh] w-full">
           <Button
             variant="ghost"
@@ -33,11 +47,11 @@ export function ImageModal({ imageUrl, specimenId, isOpen, onClose }: ImageModal
           <div className="flex h-full items-center justify-center p-4">
             <Image
               src={imageUrl}
-              alt={`Specimen ${specimenId}`}
+              alt={`Specimen ${specimen.specimenId}`}
               fill
               className="object-contain"
               sizes="95vw"
-              priority
+              unoptimized
             />
           </div>
         </div>

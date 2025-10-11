@@ -45,6 +45,15 @@ export interface MonthlySummaryFilters {
   district?: string; // Single district selection
 }
 
+export interface SpecimensListFilters {
+  offset?: number;
+  limit?: number;
+  startDate?: string; // YYYY-MM-DD format
+  endDate?: string; // YYYY-MM-DD format
+  district?: string; // Single district selection
+  siteId?: number; // Specific site ID
+}
+
 export interface DistrictOption {
   value: string;
   label: string;
