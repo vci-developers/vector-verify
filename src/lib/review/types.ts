@@ -12,8 +12,8 @@ export interface ReviewItemDto {
 export interface MonthlySummaryRequestDto {
   limit: number;
   offset: number;
-  from?: string; // YYYY-MM-DD format
-  to?: string; // YYYY-MM-DD format
+  startDate?: string; // YYYY-MM-DD format
+  endDate?: string; // YYYY-MM-DD format
   district?: string; // Single district selection
 }
 
@@ -40,19 +40,9 @@ export interface MonthlySummary {
 export interface MonthlySummaryFilters {
   offset?: number;
   limit?: number;
-  from?: string;
-  to?: string;
-  district?: string;
-}
-
-
-export interface SpecimensListFilters {
-  offset?: number;
-  limit?: number;
   startDate?: string; // YYYY-MM-DD format
-  endDate?: string;   // YYYY-MM-DD format
-  district?: string;
-  siteId?: number;
+  endDate?: string; // YYYY-MM-DD format
+  district?: string; // Single district selection
 }
 
 export interface DistrictOption {
