@@ -1,11 +1,11 @@
-import { PermissionsSiteResponseDto } from "../site";
+import { SiteDto } from "../site";
 
 export interface UserPermissions {
   sites: {
     viewSiteMetadata: boolean;
     writeSiteMetadata: boolean;
     pushSiteMetadata: boolean;
-    canAccessSites: PermissionsSiteResponseDto[];
+    canAccessSites: SiteDto[];
 
   };
   annotations: {

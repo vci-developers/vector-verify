@@ -18,15 +18,15 @@ export const reviewKeys = {
   specimens: (
     offset?: number,
     limit?: number,
-    dateFrom?: string, 
-    dateTo?: string, 
+    startDate?: string,
+    endDate?: string,
     district?: string,
     siteId?: number,
   ) =>
     [
       ...reviewKeys.root,
       'specimens',
-      { offset, limit, dateFrom, dateTo, district, siteId },
+      { offset, limit, startDate, endDate, district, siteId },
     ] as const,
 
 } as const;

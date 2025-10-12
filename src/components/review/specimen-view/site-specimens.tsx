@@ -127,10 +127,12 @@ export function SiteSpecimenAccordionItem({
             className="border-b last:border-b-0"
         >
             <AccordionTrigger className="px-4">
-                {houseNumber}
-                <span className="ml-2 text-sm text-muted-foreground">
-                    (Site ID: {siteId})
-                </span>
+                <div className="flex items-center gap-2">
+                    <span>{houseNumber}</span>
+                    <span className="text-sm text-muted-foreground">
+                        (Site ID: {siteId})
+                    </span>
+                </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
                 {isOpen && (

@@ -45,9 +45,9 @@ export function SpecimenViewPageClient({
       .filter(site => site.district === formattedDistrict);
   }, [permissions?.sites?.canAccessSites, formattedDistrict]);
 
-  const siteIds = useMemo(() => districtSites.map(site => site.id), [districtSites]);
+  const siteIds = useMemo(() => districtSites.map(site => site.siteId), [districtSites]);
   const houseNumbers = useMemo(() => 
-    districtSites.map(site => site.houseNumber ?? `Site ${site.id}`),
+    districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
     [districtSites]
   );
 
@@ -71,28 +71,41 @@ export function SpecimenViewPageClient({
           </span>
         </h1>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Items per page:</span>
-          <Select
-            value={String(pageSize)}
-            onValueChange={handleRowsPerPageChange}
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PAGE_SIZES.map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {districtSites.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Items per page:</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={handleRowsPerPageChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZES.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {isLoadingPermissions ? (
         <SpecimenAccordionLoadingSkeleton />
+      ) : districtSites.length === 0 ? (
+        <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed">
+          <div className="text-center">
+            <p className="text-lg font-medium text-muted-foreground">
+              No sites in this district
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              There are no registered sites for {formattedDistrict}
+            </p>
+          </div>
+        </div>
       ) : (
         <SpecimenReviewAccordion 
           siteIds={siteIds}
