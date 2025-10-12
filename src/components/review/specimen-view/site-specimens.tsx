@@ -9,7 +9,7 @@ import {
     PaginationFirst, 
     PaginationItem, 
     PaginationLast, 
-    PaginationLink 
+    PaginationLink
 } from "@/components/ui/pagination";
 import {
     AccordionContent,
@@ -17,6 +17,8 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
+import { ImageOff } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface SiteSpecimenAccordionItemProps {
     siteId: number;
@@ -69,20 +71,27 @@ export function SiteSpecimenAccordionItem({
     const specimens = data?.items ?? [];
     const total = data?.total ?? 0;
     
-    // Use pagination hook unconditionally
+    // Use pagination hook
     const pagination = usePagination({
         initialTotal: total,
         initialPage: currentPage,
         initialPageSize: pageSize,
     });
-    
-    // Filter specimens that have images
-    const specimensWithImages = specimens.filter(specimen => getImageUrl(specimen) !== null);
+
+    // Sync pagination hook with props
+    useEffect(() => {
+        pagination.setTotal(total);
+    }, [total, pagination]);
+
+    useEffect(() => {
+        pagination.setPageSize(pageSize);
+    }, [pageSize, pagination]);
+
+    useEffect(() => {
+        pagination.setPage(currentPage);
+    }, [currentPage, pagination]);
     
     const isPagingDisabled = isLoading;
-    
-    // Check if we should hide this accordion item
-    const shouldHide = !isLoading && specimensWithImages.length === 0 && currentPage === 1;
 
     function handleNavigateToFirstPage(
         event: React.MouseEvent<HTMLAnchorElement>,
@@ -112,11 +121,6 @@ export function SiteSpecimenAccordionItem({
         }
     }
 
-    // Don't render accordion item if no specimens with images
-    if (shouldHide) {
-        return null;
-    }
-
     return (
         <AccordionItem
             value={String(siteId)}
@@ -133,9 +137,9 @@ export function SiteSpecimenAccordionItem({
                     <>
                         {isLoading ? (
                             <SpecimenGridLoadingSkeleton />
-                        ) : specimensWithImages.length === 0 ? (
-                            <div className="p-4 text-sm text-muted-foreground">
-                                No specimens with images found for this site
+                        ) : total === 0 ? (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                                No specimens reported from this household
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -146,26 +150,37 @@ export function SiteSpecimenAccordionItem({
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                                    {specimensWithImages.map((specimen) => {
-                                        const imageUrl = getImageUrl(specimen)!;
+                                    {specimens.map((specimen) => {
+                                        const imageUrl = getImageUrl(specimen);
 
                                         return (
                                             <div
                                                 key={specimen.id}
-                                                className="cursor-pointer rounded border p-2 transition-shadow hover:shadow-lg"
-                                                onClick={() => onImageClick(specimen)}
+                                                className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
+                                                onClick={() => imageUrl && onImageClick(specimen)}
                                             >
-                                                <div className="mb-1 text-xs text-muted-foreground">
+                                                <div className="px-2 pt-2 text-xs text-muted-foreground">
                                                     {specimen.specimenId}
                                                 </div>
-                                                <Image
-                                                    src={imageUrl}
-                                                    alt={`Specimen ${specimen.specimenId}`}
-                                                    width={240}
-                                                    height={180}
-                                                    className="h-auto w-full rounded object-cover"
-                                                    unoptimized
-                                                />
+                                                <div className="relative aspect-[4/3] w-full">
+                                                    {imageUrl ? (
+                                                        <Image
+                                                            src={imageUrl}
+                                                            alt={`Specimen ${specimen.specimenId}`}
+                                                            fill
+                                                            className="object-cover"
+                                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center bg-muted">
+                                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                                                <ImageOff className="h-8 w-8" />
+                                                                <span className="text-xs">Invalid image</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         );
                                     })}

@@ -47,9 +47,7 @@ export function SpecimenViewPageClient({
 
   const siteIds = useMemo(() => districtSites.map(site => site.id), [districtSites]);
   const houseNumbers = useMemo(() => 
-    districtSites
-      .map(site => site.houseNumber)
-      .filter((houseNumber): houseNumber is string => houseNumber !== null),
+    districtSites.map(site => site.houseNumber ?? `Site ${site.id}`),
     [districtSites]
   );
 

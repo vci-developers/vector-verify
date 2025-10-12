@@ -3,7 +3,7 @@
 import {
 	Accordion,
 } from '@/components/ui/accordion';
-import { useState, useMemo, Fragment } from 'react';
+import { useState, useMemo, Fragment, useEffect } from 'react';
 import { ImageModal } from './image-modal';
 import { SiteSpecimenAccordionItem } from './site-specimens';
 import { Specimen } from '@/lib/entities/specimen';
@@ -31,6 +31,11 @@ export function SpecimenReviewAccordion({
 	// Track pagination state for each site
 	const [sitePagination, setSitePagination] = useState<Record<number, number>>({});
 
+	// Reset pagination when pageSize changes
+	useEffect(() => {
+		setSitePagination({});
+	}, [pageSize]);
+
 	// Create a map of siteId to houseNumber
 	const siteToHouseNumberMap = useMemo(() => {
 		const map: Record<number, string> = {};
@@ -54,7 +59,13 @@ export function SpecimenReviewAccordion({
 				collapsible
 				className="w-full rounded-lg border"
 				value={openItem}
-				onValueChange={setOpenItem}
+				onValueChange={(value) => {
+					setOpenItem(value);
+					// Reset pagination when closing an item
+					if (!value) {
+						setSitePagination({});
+					}
+				}}
 			>
 				{siteIds.map((siteId) => {
 					const isOpen = openItem === String(siteId);
