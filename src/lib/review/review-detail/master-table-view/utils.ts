@@ -49,35 +49,65 @@ const SEX_SORT_ORDER = [
 
 function extractColumnMeta(columnName: string) {
   const parts = columnName.trim().split(/\s+/);
-  if (parts.length < 2) return null;
+  if (parts.length < 1) return null;
+
+  const normalizedColumnName = columnName
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const normalizedTokens = normalizedColumnName.split(' ');
+  const isNonMosquito =
+    normalizedTokens.length >= 2 &&
+    normalizedTokens[0] === 'non' &&
+    normalizedTokens[1] === 'mosquito';
+
+  if (isNonMosquito) {
+    return {
+      species: 'NON-MOSQUITO',
+      column: { originalName: columnName, displayName: 'NON-MOSQUITO' },
+    };
+  }
+
+  if (normalizedColumnName.includes('unknown unknown unknown')) {
+    return null;
+  }
 
   const lowerParts = parts.map(part => part.toLowerCase());
   const sexIndex = lowerParts.findIndex(
     part => part === 'male' || part === 'female',
   );
-  if (sexIndex === -1) return null;
 
-  const species = parts.slice(0, sexIndex).join(' ');
-  const remainder = lowerParts.slice(sexIndex).join(' ');
+  // Handle mosquito columns with sex classification
+  if (sexIndex !== -1) {
+    const species = parts.slice(0, sexIndex).join(' ');
+    const remainder = lowerParts.slice(sexIndex).join(' ');
 
-  let displayName: string;
-  if (!remainder.includes('female')) {
-    if (!remainder.includes('male')) return null;
-    displayName = 'Male';
-  } else if (remainder.includes('unfed')) {
-    displayName = 'Female Unfed';
-  } else if (
-    remainder.includes('fully-fed') ||
-    remainder.includes('fully fed')
-  ) {
-    displayName = 'Female Fully-fed';
-  } else if (remainder.includes('gravid')) {
-    displayName = 'Female Gravid';
-  } else {
-    displayName = 'Female';
+    let displayName: string;
+    if (!remainder.includes('female')) {
+      if (!remainder.includes('male')) return null;
+      displayName = 'Male';
+    } else if (remainder.includes('unfed')) {
+      displayName = 'Female Unfed';
+    } else if (
+      remainder.includes('fully-fed') ||
+      remainder.includes('fully fed')
+    ) {
+      displayName = 'Female Fully-fed';
+    } else if (remainder.includes('gravid')) {
+      displayName = 'Female Gravid';
+    } else {
+      displayName = 'Female';
+    }
+
+    return { species, column: { originalName: columnName, displayName } };
   }
 
-  return { species, column: { originalName: columnName, displayName } };
+  return {
+    species: columnName,
+    column: { originalName: columnName, displayName: columnName },
+  };
 }
 
 export function groupColumnsBySpecies(columns: string[]): GroupedColumns {

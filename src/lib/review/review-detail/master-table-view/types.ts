@@ -16,6 +16,7 @@ export interface SpecimenCountsSite {
   siteId: number;
   siteInfo: SiteDto | null;
   counts: SpecimenCountEntry[];
+  totalSpecimens: number;
 }
 
 export interface SpecimenCountEntry {

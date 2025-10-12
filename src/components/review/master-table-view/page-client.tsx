@@ -84,6 +84,7 @@ export function MasterTableViewPageClient({
         key: site.siteId?.toString() || `site-${index}`,
         label: getSiteLabel(site),
         countsByColumn,
+        totalSpecimens: site.totalSpecimens,
       };
     });
 
@@ -95,14 +96,20 @@ export function MasterTableViewPageClient({
       return acc;
     }, {});
 
+    const grandTotal = rows.reduce(
+      (sum, row) => sum + (row.totalSpecimens || 0),
+      0,
+    );
+
     return {
       columns,
       groupedColumns,
       rows,
       totals,
+      grandTotal,
       minWidth: Math.max(640, 220 + columns.length * 140),
     };
-  }, [specimenCounts]);
+  }, [specimenCounts?.data, specimenCounts?.columns]);
 
   if (isLoading) {
     return <MasterTableViewLoadingSkeleton />;
@@ -164,22 +171,42 @@ export function MasterTableViewPageClient({
                     >
                       Site
                     </TableHead>
-                    {tableMeta.groupedColumns.groups.map((group, index) => (
-                      <TableHead
-                        key={group.species}
-                        className={`bg-muted sticky top-0 z-20 border-b text-center text-xs uppercase ${
-                          index > 0 ? 'border-l-border border-l-2' : ''
-                        }`}
-                        colSpan={group.columns.length}
-                      >
-                        {group.species}
-                      </TableHead>
-                    ))}
+                    {tableMeta.groupedColumns.groups.map((group, index) => {
+                      const isNonMosquito =
+                        group.columns.length === 1 &&
+                        group.columns[0].displayName === group.species;
+
+                      return (
+                        <TableHead
+                          key={group.species}
+                          className={`bg-muted sticky top-0 z-20 text-center text-xs uppercase ${
+                            index > 0 ? 'border-l-border border-l-2' : ''
+                          } ${!isNonMosquito ? 'border-b' : ''}`}
+                          colSpan={isNonMosquito ? 1 : group.columns.length}
+                          rowSpan={isNonMosquito ? 2 : 1}
+                        >
+                          {group.species}
+                        </TableHead>
+                      );
+                    })}
+                    <TableHead
+                      className="bg-muted border-l-border sticky top-0 z-20 border-b border-l-2 text-center text-xs uppercase"
+                      rowSpan={2}
+                    >
+                      Total
+                    </TableHead>
                   </TableRow>
                   <TableRow className="bg-muted">
                     {tableMeta.groupedColumns.groups.flatMap(
-                      (group, groupIndex) =>
-                        group.columns.map((column, columnIndex) => (
+                      (group, groupIndex) => {
+                        const isNonMosquito =
+                          group.columns.length === 1 &&
+                          group.columns[0].displayName === group.species;
+
+                        // Skip non-mosquito columns in second row since they span 2 rows
+                        if (isNonMosquito) return [];
+
+                        return group.columns.map((column, columnIndex) => (
                           <TableHead
                             key={column.originalName}
                             className={`bg-muted sticky top-[2.5rem] z-20 text-center text-xs uppercase ${
@@ -190,7 +217,8 @@ export function MasterTableViewPageClient({
                           >
                             {column.displayName}
                           </TableHead>
-                        )),
+                        ));
+                      },
                     )}
                   </TableRow>
                 </TableHeader>
@@ -228,6 +256,9 @@ export function MasterTableViewPageClient({
                               </TableCell>
                             )),
                         )}
+                        <TableCell className="bg-background border-l-border group-hover:bg-muted border-l-2 text-center font-semibold tabular-nums transition-colors">
+                          {(row.totalSpecimens ?? 0).toLocaleString()}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -254,6 +285,9 @@ export function MasterTableViewPageClient({
                           </TableCell>
                         )),
                     )}
+                    <TableCell className="border-l-border border-l-2 text-center font-bold tabular-nums">
+                      {(tableMeta.grandTotal ?? 0).toLocaleString()}
+                    </TableCell>
                   </TableRow>
                 </TableFooter>
               </Table>
