@@ -81,15 +81,15 @@ export function SiteSpecimenAccordionItem({
     // Sync pagination hook with props
     useEffect(() => {
         pagination.setTotal(total);
-    }, [total, pagination]);
+    }, [total]);
 
     useEffect(() => {
         pagination.setPageSize(pageSize);
-    }, [pageSize, pagination]);
+    }, [pageSize]);
 
     useEffect(() => {
         pagination.setPage(currentPage);
-    }, [currentPage, pagination]);
+    }, [currentPage]);
     
     const isPagingDisabled = isLoading;
 
