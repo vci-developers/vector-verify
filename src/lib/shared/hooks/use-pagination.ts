@@ -5,14 +5,12 @@ interface UsePaginationOptions {
   initialTotal?: number;
   initialPage?: number;
   initialPageSize?: number;
-  siblingCount?: number;
 }
 
 export function usePagination({
   initialTotal = 0,
   initialPage = 1,
   initialPageSize = DEFAULT_PAGE_SIZE,
-  siblingCount = 1,
 }: UsePaginationOptions) {
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(initialPage);
@@ -26,6 +24,9 @@ export function usePagination({
   useEffect(() => {
     // Only adjust page if it exceeds totalPages, don't reset unnecessarily
     setPage(prev => {
+      // If totalPages is 0 or less, keep current page (might be loading state)
+      if (totalPages <= 0) return prev;
+
       const validPage = Math.min(Math.max(1, prev), totalPages);
       // Only update if the page actually needs to change
       return prev !== validPage ? validPage : prev;
@@ -33,13 +34,8 @@ export function usePagination({
   }, [totalPages]);
 
   const start = (page - 1) * pageSize;
-  const end = start + pageSize;
   const canPrev = page > 1;
   const canNext = page < totalPages;
-
-  function slice<T>(items: T[]): T[] {
-    return items.slice(start, end);
-  }
 
   function setPageSizeAndReset(size: number) {
     setPageSize(size);
@@ -47,25 +43,38 @@ export function usePagination({
   }
 
   type RangeItem = number | 'ellipsis';
-  const range = useMemo<RangeItem[]>(() => {
+
+  function createRange(currentPage: number): RangeItem[] {
     const pages: RangeItem[] = [];
 
-    // Always show current page and its 2 neighbors (current-1, current, current+1)
-    const startPage = Math.max(1, page - 1);
-    const endPage = Math.min(totalPages, page + 1);
+    // Show first page if not in the neighbor range
+    if (currentPage > 2) {
+      pages.push(1);
+      if (currentPage > 3) {
+        pages.push('ellipsis');
+      }
+    }
 
-    // Add the page numbers
+    // Show current page and one neighbor on each side
+    const startPage = Math.max(1, currentPage - 1);
+    const endPage = Math.min(totalPages, currentPage + 1);
+
     for (let pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
       pages.push(pageNumber);
     }
 
-    // Add ellipsis on the right if there are more pages after the neighbors
-    if (endPage < totalPages) {
-      pages.push('ellipsis');
+    // Show last page if not in the neighbor range
+    if (currentPage < totalPages - 1) {
+      if (currentPage < totalPages - 2) {
+        pages.push('ellipsis');
+      }
+      pages.push(totalPages);
     }
 
     return pages;
-  }, [page, totalPages]);
+  }
+
+  const range = useMemo(() => createRange(page), [page, totalPages]);
 
   return {
     total,
@@ -79,8 +88,7 @@ export function usePagination({
     canPrev,
     canNext,
     start,
-    end,
-    slice,
     range,
+    createRange,
   } as const;
 }
