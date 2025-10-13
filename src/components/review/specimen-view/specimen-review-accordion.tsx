@@ -93,7 +93,6 @@ export function SpecimenReviewAccordion({
 			{selectedSpecimen && (
 				<ImageModal
 					specimen={selectedSpecimen}
-					isOpen={!!selectedSpecimen}
 					onClose={() => setSelectedSpecimen(null)}
 				/>
 			)}

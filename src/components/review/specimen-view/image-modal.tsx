@@ -8,7 +8,6 @@ import { Specimen } from '@/lib/entities/specimen';
 
 interface ImageModalProps {
   specimen: Specimen;
-  isOpen: boolean;
   onClose: () => void;
 }
 
@@ -25,11 +24,11 @@ function getImageUrl(specimen: Specimen): string | null {
   }`;
 }
 
-export function ImageModal({ specimen, isOpen, onClose }: ImageModalProps) {
+export function ImageModal({ specimen, onClose }: ImageModalProps) {
   const imageUrl = getImageUrl(specimen);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={!!specimen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" showCloseButton={false}>
         <DialogTitle className="px-4 py-3 text-lg font-semibold">
           Specimen {specimen.specimenId}
