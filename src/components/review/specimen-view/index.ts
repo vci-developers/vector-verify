@@ -1,1 +1,1 @@
-export { SpecimenViewPageClient } from './specimen-view-page-client';
+export { SpecimenViewPageClient } from './page-client';

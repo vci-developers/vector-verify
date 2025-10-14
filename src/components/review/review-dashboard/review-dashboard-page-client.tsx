@@ -8,14 +8,14 @@ import Link from 'next/link';
 
 interface ReviewDashboardPageClientProps {
   district: string;
-  month: string; // This will now be in format "2024-01"
+  monthYear: string; // This will now be in format "2024-01"
 }
 
 export function ReviewDashboardPageClient({
   district,
-  month,
+  monthYear,
 }: ReviewDashboardPageClientProps) {
-  const formattedMonth = decodeURIComponent(month);
+  const formattedMonth = decodeURIComponent(monthYear);
   const formattedDistrict = decodeURIComponent(district);
 
   // Parse the month string (format: "2024-01") to display format
@@ -49,7 +49,7 @@ export function ReviewDashboardPageClient({
                 Access the DHIS2 review interface for this district and month.
               </p>
               <Button asChild className="w-full">
-                <Link href={`/review/${district}/${month}/dhis2-view`}>
+                <Link href={`/review/${district}/${monthYear}/dhis2-view`}>
                   Go to DHIS2 View
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -67,7 +67,7 @@ export function ReviewDashboardPageClient({
                 month.
               </p>
               <Button asChild className="w-full">
-                <Link href={`/review/${district}/${month}/specimen-view`}>
+                <Link href={`/review/${district}/${monthYear}/specimen-view`}>
                   Go to Specimen View
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
