@@ -15,13 +15,19 @@ export async function getMonthlySummary(
   data: OffsetPage<MonthlySummary>;
   availableDistricts: string[];
 }> {
-  const { from, to, district, offset = 0, limit = DEFAULT_PAGE_SIZE } = filters;
+  const {
+    startDate,
+    endDate,
+    district,
+    offset = 0,
+    limit = DEFAULT_PAGE_SIZE,
+  } = filters;
 
   const requestDto = {
     limit,
     offset,
-    ...(from && { from }),
-    ...(to && { to }),
+    ...(startDate && { startDate }),
+    ...(endDate && { endDate }),
     ...(district && { district }),
   } satisfies MonthlySummaryRequestDto;
 

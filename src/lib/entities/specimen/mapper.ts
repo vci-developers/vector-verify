@@ -3,10 +3,12 @@ import type {
   SpecimenWithImagesDto,
   SpecimenWithSessionDto,
   SpecimenExpandedDto,
+  SpecimensListResponseDto,
 } from '@/lib/entities/specimen/dto';
 import type { Specimen } from '@/lib/entities/specimen/model';
 import { mapSpecimenImageDtoToModel } from '@/lib/entities/specimen-image/mapper';
 import { mapSessionDtoToModel } from '@/lib/entities/session/mapper';
+import { OffsetPage } from '../pagination';
 
 export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
   return {
@@ -58,5 +60,17 @@ export function mapSpecimenExpandedDtoToModel(
           ? mapSpecimenImageDtoToModel(dto.thumbnailImage)
           : undefined,
     session: dto.session ? mapSessionDtoToModel(dto.session) : undefined,
+  };
+}
+
+export function mapSpecimenExpandedDtoToPage(
+  dto: SpecimensListResponseDto
+): OffsetPage<Specimen> {
+  return {
+    items: dto.specimens.map(mapSpecimenExpandedDtoToModel),
+    total: dto.total,
+    offset: dto.offset,
+    limit: dto.limit,
+    hasMore: dto.hasMore,
   };
 }

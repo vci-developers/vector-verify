@@ -16,7 +16,7 @@ export function canAccessSite(
   permissions: UserPermissions,
   siteId: number,
 ): boolean {
-  return permissions.sites.canAccessSiteIds.includes(siteId);
+  return permissions.sites.canAccessSites.some(site => site.siteId === siteId);
 }
 
 export function canViewAndWriteAnnotationTasks(
