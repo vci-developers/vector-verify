@@ -52,6 +52,9 @@ export interface SpecimensListFilters {
   endDate?: string; // YYYY-MM-DD format
   district?: string; // Single district selection
   siteId?: number; // Specific site ID
+  species?: string | null; 
+  sex?: string | null; 
+  abdomenStatus?: string | null;
 }
 
 export interface DistrictOption {

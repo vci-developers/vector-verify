@@ -18,10 +18,28 @@ export function useSpecimensQuery(
     'queryKey' | 'queryFn'
   >
 ) {
-  const { offset, limit, startDate, endDate, district, siteId } = filters;
+  const { 
+    offset, 
+    limit, 
+    startDate, 
+    endDate, 
+    district, 
+    siteId, 
+    species, 
+    sex, 
+    abdomenStatus } = filters;
 
   return useQuery({
-    queryKey: reviewKeys.specimens(offset, limit, startDate, endDate, district, siteId) as SpecimensQueryKey,
+    queryKey: reviewKeys.specimens(
+      offset, 
+      limit, 
+      startDate, 
+      endDate, 
+      district, 
+      siteId, 
+      species, 
+      sex, 
+      abdomenStatus) as SpecimensQueryKey,
     queryFn: () => getSpecimens(filters),
     enabled: Boolean(siteId && district && startDate && endDate), 
     ...(options ?? {}),
