@@ -9,7 +9,7 @@ import {
   parseApiErrorResponse,
 } from '@/lib/shared/http/core';
 import { upstreamFetch } from '@/lib/shared/http/server/upstream';
-import type { RefreshRequestDto, RefreshResponseDto } from '@/lib/entities/auth/dto';
+import type { RefreshRequestDto, RefreshResponseDto } from '@/features/auth/types';
 
 export function decodeJwtExp(token?: string): number | null {
   if (!token) return null;

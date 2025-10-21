@@ -3,9 +3,8 @@ import {
   HttpError,
   parseApiErrorResponse,
 } from '@/lib/shared/http/core';
-import type { UserProfileResponseDto } from '@/lib/entities/user/dto';
-import type { User } from '@/lib/entities/user/model';
-import { mapUserDtoToDomain } from '@/lib/entities/user/mapper';
+import type { UserProfileResponseDto, User } from '@/features/user/types';
+import { mapUserDtoToModel } from '@/features/user/types';
 
 export async function getServerUserProfile(): Promise<User> {
   const response = await upstreamFetch('users/profile', { method: 'GET' });
@@ -14,5 +13,5 @@ export async function getServerUserProfile(): Promise<User> {
     throw new HttpError(error.message, error.status, error.body);
   }
   const payload: UserProfileResponseDto = await response.json();
-  return mapUserDtoToDomain(payload.user);
+  return mapUserDtoToModel(payload.user);
 }

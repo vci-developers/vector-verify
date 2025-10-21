@@ -1,4 +1,4 @@
-import { MasterTableViewPageClient } from '@/components/review/master-table-view/page-client';
+import { MasterTableViewPageClient } from '@/features/review';
 
 interface MasterTableViewPageProps {
   params: Promise<{
@@ -16,4 +16,3 @@ export default async function MasterTableViewPage({
     <MasterTableViewPageClient district={district} monthYear={monthYear} />
   );
 }
-

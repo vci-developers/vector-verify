@@ -25,6 +25,15 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
       ]
     }
   },

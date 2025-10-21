@@ -1,4 +1,4 @@
-import type { UserPermissions } from '@/lib/entities/user/permissions';
+import type { UserPermissions } from '@/features/user/types';
 
 export function canViewSites(permissions: UserPermissions): boolean {
   return permissions.sites.viewSiteMetadata;

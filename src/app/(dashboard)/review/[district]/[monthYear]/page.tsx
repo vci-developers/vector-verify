@@ -1,4 +1,4 @@
-import { ReviewDashboardPageClient } from '@/components/review/review-dashboard';
+import { ReviewDashboardPageClient } from '@/features/review';
 
 interface ReviewDashboardPageProps {
   params: Promise<{

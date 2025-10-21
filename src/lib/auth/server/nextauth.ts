@@ -1,9 +1,9 @@
 import type { NextAuthOptions } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { ENV } from '@/lib/shared/config/env';
-import type { LoginResponseDto } from '@/lib/entities/auth/dto';
-import { mapUserDtoToDomain } from '@/lib/entities/user/mapper';
-import type { User as DomainUser } from '@/lib/entities/user/model';
+import type { LoginResponseDto, AuthTokens } from '@/features/auth/types';
+import { mapAuthResponseDtoToPayload } from '@/features/auth/types';
+import type { User as DomainUser } from '@/features/user/types';
 import { loginToBackend } from '@/lib/auth/server/login';
 import { refreshAccessToken } from '@/lib/auth/server/tokens';
 import {
@@ -13,7 +13,6 @@ import {
   SESSION_UPDATE_AGE_SECONDS,
   decodeJwtExp,
 } from '@/lib/auth/server/tokens';
-import type { AuthTokens } from '@/lib/entities/auth';
 
 export const authOptions: NextAuthOptions = {
   secret: ENV.NEXTAUTH_SECRET,
@@ -37,7 +36,8 @@ export const authOptions: NextAuthOptions = {
         if (!email || !password) return null;
 
         const loginResponse: LoginResponseDto = await loginToBackend(email, password);
-        const domainUser: DomainUser = mapUserDtoToDomain(loginResponse.user);
+        const authPayload = mapAuthResponseDtoToPayload(loginResponse);
+        const domainUser: DomainUser = authPayload.user;
 
         return {
           id: String(domainUser.id),
@@ -45,8 +45,8 @@ export const authOptions: NextAuthOptions = {
           privilege: domainUser.privilege,
           isActive: domainUser.isActive,
           isWhitelisted: domainUser.isWhitelisted,
-          accessToken: loginResponse.tokens.accessToken,
-          refreshToken: loginResponse.tokens.refreshToken,
+          accessToken: authPayload.tokens.accessToken,
+          refreshToken: authPayload.tokens.refreshToken,
         };
       },
     }),

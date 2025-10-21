@@ -1,6 +1,6 @@
 'use client';
 
-import { useUserPermissionsQuery } from '@/lib/user/client';
+import { useUserPermissionsQuery } from '@/features/user';
 import {
   canViewAndWriteAnnotationTasks,
   canViewSites,

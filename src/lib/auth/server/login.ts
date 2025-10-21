@@ -4,10 +4,7 @@ import {
   parseApiErrorResponse,
 } from '@/lib/shared/http/core';
 import { upstreamFetch } from '@/lib/shared/http/server/upstream';
-import type {
-  LoginRequestDto,
-  LoginResponseDto,
-} from '@/lib/entities/auth/dto';
+import type { LoginRequestDto, LoginResponseDto } from '@/features/auth/types';
 
 export async function loginToBackend(
   email: string,

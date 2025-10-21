@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { AnnotationTaskDetailPageClient } from '@/components/annotate/task-detail/page-client';
+import { AnnotationTaskDetailPageClient } from '@/features/annotation';
 
 interface AnnotationTaskPageProps {
   params: Promise<{ annotationTaskSlug: string }>;

@@ -1,4 +1,4 @@
-import { SpecimenViewPageClient } from '@/components/review/specimen-view';
+import { SpecimenViewPageClient } from '@/features/review';
 
 interface SpecimenViewPageProps {
   params: {

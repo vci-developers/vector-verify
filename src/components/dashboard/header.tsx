@@ -1,6 +1,6 @@
 'use client';
 
-import { LogoutButton } from '@/components/auth/logout-button';
+import { LogoutButton } from '@/features/auth';
 import { BackButton } from './back-button';
 import { Brand } from './brand';
 import { useNavigationState } from './hooks/use-navigation-state';

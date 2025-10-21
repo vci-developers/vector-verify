@@ -1,4 +1,4 @@
-import { ReviewDataListPageClient } from '@/components/review/data-list/page-client';
+import { ReviewDataListPageClient } from '@/features/review';
 
 export default function ReviewDataPage() {
   return <ReviewDataListPageClient />;

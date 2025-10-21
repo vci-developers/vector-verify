@@ -3,8 +3,7 @@ import {
   HttpError,
   parseApiErrorResponse,
 } from '@/lib/shared/http/core';
-import type { UserPermissionsResponseDto } from '@/lib/entities/user/dto';
-import type { UserPermissions } from '@/lib/entities/user/permissions';
+import type { UserPermissionsResponseDto, UserPermissions } from '@/features/user/types';
 
 export async function getServerUserPermissions(): Promise<UserPermissions> {
   const response = await upstreamFetch('users/permissions', { method: 'GET' });

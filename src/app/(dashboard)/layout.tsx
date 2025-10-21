@@ -7,7 +7,7 @@ import {
   userKeys,
   type UserProfileQueryKey,
   type UserPermissionsQueryKey,
-} from '@/lib/user';
+} from '@/features/user';
 import {
   getServerUserProfile,
   getServerUserPermissions,
@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ShieldAlert } from 'lucide-react';
-import { LogoutButton } from '@/components/auth/logout-button';
+import { LogoutButton } from '@/features/auth';
 import { getAccessToken } from '@/lib/auth/server/tokens';
 
 interface DashboardLayoutProps {
