@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Button } from '@/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface ReviewDashboardPageClientProps {
   district: string;
-  monthYear: string; // This will now be in format "2024-01"
+  monthYear: string;
 }
 
 export function ReviewDashboardPageClient({
@@ -18,7 +18,6 @@ export function ReviewDashboardPageClient({
   const formattedMonth = decodeURIComponent(monthYear);
   const formattedDistrict = decodeURIComponent(district);
 
-  // Parse the month string (format: "2024-01") to display format
   const [year, monthNum] = formattedMonth.split('-');
   const monthName = new Date(
     parseInt(year),

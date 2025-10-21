@@ -1,7 +1,6 @@
-import type {
-  GroupedColumns,
-  SpecimenCountsSite,
-} from '@/features/review/types';
+import type { SpecimenCountsSite } from '@/features/review/types';
+
+type ColumnDisplay = { originalName: string; displayName: string };
 
 export interface MonthDateRange {
   startDate: string;
@@ -69,7 +68,7 @@ function extractColumnMeta(columnName: string) {
   if (isNonMosquito) {
     return {
       species: 'NON-MOSQUITO',
-      column: { originalName: columnName, displayName: 'NON-MOSQUITO' },
+      column: { originalName: columnName, displayName: 'NON-MOSQUITO' } as ColumnDisplay,
     };
   }
 
@@ -104,51 +103,48 @@ function extractColumnMeta(columnName: string) {
       displayName = 'Female';
     }
 
-    return { species, column: { originalName: columnName, displayName } };
+    return {
+      species,
+      column: { originalName: columnName, displayName } as ColumnDisplay,
+    };
   }
 
   return {
     species: columnName,
-    column: { originalName: columnName, displayName: columnName },
+    column: { originalName: columnName, displayName: columnName } as ColumnDisplay,
   };
 }
 
-export function groupColumnsBySpecies(columns: string[]): GroupedColumns {
-  const grouped = new Map<
-    string,
-    { originalName: string; displayName: string }[]
-  >();
+export function groupColumnsBySpecies(columns: string[]) {
+  const columnsBySpecies: Record<string, ColumnDisplay[]> = {};
+  const speciesOrder: string[] = [];
 
   columns.forEach(columnName => {
     const meta = extractColumnMeta(columnName);
     if (!meta) return;
 
-    if (!grouped.has(meta.species)) {
-      grouped.set(meta.species, []);
+    if (!columnsBySpecies[meta.species]) {
+      columnsBySpecies[meta.species] = [];
+      speciesOrder.push(meta.species);
     }
 
-    grouped.get(meta.species)!.push(meta.column);
+    columnsBySpecies[meta.species].push(meta.column);
   });
 
-  grouped.forEach(columns => {
-    columns.sort((a, b) => {
+  speciesOrder.forEach(species => {
+    columnsBySpecies[species].sort((a, b) => {
       const aIndex = SEX_SORT_ORDER.indexOf(a.displayName);
       const bIndex = SEX_SORT_ORDER.indexOf(b.displayName);
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
     });
   });
 
-  const groups = Array.from(grouped.entries(), ([species, columns]) => ({
-    species,
-    columns,
-  }));
-
-  const totalColumns = groups.reduce(
-    (sum, group) => sum + group.columns.length,
+  const totalColumns = speciesOrder.reduce(
+    (sum, species) => sum + columnsBySpecies[species].length,
     0,
   );
 
-  return { groups, totalColumns };
+  return { speciesOrder, columnsBySpecies, totalColumns };
 }
 
 export function getSiteLabel(site: SpecimenCountsSite) {

@@ -1,4 +1,4 @@
-import { DashboardPageClient } from '@/components/dashboard/dashboard-page-client';
+import { DashboardPageClient } from '@/features/dashboard';
 
 export default async function DashboardPage() {
   return <DashboardPageClient />;

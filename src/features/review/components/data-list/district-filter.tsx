@@ -7,11 +7,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import type { DistrictOption } from '@/features/review/types';
+} from '@/ui/select';
 
 interface DistrictFilterProps {
-  districts: DistrictOption[];
+  districts: string[];
   selectedDistrict: string | null;
   onDistrictSelected: (district: string | null) => void;
   disabled?: boolean;
@@ -24,6 +23,7 @@ export function DistrictFilter({
   disabled = false,
 }: DistrictFilterProps) {
   const effectiveSelectedDistrict = selectedDistrict || 'all';
+  const hasDistricts = districts.length > 0;
 
   return (
     <Select
@@ -31,7 +31,7 @@ export function DistrictFilter({
       onValueChange={value =>
         onDistrictSelected(value === 'all' ? null : value)
       }
-      disabled={disabled}
+      disabled={disabled || !hasDistricts}
     >
       <SelectTrigger className="w-48">
         <SelectValue placeholder="All Districts" />
@@ -39,8 +39,8 @@ export function DistrictFilter({
       <SelectContent>
         <SelectItem value="all">All Districts</SelectItem>
         {districts.map(district => (
-          <SelectItem key={district.value} value={district.value}>
-            {district.label}
+          <SelectItem key={district} value={district}>
+            {district}
           </SelectItem>
         ))}
       </SelectContent>

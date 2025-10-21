@@ -1,25 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DateRangeFilter } from '@/components/shared/date-range-filter';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { DistrictFilter } from './district-filter';
 import { ReviewTable } from './review-table';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
-import { useDateRangeValues } from '@/lib/shared/utils/date-range';
+import { calculateDateRange, toDateOnly } from '@/lib/shared/utils/date-range';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
-import { useAccumulatedDistricts } from '@/features/review/hooks/use-accumulated-districts';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { useUserProfileQuery, useUserPermissionsQuery } from '@/features/user';
-import { getAccessibleDistricts } from '@/features/review/utils/district-access';
+import {
+  getAccessibleDistricts,
+  normalizeDistrictList,
+} from '@/features/review/utils/district-access';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/select';
 import {
   Pagination,
   PaginationContent,
@@ -28,16 +30,17 @@ import {
   PaginationLink,
   PaginationFirst,
   PaginationLast,
-} from '@/components/ui/pagination';
+} from '@/ui/pagination';
 import type { DateRangeOption } from '@/lib/shared/utils/date-range';
 
 export function ReviewDataListPageClient() {
-  
-  // Local state for filters
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
 
-  const { createdAfter, createdBefore } = useDateRangeValues(dateRange);
+  const { createdAfter, createdBefore } = useMemo(
+    () => calculateDateRange(dateRange),
+    [dateRange],
+  );
 
   const { data: user } = useUserProfileQuery();
   const { data: permissions } = useUserPermissionsQuery();
@@ -55,12 +58,8 @@ export function ReviewDataListPageClient() {
     start: offset,
   } = pagination;
 
-  const startDate = createdAfter
-    ? new Date(createdAfter).toISOString().split('T')[0]
-    : undefined;
-  const endDate = createdBefore
-    ? new Date(createdBefore).toISOString().split('T')[0]
-    : undefined;
+  const startDate = toDateOnly(createdAfter);
+  const endDate = toDateOnly(createdBefore);
 
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     offset,
@@ -73,17 +72,26 @@ export function ReviewDataListPageClient() {
   const summaries = data?.data?.items ?? [];
   const totalFromServer = data?.data?.total;
 
-  const allDistricts = useAccumulatedDistricts(data?.availableDistricts);
+  const availableDistricts = useMemo(
+    () => normalizeDistrictList(data?.availableDistricts),
+    [data?.availableDistricts],
+  );
 
-  const accessibleDistrictStrings =
-    user && permissions
-      ? getAccessibleDistricts(allDistricts, user, permissions)
-      : [];
+  const accessibleDistricts = useMemo(() => {
+    if (!availableDistricts.length) return [] as string[];
+    if (!user || !permissions) return availableDistricts;
+    return getAccessibleDistricts(availableDistricts, user, permissions);
+  }, [availableDistricts, permissions, user]);
 
-  const accessibleDistricts = accessibleDistrictStrings.map(d => ({
-    value: d,
-    label: d,
-  }));
+  useEffect(() => {
+    if (
+      selectedDistrict &&
+      accessibleDistricts.length > 0 &&
+      !accessibleDistricts.includes(selectedDistrict)
+    ) {
+      setSelectedDistrict(null);
+    }
+  }, [accessibleDistricts, selectedDistrict]);
 
   useEffect(() => {
     if (totalFromServer !== undefined) {
@@ -170,7 +178,9 @@ export function ReviewDataListPageClient() {
               districts={accessibleDistricts}
               selectedDistrict={selectedDistrict}
               onDistrictSelected={handleDistrictSelected}
-              disabled={isLoading || isFetching}
+              disabled={
+                isLoading || isFetching || accessibleDistricts.length === 0
+              }
             />
             <Select
               value={String(pageSize)}

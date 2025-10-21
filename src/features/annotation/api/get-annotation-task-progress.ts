@@ -1,8 +1,8 @@
-import type { AnnotationTaskProgress } from '@/features/annotation/types/model';
 import type {
+  AnnotationTaskProgress,
   AnnotationTaskProgressDto,
   AnnotationsListResponseDto,
-} from '@/features/annotation/types/dto';
+} from '@/features/annotation/types';
 import { mapAnnotationTaskProgressDtoToModel } from '@/features/annotation/types/mapper';
 import bff from '@/lib/api/bff-client';
 

@@ -1,5 +1,5 @@
-import type { LoginResponseDto, SignupResponseDto } from './dto';
-import type { AuthPayload } from './model';
+import type { LoginResponseDto, SignupResponseDto } from './response.dto';
+import type { AuthPayload } from '@/lib/entities/auth';
 import { mapUserDtoToModel } from '@/features/user/types';
 
 export function mapAuthResponseDtoToPayload(

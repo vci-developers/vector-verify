@@ -1,15 +1,16 @@
 import {
   mapAnnotationsListResponseDtoToPage,
   type Annotation,
+  type AnnotationsListRequestDto,
+  type AnnotationsQuery,
 } from '@/features/annotation/types';
 import type { OffsetPage } from '@/lib/entities/pagination';
 import bff from '@/lib/api/bff-client';
 import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
-import type { AnnotationsListFilters } from '@/features/annotation/types';
-import type { AnnotationsListResponseDto } from '@/features/annotation/types/dto';
+import type { AnnotationsListResponseDto } from '@/features/annotation/types';
 
 export async function getAnnotations(
-  filters: AnnotationsListFilters,
+  filters: AnnotationsQuery,
 ): Promise<OffsetPage<Annotation>> {
   const {
     taskId,
@@ -18,16 +19,16 @@ export async function getAnnotations(
     status,
   } = filters;
 
-  const query = {
+  const query: AnnotationsListRequestDto = {
     taskId,
-    page,
-    limit,
-    status,
+    ...(page !== undefined ? { page } : {}),
+    ...(limit !== undefined ? { limit } : {}),
+    ...(status ? { status } : {}),
   };
 
   const data = await bff<AnnotationsListResponseDto>('/annotations', {
     method: 'GET',
-    query,
+    query: query as unknown as Record<string, string | number | boolean | null | undefined>,
   });
   return mapAnnotationsListResponseDtoToPage(data);
 }

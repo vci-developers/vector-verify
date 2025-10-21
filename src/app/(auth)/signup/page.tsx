@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/ui/card';
 import Link from 'next/link';
 
 export default function SignupPage() {

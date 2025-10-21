@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Select,
   SelectContent,
@@ -5,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
   SelectSeparator,
-} from '@/components/ui/select';
+} from '@/ui/select';
 import { cn } from '@/lib/utils';
 import { toDomId } from '@/lib/shared/utils/dom';
 

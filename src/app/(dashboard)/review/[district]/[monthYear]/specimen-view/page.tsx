@@ -3,7 +3,7 @@ import { SpecimenViewPageClient } from '@/features/review';
 interface SpecimenViewPageProps {
   params: {
     district: string;
-    monthYear: string; // This will now be in format "2024-01"
+    monthYear: string;
   };
 }
 

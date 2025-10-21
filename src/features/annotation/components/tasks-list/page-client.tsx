@@ -1,8 +1,8 @@
 'use client';
 
 import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
-import { DateRangeFilter } from '@/components/shared/date-range-filter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateRangeFilter } from '@/shared/components/date-range-filter';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import {
   Pagination,
   PaginationContent,
@@ -11,14 +11,14 @@ import {
   PaginationLink,
   PaginationFirst,
   PaginationLast,
-} from '@/components/ui/pagination';
+} from '@/ui/pagination';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/select';
 import {
   Table,
   TableBody,
@@ -26,21 +26,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/table';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
 import { PAGE_SIZES } from '@/lib/shared/constants';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import {
-  useDateRangeValues,
+  calculateDateRange,
   type DateRangeOption,
 } from '@/lib/shared/utils/date-range';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
-  // Local state for date range filter
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
-  const { createdAfter, createdBefore } = useDateRangeValues(dateRange);
+  const { createdAfter, createdBefore } = useMemo(
+    () => calculateDateRange(dateRange),
+    [dateRange],
+  );
 
   const pagination = usePagination({});
   const {
@@ -58,15 +60,14 @@ export function AnnotationTasksListPageClient() {
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
     page,
     limit: pageSize,
-    createdAfter,
-    createdBefore,
+    startDate: createdAfter,
+    endDate: createdBefore,
   });
 
   const tasks = data?.items ?? [];
   const totalFromServer = data?.total;
 
   useEffect(() => {
-    // Only update total when we have actual data to prevent pagination resets
     if (totalFromServer !== undefined) {
       setTotal(totalFromServer);
     }
@@ -80,7 +81,6 @@ export function AnnotationTasksListPageClient() {
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
-    // Reset pagination to page 1 when date range changes
     setPage(1);
   }
 

@@ -1,25 +1,26 @@
 import bff from '@/lib/api/bff-client';
+import type { SpecimenCountsSummary } from '@/features/review/types';
 import type {
-  SpecimenCountsFilters,
-  SpecimenCountsResponse,
   SpecimenCountsResponseDto,
+  SpecimenCountsRequestDto,
+  SpecimenCountsQuery,
 } from '@/features/review/types';
 import { mapSpecimenCountsResponseDtoToModel } from '@/features/review/types';
 
 export async function getSpecimenCounts(
-  filters: SpecimenCountsFilters,
-): Promise<SpecimenCountsResponse> {
+  filters: SpecimenCountsQuery,
+): Promise<SpecimenCountsSummary> {
   const { district, startDate, endDate } = filters;
 
-  const query = {
+  const query: SpecimenCountsRequestDto = {
     ...(district ? { district } : {}),
     ...(startDate ? { startDate } : {}),
     ...(endDate ? { endDate } : {}),
-  } as Record<string, string>;
+  };
 
   const response = await bff<SpecimenCountsResponseDto>('/specimens/count', {
     method: 'GET',
-    query,
+    query: query as Record<string, string>,
   });
 
   return mapSpecimenCountsResponseDtoToModel(response);

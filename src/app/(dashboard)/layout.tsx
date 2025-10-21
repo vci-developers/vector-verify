@@ -11,8 +11,8 @@ import {
 import {
   getServerUserProfile,
   getServerUserPermissions,
-} from '@/lib/user/server';
-import { DashboardHeader } from '@/components/dashboard/header';
+} from '@/features/user/server';
+import { DashboardHeader } from '@/features/dashboard';
 import { dehydrateWithSeed } from '@/lib/shared/react-query/server';
 import {
   Card,
@@ -21,7 +21,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/ui/card';
 import { ShieldAlert } from 'lucide-react';
 import { LogoutButton } from '@/features/auth';
 import { getAccessToken } from '@/lib/auth/server/tokens';

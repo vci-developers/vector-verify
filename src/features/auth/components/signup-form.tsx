@@ -1,7 +1,7 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/ui/alert';
+import { Button } from '@/ui/button';
 import {
   Form,
   FormControl,
@@ -9,12 +9,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/ui/form';
+import { Input } from '@/ui/input';
 import {
   SignupSchema,
   type SignupFormData,
-} from '@/lib/auth/validation/schema';
+} from '@/features/auth/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';

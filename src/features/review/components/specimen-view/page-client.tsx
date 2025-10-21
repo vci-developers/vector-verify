@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/select';
 import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 import { useUserPermissionsQuery } from '@/features/user';
 import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
@@ -34,10 +34,8 @@ export function SpecimenViewPageClient({
   const startDate = startOfMonth.toISOString().split('T')[0];
   const endDate = endOfMonth.toISOString().split('T')[0];
 
-  // Get user permissions
   const { data: permissions, isLoading: isLoadingPermissions } = useUserPermissionsQuery();
 
-  // Filter sites for this district
   const districtSites = useMemo(() => {
     if (!permissions?.sites?.canAccessSites) return [];
     
@@ -51,7 +49,6 @@ export function SpecimenViewPageClient({
     [districtSites]
   );
 
-  // Format month name for display
   const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',

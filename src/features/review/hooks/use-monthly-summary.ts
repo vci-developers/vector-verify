@@ -4,15 +4,12 @@ import {
   type MonthlySummaryQueryKey,
 } from '@/features/review/api/review-keys';
 import { getMonthlySummary } from '@/features/review/api/get-monthly-summary';
-import type {
-  MonthlySummaryFilters,
-  MonthlySummary,
-} from '@/features/review/types';
+import type { MonthlySummary, MonthlySummaryQuery } from '@/features/review/types';
 import type { OffsetPage } from '@/lib/entities/pagination';
 import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 
 export function useMonthlySummaryQuery(
-  filters: MonthlySummaryFilters = {},
+  filters: MonthlySummaryQuery = {},
   options?: Omit<
     UseQueryOptions<
       {
@@ -45,7 +42,14 @@ export function useMonthlySummaryQuery(
       endDate,
       district,
     ) as MonthlySummaryQueryKey,
-    queryFn: () => getMonthlySummary(filters),
+    queryFn: () =>
+      getMonthlySummary({
+        offset,
+        limit,
+        startDate,
+        endDate,
+        district,
+      }),
     placeholderData: previousData => previousData, // Keep previous data while fetching
     ...(options ?? {}),
   });

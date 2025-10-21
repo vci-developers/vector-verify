@@ -6,13 +6,13 @@ import {
 import { getAnnotationTasks } from '@/features/annotation/api/get-annotation-tasks';
 import type {
   AnnotationTask,
-  AnnotationTasksListFilters,
+  AnnotationTasksQuery,
 } from '@/features/annotation/types';
 import type { OffsetPage } from '@/lib/entities/pagination';
 import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 
 export function useAnnotationTasksQuery(
-  filters: AnnotationTasksListFilters = {},
+  filters: AnnotationTasksQuery = {},
   options?: Omit<
     UseQueryOptions<
       OffsetPage<AnnotationTask>,
@@ -26,22 +26,23 @@ export function useAnnotationTasksQuery(
   const {
     page = 1,
     limit = DEFAULT_PAGE_SIZE,
-    taskStatus,
-    taskTitle,
-    createdAfter,
-    createdBefore,
+    startDate,
+    endDate,
   } = filters;
 
   return useQuery({
     queryKey: annotationKeys.tasks(
       page,
       limit,
-      taskStatus,
-      taskTitle,
-      createdAfter,
-      createdBefore,
+      startDate,
+      endDate,
     ) as AnnotationTasksQueryKey,
-    queryFn: () => getAnnotationTasks(filters),
+    queryFn: () => getAnnotationTasks({
+      page,
+      limit,
+      startDate,
+      endDate,
+    }),
     ...(options ?? {}),
   });
 }

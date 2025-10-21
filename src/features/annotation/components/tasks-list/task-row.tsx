@@ -1,6 +1,8 @@
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { TableCell, TableRow } from '@/components/ui/table';
+'use client';
+
+import { Badge } from '@/ui/badge';
+import { Progress } from '@/ui/progress';
+import { TableCell, TableRow } from '@/ui/table';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import {
   AnnotationTask,

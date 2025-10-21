@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { useImageViewer } from './hooks/use-image-viewer';
 import { ImageOff, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/button';
 import Image from 'next/image';
 import { useEffect } from 'react';
 

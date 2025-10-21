@@ -4,12 +4,12 @@ import type {
   MonthlySummaryResponseDto,
   SpecimenCountsResponseDto,
   SpecimenCountsSiteDto,
-} from './dto';
+} from './response.dto';
 import type {
   MonthlySummary,
-  SpecimenCountsResponse,
-  SpecimenCountsSite,
   SpecimenCountEntry,
+  SpecimenCountsSummary,
+  SpecimenCountsSite,
 } from './model';
 
 function getMonthName(month: number, year: number): string {
@@ -67,9 +67,8 @@ function mapSpecimenCountsSiteDtoToModel(dto: SpecimenCountsSiteDto): SpecimenCo
 
 export function mapSpecimenCountsResponseDtoToModel(
   dto: SpecimenCountsResponseDto,
-): SpecimenCountsResponse {
+): SpecimenCountsSummary {
   return {
-    message: dto.message,
     columns: dto.columns,
     data: dto.data.map(mapSpecimenCountsSiteDtoToModel),
   };

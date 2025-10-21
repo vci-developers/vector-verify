@@ -1,9 +1,9 @@
 'use client';
 
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/ui/dialog';
 import Image from 'next/image';
 import { X, ImageOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/button';
 import { Specimen } from '@/lib/entities/specimen';
 
 interface ImageModalProps {

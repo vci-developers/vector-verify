@@ -1,7 +1,7 @@
 import type { OffsetPage } from '@/lib/entities/pagination';
 import type { Specimen } from '@/lib/entities/specimen/model';
 import { getSpecimens } from '@/features/review/api/get-specimens';
-import type { SpecimensListFilters } from '@/features/review/types';
+import type { SpecimensQuery } from '@/features/review/types';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@/features/review/api/review-keys';
 
 export function useSpecimensQuery(
-  filters: SpecimensListFilters = {},
+  filters: SpecimensQuery = {},
   options?: Omit<
     UseQueryOptions<
     OffsetPage<Specimen>, 
@@ -24,8 +24,23 @@ export function useSpecimensQuery(
   const { offset, limit, startDate, endDate, district, siteId } = filters;
 
   return useQuery({
-    queryKey: reviewKeys.specimens(offset, limit, startDate, endDate, district, siteId) as SpecimensQueryKey,
-    queryFn: () => getSpecimens(filters),
+    queryKey: reviewKeys.specimens(
+      offset,
+      limit,
+      startDate,
+      endDate,
+      district,
+      siteId,
+    ) as SpecimensQueryKey,
+    queryFn: () =>
+      getSpecimens({
+        offset,
+        limit,
+        startDate,
+        endDate,
+        district,
+        siteId,
+      }),
     enabled: Boolean(siteId && district && startDate && endDate), 
     ...(options ?? {}),
   });

@@ -1,24 +1,15 @@
 import type { QueryKey } from '@tanstack/react-query';
-import type {
-  AnnotationStatus,
-  AnnotationTaskStatus,
-} from '@/features/annotation/types/status';
+import type { AnnotationStatus } from '@/lib/entities/annotation/status';
 
 export const annotationKeys = {
   root: ['annotations'] as const,
   tasks: (
     page?: number,
     limit?: number,
-    taskStatus?: AnnotationTaskStatus,
-    taskTitle?: string,
-    createdAfter?: string,
-    createdBefore?: string,
+    startDate?: string,
+    endDate?: string,
   ) =>
-    [
-      ...annotationKeys.root,
-      'tasks',
-      { page, limit, taskStatus, taskTitle, createdAfter, createdBefore },
-    ] as const,
+    [...annotationKeys.root, 'tasks', { page, limit, startDate, endDate }] as const,
   taskProgress: (taskId: number) =>
     [...annotationKeys.root, 'task-progress', taskId] as const,
   taskAnnotations: (
@@ -27,11 +18,7 @@ export const annotationKeys = {
     limit?: number,
     status?: AnnotationStatus,
   ) =>
-    [
-      ...annotationKeys.root,
-      'task-annotations',
-      { taskId, page, limit, status },
-    ] as const,
+    [...annotationKeys.root, 'task-annotations', { taskId, page, limit, status }] as const,
 };
 
 export type AnnotationTasksQueryKey = ReturnType<typeof annotationKeys.tasks> &

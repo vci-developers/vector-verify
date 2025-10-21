@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/table';
 import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
 
 interface MasterTableViewPageClientProps {
@@ -167,21 +167,23 @@ export function MasterTableViewPageClient({
                     >
                       Site
                     </TableHead>
-                    {tableMeta.groupedColumns.groups.map((group, index) => {
+                    {tableMeta.groupedColumns.speciesOrder.map((species, index) => {
+                      const speciesColumns =
+                        tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
                       const isNonMosquito =
-                        group.columns.length === 1 &&
-                        group.columns[0].displayName === group.species;
+                        speciesColumns.length === 1 &&
+                        speciesColumns[0].displayName === species;
 
                       return (
                         <TableHead
-                          key={group.species}
+                          key={species}
                           className={`bg-muted sticky top-0 z-20 text-center text-xs uppercase ${
                             index > 0 ? 'border-l-border border-l-2' : ''
                           } ${!isNonMosquito ? 'border-b' : ''}`}
-                          colSpan={isNonMosquito ? 1 : group.columns.length}
+                          colSpan={isNonMosquito ? 1 : speciesColumns.length}
                           rowSpan={isNonMosquito ? 2 : 1}
                         >
-                          {group.species}
+                          {species}
                         </TableHead>
                       );
                     })}
@@ -193,18 +195,19 @@ export function MasterTableViewPageClient({
                     </TableHead>
                   </TableRow>
                   <TableRow className="bg-muted">
-                    {tableMeta.groupedColumns.groups.flatMap(
-                      (group, groupIndex) => {
+                    {tableMeta.groupedColumns.speciesOrder.flatMap(
+                      (species, groupIndex) => {
+                        const speciesColumns =
+                          tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
                         const isNonMosquito =
-                          group.columns.length === 1 &&
-                          group.columns[0].displayName === group.species;
+                          speciesColumns.length === 1 &&
+                          speciesColumns[0].displayName === species;
 
-                        // Skip non-mosquito columns in second row since they span 2 rows
                         if (isNonMosquito) return [];
 
-                        return group.columns.map((column, columnIndex) => (
+                        return speciesColumns.map((column, columnIndex) => (
                           <TableHead
-                            key={column.originalName}
+                            key={`${species}-${column.originalName}`}
                             className={`bg-muted sticky top-[2.5rem] z-20 text-center text-xs uppercase ${
                               groupIndex > 0 && columnIndex === 0
                                 ? 'border-l-border border-l-2'
@@ -235,22 +238,24 @@ export function MasterTableViewPageClient({
                             </div>
                           )}
                         </TableCell>
-                        {tableMeta.groupedColumns.groups.flatMap(
-                          (group, groupIndex) =>
-                            group.columns.map((column, columnIndex) => (
-                              <TableCell
-                                key={`${row.key}-${column.originalName}`}
-                                className={`bg-background text-center tabular-nums transition-colors ${
-                                  groupIndex > 0 && columnIndex === 0
-                                    ? 'border-l-border border-l-2'
-                                    : ''
-                                } group-hover:bg-muted`}
-                              >
-                                {(
-                                  row.countsByColumn[column.originalName] ?? 0
-                                ).toLocaleString()}
-                              </TableCell>
-                            )),
+                        {tableMeta.groupedColumns.speciesOrder.flatMap(
+                          (species, groupIndex) =>
+                            (tableMeta.groupedColumns.columnsBySpecies[species] ?? []).map(
+                              (column, columnIndex) => (
+                                <TableCell
+                                  key={`${row.key}-${column.originalName}`}
+                                  className={`bg-background text-center tabular-nums transition-colors ${
+                                    groupIndex > 0 && columnIndex === 0
+                                      ? 'border-l-border border-l-2'
+                                      : ''
+                                  } group-hover:bg-muted`}
+                                >
+                                  {(
+                                    row.countsByColumn[column.originalName] ?? 0
+                                  ).toLocaleString()}
+                                </TableCell>
+                              ),
+                            ),
                         )}
                         <TableCell className="bg-background border-l-border group-hover:bg-muted border-l-2 text-center font-semibold tabular-nums transition-colors">
                           {(row.totalSpecimens ?? 0).toLocaleString()}
@@ -264,22 +269,24 @@ export function MasterTableViewPageClient({
                     <TableCell className="bg-muted border-border sticky left-0 z-20 max-w-[12rem] border-r shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)]">
                       Total
                     </TableCell>
-                    {tableMeta.groupedColumns.groups.flatMap(
-                      (group, groupIndex) =>
-                        group.columns.map((column, columnIndex) => (
-                          <TableCell
-                            key={`total-${column.originalName}`}
-                            className={`text-center tabular-nums ${
-                              groupIndex > 0 && columnIndex === 0
-                                ? 'border-l-border border-l-2'
-                                : ''
-                            }`}
-                          >
-                            {(
-                              tableMeta.totals[column.originalName] ?? 0
-                            ).toLocaleString()}
-                          </TableCell>
-                        )),
+                    {tableMeta.groupedColumns.speciesOrder.flatMap(
+                      (species, groupIndex) =>
+                        (tableMeta.groupedColumns.columnsBySpecies[species] ?? []).map(
+                          (column, columnIndex) => (
+                            <TableCell
+                              key={`total-${column.originalName}`}
+                              className={`text-center tabular-nums ${
+                                groupIndex > 0 && columnIndex === 0
+                                  ? 'border-l-border border-l-2'
+                                  : ''
+                              }`}
+                            >
+                              {(
+                                tableMeta.totals[column.originalName] ?? 0
+                              ).toLocaleString()}
+                            </TableCell>
+                          ),
+                        ),
                     )}
                     <TableCell className="border-l-border border-l-2 text-center font-bold tabular-nums">
                       {(tableMeta.grandTotal ?? 0).toLocaleString()}

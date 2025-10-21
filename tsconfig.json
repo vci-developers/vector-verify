@@ -29,8 +29,11 @@
       "@/features/*": [
         "./src/features/*"
       ],
-      "@/components/*": [
-        "./src/components/*"
+      "@/shared/*": [
+        "./src/shared/*"
+      ],
+      "@/ui/*": [
+        "./src/shared/ui/*"
       ],
       "@/lib/*": [
         "./src/lib/*"

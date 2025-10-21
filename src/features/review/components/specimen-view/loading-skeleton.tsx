@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/skeleton';
 
 export function SpecimenGridLoadingSkeleton() {
   return (
@@ -50,4 +50,3 @@ export function SpecimenAccordionLoadingSkeleton() {
     </div>
   );
 }
-

@@ -6,7 +6,7 @@ import {
 } from '@/features/review/api/master-table-view-keys';
 import { getSpecimenCounts } from '@/features/review/api/get-specimen-counts';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
-import type { SpecimenCountsResponse } from '@/features/review/types';
+import type { SpecimenCountsSummary } from '@/features/review/types';
 
 interface UseSpecimenCountsParams {
   district?: string | null;
@@ -15,9 +15,9 @@ interface UseSpecimenCountsParams {
 
 type SpecimenCountsQueryOptions = Omit<
   UseQueryOptions<
-    SpecimenCountsResponse,
+    SpecimenCountsSummary,
     Error,
-    SpecimenCountsResponse,
+    SpecimenCountsSummary,
     SpecimenCountsQueryKey
   >,
   'queryKey' | 'queryFn'

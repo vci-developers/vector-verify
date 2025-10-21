@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Specimen } from '@/lib/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
@@ -10,12 +12,12 @@ import {
   PaginationItem,
   PaginationLast,
   PaginationLink,
-} from '@/components/ui/pagination';
+} from '@/ui/pagination';
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from '@/ui/accordion';
 import { usePagination } from '@/lib/shared/hooks/use-pagination';
 import { ImageOff } from 'lucide-react';
 import { useEffect } from 'react';
@@ -58,7 +60,6 @@ export function SiteSpecimenAccordionItem({
   onImageClick,
   onPageChange,
 }: SiteSpecimenAccordionItemProps) {
-  // Fetch specimens for this site - always call hook
   const { data, isLoading } = useSpecimensQuery({
     district,
     startDate,
@@ -71,14 +72,12 @@ export function SiteSpecimenAccordionItem({
   const specimens = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Use pagination hook
   const pagination = usePagination({
     initialTotal: total,
     initialPage: currentPage,
     initialPageSize: pageSize,
   });
 
-  // Sync pagination hook with props
   useEffect(() => {
     pagination.setTotal(total);
   }, [total]);

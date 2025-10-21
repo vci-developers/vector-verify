@@ -9,34 +9,6 @@ export interface MonthlySummary {
   sessionCount: number;
 }
 
-export interface MonthlySummaryFilters {
-  offset?: number;
-  limit?: number;
-  startDate?: string;
-  endDate?: string;
-  district?: string;
-}
-
-export interface DistrictOption {
-  value: string;
-  label: string;
-}
-
-export interface SpecimensListFilters {
-  offset?: number;
-  limit?: number;
-  startDate?: string;
-  endDate?: string;
-  district?: string;
-  siteId?: number;
-}
-
-export interface SpecimenCountsFilters {
-  district?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
 export interface SpecimenCountEntry {
   species: string | null;
   sex: string | null;
@@ -52,21 +24,7 @@ export interface SpecimenCountsSite {
   totalSpecimens: number;
 }
 
-export interface SpecimenCountsResponse {
-  message: string;
+export interface SpecimenCountsSummary {
   columns: string[];
   data: SpecimenCountsSite[];
-}
-
-export interface ColumnGroup {
-  species: string;
-  columns: {
-    originalName: string;
-    displayName: string;
-  }[];
-}
-
-export interface GroupedColumns {
-  groups: ColumnGroup[];
-  totalColumns: number;
 }

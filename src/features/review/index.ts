@@ -3,7 +3,6 @@ export * from './types';
 export * from './api';
 
 export { useMonthlySummaryQuery } from './hooks/use-monthly-summary';
-export { useAccumulatedDistricts } from './hooks/use-accumulated-districts';
 export { useSpecimensQuery } from './hooks/use-specimens';
 export { useSpecimenCountsQuery } from './hooks/use-specimen-counts';
 

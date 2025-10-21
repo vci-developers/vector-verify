@@ -1,40 +1,20 @@
+import type { OffsetPage } from '@/lib/entities/pagination';
 import type {
-  AnnotationDto,
-  AnnotationExpandedDto,
-  AnnotationsListResponseDto,
-  AnnotationTaskDto,
-  AnnotationTasksListResponseDto,
+  Annotation,
+  AnnotationTask,
+  AnnotationTaskProgress,
+} from '@/lib/entities/annotation/model';
+import {
+  mapAnnotationDtoToModel,
+  mapAnnotationTaskDtoToModel,
+} from '@/lib/entities/annotation/mapper';
+import type {
   AnnotationTaskProgressDto,
-} from './dto';
-import type { Annotation, AnnotationTask, AnnotationTaskProgress } from './model';
-import { mapSpecimenExpandedDtoToModel } from '@/lib/entities/specimen/mapper';
-import type { OffsetPage } from '@/lib/entities/pagination/model';
+  AnnotationsListResponseDto,
+  AnnotationTasksListResponseDto,
+} from './response.dto';
 
-export function mapAnnotationDtoToModel(
-  dto: AnnotationDto | AnnotationExpandedDto,
-): Annotation {
-  const base: Annotation = {
-    id: dto.id,
-    annotationTaskId: dto.annotationTaskId,
-    annotatorId: dto.annotatorId,
-    specimenId: dto.specimenId,
-    morphSpecies: dto.morphSpecies,
-    morphSex: dto.morphSex,
-    morphAbdomenStatus: dto.morphAbdomenStatus,
-    notes: dto.notes,
-    status: dto.status,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-  };
-
-  if ('annotationTask' in dto) {
-    base.annotationTask = mapAnnotationTaskDtoToModel(dto.annotationTask);
-    base.annotator = { ...dto.annotator };
-    base.specimen = mapSpecimenExpandedDtoToModel(dto.specimen);
-  }
-
-  return base;
-}
+export { mapAnnotationDtoToModel, mapAnnotationTaskDtoToModel } from '@/lib/entities/annotation/mapper';
 
 export function mapAnnotationsListResponseDtoToPage(
   dto: AnnotationsListResponseDto,
@@ -45,20 +25,6 @@ export function mapAnnotationsListResponseDtoToPage(
     limit: dto.limit,
     offset: dto.offset,
     hasMore: dto.hasMore,
-  };
-}
-
-export function mapAnnotationTaskDtoToModel(
-  dto: AnnotationTaskDto,
-): AnnotationTask {
-  return {
-    id: dto.id,
-    userId: dto.userId,
-    title: dto.title,
-    description: dto.description,
-    status: dto.status,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
   };
 }
 

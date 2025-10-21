@@ -12,15 +12,6 @@ export interface SpecimenDto {
   thumbnailImageId: number | null;
 }
 
-export interface SpecimenWithImagesDto extends SpecimenDto {
-  images: SpecimenImageDto[];
-  thumbnailImage: SpecimenImageDto | null;
-}
-
-export interface SpecimenWithSessionDto extends SpecimenDto {
-  session: SessionDto;
-}
-
 export interface SpecimenExpandedDto extends SpecimenDto {
   images: SpecimenImageDto[];
   thumbnailImage: SpecimenImageDto | null;
@@ -34,4 +25,3 @@ export interface SpecimensListResponseDto {
  offset: number;
  hasMore: boolean;
 }
-

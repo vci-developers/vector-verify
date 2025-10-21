@@ -1,7 +1,5 @@
 import type {
   SpecimenDto,
-  SpecimenWithImagesDto,
-  SpecimenWithSessionDto,
   SpecimenExpandedDto,
   SpecimensListResponseDto,
 } from '@/lib/entities/specimen/dto';
@@ -17,32 +15,6 @@ export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
     sessionId: dto.sessionId,
     thumbnailUrl: dto.thumbnailUrl,
     thumbnailImageId: dto.thumbnailImageId,
-  };
-}
-
-export function mapSpecimenWithImagesDtoToModel(
-  dto: SpecimenWithImagesDto,
-): Specimen {
-  const base = mapSpecimenDtoToModel(dto);
-  return {
-    ...base,
-    images: dto.images ? dto.images.map(mapSpecimenImageDtoToModel) : undefined,
-    thumbnailImage:
-      dto.thumbnailImage === null
-        ? null
-        : dto.thumbnailImage
-          ? mapSpecimenImageDtoToModel(dto.thumbnailImage)
-          : undefined,
-  };
-}
-
-export function mapSpecimenWithSessionDtoToModel(
-  dto: SpecimenWithSessionDto,
-): Specimen {
-  const base = mapSpecimenDtoToModel(dto);
-  return {
-    ...base,
-    session: dto.session ? mapSessionDtoToModel(dto.session) : undefined,
   };
 }
 
