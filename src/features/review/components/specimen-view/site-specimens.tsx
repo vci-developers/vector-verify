@@ -1,8 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import Image from 'next/image';
+import { ImageOff } from 'lucide-react';
+
 import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
 import { SpecimenGridLoadingSkeleton } from './loading-skeleton';
 import {
   Pagination,
@@ -13,26 +17,19 @@ import {
   PaginationLast,
   PaginationLink,
 } from '@/ui/pagination';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/ui/accordion';
-import { usePagination } from '@/shared/core/hooks/use-pagination';
-import { ImageOff } from 'lucide-react';
-import { useEffect } from 'react';
+import type { SpecimenFilters } from './specimen-filters';
 
-interface SiteSpecimenAccordionItemProps {
+interface SiteSpecimenContentProps {
   siteId: number;
-  houseNumber: string;
   district: string;
   startDate: string;
   endDate: string;
   currentPage: number;
   pageSize: number;
   isOpen: boolean;
+  filters: SpecimenFilters;
   onImageClick: (specimen: Specimen) => void;
-  onPageChange: (page: number) => void;
+  onPageChange: (siteId: number, page: number) => void;
 }
 
 function getImageUrl(specimen: Specimen): string | null {
@@ -43,23 +40,25 @@ function getImageUrl(specimen: Specimen): string | null {
   const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
   if (!relativePath) return null;
   if (relativePath.startsWith('http')) return relativePath;
-  return `/api/bff${
-    relativePath.startsWith('/') ? relativePath : `/${relativePath}`
-  }`;
+  return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
 }
 
-export function SiteSpecimenAccordionItem({
+export function SiteSpecimenContent({
   siteId,
-  houseNumber,
   district,
   startDate,
   endDate,
   currentPage,
   pageSize,
   isOpen,
+  filters,
   onImageClick,
   onPageChange,
-}: SiteSpecimenAccordionItemProps) {
+}: SiteSpecimenContentProps) {
+  useEffect(() => {
+    onPageChange(siteId, 1);
+  }, [filters.species, filters.sex, filters.abdomenStatus, onPageChange, siteId]);
+
   const { data, isLoading } = useSpecimensQuery({
     district,
     startDate,
@@ -67,6 +66,9 @@ export function SiteSpecimenAccordionItem({
     siteId,
     offset: (currentPage - 1) * pageSize,
     limit: pageSize,
+    species: filters.species ?? undefined,
+    sex: filters.sex ?? undefined,
+    abdomenStatus: filters.abdomenStatus ?? undefined,
   });
 
   const specimens = data?.items ?? [];
@@ -93,7 +95,7 @@ export function SiteSpecimenAccordionItem({
   ) {
     event.preventDefault();
     if (!isPagingDisabled && currentPage > 1) {
-      onPageChange(1);
+      onPageChange(siteId, 1);
     }
   }
 
@@ -102,7 +104,7 @@ export function SiteSpecimenAccordionItem({
   ) {
     event.preventDefault();
     if (!isPagingDisabled && currentPage < totalPages) {
-      onPageChange(totalPages);
+      onPageChange(siteId, totalPages);
     }
   }
 
@@ -112,135 +114,124 @@ export function SiteSpecimenAccordionItem({
   ) {
     event.preventDefault();
     if (!isPagingDisabled && pageNumber !== currentPage) {
-      onPageChange(pageNumber);
+      onPageChange(siteId, pageNumber);
     }
   }
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <AccordionItem value={String(siteId)} className="border-b last:border-b-0">
-      <AccordionTrigger className="px-4">
-        <div className="flex items-center gap-2">
-          <span>{houseNumber}</span>
-          <span className="text-muted-foreground text-sm">
-            (Site ID: {siteId})
-          </span>
+    <>
+      {isLoading ? (
+        <SpecimenGridLoadingSkeleton />
+      ) : total === 0 ? (
+        <div className="p-4 text-center text-sm text-muted-foreground">
+          {filters.species || filters.sex || filters.abdomenStatus
+            ? 'No specimens match the selected filters'
+            : 'No specimens reported from this household'}
         </div>
-      </AccordionTrigger>
-      <AccordionContent className="px-4 pb-4">
-        {isOpen && (
-          <>
-            {isLoading ? (
-              <SpecimenGridLoadingSkeleton />
-            ) : total === 0 ? (
-              <div className="text-muted-foreground p-4 text-center text-sm">
-                No specimens reported from this household
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="text-muted-foreground flex items-center justify-between text-sm">
-                  <span>
-                    Showing {(currentPage - 1) * pageSize + 1} -{' '}
-                    {Math.min(currentPage * pageSize, total)} of {total}{' '}
-                    specimens
-                  </span>
-                </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Showing {(currentPage - 1) * pageSize + 1} –
+              {` ${Math.min(currentPage * pageSize, total)} of ${total} specimens`}
+              {filters.species || filters.sex || filters.abdomenStatus ? ' (filtered)' : ''}
+            </span>
+          </div>
 
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                  {specimens.map(specimen => {
-                    const imageUrl = getImageUrl(specimen);
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {specimens.map(specimen => {
+              const imageUrl = getImageUrl(specimen);
 
-                    return (
-                      <div
-                        key={specimen.id}
-                        className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
-                        onClick={() => imageUrl && onImageClick(specimen)}
-                      >
-                        <div className="text-muted-foreground px-2 pt-2 text-xs">
-                          {specimen.specimenId}
-                        </div>
-                        <div className="relative aspect-[4/3] w-full">
-                          {imageUrl ? (
-                            <Image
-                              src={imageUrl}
-                              alt={`Specimen ${specimen.specimenId}`}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 50vw, 25vw"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="bg-muted flex h-full w-full items-center justify-center">
-                              <div className="text-muted-foreground flex flex-col items-center gap-2">
-                                <ImageOff className="h-8 w-8" />
-                                <span className="text-xs">Invalid image</span>
-                              </div>
-                            </div>
-                          )}
+              return (
+                <div
+                  key={specimen.id}
+                  className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
+                  onClick={() => imageUrl && onImageClick(specimen)}
+                >
+                  <div className="px-2 pt-2 text-xs text-muted-foreground">
+                    {specimen.specimenId}
+                  </div>
+                  <div className="relative aspect-[4/3] w-full">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={`Specimen ${specimen.specimenId}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <ImageOff className="h-8 w-8" />
+                          <span className="text-xs">Invalid image</span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="mt-6">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationFirst
-                            className={
-                              isPagingDisabled || currentPage <= 1
-                                ? 'pointer-events-none opacity-50'
-                                : ''
-                            }
-                            onClick={handleNavigateToFirstPage}
-                            href="#"
-                          />
-                        </PaginationItem>
-                        {createRange(currentPage)
-                          .map((pageItem, index) => (
-                            <PaginationItem
-                              key={
-                                pageItem === 'ellipsis'
-                                  ? `ellipsis-${index}`
-                                  : pageItem
-                              }
-                            >
-                              {pageItem === 'ellipsis' ? (
-                                <PaginationEllipsis />
-                              ) : (
-                                <PaginationLink
-                                  href="#"
-                                  isActive={pageItem === currentPage}
-                                  onClick={event =>
-                                    handleNavigateToPage(event, pageItem)
-                                  }
-                                >
-                                  {pageItem}
-                                </PaginationLink>
-                              )}
-                            </PaginationItem>
-                          ))}
-                        <PaginationItem>
-                          <PaginationLast
-                            className={
-                              isPagingDisabled || currentPage >= totalPages
-                                ? 'pointer-events-none opacity-50'
-                                : ''
-                            }
-                            onClick={handleNavigateToLastPage}
-                            href="#"
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </AccordionContent>
-    </AccordionItem>
+                </div>
+              );
+            })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationFirst
+                      className={
+                        isPagingDisabled || currentPage <= 1
+                          ? 'pointer-events-none opacity-50'
+                          : ''
+                      }
+                      onClick={handleNavigateToFirstPage}
+                      href="#"
+                    />
+                  </PaginationItem>
+                  {createRange(currentPage).map((pageItem, index) => (
+                    <PaginationItem
+                      key={
+                        pageItem === 'ellipsis'
+                          ? `ellipsis-${index}`
+                          : pageItem
+                      }
+                    >
+                      {pageItem === 'ellipsis' ? (
+                        <PaginationEllipsis />
+                      ) : (
+                        <PaginationLink
+                          href="#"
+                          isActive={pageItem === currentPage}
+                          onClick={event => handleNavigateToPage(event, pageItem)}
+                        >
+                          {pageItem}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationLast
+                      className={
+                        isPagingDisabled || currentPage >= totalPages
+                          ? 'pointer-events-none opacity-50'
+                          : ''
+                      }
+                      onClick={handleNavigateToLastPage}
+                      href="#"
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }

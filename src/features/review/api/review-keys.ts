@@ -22,11 +22,14 @@ export const reviewKeys = {
     endDate?: string,
     district?: string,
     siteId?: number,
+    species?: string | null,
+    sex?: string | null,
+    abdomenStatus?: string | null,
   ) =>
     [
       ...reviewKeys.root,
       'specimens',
-      { offset, limit, startDate, endDate, district, siteId },
+      { offset, limit, startDate, endDate, district, siteId, species, sex, abdomenStatus },
     ] as const,
 
 } as const;
