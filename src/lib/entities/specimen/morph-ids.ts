@@ -1,6 +1,6 @@
 export const SPECIES_MORPH_IDS = {
     ANOPHELES_FUNESTUS: "Anopheles funestus",
-    ANOPHELES_BAMBIAE: "Anopheles gambiae",
+    ANOPHELES_GAMBIAE: "Anopheles gambiae",
     ANOPHELES_OTHER: "Anopheles other",
     CULEX: "Culex",
     AEDES: "Aedes",
@@ -15,7 +15,7 @@ export const SEX_MORPH_IDS = {
 
 export const ABDOMEN_STATUS_MORPH_IDS = {
     UNFED: "Unfed",
-    FULLY_FED: "Fully-fed",
-    SEMI_GRAVID: "Semi-gravid",
+    FULLY_FED: "Fully Fed",
+    SEMI_GRAVID: "Semi Gravid",
     GRAVID: "Gravid"
 }

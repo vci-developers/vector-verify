@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SpecimenReviewAccordion } from './specimen-review-accordion';
 import {
   Select,
@@ -12,6 +12,7 @@ import {
 import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
 import { useUserPermissionsQuery } from '@/lib/user/client';
 import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
+import { SpecimenFilters, SpecimenFiltersComponent } from './specimen-filters';
 
 interface SpecimenViewPageClientProps {
   district: string;
@@ -26,6 +27,11 @@ export function SpecimenViewPageClient({
   const formattedMonthYear = decodeURIComponent(monthYear);
 
   const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
+  const [filters, setFilters] = useState<SpecimenFilters>({
+    species: null,
+    sex: null,
+    abdomenStatus: null,
+  });
 
   const [year, monthNum] = formattedMonthYear.split('-').map(Number);
   const startOfMonth = new Date(year, monthNum - 1, 1);
@@ -34,10 +40,8 @@ export function SpecimenViewPageClient({
   const startDate = startOfMonth.toISOString().split('T')[0];
   const endDate = endOfMonth.toISOString().split('T')[0];
 
-  // Get user permissions
   const { data: permissions, isLoading: isLoadingPermissions } = useUserPermissionsQuery();
 
-  // Filter sites for this district
   const districtSites = useMemo(() => {
     if (!permissions?.sites?.canAccessSites) return [];
     
@@ -51,7 +55,6 @@ export function SpecimenViewPageClient({
     [districtSites]
   );
 
-  // Format month name for display
   const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -60,6 +63,12 @@ export function SpecimenViewPageClient({
   function handleRowsPerPageChange(value: string) {
     setPageSize(Number(value));
   }
+
+  function handleFiltersChange(newFilters: SpecimenFilters) {
+    setFilters(newFilters);
+  }
+
+
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -71,26 +80,34 @@ export function SpecimenViewPageClient({
           </span>
         </h1>
 
-        {districtSites.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Items per page:</span>
-            <Select
-              value={String(pageSize)}
-              onValueChange={handleRowsPerPageChange}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZES.map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          <SpecimenFiltersComponent
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            disabled={isLoadingPermissions || districtSites.length === 0}
+          />
+          
+          {districtSites.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Items per page:</span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={handleRowsPerPageChange}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZES.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
       </div>
 
       {isLoadingPermissions ? (
@@ -114,6 +131,7 @@ export function SpecimenViewPageClient({
           startDate={startDate}
           endDate={endDate}
           pageSize={pageSize}
+          filters={filters}
         />
       )}
     </div>
