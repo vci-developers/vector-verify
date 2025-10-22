@@ -1,13 +1,12 @@
 import type { OffsetPage } from '@/shared/entities/pagination';
 import type { Specimen } from '@/shared/entities/specimen/model';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { getSpecimens } from '@/features/review/api/get-specimens';
-import type { SpecimensQuery } from '@/features/review/types';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
 import {
   reviewKeys,
   type SpecimensQueryKey,
 } from '@/features/review/api/review-keys';
+import type { SpecimensQuery } from '@/features/review/types';
 
 export function useSpecimensQuery(
   filters: SpecimensQuery = {},
@@ -33,7 +32,10 @@ export function useSpecimensQuery(
     abdomenStatus,
   } = filters;
 
+  const baseEnabled = Boolean(siteId && district && startDate && endDate);
+
   return useQuery({
+    ...(options ?? {}),
     queryKey: reviewKeys.specimens(
       offset,
       limit,
@@ -57,7 +59,6 @@ export function useSpecimensQuery(
         sex,
         abdomenStatus,
       }),
-    enabled: Boolean(siteId && district && startDate && endDate), 
-    ...(options ?? {}),
+    enabled: (options?.enabled ?? true) && baseEnabled,
   });
 }

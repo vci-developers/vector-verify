@@ -17,9 +17,3 @@ export interface SpecimensQuery {
   sex?: string | null;
   abdomenStatus?: string | null;
 }
-
-export interface SpecimenCountsQuery {
-  district?: string;
-  startDate?: string;
-  endDate?: string;
-}

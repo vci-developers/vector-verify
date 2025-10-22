@@ -17,17 +17,14 @@ import {
   PaginationLast,
   PaginationLink,
 } from '@/ui/pagination';
-import type { SpecimenFilters } from './specimen-filters';
+import type { SpecimensQuery } from '@/features/review/types';
 
 interface SiteSpecimenContentProps {
   siteId: number;
-  district: string;
-  startDate: string;
-  endDate: string;
+  queryParameters: SpecimensQuery;
   currentPage: number;
   pageSize: number;
   isOpen: boolean;
-  filters: SpecimenFilters;
   onImageClick: (specimen: Specimen) => void;
   onPageChange: (siteId: number, page: number) => void;
 }
@@ -45,34 +42,50 @@ function getImageUrl(specimen: Specimen): string | null {
 
 export function SiteSpecimenContent({
   siteId,
-  district,
-  startDate,
-  endDate,
+  queryParameters,
   currentPage,
   pageSize,
   isOpen,
-  filters,
   onImageClick,
   onPageChange,
 }: SiteSpecimenContentProps) {
-  useEffect(() => {
-    onPageChange(siteId, 1);
-  }, [filters.species, filters.sex, filters.abdomenStatus, onPageChange, siteId]);
+  const { district, startDate, endDate, species, sex, abdomenStatus } =
+    queryParameters;
 
-  const { data, isLoading } = useSpecimensQuery({
+  useEffect(() => {
+    if (isOpen) {
+      onPageChange(siteId, 1);
+    }
+  }, [
+    siteId,
+    isOpen,
+    onPageChange,
     district,
     startDate,
     endDate,
-    siteId,
-    offset: (currentPage - 1) * pageSize,
-    limit: pageSize,
-    species: filters.species ?? undefined,
-    sex: filters.sex ?? undefined,
-    abdomenStatus: filters.abdomenStatus ?? undefined,
-  });
+    species,
+    sex,
+    abdomenStatus,
+  ]);
+
+  const { data, isLoading } = useSpecimensQuery(
+    {
+      district,
+      startDate,
+      endDate,
+      siteId,
+      offset: (currentPage - 1) * pageSize,
+      limit: pageSize,
+      species: species ?? undefined,
+      sex: sex ?? undefined,
+      abdomenStatus: abdomenStatus ?? undefined,
+    },
+    { enabled: isOpen },
+  );
 
   const specimens = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(species || sex || abdomenStatus);
 
   const { setTotal, setPageSize, setPage, totalPages, createRange } = usePagination({
     initialTotal: total,
@@ -132,7 +145,7 @@ export function SiteSpecimenContent({
         <SpecimenGridLoadingSkeleton />
       ) : total === 0 ? (
         <div className="p-4 text-center text-sm text-muted-foreground">
-          {filters.species || filters.sex || filters.abdomenStatus
+          {hasActiveFilters
             ? 'No specimens match the selected filters'
             : 'No specimens reported from this household'}
         </div>
@@ -142,7 +155,7 @@ export function SiteSpecimenContent({
             <span>
               Showing {(currentPage - 1) * pageSize + 1} –
               {` ${Math.min(currentPage * pageSize, total)} of ${total} specimens`}
-              {filters.species || filters.sex || filters.abdomenStatus ? ' (filtered)' : ''}
+              {hasActiveFilters ? ' (filtered)' : ''}
             </span>
           </div>
 

@@ -14,7 +14,7 @@ import { Input } from '@/ui/input';
 import {
   SignupSchema,
   type SignupFormData,
-} from '@/features/auth/validation/schema';
+} from '@/features/auth/components/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -43,7 +43,7 @@ export function SignupForm() {
     try {
       await signupMutation.mutateAsync({
         email: values.email,
-        password: values.password, 
+        password: values.password,
       });
       const login = await loginMutation.mutateAsync({
         email: values.email,

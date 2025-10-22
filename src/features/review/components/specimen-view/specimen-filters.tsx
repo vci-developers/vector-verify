@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import {
   Select,
   SelectContent,
@@ -25,6 +23,10 @@ export interface SpecimenFilters {
   abdomenStatus: string | null;
 }
 
+const SPECIES_OPTIONS = Object.values(SPECIES_MORPH_IDS);
+const SEX_OPTIONS = Object.values(SEX_MORPH_IDS);
+const ABDOMEN_STATUS_OPTIONS = Object.values(ABDOMEN_STATUS_MORPH_IDS);
+
 interface SpecimenFiltersProps {
   filters: SpecimenFilters;
   onFiltersChange: (filters: SpecimenFilters) => void;
@@ -36,10 +38,7 @@ export function SpecimenFiltersBar({
   onFiltersChange,
   disabled = false,
 }: SpecimenFiltersProps) {
-  const speciesOptions = useMemo(() => Object.values(SPECIES_MORPH_IDS), []);
-  const sexOptions = useMemo(() => Object.values(SEX_MORPH_IDS), []);
-  const abdomenOptions = useMemo(() => Object.values(ABDOMEN_STATUS_MORPH_IDS), []);
-
+  
   const sexEnabled = isSexEnabled(filters.species ?? undefined);
   const abdomenStatusEnabled = isAbdomenStatusEnabled(
     filters.species ?? undefined,
@@ -77,8 +76,7 @@ export function SpecimenFiltersBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Species</SelectItem>
-          <SelectItem value="null">Unclassified</SelectItem>
-          {speciesOptions.map(species => (
+          {SPECIES_OPTIONS.map(species => (
             <SelectItem key={species} value={species}>
               {species}
             </SelectItem>
@@ -96,8 +94,7 @@ export function SpecimenFiltersBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Sexes</SelectItem>
-          <SelectItem value="null">Unclassified</SelectItem>
-          {sexOptions.map(sex => (
+          {SEX_OPTIONS.map(sex => (
             <SelectItem key={sex} value={sex}>
               {sex}
             </SelectItem>
@@ -115,8 +112,7 @@ export function SpecimenFiltersBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Statuses</SelectItem>
-          <SelectItem value="null">Unclassified</SelectItem>
-          {abdomenOptions.map(status => (
+          {ABDOMEN_STATUS_OPTIONS.map(status => (
             <SelectItem key={status} value={status}>
               {status}
             </SelectItem>

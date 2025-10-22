@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SpecimenReviewAccordion } from './specimen-review-accordion';
 import {
   Select,
@@ -26,7 +26,7 @@ export function SpecimenViewPageClient({
   const formattedDistrict = decodeURIComponent(district);
   const formattedMonthYear = decodeURIComponent(monthYear);
 
-  const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [filters, setFilters] = useState<SpecimenFilters>({
     species: null,
     sex: null,

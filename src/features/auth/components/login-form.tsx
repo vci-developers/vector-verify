@@ -11,7 +11,10 @@ import {
   FormMessage,
 } from '@/ui/form';
 import { Input } from '@/ui/input';
-import { type LoginFormData, LoginSchema } from '@/features/auth/validation/schema';
+import {
+  type LoginFormData,
+  LoginSchema,
+} from '@/features/auth/components/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';

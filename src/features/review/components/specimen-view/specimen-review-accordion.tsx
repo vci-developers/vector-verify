@@ -77,13 +77,17 @@ export function SpecimenReviewAccordion({
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent
                 siteId={siteId}
-                district={district}
-                startDate={startDate}
-                endDate={endDate}
+                queryParameters={{
+                  district,
+                  startDate,
+                  endDate,
+                  species: filters.species,
+                  sex: filters.sex,
+                  abdomenStatus: filters.abdomenStatus,
+                }}
                 currentPage={currentPage}
                 pageSize={pageSize}
                 isOpen={isOpen}
-                filters={filters}
                 onImageClick={setSelectedSpecimen}
                 onPageChange={handleSitePageChange}
               />
@@ -100,7 +104,9 @@ export function SpecimenReviewAccordion({
       startDate,
       endDate,
       pageSize,
-      filters,
+      filters.species,
+      filters.sex,
+      filters.abdomenStatus,
       handleSitePageChange,
     ],
   );
