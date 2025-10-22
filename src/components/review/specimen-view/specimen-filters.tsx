@@ -86,9 +86,7 @@ export function SpecimenFiltersComponent({
                     <SelectItem value="null">Unclassified</SelectItem>
                     {Object.entries(SPECIES_MORPH_IDS).map(([key, value]) => (
                         <SelectItem key={value} value={String(value)}>
-                            {key.split('_').map(word => 
-                                word.charAt(0) + word.slice(1).toLowerCase()
-                            ).join(' ')}
+                            {value}
                         </SelectItem>
                     ))}
                 </SelectContent>
@@ -107,7 +105,7 @@ export function SpecimenFiltersComponent({
                     <SelectItem value="null">Unclassified</SelectItem>
                     {Object.entries(SEX_MORPH_IDS).map(([key, value]) => (
                         <SelectItem key={value} value={String(value)}>
-                            {key.charAt(0) + key.slice(1).toLowerCase()}
+                            {value}
                         </SelectItem>
                     ))}
                 </SelectContent>
@@ -126,9 +124,7 @@ export function SpecimenFiltersComponent({
                     <SelectItem value="null">Unclassified</SelectItem>
                     {Object.entries(ABDOMEN_STATUS_MORPH_IDS).map(([key, value]) => (
                         <SelectItem key={value} value={String(value)}>
-                            {key.split('_').map(word => 
-                                word.charAt(0) + word.slice(1).toLowerCase()
-                            ).join(' ')}
+                            {value}
                         </SelectItem>
                     ))}
                 </SelectContent>
