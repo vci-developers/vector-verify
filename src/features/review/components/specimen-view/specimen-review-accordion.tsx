@@ -1,14 +1,12 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/ui/accordion';
-
 import { ImageModal } from './image-modal';
 import { SiteSpecimenContent } from './site-specimens';
 import type { Specimen } from '@/shared/entities/specimen';
