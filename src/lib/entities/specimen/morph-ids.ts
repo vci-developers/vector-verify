@@ -1,7 +1,7 @@
 export const SPECIES_MORPH_IDS = {
-    ANOPHELES_FUNESTUS: "Anopheles Funestus",
-    ANOPHELES_BAMBIAE: "Anopheles Gambiae",
-    ANOPHELES_OTHER: "Anopheles Other",
+    ANOPHELES_FUNESTUS: "Anopheles funestus",
+    ANOPHELES_GAMBIAE: "Anopheles gambiae",
+    ANOPHELES_OTHER: "Anopheles other",
     CULEX: "Culex",
     AEDES: "Aedes",
     MANSIONIA: "Mansonia",
