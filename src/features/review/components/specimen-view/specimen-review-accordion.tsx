@@ -39,7 +39,15 @@ export function SpecimenReviewAccordion({
 
   useEffect(() => {
     setSitePagination({});
-  }, [pageSize, filters]);
+  }, [
+    pageSize,
+    district,
+    startDate,
+    endDate,
+    filters.species,
+    filters.sex,
+    filters.abdomenStatus,
+  ]);
 
   const siteToHouseNumberMap = useMemo(() => {
     const map: Record<number, string> = {};
@@ -52,6 +60,18 @@ export function SpecimenReviewAccordion({
   const handleSitePageChange = useCallback((siteId: number, page: number) => {
     setSitePagination(prev => ({ ...prev, [siteId]: page }));
   }, []);
+
+  const filterQuery = useMemo(
+    () => ({
+      district,
+      startDate,
+      endDate,
+      species: filters.species,
+      sex: filters.sex,
+      abdomenStatus: filters.abdomenStatus,
+    }),
+    [district, startDate, endDate, filters.species, filters.sex, filters.abdomenStatus],
+  );
 
   const accordionItems = useMemo(
     () =>
@@ -77,14 +97,7 @@ export function SpecimenReviewAccordion({
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent
                 siteId={siteId}
-                queryParameters={{
-                  district,
-                  startDate,
-                  endDate,
-                  species: filters.species,
-                  sex: filters.sex,
-                  abdomenStatus: filters.abdomenStatus,
-                }}
+                queryParameters={filterQuery}
                 currentPage={currentPage}
                 pageSize={pageSize}
                 isOpen={isOpen}
@@ -100,13 +113,8 @@ export function SpecimenReviewAccordion({
       openItem,
       sitePagination,
       siteToHouseNumberMap,
-      district,
-      startDate,
-      endDate,
+      filterQuery,
       pageSize,
-      filters.species,
-      filters.sex,
-      filters.abdomenStatus,
       handleSitePageChange,
     ],
   );
