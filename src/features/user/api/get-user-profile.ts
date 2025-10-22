@@ -1,4 +1,4 @@
-import bff from '@/lib/api/bff-client';
+import bff from '@/shared/infra/api/bff-client';
 import type { UserProfileResponseDto } from '@/features/user/types';
 import type { User } from '@/features/user/types';
 import { mapUserDtoToModel } from '@/features/user/types';

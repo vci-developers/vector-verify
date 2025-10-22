@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Specimen } from '@/lib/entities/specimen';
+import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
 import { SpecimenGridLoadingSkeleton } from './loading-skeleton';
 import {
@@ -18,7 +18,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/ui/accordion';
-import { usePagination } from '@/lib/shared/hooks/use-pagination';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
 import { ImageOff } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -72,23 +72,19 @@ export function SiteSpecimenAccordionItem({
   const specimens = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const pagination = usePagination({
+  const { setTotal, setPageSize, totalPages, createRange } = usePagination({
     initialTotal: total,
     initialPage: currentPage,
     initialPageSize: pageSize,
   });
 
   useEffect(() => {
-    pagination.setTotal(total);
-  }, [total]);
+    setTotal(total);
+  }, [setTotal, total]);
 
   useEffect(() => {
-    pagination.setPageSize(pageSize);
-  }, [pageSize]);
-
-  useEffect(() => {
-    pagination.setPage(currentPage);
-  }, [currentPage]);
+    setPageSize(pageSize);
+  }, [pageSize, setPageSize]);
 
   const isPagingDisabled = isLoading;
 
@@ -105,8 +101,8 @@ export function SiteSpecimenAccordionItem({
     event: React.MouseEvent<HTMLAnchorElement>,
   ) {
     event.preventDefault();
-    if (!isPagingDisabled && currentPage < pagination.totalPages) {
-      onPageChange(pagination.totalPages);
+    if (!isPagingDisabled && currentPage < totalPages) {
+      onPageChange(totalPages);
     }
   }
 
@@ -186,7 +182,7 @@ export function SiteSpecimenAccordionItem({
                   })}
                 </div>
 
-                {pagination.totalPages > 1 && (
+                {totalPages > 1 && (
                   <div className="mt-6">
                     <Pagination>
                       <PaginationContent>
@@ -201,8 +197,7 @@ export function SiteSpecimenAccordionItem({
                             href="#"
                           />
                         </PaginationItem>
-                        {pagination
-                          .createRange(currentPage)
+                        {createRange(currentPage)
                           .map((pageItem, index) => (
                             <PaginationItem
                               key={
@@ -229,8 +224,7 @@ export function SiteSpecimenAccordionItem({
                         <PaginationItem>
                           <PaginationLast
                             className={
-                              isPagingDisabled ||
-                              currentPage >= pagination.totalPages
+                              isPagingDisabled || currentPage >= totalPages
                                 ? 'pointer-events-none opacity-50'
                                 : ''
                             }

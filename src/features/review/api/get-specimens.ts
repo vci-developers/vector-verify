@@ -1,13 +1,13 @@
-import { mapSpecimenExpandedDtoToPage } from '@/lib/entities/specimen';
-import type { OffsetPage } from '@/lib/entities/pagination';
-import type { Specimen } from '@/lib/entities/specimen/model';
-import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
-import bff from '@/lib/api/bff-client';
+import { mapSpecimenExpandedDtoToPage } from '@/shared/entities/specimen';
+import type { OffsetPage } from '@/shared/entities/pagination';
+import type { Specimen } from '@/shared/entities/specimen/model';
+import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
+import bff from '@/shared/infra/api/bff-client';
 import type {
   SpecimensRequestDto,
   SpecimensQuery,
 } from '@/features/review/types';
-import type { SpecimensListResponseDto } from '@/lib/entities/specimen/dto';
+import type { SpecimensListResponseDto } from '@/shared/entities/specimen/dto';
 
 
 export async function getSpecimens(

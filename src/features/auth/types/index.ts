@@ -1,4 +1,4 @@
 export * from './response.dto';
 export * from './mapper';
 export * from './request.dto';
-export * from '@/lib/entities/auth';
+export * from '@/shared/entities/auth';

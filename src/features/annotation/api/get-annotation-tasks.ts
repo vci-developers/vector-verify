@@ -5,9 +5,9 @@ import {
   AnnotationTasksListRequestDto,
   AnnotationTasksQuery,
 } from '@/features/annotation/types';
-import type { OffsetPage } from '@/lib/entities/pagination';
-import bff from '@/lib/api/bff-client';
-import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
+import type { OffsetPage } from '@/shared/entities/pagination';
+import bff from '@/shared/infra/api/bff-client';
+import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 
 export async function getAnnotationTasks(
   filters: AnnotationTasksQuery = {},

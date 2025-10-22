@@ -1,5 +1,5 @@
-import type { UserDto } from '@/lib/entities/user';
-import type { AuthTokens } from '@/lib/entities/auth';
+import type { UserDto } from '@/shared/entities/user';
+import type { AuthTokens } from '@/shared/entities/auth';
 
 export interface LoginResponseDto {
   message: string;

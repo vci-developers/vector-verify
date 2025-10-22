@@ -1,4 +1,4 @@
-import type { UserDto, UserPermissionsDto } from '@/lib/entities/user';
+import type { UserDto, UserPermissionsDto } from '@/shared/entities/user';
 
 export interface UserProfileResponseDto {
   message: string;

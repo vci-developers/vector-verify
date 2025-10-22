@@ -28,12 +28,12 @@ import {
   TableRow,
 } from '@/ui/table';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
-import { PAGE_SIZES } from '@/lib/shared/constants';
-import { usePagination } from '@/lib/shared/hooks/use-pagination';
+import { PAGE_SIZES } from '@/shared/entities/pagination';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
 import {
   calculateDateRange,
   type DateRangeOption,
-} from '@/lib/shared/utils/date-range';
+} from '@/shared/core/utils/date-range';
 import { useEffect, useMemo, useState } from 'react';
 import { TaskRow } from './task-row';
 
@@ -51,8 +51,6 @@ export function AnnotationTasksListPageClient() {
     setPage,
     pageSize,
     setPageSizeAndReset,
-    canPrev,
-    canNext,
     totalPages,
     range: pages,
   } = pagination;
@@ -82,20 +80,6 @@ export function AnnotationTasksListPageClient() {
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
     setPage(1);
-  }
-
-  function handleNavigateToPreviousPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && canPrev) setPage(page - 1);
-  }
-
-  function handleNavigateToNextPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && canNext) setPage(page + 1);
   }
 
   function handleNavigateToFirstPage(

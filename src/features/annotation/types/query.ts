@@ -1,4 +1,4 @@
-import type { AnnotationStatus } from '@/lib/entities/annotation/status';
+import type { AnnotationStatus } from '@/shared/entities/annotation/status';
 
 export interface AnnotationTasksQuery {
   page?: number;

@@ -6,7 +6,7 @@ import {
 import { useState, useMemo, Fragment, useEffect } from 'react';
 import { ImageModal } from './image-modal';
 import { SiteSpecimenAccordionItem } from './site-specimens';
-import { Specimen } from '@/lib/entities/specimen';
+import { Specimen } from '@/shared/entities/specimen';
 
 interface SpecimenReviewAccordionProps {
 	siteIds: number[];

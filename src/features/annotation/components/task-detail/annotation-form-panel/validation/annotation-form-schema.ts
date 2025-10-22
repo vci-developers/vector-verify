@@ -2,7 +2,7 @@ import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
-} from '@/lib/entities/specimen/morph-ids';
+} from '@/shared/entities/specimen/morph-ids';
 
 import { z } from 'zod';
 

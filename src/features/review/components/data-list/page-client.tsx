@@ -6,10 +6,10 @@ import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { DistrictFilter } from './district-filter';
 import { ReviewTable } from './review-table';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
-import { calculateDateRange, toDateOnly } from '@/lib/shared/utils/date-range';
+import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
-import { usePagination } from '@/lib/shared/hooks/use-pagination';
-import { PAGE_SIZES } from '@/lib/shared/constants';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
+import { PAGE_SIZES } from '@/shared/entities/pagination';
 import { useUserProfileQuery, useUserPermissionsQuery } from '@/features/user';
 import {
   getAccessibleDistricts,
@@ -31,7 +31,7 @@ import {
   PaginationFirst,
   PaginationLast,
 } from '@/ui/pagination';
-import type { DateRangeOption } from '@/lib/shared/utils/date-range';
+import type { DateRangeOption } from '@/shared/core/utils/date-range';
 
 export function ReviewDataListPageClient() {
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
@@ -51,8 +51,6 @@ export function ReviewDataListPageClient() {
     setPage,
     pageSize,
     setPageSizeAndReset,
-    canPrev,
-    canNext,
     totalPages,
     range: pages,
     start: offset,
@@ -72,10 +70,36 @@ export function ReviewDataListPageClient() {
   const summaries = data?.data?.items ?? [];
   const totalFromServer = data?.data?.total;
 
-  const availableDistricts = useMemo(
+  const normalizedDistrictsFromResponse = useMemo(
     () => normalizeDistrictList(data?.availableDistricts),
     [data?.availableDistricts],
   );
+
+  const [persistedAvailableDistricts, setPersistedAvailableDistricts] = useState<
+    string[]
+  >([]);
+
+  useEffect(() => {
+    if (!normalizedDistrictsFromResponse.length) return;
+
+    setPersistedAvailableDistricts(prevDistricts => {
+      const merged = normalizeDistrictList([
+        ...prevDistricts,
+        ...normalizedDistrictsFromResponse,
+      ]);
+
+      const isUnchanged =
+        merged.length === prevDistricts.length &&
+        merged.every((district, index) => district === prevDistricts[index]);
+
+      return isUnchanged ? prevDistricts : merged;
+    });
+  }, [normalizedDistrictsFromResponse]);
+
+  const availableDistricts = useMemo(() => {
+    if (persistedAvailableDistricts.length) return persistedAvailableDistricts;
+    return normalizedDistrictsFromResponse;
+  }, [persistedAvailableDistricts, normalizedDistrictsFromResponse]);
 
   const accessibleDistricts = useMemo(() => {
     if (!availableDistricts.length) return [] as string[];
@@ -113,20 +137,6 @@ export function ReviewDataListPageClient() {
   function handleDistrictSelected(district: string | null) {
     setSelectedDistrict(district);
     setPage(1);
-  }
-
-  function handleNavigateToPreviousPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && canPrev) setPage(page - 1);
-  }
-
-  function handleNavigateToNextPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && canNext) setPage(page + 1);
   }
 
   function handleNavigateToFirstPage(

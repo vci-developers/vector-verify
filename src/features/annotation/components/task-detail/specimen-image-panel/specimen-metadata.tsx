@@ -1,5 +1,5 @@
-import { Session } from '@/lib/entities/session';
-import { Site } from '@/lib/entities/site';
+import { Session } from '@/shared/entities/session';
+import { Site } from '@/shared/entities/site';
 
 interface SpecimenMetadataProps {
   session?: Session;

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/ui/dialog';
 import Image from 'next/image';
 import { X, ImageOff } from 'lucide-react';
 import { Button } from '@/ui/button';
-import { Specimen } from '@/lib/entities/specimen';
+import { Specimen } from '@/shared/entities/specimen';
 
 interface ImageModalProps {
   specimen: Specimen;

@@ -2,7 +2,7 @@ import type {
   AnnotationDto,
   AnnotationExpandedDto,
   AnnotationTaskDto,
-} from '@/lib/entities/annotation/dto';
+} from '@/shared/entities/annotation/dto';
 
 export interface AnnotationsListResponseDto {
   annotations: AnnotationExpandedDto[];

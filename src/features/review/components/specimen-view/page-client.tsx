@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select';
-import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
+import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 import { useUserPermissionsQuery } from '@/features/user';
 import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
 

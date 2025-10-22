@@ -222,7 +222,7 @@ export function MasterTableViewPageClient({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableMeta.rows.map((row, rowIndex) => {
+                  {tableMeta.rows.map(row => {
                     return (
                       <TableRow
                         key={row.key}

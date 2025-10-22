@@ -8,8 +8,8 @@ import {
   SelectValue,
   SelectSeparator,
 } from '@/ui/select';
-import { cn } from '@/lib/utils';
-import { toDomId } from '@/lib/shared/utils/dom';
+import { cn } from '@/shared/core/utils';
+import { toDomId } from '@/shared/core/utils/dom';
 
 interface MorphIdSelectMenuProps {
   label: string;

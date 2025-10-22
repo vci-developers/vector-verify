@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/core/utils';
 import { useImageViewer } from './hooks/use-image-viewer';
 import { ImageOff, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/ui/button';

@@ -1,5 +1,5 @@
-import type { OffsetPage } from '@/lib/entities/pagination';
-import type { Specimen } from '@/lib/entities/specimen/model';
+import type { OffsetPage } from '@/shared/entities/pagination';
+import type { Specimen } from '@/shared/entities/specimen/model';
 import { getSpecimens } from '@/features/review/api/get-specimens';
 import type { SpecimensQuery } from '@/features/review/types';
 import type { UseQueryOptions } from '@tanstack/react-query';

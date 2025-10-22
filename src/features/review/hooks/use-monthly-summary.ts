@@ -5,8 +5,8 @@ import {
 } from '@/features/review/api/review-keys';
 import { getMonthlySummary } from '@/features/review/api/get-monthly-summary';
 import type { MonthlySummary, MonthlySummaryQuery } from '@/features/review/types';
-import type { OffsetPage } from '@/lib/entities/pagination';
-import { DEFAULT_PAGE_SIZE } from '@/lib/shared/constants';
+import type { OffsetPage } from '@/shared/entities/pagination';
+import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 
 export function useMonthlySummaryQuery(
   filters: MonthlySummaryQuery = {},

@@ -1,2 +1,2 @@
-export * from '@/lib/entities/user';
+export * from '@/shared/entities/user';
 export * from './response.dto';

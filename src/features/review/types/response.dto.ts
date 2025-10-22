@@ -1,4 +1,4 @@
-import type { SiteDto } from '@/lib/entities/site/dto';
+import type { SiteDto } from '@/shared/entities/site/dto';
 
 export interface ReviewItemDto {
   district: string;

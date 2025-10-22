@@ -12,7 +12,7 @@ import {
 } from '@/ui/card';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
-import { formatDate } from '@/lib/shared/utils/date';
+import { formatDate } from '@/shared/core/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { notFound } from 'next/navigation';

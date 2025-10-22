@@ -16,21 +16,21 @@ import {
   isAbdomenStatusEnabled,
   isSexEnabled,
 } from './validation/annotation-form-schema';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/core/utils';
 import { Textarea } from '@/ui/textarea';
 import { Button } from '@/ui/button';
 import { Toggle } from '@/ui/toggle';
 import { Flag, Save } from 'lucide-react';
-import { toDomId } from '@/lib/shared/utils/dom';
+import { toDomId } from '@/shared/core/utils/dom';
 import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
 import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
-} from '@/lib/entities/specimen/morph-ids';
+} from '@/shared/entities/specimen/morph-ids';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
-import { showSuccessToast } from '@/lib/shared/ui/show-success-toast';
+import { showSuccessToast } from '@/shared/ui/show-success-toast';
 
 interface AnnotationFormProps {
   annotationId: number;

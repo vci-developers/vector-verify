@@ -1,8 +1,8 @@
-import { upstreamFetch } from '@/lib/shared/http/server';
+import { upstreamFetch } from '@/shared/infra/http/server';
 import {
   HttpError,
   parseApiErrorResponse,
-} from '@/lib/shared/http/core';
+} from '@/shared/infra/http/core';
 import type { UserPermissionsResponseDto, UserPermissions } from '@/features/user/types';
 
 export async function getServerUserPermissions(): Promise<UserPermissions> {

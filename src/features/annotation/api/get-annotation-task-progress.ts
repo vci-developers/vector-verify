@@ -4,7 +4,7 @@ import type {
   AnnotationsListResponseDto,
 } from '@/features/annotation/types';
 import { mapAnnotationTaskProgressDtoToModel } from '@/features/annotation/types/mapper';
-import bff from '@/lib/api/bff-client';
+import bff from '@/shared/infra/api/bff-client';
 
 export async function getAnnotationTaskProgress(
   taskId: number

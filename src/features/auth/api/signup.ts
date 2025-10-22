@@ -1,7 +1,7 @@
-import bff from '@/lib/api/bff-client';
+import bff from '@/shared/infra/api/bff-client';
 import type { SignupRequestDto, AuthPayload, SignupResponseDto } from '@/features/auth/types';
 import { mapAuthResponseDtoToPayload } from '@/features/auth/types';
-import { createJsonRequestInit } from '@/lib/shared/http/core/json';
+import { createJsonRequestInit } from '@/shared/infra/http/core/json';
 
 export async function signUpWithCredentials(
   input: SignupRequestDto,

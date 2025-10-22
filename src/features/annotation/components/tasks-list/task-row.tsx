@@ -8,7 +8,7 @@ import {
   AnnotationTask,
   AnnotationTaskStatus,
 } from '@/features/annotation/types';
-import { formatDate } from '@/lib/shared/utils/date';
+import { formatDate } from '@/shared/core/utils/date';
 import Link from 'next/link';
 
 function getBadgeVariantForTaskStatus(

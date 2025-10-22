@@ -10,7 +10,7 @@ import {
 import {
   DATE_RANGE_OPTIONS,
   type DateRangeOption,
-} from '@/lib/shared/utils/date-range';
+} from '@/shared/core/utils/date-range';
 
 interface DateRangeFilterProps {
   value?: DateRangeOption;

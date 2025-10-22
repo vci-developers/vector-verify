@@ -1,4 +1,4 @@
-import type { OffsetPage } from '@/lib/entities/pagination';
+import type { OffsetPage } from '@/shared/entities/pagination';
 import type {
   ReviewItemDto,
   MonthlySummaryResponseDto,

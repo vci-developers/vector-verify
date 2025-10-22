@@ -1,8 +1,8 @@
 import { Fragment } from 'react';
 import { redirect } from 'next/navigation';
 import { HydrationBoundary } from '@tanstack/react-query';
-import { HttpError } from '@/lib/shared/http/core/http-error';
-import { withRouteError } from '@/lib/shared/http/core';
+import { HttpError } from '@/shared/infra/http/core/http-error';
+import { withRouteError } from '@/shared/infra/http/core';
 import {
   userKeys,
   type UserProfileQueryKey,
@@ -13,7 +13,7 @@ import {
   getServerUserPermissions,
 } from '@/features/user/server';
 import { DashboardHeader } from '@/features/dashboard';
-import { dehydrateWithSeed } from '@/lib/shared/react-query/server';
+import { dehydrateWithSeed } from '@/shared/infra/react-query/server';
 import {
   Card,
   CardContent,
@@ -24,7 +24,7 @@ import {
 } from '@/ui/card';
 import { ShieldAlert } from 'lucide-react';
 import { LogoutButton } from '@/features/auth';
-import { getAccessToken } from '@/lib/auth/server/tokens';
+import { getAccessToken } from '@/features/auth/server/tokens';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

@@ -1,5 +1,5 @@
 import type { QueryKey } from '@tanstack/react-query';
-import type { AnnotationStatus } from '@/lib/entities/annotation/status';
+import type { AnnotationStatus } from '@/shared/entities/annotation/status';
 
 export const annotationKeys = {
   root: ['annotations'] as const,

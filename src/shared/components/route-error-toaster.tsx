@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { showErrorToast } from '@/lib/shared/ui/show-error-toast';
+import { showErrorToast } from '@/shared/ui/show-error-toast';
 
 export function RouteErrorToaster() {
   const searchParams = useSearchParams();

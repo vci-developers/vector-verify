@@ -1,20 +1,20 @@
-import type { OffsetPage } from '@/lib/entities/pagination';
+import type { OffsetPage } from '@/shared/entities/pagination';
 import type {
   Annotation,
   AnnotationTask,
   AnnotationTaskProgress,
-} from '@/lib/entities/annotation/model';
+} from '@/shared/entities/annotation/model';
 import {
   mapAnnotationDtoToModel,
   mapAnnotationTaskDtoToModel,
-} from '@/lib/entities/annotation/mapper';
+} from '@/shared/entities/annotation/mapper';
 import type {
   AnnotationTaskProgressDto,
   AnnotationsListResponseDto,
   AnnotationTasksListResponseDto,
 } from './response.dto';
 
-export { mapAnnotationDtoToModel, mapAnnotationTaskDtoToModel } from '@/lib/entities/annotation/mapper';
+export { mapAnnotationDtoToModel, mapAnnotationTaskDtoToModel } from '@/shared/entities/annotation/mapper';
 
 export function mapAnnotationsListResponseDtoToPage(
   dto: AnnotationsListResponseDto,

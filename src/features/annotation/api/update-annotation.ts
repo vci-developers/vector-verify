@@ -1,11 +1,11 @@
 'use client';
 
-import bff from '@/lib/api/bff-client';
+import bff from '@/shared/infra/api/bff-client';
 import type {
   AnnotationUpdateRequestDto,
   AnnotationUpdateResponseDto,
 } from '@/features/annotation/types';
-import { createJsonRequestInit } from '@/lib/shared/http/core/json';
+import { createJsonRequestInit } from '@/shared/infra/http/core/json';
 
 export async function updateAnnotation(
   annotationId: number,

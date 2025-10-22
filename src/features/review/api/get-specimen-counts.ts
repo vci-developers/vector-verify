@@ -1,4 +1,4 @@
-import bff from '@/lib/api/bff-client';
+import bff from '@/shared/infra/api/bff-client';
 import type { SpecimenCountsSummary } from '@/features/review/types';
 import type {
   SpecimenCountsResponseDto,

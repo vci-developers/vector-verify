@@ -1,8 +1,8 @@
-import { upstreamFetch } from '@/lib/shared/http/server';
+import { upstreamFetch } from '@/shared/infra/http/server';
 import {
   HttpError,
   parseApiErrorResponse,
-} from '@/lib/shared/http/core';
+} from '@/shared/infra/http/core';
 import type { UserProfileResponseDto, User } from '@/features/user/types';
 import { mapUserDtoToModel } from '@/features/user/types';
 
