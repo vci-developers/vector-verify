@@ -20,6 +20,9 @@ export async function getSpecimens(
     endDate,
     district,
     siteId,
+    species,
+    sex,
+    abdomenStatus,
   } = filters;
 
 
@@ -30,6 +33,9 @@ export async function getSpecimens(
     ...(endDate ? { endDate } : {}),
     ...(district ? { district } : {}),
     ...(siteId ? { siteId } : {}),
+    ...(species ? { species } : {}),
+    ...(sex ? { sex } : {}),
+    ...(abdomenStatus ? { abdomenStatus } : {}),
   };
 
 

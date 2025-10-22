@@ -13,6 +13,9 @@ export interface SpecimensQuery {
   endDate?: string;
   district?: string;
   siteId?: number;
+  species?: string | null;
+  sex?: string | null;
+  abdomenStatus?: string | null;
 }
 
 export interface SpecimenCountsQuery {

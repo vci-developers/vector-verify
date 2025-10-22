@@ -74,7 +74,7 @@ export function SiteSpecimenContent({
   const specimens = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const { setTotal, setPageSize, totalPages, createRange } = usePagination({
+  const { setTotal, setPageSize, setPage, totalPages, createRange } = usePagination({
     initialTotal: total,
     initialPage: currentPage,
     initialPageSize: pageSize,
@@ -87,6 +87,10 @@ export function SiteSpecimenContent({
   useEffect(() => {
     setPageSize(pageSize);
   }, [pageSize, setPageSize]);
+
+  useEffect(() => {
+    setPage(currentPage);
+  }, [currentPage, setPage]);
 
   const isPagingDisabled = isLoading;
 

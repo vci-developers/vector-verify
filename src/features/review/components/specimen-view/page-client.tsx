@@ -12,7 +12,7 @@ import {
 import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 import { useUserPermissionsQuery } from '@/features/user';
 import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
-import { SpecimenFilters, SpecimenFiltersComponent } from './specimen-filters';
+import { SpecimenFilters, SpecimenFiltersBar } from './specimen-filters';
 
 interface SpecimenViewPageClientProps {
   district: string;
@@ -81,7 +81,7 @@ export function SpecimenViewPageClient({
         </h1>
 
         <div className="flex items-center gap-4">
-          <SpecimenFiltersComponent
+          <SpecimenFiltersBar
             filters={filters}
             onFiltersChange={handleFiltersChange}
             disabled={isLoadingPermissions || districtSites.length === 0}
