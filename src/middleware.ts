@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { ENV } from '@/lib/shared/config/env';
+import { ENV } from '@/shared/core/config/env';
 
 const AUTH_ROUTES = new Set(['/login', '/signup']);
 const PUBLIC_FILE = /\.(.*)$/;

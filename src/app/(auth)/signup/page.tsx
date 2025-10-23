@@ -1,4 +1,4 @@
-import { SignupForm } from '@/components/auth/signup-form';
+import { SignupForm } from '@/features/auth';
 import {
   Card,
   CardContent,
@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/ui/card';
 import Link from 'next/link';
 
 export default function SignupPage() {

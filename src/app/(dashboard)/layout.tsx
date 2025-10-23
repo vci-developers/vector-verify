@@ -1,19 +1,19 @@
 import { Fragment } from 'react';
 import { redirect } from 'next/navigation';
 import { HydrationBoundary } from '@tanstack/react-query';
-import { HttpError } from '@/lib/shared/http/core/http-error';
-import { withRouteError } from '@/lib/shared/http/core';
+import { HttpError } from '@/shared/infra/http/core/http-error';
+import { withRouteError } from '@/shared/infra/http/core';
 import {
   userKeys,
   type UserProfileQueryKey,
   type UserPermissionsQueryKey,
-} from '@/lib/user';
+} from '@/features/user';
 import {
   getServerUserProfile,
   getServerUserPermissions,
-} from '@/lib/user/server';
-import { DashboardHeader } from '@/components/dashboard/header';
-import { dehydrateWithSeed } from '@/lib/shared/react-query/server';
+} from '@/features/user/server';
+import { DashboardHeader } from '@/features/dashboard';
+import { dehydrateWithSeed } from '@/shared/infra/react-query/server';
 import {
   Card,
   CardContent,
@@ -21,10 +21,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/ui/card';
 import { ShieldAlert } from 'lucide-react';
-import { LogoutButton } from '@/components/auth/logout-button';
-import { getAccessToken } from '@/lib/auth/server/tokens';
+import { LogoutButton } from '@/features/auth';
+import { getAccessToken } from '@/features/auth/server/tokens';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

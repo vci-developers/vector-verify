@@ -3,12 +3,12 @@ import {
   upstreamFetch,
   forwardRequestHeaders,
   forwardResponseHeaders,
-} from '@/lib/shared/http/server';
+} from '@/shared/infra/http/server';
 import {
   HTTP_STATUS,
   MEDIA_TYPE,
   parseApiErrorResponse,
-} from '@/lib/shared/http/core';
+} from '@/shared/infra/http/core';
 
 async function readRequestBody(
   request: NextRequest,
