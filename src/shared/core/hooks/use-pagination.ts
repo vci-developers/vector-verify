@@ -47,29 +47,19 @@ export function usePagination({
   const createRange = useCallback(
     (currentPage: number): RangeItem[] => {
       const pages: RangeItem[] = [];
-
-      // Show first page if not in the neighbor range
-      if (currentPage > 2) {
-        pages.push(1);
-        if (currentPage > 3) {
-          pages.push('ellipsis');
-        }
+      const previous = currentPage - 1;
+      if (previous >= 1) {
+        pages.push(previous);
       }
 
-      // Show current page and one neighbor on each side
-      const startPage = Math.max(1, currentPage - 1);
-      const endPage = Math.min(totalPages, currentPage + 1);
+      pages.push(currentPage);
 
-      for (let pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
-        pages.push(pageNumber);
-      }
-
-      // Show last page if not in the neighbor range
-      if (currentPage < totalPages - 1) {
-        if (currentPage < totalPages - 2) {
+      const next = currentPage + 1;
+      if (next <= totalPages) {
+        pages.push(next);
+        if (next < totalPages) {
           pages.push('ellipsis');
         }
-        pages.push(totalPages);
       }
 
       return pages;

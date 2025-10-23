@@ -23,12 +23,7 @@ export function useAnnotationTasksQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
-  const {
-    page = 1,
-    limit = DEFAULT_PAGE_SIZE,
-    startDate,
-    endDate,
-  } = filters;
+  const { page = 1, limit = DEFAULT_PAGE_SIZE, startDate, endDate } = filters;
 
   return useQuery({
     queryKey: annotationKeys.tasks(
@@ -37,12 +32,7 @@ export function useAnnotationTasksQuery(
       startDate,
       endDate,
     ) as AnnotationTasksQueryKey,
-    queryFn: () => getAnnotationTasks({
-      page,
-      limit,
-      startDate,
-      endDate,
-    }),
+    queryFn: () => getAnnotationTasks(filters),
     ...(options ?? {}),
   });
 }

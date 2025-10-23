@@ -214,9 +214,7 @@ export function SiteSpecimenContent({
                   {createRange(currentPage).map((pageItem, index) => (
                     <PaginationItem
                       key={
-                        pageItem === 'ellipsis'
-                          ? `ellipsis-${index}`
-                          : pageItem
+                        pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
                       }
                     >
                       {pageItem === 'ellipsis' ? (
