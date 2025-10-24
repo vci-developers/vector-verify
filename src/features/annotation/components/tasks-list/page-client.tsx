@@ -4,6 +4,14 @@ import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table';
+import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -12,21 +20,6 @@ import {
   PaginationFirst,
   PaginationLast,
 } from '@/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import { usePagination } from '@/shared/core/hooks/use-pagination';
@@ -36,6 +29,13 @@ import {
 } from '@/shared/core/utils/date-range';
 import { useEffect, useMemo, useState } from 'react';
 import { TaskRow } from './task-row';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select';
 
 export function AnnotationTasksListPageClient() {
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
@@ -104,8 +104,6 @@ export function AnnotationTasksListPageClient() {
     if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
   }
 
-  const isEmpty = !isLoading && !isFetching && tasks.length === 0;
-
   if (isLoading || isFetching) {
     return <AnnotationTasksListLoadingSkeleton />;
   }
@@ -160,7 +158,7 @@ export function AnnotationTasksListPageClient() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isEmpty ? (
+              {tasks.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}

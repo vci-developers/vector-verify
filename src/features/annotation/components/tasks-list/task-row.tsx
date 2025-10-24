@@ -38,7 +38,6 @@ export function TaskRow({ task }: { task: AnnotationTask }) {
   } = progressData ?? {};
   const displayPercent = Math.round(percent);
   const completed = Math.max(0, Math.min(total, annotated + flagged));
-
   const hasItems = total > 0;
 
   return (
