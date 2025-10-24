@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { showErrorToast } from '@/ui/show-error-toast';
 
-export function RouteErrorToaster() {
+function RouteErrorToasterContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -39,4 +39,12 @@ export function RouteErrorToaster() {
   }, [router, searchParams]);
 
   return null;
+}
+
+export function RouteErrorToaster() {
+  return (
+    <Suspense fallback={null}>
+      <RouteErrorToasterContent />
+    </Suspense>
+  );
 }

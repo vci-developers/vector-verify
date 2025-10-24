@@ -2,23 +2,9 @@
 
 import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
+import { PageSizeSelector } from '@/shared/components/page-size-selector';
+import { TablePagination } from '@/shared/components/table-pagination';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationFirst,
-  PaginationLast,
-} from '@/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select';
 import {
   Table,
   TableBody,
@@ -29,12 +15,12 @@ import {
 } from '@/ui/table';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
-import { usePagination } from '@/shared/core/hooks/use-pagination';
+import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import {
   calculateDateRange,
   type DateRangeOption,
 } from '@/shared/core/utils/date-range';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TaskRow } from './task-row';
 
 export function AnnotationTasksListPageClient() {
@@ -44,20 +30,7 @@ export function AnnotationTasksListPageClient() {
     [dateRange],
   );
 
-  const pagination = usePagination({});
-  const {
-    setTotal,
-    page,
-    setPage,
-    pageSize,
-    setPageSizeAndReset,
-    totalPages,
-    range: pages,
-  } = pagination;
-
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
-    page,
-    limit: pageSize,
     startDate: createdAfter,
     endDate: createdBefore,
   });
@@ -65,43 +38,30 @@ export function AnnotationTasksListPageClient() {
   const tasks = data?.items ?? [];
   const totalFromServer = data?.total;
 
-  useEffect(() => {
-    if (totalFromServer !== undefined) {
-      setTotal(totalFromServer);
-    }
-  }, [totalFromServer, setTotal]);
+  const pagination = useTablePagination({
+    total: totalFromServer,
+    isLoading,
+    isFetching,
+  });
 
-  const isPagingDisabled = isLoading || isFetching;
+  const {
+    page,
+    pageSize,
+    totalPages,
+    pages,
+    handleRowsPerPageChange,
+    handleNavigateToFirstPage,
+    handleNavigateToLastPage,
+    handleNavigateToPage,
+    setPage,
+  } = pagination;
 
-  function handleRowsPerPageChange(value: string) {
-    setPageSizeAndReset(Number(value));
-  }
+  // Use actual loading states for pagination
+  const actualIsPagingDisabled = Boolean(isLoading || isFetching);
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
     setPage(1);
-  }
-
-  function handleNavigateToFirstPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && page > 1) setPage(1);
-  }
-
-  function handleNavigateToLastPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && page < totalPages) setPage(totalPages);
-  }
-
-  function handleNavigateToPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-    pageNumber: number,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
   }
 
   const isEmpty = !isLoading && !isFetching && tasks.length === 0;
@@ -121,21 +81,12 @@ export function AnnotationTasksListPageClient() {
               onValueChange={handleDateRangeChange}
               disabled={isLoading || isFetching}
             />
-            <Select
-              value={String(pageSize)}
+            <PageSizeSelector
+              value={pageSize}
               onValueChange={handleRowsPerPageChange}
-            >
-              <SelectTrigger size="sm">
-                <SelectValue placeholder="Page size" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZES.map(size => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size} / page
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={PAGE_SIZES}
+              disabled={isLoading || isFetching}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -175,53 +126,15 @@ export function AnnotationTasksListPageClient() {
             </TableBody>
           </Table>
 
-          <div className="mt-6">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationFirst
-                    className={
-                      isPagingDisabled || page === 1
-                        ? 'pointer-events-none opacity-50'
-                        : ''
-                    }
-                    onClick={handleNavigateToFirstPage}
-                    href="#"
-                  />
-                </PaginationItem>
-                {pages.map((pageItem, index) => (
-                  <PaginationItem
-                    key={
-                      pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
-                    }
-                  >
-                    {pageItem === 'ellipsis' ? (
-                      <PaginationEllipsis />
-                    ) : (
-                      <PaginationLink
-                        href="#"
-                        isActive={pageItem === page}
-                        onClick={event => handleNavigateToPage(event, pageItem)}
-                      >
-                        {pageItem}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationLast
-                    className={
-                      isPagingDisabled || page === totalPages
-                        ? 'pointer-events-none opacity-50'
-                        : ''
-                    }
-                    onClick={handleNavigateToLastPage}
-                    href="#"
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <TablePagination
+            page={page}
+            totalPages={totalPages}
+            pages={pages}
+            isPagingDisabled={actualIsPagingDisabled}
+            onNavigateToFirstPage={handleNavigateToFirstPage}
+            onNavigateToLastPage={handleNavigateToLastPage}
+            onNavigateToPage={handleNavigateToPage}
+          />
         </CardContent>
       </Card>
     </div>

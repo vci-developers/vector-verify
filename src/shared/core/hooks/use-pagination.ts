@@ -12,8 +12,16 @@ export function usePagination({
   initialPage = 1,
   initialPageSize = DEFAULT_PAGE_SIZE,
 }: UsePaginationOptions) {
-  const [total, setTotal] = useState(initialTotal);
-  const [page, setPage] = useState(initialPage);
+  const [total, setTotalState] = useState(initialTotal);
+
+  const setTotal = useCallback((newTotal: number) => {
+    setTotalState(newTotal);
+  }, []);
+  const [page, setPageState] = useState(initialPage);
+
+  const setPage = useCallback((newPage: number) => {
+    setPageState(newPage);
+  }, []);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
   const totalPages = useMemo(
@@ -23,7 +31,7 @@ export function usePagination({
 
   useEffect(() => {
     // Only adjust page if it exceeds totalPages, don't reset unnecessarily
-    setPage(prev => {
+    setPageState(prev => {
       // If totalPages is 0 or less, keep current page (might be loading state)
       if (totalPages <= 0) return prev;
 
@@ -37,10 +45,13 @@ export function usePagination({
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
-  function setPageSizeAndReset(size: number) {
-    setPageSize(size);
-    setPage(1);
-  }
+  const setPageSizeAndReset = useCallback(
+    (size: number) => {
+      setPageSize(size);
+      setPage(1);
+    },
+    [setPage],
+  );
 
   type RangeItem = number | 'ellipsis';
 
