@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import {
   Table,
   TableBody,
@@ -8,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/ui/table';
-import { Button } from '@/ui/button';
+} from '@/shared/ui/table';
+import { Button } from '@/shared/ui/button';
 import { ArrowRight } from 'lucide-react';
 import type { MonthlySummary } from '@/features/review/types';
 

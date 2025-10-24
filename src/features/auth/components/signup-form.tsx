@@ -1,7 +1,7 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/ui/alert';
-import { Button } from '@/ui/button';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
 import {
   Form,
   FormControl,
@@ -9,8 +9,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/ui/form';
-import { Input } from '@/ui/input';
+} from '@/shared/ui/form';
+import { Input } from '@/shared/ui/input';
 import {
   SignupSchema,
   type SignupFormData,

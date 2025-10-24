@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/ui/table';
+} from '@/shared/ui/table';
 import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
 
 interface MasterTableViewPageClientProps {

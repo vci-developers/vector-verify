@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/select';
+} from '@/shared/ui/select';
 import { MapPin } from 'lucide-react';
 
 interface DistrictFilterProps {

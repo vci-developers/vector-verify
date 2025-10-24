@@ -1,5 +1,5 @@
-import { Card, CardContent, CardFooter, CardHeader } from '@/ui/card';
-import { Skeleton } from '@/ui/skeleton';
+import { Card, CardContent, CardFooter, CardHeader } from '@/shared/ui/card';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 const layoutClass =
   'mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]';
@@ -61,7 +61,10 @@ export function AnnotationTaskDetailSkeleton() {
         </CardContent>
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           {Array.from({ length: 2 }, (_, index) => (
-            <Skeleton key={index} className="h-9 w-28 min-w-[120px] rounded-md" />
+            <Skeleton
+              key={index}
+              className="h-9 w-28 min-w-[120px] rounded-md"
+            />
           ))}
         </CardFooter>
       </Card>

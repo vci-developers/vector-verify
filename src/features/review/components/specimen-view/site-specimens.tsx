@@ -16,7 +16,7 @@ import {
   PaginationItem,
   PaginationLast,
   PaginationLink,
-} from '@/ui/pagination';
+} from '@/shared/ui/pagination';
 import type { SpecimensQuery } from '@/features/review/types';
 
 interface SiteSpecimenContentProps {

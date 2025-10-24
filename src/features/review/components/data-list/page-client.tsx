@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
 import { TablePagination } from '@/shared/components/table-pagination';

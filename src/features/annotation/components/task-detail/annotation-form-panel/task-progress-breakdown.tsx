@@ -1,4 +1,4 @@
-import { Progress } from '@/ui/progress';
+import { Progress } from '@/shared/ui/progress';
 import type { AnnotationTaskProgress } from '@/features/annotation/types';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { Fragment } from 'react';

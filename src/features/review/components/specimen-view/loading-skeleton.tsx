@@ -1,4 +1,4 @@
-import { Skeleton } from '@/ui/skeleton';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 export function SpecimenGridLoadingSkeleton() {
   return (
@@ -34,10 +34,7 @@ export function SpecimenAccordionLoadingSkeleton() {
   return (
     <div className="w-full rounded-lg border">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div
-          key={index}
-          className="border-b p-4 last:border-b-0"
-        >
+        <div key={index} className="border-b p-4 last:border-b-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Skeleton className="h-5 w-48" />

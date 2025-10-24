@@ -1,4 +1,4 @@
-import { Skeleton } from '@/ui/skeleton';
+import { Skeleton } from '@/shared/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/ui/table';
+} from '@/shared/ui/table';
 
 export function MasterTableViewLoadingSkeleton() {
   return (

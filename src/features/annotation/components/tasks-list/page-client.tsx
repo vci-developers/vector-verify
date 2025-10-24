@@ -4,7 +4,7 @@ import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
 import { TablePagination } from '@/shared/components/table-pagination';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/ui/table';
+} from '@/shared/ui/table';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';

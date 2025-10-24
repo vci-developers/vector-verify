@@ -7,7 +7,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/ui/form';
+} from '@/shared/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -17,9 +17,9 @@ import {
   isSexEnabled,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
-import { Textarea } from '@/ui/textarea';
-import { Button } from '@/ui/button';
-import { Toggle } from '@/ui/toggle';
+import { Textarea } from '@/shared/ui/textarea';
+import { Button } from '@/shared/ui/button';
+import { Toggle } from '@/shared/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/shared/core/utils/dom';
 import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';

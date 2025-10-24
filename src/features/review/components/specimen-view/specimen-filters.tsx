@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/select';
+} from '@/shared/ui/select';
 import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
@@ -38,7 +38,6 @@ export function SpecimenFiltersBar({
   onFiltersChange,
   disabled = false,
 }: SpecimenFiltersProps) {
-  
   const sexEnabled = isSexEnabled(filters.species ?? undefined);
   const abdomenStatusEnabled = isAbdomenStatusEnabled(
     filters.species ?? undefined,
