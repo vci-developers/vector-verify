@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { showErrorToast } from '@/ui/show-error-toast';
+import { showErrorToast } from '@/shared/ui/show-error-toast';
 
 function RouteErrorToasterContent() {
   const searchParams = useSearchParams();
