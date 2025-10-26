@@ -12,6 +12,7 @@ import type {
 } from '@/features/review/types';
 import { DiscrepancyCell } from './discrepancy-cell';
 import { StandardCell } from './standard-cell';
+import { NoDataCell } from './no-data-cell';
 
 interface HouseholdInfoTableProps {
   tableMeta: HouseholdTableMeta | null;
@@ -113,14 +114,23 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
                     </div>
                   )}
                 </TableCell>
-                {tableColumns.map(column => (
+                {row.sessionCount === 0 ? (
                   <TableCell
-                    key={`${row.key}-${column.key}`}
-                    className={`bg-background px-4 py-4 align-top ${column.width}`}
+                    colSpan={tableColumns.length}
+                    className="bg-background px-4 py-4"
                   >
-                    {column.render(row)}
+                    <NoDataCell />
                   </TableCell>
-                ))}
+                ) : (
+                  tableColumns.map(column => (
+                    <TableCell
+                      key={`${row.key}-${column.key}`}
+                      className={`bg-background px-4 py-4 align-top ${column.width}`}
+                    >
+                      {column.render(row)}
+                    </TableCell>
+                  ))
+                )}
               </TableRow>
             ))}
           </TableBody>
