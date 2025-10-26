@@ -6,30 +6,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/table';
-
-export type HouseholdRowData = {
-  key: string;
-  siteLabel: {
-    topLine: string;
-    bottomLine: string | null;
-  };
-  collectorName: string | null;
-  collectorTitle: string | null;
-  collectionMethod: string | null;
-  mostRecentDate: number | null;
-  sessionCount: number;
-  hasCollectorNameDiscrepancy: boolean;
-  hasCollectorTitleDiscrepancy: boolean;
-  hasCollectionMethodDiscrepancy: boolean;
-  collectorNames: string[];
-  collectorTitles: string[];
-  collectionMethods: string[];
-};
-
-export type HouseholdTableMeta = {
-  rows: HouseholdRowData[];
-  minWidth: number;
-};
+import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
+import type {
+  HouseholdRowData,
+  HouseholdTableMeta,
+} from '@/features/review/types';
 
 interface HouseholdInfoTableProps {
   tableMeta: HouseholdTableMeta | null;
@@ -177,16 +158,7 @@ export function HouseholdInfoTable({
   isLoading,
 }: HouseholdInfoTableProps) {
   if (isLoading) {
-    return (
-      <div className="border-border/60 bg-background max-h-[560px] w-full animate-pulse rounded-xl border p-6">
-        <div className="bg-muted mb-4 h-6 w-1/3 rounded-full" />
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="bg-muted h-4 rounded-full" />
-          ))}
-        </div>
-      </div>
-    );
+    return <MasterTableViewLoadingSkeleton />;
   }
 
   if (!tableMeta) {

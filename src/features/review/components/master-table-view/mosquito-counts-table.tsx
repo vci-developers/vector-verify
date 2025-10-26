@@ -7,22 +7,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/table';
-import type { SpecimenCountsSummary } from '@/features/review/types';
+import type {
+  SpecimenCountsSummary,
+  MosquitoTableMeta,
+} from '@/features/review/types';
 import { groupColumnsBySpecies } from '@/features/review/utils/master-table-view';
-
-export type MosquitoTableMeta = {
-  columns: string[];
-  groupedColumns: ReturnType<typeof groupColumnsBySpecies>;
-  rows: {
-    key: string;
-    label: { topLine: string; bottomLine?: string | null };
-    countsByColumn: Record<string, number>;
-    totalSpecimens?: number | null;
-  }[];
-  totals: Record<string, number>;
-  grandTotal?: number | null;
-  minWidth: number;
-};
 
 interface MosquitoCountsTableProps {
   tableMeta: MosquitoTableMeta | null;

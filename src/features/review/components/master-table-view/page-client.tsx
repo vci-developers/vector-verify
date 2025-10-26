@@ -6,6 +6,7 @@ import {
   getMonthDateRange,
   groupColumnsBySpecies,
   getSiteLabel,
+  formatSiteLabel,
 } from '@/features/review/utils/master-table-view';
 import { useSpecimenCountsQuery } from '@/features/review/hooks/use-specimen-counts';
 import {
@@ -13,14 +14,12 @@ import {
   type SessionsBySite,
 } from '@/features/review/hooks/use-sessions-by-site';
 import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
-import {
-  MosquitoCountsTable,
-  type MosquitoTableMeta,
-} from './mosquito-counts-table';
-import {
-  HouseholdInfoTable,
-  type HouseholdTableMeta,
-} from './household-info-table';
+import { MosquitoCountsTable } from './mosquito-counts-table';
+import { HouseholdInfoTable } from './household-info-table';
+import type {
+  MosquitoTableMeta,
+  HouseholdTableMeta,
+} from '@/features/review/types';
 import { ToggleGroup, ToggleGroupItem } from '@/ui/toggle-group';
 import { useUserPermissionsQuery } from '@/features/user';
 
@@ -38,51 +37,6 @@ function formatMonthLabel(monthYear: string) {
     month: 'long',
     year: 'numeric',
   });
-}
-
-function formatSiteLabel(site: {
-  siteId: number;
-  district: string | null;
-  subCounty: string | null;
-  parish: string | null;
-  villageName: string | null;
-  houseNumber: string | null;
-  healthCenter: string | null;
-}): { topLine: string; bottomLine: string | null } {
-  // Primary parts: village name and house number
-  const primaryParts = [
-    site.villageName,
-    site.houseNumber && `House ${site.houseNumber}`,
-  ].filter(Boolean) as string[];
-
-  // Fallback if no primary parts
-  const fallback =
-    site.healthCenter ??
-    site.parish ??
-    site.subCounty ??
-    site.district ??
-    `Site #${site.siteId}`;
-
-  const topLine = primaryParts.length > 0 ? primaryParts.join(' • ') : fallback;
-
-  // Secondary parts: health center, parish, sub-county, district
-  const secondaryParts = [
-    site.healthCenter && site.healthCenter !== topLine
-      ? site.healthCenter
-      : null,
-    site.parish && !primaryParts.includes(site.parish) ? site.parish : null,
-    site.subCounty && !primaryParts.includes(site.subCounty)
-      ? site.subCounty
-      : null,
-    site.district && !primaryParts.includes(site.district)
-      ? site.district
-      : null,
-  ].filter(Boolean) as string[];
-
-  return {
-    topLine,
-    bottomLine: secondaryParts.length > 0 ? secondaryParts.join(' • ') : null,
-  };
 }
 
 export function MasterTableViewPageClient({
