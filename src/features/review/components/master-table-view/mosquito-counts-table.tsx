@@ -34,13 +34,13 @@ export function MosquitoCountsTable({
   }
 
   return (
-    <div className="border-border bg-background overflow-hidden rounded-lg border">
+    <div className="border-border bg-background overflow-hidden rounded-lg border shadow-sm">
       <div className="max-h-[600px] overflow-auto">
         <Table style={{ minWidth: tableMeta.minWidth }}>
           <TableHeader>
-            <TableRow className="bg-muted hover:bg-muted border-b">
+            <TableRow className="bg-muted hover:bg-muted h-12 border-b-2">
               <TableHead
-                className="bg-muted sticky top-0 left-0 z-30 min-w-[220px] border-r px-4 text-xs font-semibold uppercase"
+                className="bg-muted sticky top-0 left-0 z-30 h-12 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 text-center text-xs font-semibold uppercase"
                 rowSpan={2}
               >
                 Site
@@ -55,7 +55,7 @@ export function MosquitoCountsTable({
                 return (
                   <TableHead
                     key={species}
-                    className={`bg-muted sticky top-0 z-20 text-center text-xs font-semibold uppercase ${
+                    className={`bg-muted sticky top-0 z-20 h-12 text-center text-xs font-semibold uppercase ${
                       index > 0 ? 'border-border border-l-2' : ''
                     } ${!isNonMosquito ? 'border-border border-b' : ''}`}
                     colSpan={isNonMosquito ? 1 : speciesColumns.length}
@@ -66,13 +66,13 @@ export function MosquitoCountsTable({
                 );
               })}
               <TableHead
-                className="border-border bg-muted sticky top-0 z-20 border-b border-l-2 text-center text-xs font-semibold uppercase"
+                className="border-border bg-muted sticky top-0 z-20 h-12 border-b border-l-2 text-center text-xs font-semibold uppercase"
                 rowSpan={2}
               >
                 Total
               </TableHead>
             </TableRow>
-            <TableRow className="bg-muted hover:bg-muted border-b">
+            <TableRow className="bg-muted hover:bg-muted h-12 border-b-2">
               {tableMeta.groupedColumns.speciesOrder.flatMap(
                 (species, groupIndex) => {
                   const speciesColumns =
@@ -86,7 +86,7 @@ export function MosquitoCountsTable({
                   return speciesColumns.map((column, columnIndex) => (
                     <TableHead
                       key={`${species}-${column.originalName}`}
-                      className={`bg-muted sticky top-[2.5rem] z-20 text-center text-xs font-semibold uppercase ${
+                      className={`bg-muted sticky top-[2.5rem] z-20 h-12 text-center text-xs font-semibold uppercase ${
                         groupIndex > 0 && columnIndex === 0
                           ? 'border-border border-l-2'
                           : ''
@@ -105,12 +105,12 @@ export function MosquitoCountsTable({
                 key={row.key}
                 className="hover:bg-muted/30 border-b transition-colors last:border-b-0"
               >
-                <TableCell className="bg-background sticky left-0 z-20 min-w-[220px] border-r px-4 py-4 align-top font-medium">
-                  <div className="text-foreground text-sm font-semibold break-words">
+                <TableCell className="bg-background sticky left-0 z-20 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 py-4 text-center font-medium">
+                  <div className="text-foreground text-sm font-semibold break-words whitespace-normal">
                     {row.label.topLine}
                   </div>
                   {row.label.bottomLine && (
-                    <div className="text-muted-foreground mt-1 text-xs break-words">
+                    <div className="text-muted-foreground mt-1 text-xs break-words whitespace-normal">
                       {row.label.bottomLine}
                     </div>
                   )}
@@ -122,7 +122,7 @@ export function MosquitoCountsTable({
                     ).map((column, columnIndex) => (
                       <TableCell
                         key={`${row.key}-${column.originalName}`}
-                        className={`bg-background px-4 py-4 text-center tabular-nums transition-colors ${
+                        className={`bg-background border-r px-4 py-4 text-center tabular-nums transition-colors ${
                           groupIndex > 0 && columnIndex === 0
                             ? 'border-border border-l-2'
                             : ''
@@ -142,7 +142,7 @@ export function MosquitoCountsTable({
           </TableBody>
           <TableFooter>
             <TableRow className="bg-muted hover:bg-muted/50 border-t-2 font-semibold">
-              <TableCell className="bg-muted sticky left-0 z-20 min-w-[220px] border-r px-4 py-4">
+              <TableCell className="bg-muted sticky left-0 z-20 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 py-4 text-center">
                 Total
               </TableCell>
               {tableMeta.groupedColumns.speciesOrder.flatMap(
@@ -152,7 +152,7 @@ export function MosquitoCountsTable({
                   ).map((column, columnIndex) => (
                     <TableCell
                       key={`total-${column.originalName}`}
-                      className={`bg-muted px-4 py-4 text-center tabular-nums ${
+                      className={`bg-muted border-r px-4 py-4 text-center tabular-nums ${
                         groupIndex > 0 && columnIndex === 0
                           ? 'border-border border-l-2'
                           : ''

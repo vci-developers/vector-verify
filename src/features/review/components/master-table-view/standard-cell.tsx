@@ -3,5 +3,7 @@ interface StandardCellProps {
 }
 
 export function StandardCell({ value }: StandardCellProps) {
-  return <span className="text-foreground text-sm">{value ?? '—'}</span>;
+  return (
+    <span className="text-foreground inline-block text-sm">{value ?? '—'}</span>
+  );
 }

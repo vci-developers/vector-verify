@@ -30,10 +30,10 @@ const tableColumns = [
   {
     key: 'collectorName',
     label: 'Collector Name',
-    width: 'min-w-[220px]',
+    width: 'min-w-[180px]',
     render: (row: HouseholdRowData) =>
       row.hasCollectorNameDiscrepancy ? (
-        <DiscrepancyCell values={row.collectorNames} />
+        <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectorName} />
       ),
@@ -41,10 +41,10 @@ const tableColumns = [
   {
     key: 'collectorTitle',
     label: 'Collector Title',
-    width: 'min-w-[200px]',
+    width: 'min-w-[180px]',
     render: (row: HouseholdRowData) =>
       row.hasCollectorTitleDiscrepancy ? (
-        <DiscrepancyCell values={row.collectorTitles} />
+        <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectorTitle} />
       ),
@@ -59,14 +59,120 @@ const tableColumns = [
   },
   {
     key: 'collectionMethod',
-    label: 'Method',
-    width: 'min-w-[200px]',
+    label: 'Collection Method',
+    width: 'min-w-[160px]',
     render: (row: HouseholdRowData) =>
       row.hasCollectionMethodDiscrepancy ? (
-        <DiscrepancyCell values={row.collectionMethods} />
+        <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectionMethod} />
       ),
+  },
+  {
+    key: 'numPeopleSleptInHouse',
+    label: 'People in House',
+    width: 'min-w-[140px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.numPeopleSleptInHouse.filter(
+        (v): v is number => v !== null,
+      );
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasNumPeopleSleptInHouseDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={String(values[0])} />
+      );
+    },
+  },
+  {
+    key: 'wasIrsConducted',
+    label: 'IRS Conducted',
+    width: 'min-w-[130px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.wasIrsConducted.filter(
+        (v): v is boolean => v !== null,
+      );
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasWasIrsConductedDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={values[0] ? 'Yes' : 'No'} />
+      );
+    },
+  },
+  {
+    key: 'monthsSinceIrs',
+    label: 'Months Since IRS',
+    width: 'min-w-[150px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.monthsSinceIrs.filter((v): v is number => v !== null);
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasMonthsSinceIrsDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={String(values[0])} />
+      );
+    },
+  },
+  {
+    key: 'numLlinsAvailable',
+    label: 'LLINs Available',
+    width: 'min-w-[140px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.numLlinsAvailable.filter(
+        (v): v is number => v !== null,
+      );
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasNumLlinsAvailableDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={String(values[0])} />
+      );
+    },
+  },
+  {
+    key: 'llinType',
+    label: 'LLIN Type',
+    width: 'min-w-[130px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.llinType.filter((v): v is string => v !== null);
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasLlinTypeDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={values[0]} />
+      );
+    },
+  },
+  {
+    key: 'llinBrand',
+    label: 'LLIN Brand',
+    width: 'min-w-[130px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.llinBrand.filter((v): v is string => v !== null);
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasLlinBrandDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={values[0]} />
+      );
+    },
+  },
+  {
+    key: 'numPeopleSleptUnderLlin',
+    label: 'People Slept Under LLIN',
+    width: 'min-w-[160px]',
+    render: (row: HouseholdRowData) => {
+      const values = row.numPeopleSleptUnderLlin.filter(
+        (v): v is number => v !== null,
+      );
+      if (values.length === 0) return <StandardCell value={null} />;
+      return row.hasNumPeopleSleptUnderLlinDiscrepancy ? (
+        <DiscrepancyCell />
+      ) : (
+        <StandardCell value={String(values[0])} />
+      );
+    },
   },
 ] as const;
 
@@ -80,18 +186,18 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
   }
 
   return (
-    <div className="border-border bg-background overflow-hidden rounded-lg border">
+    <div className="border-border bg-background overflow-hidden rounded-lg border shadow-sm">
       <div className="max-h-[600px] overflow-auto">
         <Table style={{ minWidth: tableMeta.minWidth }}>
           <TableHeader>
-            <TableRow className="bg-muted hover:bg-muted border-b">
-              <TableHead className="bg-muted sticky top-0 left-0 z-30 min-w-[220px] border-r px-4 text-xs font-semibold uppercase">
+            <TableRow className="bg-muted hover:bg-muted h-24 border-b-2">
+              <TableHead className="bg-muted sticky top-0 left-0 z-30 h-24 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 text-center text-xs font-semibold uppercase">
                 Site
               </TableHead>
               {tableColumns.map(column => (
                 <TableHead
                   key={column.key}
-                  className={`bg-muted sticky top-0 z-20 text-xs font-semibold uppercase ${column.width}`}
+                  className={`bg-muted sticky top-0 z-20 h-24 border-r px-4 text-center text-xs font-semibold uppercase last:border-r-0 ${column.width}`}
                 >
                   {column.label}
                 </TableHead>
@@ -104,12 +210,12 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
                 key={row.key}
                 className="hover:bg-muted/30 border-b transition-colors last:border-b-0"
               >
-                <TableCell className="bg-background sticky left-0 z-20 min-w-[220px] border-r px-4 py-4 align-top font-medium">
-                  <div className="text-foreground text-sm font-semibold break-words">
+                <TableCell className="bg-background sticky left-0 z-20 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 py-4 text-center font-medium">
+                  <div className="text-foreground text-sm font-semibold break-words whitespace-normal">
                     {row.siteLabel.topLine}
                   </div>
                   {row.siteLabel.bottomLine && (
-                    <div className="text-muted-foreground mt-1 text-xs break-words">
+                    <div className="text-muted-foreground mt-1 text-xs break-words whitespace-normal">
                       {row.siteLabel.bottomLine}
                     </div>
                   )}
@@ -117,7 +223,7 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
                 {row.sessionCount === 0 ? (
                   <TableCell
                     colSpan={tableColumns.length}
-                    className="bg-background px-4 py-4"
+                    className="bg-background px-4 py-4 text-center"
                   >
                     <NoDataCell />
                   </TableCell>
@@ -125,7 +231,7 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
                   tableColumns.map(column => (
                     <TableCell
                       key={`${row.key}-${column.key}`}
-                      className={`bg-background px-4 py-4 align-top ${column.width}`}
+                      className={`bg-background border-r px-4 py-4 text-center last:border-r-0 ${column.width}`}
                     >
                       {column.render(row)}
                     </TableCell>

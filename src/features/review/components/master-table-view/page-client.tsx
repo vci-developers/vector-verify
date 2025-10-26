@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Session } from '@/shared/entities/session/model';
+import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 import {
   getMonthDateRange,
   groupColumnsBySpecies,
@@ -13,6 +14,7 @@ import {
   useSessionsBySiteQuery,
   type SessionsBySite,
 } from '@/features/review/hooks/use-sessions-by-site';
+import { useSurveillanceFormsQuery } from '@/features/review/hooks/use-surveillance-forms';
 import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
 import { MosquitoCountsTable } from './mosquito-counts-table';
 import { HouseholdInfoTable } from './household-info-table';
@@ -72,6 +74,18 @@ export function MasterTableViewPageClient({
         enabled: viewMode === 'household' && Boolean(startDate && endDate),
       },
     );
+
+  const allSessionIds = useMemo(() => {
+    if (!sessionsBySite) return [];
+    return sessionsBySite.flatMap(group =>
+      group.sessions.map(s => s.sessionId),
+    );
+  }, [sessionsBySite]);
+
+  const { data: surveillanceForms, isLoading: isSurveillanceFormsLoading } =
+    useSurveillanceFormsQuery(allSessionIds, {
+      enabled: viewMode === 'household' && allSessionIds.length > 0,
+    });
 
   const { data: permissions } = useUserPermissionsQuery();
 
@@ -220,6 +234,32 @@ export function MasterTableViewPageClient({
           null,
         );
 
+        // Get surveillance form data for these sessions
+        const forms = sessions
+          .map(s => surveillanceForms?.get(s.sessionId))
+          .filter((f): f is SurveillanceForm => Boolean(f));
+
+        // Extract surveillance form values
+        const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
+        const wasIrsConducted = forms.map(f => f.wasIrsConducted);
+        const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
+        const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
+        const llinType = forms.map(f => f.llinType);
+        const llinBrand = forms.map(f => f.llinBrand);
+        const numPeopleSleptUnderLlin = forms.map(
+          f => f.numPeopleSleptUnderLlin,
+        );
+
+        // Helper to check discrepancy (unique non-null values > 1)
+        const hasDiscrepancy = <T,>(values: (T | null)[]) => {
+          const uniqueNonNull = Array.from(
+            new Set(values.filter((v): v is T => v !== null)),
+          );
+          return uniqueNonNull.length > 1;
+        };
+
+        const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
+
         return {
           key: `site-${site.siteId}`,
           siteLabel,
@@ -236,23 +276,47 @@ export function MasterTableViewPageClient({
           collectorNames,
           collectorTitles,
           collectionMethods,
+          // Surveillance form data
+          numPeopleSleptInHouse,
+          wasIrsConducted,
+          monthsSinceIrs,
+          numLlinsAvailable,
+          llinType,
+          llinBrand,
+          numPeopleSleptUnderLlin,
+          // Surveillance form discrepancies
+          hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(
+            numPeopleSleptInHouse,
+          ),
+          hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
+          // If IRS conducted has discrepancy, monthsSinceIrs also has discrepancy
+          hasMonthsSinceIrsDiscrepancy:
+            hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
+          hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
+          hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
+          hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
+          hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
+            numPeopleSleptUnderLlin,
+          ),
         };
       });
 
     const meta: HouseholdTableMeta = {
       rows,
-      minWidth: 1000, // Site (220) + Collector Name (220) + Collector Title (200) + Date (160) + Method (200)
+      minWidth: 2200, // Expanded for surveillance form fields
     };
     return meta;
   }, [
     specimenCounts?.data,
     sessionsBySite,
+    surveillanceForms,
     permissions?.sites?.canAccessSites,
   ]);
 
   const isLoading =
     (viewMode === 'mosquito' && isSpecimenCountsLoading) ||
-    (viewMode === 'household' && isSessionsLoading);
+    (viewMode === 'household' &&
+      (isSessionsLoading || isSurveillanceFormsLoading));
 
   if (isLoading) {
     return <MasterTableViewLoadingSkeleton />;

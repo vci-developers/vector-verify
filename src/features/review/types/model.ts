@@ -49,6 +49,22 @@ export interface HouseholdRowData {
   collectorNames: string[];
   collectorTitles: string[];
   collectionMethods: string[];
+  // Surveillance form fields
+  numPeopleSleptInHouse: (number | null)[];
+  wasIrsConducted: (boolean | null)[];
+  monthsSinceIrs: (number | null)[];
+  numLlinsAvailable: (number | null)[];
+  llinType: (string | null)[];
+  llinBrand: (string | null)[];
+  numPeopleSleptUnderLlin: (number | null)[];
+  // Discrepancy flags
+  hasNumPeopleSleptInHouseDiscrepancy: boolean;
+  hasWasIrsConductedDiscrepancy: boolean;
+  hasMonthsSinceIrsDiscrepancy: boolean;
+  hasNumLlinsAvailableDiscrepancy: boolean;
+  hasLlinTypeDiscrepancy: boolean;
+  hasLlinBrandDiscrepancy: boolean;
+  hasNumPeopleSleptUnderLlinDiscrepancy: boolean;
 }
 
 export interface HouseholdTableMeta {
