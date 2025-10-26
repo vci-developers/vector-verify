@@ -11,20 +11,17 @@ import type {
   SpecimenCountsSummary,
   MosquitoTableMeta,
 } from '@/features/review/types';
-import { groupColumnsBySpecies } from '@/features/review/utils/master-table-view';
 
 interface MosquitoCountsTableProps {
   tableMeta: MosquitoTableMeta | null;
   specimenCounts: SpecimenCountsSummary | undefined;
-  isLoading: boolean;
 }
 
 export function MosquitoCountsTable({
   tableMeta,
   specimenCounts,
-  isLoading,
 }: MosquitoCountsTableProps) {
-  if (!tableMeta && !isLoading && specimenCounts) {
+  if (!tableMeta && specimenCounts) {
     return (
       <p className="text-muted-foreground text-sm">
         No specimen count data returned for this district and month.

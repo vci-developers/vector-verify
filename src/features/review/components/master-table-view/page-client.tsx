@@ -250,7 +250,11 @@ export function MasterTableViewPageClient({
     permissions?.sites?.canAccessSites,
   ]);
 
-  if (isSpecimenCountsLoading && viewMode === 'mosquito') {
+  const isLoading =
+    (viewMode === 'mosquito' && isSpecimenCountsLoading) ||
+    (viewMode === 'household' && isSessionsLoading);
+
+  if (isLoading) {
     return <MasterTableViewLoadingSkeleton />;
   }
 
@@ -327,15 +331,11 @@ export function MasterTableViewPageClient({
           <MosquitoCountsTable
             tableMeta={mosquitoTableMeta}
             specimenCounts={specimenCounts}
-            isLoading={isSpecimenCountsLoading}
           />
         )}
 
         {viewMode === 'household' && (
-          <HouseholdInfoTable
-            tableMeta={householdTableMeta}
-            isLoading={isSessionsLoading}
-          />
+          <HouseholdInfoTable tableMeta={householdTableMeta} />
         )}
       </section>
     </div>
