@@ -1,3 +1,4 @@
+import type { SessionDto } from '@/shared/entities/session/dto';
 import type { SiteDto } from '@/shared/entities/site/dto';
 
 export interface ReviewItemDto {
@@ -35,4 +36,12 @@ export interface SpecimenCountsResponseDto {
   message: string;
   columns: string[];
   data: SpecimenCountsSiteDto[];
+}
+
+export interface SessionsResponseDto {
+  sessions: SessionDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
 }
