@@ -16,7 +16,7 @@ interface PageSizeSelectorProps {
   disabled?: boolean;
 }
 
-const DEFAULT_PAGE_SIZES = [10, 25, 50, 100];
+const DEFAULT_PAGE_SIZES = [10, 20, 50];
 
 export function PageSizeSelector({
   value,

@@ -14,14 +14,14 @@ export function usePagination({
 }: UsePaginationOptions) {
   const [total, setTotalState] = useState(initialTotal);
 
-  const setTotal = useCallback((newTotal: number) => {
+  const setTotal = (newTotal: number) => {
     setTotalState(newTotal);
-  }, []);
+  };
   const [page, setPageState] = useState(initialPage);
 
-  const setPage = useCallback((newPage: number) => {
+  const setPage = (newPage: number) => {
     setPageState(newPage);
-  }, []);
+  };
   const [pageSize, setPageSize] = useState(initialPageSize);
 
   const totalPages = useMemo(

@@ -7,7 +7,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/shared/ui/form';
+} from '@/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -17,9 +17,9 @@ import {
   isSexEnabled,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
-import { Textarea } from '@/shared/ui/textarea';
-import { Button } from '@/shared/ui/button';
-import { Toggle } from '@/shared/ui/toggle';
+import { Textarea } from '@/ui/textarea';
+import { Button } from '@/ui/button';
+import { Toggle } from '@/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/shared/core/utils/dom';
 import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
@@ -30,7 +30,7 @@ import {
 } from '@/shared/entities/specimen/morph-ids';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
-import { showSuccessToast } from '@/shared/ui/show-success-toast';
+import { showSuccessToast } from '@/ui/show-success-toast';
 
 interface AnnotationFormProps {
   annotationId: number;

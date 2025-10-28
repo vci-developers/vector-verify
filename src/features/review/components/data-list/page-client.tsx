@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { ColumnDef } from '@tanstack/react-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
+import { DataTable } from '@/ui/data-table';
 import { TablePagination } from '@/shared/components/table-pagination';
+import { Button } from '@/ui/button';
+import { ArrowRight } from 'lucide-react';
 import { DistrictFilter } from './district-filter';
-import { ReviewTable } from './review-table';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
 import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
@@ -14,6 +17,7 @@ import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import { useDistrictManagement } from '@/features/review/hooks/use-district-management';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import type { DateRangeOption } from '@/shared/core/utils/date-range';
+import type { MonthlySummary } from '@/features/review/types';
 
 export function ReviewDataListPageClient() {
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
@@ -92,7 +96,67 @@ export function ReviewDataListPageClient() {
     window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}`;
   }
 
-  const isEmpty = !isLoading && !isFetching && summaries.length === 0;
+  const columns: ColumnDef<MonthlySummary>[] = useMemo(
+    () => [
+      {
+        id: 'district',
+        accessorKey: 'district',
+        header: 'District / Month',
+        cell: ({ row }) => {
+          const summary = row.original;
+          return (
+            <div className="text-center">
+              <div className="text-foreground font-semibold">
+                {summary.district}
+              </div>
+              <div className="text-muted-foreground text-sm">
+                {summary.monthName}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'sessionCount',
+        accessorKey: 'sessionCount',
+        header: 'Sessions',
+        cell: ({ row }) => {
+          const summary = row.original;
+          return (
+            <div className="text-center">
+              <div className="text-foreground font-semibold">
+                {summary.sessionCount}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        accessorKey: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const summary = row.original;
+          return (
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  handleNavigateToReview(summary.district, summary.monthString)
+                }
+                className="text-primary hover:text-primary/80 h-auto p-0 font-normal"
+              >
+                Review
+                <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
 
   if (isLoading || isFetching) {
     return <ReviewDataListLoadingSkeleton />;
@@ -126,10 +190,11 @@ export function ReviewDataListPageClient() {
           </div>
         </CardHeader>
         <CardContent>
-          <ReviewTable
-            summaries={summaries}
-            onNavigateToReview={handleNavigateToReview}
-            isEmpty={isEmpty}
+          <DataTable
+            columns={columns}
+            data={summaries}
+            searchKey="district"
+            searchPlaceholder="Search districts..."
           />
 
           <TablePagination

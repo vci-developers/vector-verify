@@ -5,7 +5,7 @@ import {
   canViewAndWriteAnnotationTasks,
   canViewSites,
 } from '@/features/user/utils/permissions';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/ui/button';
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/shared/ui/card';
+} from '@/ui/card';
 import { ArrowRight, Loader2, PencilLine, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

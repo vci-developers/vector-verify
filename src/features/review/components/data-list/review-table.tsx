@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/shared/ui/table';
-import { Button } from '@/shared/ui/button';
+} from '@/ui/table';
+import { Button } from '@/ui/button';
 import { ArrowRight } from 'lucide-react';
 import type { MonthlySummary } from '@/features/review/types';
 

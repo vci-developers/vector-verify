@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui/select';
+} from '@/ui/select';
 import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,

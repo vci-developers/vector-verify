@@ -1,7 +1,7 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/shared/ui/alert';
-import { Button } from '@/shared/ui/button';
+import { Alert, AlertDescription } from '@/ui/alert';
+import { Button } from '@/ui/button';
 import {
   Form,
   FormControl,
@@ -9,8 +9,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/shared/ui/form';
-import { Input } from '@/shared/ui/input';
+} from '@/ui/form';
+import { Input } from '@/ui/input';
 import {
   type LoginFormData,
   LoginSchema,
@@ -20,7 +20,7 @@ import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { showErrorToast } from '@/ui/show-error-toast';
 import { useLoginMutation } from '@/features/auth/hooks/use-login';
 
 export function LoginForm() {

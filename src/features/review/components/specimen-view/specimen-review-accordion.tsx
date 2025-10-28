@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/shared/ui/accordion';
+} from '@/ui/accordion';
 import { ImageModal } from './image-modal';
 import { SiteSpecimenContent } from './site-specimens';
 import type { Specimen } from '@/shared/entities/specimen';

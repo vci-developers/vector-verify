@@ -1,4 +1,4 @@
-import { Skeleton } from '@/shared/ui/skeleton';
+import { Skeleton } from '@/ui/skeleton';
 
 export function SpecimenGridLoadingSkeleton() {
   return (

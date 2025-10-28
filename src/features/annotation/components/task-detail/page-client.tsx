@@ -1,15 +1,15 @@
 'use client';
 
 import { AnnotationTaskDetailSkeleton } from './loading-skeleton';
-import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
+import { Badge } from '@/ui/badge';
+import { Button } from '@/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/shared/ui/card';
+} from '@/ui/card';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';

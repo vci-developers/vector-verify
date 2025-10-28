@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui/select';
+} from '@/ui/select';
 import { MapPin } from 'lucide-react';
 
 interface DistrictFilterProps {

@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
   SelectSeparator,
-} from '@/shared/ui/select';
+} from '@/ui/select';
 import { cn } from '@/shared/core/utils';
 import { toDomId } from '@/shared/core/utils/dom';
 
