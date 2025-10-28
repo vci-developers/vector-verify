@@ -28,3 +28,42 @@ export interface SpecimenCountsSummary {
   columns: string[];
   data: SpecimenCountsSite[];
 }
+
+export interface SiteLabel {
+  topLine: string;
+  bottomLine?: string;
+}
+
+export interface HouseholdRowData {
+  key: string;
+  siteLabel: SiteLabel;
+  sessionCount: number;
+  collectorName: string;
+  hasCollectorNameDiscrepancy: boolean;
+  collectorTitle: string;
+  hasCollectorTitleDiscrepancy: boolean;
+  mostRecentDate: number | null;
+  collectionMethod: string;
+  hasCollectionMethodDiscrepancy: boolean;
+  numPeopleSleptInHouse: (number | null)[];
+  hasNumPeopleSleptInHouseDiscrepancy: boolean;
+  wasIrsConducted: (boolean | null)[];
+  hasWasIrsConductedDiscrepancy: boolean;
+  monthsSinceIrs: (number | null)[];
+  hasMonthsSinceIrsDiscrepancy: boolean;
+  numLlinsAvailable: (number | null)[];
+  hasNumLlinsAvailableDiscrepancy: boolean;
+  llinType: (string | null)[];
+  hasLlinTypeDiscrepancy: boolean;
+  llinBrand: (string | null)[];
+  hasLlinBrandDiscrepancy: boolean;
+  numLlinsUsed: (number | null)[];
+  hasNumLlinsUsedDiscrepancy: boolean;
+  numPeopleSleptUnderLlin: (number | null)[];
+  hasNumPeopleSleptUnderLlinDiscrepancy: boolean;
+}
+
+export interface HouseholdTableMeta {
+  rows: HouseholdRowData[];
+  minWidth: number;
+}

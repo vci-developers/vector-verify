@@ -1,13 +1,11 @@
 import { Card, CardContent, CardHeader } from '@/ui/card';
 import { Skeleton } from '@/ui/skeleton';
-import { BackButton } from '@/features/dashboard/components/back-button';
 
 export function DashboardLoadingSkeleton() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <BackButton />
-        <Skeleton className="mt-4 h-8 w-80" />
+        <Skeleton className="h-8 w-80" />
         <Skeleton className="mt-2 h-4 w-48" />
       </div>
 

@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Card, CardContent } from '@/ui/card';
 import { useDashboardDataQuery } from '@/features/review/hooks';
-import { BackButton } from '@/features/dashboard/components/back-button';
 import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
@@ -52,9 +51,7 @@ export function DashboardPageClient({
                 Error Loading Dashboard
               </h2>
               <p className="text-gray-600">
-                {error instanceof Error
-                  ? error.message
-                  : 'An unexpected error occurred'}
+                {error?.message || 'An unexpected error occurred'}
               </p>
             </div>
           </CardContent>
@@ -63,7 +60,9 @@ export function DashboardPageClient({
     );
   }
 
-  if (!data) {
+  const displayData = data;
+
+  if (!displayData) {
     return (
       <div className="container mx-auto px-4 py-6">
         <Card>
@@ -83,31 +82,35 @@ export function DashboardPageClient({
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-6">
-        <BackButton />
-        <h1 className="mt-4 text-3xl font-bold text-gray-900">
-          Review Data Dashboard
-        </h1>
-        <p className="mt-2 text-gray-600">
-          {district} - {monthName}
-        </p>
-      </div>
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
+            <p className="mt-2 text-lg text-gray-600">{monthName}</p>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Site Information */}
-        <SiteInformationSection data={data.siteInformation} />
+        {/* Dashboard Content */}
+        <div className="space-y-12">
+          {/* Site Information */}
+          <SiteInformationSection
+            data={displayData.siteInformation}
+            vectorDensity={displayData.entomologicalSummary.vectorDensity}
+          />
 
-        {/* Entomological Summary */}
-        <EntomologicalSummarySection
-          data={data.entomologicalSummary}
-          speciesDistribution={data.speciesDistribution}
-          sexRatio={data.sexRatio}
-          abdomenStatus={data.abdomenStatus}
-        />
+          {/* Entomological Summary */}
+          <EntomologicalSummarySection
+            data={displayData.entomologicalSummary}
+            speciesDistribution={displayData.speciesDistribution}
+            sexRatio={displayData.sexRatio}
+            abdomenStatus={displayData.abdomenStatus}
+          />
 
-        {/* Bednets Data */}
-        <BednetsDataSection data={data.entomologicalSummary} />
+          {/* Bednets Data */}
+          <BednetsDataSection data={displayData.entomologicalSummary} />
+        </div>
       </div>
     </div>
   );

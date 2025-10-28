@@ -19,5 +19,5 @@ export async function getDashboardMetrics(
     },
   });
 
-  return response;
+  return response as unknown as DashboardMetrics;
 }

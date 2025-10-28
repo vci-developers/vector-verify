@@ -1,12 +1,11 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import {
-  getDashboardMetrics,
-  getDashboardSpecimenData,
-} from '@/features/review/api';
+import { getDashboardMetrics, getSpecimenCounts } from '@/features/review/api';
+import { DashboardDataCalculator } from '@/features/review/services/dashboard-data-calculator';
 import type {
   CompleteDashboardData,
   DashboardMetricsRequest,
 } from '@/features/review/types/dashboard';
+import type { SpecimenCountsQuery } from '@/features/review/types';
 
 export function useDashboardDataQuery(
   request: DashboardMetricsRequest,
@@ -28,15 +27,32 @@ export function useDashboardDataQuery(
       request.endDate,
     ],
     queryFn: async () => {
-      const [metrics, specimenData] = await Promise.all([
+      // Fetch both metrics and specimen counts data
+      const [metrics, specimenCounts] = await Promise.all([
         getDashboardMetrics(request),
-        getDashboardSpecimenData(request),
+        getSpecimenCounts({
+          district: request.district,
+          startDate: request.startDate,
+          endDate: request.endDate,
+        }),
       ]);
 
-      return {
-        ...metrics,
-        ...specimenData,
-      } as CompleteDashboardData;
+      // Validate data
+      const validation = DashboardDataCalculator.validateData({
+        metrics,
+        specimenCounts,
+      });
+      if (!validation.isValid) {
+        throw new Error(
+          `Data validation failed: ${validation.errors.join(', ')}`,
+        );
+      }
+
+      // Calculate all dashboard data using the calculator
+      return DashboardDataCalculator.calculateDashboardData({
+        metrics,
+        specimenCounts,
+      });
     },
     ...options,
   });
