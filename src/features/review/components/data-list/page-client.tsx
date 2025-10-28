@@ -75,9 +75,8 @@ export function ReviewDataListPageClient() {
     [data?.availableDistricts],
   );
 
-  const [persistedAvailableDistricts, setPersistedAvailableDistricts] = useState<
-    string[]
-  >([]);
+  const [persistedAvailableDistricts, setPersistedAvailableDistricts] =
+    useState<string[]>([]);
 
   useEffect(() => {
     if (!normalizedDistrictsFromResponse.length) return;
@@ -167,6 +166,12 @@ export function ReviewDataListPageClient() {
     window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}`;
   }
 
+  function handleNavigateToDashboard(district: string, monthYear: string) {
+    const encodedDistrict = encodeURIComponent(district);
+    const encodedMonthYear = encodeURIComponent(monthYear);
+    window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}/dashboard`;
+  }
+
   const isEmpty = !isLoading && !isFetching && summaries.length === 0;
 
   if (isLoading || isFetching) {
@@ -213,6 +218,7 @@ export function ReviewDataListPageClient() {
           <ReviewTable
             summaries={summaries}
             onNavigateToReview={handleNavigateToReview}
+            onNavigateToDashboard={handleNavigateToDashboard}
             isEmpty={isEmpty}
           />
 
