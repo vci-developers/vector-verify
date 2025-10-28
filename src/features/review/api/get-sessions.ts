@@ -55,7 +55,7 @@ export async function getAllSessions(
 
     hasMore = page.hasMore && mapped.length > 0;
     if (!hasMore) break;
-    offset = page.offset + page.limit;
+    offset += limit;
   }
 
   return collected;

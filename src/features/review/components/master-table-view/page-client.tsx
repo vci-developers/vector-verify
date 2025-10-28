@@ -169,7 +169,6 @@ export function MasterTableViewPageClient({
   ]);
 
   const householdTableMeta = useMemo(() => {
-    // Use specimen counts data as the master list of sites
     if (!specimenCounts?.data?.length) return null;
 
     const accessibleSites = permissions?.sites?.canAccessSites ?? [];
@@ -178,7 +177,6 @@ export function MasterTableViewPageClient({
     );
     const hasPermissions = siteLookup.size > 0;
 
-    // Create a map of sessions by siteId for quick lookup
     const sessionsBySiteMap = new Map<number, SessionsBySite>();
     if (sessionsBySite) {
       sessionsBySite.forEach(group => {
@@ -186,7 +184,6 @@ export function MasterTableViewPageClient({
       });
     }
 
-    // Use the same site list and order as mosquito counts
     const rows = specimenCounts.data
       .filter(site => !hasPermissions || siteLookup.has(site.siteId))
       .map(site => {
@@ -195,11 +192,9 @@ export function MasterTableViewPageClient({
           ? formatSiteLabel(siteInfo)
           : getSiteLabel(site);
 
-        // Get sessions for this site, if any
         const siteGroup = sessionsBySiteMap.get(site.siteId);
         const sessions = siteGroup?.sessions || [];
 
-        // Get unique values
         const collectorNames = Array.from(
           new Set(
             sessions
@@ -222,7 +217,6 @@ export function MasterTableViewPageClient({
           ),
         );
 
-        // Find most recent date
         const mostRecentDate = sessions.reduce<number | null>(
           (latest: number | null, session: Session) => {
             if (!session.collectionDate) return latest;
@@ -234,12 +228,10 @@ export function MasterTableViewPageClient({
           null,
         );
 
-        // Get surveillance form data for these sessions
         const forms = sessions
           .map(s => surveillanceForms?.get(s.sessionId))
           .filter((f): f is SurveillanceForm => Boolean(f));
 
-        // Extract surveillance form values
         const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
         const wasIrsConducted = forms.map(f => f.wasIrsConducted);
         const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
@@ -250,7 +242,6 @@ export function MasterTableViewPageClient({
           f => f.numPeopleSleptUnderLlin,
         );
 
-        // Helper to check discrepancy (unique non-null values > 1)
         const hasDiscrepancy = <T,>(values: (T | null)[]) => {
           const uniqueNonNull = Array.from(
             new Set(values.filter((v): v is T => v !== null)),
@@ -276,7 +267,6 @@ export function MasterTableViewPageClient({
           collectorNames,
           collectorTitles,
           collectionMethods,
-          // Surveillance form data
           numPeopleSleptInHouse,
           wasIrsConducted,
           monthsSinceIrs,
@@ -284,12 +274,10 @@ export function MasterTableViewPageClient({
           llinType,
           llinBrand,
           numPeopleSleptUnderLlin,
-          // Surveillance form discrepancies
           hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(
             numPeopleSleptInHouse,
           ),
           hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
-          // If IRS conducted has discrepancy, monthsSinceIrs also has discrepancy
           hasMonthsSinceIrsDiscrepancy:
             hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
           hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
@@ -303,7 +291,7 @@ export function MasterTableViewPageClient({
 
     const meta: HouseholdTableMeta = {
       rows,
-      minWidth: 2200, // Expanded for surveillance form fields
+      minWidth: 2200,
     };
     return meta;
   }, [
