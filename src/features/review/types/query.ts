@@ -25,7 +25,7 @@ export interface SpecimenCountsQuery {
   endDate?: string;
 }
 
-export interface SessionsQuery{
+export interface SessionsQuery {
   district?: string;
   startDate?: string;
   endDate?: string;
