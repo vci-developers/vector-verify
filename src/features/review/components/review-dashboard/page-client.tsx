@@ -37,7 +37,7 @@ export function ReviewDashboardPageClient({
         <p className="text-muted-foreground mt-1">{monthName}</p>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center">
         <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
@@ -73,8 +73,8 @@ export function ReviewDashboardPageClient({
               </Button>
             </CardContent>
           </Card>
-
-
+        </div>
+        <div className="w-full max-w-md mt-8">
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
               <CardTitle className="text-xl">Session View</CardTitle>
