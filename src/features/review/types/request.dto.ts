@@ -24,7 +24,7 @@ export interface SpecimenCountsRequestDto {
   endDate?: string;
 }
 
-export interface SessionsRequestDto{
+export interface SessionsRequestDto {
   district?: string;
   startDate?: string;
   endDate?: string;
