@@ -61,14 +61,12 @@ export function SessionsViewPageClient({
 
   useEffect((): void => {
     if (!sessionsResponse) return;
-    // Set total from server for pagination controls
     setTotal(sessionsResponse.total ?? 0);
     const newPageSessions = sessionsResponse.sessions ?? [];
     if (page === 1) {
       setAccumulatedSessions(newPageSessions);
       return;
     }
-    // Append unique by sessionId
     setAccumulatedSessions((prev: Session[]) => {
       const seen = new Set(prev.map((s: Session) => s.sessionId));
       const toAppend = newPageSessions.filter((s: Session) => !seen.has(s.sessionId));
