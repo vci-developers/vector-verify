@@ -36,6 +36,7 @@ export interface SpecimenCountsResponseDto {
   message: string;
   columns: string[];
   data: SpecimenCountsSiteDto[];
+  sessionId?: string;
 }
 
 export interface SessionsResponseDto {

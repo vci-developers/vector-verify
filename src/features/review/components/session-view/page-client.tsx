@@ -94,9 +94,9 @@ export function SessionsViewPageClient({
         {accumulatedSessions && (
           <div className="text-muted-foreground text-sm">
             <span className="text-2xl font-semibold">
-              {sessionsResponse?.total?.toLocaleString()}
+              {sessionsResponse?.total?.toLocaleString() ?? 0}
             </span>{' '}
-            session{accumulatedSessions.length === 1 ? '' : 's'} in view
+            session{sessionsResponse?.total === 1 ? '' : 's'} in view
           </div>
         )}
       </header>
@@ -133,10 +133,10 @@ export function SessionsViewPageClient({
                     className="px-4 py-3"
                   >
                     <AccordionTrigger>
-                      <div className="grid grid-cols-12 items-center w-full gap-2">
+                      <div className="grid grid-cols-12 items-center w-full gap-8">
                         <div className="col-span-2 flex items-center">
                           <span className="font-semibold">
-                            {collectionDateObj
+                            Collection Date: {collectionDateObj
                               ? `${String(collectionDateObj.getMonth() + 1).padStart(2, '0')}/${String(collectionDateObj.getDate()).padStart(2, '0')}`
                               : 'No Date'}
                           </span>
@@ -144,7 +144,7 @@ export function SessionsViewPageClient({
                         <div className="col-span-5 flex items-center gap-2 min-w-0">
                           <CircleUserIcon className="w-5 h-5 text-muted-foreground shrink-0" />
                           <span className="truncate font-medium">
-                            {session.collectorTitle || 'Unknown'}
+                            {session.collectorName || 'Unknown'}
                           </span>
                         </div>
                         <div className="col-span-5 flex items-center min-w-0">

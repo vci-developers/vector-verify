@@ -86,15 +86,6 @@ export function SessionDataTable({
     return result;
   }, [specimenCounts, allSpecies]);
 
-  const totalSpecimens = allSpecies.reduce((sum, species) => {
-    if (species === 'Non-Mosquito') {
-      return sum + (countsBySpeciesAndSex[species]?.['total'] || 0);
-    }
-    return sum + SEX_SORT_ORDER.reduce(
-      (sexSum, sex) => sexSum + (countsBySpeciesAndSex[species]?.[sex] || 0),
-      0
-    );
-  }, 0);
 
   if (isLoading) {
     return (
@@ -141,13 +132,11 @@ export function SessionDataTable({
               )}
             </TableRow>
           ))}
-          {/* Total row for each species */}
           <TableRow>
             <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
               Total
             </TableCell>
             {allSpecies.map(species => {
-              // Sum all counts for this species (including 'total' for Non-Mosquito)
               const total = species === 'Non-Mosquito'
                 ? countsBySpeciesAndSex[species]?.['total'] || 0
                 : SEX_SORT_ORDER.reduce(
