@@ -28,7 +28,7 @@ export function useSpecimenCountsQuery(
   params: UseSpecimenCountsParams = {},
   options?: SpecimenCountsQueryOptions,
 ) {
-  const { district, monthYear, sessionId } = params; // <-- destructure sessionId
+  const { district, monthYear, sessionId } = params; 
   const dateRange = useMemo(() => getMonthDateRange(monthYear), [monthYear]);
 
   const startDate = dateRange?.startDate ?? null;
