@@ -73,6 +73,25 @@ export function ReviewDashboardPageClient({
               </Button>
             </CardContent>
           </Card>
+
+
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl">Session View</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Access the session review interface for this district and
+                month.
+              </p>
+              <Button asChild className="w-full">
+                <Link href={`/review/${district}/${monthYear}/session-view`}>
+                  Go to Session View
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

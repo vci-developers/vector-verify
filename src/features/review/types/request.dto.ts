@@ -23,3 +23,10 @@ export interface SpecimenCountsRequestDto {
   startDate?: string;
   endDate?: string;
 }
+
+export interface SessionsRequestDto{
+  district?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+}
