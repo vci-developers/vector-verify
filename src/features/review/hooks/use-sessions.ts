@@ -1,15 +1,17 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { getSessions } from "../api/get-sessions";
 import { reviewKeys, type SessionsQueryKey } from "../api/review-keys";
-import { SessionsQuery, SessionsResponseDto } from "../types";
+import { SessionsQuery } from "../types";
+import { OffsetPage } from "@/shared/entities/pagination/model";
+import { Session } from "@/shared/entities/session/model";
 
 export function useSessionsQuery(
     filters: SessionsQuery = {},
     options?: Omit<
         UseQueryOptions<
-            SessionsResponseDto,
+            OffsetPage<Session>,
             Error,
-            SessionsResponseDto,
+            OffsetPage<Session>,    
             SessionsQueryKey
         >,
         "queryKey" | "queryFn"
@@ -35,7 +37,13 @@ export function useSessionsQuery(
             ) as SessionsQueryKey,
             queryFn: async () => {
                 const response = await getSessions(filters);
-                return response; 
+                return {
+                    items: response.items,
+                    total: response.total,
+                    limit: response.limit,
+                    offset: response.offset,
+                    hasMore: response.hasMore,
+                } as OffsetPage<Session>;
             },
             ...options,
             enabled: baseEnabled && (options?.enabled ?? true),

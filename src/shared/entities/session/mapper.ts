@@ -31,7 +31,7 @@ export function mapSessionDtoToModel(
 }
 
 export interface SessionsResponseModel {
-  sessions: Session[];
+  items: Session[];
   total: number;
   limit: number;
   offset: number;
@@ -42,7 +42,7 @@ export function mapSessionsResponseDtoToModel(
   dto: SessionsResponseDto
 ): SessionsResponseModel {
   return {
-    sessions: dto.sessions.map(mapSessionDtoToModel),
+    items: dto.sessions.map(mapSessionDtoToModel),
     total: dto.total,
     limit: dto.limit,
     offset: dto.offset,

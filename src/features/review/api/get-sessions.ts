@@ -1,14 +1,15 @@
 import bff from '@/shared/infra/api/bff-client';
 import { SessionsRequestDto } from '../types';
 import type { SessionsQuery, SessionsResponseDto } from '../types';
-import { mapSessionsResponseDtoToModel } from '@/shared/entities/session';
+import { mapSessionsResponseDtoToModel, Session } from '@/shared/entities/session';
 import { DEFAULT_PAGE_SIZE } from "@/shared/entities/pagination";
+import { OffsetPage } from '@/shared/entities/pagination';
 
 
 
 export async function getSessions(
     filters: SessionsQuery,
-): Promise<SessionsResponseDto> {
+): Promise<OffsetPage<Session>> {
     const {
         district,
         startDate,

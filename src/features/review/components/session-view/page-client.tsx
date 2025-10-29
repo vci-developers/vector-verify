@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSessionsQuery } from '@/features/review/hooks/use-sessions';
+import React, { useMemo } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionContent,
@@ -9,12 +9,14 @@ import {
   AccordionTrigger,
 } from '@/ui/accordion';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
+import { getSessions } from '@/features/review/api/get-sessions';
 import { CircleUserIcon } from 'lucide-react';
 import { SessionDataTable } from './session-data';
 import { SessionsAccordionSkeleton } from './loading-skeleton';
-import { usePagination } from '@/shared/core/hooks/use-pagination';
 import type { Session } from '@/shared/entities/session/model';
 import { Button } from '@/ui/button';
+import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
+
 
 interface SessionsViewPageClientProps {
   district: string;
@@ -42,37 +44,43 @@ export function SessionsViewPageClient({
   const dateRange = getMonthDateRange(decodedMonthYear);
   const { startDate, endDate } = dateRange ?? {};
 
-  const [accumulatedSessions, setAccumulatedSessions] = useState<Session[]>([]);
-
-  const pagination = usePagination({});
-  const { page, pageSize, setTotal, canNext, start: offset } = pagination;
-
   const {
-    data: sessionsResponse,
+    data,
     isLoading,
-    isFetching,
-  } = useSessionsQuery({
-    district: decodedDistrict,
-    startDate,
-    endDate,
-    limit: pageSize,
-    offset,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: [
+      'sessions',
+      decodedDistrict,
+      startDate,
+      endDate,
+      DEFAULT_PAGE_SIZE,
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      return getSessions({
+        district: decodedDistrict,
+        startDate,
+        endDate,
+        limit: DEFAULT_PAGE_SIZE,
+        offset: pageParam,
+      });
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce(
+        (sum, page) => sum + (page.items?.length ?? 0),
+        0
+      );
+      return loaded < (lastPage.total ?? 0) ? loaded : undefined;
+    },
+    enabled: Boolean(decodedDistrict && startDate && endDate),
+    initialPageParam: 0,
   });
 
-  useEffect((): void => {
-    if (!sessionsResponse) return;
-    setTotal(sessionsResponse.total ?? 0);
-    const newPageSessions = sessionsResponse.sessions ?? [];
-    if (page === 1) {
-      setAccumulatedSessions(newPageSessions);
-      return;
-    }
-    setAccumulatedSessions((prev: Session[]) => {
-      const seen = new Set(prev.map((s: Session) => s.sessionId));
-      const toAppend = newPageSessions.filter((s: Session) => !seen.has(s.sessionId));
-      return prev.concat(toAppend);
-    });
-  }, [sessionsResponse, page, setTotal]);
+  const sessions =
+    data?.pages.flatMap((page) => page.items ?? []) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
 
   const monthLabel = useMemo(
     () => formatMonthLabel(decodedMonthYear),
@@ -91,14 +99,13 @@ export function SessionsViewPageClient({
             {monthLabel}
           </p>
         </div>
-        {accumulatedSessions && (
-          <div className="text-muted-foreground text-sm">
-            <span className="text-2xl font-semibold">
-              {sessionsResponse?.total?.toLocaleString() ?? 0}
-            </span>{' '}
-            session{sessionsResponse?.total === 1 ? '' : 's'} in view
-          </div>
-        )}
+        <div className="text-muted-foreground text-sm">
+          <span className="text-2xl font-semibold">
+            {sessions.length.toLocaleString()}
+          </span>
+          {' '}
+          of {total.toLocaleString()} session{total === 1 ? '' : 's'} loaded
+        </div>
       </header>
 
       <section className="flex flex-col gap-4">
@@ -112,19 +119,17 @@ export function SessionsViewPageClient({
         </div>
 
         <div className="flex flex-col gap-3">
-          {isLoading && (
-            <SessionsAccordionSkeleton />
-          )}
+          {isLoading && <SessionsAccordionSkeleton />}
 
-          {!isLoading && (!accumulatedSessions || accumulatedSessions.length === 0) && (
+          {!isLoading && sessions.length === 0 && (
             <p className="text-muted-foreground text-sm">
               No sessions found for this selection.
             </p>
           )}
 
-          {accumulatedSessions && accumulatedSessions.length > 0 && (
+          {sessions.length > 0 && (
             <Accordion type="single" collapsible className="w-full border rounded-xl shadow-sm">
-              {accumulatedSessions.map((session: Session) => {
+              {sessions.map((session: Session) => {
                 const collectionDateObj = session.collectionDate ? new Date(session.collectionDate) : null;
                 return (
                   <AccordionItem
@@ -188,14 +193,15 @@ export function SessionsViewPageClient({
               })}
             </Accordion>
           )}
-          {(sessionsResponse?.hasMore || canNext) && (
+
+          {hasNextPage && (
             <div className="flex justify-center pt-2">
               <Button
                 variant="outline"
-                onClick={() => pagination.setPage(page + 1)}
-                disabled={isFetching || !canNext}
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
               >
-                {isFetching ? 'Loading...' : 'Load more'}
+                {isFetchingNextPage ? 'Loading...' : 'Load more'}
               </Button>
             </div>
           )}
