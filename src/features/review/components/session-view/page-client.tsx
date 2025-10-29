@@ -11,6 +11,7 @@ import {
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
 import { CircleUserIcon } from 'lucide-react';
 import { SessionDataTable } from './session-data';
+import { SessionsAccordionSkeleton } from './loading-skeleton';
 
 interface SessionsViewPageClientProps {
   district: string;
@@ -41,7 +42,7 @@ export function SessionsViewPageClient({
   const { 
     data: sessions,
     isLoading,
-   } = useSessionsQuery({
+  } = useSessionsQuery({
     district: decodedDistrict,
     startDate,
     endDate,
@@ -86,7 +87,7 @@ export function SessionsViewPageClient({
 
         <div className="flex flex-col gap-3">
           {isLoading && (
-            <p className="text-muted-foreground text-sm">Loading sessions…</p>
+            <SessionsAccordionSkeleton />
           )}
 
           {!isLoading && (!sessions || sessions.length === 0) && (

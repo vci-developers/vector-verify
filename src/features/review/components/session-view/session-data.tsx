@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/table';
+import { TableSkeleton } from './loading-skeleton';
 
 const SEX_SORT_ORDER = [
   'Male',
@@ -98,7 +99,7 @@ export function SessionDataTable({
   if (isLoading) {
     return (
       <div className="w-full flex justify-center py-8">
-        <span className="text-muted-foreground">Loading specimen counts…</span>
+        <TableSkeleton />
       </div>
     );
   }
