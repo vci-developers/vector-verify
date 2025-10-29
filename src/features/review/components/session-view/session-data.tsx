@@ -39,10 +39,7 @@ export function SessionDataTable({
     monthYear, 
   });
 
-  const allSpecies = useMemo(
-    () => Object.values(SPECIES_MORPH_IDS),
-    []
-  );
+  const allSpecies = Object.values(SPECIES_MORPH_IDS);
 
   const countsBySpeciesAndSex = useMemo(() => {
     const result: Record<string, Record<string, number>> = {};
@@ -70,13 +67,10 @@ export function SessionDataTable({
                 result[speciesKey]['Female Unfed'] += count.count || 0;
                 break;
               case 'Fully Fed':
-              case 'Fully fed':
                 result[speciesKey]['Female Fully-fed'] += count.count || 0;
                 break;
               case 'Gravid':
                 result[speciesKey]['Female Gravid'] += count.count || 0;
-                break;
-              default:
                 break;
             }
           }
