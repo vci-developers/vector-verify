@@ -10,11 +10,23 @@ export const masterTableViewKeys = {
     [
       ...masterTableViewKeys.root,
       'specimen-counts',
-      { district: district ?? null, startDate: startDate ?? null, endDate: endDate ?? null },
+      {
+        district: district ?? null,
+        startDate: startDate ?? null,
+        endDate: endDate ?? null,
+      },
     ] as const,
+
+  surveillanceForm: (sessionId: number) =>
+    [...masterTableViewKeys.root, 'surveillance-form', { sessionId }] as const,
 } as const;
 
 export type SpecimenCountsQueryKey = ReturnType<
   typeof masterTableViewKeys.specimenCounts
+> &
+  QueryKey;
+
+export type SurveillanceFormQueryKey = ReturnType<
+  typeof masterTableViewKeys.surveillanceForm
 > &
   QueryKey;

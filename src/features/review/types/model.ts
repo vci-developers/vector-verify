@@ -67,3 +67,28 @@ export interface HouseholdTableMeta {
   rows: HouseholdRowData[];
   minWidth: number;
 }
+
+export interface MosquitoColumn {
+  originalName: string;
+  displayName: string;
+}
+
+export interface MosquitoGroupedColumns {
+  speciesOrder: string[];
+  columnsBySpecies: Record<string, MosquitoColumn[]>;
+}
+
+export interface MosquitoRowData {
+  key: string;
+  label: SiteLabel;
+  countsByColumn: Record<string, number>;
+  totalSpecimens: number;
+}
+
+export interface MosquitoTableMeta {
+  rows: MosquitoRowData[];
+  groupedColumns: MosquitoGroupedColumns;
+  totals: Record<string, number>;
+  grandTotal: number;
+  minWidth: number;
+}

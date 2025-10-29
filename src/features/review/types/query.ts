@@ -23,3 +23,15 @@ export interface SpecimenCountsQuery {
   startDate?: string;
   endDate?: string;
 }
+
+export interface SessionsQuery {
+  district?: string;
+  siteId?: number;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  type?: string;
+}
