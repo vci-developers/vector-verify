@@ -29,4 +29,5 @@ export interface SessionsRequestDto{
   startDate?: string;
   endDate?: string;
   limit?: number;
+  offset?: number;
 }

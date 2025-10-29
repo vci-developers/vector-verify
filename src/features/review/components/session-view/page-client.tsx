@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSessionsQuery } from '@/features/review/hooks/use-sessions';
 import {
   Accordion,
@@ -12,6 +12,9 @@ import { getMonthDateRange } from '@/features/review/utils/master-table-view';
 import { CircleUserIcon } from 'lucide-react';
 import { SessionDataTable } from './session-data';
 import { SessionsAccordionSkeleton } from './loading-skeleton';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
+import type { Session } from '@/shared/entities/session/model';
+import { Button } from '@/ui/button';
 
 interface SessionsViewPageClientProps {
   district: string;
@@ -39,14 +42,39 @@ export function SessionsViewPageClient({
   const dateRange = getMonthDateRange(decodedMonthYear);
   const { startDate, endDate } = dateRange ?? {};
 
-  const { 
-    data: sessions,
+  const [accumulatedSessions, setAccumulatedSessions] = useState<Session[]>([]);
+
+  const pagination = usePagination({});
+  const { page, pageSize, setTotal, canNext, start: offset } = pagination;
+
+  const {
+    data: sessionsResponse,
     isLoading,
+    isFetching,
   } = useSessionsQuery({
     district: decodedDistrict,
     startDate,
     endDate,
+    limit: pageSize,
+    offset,
   });
+
+  useEffect((): void => {
+    if (!sessionsResponse) return;
+    // Set total from server for pagination controls
+    setTotal(sessionsResponse.total ?? 0);
+    const newPageSessions = sessionsResponse.sessions ?? [];
+    if (page === 1) {
+      setAccumulatedSessions(newPageSessions);
+      return;
+    }
+    // Append unique by sessionId
+    setAccumulatedSessions((prev: Session[]) => {
+      const seen = new Set(prev.map((s: Session) => s.sessionId));
+      const toAppend = newPageSessions.filter((s: Session) => !seen.has(s.sessionId));
+      return prev.concat(toAppend);
+    });
+  }, [sessionsResponse, page, setTotal]);
 
   const monthLabel = useMemo(
     () => formatMonthLabel(decodedMonthYear),
@@ -65,12 +93,12 @@ export function SessionsViewPageClient({
             {monthLabel}
           </p>
         </div>
-        {sessions && (
+        {accumulatedSessions && (
           <div className="text-muted-foreground text-sm">
             <span className="text-2xl font-semibold">
-              {sessions.length.toLocaleString()}
+              {accumulatedSessions.length.toLocaleString()}
             </span>{' '}
-            session{sessions.length === 1 ? '' : 's'} in view
+            session{accumulatedSessions.length === 1 ? '' : 's'} in view
           </div>
         )}
       </header>
@@ -90,15 +118,15 @@ export function SessionsViewPageClient({
             <SessionsAccordionSkeleton />
           )}
 
-          {!isLoading && (!sessions || sessions.length === 0) && (
+          {!isLoading && (!accumulatedSessions || accumulatedSessions.length === 0) && (
             <p className="text-muted-foreground text-sm">
               No sessions found for this selection.
             </p>
           )}
 
-          {sessions && sessions.length > 0 && (
+          {accumulatedSessions && accumulatedSessions.length > 0 && (
             <Accordion type="single" collapsible className="w-full border rounded-xl shadow-sm">
-              {sessions.map(session => {
+              {accumulatedSessions.map((session: Session) => {
                 const collectionDateObj = session.collectionDate ? new Date(session.collectionDate) : null;
                 return (
                   <AccordionItem
@@ -161,6 +189,17 @@ export function SessionsViewPageClient({
                 );
               })}
             </Accordion>
+          )}
+          {(sessionsResponse?.hasMore || canNext) && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={() => pagination.setPage(page + 1)}
+                disabled={isFetching || !canNext}
+              >
+                {isFetching ? 'Loading...' : 'Load more'}
+              </Button>
+            </div>
           )}
         </div>
       </section>

@@ -2,6 +2,8 @@ import bff from '@/shared/infra/api/bff-client';
 import { SessionsRequestDto } from '../types';
 import type { SessionsQuery, SessionsResponseDto } from '../types';
 import { mapSessionsResponseDtoToModel } from '@/shared/entities/session';
+import { DEFAULT_PAGE_SIZE } from "@/shared/entities/pagination";
+
 
 
 export async function getSessions(
@@ -11,14 +13,16 @@ export async function getSessions(
         district,
         startDate,
         endDate,
-        limit,
+        limit = DEFAULT_PAGE_SIZE,
+        offset = 0,
     } = filters;
 
     const query: SessionsRequestDto = {
     ...(district ? { district } : {}),
     ...(startDate ? { startDate } : {}),
     ...(endDate ? { endDate } : {}),
-    limit: limit ?? 100,
+    ...(offset !== undefined ? { offset } : {}),
+    ...(limit !== undefined ? { limit } : {}),    
     };
 
     const data = await bff<SessionsResponseDto>('/sessions', {

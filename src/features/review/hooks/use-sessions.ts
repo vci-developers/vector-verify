@@ -1,17 +1,15 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { getSessions } from "../api/get-sessions";
 import { reviewKeys, type SessionsQueryKey } from "../api/review-keys";
-import type { Session } from "@/shared/entities/session/model";
-import { SessionsQuery } from "../types";
-import { DEFAULT_PAGE_SIZE } from "@/shared/entities/pagination";
+import { SessionsQuery, SessionsResponseDto } from "../types";
 
 export function useSessionsQuery(
     filters: SessionsQuery = {},
     options?: Omit<
         UseQueryOptions<
-            Session[],
+            SessionsResponseDto,
             Error,
-            Session[],
+            SessionsResponseDto,
             SessionsQueryKey
         >,
         "queryKey" | "queryFn"
@@ -21,23 +19,28 @@ export function useSessionsQuery(
         district,
         startDate,
         endDate,
+        limit,
+        offset,
     } = filters;
 
     const baseEnabled = Boolean(district && startDate && endDate);
     return useQuery(
         {
             queryKey: reviewKeys.sessions(
-                filters.district,
-                filters.startDate,
-                filters.endDate,
-                filters.limit
+                district,
+                startDate,
+                endDate,
+                limit,
+                offset,
             ) as SessionsQueryKey,
             queryFn: async () => {
                 const response = await getSessions(filters);
-                return response.sessions; 
+                return response; 
             },
             ...options,
             enabled: baseEnabled && (options?.enabled ?? true),
+            placeholderData: (prev) => prev,
+
         }
     );
 }
