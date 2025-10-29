@@ -94,7 +94,7 @@ export function SessionsViewPageClient({
         {accumulatedSessions && (
           <div className="text-muted-foreground text-sm">
             <span className="text-2xl font-semibold">
-              {accumulatedSessions.length.toLocaleString()}
+              {sessionsResponse?.total?.toLocaleString()}
             </span>{' '}
             session{accumulatedSessions.length === 1 ? '' : 's'} in view
           </div>
