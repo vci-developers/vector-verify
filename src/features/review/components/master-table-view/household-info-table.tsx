@@ -36,12 +36,12 @@ function renderDiscrepancyAwareCell<T>(
     (value): value is T => value !== null && value !== undefined,
   );
 
-  if (nonNull.length === 0) {
-    return <StandardCell value={null} />;
-  }
-
   if (hasDiscrepancy) {
     return <DiscrepancyCell />;
+  }
+
+  if (nonNull.length === 0) {
+    return <StandardCell value={null} />;
   }
 
   const formattedValue = formatValue(nonNull[0]);
