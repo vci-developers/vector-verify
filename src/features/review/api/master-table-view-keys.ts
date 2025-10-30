@@ -6,6 +6,7 @@ export const masterTableViewKeys = {
     district?: string | null,
     startDate?: string | null,
     endDate?: string | null,
+    sessionId?: string | null,
   ) =>
     [
       ...masterTableViewKeys.root,
@@ -14,6 +15,7 @@ export const masterTableViewKeys = {
         district: district ?? null,
         startDate: startDate ?? null,
         endDate: endDate ?? null,
+        sessionId: sessionId ?? null,
       },
     ] as const,
   surveillanceForm: (sessionId: number) =>

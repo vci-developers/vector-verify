@@ -20,6 +20,7 @@ export interface SpecimensQuery {
 
 export interface SpecimenCountsQuery {
   district?: string;
+  sessionId?: string;
   startDate?: string;
   endDate?: string;
 }

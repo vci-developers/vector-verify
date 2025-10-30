@@ -1,3 +1,4 @@
+import { SessionsResponseDto } from '@/features/review';
 import type {
   SessionDto,
   SessionWithSiteDto,
@@ -27,4 +28,24 @@ export function mapSessionDtoToModel(
     type: dto.type,
   };
   return 'site' in dto ? { ...base, site: mapSiteDtoToModel(dto.site) } : base;
+}
+
+export interface SessionsResponseModel {
+  items: Session[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export function mapSessionsResponseDtoToModel(
+  dto: SessionsResponseDto
+): SessionsResponseModel {
+  return {
+    items: dto.sessions.map(mapSessionDtoToModel),
+    total: dto.total,
+    limit: dto.limit,
+    offset: dto.offset,
+    hasMore: dto.hasMore,
+  };
 }
