@@ -65,17 +65,32 @@ export function useTablePagination({
     [isPagingDisabled, page, setPage],
   );
 
-  return {
-    page,
-    pageSize,
-    totalPages,
-    pages,
-    isPagingDisabled,
-    handleRowsPerPageChange,
-    handleNavigateToFirstPage,
-    handleNavigateToLastPage,
-    handleNavigateToPage,
-    setPage,
-    setTotal,
-  };
+  return React.useMemo(
+    () => ({
+      page,
+      pageSize,
+      totalPages,
+      pages,
+      isPagingDisabled,
+      handleRowsPerPageChange,
+      handleNavigateToFirstPage,
+      handleNavigateToLastPage,
+      handleNavigateToPage,
+      setPage,
+      setTotal,
+    }),
+    [
+      page,
+      pageSize,
+      totalPages,
+      pages,
+      isPagingDisabled,
+      handleRowsPerPageChange,
+      handleNavigateToFirstPage,
+      handleNavigateToLastPage,
+      handleNavigateToPage,
+      setPage,
+      setTotal,
+    ],
+  );
 }

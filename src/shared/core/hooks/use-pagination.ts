@@ -50,7 +50,7 @@ export function usePagination({
       setPageSize(size);
       setPage(1);
     },
-    [setPage],
+    [setPage, setPageSize],
   );
 
   type RangeItem = number | 'ellipsis';
