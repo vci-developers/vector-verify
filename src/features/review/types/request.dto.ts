@@ -41,3 +41,9 @@ export interface SessionsRequestDto {
   sortOrder?: 'asc' | 'desc';
   type?: string;
 }
+
+export interface DashboardMetricsRequestDto {
+  district: string;
+  startDate: string;
+  endDate: string;
+}

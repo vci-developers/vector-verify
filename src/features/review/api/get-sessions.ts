@@ -1,14 +1,8 @@
 import bff from '@/shared/infra/api/bff-client';
-import { mapSessionDtoToModel } from '@/shared/entities/session/mapper';
-import type { Session } from '@/shared/entities/session/model';
-import type { SessionsQuery } from '@/features/review/types/query';
-import type { SessionsResponseDto } from '@/features/review/types/response.dto';
-
-const PAGE_LIMIT = 100;
-
-async function fetchSessionsPage(
-import type { SessionsQuery, SessionsResponseDto } from '@/features/review/types';
-import { SessionsRequestDto } from '@/features/review/types';
+import type {
+  SessionsQuery,
+  SessionsResponseDto,
+} from '@/features/review/types';
 import { mapSessionsResponseDtoToModel } from '@/shared/entities/session';
 import type { Session } from '@/shared/entities/session/model';
 import { DEFAULT_PAGE_SIZE, OffsetPage } from '@/shared/entities/pagination';
@@ -23,7 +17,6 @@ async function requestSessions(
     siteId,
     startDate,
     endDate,
-    limit = PAGE_LIMIT,
     limit = DEFAULT_PAGE_SIZE,
     offset = 0,
     sortBy,
@@ -32,7 +25,7 @@ async function requestSessions(
   } = params;
 
   const query: Record<string, string | number> = {
-    limit: Math.min(limit, PAGE_LIMIT),
+    limit: Math.min(limit ?? DEFAULT_PAGE_SIZE, PAGE_LIMIT),
     offset,
   };
 
@@ -47,24 +40,6 @@ async function requestSessions(
   return bff<SessionsResponseDto>('/sessions', {
     method: 'GET',
     query,
-  });
-}
-
-  const query = {
-    limit: Math.min(limit, PAGE_LIMIT),
-    offset,
-    ...(district ? { district } : {}),
-    ...(siteId !== undefined ? { siteId } : {}),
-    ...(startDate ? { startDate } : {}),
-    ...(endDate ? { endDate } : {}),
-    ...(sortBy ? { sortBy } : {}),
-    ...(sortOrder ? { sortOrder } : {}),
-    ...(type ? { type } : {}),
-  };
-
-  return bff<SessionsResponseDto>('/sessions', {
-    method: 'GET',
-    query
   });
 }
 
@@ -84,13 +59,6 @@ export async function getAllSessions(
   let hasMore = true;
 
   while (hasMore) {
-    const page = await fetchSessionsPage({ ...params, offset, limit });
-    const mapped = page.sessions.map(mapSessionDtoToModel);
-    collected.push(...mapped);
-
-    hasMore = page.hasMore && mapped.length > 0;
-    if (!hasMore) break;
-    offset = page.offset + page.limit;
     const page = await getSessions({ ...params, offset, limit });
     const items = page.items;
     collected.push(...items);

@@ -47,14 +47,6 @@ export interface SessionsResponseDto {
   hasMore: boolean;
 }
 
-export interface SessionsResponseDto {
-  sessions: SessionDto[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-}
-
 export interface DashboardMetricsResponseDto {
   siteInformation: {
     housesUsedForCollection: number;

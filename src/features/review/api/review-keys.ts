@@ -42,27 +42,12 @@ export const reviewKeys = {
       },
     ] as const,
 
-  sessionsBySite: (
-    district?: string,
-    siteId?: number,
   sessions: (
     district?: string,
     startDate?: string,
     endDate?: string,
     limit?: number,
     offset?: number,
-    sortBy?: string,
-    sortOrder?: 'asc' | 'desc',
-    type?: string,
-  ) =>
-    [
-      ...reviewKeys.root,
-      'sessions-by-site',
-      {
-        district,
-        siteId,
-    siteId?: number,
-    type?: string,
     sortBy?:
       | 'id'
       | 'frontendId'
@@ -71,6 +56,7 @@ export const reviewKeys = {
       | 'submittedAt'
       | 'collectionDate',
     sortOrder?: 'asc' | 'desc',
+    type?: string,
   ) =>
     [
       ...reviewKeys.root,
@@ -84,12 +70,6 @@ export const reviewKeys = {
         sortBy,
         sortOrder,
         type,
-      },
-    ] as const,
-        siteId,
-        type,
-        sortBy,
-        sortOrder,
       },
     ] as const,
   sessionsBySite: (

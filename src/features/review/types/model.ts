@@ -39,33 +39,10 @@ export interface HouseholdRowData {
   key: string;
   siteLabel: SiteLabel;
   sessionCount: number;
-  collectorName: string;
-  hasCollectorNameDiscrepancy: boolean;
-  collectorTitle: string;
-  hasCollectorTitleDiscrepancy: boolean;
-  mostRecentDate: number | null;
-  collectionMethod: string;
-  hasCollectionMethodDiscrepancy: boolean;
-  numPeopleSleptInHouse: (number | null)[];
-  hasNumPeopleSleptInHouseDiscrepancy: boolean;
-  wasIrsConducted: (boolean | null)[];
-  hasWasIrsConductedDiscrepancy: boolean;
-  monthsSinceIrs: (number | null)[];
-  hasMonthsSinceIrsDiscrepancy: boolean;
-  numLlinsAvailable: (number | null)[];
-  hasNumLlinsAvailableDiscrepancy: boolean;
-  llinType: (string | null)[];
-  hasLlinTypeDiscrepancy: boolean;
-  llinBrand: (string | null)[];
-  hasLlinBrandDiscrepancy: boolean;
-  numLlinsUsed: (number | null)[];
-  hasNumLlinsUsedDiscrepancy: boolean;
-  numPeopleSleptUnderLlin: (number | null)[];
   collectorName: string | null;
   collectorTitle: string | null;
   collectionMethod: string | null;
   mostRecentDate: number | null;
-  sessionCount: number;
   hasCollectorNameDiscrepancy: boolean;
   hasCollectorTitleDiscrepancy: boolean;
   hasCollectionMethodDiscrepancy: boolean;
@@ -166,17 +143,4 @@ export interface CompleteDashboardData extends DashboardMetrics {
   speciesDistribution: SpeciesDistribution[];
   sexRatio: SexRatio;
   abdomenStatus: AbdomenStatus;
-}
-export interface MosquitoTableMeta {
-  columns: string[];
-  groupedColumns: ReturnType<typeof groupColumnsBySpecies>;
-  rows: {
-    key: string;
-    label: SiteLabel;
-    countsByColumn: Record<string, number>;
-    totalSpecimens?: number | null;
-  }[];
-  totals: Record<string, number>;
-  grandTotal?: number | null;
-  minWidth: number;
 }

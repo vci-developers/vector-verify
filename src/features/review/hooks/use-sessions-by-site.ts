@@ -35,13 +35,6 @@ export function useSessionsBySiteQuery(
   return useQuery({
     queryKey: reviewKeys.sessionsBySite(
       params?.district,
-      params?.siteId,
-      params?.startDate,
-      params?.endDate,
-      params?.limit,
-      params?.offset,
-      params?.sortBy,
-      params?.sortOrder,
       params?.startDate,
       params?.endDate,
       params?.siteId,

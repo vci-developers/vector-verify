@@ -16,8 +16,6 @@ export async function getSurveillanceForm(
     );
     return mapSurveillanceFormDtoToModel(dto);
   } catch (error) {
-    // If no surveillance form exists, return null
-    return null;
     if (
       error instanceof HttpError &&
       error.status === HTTP_STATUS.NOT_FOUND
