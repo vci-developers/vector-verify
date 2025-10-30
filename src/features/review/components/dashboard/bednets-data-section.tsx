@@ -2,7 +2,7 @@
 
 import { Home, Users, Bug } from 'lucide-react';
 import { InfoCard, SectionHeader } from './shared';
-import type { DashboardMetrics } from '@/features/review/types/dashboard';
+import type { DashboardMetrics } from '@/features/review/types/model';
 
 interface BednetsDataSectionProps {
   data: DashboardMetrics['entomologicalSummary'];

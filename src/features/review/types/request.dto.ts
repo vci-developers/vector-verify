@@ -23,3 +23,9 @@ export interface SpecimenCountsRequestDto {
   startDate?: string;
   endDate?: string;
 }
+
+export interface DashboardMetricsRequestDto {
+  district: string;
+  startDate: string;
+  endDate: string;
+}

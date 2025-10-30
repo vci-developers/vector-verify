@@ -45,3 +45,17 @@ export interface SessionsResponseDto {
   offset: number;
   hasMore: boolean;
 }
+
+export interface DashboardMetricsResponseDto {
+  siteInformation: {
+    housesUsedForCollection: number;
+    peopleInAllHousesInspected: number;
+  };
+  entomologicalSummary: {
+    vectorDensity: number;
+    fedMosquitoesToPeopleSleptRatio: number;
+    totalLlins: number;
+    totalPeopleSleptUnderLlin: number;
+    llinsPerPerson: number;
+  };
+}

@@ -5,7 +5,7 @@ import type {
   SexRatio,
   AbdomenStatus,
   CompleteDashboardData,
-} from '../types/dashboard';
+} from '../types/model';
 
 interface DashboardDataInput {
   metrics: DashboardMetrics;

@@ -34,12 +34,6 @@
       ],
       "@/ui/*": [
         "./src/shared/ui/*"
-      ],
-      "@/chart": [
-        "./src/ui/chart"
-      ],
-      "@/ui/chart-components": [
-        "./src/shared/ui/chart-components"
       ]
     }
   },

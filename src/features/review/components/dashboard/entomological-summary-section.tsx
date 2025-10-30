@@ -13,7 +13,7 @@ import type {
   SpeciesDistribution,
   SexRatio,
   AbdomenStatus,
-} from '@/features/review/types/dashboard';
+} from '@/features/review/types/model';
 
 interface EntomologicalSummarySectionProps {
   data: DashboardMetrics['entomologicalSummary'];

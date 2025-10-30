@@ -2,7 +2,7 @@ import type {
   SpeciesDistribution,
   SexRatio,
   AbdomenStatus,
-} from '@/features/review/types/dashboard';
+} from '@/features/review/types/model';
 
 /**
  * Data processing utilities for dashboard components

@@ -1,14 +1,12 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getDashboardMetrics, getSpecimenCounts } from '@/features/review/api';
 import { DashboardDataCalculator } from '@/features/review/services/dashboard-data-calculator';
-import type {
-  CompleteDashboardData,
-  DashboardMetricsRequest,
-} from '@/features/review/types/dashboard';
+import type { CompleteDashboardData } from '@/features/review/types/model';
+import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
 import type { SpecimenCountsQuery } from '@/features/review/types';
 
 export function useDashboardDataQuery(
-  request: DashboardMetricsRequest,
+  request: DashboardMetricsRequestDto,
   options?: Omit<
     UseQueryOptions<
       CompleteDashboardData,
