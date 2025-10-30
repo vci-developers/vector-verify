@@ -11,16 +11,34 @@ export const masterTableViewKeys = {
     [
       ...masterTableViewKeys.root,
       'specimen-counts',
-      { 
-        district: district ?? null, 
-        startDate: startDate ?? null, 
-        endDate: endDate ?? null, 
-        sessionId: sessionId ?? null 
+      {
+        district: district ?? null,
+        startDate: startDate ?? null,
+        endDate: endDate ?? null,
+        sessionId: sessionId ?? null,
       },
+    ] as const,
+  surveillanceForm: (sessionId: number) =>
+    [...masterTableViewKeys.root, 'surveillance-form', { sessionId }] as const,
+  surveillanceForms: (sessionIds: number[]) =>
+    [
+      ...masterTableViewKeys.root,
+      'surveillance-forms',
+      { sessionIds },
     ] as const,
 } as const;
 
 export type SpecimenCountsQueryKey = ReturnType<
   typeof masterTableViewKeys.specimenCounts
+> &
+  QueryKey;
+
+export type SurveillanceFormQueryKey = ReturnType<
+  typeof masterTableViewKeys.surveillanceForm
+> &
+  QueryKey;
+
+export type SurveillanceFormsQueryKey = ReturnType<
+  typeof masterTableViewKeys.surveillanceForms
 > &
   QueryKey;

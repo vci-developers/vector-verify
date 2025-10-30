@@ -1,5 +1,5 @@
 import type { SiteDto } from '@/shared/entities/site/dto';
-import { SessionDto } from '@/shared/entities/session/dto';
+import type { SessionDto } from '@/shared/entities/session/dto';
 
 export interface ReviewItemDto {
   district: string;

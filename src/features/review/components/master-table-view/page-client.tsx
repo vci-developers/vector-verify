@@ -1,18 +1,29 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { getMonthDateRange, groupColumnsBySpecies, getSiteLabel } from '@/features/review/utils/master-table-view';
+import React, { useMemo, useState } from 'react';
+import type { Session } from '@/shared/entities/session/model';
+import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
+import {
+  getMonthDateRange,
+  groupColumnsBySpecies,
+  getSiteLabel,
+  formatSiteLabel,
+} from '@/features/review/utils/master-table-view';
 import { useSpecimenCountsQuery } from '@/features/review/hooks/use-specimen-counts';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table';
+  useSessionsBySiteQuery,
+  type SessionsBySite,
+} from '@/features/review/hooks/use-sessions-by-site';
+import { useSurveillanceFormsQuery } from '@/features/review/hooks/use-surveillance-forms';
 import { MasterTableViewLoadingSkeleton } from './loading-skeleton';
+import { MosquitoCountsTable } from './mosquito-counts-table';
+import { HouseholdInfoTable } from './household-info-table';
+import type {
+  MosquitoTableMeta,
+  HouseholdTableMeta,
+} from '@/features/review/types';
+import { ToggleGroup, ToggleGroupItem } from '@/ui/toggle-group';
+import { useUserPermissionsQuery } from '@/features/user';
 
 interface MasterTableViewPageClientProps {
   district: string;
@@ -37,18 +48,53 @@ export function MasterTableViewPageClient({
   const decodedDistrict = decodeURIComponent(district);
   const decodedMonthYear = decodeURIComponent(monthYear);
 
+  const [viewMode, setViewMode] = useState<'mosquito' | 'household'>(
+    'mosquito',
+  );
+
   const dateRange = getMonthDateRange(decodedMonthYear);
-  const { data: specimenCounts, isLoading } = useSpecimenCountsQuery({
-    district: decodedDistrict,
-    monthYear: decodedMonthYear,
-  });
+  const startDate = dateRange?.startDate ?? undefined;
+  const endDate = dateRange?.endDate ?? undefined;
+
+  const { data: specimenCounts, isLoading: isSpecimenCountsLoading } =
+    useSpecimenCountsQuery({
+      district: decodedDistrict,
+      monthYear: decodedMonthYear,
+    });
+
+  const { data: sessionsBySite, isLoading: isSessionsLoading } =
+    useSessionsBySiteQuery(
+      {
+        district: decodedDistrict,
+        startDate,
+        endDate,
+        type: 'SURVEILLANCE',
+      },
+      {
+        enabled: viewMode === 'household' && Boolean(startDate && endDate),
+      },
+    );
+
+  const allSessionIds = useMemo(() => {
+    if (!sessionsBySite) return [];
+    return sessionsBySite.flatMap(group =>
+      group.sessions.map(s => s.sessionId),
+    );
+  }, [sessionsBySite]);
+
+  const { data: surveillanceForms, isLoading: isSurveillanceFormsLoading } =
+    useSurveillanceFormsQuery(allSessionIds, {
+      enabled: viewMode === 'household' && allSessionIds.length > 0,
+    });
+
+  const { data: permissions } = useUserPermissionsQuery();
 
   const monthLabel = useMemo(
     () => formatMonthLabel(decodedMonthYear),
     [decodedMonthYear],
   );
 
-  const tableMeta = useMemo(() => {
+  const mosquitoTableMeta = useMemo(() => {
     if (!specimenCounts?.data?.length) return null;
 
     const sites = specimenCounts.data;
@@ -64,6 +110,11 @@ export function MasterTableViewPageClient({
 
     const groupedColumns = groupColumnsBySpecies(columns);
 
+    const accessibleSites = permissions?.sites?.canAccessSites ?? [];
+    const siteLookup = new Map(
+      accessibleSites.map(site => [site.siteId, site]),
+    );
+
     const rows = sites.map((site, index) => {
       const countsByColumn = site.counts.reduce<Record<string, number>>(
         (acc, count) => {
@@ -76,9 +127,14 @@ export function MasterTableViewPageClient({
         {},
       );
 
+      const siteInfo = siteLookup.get(site.siteId);
+      const siteLabel = siteInfo
+        ? formatSiteLabel(siteInfo)
+        : getSiteLabel(site);
+
       return {
         key: site.siteId?.toString() || `site-${index}`,
-        label: getSiteLabel(site),
+        label: siteLabel,
         countsByColumn,
         totalSpecimens: site.totalSpecimens,
       };
@@ -97,7 +153,7 @@ export function MasterTableViewPageClient({
       0,
     );
 
-    return {
+    const meta: MosquitoTableMeta = {
       columns,
       groupedColumns,
       rows,
@@ -105,7 +161,150 @@ export function MasterTableViewPageClient({
       grandTotal,
       minWidth: Math.max(640, 220 + columns.length * 140),
     };
-  }, [specimenCounts?.data, specimenCounts?.columns]);
+    return meta;
+  }, [
+    specimenCounts?.data,
+    specimenCounts?.columns,
+    permissions?.sites?.canAccessSites,
+  ]);
+
+  const householdTableMeta = useMemo(() => {
+    if (!specimenCounts?.data?.length) return null;
+
+    const accessibleSites = permissions?.sites?.canAccessSites ?? [];
+    const siteLookup = new Map(
+      accessibleSites.map(site => [site.siteId, site]),
+    );
+    const hasPermissions = siteLookup.size > 0;
+
+    const sessionsBySiteMap = new Map<number, SessionsBySite>();
+    if (sessionsBySite) {
+      sessionsBySite.forEach(group => {
+        sessionsBySiteMap.set(group.siteId, group);
+      });
+    }
+
+    const rows = specimenCounts.data
+      .filter(site => !hasPermissions || siteLookup.has(site.siteId))
+      .map(site => {
+        const siteInfo = siteLookup.get(site.siteId);
+        const siteLabel = siteInfo
+          ? formatSiteLabel(siteInfo)
+          : getSiteLabel(site);
+
+        const siteGroup = sessionsBySiteMap.get(site.siteId);
+        const sessions = siteGroup?.sessions || [];
+
+        const collectorNames = Array.from(
+          new Set(
+            sessions
+              .map((s: Session) => s.collectorName)
+              .filter((name): name is string => Boolean(name)),
+          ),
+        );
+        const collectorTitles = Array.from(
+          new Set(
+            sessions
+              .map((s: Session) => s.collectorTitle)
+              .filter((title): title is string => Boolean(title)),
+          ),
+        );
+        const collectionMethods = Array.from(
+          new Set(
+            sessions
+              .map((s: Session) => s.collectionMethod)
+              .filter((method): method is string => Boolean(method)),
+          ),
+        );
+
+        const mostRecentDate = sessions.reduce<number | null>(
+          (latest: number | null, session: Session) => {
+            if (!session.collectionDate) return latest;
+            if (!latest) return session.collectionDate;
+            return session.collectionDate > latest
+              ? session.collectionDate
+              : latest;
+          },
+          null,
+        );
+
+        const forms = sessions
+          .map(s => surveillanceForms?.get(s.sessionId))
+          .filter((f): f is SurveillanceForm => Boolean(f));
+
+        const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
+        const wasIrsConducted = forms.map(f => f.wasIrsConducted);
+        const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
+        const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
+        const llinType = forms.map(f => f.llinType);
+        const llinBrand = forms.map(f => f.llinBrand);
+        const numPeopleSleptUnderLlin = forms.map(
+          f => f.numPeopleSleptUnderLlin,
+        );
+
+        const hasDiscrepancy = <T,>(values: (T | null)[]) => {
+          const uniqueNonNull = Array.from(
+            new Set(values.filter((v): v is T => v !== null)),
+          );
+          return uniqueNonNull.length > 1;
+        };
+
+        const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
+
+        return {
+          key: `site-${site.siteId}`,
+          siteLabel,
+          collectorName: collectorNames.length === 1 ? collectorNames[0] : null,
+          collectorTitle:
+            collectorTitles.length === 1 ? collectorTitles[0] : null,
+          collectionMethod:
+            collectionMethods.length === 1 ? collectionMethods[0] : null,
+          mostRecentDate,
+          sessionCount: sessions.length,
+          hasCollectorNameDiscrepancy: collectorNames.length > 1,
+          hasCollectorTitleDiscrepancy: collectorTitles.length > 1,
+          hasCollectionMethodDiscrepancy: collectionMethods.length > 1,
+          collectorNames,
+          collectorTitles,
+          collectionMethods,
+          numPeopleSleptInHouse,
+          wasIrsConducted,
+          monthsSinceIrs,
+          numLlinsAvailable,
+          llinType,
+          llinBrand,
+          numPeopleSleptUnderLlin,
+          hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(
+            numPeopleSleptInHouse,
+          ),
+          hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
+          hasMonthsSinceIrsDiscrepancy:
+            hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
+          hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
+          hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
+          hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
+          hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
+            numPeopleSleptUnderLlin,
+          ),
+        };
+      });
+
+    const meta: HouseholdTableMeta = {
+      rows,
+      minWidth: 2200,
+    };
+    return meta;
+  }, [
+    specimenCounts?.data,
+    sessionsBySite,
+    surveillanceForms,
+    permissions?.sites?.canAccessSites,
+  ]);
+
+  const isLoading =
+    (viewMode === 'mosquito' && isSpecimenCountsLoading) ||
+    (viewMode === 'household' &&
+      (isSessionsLoading || isSurveillanceFormsLoading));
 
   if (isLoading) {
     return <MasterTableViewLoadingSkeleton />;
@@ -126,183 +325,71 @@ export function MasterTableViewPageClient({
             )}
           </p>
         </div>
-        {tableMeta && (
+        {viewMode === 'mosquito' && mosquitoTableMeta && (
           <div className="text-muted-foreground text-sm">
             <span className="text-2xl font-semibold">
-              {tableMeta.rows.length.toLocaleString()}
+              {mosquitoTableMeta.rows.length.toLocaleString()}
             </span>{' '}
-            site{tableMeta.rows.length === 1 ? '' : 's'} in view
+            site{mosquitoTableMeta.rows.length === 1 ? '' : 's'} in view
+          </div>
+        )}
+        {viewMode === 'household' && householdTableMeta && (
+          <div className="text-muted-foreground text-sm">
+            <span className="text-2xl font-semibold">
+              {householdTableMeta.rows.length.toLocaleString()}
+            </span>{' '}
+            site{householdTableMeta.rows.length === 1 ? '' : 's'} in view
           </div>
         )}
       </header>
 
       <section className="flex flex-col gap-4">
         <div>
-          <h2 className="text-foreground text-2xl font-semibold">
-            Specimen Counts
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Review site-level submissions for the selected district and month.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          {!isLoading && !specimenCounts && (
-            <p className="text-muted-foreground text-sm">
-              No specimen count data available for this selection.
-            </p>
-          )}
-
-          {tableMeta && (
-            <div className="border-border/60 bg-background max-h-[560px] w-full overflow-auto rounded-xl border shadow-sm">
-              <Table
-                className="text-sm"
-                style={{ minWidth: tableMeta.minWidth }}
-              >
-                <TableHeader>
-                  <TableRow className="bg-muted">
-                    <TableHead
-                      className="bg-muted border-border sticky top-0 left-0 z-30 max-w-[12rem] border-r px-3 text-xs uppercase"
-                      rowSpan={2}
-                    >
-                      Site
-                    </TableHead>
-                    {tableMeta.groupedColumns.speciesOrder.map((species, index) => {
-                      const speciesColumns =
-                        tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
-                      const isNonMosquito =
-                        speciesColumns.length === 1 &&
-                        speciesColumns[0].displayName === species;
-
-                      return (
-                        <TableHead
-                          key={species}
-                          className={`bg-muted sticky top-0 z-20 text-center text-xs uppercase ${
-                            index > 0 ? 'border-l-border border-l-2' : ''
-                          } ${!isNonMosquito ? 'border-b' : ''}`}
-                          colSpan={isNonMosquito ? 1 : speciesColumns.length}
-                          rowSpan={isNonMosquito ? 2 : 1}
-                        >
-                          {species}
-                        </TableHead>
-                      );
-                    })}
-                    <TableHead
-                      className="bg-muted border-l-border sticky top-0 z-20 border-b border-l-2 text-center text-xs uppercase"
-                      rowSpan={2}
-                    >
-                      Total
-                    </TableHead>
-                  </TableRow>
-                  <TableRow className="bg-muted">
-                    {tableMeta.groupedColumns.speciesOrder.flatMap(
-                      (species, groupIndex) => {
-                        const speciesColumns =
-                          tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
-                        const isNonMosquito =
-                          speciesColumns.length === 1 &&
-                          speciesColumns[0].displayName === species;
-
-                        if (isNonMosquito) return [];
-
-                        return speciesColumns.map((column, columnIndex) => (
-                          <TableHead
-                            key={`${species}-${column.originalName}`}
-                            className={`bg-muted sticky top-[2.5rem] z-20 text-center text-xs uppercase ${
-                              groupIndex > 0 && columnIndex === 0
-                                ? 'border-l-border border-l-2'
-                                : ''
-                            }`}
-                          >
-                            {column.displayName}
-                          </TableHead>
-                        ));
-                      },
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableMeta.rows.map(row => {
-                    return (
-                      <TableRow
-                        key={row.key}
-                        className="group bg-background hover:bg-muted transition-colors"
-                      >
-                        <TableCell className="bg-background border-border group-hover:bg-muted sticky left-0 z-40 max-w-[12rem] border-r align-top break-words whitespace-normal shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)] transition-colors">
-                          <div className="text-foreground text-sm font-semibold break-words">
-                            {row.label.topLine}
-                          </div>
-                          {row.label.bottomLine && (
-                            <div className="text-muted-foreground mt-1 text-xs break-words">
-                              {row.label.bottomLine}
-                            </div>
-                          )}
-                        </TableCell>
-                        {tableMeta.groupedColumns.speciesOrder.flatMap(
-                          (species, groupIndex) =>
-                            (tableMeta.groupedColumns.columnsBySpecies[species] ?? []).map(
-                              (column, columnIndex) => (
-                                <TableCell
-                                  key={`${row.key}-${column.originalName}`}
-                                  className={`bg-background text-center tabular-nums transition-colors ${
-                                    groupIndex > 0 && columnIndex === 0
-                                      ? 'border-l-border border-l-2'
-                                      : ''
-                                  } group-hover:bg-muted`}
-                                >
-                                  {(
-                                    row.countsByColumn[column.originalName] ?? 0
-                                  ).toLocaleString()}
-                                </TableCell>
-                              ),
-                            ),
-                        )}
-                        <TableCell className="bg-background border-l-border group-hover:bg-muted border-l-2 text-center font-semibold tabular-nums transition-colors">
-                          {(row.totalSpecimens ?? 0).toLocaleString()}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-                <TableFooter>
-                  <TableRow className="bg-muted font-semibold">
-                    <TableCell className="bg-muted border-border sticky left-0 z-20 max-w-[12rem] border-r shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)]">
-                      Total
-                    </TableCell>
-                    {tableMeta.groupedColumns.speciesOrder.flatMap(
-                      (species, groupIndex) =>
-                        (tableMeta.groupedColumns.columnsBySpecies[species] ?? []).map(
-                          (column, columnIndex) => (
-                            <TableCell
-                              key={`total-${column.originalName}`}
-                              className={`text-center tabular-nums ${
-                                groupIndex > 0 && columnIndex === 0
-                                  ? 'border-l-border border-l-2'
-                                  : ''
-                              }`}
-                            >
-                              {(
-                                tableMeta.totals[column.originalName] ?? 0
-                              ).toLocaleString()}
-                            </TableCell>
-                          ),
-                        ),
-                    )}
-                    <TableCell className="border-l-border border-l-2 text-center font-bold tabular-nums">
-                      {(tableMeta.grandTotal ?? 0).toLocaleString()}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-foreground text-2xl font-semibold">
+                Master Table View
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Switch between mosquito counts and household information.
+              </p>
             </div>
-          )}
-
-          {!tableMeta && !isLoading && specimenCounts && (
-            <p className="text-muted-foreground text-sm">
-              No specimen count data returned for this district and month.
-            </p>
-          )}
+            <ToggleGroup
+              type="single"
+              value={viewMode}
+              spacing={0}
+              variant="outline"
+              onValueChange={nextValue => {
+                if (typeof nextValue !== 'string') return;
+                setViewMode(nextValue as 'mosquito' | 'household');
+              }}
+            >
+              <ToggleGroupItem
+                value="mosquito"
+                className="data-[state=off]:bg-muted data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-none px-5 py-2 text-sm font-medium"
+              >
+                Mosquito Counts
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="household"
+                className="data-[state=off]:bg-muted data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-none px-5 py-2 text-sm font-medium"
+              >
+                Household Info
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
         </div>
+
+        {viewMode === 'mosquito' && (
+          <MosquitoCountsTable
+            tableMeta={mosquitoTableMeta}
+            specimenCounts={specimenCounts}
+          />
+        )}
+
+        {viewMode === 'household' && (
+          <HouseholdInfoTable tableMeta={householdTableMeta} />
+        )}
       </section>
     </div>
   );
