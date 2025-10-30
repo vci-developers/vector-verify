@@ -29,9 +29,63 @@ export const reviewKeys = {
     [
       ...reviewKeys.root,
       'specimens',
-      { offset, limit, startDate, endDate, district, siteId, species, sex, abdomenStatus },
+      {
+        offset,
+        limit,
+        startDate,
+        endDate,
+        district,
+        siteId,
+        species,
+        sex,
+        abdomenStatus,
+      },
     ] as const,
 
+  sessions: (
+    district?: string,
+    startDate?: string,
+    endDate?: string,
+    limit?: number,
+    offset?: number,
+    siteId?: number,
+    type?: string,
+    sortBy?:
+      | 'id'
+      | 'frontendId'
+      | 'createdAt'
+      | 'completedAt'
+      | 'submittedAt'
+      | 'collectionDate',
+    sortOrder?: 'asc' | 'desc',
+  ) =>
+    [
+      ...reviewKeys.root,
+      'sessions',
+      {
+        district,
+        startDate,
+        endDate,
+        limit,
+        offset,
+        siteId,
+        type,
+        sortBy,
+        sortOrder,
+      },
+    ] as const,
+  sessionsBySite: (
+    district?: string,
+    startDate?: string,
+    endDate?: string,
+    siteId?: number,
+    type?: string,
+  ) =>
+    [
+      ...reviewKeys.root,
+      'sessions-by-site',
+      { district, startDate, endDate, siteId, type },
+    ] as const,
 } as const;
 
 export type MonthlySummaryQueryKey = ReturnType<
@@ -39,8 +93,15 @@ export type MonthlySummaryQueryKey = ReturnType<
 > &
   QueryKey;
 
+export type SpecimensQueryKey = ReturnType<typeof reviewKeys.specimens> &
+  QueryKey;
 
+export type SessionsQueryKey = ReturnType<
+  typeof reviewKeys.sessions
+> &
+  QueryKey;
 
-export type SpecimensQueryKey = ReturnType<
-  typeof reviewKeys.specimens
-> & QueryKey;
+export type SessionsBySiteQueryKey = ReturnType<
+  typeof reviewKeys.sessionsBySite
+> &
+  QueryKey;
