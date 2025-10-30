@@ -32,6 +32,18 @@ export const reviewKeys = {
       { offset, limit, startDate, endDate, district, siteId, species, sex, abdomenStatus },
     ] as const,
 
+  sessions: (
+    district?: string,
+    startDate?: string,
+    endDate?: string,
+    limit?: number,
+    offset?: number, 
+  ) =>
+    [
+      ...reviewKeys.root,
+      'sessions',
+      { district, startDate, endDate, limit, offset },
+    ] as const,
 } as const;
 
 export type MonthlySummaryQueryKey = ReturnType<
@@ -43,4 +55,8 @@ export type MonthlySummaryQueryKey = ReturnType<
 
 export type SpecimensQueryKey = ReturnType<
   typeof reviewKeys.specimens
+> & QueryKey;
+
+export type SessionsQueryKey = ReturnType<
+  typeof reviewKeys.sessions
 > & QueryKey;

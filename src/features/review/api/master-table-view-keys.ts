@@ -6,11 +6,17 @@ export const masterTableViewKeys = {
     district?: string | null,
     startDate?: string | null,
     endDate?: string | null,
+    sessionId?: string | null,
   ) =>
     [
       ...masterTableViewKeys.root,
       'specimen-counts',
-      { district: district ?? null, startDate: startDate ?? null, endDate: endDate ?? null },
+      { 
+        district: district ?? null, 
+        startDate: startDate ?? null, 
+        endDate: endDate ?? null, 
+        sessionId: sessionId ?? null 
+      },
     ] as const,
 } as const;
 
