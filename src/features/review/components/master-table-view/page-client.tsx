@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Session } from '@/shared/entities/session/model';
 import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 import {
@@ -22,6 +21,7 @@ import { HouseholdInfoTable } from './household-info-table';
 import type {
   MosquitoTableMeta,
   HouseholdTableMeta,
+  HouseholdRowData,
 } from '@/features/review/types';
 import { ToggleGroup, ToggleGroupItem } from '@/ui/toggle-group';
 import { useUserPermissionsQuery } from '@/features/user';
@@ -31,7 +31,7 @@ interface MasterTableViewPageClientProps {
   monthYear: string;
 }
 
-function formatMonthLabel(monthYear: string) {
+function formatMonthLabel(monthYear: string): string {
   const [year, month] = monthYear.split('-');
   return new Date(
     Number.parseInt(year, 10),
@@ -40,6 +40,94 @@ function formatMonthLabel(monthYear: string) {
     month: 'long',
     year: 'numeric',
   });
+}
+
+function extractUniqueValues<T>(
+  sessions: Session[],
+  extractor: (session: Session) => T | null,
+): T[] {
+  return Array.from(
+    new Set(sessions.map(extractor).filter((v): v is T => v !== null)),
+  );
+}
+
+function hasDiscrepancy<T>(values: (T | null)[]): boolean {
+  const uniqueNonNull = Array.from(
+    new Set(values.filter((v): v is T => v !== null)),
+  );
+  return uniqueNonNull.length > 1;
+}
+
+function findMostRecentDate(sessions: Session[]): number | null {
+  return sessions.reduce<number | null>((latest, session) => {
+    if (!session.collectionDate) return latest;
+    if (!latest) return session.collectionDate;
+    return session.collectionDate > latest ? session.collectionDate : latest;
+  }, null);
+}
+
+function buildHouseholdRowData(
+  site: { siteId: number },
+  siteLabel: { topLine: string; bottomLine: string | null },
+  sessions: Session[],
+  surveillanceForms: Map<number, SurveillanceForm> | undefined,
+): HouseholdRowData {
+  const collectorNames = extractUniqueValues(sessions, s => s.collectorName);
+  const collectorTitles = extractUniqueValues(sessions, s => s.collectorTitle);
+  const collectionMethods = extractUniqueValues(
+    sessions,
+    s => s.collectionMethod,
+  );
+
+  const mostRecentDate = findMostRecentDate(sessions);
+
+  const forms = sessions
+    .map(s => surveillanceForms?.get(s.sessionId))
+    .filter((f): f is SurveillanceForm => Boolean(f));
+
+  const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
+  const wasIrsConducted = forms.map(f => f.wasIrsConducted);
+  const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
+  const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
+  const llinType = forms.map(f => f.llinType);
+  const llinBrand = forms.map(f => f.llinBrand);
+  const numPeopleSleptUnderLlin = forms.map(f => f.numPeopleSleptUnderLlin);
+
+  const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
+
+  return {
+    key: `site-${site.siteId}`,
+    siteLabel,
+    collectorName: collectorNames.length === 1 ? collectorNames[0] : null,
+    collectorTitle: collectorTitles.length === 1 ? collectorTitles[0] : null,
+    collectionMethod:
+      collectionMethods.length === 1 ? collectionMethods[0] : null,
+    mostRecentDate,
+    sessionCount: sessions.length,
+    hasCollectorNameDiscrepancy: collectorNames.length > 1,
+    hasCollectorTitleDiscrepancy: collectorTitles.length > 1,
+    hasCollectionMethodDiscrepancy: collectionMethods.length > 1,
+    collectorNames,
+    collectorTitles,
+    collectionMethods,
+    numPeopleSleptInHouse,
+    wasIrsConducted,
+    monthsSinceIrs,
+    numLlinsAvailable,
+    llinType,
+    llinBrand,
+    numPeopleSleptUnderLlin,
+    hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(numPeopleSleptInHouse),
+    hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
+    hasMonthsSinceIrsDiscrepancy:
+      hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
+    hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
+    hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
+    hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
+    hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
+      numPeopleSleptUnderLlin,
+    ),
+  };
 }
 
 export function MasterTableViewPageClient({
@@ -196,105 +284,18 @@ export function MasterTableViewPageClient({
         const siteGroup = sessionsBySiteMap.get(site.siteId);
         const sessions = siteGroup?.sessions || [];
 
-        const collectorNames = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectorName)
-              .filter((name): name is string => Boolean(name)),
-          ),
-        );
-        const collectorTitles = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectorTitle)
-              .filter((title): title is string => Boolean(title)),
-          ),
-        );
-        const collectionMethods = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectionMethod)
-              .filter((method): method is string => Boolean(method)),
-          ),
-        );
-
-        const mostRecentDate = sessions.reduce<number | null>(
-          (latest: number | null, session: Session) => {
-            if (!session.collectionDate) return latest;
-            if (!latest) return session.collectionDate;
-            return session.collectionDate > latest
-              ? session.collectionDate
-              : latest;
-          },
-          null,
-        );
-
-        const forms = sessions
-          .map(s => surveillanceForms?.get(s.sessionId))
-          .filter((f): f is SurveillanceForm => Boolean(f));
-
-        const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
-        const wasIrsConducted = forms.map(f => f.wasIrsConducted);
-        const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
-        const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
-        const llinType = forms.map(f => f.llinType);
-        const llinBrand = forms.map(f => f.llinBrand);
-        const numPeopleSleptUnderLlin = forms.map(
-          f => f.numPeopleSleptUnderLlin,
-        );
-
-        const hasDiscrepancy = <T,>(values: (T | null)[]) => {
-          const uniqueNonNull = Array.from(
-            new Set(values.filter((v): v is T => v !== null)),
-          );
-          return uniqueNonNull.length > 1;
-        };
-
-        const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
-
-        return {
-          key: `site-${site.siteId}`,
+        return buildHouseholdRowData(
+          site,
           siteLabel,
-          collectorName: collectorNames.length === 1 ? collectorNames[0] : null,
-          collectorTitle:
-            collectorTitles.length === 1 ? collectorTitles[0] : null,
-          collectionMethod:
-            collectionMethods.length === 1 ? collectionMethods[0] : null,
-          mostRecentDate,
-          sessionCount: sessions.length,
-          hasCollectorNameDiscrepancy: collectorNames.length > 1,
-          hasCollectorTitleDiscrepancy: collectorTitles.length > 1,
-          hasCollectionMethodDiscrepancy: collectionMethods.length > 1,
-          collectorNames,
-          collectorTitles,
-          collectionMethods,
-          numPeopleSleptInHouse,
-          wasIrsConducted,
-          monthsSinceIrs,
-          numLlinsAvailable,
-          llinType,
-          llinBrand,
-          numPeopleSleptUnderLlin,
-          hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(
-            numPeopleSleptInHouse,
-          ),
-          hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
-          hasMonthsSinceIrsDiscrepancy:
-            hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
-          hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
-          hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
-          hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
-          hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
-            numPeopleSleptUnderLlin,
-          ),
-        };
+          sessions,
+          surveillanceForms,
+        );
       });
 
-    const meta: HouseholdTableMeta = {
+    return {
       rows,
       minWidth: 2200,
-    };
-    return meta;
+    } satisfies HouseholdTableMeta;
   }, [
     specimenCounts?.data,
     sessionsBySite,
@@ -388,166 +389,17 @@ export function MasterTableViewPageClient({
             </p>
           )}
 
-          {tableMeta && (
-            <div className="border-border/60 bg-background max-h-[560px] w-full overflow-auto rounded-xl border shadow-sm">
-              <Table
-                className="text-sm"
-                style={{ minWidth: tableMeta.minWidth }}
-              >
-                <TableHeader>
-                  <TableRow className="bg-muted">
-                    <TableHead
-                      className="bg-muted border-border sticky top-0 left-0 z-30 max-w-[12rem] border-r px-3 text-xs uppercase"
-                      rowSpan={2}
-                    >
-                      Site
-                    </TableHead>
-                    {tableMeta.groupedColumns.speciesOrder.map(
-                      (species, index) => {
-                        const speciesColumns =
-                          tableMeta.groupedColumns.columnsBySpecies[species] ??
-                          [];
-                        const isNonMosquito =
-                          speciesColumns.length === 1 &&
-                          speciesColumns[0].displayName === species;
-
-                        return (
-                          <TableHead
-                            key={species}
-                            className={`bg-muted sticky top-0 z-20 text-center text-xs uppercase ${
-                              index > 0 ? 'border-l-border border-l-2' : ''
-                            } ${!isNonMosquito ? 'border-b' : ''}`}
-                            colSpan={isNonMosquito ? 1 : speciesColumns.length}
-                            rowSpan={isNonMosquito ? 2 : 1}
-                          >
-                            {species}
-                          </TableHead>
-                        );
-                      },
-                    )}
-                    <TableHead
-                      className="bg-muted border-l-border sticky top-0 z-20 border-b border-l-2 text-center text-xs uppercase"
-                      rowSpan={2}
-                    >
-                      Total
-                    </TableHead>
-                  </TableRow>
-                  <TableRow className="bg-muted">
-                    {tableMeta.groupedColumns.speciesOrder.flatMap(
-                      (species, groupIndex) => {
-                        const speciesColumns =
-                          tableMeta.groupedColumns.columnsBySpecies[species] ??
-                          [];
-                        const isNonMosquito =
-                          speciesColumns.length === 1 &&
-                          speciesColumns[0].displayName === species;
-
-                        if (isNonMosquito) return [];
-
-                        return speciesColumns.map((column, columnIndex) => (
-                          <TableHead
-                            key={`${species}-${column.originalName}`}
-                            className={`bg-muted sticky top-[2.5rem] z-20 text-center text-xs uppercase ${
-                              groupIndex > 0 && columnIndex === 0
-                                ? 'border-l-border border-l-2'
-                                : ''
-                            }`}
-                          >
-                            {column.displayName}
-                          </TableHead>
-                        ));
-                      },
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableMeta.rows.map(row => {
-                    return (
-                      <TableRow
-                        key={row.key}
-                        className="group bg-background hover:bg-muted transition-colors"
-                      >
-                        <TableCell className="bg-background border-border group-hover:bg-muted sticky left-0 z-40 max-w-[12rem] border-r align-top break-words whitespace-normal shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)] transition-colors">
-                          <div className="text-foreground text-sm font-semibold break-words">
-                            {row.label.topLine}
-                          </div>
-                          {row.label.bottomLine && (
-                            <div className="text-muted-foreground mt-1 text-xs break-words">
-                              {row.label.bottomLine}
-                            </div>
-                          )}
-                        </TableCell>
-                        {tableMeta.groupedColumns.speciesOrder.flatMap(
-                          (species, groupIndex) =>
-                            (
-                              tableMeta.groupedColumns.columnsBySpecies[
-                                species
-                              ] ?? []
-                            ).map((column, columnIndex) => (
-                              <TableCell
-                                key={`${row.key}-${column.originalName}`}
-                                className={`bg-background text-center tabular-nums transition-colors ${
-                                  groupIndex > 0 && columnIndex === 0
-                                    ? 'border-l-border border-l-2'
-                                    : ''
-                                } group-hover:bg-muted`}
-                              >
-                                {(
-                                  row.countsByColumn[column.originalName] ?? 0
-                                ).toLocaleString()}
-                              </TableCell>
-                            )),
-                        )}
-                        <TableCell className="bg-background border-l-border group-hover:bg-muted border-l-2 text-center font-semibold tabular-nums transition-colors">
-                          {(row.totalSpecimens ?? 0).toLocaleString()}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-                <TableFooter>
-                  <TableRow className="bg-muted font-semibold">
-                    <TableCell className="bg-muted border-border sticky left-0 z-20 max-w-[12rem] border-r shadow-[2px_0_4px_-2px_rgba(0,0,0,0.2)]">
-                      Total
-                    </TableCell>
-                    {tableMeta.groupedColumns.speciesOrder.flatMap(
-                      (species, groupIndex) =>
-                        (
-                          tableMeta.groupedColumns.columnsBySpecies[species] ??
-                          []
-                        ).map((column, columnIndex) => (
-                          <TableCell
-                            key={`total-${column.originalName}`}
-                            className={`text-center tabular-nums ${
-                              groupIndex > 0 && columnIndex === 0
-                                ? 'border-l-border border-l-2'
-                                : ''
-                            }`}
-                          >
-                            {(
-                              tableMeta.totals[column.originalName] ?? 0
-                            ).toLocaleString()}
-                          </TableCell>
-                        )),
-                    )}
-                    <TableCell className="border-l-border border-l-2 text-center font-bold tabular-nums">
-                      {(tableMeta.grandTotal ?? 0).toLocaleString()}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </div>
+          {viewMode === 'mosquito' && (
+            <MosquitoCountsTable
+              tableMeta={mosquitoTableMeta}
+              specimenCounts={specimenCounts}
+            />
           )}
-        {viewMode === 'mosquito' && (
-          <MosquitoCountsTable
-            tableMeta={mosquitoTableMeta}
-            specimenCounts={specimenCounts}
-          />
-        )}
 
-        {viewMode === 'household' && (
-          <HouseholdInfoTable tableMeta={householdTableMeta} />
-        )}
+          {viewMode === 'household' && (
+            <HouseholdInfoTable tableMeta={householdTableMeta} />
+          )}
+        </div>
       </section>
     </div>
   );
