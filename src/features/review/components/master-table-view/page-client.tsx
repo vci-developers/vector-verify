@@ -359,9 +359,10 @@ export function MasterTableViewPageClient({
               value={viewMode}
               spacing={0}
               variant="outline"
-              onValueChange={value =>
-                value && setViewMode(value as typeof viewMode)
-              }
+              onValueChange={nextValue => {
+                if (typeof nextValue !== 'string') return;
+                setViewMode(nextValue as 'mosquito' | 'household');
+              }}
             >
               <ToggleGroupItem
                 value="mosquito"

@@ -1,6 +1,5 @@
-import type { SessionDto } from '@/shared/entities/session/dto';
 import type { SiteDto } from '@/shared/entities/site/dto';
-import { SessionDto } from '@/shared/entities/session/dto';
+import type { SessionDto } from '@/shared/entities/session/dto';
 
 export interface ReviewItemDto {
   district: string;
@@ -38,14 +37,6 @@ export interface SpecimenCountsResponseDto {
   columns: string[];
   data: SpecimenCountsSiteDto[];
   sessionId?: string;
-}
-
-export interface SessionsResponseDto {
-  sessions: SessionDto[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface SessionsResponseDto {
