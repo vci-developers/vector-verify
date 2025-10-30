@@ -68,7 +68,10 @@ function extractColumnMeta(columnName: string) {
   if (isNonMosquito) {
     return {
       species: 'NON-MOSQUITO',
-      column: { originalName: columnName, displayName: 'NON-MOSQUITO' } as ColumnDisplay,
+      column: {
+        originalName: columnName,
+        displayName: 'NON-MOSQUITO',
+      } as ColumnDisplay,
     };
   }
 
@@ -111,7 +114,10 @@ function extractColumnMeta(columnName: string) {
 
   return {
     species: columnName,
-    column: { originalName: columnName, displayName: columnName } as ColumnDisplay,
+    column: {
+      originalName: columnName,
+      displayName: columnName,
+    } as ColumnDisplay,
   };
 }
 
@@ -145,6 +151,48 @@ export function groupColumnsBySpecies(columns: string[]) {
   );
 
   return { speciesOrder, columnsBySpecies, totalColumns };
+}
+
+export function formatSiteLabel(site: {
+  siteId: number;
+  district: string | null;
+  subCounty: string | null;
+  parish: string | null;
+  villageName: string | null;
+  houseNumber: string | null;
+  healthCenter: string | null;
+}): { topLine: string; bottomLine: string | null } {
+  const primaryParts = [
+    site.villageName,
+    site.houseNumber && `House ${site.houseNumber}`,
+  ].filter(Boolean) as string[];
+
+  const fallback =
+    site.healthCenter ??
+    site.parish ??
+    site.subCounty ??
+    site.district ??
+    `Site #${site.siteId}`;
+
+  const topLine = primaryParts.length > 0 ? primaryParts.join(' • ') : fallback;
+
+  const secondaryParts = [
+    site.healthCenter && site.healthCenter !== topLine
+      ? site.healthCenter
+      : null,
+    site.parish && !primaryParts.includes(site.parish) ? site.parish : null,
+    site.subCounty && !primaryParts.includes(site.subCounty)
+      ? site.subCounty
+      : null,
+    site.district && !primaryParts.includes(site.district)
+      ? site.district
+      : null,
+  ].filter(Boolean) as string[];
+
+  return {
+    topLine,
+    bottomLine: secondaryParts.length > 0 ? secondaryParts.join(' • ') : null,
+  };
 }
 
 export function getSiteLabel(site: SpecimenCountsSite) {

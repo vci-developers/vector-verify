@@ -26,6 +26,28 @@ function formatDate(value?: number | null) {
   });
 }
 
+function renderDiscrepancyAwareCell<T>(
+  input: T | null | undefined | (T | null | undefined)[],
+  hasDiscrepancy: boolean,
+  formatValue: (value: T) => string | null = value => String(value),
+) {
+  const valuesArray = Array.isArray(input) ? input : [input];
+  const nonNull = valuesArray.filter(
+    (value): value is T => value !== null && value !== undefined,
+  );
+
+  if (hasDiscrepancy) {
+    return <DiscrepancyCell />;
+  }
+
+  if (nonNull.length === 0) {
+    return <StandardCell value={null} />;
+  }
+
+  const formattedValue = formatValue(nonNull[0]);
+  return <StandardCell value={formattedValue ?? null} />;
+}
+
 const tableColumns = [
   {
     key: 'collectorName',
@@ -36,6 +58,9 @@ const tableColumns = [
         <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectorName} />
+      renderDiscrepancyAwareCell(
+        row.collectorName,
+        row.hasCollectorNameDiscrepancy,
       ),
   },
   {
@@ -47,6 +72,9 @@ const tableColumns = [
         <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectorTitle} />
+      renderDiscrepancyAwareCell(
+        row.collectorTitle,
+        row.hasCollectorTitleDiscrepancy,
       ),
   },
   {
@@ -56,6 +84,12 @@ const tableColumns = [
     render: (row: HouseholdRowData) => (
       <StandardCell value={formatDate(row.mostRecentDate)} />
     ),
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.mostRecentDate,
+        false,
+        value => formatDate(value),
+      ),
   },
   {
     key: 'collectionMethod',
@@ -66,6 +100,9 @@ const tableColumns = [
         <DiscrepancyCell />
       ) : (
         <StandardCell value={row.collectionMethod} />
+      renderDiscrepancyAwareCell(
+        row.collectionMethod,
+        row.hasCollectionMethodDiscrepancy,
       ),
   },
   {
@@ -83,6 +120,11 @@ const tableColumns = [
         <StandardCell value={String(values[0])} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.numPeopleSleptInHouse,
+        row.hasNumPeopleSleptInHouseDiscrepancy,
+      ),
   },
   {
     key: 'wasIrsConducted',
@@ -99,6 +141,12 @@ const tableColumns = [
         <StandardCell value={values[0] ? 'Yes' : 'No'} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.wasIrsConducted,
+        row.hasWasIrsConductedDiscrepancy,
+        value => (value ? 'Yes' : 'No'),
+      ),
   },
   {
     key: 'monthsSinceIrs',
@@ -115,6 +163,11 @@ const tableColumns = [
         <StandardCell value={String(values[0])} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.monthsSinceIrs,
+        row.hasMonthsSinceIrsDiscrepancy || row.hasWasIrsConductedDiscrepancy,
+      ),
   },
   {
     key: 'numLlinsAvailable',
@@ -131,6 +184,11 @@ const tableColumns = [
         <StandardCell value={String(values[0])} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.numLlinsAvailable,
+        row.hasNumLlinsAvailableDiscrepancy,
+      ),
   },
   {
     key: 'llinType',
@@ -147,6 +205,11 @@ const tableColumns = [
         <StandardCell value={values[0]} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.llinType,
+        row.hasLlinTypeDiscrepancy,
+      ),
   },
   {
     key: 'llinBrand',
@@ -163,6 +226,11 @@ const tableColumns = [
         <StandardCell value={values[0]} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.llinBrand,
+        row.hasLlinBrandDiscrepancy,
+      ),
   },
   {
     key: 'numPeopleSleptUnderLlin',
@@ -179,6 +247,11 @@ const tableColumns = [
         <StandardCell value={String(values[0])} />
       );
     },
+    render: (row: HouseholdRowData) =>
+      renderDiscrepancyAwareCell(
+        row.numPeopleSleptUnderLlin,
+        row.hasNumPeopleSleptUnderLlinDiscrepancy,
+      ),
   },
 ] as const;
 
@@ -212,6 +285,7 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
           </TableHeader>
           <TableBody>
             {tableMeta.rows.map((row: HouseholdRowData) => (
+            {tableMeta.rows.map(row => (
               <TableRow
                 key={row.key}
                 className="hover:bg-muted/30 border-b transition-colors last:border-b-0"

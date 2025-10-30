@@ -69,6 +69,26 @@ export function MosquitoCountsTable({
                   );
                 },
               )}
+              {tableMeta.groupedColumns.speciesOrder.map((species, index) => {
+                const speciesColumns =
+                  tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
+                const isNonMosquito =
+                  speciesColumns.length === 1 &&
+                  speciesColumns[0].displayName === species;
+
+                return (
+                  <TableHead
+                    key={species}
+                    className={`bg-muted sticky top-0 z-20 h-12 text-center text-xs font-semibold uppercase ${
+                      index > 0 ? 'border-border border-l-2' : ''
+                    } ${!isNonMosquito ? 'border-border border-b' : ''}`}
+                    colSpan={isNonMosquito ? 1 : speciesColumns.length}
+                    rowSpan={isNonMosquito ? 2 : 1}
+                  >
+                    {species}
+                  </TableHead>
+                );
+              })}
               <TableHead
                 className="border-border bg-muted sticky top-0 z-20 h-12 border-b border-l-2 text-center text-xs font-semibold uppercase"
                 rowSpan={2}
@@ -79,6 +99,7 @@ export function MosquitoCountsTable({
             <TableRow className="bg-muted hover:bg-muted h-12 border-b-2">
               {tableMeta.groupedColumns.speciesOrder.flatMap(
                 (species: string, groupIndex: number) => {
+                (species, groupIndex) => {
                   const speciesColumns =
                     tableMeta.groupedColumns.columnsBySpecies[species] ?? [];
                   const isNonMosquito =
@@ -101,12 +122,25 @@ export function MosquitoCountsTable({
                       </TableHead>
                     ),
                   );
+                  return speciesColumns.map((column, columnIndex) => (
+                    <TableHead
+                      key={`${species}-${column.originalName}`}
+                      className={`bg-muted sticky top-[2.5rem] z-20 h-12 text-center text-xs font-semibold uppercase ${
+                        groupIndex > 0 && columnIndex === 0
+                          ? 'border-border border-l-2'
+                          : ''
+                      }`}
+                    >
+                      {column.displayName}
+                    </TableHead>
+                  ));
                 },
               )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {tableMeta.rows.map((row: MosquitoRowData) => (
+            {tableMeta.rows.map(row => (
               <TableRow
                 key={row.key}
                 className="hover:bg-muted/30 border-b transition-colors last:border-b-0"
@@ -126,6 +160,10 @@ export function MosquitoCountsTable({
                     (
                       tableMeta.groupedColumns.columnsBySpecies[species] ?? []
                     ).map((column: MosquitoColumn, columnIndex: number) => (
+                  (species, groupIndex) =>
+                    (
+                      tableMeta.groupedColumns.columnsBySpecies[species] ?? []
+                    ).map((column, columnIndex) => (
                       <TableCell
                         key={`${row.key}-${column.originalName}`}
                         className={`bg-background border-r px-4 py-4 text-center tabular-nums transition-colors ${
@@ -156,6 +194,10 @@ export function MosquitoCountsTable({
                   (
                     tableMeta.groupedColumns.columnsBySpecies[species] ?? []
                   ).map((column: MosquitoColumn, columnIndex: number) => (
+                (species, groupIndex) =>
+                  (
+                    tableMeta.groupedColumns.columnsBySpecies[species] ?? []
+                  ).map((column, columnIndex) => (
                     <TableCell
                       key={`total-${column.originalName}`}
                       className={`bg-muted border-r px-4 py-4 text-center tabular-nums ${

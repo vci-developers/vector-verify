@@ -1,5 +1,9 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { masterTableViewKeys } from '@/features/review/api/master-table-view-keys';
+import {
+  masterTableViewKeys,
+  type SurveillanceFormsQueryKey,
+} from '@/features/review/api/master-table-view-keys';
 import { getSurveillanceFormsForSessions } from '@/features/review/api/get-surveillance-form';
 import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 
@@ -9,6 +13,7 @@ type SurveillanceFormsQueryOptions = Omit<
     Error,
     Map<number, SurveillanceForm>,
     readonly [string, string, string, { sessionIds: number[] }]
+    SurveillanceFormsQueryKey
   >,
   'queryKey' | 'queryFn'
 >;
@@ -25,6 +30,7 @@ export function useSurveillanceFormsQuery(
       'surveillance-forms',
       { sessionIds },
     ] as const,
+    queryKey: masterTableViewKeys.surveillanceForms(sessionIds),
     queryFn: () => getSurveillanceFormsForSessions(sessionIds),
     enabled: sessionIds.length > 0 && (optionsEnabled ?? true),
     ...restOptions,

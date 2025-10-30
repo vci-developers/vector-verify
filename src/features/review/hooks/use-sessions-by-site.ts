@@ -42,6 +42,9 @@ export function useSessionsBySiteQuery(
       params?.offset,
       params?.sortBy,
       params?.sortOrder,
+      params?.startDate,
+      params?.endDate,
+      params?.siteId,
       params?.type,
     ) as SessionsBySiteQueryKey,
     queryFn: async () => {

@@ -11,6 +11,7 @@ import type { SpecimenCountsSummary } from '@/features/review/types';
 interface UseSpecimenCountsParams {
   district?: string | null;
   monthYear?: string | null;
+  sessionId?: string | null; 
 }
 
 type SpecimenCountsQueryOptions = Omit<
@@ -27,7 +28,7 @@ export function useSpecimenCountsQuery(
   params: UseSpecimenCountsParams = {},
   options?: SpecimenCountsQueryOptions,
 ) {
-  const { district, monthYear } = params;
+  const { district, monthYear, sessionId } = params; 
   const dateRange = useMemo(() => getMonthDateRange(monthYear), [monthYear]);
 
   const startDate = dateRange?.startDate ?? null;
@@ -41,12 +42,14 @@ export function useSpecimenCountsQuery(
       district ?? null,
       startDate,
       endDate,
+      sessionId ?? null 
     ) as SpecimenCountsQueryKey,
     queryFn: () =>
       getSpecimenCounts({
         district: district ?? undefined,
         startDate: startDate ?? undefined,
         endDate: endDate ?? undefined,
+        sessionId: sessionId ?? undefined,
       }),
     enabled: isReady && (optionsEnabled ?? true),
     ...restOptions,

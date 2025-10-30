@@ -20,6 +20,7 @@ export interface SpecimensQuery {
 
 export interface SpecimenCountsQuery {
   district?: string;
+  sessionId?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -31,7 +32,13 @@ export interface SessionsQuery {
   endDate?: string;
   limit?: number;
   offset?: number;
-  sortBy?: string;
+  sortBy?:
+    | 'id'
+    | 'frontendId'
+    | 'createdAt'
+    | 'completedAt'
+    | 'submittedAt'
+    | 'collectionDate';
   sortOrder?: 'asc' | 'desc';
   type?: string;
 }

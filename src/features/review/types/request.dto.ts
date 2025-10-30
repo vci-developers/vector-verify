@@ -24,8 +24,20 @@ export interface SpecimenCountsRequestDto {
   endDate?: string;
 }
 
-export interface DashboardMetricsRequestDto {
-  district: string;
-  startDate: string;
-  endDate: string;
+export interface SessionsRequestDto {
+  district?: string;
+  siteId?: number;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+  sortBy?:
+    | 'id'
+    | 'frontendId'
+    | 'createdAt'
+    | 'completedAt'
+    | 'submittedAt'
+    | 'collectionDate';
+  sortOrder?: 'asc' | 'desc';
+  type?: string;
 }

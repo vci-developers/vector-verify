@@ -2,6 +2,7 @@ import bff from '@/shared/infra/api/bff-client';
 import { mapSurveillanceFormDtoToModel } from '@/shared/entities/surveillance-form/mapper';
 import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 import type { SurveillanceFormDto } from '@/shared/entities/surveillance-form/dto';
+import { HttpError, HTTP_STATUS } from '@/shared/infra/http/core';
 
 export async function getSurveillanceForm(
   sessionId: number,
@@ -17,6 +18,14 @@ export async function getSurveillanceForm(
   } catch (error) {
     // If no surveillance form exists, return null
     return null;
+    if (
+      error instanceof HttpError &&
+      error.status === HTTP_STATUS.NOT_FOUND
+    ) {
+      return null;
+    }
+
+    throw error;
   }
 }
 
