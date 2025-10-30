@@ -58,4 +58,17 @@ export interface DashboardMetricsResponseDto {
     totalPeopleSleptUnderLlin: number;
     llinsPerPerson: number;
   };
+  // Optional additional metrics provided by API for charts
+  speciesDistribution?: Array<{ species: string; count: number }>;
+  sexRatio?: {
+    total: number;
+    male: { count: number; percentage: number };
+    female: { count: number; percentage: number };
+  };
+  abdomenStatus?: {
+    total: number;
+    fed: { count: number; percentage: number };
+    unfed: { count: number; percentage: number };
+    gravid: { count: number; percentage: number };
+  };
 }

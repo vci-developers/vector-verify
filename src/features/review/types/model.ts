@@ -105,6 +105,10 @@ export interface DashboardMetrics {
     totalPeopleSleptUnderLlin: number;
     llinsPerPerson: number;
   };
+  // Optional additional metrics passed through from API for charts
+  speciesDistribution?: SpeciesDistribution[];
+  sexRatio?: SexRatio;
+  abdomenStatus?: AbdomenStatus;
 }
 
 export interface SpecimenData {

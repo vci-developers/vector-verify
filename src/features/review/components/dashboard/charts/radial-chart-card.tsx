@@ -23,15 +23,6 @@ interface RadialChartCardProps {
   }>;
 }
 
-const chartConfig = {
-  value: {
-    label: 'Value',
-  },
-  name: {
-    label: 'Name',
-  },
-};
-
 export function RadialChartCard({
   title,
   data,

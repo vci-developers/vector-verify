@@ -101,12 +101,7 @@ export function DashboardPageClient({
           />
 
           {/* Entomological Summary */}
-          <EntomologicalSummarySection
-            data={displayData.entomologicalSummary}
-            speciesDistribution={displayData.speciesDistribution}
-            sexRatio={displayData.sexRatio}
-            abdomenStatus={displayData.abdomenStatus}
-          />
+          <EntomologicalSummarySection metrics={displayData} />
 
           {/* Bednets Data */}
           <BednetsDataSection data={displayData.entomologicalSummary} />

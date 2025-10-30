@@ -3,35 +3,113 @@
 import { Bug, Moon } from 'lucide-react';
 import { SectionHeader, InfoCard } from './shared';
 import { RadialChartCard, BarChartCard } from './charts';
-import {
-  processSexRatioData,
-  processAbdomenStatusData,
-  hasChartData,
-} from './utils/data-processor';
-import type {
-  DashboardMetrics,
-  SpeciesDistribution,
-  SexRatio,
-  AbdomenStatus,
-} from '@/features/review/types/model';
+import type { DashboardMetrics } from '@/features/review/types/model';
 
 interface EntomologicalSummarySectionProps {
-  data: DashboardMetrics['entomologicalSummary'];
-  speciesDistribution: SpeciesDistribution[];
-  sexRatio: SexRatio;
-  abdomenStatus: AbdomenStatus;
+  metrics: DashboardMetrics;
 }
 
 export function EntomologicalSummarySection({
-  data,
-  speciesDistribution,
-  sexRatio,
-  abdomenStatus,
+  metrics,
 }: EntomologicalSummarySectionProps) {
-  // Process data for charts
-  const hasData = hasChartData(sexRatio, abdomenStatus, speciesDistribution);
-  const sexRatioChartData = processSexRatioData(sexRatio);
-  const abdomenStatusChartData = processAbdomenStatusData(abdomenStatus);
+  const data = metrics.entomologicalSummary;
+  const speciesDistribution = metrics.speciesDistribution ?? [];
+  const sexRatio = metrics.sexRatio ?? {
+    total: 0,
+    male: { count: 0, percentage: 0 },
+    female: { count: 0, percentage: 0 },
+  };
+  const abdomenStatus = metrics.abdomenStatus ?? {
+    total: 0,
+    fed: { count: 0, percentage: 0 },
+    unfed: { count: 0, percentage: 0 },
+    gravid: { count: 0, percentage: 0 },
+  };
+
+  const hasData =
+    speciesDistribution.length > 0 ||
+    sexRatio.total > 0 ||
+    abdomenStatus.total > 0;
+
+  // Figma-aligned palette: shades of green only
+  const sexColors = ['#166534', '#22C55E']; // dark green, medium green
+  const abdomenColors = ['#166534', '#22C55E', '#86EFAC']; // dark, medium, light green
+
+  const sexRatioChartData = {
+    data: [
+      {
+        name: 'Male',
+        value: sexRatio.male.count,
+        percentage: sexRatio.male.percentage,
+        fill: sexColors[0],
+      },
+      {
+        name: 'Female',
+        value: sexRatio.female.count,
+        percentage: sexRatio.female.percentage,
+        fill: sexColors[1],
+      },
+    ],
+    colors: sexColors,
+    legendItems: [
+      {
+        label: 'Male',
+        count: sexRatio.male.count,
+        percentage: sexRatio.male.percentage,
+        color: sexColors[0],
+      },
+      {
+        label: 'Female',
+        count: sexRatio.female.count,
+        percentage: sexRatio.female.percentage,
+        color: sexColors[1],
+      },
+    ],
+  };
+
+  const abdomenStatusChartData = {
+    data: [
+      {
+        name: 'Fed',
+        value: abdomenStatus.fed.count,
+        percentage: abdomenStatus.fed.percentage,
+        fill: abdomenColors[0],
+      },
+      {
+        name: 'Unfed',
+        value: abdomenStatus.unfed.count,
+        percentage: abdomenStatus.unfed.percentage,
+        fill: abdomenColors[1],
+      },
+      {
+        name: 'Gravid',
+        value: abdomenStatus.gravid.count,
+        percentage: abdomenStatus.gravid.percentage,
+        fill: abdomenColors[2],
+      },
+    ],
+    colors: abdomenColors,
+    legendItems: [
+      {
+        label: 'Fed',
+        count: abdomenStatus.fed.count,
+        percentage: abdomenStatus.fed.percentage,
+        color: abdomenColors[0],
+      },
+      {
+        label: 'Unfed',
+        count: abdomenStatus.unfed.count,
+        percentage: abdomenStatus.unfed.percentage,
+        color: abdomenColors[1],
+      },
+      {
+        label: 'Gravid',
+        count: abdomenStatus.gravid.count,
+        percentage: abdomenStatus.gravid.percentage,
+        color: abdomenColors[2],
+      },
+    ],
+  };
 
   return (
     <div className="space-y-6">
