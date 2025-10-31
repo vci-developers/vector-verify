@@ -96,6 +96,7 @@ export function SpecimenReviewAccordion({
               siteId={siteId}
               houseNumber={houseNumber}
               filterQuery={filterQuery}
+              enabled={isOpen}
             />
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent

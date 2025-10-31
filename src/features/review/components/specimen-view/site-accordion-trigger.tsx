@@ -9,17 +9,19 @@ interface SiteAccordionTriggerProps {
   siteId: number;
   houseNumber: string;
   filterQuery: SpecimensQuery;
+  enabled?: boolean;
 }
 
 export function SiteAccordionTrigger({
   siteId,
   houseNumber,
   filterQuery,
+  enabled = true,
 }: SiteAccordionTriggerProps) {
-  const { totalSpecimens, totalImages, isLoading } = useSiteStatistics({
+  const { totalSpecimens, totalImages, isLoading, isPartial } = useSiteStatistics({
     siteId,
     queryParameters: filterQuery,
-    enabled: true,
+    enabled,
   });
 
   const displayHouseNumber = formatHouseNumber(houseNumber);
@@ -35,9 +37,11 @@ export function SiteAccordionTrigger({
           <>
             <span className="text-muted-foreground text-sm">
               Total Specimens: {totalSpecimens}
+              {isPartial && ' (partial)'}
             </span>
             <span className="text-muted-foreground text-sm">
               Total Images: {totalImages}
+              {isPartial && ' (partial)'}
             </span>
           </>
         ) : (

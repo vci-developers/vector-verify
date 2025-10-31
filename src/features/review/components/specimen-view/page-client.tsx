@@ -57,12 +57,7 @@ export function SpecimenViewPageClient({
   );
   const houseNumbers = useMemo(
     () =>
-      districtSites.map(site => {
-        const houseNumber = site.houseNumber;
-        return houseNumber && houseNumber.trim() !== ''
-          ? houseNumber
-          : `Site ${site.siteId}`;
-      }),
+      districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
     [districtSites],
   );
 
