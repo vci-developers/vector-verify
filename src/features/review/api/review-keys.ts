@@ -25,6 +25,7 @@ export const reviewKeys = {
     species?: string | null,
     sex?: string | null,
     abdomenStatus?: string | null,
+    includeAllImages?: boolean,
   ) =>
     [
       ...reviewKeys.root,
@@ -39,6 +40,7 @@ export const reviewKeys = {
         species,
         sex,
         abdomenStatus,
+        includeAllImages,
       },
     ] as const,
 

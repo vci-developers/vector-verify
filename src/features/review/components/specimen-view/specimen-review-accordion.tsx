@@ -1,16 +1,13 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem } from '@/ui/accordion';
 import { ImageModal } from './image-modal';
 import { SiteSpecimenContent } from './site-specimens';
+import { SiteAccordionTrigger } from './site-accordion-trigger';
 import type { Specimen } from '@/shared/entities/specimen';
 import type { SpecimenFilters } from './specimen-filters';
+import type { SpecimensQuery } from '@/features/review/types';
 
 interface SpecimenReviewAccordionProps {
   siteIds: number[];
@@ -32,8 +29,12 @@ export function SpecimenReviewAccordion({
   filters,
 }: SpecimenReviewAccordionProps) {
   const [openItem, setOpenItem] = useState('');
-  const [selectedSpecimen, setSelectedSpecimen] = useState<Specimen | null>(null);
-  const [sitePagination, setSitePagination] = useState<Record<number, number>>({});
+  const [selectedSpecimen, setSelectedSpecimen] = useState<Specimen | null>(
+    null,
+  );
+  const [sitePagination, setSitePagination] = useState<Record<number, number>>(
+    {},
+  );
 
   useEffect(() => {
     setSitePagination({});
@@ -68,7 +69,14 @@ export function SpecimenReviewAccordion({
       sex: filters.sex,
       abdomenStatus: filters.abdomenStatus,
     }),
-    [district, startDate, endDate, filters.species, filters.sex, filters.abdomenStatus],
+    [
+      district,
+      startDate,
+      endDate,
+      filters.species,
+      filters.sex,
+      filters.abdomenStatus,
+    ],
   );
 
   const accordionItems = useMemo(
@@ -84,14 +92,11 @@ export function SpecimenReviewAccordion({
             value={String(siteId)}
             className="border-b last:border-b-0"
           >
-            <AccordionTrigger className="px-4">
-              <div className="flex items-center gap-2">
-                <span>{houseNumber}</span>
-                <span className="text-sm text-muted-foreground">
-                  (Site ID: {siteId})
-                </span>
-              </div>
-            </AccordionTrigger>
+            <SiteAccordionTrigger
+              siteId={siteId}
+              houseNumber={houseNumber}
+              filterQuery={filterQuery}
+            />
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent
                 siteId={siteId}
