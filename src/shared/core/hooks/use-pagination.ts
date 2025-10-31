@@ -12,16 +12,8 @@ export function usePagination({
   initialPage = 1,
   initialPageSize = DEFAULT_PAGE_SIZE,
 }: UsePaginationOptions) {
-  const [total, setTotalState] = useState(initialTotal);
-
-  const setTotal = (newTotal: number) => {
-    setTotalState(newTotal);
-  };
-  const [page, setPageState] = useState(initialPage);
-
-  const setPage = (newPage: number) => {
-    setPageState(newPage);
-  };
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
   const totalPages = useMemo(
@@ -30,13 +22,10 @@ export function usePagination({
   );
 
   useEffect(() => {
-    // Only adjust page if it exceeds totalPages, don't reset unnecessarily
-    setPageState(prev => {
-      // If totalPages is 0 or less, keep current page (might be loading state)
+    setPage(prev => {
       if (totalPages <= 0) return prev;
 
       const validPage = Math.min(Math.max(1, prev), totalPages);
-      // Only update if the page actually needs to change
       return prev !== validPage ? validPage : prev;
     });
   }, [totalPages]);
@@ -45,13 +34,10 @@ export function usePagination({
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
-  const setPageSizeAndReset = useCallback(
-    (size: number) => {
-      setPageSize(size);
-      setPage(1);
-    },
-    [setPage, setPageSize],
-  );
+  const setPageSizeAndReset = useCallback((size: number) => {
+    setPageSize(size);
+    setPage(1);
+  }, []);
 
   type RangeItem = number | 'ellipsis';
 

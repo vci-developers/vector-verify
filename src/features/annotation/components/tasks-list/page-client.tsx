@@ -1,18 +1,17 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, type Row } from '@tanstack/react-table';
 import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { DataTable } from '@/ui/data-table';
 import { Badge } from '@/ui/badge';
-import { Progress } from '@/ui/progress';
 import { TablePagination } from '@/shared/components/table-pagination';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
-import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
+import { TaskProgressCell } from './task-progress-cell';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import {
   calculateDateRange,
@@ -38,37 +37,6 @@ function getBadgeVariantForTaskStatus(
     default:
       return 'outline';
   }
-}
-
-function TaskProgressCell({ task }: { task: AnnotationTask }) {
-  const { data: progressData } = useAnnotationTaskProgressQuery(task.id);
-  const {
-    percent = 0,
-    annotated = 0,
-    total = 0,
-    flagged = 0,
-  } = progressData ?? {};
-  const displayPercent = Math.round(percent);
-  const completed = Math.max(0, Math.min(total, annotated + flagged));
-  const hasItems = total > 0;
-
-  return (
-    <div className="mx-auto flex max-w-[360px] flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Progress className="w-full" value={percent} />
-        <span className="text-muted-foreground text-xs font-semibold">
-          {displayPercent}%
-        </span>
-      </div>
-      <div className="text-muted-foreground text-xs">
-        {hasItems ? (
-          `${completed.toLocaleString()} of ${total.toLocaleString()} images completed`
-        ) : (
-          <span className="italic">No annotations for this task.</span>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export function AnnotationTasksListPageClient() {
@@ -102,10 +70,8 @@ export function AnnotationTasksListPageClient() {
     handleNavigateToLastPage,
     handleNavigateToPage,
     setPage,
+    isPagingDisabled,
   } = pagination;
-
-  // Use actual loading states for pagination
-  const actualIsPagingDisabled = Boolean(isLoading || isFetching);
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
@@ -118,7 +84,7 @@ export function AnnotationTasksListPageClient() {
         id: 'title',
         accessorKey: 'title',
         header: 'Title',
-        cell: ({ row }) => {
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
           const task = row.original;
           return (
             <div className="text-center">
@@ -136,7 +102,7 @@ export function AnnotationTasksListPageClient() {
         id: 'status',
         accessorKey: 'status',
         header: 'Status',
-        cell: ({ row }) => {
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
           const task = row.original;
           return (
             <div className="text-center">
@@ -151,7 +117,7 @@ export function AnnotationTasksListPageClient() {
         id: 'createdAt',
         accessorKey: 'createdAt',
         header: 'Created',
-        cell: ({ row }) => {
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
           const task = row.original;
           const { shortMonthYear: createdAt } = formatDate(task.createdAt);
           return (
@@ -163,7 +129,7 @@ export function AnnotationTasksListPageClient() {
         id: 'updatedAt',
         accessorKey: 'updatedAt',
         header: 'Updated',
-        cell: ({ row }) => {
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
           const task = row.original;
           const { fullDateTime: updatedAt } = formatDate(task.updatedAt);
           return (
@@ -175,7 +141,7 @@ export function AnnotationTasksListPageClient() {
         id: 'progress',
         accessorKey: 'progress',
         header: 'Progress',
-        cell: ({ row }) => {
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
           const task = row.original;
           return (
             <div className="text-center">
@@ -188,7 +154,7 @@ export function AnnotationTasksListPageClient() {
     [],
   );
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return <AnnotationTasksListLoadingSkeleton />;
   }
 
@@ -201,13 +167,13 @@ export function AnnotationTasksListPageClient() {
             <DateRangeFilter
               value={dateRange}
               onValueChange={handleDateRangeChange}
-              disabled={isLoading || isFetching}
+              disabled={isFetching}
             />
             <PageSizeSelector
               value={pageSize}
               onValueChange={handleRowsPerPageChange}
               options={PAGE_SIZES}
-              disabled={isLoading || isFetching}
+              disabled={isFetching}
             />
           </div>
         </CardHeader>
@@ -223,7 +189,7 @@ export function AnnotationTasksListPageClient() {
             page={page}
             totalPages={totalPages}
             pages={pages}
-            isPagingDisabled={actualIsPagingDisabled}
+            isPagingDisabled={isPagingDisabled}
             onNavigateToFirstPage={handleNavigateToFirstPage}
             onNavigateToLastPage={handleNavigateToLastPage}
             onNavigateToPage={handleNavigateToPage}

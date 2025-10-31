@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { MouseEvent } from 'react';
 import { usePagination } from './use-pagination';
 
 interface UseTablePaginationProps {
@@ -25,8 +26,7 @@ export function useTablePagination({
     range: pages,
   } = pagination;
 
-  // Update total when it changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (total !== undefined) {
       setTotal(total);
     }
@@ -42,7 +42,7 @@ export function useTablePagination({
   );
 
   const handleNavigateToFirstPage = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
+    (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
       if (!isPagingDisabled && page > 1) setPage(1);
     },
@@ -50,7 +50,7 @@ export function useTablePagination({
   );
 
   const handleNavigateToLastPage = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
+    (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
       if (!isPagingDisabled && page < totalPages) setPage(totalPages);
     },
@@ -58,14 +58,14 @@ export function useTablePagination({
   );
 
   const handleNavigateToPage = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>, pageNumber: number) => {
+    (event: MouseEvent<HTMLAnchorElement>, pageNumber: number) => {
       event.preventDefault();
       if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
     },
     [isPagingDisabled, page, setPage],
   );
 
-  return React.useMemo(
+  return useMemo(
     () => ({
       page,
       pageSize,
