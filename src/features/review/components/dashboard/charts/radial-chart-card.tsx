@@ -10,24 +10,24 @@ interface RadialChartData {
   fill: string;
 }
 
+type LegendItem = {
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+};
+
 interface RadialChartCardProps {
   title: string;
   data: RadialChartData[];
   total: number;
-  colors: string[];
-  legendItems: Array<{
-    label: string;
-    count: number;
-    percentage: number;
-    color: string;
-  }>;
+  legendItems: LegendItem[];
 }
 
 export function RadialChartCard({
   title,
   data,
   total,
-  colors,
   legendItems,
 }: RadialChartCardProps) {
   return (
@@ -94,7 +94,7 @@ export function RadialChartCard({
         </div>
 
         <div className="mt-4 flex justify-center space-x-4 text-sm">
-          {legendItems.map((item: any, index: number) => (
+          {legendItems.map((item, index: number) => (
             <div key={index} className="flex items-center">
               <div
                 className="mr-2 h-3 w-3 rounded-full"

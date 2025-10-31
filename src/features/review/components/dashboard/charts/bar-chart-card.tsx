@@ -94,11 +94,11 @@ export function BarChartCard({ title, data, description }: BarChartCardProps) {
                           <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
                           <span className="text-sm font-medium">{label}</span>
                         </div>
-                        {payload.map((item: any, index: number) => (
+                        {payload.map((item, index: number) => (
                           <div key={index} className="flex items-center gap-2">
                             <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
                             <span className="text-sm text-gray-600">
-                              Count: {item.value}
+                              Count: {item.value ?? 0}
                             </span>
                           </div>
                         ))}

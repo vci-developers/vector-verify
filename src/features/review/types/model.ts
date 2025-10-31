@@ -1,5 +1,4 @@
 import type { SiteDto } from '@/shared/entities/site/dto';
-import type { groupColumnsBySpecies } from '../utils/master-table-view';
 
 export interface MonthlySummary {
   district: string;
@@ -49,7 +48,6 @@ export interface HouseholdRowData {
   collectorNames: string[];
   collectorTitles: string[];
   collectionMethods: string[];
-  // Surveillance form fields
   numPeopleSleptInHouse: (number | null)[];
   wasIrsConducted: (boolean | null)[];
   monthsSinceIrs: (number | null)[];
@@ -57,7 +55,6 @@ export interface HouseholdRowData {
   llinType: (string | null)[];
   llinBrand: (string | null)[];
   numPeopleSleptUnderLlin: (number | null)[];
-  // Discrepancy flags
   hasNumPeopleSleptInHouseDiscrepancy: boolean;
   hasWasIrsConductedDiscrepancy: boolean;
   hasMonthsSinceIrsDiscrepancy: boolean;
@@ -109,10 +106,9 @@ export interface DashboardMetrics {
     totalPeopleSleptUnderLlin: number;
     llinsPerPerson: number;
   };
-  // Optional additional metrics passed through from API for charts
   speciesDistribution?: SpeciesDistribution[];
-  sexRatio?: SexRatio;
-  abdomenStatus?: AbdomenStatus;
+  sexDistribution?: SexDistribution;
+  abdomenStatusDistribution?: AbdomenStatusDistribution;
 }
 
 export interface SpecimenData {
@@ -126,13 +122,13 @@ export interface SpeciesDistribution {
   count: number;
 }
 
-export interface SexRatio {
+export interface SexDistribution {
   total: number;
   male: { count: number; percentage: number };
   female: { count: number; percentage: number };
 }
 
-export interface AbdomenStatus {
+export interface AbdomenStatusDistribution {
   total: number;
   fed: { count: number; percentage: number };
   unfed: { count: number; percentage: number };
@@ -141,6 +137,6 @@ export interface AbdomenStatus {
 
 export interface CompleteDashboardData extends DashboardMetrics {
   speciesDistribution: SpeciesDistribution[];
-  sexRatio: SexRatio;
-  abdomenStatus: AbdomenStatus;
+  sexDistribution: SexDistribution;
+  abdomenStatusDistribution: AbdomenStatusDistribution;
 }

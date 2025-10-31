@@ -10,7 +10,6 @@ export function DashboardLoadingSkeleton() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Site Information Skeleton */}
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-40" />
@@ -31,7 +30,6 @@ export function DashboardLoadingSkeleton() {
           </CardContent>
         </Card>
 
-        {/* Entomological Summary Skeleton */}
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />
@@ -52,7 +50,6 @@ export function DashboardLoadingSkeleton() {
           </CardContent>
         </Card>
 
-        {/* Bednets Data Skeleton */}
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />

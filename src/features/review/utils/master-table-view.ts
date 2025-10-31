@@ -84,7 +84,6 @@ function extractColumnMeta(columnName: string) {
     part => part === 'male' || part === 'female',
   );
 
-  // Handle mosquito columns with sex classification
   if (sexIndex !== -1) {
     const species = parts.slice(0, sexIndex).join(' ');
     const remainder = lowerParts.slice(sexIndex).join(' ');

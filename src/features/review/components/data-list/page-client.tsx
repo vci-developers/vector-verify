@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { DistrictFilter } from './district-filter';
@@ -34,6 +35,7 @@ import {
 import type { DateRangeOption } from '@/shared/core/utils/date-range';
 
 export function ReviewDataListPageClient() {
+  const router = useRouter();
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
 
@@ -163,13 +165,13 @@ export function ReviewDataListPageClient() {
   function handleNavigateToReview(district: string, monthYear: string) {
     const encodedDistrict = encodeURIComponent(district);
     const encodedMonthYear = encodeURIComponent(monthYear);
-    window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}`;
+    router.push(`/review/${encodedDistrict}/${encodedMonthYear}`);
   }
 
   function handleNavigateToDashboard(district: string, monthYear: string) {
     const encodedDistrict = encodeURIComponent(district);
     const encodedMonthYear = encodeURIComponent(monthYear);
-    window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}/dashboard`;
+    router.push(`/review/${encodedDistrict}/${encodedMonthYear}/dashboard`);
   }
 
   const isEmpty = !isLoading && !isFetching && summaries.length === 0;

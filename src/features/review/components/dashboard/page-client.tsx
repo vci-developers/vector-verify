@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent } from '@/ui/card';
 import { useDashboardDataQuery } from '@/features/review/hooks';
 import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
-import { DashboardLoadingSkeleton } from './dashboard-loading-skeleton';
+import { DashboardLoadingSkeleton } from './loading-skeleton';
 
 interface DashboardPageClientProps {
   district: string;
@@ -60,9 +60,7 @@ export function DashboardPageClient({
     );
   }
 
-  const displayData = data;
-
-  if (!displayData) {
+  if (!data) {
     return (
       <div className="container mx-auto px-4 py-6">
         <Card>
@@ -84,7 +82,6 @@ export function DashboardPageClient({
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
@@ -92,19 +89,15 @@ export function DashboardPageClient({
           </div>
         </div>
 
-        {/* Dashboard Content */}
         <div className="space-y-12">
-          {/* Site Information */}
           <SiteInformationSection
-            data={displayData.siteInformation}
-            vectorDensity={displayData.entomologicalSummary.vectorDensity}
+            data={data.siteInformation}
+            vectorDensity={data.entomologicalSummary.vectorDensity}
           />
 
-          {/* Entomological Summary */}
-          <EntomologicalSummarySection metrics={displayData} />
+          <EntomologicalSummarySection metrics={data} />
 
-          {/* Bednets Data */}
-          <BednetsDataSection data={displayData.entomologicalSummary} />
+          <BednetsDataSection data={data.entomologicalSummary} />
         </div>
       </div>
     </div>

@@ -10,8 +10,6 @@ import {
 import type {
   SpecimenCountsSummary,
   MosquitoTableMeta,
-  MosquitoColumn,
-  MosquitoRowData,
 } from '@/features/review/types';
 
 interface MosquitoCountsTableProps {
