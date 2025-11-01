@@ -10,3 +10,4 @@ export { ReviewDataListPageClient } from './components/data-list/page-client';
 export { ReviewDashboardPageClient } from './components/review-dashboard';
 export { SpecimenViewPageClient } from './components/specimen-view/page-client';
 export { MasterTableViewPageClient } from './components/master-table-view/page-client';
+export { ReviewDataQualityPageClient } from './components/data-quality/page-client';
