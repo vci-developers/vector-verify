@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
 import { usePagination } from '@/shared/core/hooks/use-pagination';
@@ -39,21 +39,15 @@ export function SiteSpecimenContent({
   const { district, startDate, endDate, species, sex, abdomenStatus } =
     queryParameters;
 
+  const prevIsOpenRef = useRef(isOpen);
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !prevIsOpenRef.current) {
       onPageChange(siteId, 1);
     }
-  }, [
-    siteId,
-    isOpen,
-    onPageChange,
-    district,
-    startDate,
-    endDate,
-    species,
-    sex,
-    abdomenStatus,
-  ]);
+    prevIsOpenRef.current = isOpen;
+    
+  }, [isOpen, siteId]);
 
   const { data, isLoading } = useSpecimensQuery(
     {
@@ -74,9 +68,9 @@ export function SiteSpecimenContent({
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(species || sex || abdomenStatus);
 
-  const { setTotal, setPageSize, setPage, totalPages, createRange } = usePagination({
+  
+  const { setTotal, setPageSize, totalPages, createRange } = usePagination({
     initialTotal: total,
-    initialPage: currentPage,
     initialPageSize: pageSize,
   });
 
@@ -88,9 +82,10 @@ export function SiteSpecimenContent({
     setPageSize(pageSize);
   }, [pageSize, setPageSize]);
 
-  useEffect(() => {
-    setPage(currentPage);
-  }, [currentPage, setPage]);
+  const validCurrentPage = useMemo(() => {
+    if (totalPages <= 0) return 1;
+    return Math.min(Math.max(1, currentPage), totalPages);
+  }, [currentPage, totalPages]);
 
   const isPagingDisabled = isLoading;
 
@@ -178,7 +173,7 @@ export function SiteSpecimenContent({
                       href="#"
                     />
                   </PaginationItem>
-                  {createRange(currentPage).map((pageItem, index) => (
+                  {createRange(validCurrentPage).map((pageItem, index) => (
                     <PaginationItem
                       key={
                         pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem

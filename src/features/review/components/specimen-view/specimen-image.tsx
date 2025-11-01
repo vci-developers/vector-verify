@@ -45,7 +45,7 @@ export function SpecimenImage({ specimen, className, onClick }: SpecimenImagePro
           <div className="flex h-full w-full items-center justify-center bg-muted">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <ImageOff className="h-8 w-8" />
-              <span className="text-xs">Invalid image</span>
+              <span className="text-xs">No image available</span>
             </div>
           </div>
         )}
