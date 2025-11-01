@@ -14,13 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
-import type { MissingSiteSummary } from '@/features/review/hooks/use-data-quality';
+import type { MissingSiteSummary } from '@/features/review/types';
 
-interface MissingSitesCardProps {
-  sites: MissingSiteSummary[];
-}
-
-export function MissingSitesCard({ sites }: MissingSitesCardProps) {
+export function MissingSitesCard({ sites }: { sites: MissingSiteSummary[] }) {
   return (
     <Card className="border-destructive/60 bg-destructive/5 shadow-lg">
       <CardHeader className="border-b pb-6">
@@ -38,8 +34,7 @@ export function MissingSitesCard({ sites }: MissingSitesCardProps) {
       <CardContent className="py-6">
         {sites.length === 0 ? (
           <div className="text-muted-foreground border-destructive/40 bg-background/60 rounded-lg border border-dashed px-5 py-10 text-center text-sm">
-            Sessions were reported for every site you can access in this
-            district.
+            Sessions were reported for every site in this district.
           </div>
         ) : (
           <div className="border-destructive/30 bg-background overflow-hidden rounded-lg border shadow-sm">

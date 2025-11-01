@@ -14,15 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
-import type { SiteDiscrepancySummary } from '@/features/review/hooks/use-data-quality';
-
-interface SiteDiscrepanciesCardProps {
-  siteDiscrepancies: SiteDiscrepancySummary[];
-}
+import type { SiteDiscrepancySummary } from '@/features/review/types';
 
 export function SiteDiscrepanciesCard({
   siteDiscrepancies,
-}: SiteDiscrepanciesCardProps) {
+}: {
+  siteDiscrepancies: SiteDiscrepancySummary[];
+}) {
   return (
     <Card className="shadow-lg border-amber-300 bg-amber-50/60">
       <CardHeader className="border-b border-amber-200/70 pb-6">

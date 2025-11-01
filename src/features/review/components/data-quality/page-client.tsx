@@ -7,15 +7,13 @@ import { DataQualityLoading } from './loading';
 import { MissingSitesCard } from './missing-sites-card';
 import { SiteDiscrepanciesCard } from './site-discrepancies-card';
 
-interface ReviewDataQualityPageClientProps {
-  district: string;
-  monthYear: string;
-}
-
 export function ReviewDataQualityPageClient({
   district,
   monthYear,
-}: ReviewDataQualityPageClientProps) {
+}: {
+  district: string;
+  monthYear: string;
+}) {
   const decodedDistrict = decodeURIComponent(district);
   const decodedMonthYear = decodeURIComponent(monthYear);
   const dateRange = getMonthDateRange(decodedMonthYear);
