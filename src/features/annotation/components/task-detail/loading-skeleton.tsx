@@ -61,7 +61,10 @@ export function AnnotationTaskDetailSkeleton() {
         </CardContent>
         <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           {Array.from({ length: 2 }, (_, index) => (
-            <Skeleton key={index} className="h-9 w-28 min-w-[120px] rounded-md" />
+            <Skeleton
+              key={index}
+              className="h-9 w-28 min-w-[120px] rounded-md"
+            />
           ))}
         </CardFooter>
       </Card>

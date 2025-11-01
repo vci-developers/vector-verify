@@ -87,11 +87,12 @@ export function SiteSpecimenContent({
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(species || sex || abdomenStatus);
 
-  const { setTotal, setPageSize, setPage, totalPages, createRange } = usePagination({
-    initialTotal: total,
-    initialPage: currentPage,
-    initialPageSize: pageSize,
-  });
+  const { setTotal, setPageSize, setPage, totalPages, createRange } =
+    usePagination({
+      initialTotal: total,
+      initialPage: currentPage,
+      initialPageSize: pageSize,
+    });
 
   useEffect(() => {
     setTotal(total);
@@ -144,14 +145,14 @@ export function SiteSpecimenContent({
       {isLoading ? (
         <SpecimenGridLoadingSkeleton />
       ) : total === 0 ? (
-        <div className="p-4 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground p-4 text-center text-sm">
           {hasActiveFilters
             ? 'No specimens match the selected filters'
             : 'No specimens reported from this household'}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-between text-sm">
             <span>
               Showing {(currentPage - 1) * pageSize + 1} –
               {` ${Math.min(currentPage * pageSize, total)} of ${total} specimens`}
@@ -169,7 +170,7 @@ export function SiteSpecimenContent({
                   className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
                   onClick={() => imageUrl && onImageClick(specimen)}
                 >
-                  <div className="px-2 pt-2 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground px-2 pt-2 text-xs">
                     {specimen.specimenId}
                   </div>
                   <div className="relative aspect-[4/3] w-full">
@@ -183,8 +184,8 @@ export function SiteSpecimenContent({
                         unoptimized
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-muted">
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <div className="bg-muted flex h-full w-full items-center justify-center">
+                        <div className="text-muted-foreground flex flex-col items-center gap-2">
                           <ImageOff className="h-8 w-8" />
                           <span className="text-xs">Invalid image</span>
                         </div>
@@ -223,7 +224,9 @@ export function SiteSpecimenContent({
                         <PaginationLink
                           href="#"
                           isActive={pageItem === currentPage}
-                          onClick={event => handleNavigateToPage(event, pageItem)}
+                          onClick={event =>
+                            handleNavigateToPage(event, pageItem)
+                          }
                         >
                           {pageItem}
                         </PaginationLink>
