@@ -22,25 +22,31 @@ interface MissingSitesCardProps {
 
 export function MissingSitesCard({ sites }: MissingSitesCardProps) {
   return (
-    <Card className="shadow-lg border-destructive/60 bg-destructive/5">
+    <Card className="border-destructive/60 bg-destructive/5 shadow-lg">
       <CardHeader className="border-b pb-6">
-        <CardTitle className="flex items-center gap-2 text-destructive">
+        <CardTitle className="text-destructive flex items-center gap-2">
           Missing Data
-          <Badge variant="destructive">{sites.length}</Badge>
+          <Badge variant="destructive">
+            {sites.length} site
+            {sites.length === 1 ? '' : 's'}
+          </Badge>
         </CardTitle>
-        <CardDescription>Sites without sessions for this period.</CardDescription>
+        <CardDescription>
+          Sites without sessions for this period.
+        </CardDescription>
       </CardHeader>
       <CardContent className="py-6">
         {sites.length === 0 ? (
-          <div className="text-muted-foreground rounded-lg border border-dashed border-destructive/40 bg-background/60 px-5 py-10 text-center text-sm">
-            Sessions were reported for every site you can access in this district.
+          <div className="text-muted-foreground border-destructive/40 bg-background/60 rounded-lg border border-dashed px-5 py-10 text-center text-sm">
+            Sessions were reported for every site you can access in this
+            district.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-destructive/30 bg-background shadow-sm">
+          <div className="border-destructive/30 bg-background overflow-hidden rounded-lg border shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow className="bg-destructive/10 hover:bg-destructive/10">
-                  <TableHead className="w-[38%] text-destructive">
+                  <TableHead className="text-destructive w-[38%]">
                     Site
                   </TableHead>
                   <TableHead className="text-destructive/90">Parish</TableHead>
@@ -54,9 +60,12 @@ export function MissingSitesCard({ sites }: MissingSitesCardProps) {
               </TableHeader>
               <TableBody>
                 {sites.map(({ site, display }) => (
-                  <TableRow key={site.siteId} className="hover:bg-destructive/5">
+                  <TableRow
+                    key={site.siteId}
+                    className="hover:bg-destructive/5"
+                  >
                     <TableCell>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-foreground text-sm font-semibold">
                         {display || `Site #${site.siteId}`}
                       </span>
                     </TableCell>
