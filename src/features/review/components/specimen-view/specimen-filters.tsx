@@ -38,7 +38,6 @@ export function SpecimenFiltersBar({
   onFiltersChange,
   disabled = false,
 }: SpecimenFiltersProps) {
-  
   const sexEnabled = isSexEnabled(filters.species ?? undefined);
   const abdomenStatusEnabled = isAbdomenStatusEnabled(
     filters.species ?? undefined,

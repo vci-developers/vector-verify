@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -48,7 +47,9 @@ export function ReviewDashboardPageClient({
                 Access the DHIS2 review interface for this district and month.
               </p>
               <Button asChild className="w-full">
-                <Link href={`/review/${district}/${monthYear}/master-table-view`}>
+                <Link
+                  href={`/review/${district}/${monthYear}/master-table-view`}
+                >
                   Go to DHIS2 View
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
