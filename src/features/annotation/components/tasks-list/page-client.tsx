@@ -1,41 +1,43 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import { ColumnDef, type Row } from '@tanstack/react-table';
 import { AnnotationTasksListLoadingSkeleton } from './loading-skeleton';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
+import { PageSizeSelector } from '@/shared/components/page-size-selector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationFirst,
-  PaginationLast,
-} from '@/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table';
+import { DataTable } from '@/ui/data-table';
+import { Badge } from '@/ui/badge';
+import { TablePagination } from '@/shared/components/table-pagination';
 import { useAnnotationTasksQuery } from '@/features/annotation/hooks/use-annotation-tasks';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
-import { usePagination } from '@/shared/core/hooks/use-pagination';
+import { TaskProgressCell } from './task-progress-cell';
+import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import {
   calculateDateRange,
   type DateRangeOption,
 } from '@/shared/core/utils/date-range';
-import { useEffect, useMemo, useState } from 'react';
-import { TaskRow } from './task-row';
+import {
+  AnnotationTask,
+  AnnotationTaskStatus,
+} from '@/features/annotation/types';
+import { formatDate } from '@/shared/core/utils/date';
+import Link from 'next/link';
+
+function getBadgeVariantForTaskStatus(
+  status: AnnotationTaskStatus,
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  switch (status) {
+    case 'PENDING':
+      return 'destructive';
+    case 'IN_PROGRESS':
+      return 'secondary';
+    case 'COMPLETED':
+      return 'default';
+    default:
+      return 'outline';
+  }
+}
 
 export function AnnotationTasksListPageClient() {
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
@@ -44,20 +46,7 @@ export function AnnotationTasksListPageClient() {
     [dateRange],
   );
 
-  const pagination = usePagination({});
-  const {
-    setTotal,
-    page,
-    setPage,
-    pageSize,
-    setPageSizeAndReset,
-    totalPages,
-    range: pages,
-  } = pagination;
-
   const { data, isLoading, isFetching } = useAnnotationTasksQuery({
-    page,
-    limit: pageSize,
     startDate: createdAfter,
     endDate: createdBefore,
   });
@@ -65,48 +54,107 @@ export function AnnotationTasksListPageClient() {
   const tasks = data?.items ?? [];
   const totalFromServer = data?.total;
 
-  useEffect(() => {
-    if (totalFromServer !== undefined) {
-      setTotal(totalFromServer);
-    }
-  }, [totalFromServer, setTotal]);
+  const pagination = useTablePagination({
+    total: totalFromServer,
+    isLoading,
+    isFetching,
+  });
 
-  const isPagingDisabled = isLoading || isFetching;
-
-  function handleRowsPerPageChange(value: string) {
-    setPageSizeAndReset(Number(value));
-  }
+  const {
+    page,
+    pageSize,
+    totalPages,
+    pages,
+    handleRowsPerPageChange,
+    handleNavigateToFirstPage,
+    handleNavigateToLastPage,
+    handleNavigateToPage,
+    setPage,
+    isPagingDisabled,
+  } = pagination;
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
     setPage(1);
   }
 
-  function handleNavigateToFirstPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && page > 1) setPage(1);
-  }
+  const columns: ColumnDef<AnnotationTask>[] = useMemo(
+    () => [
+      {
+        id: 'title',
+        accessorKey: 'title',
+        header: 'Title',
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
+          const task = row.original;
+          return (
+            <div className="text-center">
+              <Link
+                href={'/annotate/' + task.id}
+                className="text-foreground hover:text-primary inline-block max-w-full truncate hover:underline"
+              >
+                {task.title || 'Task #' + task.id}
+              </Link>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'status',
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
+          const task = row.original;
+          return (
+            <div className="text-center">
+              <Badge variant={getBadgeVariantForTaskStatus(task.status)}>
+                {task.status}
+              </Badge>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'createdAt',
+        accessorKey: 'createdAt',
+        header: 'Created',
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
+          const task = row.original;
+          const { shortMonthYear: createdAt } = formatDate(task.createdAt);
+          return (
+            <div className="text-muted-foreground text-center">{createdAt}</div>
+          );
+        },
+      },
+      {
+        id: 'updatedAt',
+        accessorKey: 'updatedAt',
+        header: 'Updated',
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
+          const task = row.original;
+          const { fullDateTime: updatedAt } = formatDate(task.updatedAt);
+          return (
+            <div className="text-muted-foreground text-center">{updatedAt}</div>
+          );
+        },
+      },
+      {
+        id: 'progress',
+        accessorKey: 'progress',
+        header: 'Progress',
+        cell: ({ row }: { row: Row<AnnotationTask> }) => {
+          const task = row.original;
+          return (
+            <div className="text-center">
+              <TaskProgressCell task={task} />
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
 
-  function handleNavigateToLastPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && page < totalPages) setPage(totalPages);
-  }
-
-  function handleNavigateToPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-    pageNumber: number,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && pageNumber !== page) setPage(pageNumber);
-  }
-
-  const isEmpty = !isLoading && !isFetching && tasks.length === 0;
-
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return <AnnotationTasksListLoadingSkeleton />;
   }
 
@@ -119,109 +167,33 @@ export function AnnotationTasksListPageClient() {
             <DateRangeFilter
               value={dateRange}
               onValueChange={handleDateRangeChange}
-              disabled={isLoading || isFetching}
+              disabled={isFetching}
             />
-            <Select
-              value={String(pageSize)}
+            <PageSizeSelector
+              value={pageSize}
               onValueChange={handleRowsPerPageChange}
-            >
-              <SelectTrigger size="sm">
-                <SelectValue placeholder="Page size" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZES.map(size => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size} / page
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={PAGE_SIZES}
+              disabled={isFetching}
+            />
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/60">
-                <TableHead className="text-muted-foreground w-[28%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-                  Title
-                </TableHead>
-                <TableHead className="text-muted-foreground w-[14%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-                  Status
-                </TableHead>
-                <TableHead className="text-muted-foreground w-[12%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-                  Created
-                </TableHead>
-                <TableHead className="text-muted-foreground w-[20%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-                  Updated
-                </TableHead>
-                <TableHead className="text-muted-foreground w-[26%] px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase">
-                  Progress
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isEmpty ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-muted-foreground px-3 py-6 text-center"
-                  >
-                    No tasks found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                tasks.map(task => <TaskRow key={task.id} task={task} />)
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={tasks}
+            searchKey="title"
+            searchPlaceholder="Search tasks..."
+          />
 
-          <div className="mt-6">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationFirst
-                    className={
-                      isPagingDisabled || page === 1
-                        ? 'pointer-events-none opacity-50'
-                        : ''
-                    }
-                    onClick={handleNavigateToFirstPage}
-                    href="#"
-                  />
-                </PaginationItem>
-                {pages.map((pageItem, index) => (
-                  <PaginationItem
-                    key={
-                      pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
-                    }
-                  >
-                    {pageItem === 'ellipsis' ? (
-                      <PaginationEllipsis />
-                    ) : (
-                      <PaginationLink
-                        href="#"
-                        isActive={pageItem === page}
-                        onClick={event => handleNavigateToPage(event, pageItem)}
-                      >
-                        {pageItem}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationLast
-                    className={
-                      isPagingDisabled || page === totalPages
-                        ? 'pointer-events-none opacity-50'
-                        : ''
-                    }
-                    onClick={handleNavigateToLastPage}
-                    href="#"
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <TablePagination
+            page={page}
+            totalPages={totalPages}
+            pages={pages}
+            isPagingDisabled={isPagingDisabled}
+            onNavigateToFirstPage={handleNavigateToFirstPage}
+            onNavigateToLastPage={handleNavigateToLastPage}
+            onNavigateToPage={handleNavigateToPage}
+          />
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Session } from '@/shared/entities/session/model';
 import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 import {
@@ -21,6 +21,7 @@ import { HouseholdInfoTable } from './household-info-table';
 import type {
   MosquitoTableMeta,
   HouseholdTableMeta,
+  HouseholdRowData,
 } from '@/features/review/types';
 import { ToggleGroup, ToggleGroupItem } from '@/ui/toggle-group';
 import { useUserPermissionsQuery } from '@/features/user';
@@ -30,7 +31,7 @@ interface MasterTableViewPageClientProps {
   monthYear: string;
 }
 
-function formatMonthLabel(monthYear: string) {
+function formatMonthLabel(monthYear: string): string {
   const [year, month] = monthYear.split('-');
   return new Date(
     Number.parseInt(year, 10),
@@ -39,6 +40,94 @@ function formatMonthLabel(monthYear: string) {
     month: 'long',
     year: 'numeric',
   });
+}
+
+function extractUniqueValues<T>(
+  sessions: Session[],
+  extractor: (session: Session) => T | null,
+): T[] {
+  return Array.from(
+    new Set(sessions.map(extractor).filter((v): v is T => v !== null)),
+  );
+}
+
+function hasDiscrepancy<T>(values: (T | null)[]): boolean {
+  const uniqueNonNull = Array.from(
+    new Set(values.filter((v): v is T => v !== null)),
+  );
+  return uniqueNonNull.length > 1;
+}
+
+function findMostRecentDate(sessions: Session[]): number | null {
+  return sessions.reduce<number | null>((latest, session) => {
+    if (!session.collectionDate) return latest;
+    if (!latest) return session.collectionDate;
+    return session.collectionDate > latest ? session.collectionDate : latest;
+  }, null);
+}
+
+function buildHouseholdRowData(
+  site: { siteId: number },
+  siteLabel: { topLine: string; bottomLine: string | null },
+  sessions: Session[],
+  surveillanceForms: Map<number, SurveillanceForm> | undefined,
+): HouseholdRowData {
+  const collectorNames = extractUniqueValues(sessions, s => s.collectorName);
+  const collectorTitles = extractUniqueValues(sessions, s => s.collectorTitle);
+  const collectionMethods = extractUniqueValues(
+    sessions,
+    s => s.collectionMethod,
+  );
+
+  const mostRecentDate = findMostRecentDate(sessions);
+
+  const forms = sessions
+    .map(s => surveillanceForms?.get(s.sessionId))
+    .filter((f): f is SurveillanceForm => Boolean(f));
+
+  const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
+  const wasIrsConducted = forms.map(f => f.wasIrsConducted);
+  const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
+  const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
+  const llinType = forms.map(f => f.llinType);
+  const llinBrand = forms.map(f => f.llinBrand);
+  const numPeopleSleptUnderLlin = forms.map(f => f.numPeopleSleptUnderLlin);
+
+  const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
+
+  return {
+    key: `site-${site.siteId}`,
+    siteLabel,
+    collectorName: collectorNames.length === 1 ? collectorNames[0] : null,
+    collectorTitle: collectorTitles.length === 1 ? collectorTitles[0] : null,
+    collectionMethod:
+      collectionMethods.length === 1 ? collectionMethods[0] : null,
+    mostRecentDate,
+    sessionCount: sessions.length,
+    hasCollectorNameDiscrepancy: collectorNames.length > 1,
+    hasCollectorTitleDiscrepancy: collectorTitles.length > 1,
+    hasCollectionMethodDiscrepancy: collectionMethods.length > 1,
+    collectorNames,
+    collectorTitles,
+    collectionMethods,
+    numPeopleSleptInHouse,
+    wasIrsConducted,
+    monthsSinceIrs,
+    numLlinsAvailable,
+    llinType,
+    llinBrand,
+    numPeopleSleptUnderLlin,
+    hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(numPeopleSleptInHouse),
+    hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
+    hasMonthsSinceIrsDiscrepancy:
+      hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
+    hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
+    hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
+    hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
+    hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
+      numPeopleSleptUnderLlin,
+    ),
+  };
 }
 
 export function MasterTableViewPageClient({
@@ -194,105 +283,18 @@ export function MasterTableViewPageClient({
         const siteGroup = sessionsBySiteMap.get(site.siteId);
         const sessions = siteGroup?.sessions || [];
 
-        const collectorNames = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectorName)
-              .filter((name): name is string => Boolean(name)),
-          ),
-        );
-        const collectorTitles = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectorTitle)
-              .filter((title): title is string => Boolean(title)),
-          ),
-        );
-        const collectionMethods = Array.from(
-          new Set(
-            sessions
-              .map((s: Session) => s.collectionMethod)
-              .filter((method): method is string => Boolean(method)),
-          ),
-        );
-
-        const mostRecentDate = sessions.reduce<number | null>(
-          (latest: number | null, session: Session) => {
-            if (!session.collectionDate) return latest;
-            if (!latest) return session.collectionDate;
-            return session.collectionDate > latest
-              ? session.collectionDate
-              : latest;
-          },
-          null,
-        );
-
-        const forms = sessions
-          .map(s => surveillanceForms?.get(s.sessionId))
-          .filter((f): f is SurveillanceForm => Boolean(f));
-
-        const numPeopleSleptInHouse = forms.map(f => f.numPeopleSleptInHouse);
-        const wasIrsConducted = forms.map(f => f.wasIrsConducted);
-        const monthsSinceIrs = forms.map(f => f.monthsSinceIrs);
-        const numLlinsAvailable = forms.map(f => f.numLlinsAvailable);
-        const llinType = forms.map(f => f.llinType);
-        const llinBrand = forms.map(f => f.llinBrand);
-        const numPeopleSleptUnderLlin = forms.map(
-          f => f.numPeopleSleptUnderLlin,
-        );
-
-        const hasDiscrepancy = <T,>(values: (T | null)[]) => {
-          const uniqueNonNull = Array.from(
-            new Set(values.filter((v): v is T => v !== null)),
-          );
-          return uniqueNonNull.length > 1;
-        };
-
-        const hasIrsDiscrepancy = hasDiscrepancy(wasIrsConducted);
-
-        return {
-          key: `site-${site.siteId}`,
+        return buildHouseholdRowData(
+          site,
           siteLabel,
-          collectorName: collectorNames.length === 1 ? collectorNames[0] : null,
-          collectorTitle:
-            collectorTitles.length === 1 ? collectorTitles[0] : null,
-          collectionMethod:
-            collectionMethods.length === 1 ? collectionMethods[0] : null,
-          mostRecentDate,
-          sessionCount: sessions.length,
-          hasCollectorNameDiscrepancy: collectorNames.length > 1,
-          hasCollectorTitleDiscrepancy: collectorTitles.length > 1,
-          hasCollectionMethodDiscrepancy: collectionMethods.length > 1,
-          collectorNames,
-          collectorTitles,
-          collectionMethods,
-          numPeopleSleptInHouse,
-          wasIrsConducted,
-          monthsSinceIrs,
-          numLlinsAvailable,
-          llinType,
-          llinBrand,
-          numPeopleSleptUnderLlin,
-          hasNumPeopleSleptInHouseDiscrepancy: hasDiscrepancy(
-            numPeopleSleptInHouse,
-          ),
-          hasWasIrsConductedDiscrepancy: hasIrsDiscrepancy,
-          hasMonthsSinceIrsDiscrepancy:
-            hasIrsDiscrepancy || hasDiscrepancy(monthsSinceIrs),
-          hasNumLlinsAvailableDiscrepancy: hasDiscrepancy(numLlinsAvailable),
-          hasLlinTypeDiscrepancy: hasDiscrepancy(llinType),
-          hasLlinBrandDiscrepancy: hasDiscrepancy(llinBrand),
-          hasNumPeopleSleptUnderLlinDiscrepancy: hasDiscrepancy(
-            numPeopleSleptUnderLlin,
-          ),
-        };
+          sessions,
+          surveillanceForms,
+        );
       });
 
-    const meta: HouseholdTableMeta = {
+    return {
       rows,
       minWidth: 2200,
-    };
-    return meta;
+    } satisfies HouseholdTableMeta;
   }, [
     specimenCounts?.data,
     sessionsBySite,
@@ -379,16 +381,24 @@ export function MasterTableViewPageClient({
           </div>
         </div>
 
-        {viewMode === 'mosquito' && (
-          <MosquitoCountsTable
-            tableMeta={mosquitoTableMeta}
-            specimenCounts={specimenCounts}
-          />
-        )}
+        <div className="flex flex-col gap-3">
+          {!isLoading && !specimenCounts && (
+            <p className="text-muted-foreground text-sm">
+              No specimen count data available for this selection.
+            </p>
+          )}
 
-        {viewMode === 'household' && (
-          <HouseholdInfoTable tableMeta={householdTableMeta} />
-        )}
+          {viewMode === 'mosquito' && (
+            <MosquitoCountsTable
+              tableMeta={mosquitoTableMeta}
+              specimenCounts={specimenCounts}
+            />
+          )}
+
+          {viewMode === 'household' && (
+            <HouseholdInfoTable tableMeta={householdTableMeta} />
+          )}
+        </div>
       </section>
     </div>
   );

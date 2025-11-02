@@ -20,7 +20,7 @@ import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { showErrorToast } from '@/ui/show-error-toast';
 import { useLoginMutation } from '@/features/auth/hooks/use-login';
 
 export function LoginForm() {

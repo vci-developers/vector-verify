@@ -3,7 +3,7 @@
 import { Button } from '@/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogoutMutation } from '@/features/auth/hooks/use-logout';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { showErrorToast } from '@/ui/show-error-toast';
 
 export function LogoutButton() {
   const queryClient = useQueryClient();
