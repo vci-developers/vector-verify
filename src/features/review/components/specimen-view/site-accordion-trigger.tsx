@@ -8,30 +8,31 @@ import type { SpecimensQuery } from '@/features/review/types';
 interface SiteAccordionTriggerProps {
   siteId: number;
   houseNumber: string;
+  villageName?: string | null;
   filterQuery: SpecimensQuery;
-  enabled?: boolean;
 }
 
 export function SiteAccordionTrigger({
   siteId,
   houseNumber,
+  villageName,
   filterQuery,
-  enabled = true,
 }: SiteAccordionTriggerProps) {
   const { totalSpecimens, totalImages, isLoading, isPartial } = useSiteStatistics({
     siteId,
     queryParameters: filterQuery,
-    enabled,
+    enabled: true,
   });
 
   const displayHouseNumber = formatHouseNumber(houseNumber);
+  const displayVillageName = villageName || `Site ${siteId}`;
 
   return (
     <AccordionTrigger className="w-full px-4 py-3 hover:no-underline">
       <div className="grid w-full grid-cols-4 items-center gap-8">
         <span className="text-base font-semibold">{displayHouseNumber}</span>
         <span className="text-muted-foreground text-sm">
-          (Site ID: {siteId})
+          {displayVillageName}
         </span>
         {!isLoading ? (
           <>

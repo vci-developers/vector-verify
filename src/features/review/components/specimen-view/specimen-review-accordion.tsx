@@ -12,6 +12,7 @@ import type { SpecimensQuery } from '@/features/review/types';
 interface SpecimenReviewAccordionProps {
   siteIds: number[];
   houseNumbers: string[];
+  villageNames: (string | null)[];
   district: string;
   startDate: string;
   endDate: string;
@@ -22,6 +23,7 @@ interface SpecimenReviewAccordionProps {
 export function SpecimenReviewAccordion({
   siteIds,
   houseNumbers,
+  villageNames,
   district,
   startDate,
   endDate,
@@ -56,6 +58,14 @@ export function SpecimenReviewAccordion({
     return map;
   }, [siteIds, houseNumbers]);
 
+  const siteToVillageNameMap = useMemo(() => {
+    const map: Record<number, string | null> = {};
+    siteIds.forEach((siteId, index) => {
+      map[siteId] = villageNames[index] ?? null;
+    });
+    return map;
+  }, [siteIds, villageNames]);
+
   const handleSitePageChange = useCallback((siteId: number, page: number) => {
     setSitePagination(prev => ({ ...prev, [siteId]: page }));
   }, []);
@@ -85,6 +95,7 @@ export function SpecimenReviewAccordion({
         const isOpen = openItem === String(siteId);
         const currentPage = sitePagination[siteId] ?? 1;
         const houseNumber = siteToHouseNumberMap[siteId];
+        const villageName = siteToVillageNameMap[siteId];
 
         return (
           <AccordionItem
@@ -95,8 +106,8 @@ export function SpecimenReviewAccordion({
             <SiteAccordionTrigger
               siteId={siteId}
               houseNumber={houseNumber}
+              villageName={villageName}
               filterQuery={filterQuery}
-              enabled={isOpen}
             />
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent
@@ -117,6 +128,7 @@ export function SpecimenReviewAccordion({
       openItem,
       sitePagination,
       siteToHouseNumberMap,
+      siteToVillageNameMap,
       filterQuery,
       pageSize,
       handleSitePageChange,

@@ -56,8 +56,11 @@ export function SpecimenViewPageClient({
     [districtSites],
   );
   const houseNumbers = useMemo(
-    () =>
-      districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
+    () => districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
+    [districtSites],
+  );
+  const villageNames = useMemo(
+    () => districtSites.map(site => site.villageName ?? null),
     [districtSites],
   );
 
@@ -136,6 +139,7 @@ export function SpecimenViewPageClient({
         <SpecimenReviewAccordion
           siteIds={siteIds}
           houseNumbers={houseNumbers}
+          villageNames={villageNames}
           district={formattedDistrict}
           startDate={startDate}
           endDate={endDate}
