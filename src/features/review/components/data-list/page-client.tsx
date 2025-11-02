@@ -3,19 +3,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
+import { ArrowRight, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Button } from '@/ui/button';
+import { DataTable } from '@/ui/data-table';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
-import { DataTable } from '@/ui/data-table';
 import { TablePagination } from '@/shared/components/table-pagination';
-import { Button } from '@/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { DistrictFilter } from './district-filter';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
-import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
+import { DistrictFilter } from './district-filter';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import { useDistrictManagement } from '@/features/review/hooks/use-district-management';
+import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import type { DateRangeOption } from '@/shared/core/utils/date-range';
 import type { MonthlySummary } from '@/features/review/types';
@@ -32,18 +32,6 @@ export function ReviewDataListPageClient() {
   const startDate = toDateOnly(createdAfter);
   const endDate = toDateOnly(createdBefore);
 
-  // Get initial data to determine available districts
-  const { data: initialData } = useMonthlySummaryQuery({
-    startDate,
-    endDate,
-  });
-
-  const { selectedDistrict, accessibleDistricts, handleDistrictSelected } =
-    useDistrictManagement({
-      availableDistricts: initialData?.availableDistricts,
-    });
-
-  // Initialize pagination with default values first
   const pagination = useTablePagination({
     isLoading: false,
     isFetching: false,
@@ -61,6 +49,20 @@ export function ReviewDataListPageClient() {
     setPage,
   } = pagination;
 
+  const { data: unfilteredData } = useMonthlySummaryQuery({
+    startDate,
+    endDate,
+  });
+
+  const availableDistricts = useMemo(() => {
+    return unfilteredData?.availableDistricts ?? [];
+  }, [unfilteredData?.availableDistricts]);
+
+  const { selectedDistrict, accessibleDistricts, handleDistrictSelected } =
+    useDistrictManagement({
+      availableDistricts,
+    });
+
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     offset: (page - 1) * pageSize,
     limit: pageSize,
@@ -70,43 +72,13 @@ export function ReviewDataListPageClient() {
   });
 
   const summaries = data?.data?.items ?? [];
-  const totalFromServer = data?.data?.total;
-
-  const normalizedDistrictsFromResponse = useMemo(
-    () => normalizeDistrictList(data?.availableDistricts),
-    [data?.availableDistricts],
-  );
-
-  const [persistedAvailableDistricts, setPersistedAvailableDistricts] =
-    useState<string[]>([]);
+  const total = data?.data?.total;
 
   useEffect(() => {
-    if (!normalizedDistrictsFromResponse.length) return;
-
-    setPersistedAvailableDistricts(prevDistricts => {
-      const merged = normalizeDistrictList([
-        ...prevDistricts,
-        ...normalizedDistrictsFromResponse,
-      ]);
-
-      const isUnchanged =
-        merged.length === prevDistricts.length &&
-        merged.every((district, index) => district === prevDistricts[index]);
-
-      return isUnchanged ? prevDistricts : merged;
-    });
-  }, [normalizedDistrictsFromResponse]);
-
-  const availableDistricts = useMemo(() => {
-    if (persistedAvailableDistricts.length) return persistedAvailableDistricts;
-    return normalizedDistrictsFromResponse;
-  }, [persistedAvailableDistricts, normalizedDistrictsFromResponse]);
-
-  const accessibleDistricts = useMemo(() => {
-    if (!availableDistricts.length) return [] as string[];
-    if (!user || !permissions) return availableDistricts;
-    return getAccessibleDistricts(availableDistricts, user, permissions);
-  }, [availableDistricts, permissions, user]);
+    if (total !== undefined) {
+      pagination.setTotal(total);
+    }
+  }, [total, pagination]);
 
   useEffect(() => {
     if (
@@ -114,18 +86,9 @@ export function ReviewDataListPageClient() {
       accessibleDistricts.length > 0 &&
       !accessibleDistricts.includes(selectedDistrict)
     ) {
-      setSelectedDistrict(null);
+      handleDistrictSelected(null);
     }
-  }, [accessibleDistricts, selectedDistrict]);
-
-  useEffect(() => {
-    if (totalFromServer !== undefined) {
-      pagination.setTotal(totalFromServer);
-    }
-  }, [totalFromServer, pagination]);
-
-  // Update isPagingDisabled with actual loading states
-  const actualIsPagingDisabled = Boolean(isLoading || isFetching);
+  }, [accessibleDistricts, selectedDistrict, handleDistrictSelected]);
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
@@ -191,7 +154,7 @@ export function ReviewDataListPageClient() {
         cell: ({ row }) => {
           const summary = row.original;
           return (
-            <div className="text-center">
+            <div className="flex justify-center space-x-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -202,6 +165,20 @@ export function ReviewDataListPageClient() {
               >
                 Review
                 <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  handleNavigateToDashboard(
+                    summary.district,
+                    summary.monthString,
+                  )
+                }
+                className="h-auto p-0 font-normal text-blue-600 hover:text-blue-800"
+              >
+                <BarChart3 className="mr-1 h-3 w-3" />
+                Dashboard
               </Button>
             </div>
           );
@@ -243,11 +220,6 @@ export function ReviewDataListPageClient() {
           </div>
         </CardHeader>
         <CardContent>
-          <ReviewTable
-            summaries={summaries}
-            onNavigateToReview={handleNavigateToReview}
-            onNavigateToDashboard={handleNavigateToDashboard}
-            isEmpty={isEmpty}
           <DataTable
             columns={columns}
             data={summaries}
@@ -259,7 +231,7 @@ export function ReviewDataListPageClient() {
             page={page}
             totalPages={totalPages}
             pages={pages}
-            isPagingDisabled={actualIsPagingDisabled}
+            isPagingDisabled={isLoading || isFetching}
             onNavigateToFirstPage={handleNavigateToFirstPage}
             onNavigateToLastPage={handleNavigateToLastPage}
             onNavigateToPage={handleNavigateToPage}

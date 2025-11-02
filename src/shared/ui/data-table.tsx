@@ -118,12 +118,12 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="text-center">
                       {header.isPlaceholder ? null : (
                         <Button
                           variant="ghost"
                           onClick={header.column.getToggleSortingHandler()}
-                          className="h-auto p-0 font-semibold"
+                          className="h-auto w-full justify-center p-0 font-semibold"
                         >
                           {flexRender(
                             header.column.columnDef.header,
