@@ -1,5 +1,9 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getDashboardMetrics, getSpecimenCounts, dashboardKeys } from '@/features/review/api';
+import {
+  getDashboardMetrics,
+  getSpecimenCounts,
+  dashboardKeys,
+} from '@/features/review/api';
 import type { DashboardMetrics } from '@/features/review/types/model';
 import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
 import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
@@ -7,7 +11,12 @@ import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-k
 export function useDashboardDataQuery(
   request: DashboardMetricsRequestDto,
   options?: Omit<
-    UseQueryOptions<DashboardMetrics, Error, DashboardMetrics, DashboardMetricsQueryKey>,
+    UseQueryOptions<
+      DashboardMetrics,
+      Error,
+      DashboardMetrics,
+      DashboardMetricsQueryKey
+    >,
     'queryKey' | 'queryFn'
   >,
 ) {
@@ -48,14 +57,25 @@ export function useDashboardDataQuery(
           }
           if (sex === 'male') male += specimenCount.count;
           if (sex === 'female') female += specimenCount.count;
-          if (abdomen === 'fed') fed += specimenCount.count;
-          if (abdomen === 'unfed') unfed += specimenCount.count;
-          if (abdomen === 'gravid') gravid += specimenCount.count;
+
+          // Only count abdomen status for female mosquitoes
+          if (sex === 'female' && abdomen) {
+            if (abdomen === 'fully fed') {
+              fed += specimenCount.count;
+            } else if (abdomen === 'unfed') {
+              unfed += specimenCount.count;
+            } else if (abdomen === 'gravid') {
+              gravid += specimenCount.count;
+            }
+          }
         }
       }
 
       const speciesDistribution = Array.from(speciesTotals.entries())
-        .map(([speciesName, speciesCount]) => ({ species: speciesName, count: speciesCount }))
+        .map(([speciesName, speciesCount]) => ({
+          species: speciesName,
+          count: speciesCount,
+        }))
         .sort((first, second) => second.count - first.count);
 
       const safeTotalSex = male + female;
@@ -75,7 +95,8 @@ export function useDashboardDataQuery(
         },
       } as const;
 
-      const safeTotalAbdomen = fed + unfed + gravid;
+      // Total should match female count (all female mosquitoes)
+      const safeTotalAbdomen = female;
       const abdomenStatusDistribution = {
         total: safeTotalAbdomen,
         fed: {

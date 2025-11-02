@@ -31,15 +31,9 @@ export function EntomologicalSummarySection({
     sexDistribution.total > 0 ||
     abdomenStatusDistribution.total > 0;
 
-  const sexColors = [
-    'var(--color-chart-green-dark)',
-    'var(--color-chart-green-medium)',
-  ];
-  const abdomenColors = [
-    'var(--color-chart-green-dark)',
-    'var(--color-chart-green-medium)',
-    'var(--color-chart-green-light)',
-  ];
+  // Using hex color values from globals.css (chart-green-dark: #166534, chart-green-medium: #22C55E, chart-green-light: #86EFAC)
+  const sexColors = ['#166534', '#22C55E'];
+  const abdomenColors = ['#166534', '#22C55E', '#86EFAC'];
 
   const sexDistributionChartData = [
     {
