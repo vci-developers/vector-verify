@@ -30,7 +30,7 @@ import {
 } from '@/shared/entities/specimen/morph-ids';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
-import { showSuccessToast } from '@/shared/ui/show-success-toast';
+import { showSuccessToast } from '@/ui/show-success-toast';
 
 interface AnnotationFormProps {
   annotationId: number;

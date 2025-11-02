@@ -29,7 +29,10 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
 
   return (
     <Dialog open={!!specimen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" showCloseButton={false}>
+      <DialogContent
+        className="max-h-[95vh] max-w-[95vw] p-0"
+        showCloseButton={false}
+      >
         <DialogTitle className="px-4 py-3 text-lg font-semibold">
           Specimen {specimen.specimenId}
         </DialogTitle>
@@ -37,7 +40,7 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 z-50 rounded-full bg-black/50 text-white hover:bg-black/70"
+            className="absolute top-4 right-4 z-50 rounded-full bg-black/50 text-white hover:bg-black/70"
             onClick={onClose}
           >
             <X className="h-6 w-6" />
@@ -54,11 +57,13 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
                 unoptimized
               />
             ) : (
-              <div className="flex flex-col items-center gap-4 text-muted-foreground">
+              <div className="text-muted-foreground flex flex-col items-center gap-4">
                 <ImageOff className="h-16 w-16" />
                 <div className="text-center">
                   <p className="text-lg font-medium">No Image Available</p>
-                  <p className="text-sm">This specimen does not have an associated image.</p>
+                  <p className="text-sm">
+                    This specimen does not have an associated image.
+                  </p>
                 </div>
               </div>
             )}
