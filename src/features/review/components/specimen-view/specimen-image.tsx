@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { ImageOff } from 'lucide-react';
 import { Specimen } from '@/shared/entities/specimen';
+import { getImageUrl } from '@/features/review/utils/get-image';
 
 interface SpecimenImageProps {
   specimen: Specimen;
@@ -8,25 +9,15 @@ interface SpecimenImageProps {
   onClick?: () => void;
 }
 
-function getImageUrl(specimen: Specimen): string | null {
-  if (specimen.thumbnailImageId) {
-    return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
-  }
-
-  const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
-  if (!relativePath) return null;
-  if (relativePath.startsWith('http')) return relativePath;
-  return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
-}
-
 export function SpecimenImage({ specimen, className, onClick }: SpecimenImageProps) {
   const imageUrl = getImageUrl(specimen);
+  const hasValidImage = imageUrl !== null;
 
   return (
     <div
       className={className}
-      onClick={onClick}
-      style={onClick ? { cursor: 'pointer' } : undefined}
+      onClick={hasValidImage ? onClick : undefined}
+      style={hasValidImage && onClick ? { cursor: 'pointer' } : undefined}
     >
       <div className="px-2 pt-2 text-xs text-muted-foreground">
         {specimen.specimenId}

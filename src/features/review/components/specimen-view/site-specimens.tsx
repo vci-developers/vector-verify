@@ -3,6 +3,7 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
+import { usePagination } from '@/shared/core/hooks/use-pagination';
 import { SpecimenGridLoadingSkeleton } from './loading-skeleton';
 import {
   Pagination,
@@ -24,36 +25,6 @@ interface SiteSpecimenContentProps {
   isOpen: boolean;
   onImageClick: (specimen: Specimen) => void;
   onPageChange: (siteId: number, page: number) => void;
-}
-
-function createPageRange(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
-  const items: (number | 'ellipsis')[] = [];
-  const maxButtons = 7;
-
-  if (totalPages <= maxButtons) {
-    for (let i = 1; i <= totalPages; i++) items.push(i);
-    return items;
-  }
-
-  const showLeft = currentPage <= 4;
-  const showRight = currentPage >= totalPages - 3;
-
-  if (showLeft) {
-    for (let i = 1; i <= 5; i++) items.push(i);
-    items.push('ellipsis', totalPages);
-    return items;
-  }
-
-  if (showRight) {
-    items.push(1, 'ellipsis');
-    for (let i = totalPages - 4; i <= totalPages; i++) items.push(i);
-    return items;
-  }
-
-  items.push(1, 'ellipsis');
-  for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
-  items.push('ellipsis', totalPages);
-  return items;
 }
 
 export function SiteSpecimenContent({
@@ -98,9 +69,15 @@ export function SiteSpecimenContent({
 
   const totalPages = useMemo(() => Math.ceil(total / pageSize) || 1, [total, pageSize]);
 
+  const { createRange } = usePagination({
+    initialTotal: total,
+    initialPage: currentPage,
+    initialPageSize: pageSize,
+  });
+
   const pageItems = useMemo(
-    () => createPageRange(currentPage, totalPages),
-    [currentPage, totalPages]
+    () => createRange(currentPage),
+    [createRange, currentPage]
   );
 
   const isPagingDisabled = isLoading;
