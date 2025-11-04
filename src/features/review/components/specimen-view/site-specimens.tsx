@@ -67,13 +67,23 @@ export function SiteSpecimenContent({
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(species || sex || abdomenStatus);
 
-  const totalPages = useMemo(() => Math.ceil(total / pageSize) || 1, [total, pageSize]);
-
-  const { createRange } = usePagination({
+  const { setTotal, setPage, totalPages, createRange } = usePagination({
     initialTotal: total,
     initialPage: currentPage,
     initialPageSize: pageSize,
   });
+
+  const hasSyncedRef = useRef(false);
+  useEffect(() => {
+    if (total > 0 || !hasSyncedRef.current) {
+      setTotal(total);
+      hasSyncedRef.current = true;
+    }
+  }, [total, setTotal]);
+
+  useEffect(() => {
+    setPage(currentPage);
+  }, [currentPage, setPage]);
 
   const pageItems = useMemo(
     () => createRange(currentPage),
