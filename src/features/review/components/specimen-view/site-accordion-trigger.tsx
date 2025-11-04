@@ -1,15 +1,15 @@
 'use client';
 
 import { AccordionTrigger } from '@/ui/accordion';
-import { useSiteStatistics } from './site-statistics';
 import { formatHouseNumber } from './utils';
-import type { SpecimensQuery } from '@/features/review/types';
+import type { SpecimensQuery, SiteStatisticsData } from '@/features/review/types';
 
 interface SiteAccordionTriggerProps {
   siteId: number;
   houseNumber: string;
   villageName?: string | null;
   filterQuery: SpecimensQuery;
+  statistics?: SiteStatisticsData;
 }
 
 export function SiteAccordionTrigger({
@@ -17,12 +17,14 @@ export function SiteAccordionTrigger({
   houseNumber,
   villageName,
   filterQuery,
+  statistics,
 }: SiteAccordionTriggerProps) {
-  const { totalSpecimens, totalImages, isLoading, isPartial } = useSiteStatistics({
-    siteId,
-    queryParameters: filterQuery,
-    enabled: true,
-  });
+  const { totalSpecimens, totalImages, isLoading, isPartial } = statistics ?? {
+    totalSpecimens: 0,
+    totalImages: 0,
+    isLoading: true,
+    isPartial: false,
+  };
 
   const displayHouseNumber = formatHouseNumber(houseNumber);
   const displayVillageName = villageName || `Site ${siteId}`;

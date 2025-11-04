@@ -13,3 +13,14 @@ export interface SiteStatisticsData {
   isPartial: boolean;
 }
 
+export interface BatchedSiteStatisticsProps {
+  siteIds: number[];
+  queryParameters: SpecimensQuery;
+  enabled?: boolean;
+}
+
+export interface BatchedSiteStatisticsData {
+  statisticsMap: Map<number, SiteStatisticsData>;
+  isLoading: boolean;
+}
+

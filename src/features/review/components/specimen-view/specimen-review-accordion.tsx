@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem } from '@/ui/accordion';
 import { ImageModal } from './image-modal';
 import { SiteSpecimenContent } from './site-specimens';
 import { SiteAccordionTrigger } from './site-accordion-trigger';
+import { useBatchedSiteStatistics } from './site-statistics';
 import type { Specimen } from '@/shared/entities/specimen';
 import type { SpecimenFilters } from './specimen-filters';
 import type { SpecimensQuery } from '@/features/review/types';
@@ -89,6 +90,13 @@ export function SpecimenReviewAccordion({
     ],
   );
 
+  // Fetch statistics for all sites in parallel using batched hook
+  const { statisticsMap } = useBatchedSiteStatistics({
+    siteIds,
+    queryParameters: filterQuery,
+    enabled: true,
+  });
+
   const accordionItems = useMemo(
     () =>
       siteIds.map(siteId => {
@@ -108,6 +116,7 @@ export function SpecimenReviewAccordion({
               houseNumber={houseNumber}
               villageName={villageName}
               filterQuery={filterQuery}
+              statistics={statisticsMap.get(siteId)}
             />
             <AccordionContent className="px-4 pb-4">
               <SiteSpecimenContent
@@ -132,6 +141,7 @@ export function SpecimenReviewAccordion({
       filterQuery,
       pageSize,
       handleSitePageChange,
+      statisticsMap,
     ],
   );
 

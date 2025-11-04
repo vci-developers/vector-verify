@@ -35,7 +35,8 @@ export async function getSpecimens(
     ...(species ? { species } : {}),
     ...(sex ? { sex } : {}),
     ...(abdomenStatus ? { abdomenStatus } : {}),
-    ...(includeAllImages !== undefined ? { includeAllImages } : {}),
+    // Only include includeAllImages if it's explicitly true (omit if false/undefined)
+    ...(includeAllImages === true ? { includeAllImages: true } : {}),
   };
 
   const data = await bff<SpecimensListResponseDto>('/specimens', {
