@@ -1,25 +1,27 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
+import { ArrowRight, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { Button } from '@/ui/button';
+import { DataTable } from '@/ui/data-table';
 import { DateRangeFilter } from '@/shared/components/date-range-filter';
 import { PageSizeSelector } from '@/shared/components/page-size-selector';
-import { DataTable } from '@/ui/data-table';
 import { TablePagination } from '@/shared/components/table-pagination';
-import { Button } from '@/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { DistrictFilter } from './district-filter';
 import { ReviewDataListLoadingSkeleton } from './loading-skeleton';
-import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
+import { DistrictFilter } from './district-filter';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import { useDistrictManagement } from '@/features/review/hooks/use-district-management';
+import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import type { DateRangeOption } from '@/shared/core/utils/date-range';
 import type { MonthlySummary } from '@/features/review/types';
 
 export function ReviewDataListPageClient() {
+  const router = useRouter();
   const [dateRange, setDateRange] = useState<DateRangeOption>('all-time');
 
   const { createdAfter, createdBefore } = useMemo(
@@ -30,18 +32,6 @@ export function ReviewDataListPageClient() {
   const startDate = toDateOnly(createdAfter);
   const endDate = toDateOnly(createdBefore);
 
-  // Get initial data to determine available districts
-  const { data: initialData } = useMonthlySummaryQuery({
-    startDate,
-    endDate,
-  });
-
-  const { selectedDistrict, accessibleDistricts, handleDistrictSelected } =
-    useDistrictManagement({
-      availableDistricts: initialData?.availableDistricts,
-    });
-
-  // Initialize pagination with default values first
   const pagination = useTablePagination({
     isLoading: false,
     isFetching: false,
@@ -59,6 +49,20 @@ export function ReviewDataListPageClient() {
     setPage,
   } = pagination;
 
+  const { data: unfilteredData } = useMonthlySummaryQuery({
+    startDate,
+    endDate,
+  });
+
+  const availableDistricts = useMemo(() => {
+    return unfilteredData?.availableDistricts ?? [];
+  }, [unfilteredData?.availableDistricts]);
+
+  const { selectedDistrict, accessibleDistricts, handleDistrictSelected } =
+    useDistrictManagement({
+      availableDistricts,
+    });
+
   const { data, isLoading, isFetching } = useMonthlySummaryQuery({
     offset: (page - 1) * pageSize,
     limit: pageSize,
@@ -68,17 +72,23 @@ export function ReviewDataListPageClient() {
   });
 
   const summaries = data?.data?.items ?? [];
-  const totalFromServer = data?.data?.total;
+  const total = data?.data?.total;
 
-  // Update pagination with actual data and loading states
   useEffect(() => {
-    if (totalFromServer !== undefined) {
-      pagination.setTotal(totalFromServer);
+    if (total !== undefined) {
+      pagination.setTotal(total);
     }
-  }, [totalFromServer, pagination]);
+  }, [total, pagination]);
 
-  // Update isPagingDisabled with actual loading states
-  const actualIsPagingDisabled = Boolean(isLoading || isFetching);
+  useEffect(() => {
+    if (
+      selectedDistrict &&
+      accessibleDistricts.length > 0 &&
+      !accessibleDistricts.includes(selectedDistrict)
+    ) {
+      handleDistrictSelected(null);
+    }
+  }, [accessibleDistricts, selectedDistrict, handleDistrictSelected]);
 
   function handleDateRangeChange(newDateRange: DateRangeOption) {
     setDateRange(newDateRange);
@@ -93,7 +103,13 @@ export function ReviewDataListPageClient() {
   function handleNavigateToReview(district: string, monthYear: string) {
     const encodedDistrict = encodeURIComponent(district);
     const encodedMonthYear = encodeURIComponent(monthYear);
-    window.location.href = `/review/${encodedDistrict}/${encodedMonthYear}`;
+    router.push(`/review/${encodedDistrict}/${encodedMonthYear}`);
+  }
+
+  function handleNavigateToDashboard(district: string, monthYear: string) {
+    const encodedDistrict = encodeURIComponent(district);
+    const encodedMonthYear = encodeURIComponent(monthYear);
+    router.push(`/review/${encodedDistrict}/${encodedMonthYear}/dashboard`);
   }
 
   const columns: ColumnDef<MonthlySummary>[] = useMemo(
@@ -138,7 +154,7 @@ export function ReviewDataListPageClient() {
         cell: ({ row }) => {
           const summary = row.original;
           return (
-            <div className="text-center">
+            <div className="flex justify-center space-x-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -149,6 +165,20 @@ export function ReviewDataListPageClient() {
               >
                 Review
                 <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  handleNavigateToDashboard(
+                    summary.district,
+                    summary.monthString,
+                  )
+                }
+                className="h-auto p-0 font-normal text-blue-600 hover:text-blue-800"
+              >
+                <BarChart3 className="mr-1 h-3 w-3" />
+                Dashboard
               </Button>
             </div>
           );
@@ -201,7 +231,7 @@ export function ReviewDataListPageClient() {
             page={page}
             totalPages={totalPages}
             pages={pages}
-            isPagingDisabled={actualIsPagingDisabled}
+            isPagingDisabled={isLoading || isFetching}
             onNavigateToFirstPage={handleNavigateToFirstPage}
             onNavigateToLastPage={handleNavigateToLastPage}
             onNavigateToPage={handleNavigateToPage}

@@ -243,7 +243,6 @@ export function MasterTableViewPageClient({
     );
 
     const meta: MosquitoTableMeta = {
-      columns,
       groupedColumns,
       rows,
       totals,

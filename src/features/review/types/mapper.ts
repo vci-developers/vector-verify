@@ -4,12 +4,14 @@ import type {
   MonthlySummaryResponseDto,
   SpecimenCountsResponseDto,
   SpecimenCountsSiteDto,
+  DashboardMetricsResponseDto,
 } from './response.dto';
 import type {
   MonthlySummary,
   SpecimenCountEntry,
   SpecimenCountsSummary,
   SpecimenCountsSite,
+  DashboardMetrics,
 } from './model';
 
 function getMonthName(month: number, year: number): string {
@@ -71,5 +73,17 @@ export function mapSpecimenCountsResponseDtoToModel(
   return {
     columns: dto.columns,
     data: dto.data.map(mapSpecimenCountsSiteDtoToModel),
+  };
+}
+
+export function mapDashboardMetricsResponseDtoToModel(
+  dto: DashboardMetricsResponseDto,
+): DashboardMetrics {
+  return {
+    siteInformation: dto.siteInformation,
+    entomologicalSummary: dto.entomologicalSummary,
+    speciesDistribution: dto.speciesDistribution,
+    sexDistribution: dto.sexRatio,
+    abdomenStatusDistribution: dto.abdomenStatus,
   };
 }
