@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import { ImageOff } from 'lucide-react';
 
-import { Specimen } from '@/shared/entities/specimen';
+import { Specimen, getSpecimenImageUrl } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
 import { usePagination } from '@/shared/core/hooks/use-pagination';
 import { SpecimenGridLoadingSkeleton } from './loading-skeleton';
@@ -29,16 +29,6 @@ interface SiteSpecimenContentProps {
   onPageChange: (siteId: number, page: number) => void;
 }
 
-function getImageUrl(specimen: Specimen): string | null {
-  if (specimen.thumbnailImageId) {
-    return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
-  }
-
-  const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
-  if (!relativePath) return null;
-  if (relativePath.startsWith('http')) return relativePath;
-  return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
-}
 
 export function SiteSpecimenContent({
   siteId,
@@ -161,7 +151,7 @@ export function SiteSpecimenContent({
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {specimens.map(specimen => {
-              const imageUrl = getImageUrl(specimen);
+              const imageUrl = getSpecimenImageUrl(specimen);
 
               return (
                 <div
