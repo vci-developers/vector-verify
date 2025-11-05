@@ -73,12 +73,8 @@ export function SiteSpecimenContent({
     initialPageSize: pageSize,
   });
 
-  const hasSyncedRef = useRef(false);
   useEffect(() => {
-    if (total > 0 || !hasSyncedRef.current) {
-      setTotal(total);
-      hasSyncedRef.current = true;
-    }
+    setTotal(total);
   }, [total, setTotal]);
 
   useEffect(() => {
