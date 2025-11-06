@@ -96,7 +96,7 @@ export function SignupForm() {
                       {...field}
                       type="email"
                       autoComplete="email"
-                      placeholder="you@example.com"
+                      placeholder="Create your account"
                       className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
                     />
                   </FormControl>
@@ -121,7 +121,7 @@ export function SignupForm() {
                       {...field}
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder="min 8 characters"
+                      placeholder="Min 8 characters"
                       className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
                     />
                   </FormControl>
@@ -161,7 +161,7 @@ export function SignupForm() {
                       {...field}
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder="confirm your password"
+                      placeholder="Confirm your password"
                       className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
                     />
                   </FormControl>
@@ -173,7 +173,7 @@ export function SignupForm() {
 
           <Button
             type="submit"
-            className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
+            className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md bg-gradient-to-r from-chart-green-medium/90 to-chart-green-light text-white hover:from-chart-green-medium/80 hover:to-chart-green-light/90"
             disabled={isPending}
           >
             {isPending ? (
