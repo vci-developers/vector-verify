@@ -20,6 +20,9 @@ import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-bre
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
 import { AnnotationForm } from './annotation-form-panel/annotation-form';
+import { getAnnotations } from '@/features/annotation/api/get-annotations';
+import { useQueryClient } from '@tanstack/react-query';
+import { annotationKeys } from '@/features/annotation/api/annotation-keys';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -29,6 +32,7 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
 
   const {
     data: annotationsPage,
@@ -74,6 +78,88 @@ export function AnnotationTaskDetailPageClient({
       setPage(prev => Math.max(prev - 1, 1));
     }
   }, [page, isFetching, isLoading]);
+
+  const handleAnnotationSuccess = useCallback(async () => {
+    try {
+      // First, check if we already have cached data for all annotations
+      const cachedAllAnnotations = queryClient.getQueriesData({
+        queryKey: annotationKeys.taskAnnotations(taskId),
+        exact: false,
+      });
+
+      // Try to find pending annotation in cache first
+      let firstPendingId: number | null = null;
+      let cachedIndex = -1;
+
+      for (const [, data] of cachedAllAnnotations) {
+        if (data && typeof data === 'object' && 'items' in data) {
+          const items = (data as any).items;
+          cachedIndex = items.findIndex((item: any) => item.status === 'PENDING');
+          if (cachedIndex !== -1) {
+            firstPendingId = items[cachedIndex].id;
+            break;
+          }
+        }
+      }
+
+      // If found in cache, use it
+      if (firstPendingId !== null && cachedIndex !== -1) {
+        setPage(cachedIndex + 1);
+        return;
+      }
+
+      // Otherwise, fetch from API
+      const pendingAnnotations = await getAnnotations({
+        taskId,
+        page: 1,
+        limit: 1,
+        status: 'PENDING',
+      });
+
+      if (pendingAnnotations.items && pendingAnnotations.items.length > 0) {
+        firstPendingId = pendingAnnotations.items[0].id;
+        
+        // Use batching to find position efficiently
+        let found = false;
+        let currentBatch = 1;
+        const batchSize = 50;
+        
+        while (!found && currentBatch <= 10) {
+          const batch = await getAnnotations({
+            taskId,
+            page: currentBatch,
+            limit: batchSize,
+          });
+          
+          const indexInBatch = batch.items.findIndex(
+            (annotation) => annotation.id === firstPendingId
+          );
+          
+          if (indexInBatch !== -1) {
+            const overallIndex = (currentBatch - 1) * batchSize + indexInBatch;
+            setPage(overallIndex + 1);
+            found = true;
+          } else if (!batch.hasMore) {
+            if (hasMore) setPage(prev => prev + 1);
+            break;
+          }
+          
+          currentBatch++;
+        }
+        
+        if (!found && hasMore) {
+          setPage(prev => prev + 1);
+        }
+      } else if (hasMore) {
+        setPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error finding next pending annotation:', error);
+      if (hasMore) {
+        setPage(prev => prev + 1);
+      }
+    }
+  }, [taskId, hasMore, queryClient]);
 
   if (isLoading) {
     return <AnnotationTaskDetailSkeleton />;
@@ -141,6 +227,7 @@ export function AnnotationTaskDetailPageClient({
           <AnnotationForm
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
+            taskId={taskId}
             defaultValues={{
               species: currentAnnotation.morphSpecies ?? undefined,
               sex: currentAnnotation.morphSex ?? undefined,
@@ -148,6 +235,7 @@ export function AnnotationTaskDetailPageClient({
               notes: currentAnnotation.notes ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
+            onSuccess={handleAnnotationSuccess}
           />
         </CardContent>
 

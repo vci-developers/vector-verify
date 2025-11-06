@@ -34,6 +34,7 @@ import { showSuccessToast } from '@/ui/show-success-toast';
 
 interface AnnotationFormProps {
   annotationId: number;
+  taskId: number;
   defaultValues: {
     species?: string;
     sex?: string;
@@ -41,11 +42,14 @@ interface AnnotationFormProps {
     notes?: string;
     flagged?: boolean;
   };
+  onSuccess?: () => void;
 }
 
 export function AnnotationForm({
   annotationId,
+  taskId,
   defaultValues,
+  onSuccess,
 }: AnnotationFormProps) {
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
@@ -53,6 +57,10 @@ export function AnnotationForm({
       queryClient.invalidateQueries({ queryKey: ['annotations'] });
       queryClient.invalidateQueries({ queryKey: ['annotation-task-progress'] });
       showSuccessToast('Annotation submitted successfully.');
+      
+      if (onSuccess) {
+        onSuccess();
+      }
     },
   });
 
