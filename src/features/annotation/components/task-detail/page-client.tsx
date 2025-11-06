@@ -14,12 +14,14 @@ import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { notFound } from 'next/navigation';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
 import { AnnotationForm } from './annotation-form-panel/annotation-form';
+import { MorphIdentificationForm } from './annotation-form-panel/morph-identification-form';
+import { useShouldProcessFurther } from './hooks/use-should-process-further';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -29,6 +31,12 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [morphFormValues, setMorphFormValues] = useState<{
+    received: boolean;
+    species?: string;
+    sex?: string;
+    abdomenStatus?: string;
+  } | null>(null);
 
   const {
     data: annotationsPage,
@@ -75,8 +83,39 @@ export function AnnotationTaskDetailPageClient({
     }
   }, [page, isFetching, isLoading]);
 
-  if (isLoading) {
-    return <AnnotationTaskDetailSkeleton />;
+  const { shouldProcessFurther, isLoading: isLoadingShouldProcessFurther } =
+    useShouldProcessFurther(currentAnnotation?.specimen);
+
+  useEffect(() => {
+    if (!currentAnnotation) {
+      setMorphFormValues(null);
+      return;
+    }
+
+    if (shouldProcessFurther) {
+      setMorphFormValues({
+        received: false,
+        species: currentAnnotation.morphSpecies ?? undefined,
+        sex: currentAnnotation.morphSex ?? undefined,
+        abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
+      });
+    } else {
+      setMorphFormValues(null);
+    }
+  }, [
+    currentAnnotation?.id,
+    shouldProcessFurther,
+    currentAnnotation?.morphSpecies,
+    currentAnnotation?.morphSex,
+    currentAnnotation?.morphAbdomenStatus,
+  ]);
+
+  if (isLoading || isLoadingShouldProcessFurther) {
+    return (
+      <AnnotationTaskDetailSkeleton
+        shouldProcessFurther={shouldProcessFurther}
+      />
+    );
   }
 
   if (!currentAnnotation) {
@@ -93,8 +132,15 @@ export function AnnotationTaskDetailPageClient({
       ? `#${currentAnnotation.specimen.id}`
       : null);
 
+  const gridCols = shouldProcessFurther
+    ? 'md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]'
+    : 'md:grid-cols-[1fr_1fr]';
+  const maxWidth = shouldProcessFurther ? 'max-w-[1800px]' : 'max-w-6xl';
+
   return (
-    <div className="mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]">
+    <div
+      className={`mx-auto grid h-full w-full ${maxWidth} gap-6 p-6 ${gridCols}`}
+    >
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -131,9 +177,14 @@ export function AnnotationTaskDetailPageClient({
 
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-3">
-          <CardTitle className="text-lg font-semibold">
-            Annotation Form
-          </CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold">
+              Visual Annotation Form
+            </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Identify the specimen by visually examining the image.
+            </p>
+          </div>
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
 
@@ -142,12 +193,14 @@ export function AnnotationTaskDetailPageClient({
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
-              species: currentAnnotation.morphSpecies ?? undefined,
-              sex: currentAnnotation.morphSex ?? undefined,
-              abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
+              species: currentAnnotation.visualSpecies ?? undefined,
+              sex: currentAnnotation.visualSex ?? undefined,
+              abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
               notes: currentAnnotation.notes ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
+            morphFormValues={morphFormValues}
+            shouldProcessFurther={shouldProcessFurther}
           />
         </CardContent>
 
@@ -172,6 +225,35 @@ export function AnnotationTaskDetailPageClient({
           </Button>
         </CardFooter>
       </Card>
+
+      {shouldProcessFurther && (
+        <Card className="flex h-full flex-col overflow-hidden shadow-sm">
+          <CardHeader className="space-y-3">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-semibold">
+                Morph Identification Annotation Form
+              </CardTitle>
+              <p className="text-muted-foreground text-sm">
+                Identify the specimen by examining it under a microscope.
+              </p>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pt-0">
+            <MorphIdentificationForm
+              key={`morph-${currentAnnotation.id}`}
+              defaultValues={{
+                received: false,
+                species: currentAnnotation.morphSpecies ?? undefined,
+                sex: currentAnnotation.morphSex ?? undefined,
+                abdomenStatus:
+                  currentAnnotation.morphAbdomenStatus ?? undefined,
+              }}
+              onValuesChange={setMorphFormValues}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

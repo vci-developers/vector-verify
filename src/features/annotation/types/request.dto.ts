@@ -15,6 +15,9 @@ export interface AnnotationsListRequestDto {
 }
 
 export interface AnnotationUpdateRequestDto {
+  visualSpecies?: string | null;
+  visualSex?: string | null;
+  visualAbdomenStatus?: string | null;
   morphSpecies?: string | null;
   morphSex?: string | null;
   morphAbdomenStatus?: string | null;

@@ -6,12 +6,16 @@ import {
 
 import { z } from 'zod';
 
-const SPECIES_VALUES = Object.values(SPECIES_MORPH_IDS) as [
+export const SPECIES_VISUAL_IDS = SPECIES_MORPH_IDS;
+export const SEX_VISUAL_IDS = SEX_MORPH_IDS;
+export const ABDOMEN_STATUS_VISUAL_IDS = ABDOMEN_STATUS_MORPH_IDS;
+
+const SPECIES_VALUES = Object.values(SPECIES_VISUAL_IDS) as [
   string,
   ...string[],
 ];
-const SEX_VALUES = Object.values(SEX_MORPH_IDS) as [string, ...string[]];
-const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_MORPH_IDS) as [
+const SEX_VALUES = Object.values(SEX_VISUAL_IDS) as [string, ...string[]];
+const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_VISUAL_IDS) as [
   string,
   ...string[],
 ];
@@ -24,9 +28,9 @@ export const AnnotationBase = z.object({
   flagged: z.boolean().default(false),
 });
 export const isSexEnabled = (species?: string) =>
-  species !== SPECIES_MORPH_IDS.NON_MOSQUITO;
+  species !== SPECIES_VISUAL_IDS.NON_MOSQUITO;
 export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
-  isSexEnabled(species) && sex !== SEX_MORPH_IDS.MALE;
+  isSexEnabled(species) && sex !== SEX_VISUAL_IDS.MALE;
 
 export const annotationFormSchema = AnnotationBase.superRefine(
   (formFields, context) => {

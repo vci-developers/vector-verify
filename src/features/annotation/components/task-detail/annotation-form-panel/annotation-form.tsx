@@ -15,6 +15,9 @@ import {
   annotationFormSchema,
   isAbdomenStatusEnabled,
   isSexEnabled,
+  SPECIES_VISUAL_IDS,
+  SEX_VISUAL_IDS,
+  ABDOMEN_STATUS_VISUAL_IDS,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
 import { Textarea } from '@/ui/textarea';
@@ -22,12 +25,7 @@ import { Button } from '@/ui/button';
 import { Toggle } from '@/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/shared/core/utils/dom';
-import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
-import {
-  SPECIES_MORPH_IDS,
-  SEX_MORPH_IDS,
-  ABDOMEN_STATUS_MORPH_IDS,
-} from '@/shared/entities/specimen/morph-ids';
+import MorphIdSelectMenu from './morph-id-select-menu';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
@@ -41,11 +39,20 @@ interface AnnotationFormProps {
     notes?: string;
     flagged?: boolean;
   };
+  morphFormValues?: {
+    received: boolean;
+    species?: string;
+    sex?: string;
+    abdomenStatus?: string;
+  } | null;
+  shouldProcessFurther?: boolean;
 }
 
 export function AnnotationForm({
   annotationId,
   defaultValues,
+  morphFormValues,
+  shouldProcessFurther = false,
 }: AnnotationFormProps) {
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
@@ -121,12 +128,25 @@ export function AnnotationForm({
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
+    let morphSpecies: string | null = null;
+    let morphSex: string | null = null;
+    let morphAbdomenStatus: string | null = null;
+
+    if (shouldProcessFurther && morphFormValues?.received) {
+      morphSpecies = morphFormValues.species || null;
+      morphSex = morphFormValues.sex || null;
+      morphAbdomenStatus = morphFormValues.abdomenStatus || null;
+    }
+
     await updateAnnotationMutation.mutateAsync({
       annotationId,
       payload: {
-        morphSpecies: formInput.species || null,
-        morphSex: formInput.sex || null,
-        morphAbdomenStatus: formInput.abdomenStatus || null,
+        visualSpecies: formInput.species || null,
+        visualSex: formInput.sex || null,
+        visualAbdomenStatus: formInput.abdomenStatus || null,
+        morphSpecies,
+        morphSex,
+        morphAbdomenStatus,
         notes: formInput.notes || null,
         status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
       },
@@ -154,7 +174,7 @@ export function AnnotationForm({
                 <FormControl>
                   <MorphIdSelectMenu
                     label="species"
-                    morphIds={Object.values(SPECIES_MORPH_IDS)}
+                    morphIds={Object.values(SPECIES_VISUAL_IDS)}
                     selectedMorphId={field.value}
                     onMorphSelect={handleSpeciesSelect}
                     inValid={!!fieldState.error}
@@ -176,7 +196,7 @@ export function AnnotationForm({
                 <FormControl>
                   <MorphIdSelectMenu
                     label="Sex"
-                    morphIds={Object.values(SEX_MORPH_IDS)}
+                    morphIds={Object.values(SEX_VISUAL_IDS)}
                     selectedMorphId={field.value}
                     onMorphSelect={handleSexSelect}
                     inValid={!!fieldState.error && sexEnabled}
@@ -199,7 +219,7 @@ export function AnnotationForm({
                 <FormControl>
                   <MorphIdSelectMenu
                     label="Abdomen Status"
-                    morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
+                    morphIds={Object.values(ABDOMEN_STATUS_VISUAL_IDS)}
                     selectedMorphId={field.value}
                     onMorphSelect={handleAbdomenStatusSelect}
                     inValid={!!fieldState.error && abdomenStatusEnabled}

@@ -7,6 +7,7 @@ export interface SpecimenDto {
   sessionId: number;
   thumbnailUrl: string | null;
   thumbnailImageId: number | null;
+  shouldProcessFurther: boolean;
 }
 
 export interface SpecimenExpandedDto extends SpecimenDto {
