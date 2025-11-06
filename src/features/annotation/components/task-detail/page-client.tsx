@@ -81,13 +81,11 @@ export function AnnotationTaskDetailPageClient({
 
   const handleAnnotationSuccess = useCallback(async () => {
     try {
-      // First, check if we already have cached data for all annotations
       const cachedAllAnnotations = queryClient.getQueriesData({
         queryKey: annotationKeys.taskAnnotations(taskId),
         exact: false,
       });
 
-      // Try to find pending annotation in cache first
       let firstPendingId: number | null = null;
       let cachedIndex = -1;
 
@@ -102,13 +100,11 @@ export function AnnotationTaskDetailPageClient({
         }
       }
 
-      // If found in cache, use it
       if (firstPendingId !== null && cachedIndex !== -1) {
         setPage(cachedIndex + 1);
         return;
       }
 
-      // Otherwise, fetch from API
       const pendingAnnotations = await getAnnotations({
         taskId,
         page: 1,
@@ -119,7 +115,6 @@ export function AnnotationTaskDetailPageClient({
       if (pendingAnnotations.items && pendingAnnotations.items.length > 0) {
         firstPendingId = pendingAnnotations.items[0].id;
         
-        // Use batching to find position efficiently
         let found = false;
         let currentBatch = 1;
         const batchSize = 50;
