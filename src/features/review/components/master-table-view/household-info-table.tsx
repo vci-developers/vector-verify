@@ -74,10 +74,8 @@ const tableColumns = [
     label: 'Collection Date',
     width: 'min-w-[160px]',
     render: (row: HouseholdRowData) =>
-      renderDiscrepancyAwareCell(
-        row.mostRecentDate,
-        false,
-        value => formatDate(value),
+      renderDiscrepancyAwareCell(row.mostRecentDate, false, value =>
+        formatDate(value),
       ),
   },
   {
@@ -136,20 +134,14 @@ const tableColumns = [
     label: 'LLIN Type',
     width: 'min-w-[130px]',
     render: (row: HouseholdRowData) =>
-      renderDiscrepancyAwareCell(
-        row.llinType,
-        row.hasLlinTypeDiscrepancy,
-      ),
+      renderDiscrepancyAwareCell(row.llinType, row.hasLlinTypeDiscrepancy),
   },
   {
     key: 'llinBrand',
     label: 'LLIN Brand',
     width: 'min-w-[130px]',
     render: (row: HouseholdRowData) =>
-      renderDiscrepancyAwareCell(
-        row.llinBrand,
-        row.hasLlinBrandDiscrepancy,
-      ),
+      renderDiscrepancyAwareCell(row.llinBrand, row.hasLlinBrandDiscrepancy),
   },
   {
     key: 'numPeopleSleptUnderLlin',

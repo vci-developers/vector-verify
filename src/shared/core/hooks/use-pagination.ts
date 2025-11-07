@@ -22,13 +22,10 @@ export function usePagination({
   );
 
   useEffect(() => {
-    // Only adjust page if it exceeds totalPages, don't reset unnecessarily
     setPage(prev => {
-      // If totalPages is 0 or less, keep current page (might be loading state)
       if (totalPages <= 0) return prev;
 
       const validPage = Math.min(Math.max(1, prev), totalPages);
-      // Only update if the page actually needs to change
       return prev !== validPage ? validPage : prev;
     });
   }, [totalPages]);
@@ -37,10 +34,10 @@ export function usePagination({
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
-  function setPageSizeAndReset(size: number) {
+  const setPageSizeAndReset = useCallback((size: number) => {
     setPageSize(size);
     setPage(1);
-  }
+  }, []);
 
   type RangeItem = number | 'ellipsis';
 

@@ -4,7 +4,7 @@ import {
   QueryClient,
   type QueryClientConfig,
 } from '@tanstack/react-query';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { showErrorToast } from '@/ui/show-error-toast';
 
 export function createQueryClient(config?: QueryClientConfig): QueryClient {
   return new QueryClient({

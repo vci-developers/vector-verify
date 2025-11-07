@@ -40,25 +40,33 @@ export function SpecimenViewPageClient({
   const startDate = startOfMonth.toISOString().split('T')[0];
   const endDate = endOfMonth.toISOString().split('T')[0];
 
-  const { data: permissions, isLoading: isLoadingPermissions } = useUserPermissionsQuery();
+  const { data: permissions, isLoading: isLoadingPermissions } =
+    useUserPermissionsQuery();
 
   const districtSites = useMemo(() => {
     if (!permissions?.sites?.canAccessSites) return [];
-    
-    return permissions.sites.canAccessSites
-      .filter(site => site.district === formattedDistrict);
+
+    return permissions.sites.canAccessSites.filter(
+      site => site.district === formattedDistrict,
+    );
   }, [permissions?.sites?.canAccessSites, formattedDistrict]);
 
-  const siteIds = useMemo(() => districtSites.map(site => site.siteId), [districtSites]);
-  const houseNumbers = useMemo(() => 
-    districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
-    [districtSites]
+  const siteIds = useMemo(
+    () => districtSites.map(site => site.siteId),
+    [districtSites],
+  );
+  const houseNumbers = useMemo(
+    () => districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
+    [districtSites],
   );
 
-  const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
+  const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString(
+    'en-US',
+    {
+      month: 'long',
+      year: 'numeric',
+    },
+  );
 
   function handleRowsPerPageChange(value: string) {
     setPageSize(Number(value));
@@ -68,14 +76,12 @@ export function SpecimenViewPageClient({
     setFilters(newFilters);
   }
 
-
-
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">
           {formattedDistrict}
-          <span className="ml-3 text-2xl font-normal text-muted-foreground">
+          <span className="text-muted-foreground ml-3 text-2xl font-normal">
             {monthName}
           </span>
         </h1>
@@ -86,10 +92,12 @@ export function SpecimenViewPageClient({
             onFiltersChange={handleFiltersChange}
             disabled={isLoadingPermissions || districtSites.length === 0}
           />
-          
+
           {districtSites.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Items per page:</span>
+              <span className="text-muted-foreground text-sm">
+                Items per page:
+              </span>
               <Select
                 value={String(pageSize)}
                 onValueChange={handleRowsPerPageChange}
@@ -98,7 +106,7 @@ export function SpecimenViewPageClient({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PAGE_SIZES.map((size) => (
+                  {PAGE_SIZES.map(size => (
                     <SelectItem key={size} value={String(size)}>
                       {size}
                     </SelectItem>
@@ -115,16 +123,16 @@ export function SpecimenViewPageClient({
       ) : districtSites.length === 0 ? (
         <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed">
           <div className="text-center">
-            <p className="text-lg font-medium text-muted-foreground">
+            <p className="text-muted-foreground text-lg font-medium">
               No sites in this district
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               There are no registered sites for {formattedDistrict}
             </p>
           </div>
         </div>
       ) : (
-        <SpecimenReviewAccordion 
+        <SpecimenReviewAccordion
           siteIds={siteIds}
           houseNumbers={houseNumbers}
           district={formattedDistrict}

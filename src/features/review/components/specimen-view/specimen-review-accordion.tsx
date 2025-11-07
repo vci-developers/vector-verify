@@ -32,8 +32,12 @@ export function SpecimenReviewAccordion({
   filters,
 }: SpecimenReviewAccordionProps) {
   const [openItem, setOpenItem] = useState('');
-  const [selectedSpecimen, setSelectedSpecimen] = useState<Specimen | null>(null);
-  const [sitePagination, setSitePagination] = useState<Record<number, number>>({});
+  const [selectedSpecimen, setSelectedSpecimen] = useState<Specimen | null>(
+    null,
+  );
+  const [sitePagination, setSitePagination] = useState<Record<number, number>>(
+    {},
+  );
 
   useEffect(() => {
     setSitePagination({});
@@ -68,7 +72,14 @@ export function SpecimenReviewAccordion({
       sex: filters.sex,
       abdomenStatus: filters.abdomenStatus,
     }),
-    [district, startDate, endDate, filters.species, filters.sex, filters.abdomenStatus],
+    [
+      district,
+      startDate,
+      endDate,
+      filters.species,
+      filters.sex,
+      filters.abdomenStatus,
+    ],
   );
 
   const accordionItems = useMemo(
@@ -87,7 +98,7 @@ export function SpecimenReviewAccordion({
             <AccordionTrigger className="px-4">
               <div className="flex items-center gap-2">
                 <span>{houseNumber}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   (Site ID: {siteId})
                 </span>
               </div>
