@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   Accordion,
@@ -99,12 +99,14 @@ export function SessionsViewPageClient({
             {monthLabel}
           </p>
         </div>
-        <div className="text-muted-foreground text-sm">
-          <span className="text-2xl font-semibold">
-            {sessions.length.toLocaleString()}
-          </span>
-          {' '}
-          of {total.toLocaleString()} session{total === 1 ? '' : 's'} loaded
+        <div className="flex items-center gap-4">
+          <div className="text-muted-foreground text-sm">
+            <span className="text-2xl font-semibold">
+              {sessions.length.toLocaleString()}
+            </span>
+            {' '}
+            of {total.toLocaleString()} session{total === 1 ? '' : 's'} loaded
+          </div>
         </div>
       </header>
 

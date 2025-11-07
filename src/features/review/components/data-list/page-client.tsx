@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowRight, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { DataTable } from '@/ui/data-table';
@@ -100,11 +100,6 @@ export function ReviewDataListPageClient() {
     setPage(1);
   }
 
-  function handleNavigateToReview(district: string, monthYear: string) {
-    const encodedDistrict = encodeURIComponent(district);
-    const encodedMonthYear = encodeURIComponent(monthYear);
-    router.push(`/review/${encodedDistrict}/${encodedMonthYear}`);
-  }
 
   function handleNavigateToDashboard(district: string, monthYear: string) {
     const encodedDistrict = encodeURIComponent(district);
@@ -155,17 +150,6 @@ export function ReviewDataListPageClient() {
           const summary = row.original;
           return (
             <div className="flex justify-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  handleNavigateToReview(summary.district, summary.monthString)
-                }
-                className="text-primary hover:text-primary/80 h-auto p-0 font-normal"
-              >
-                Review
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
               <Button
                 variant="ghost"
                 size="sm"

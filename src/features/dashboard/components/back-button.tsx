@@ -1,37 +1,165 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/shared/ui/drawer';
+import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, ArrowLeft } from 'lucide-react';
+import { cn } from '@/shared/core/utils';
 
 interface BackButtonProps {
   show: boolean;
+  district?: string;
+  monthYear?: string;
 }
 
-/**
- * BackButton component responsible for navigation back functionality
- * Single responsibility: Handle back navigation and display
- */
-export function BackButton({ show }: BackButtonProps) {
-  const router = useRouter();
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
 
-  const handleBackClick = () => {
-    router.back();
-  };
+
+export function BackButton({ show, district, monthYear }: BackButtonProps) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   if (!show) {
     return <div className="w-20" />;
   }
 
+  if (!district || !monthYear) {
+    const handleBackClick = () => {
+      router.back();
+    };
+
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleBackClick}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Previous
+      </Button>
+    );
+  }
+
+  const navItems: NavItem[] = useMemo(
+    () => [
+      {
+        label: 'Dashboard',
+        path: `/review/${district}/${monthYear}/dashboard`,
+        icon: LayoutDashboard,
+        description: 'Overview and statistics',
+      },
+      {
+        label: 'Master Table View',
+        path: `/review/${district}/${monthYear}/master-table-view`,
+        icon: Table,
+        description: 'Detailed data table',
+      },
+      {
+        label: 'Session View',
+        path: `/review/${district}/${monthYear}/session-view`,
+        icon: Users,
+        description: 'Session details and forms',
+      },
+      {
+        label: 'Specimen View',
+        path: `/review/${district}/${monthYear}/specimen-view`,
+        icon: Microscope,
+        description: 'Specimen images and data',
+      },
+    ],
+    [district, monthYear],
+  );
+
+  const handleNavigate = (path: string) => {
+    router.push(path);
+    setOpen(false);
+  };
+
+  const isActivePath = (path: string) => pathname === path;
+
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={handleBackClick}
-      className="flex items-center gap-2"
-    >
-      <ArrowLeft className="h-4 w-4" />
-      Previous
-    </Button>
+    <Drawer open={open} onOpenChange={setOpen} direction="left">
+      <DrawerTrigger asChild>
+        <Button variant="outline" size="icon" className="shrink-0">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open navigation menu</span>
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="h-full w-80 rounded-none">
+        <div className="flex h-full flex-col">
+          <DrawerHeader className="border-b">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1">
+                <DrawerTitle>
+                  {decodeURIComponent(district)} - {decodeURIComponent(monthYear)}
+                </DrawerTitle>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleNavigate('/')}
+                className="shrink-0"
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Home
+              </Button>
+            </div>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = isActivePath(item.path);
+                
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigate(item.path)}
+                    className={cn(
+                      'w-full flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
+                      isActive
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-border hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    <Icon className={cn('h-5 w-5 mt-0.5 flex-shrink-0', isActive && 'text-primary')} />
+                    <div className="flex-1 space-y-1">
+                      <div className="font-medium leading-none">{item.label}</div>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <DrawerFooter className="border-t">
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">
+                <X className="mr-2 h-4 w-4" />
+                Close
+              </Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

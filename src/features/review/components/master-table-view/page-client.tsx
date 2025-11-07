@@ -326,22 +326,24 @@ export function MasterTableViewPageClient({
             )}
           </p>
         </div>
-        {viewMode === 'mosquito' && mosquitoTableMeta && (
-          <div className="text-muted-foreground text-sm">
-            <span className="text-2xl font-semibold">
-              {mosquitoTableMeta.rows.length.toLocaleString()}
-            </span>{' '}
-            site{mosquitoTableMeta.rows.length === 1 ? '' : 's'} in view
-          </div>
-        )}
-        {viewMode === 'household' && householdTableMeta && (
-          <div className="text-muted-foreground text-sm">
-            <span className="text-2xl font-semibold">
-              {householdTableMeta.rows.length.toLocaleString()}
-            </span>{' '}
-            site{householdTableMeta.rows.length === 1 ? '' : 's'} in view
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {viewMode === 'mosquito' && mosquitoTableMeta && (
+            <div className="text-muted-foreground text-sm">
+              <span className="text-2xl font-semibold">
+                {mosquitoTableMeta.rows.length.toLocaleString()}
+              </span>{' '}
+              site{mosquitoTableMeta.rows.length === 1 ? '' : 's'} in view
+            </div>
+          )}
+          {viewMode === 'household' && householdTableMeta && (
+            <div className="text-muted-foreground text-sm">
+              <span className="text-2xl font-semibold">
+                {householdTableMeta.rows.length.toLocaleString()}
+              </span>{' '}
+              site{householdTableMeta.rows.length === 1 ? '' : 's'} in view
+            </div>
+          )}
+        </div>
       </header>
 
       <section className="flex flex-col gap-4">
