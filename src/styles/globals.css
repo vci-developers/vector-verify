@@ -42,6 +42,8 @@
   --color-chart-green-dark: var(--chart-green-dark);
   --color-chart-green-medium: var(--chart-green-medium);
   --color-chart-green-light: var(--chart-green-light);
+  --color-white-green: var(--white-green);
+  --color-grass-green: var(--grass-green);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -84,8 +86,10 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.606 0.25 292.717);
   --chart-green-dark: #166534;
-  --chart-green-medium: #22C55E;
-  --chart-green-light: #86EFAC;
+  --chart-green-medium: #22c55e;
+  --chart-green-light: #86efac;
+  --white-green: #e0f2f1;
+  --grass-green: #4ebd8b;
 }
 
 .dark {
