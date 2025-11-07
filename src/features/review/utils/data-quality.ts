@@ -22,22 +22,31 @@ const formatValueList = (values: (string | number | boolean)[]) =>
     : values
         .map(value => {
           if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-          if (typeof value === 'number') return Number.isFinite(value) ? `${value}` : '—';
+          if (typeof value === 'number') return `${value}`;
           return value;
         })
         .join(' • ');
 
 const formatMonthsSinceIrsConflict = (forms: SurveillanceForm[]) => {
-  const yesValues = uniqueNonNull(forms.filter(f => f.wasIrsConducted).map(f => f.monthsSinceIrs));
-  const yesLabel =
-    yesValues.length === 0
-      ? 'Yes: Not recorded'
-      : `Yes: ${yesValues
-          .map(value => (Number.isFinite(value) ? `${value}` : 'Not recorded'))
-          .join(', ')}`;
+  const segments: string[] = [];
+  const yesValues = uniqueNonNull(
+    forms
+      .filter(f => f.wasIrsConducted === true)
+      .map(f => f.monthsSinceIrs),
+  );
 
-  const segments = [yesLabel];
-  if (forms.some(f => f.wasIrsConducted === false)) segments.push('No: N/A');
+  if (forms.some(f => f.wasIrsConducted === true)) {
+    segments.push(
+      yesValues.length === 0
+        ? 'Yes: Not recorded'
+        : `Yes: ${yesValues.map(value => `${value}`).join(', ')}`,
+    );
+  }
+
+  if (forms.some(f => f.wasIrsConducted === false)) {
+    segments.push('No: N/A');
+  }
+
   return segments;
 };
 
@@ -94,10 +103,13 @@ export const collectDiscrepanciesForSite = (
     hasIrsDiscrepancy && wasIrsConducted.includes(true) && wasIrsConducted.includes(false);
 
   push('wasIrsConducted', 'IRS Conducted', wasIrsConducted, hasIrsDiscrepancy);
+  const monthsSinceIrsValues = hasYesAndNo
+    ? formatMonthsSinceIrsConflict(forms)
+    : monthsSinceIrsRaw.map(value => `${value}`);
   push(
     'monthsSinceIrs',
     'Months Since IRS',
-    hasYesAndNo ? formatMonthsSinceIrsConflict(forms) : monthsSinceIrsRaw,
+    monthsSinceIrsValues,
     hasIrsDiscrepancy || monthsSinceIrsRaw.length > 1,
     hasIrsDiscrepancy,
   );

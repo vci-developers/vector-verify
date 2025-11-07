@@ -61,10 +61,13 @@ export function useDataQualitySummary({
     [sessionsBySite],
   );
 
-  const { data: surveillanceForms, isLoading: isSurveillanceFormsLoading } =
-    useSurveillanceFormsQuery(allSessionIds, {
-      enabled: allSessionIds.length > 0,
-    });
+  const {
+    data: surveillanceForms,
+    isLoading: isSurveillanceFormsLoading,
+    isError: isSurveillanceFormsError,
+  } = useSurveillanceFormsQuery(allSessionIds, {
+    enabled: allSessionIds.length > 0,
+  });
 
   const accessibleSiteLookup = useMemo(
     () => new Map(accessibleSites.map(site => [site.siteId, site])),
@@ -73,7 +76,19 @@ export function useDataQualitySummary({
 
   const siteDiscrepancies: SiteDiscrepancySummary[] = useMemo(() => {
     if (!sessionsBySite?.length) return [];
-    const formsMap = surveillanceForms ?? new Map<number, SurveillanceForm>();
+
+    const awaitingForms =
+      allSessionIds.length > 0 &&
+      (isSurveillanceFormsLoading ||
+        isSurveillanceFormsError ||
+        !surveillanceForms);
+
+    if (awaitingForms) {
+      return [];
+    }
+
+    const formsMap =
+      surveillanceForms ?? new Map<number, SurveillanceForm>();
 
     return sessionsBySite
       .map(siteGroup => {
@@ -95,7 +110,14 @@ export function useDataQualitySummary({
         const diff = b.fields.length - a.fields.length;
         return diff !== 0 ? diff : a.siteId - b.siteId;
       });
-  }, [sessionsBySite, surveillanceForms, accessibleSiteLookup]);
+  }, [
+    sessionsBySite,
+    surveillanceForms,
+    accessibleSiteLookup,
+    isSurveillanceFormsLoading,
+    isSurveillanceFormsError,
+    allSessionIds.length,
+  ]);
 
   const siteIdsWithSessions = useMemo(
     () => new Set((sessionsBySite ?? []).map(group => group.siteId)),
