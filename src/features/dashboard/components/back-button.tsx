@@ -45,10 +45,12 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
 
     return (
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         onClick={handleBackClick}
         className="flex items-center gap-2"
+        aria-label="Go back to previous page"
       >
         <ArrowLeft className="h-4 w-4" />
         Previous
@@ -96,7 +98,12 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="left">
       <DrawerTrigger asChild>
-        <Button variant="outline" size="icon" className="shrink-0">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="shrink-0"
+          aria-label="Open review navigation menu"
+        >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open navigation menu</span>
         </Button>
@@ -111,10 +118,12 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                 </DrawerTitle>
               </div>
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => handleNavigate('/')}
                 className="shrink-0"
+                aria-label="Return to home page"
               >
                 <Home className="h-4 w-4 mr-1" />
                 Home
@@ -122,7 +131,7 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
             </div>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
+            <nav className="space-y-2" aria-label="Review sections">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = isActivePath(item.path);
@@ -130,6 +139,7 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                 return (
                   <button
                     key={item.path}
+                    type="button"
                     onClick={() => handleNavigate(item.path)}
                     className={cn(
                       'w-full flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
@@ -137,6 +147,8 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                         ? 'border-primary bg-primary/5 text-primary'
                         : 'border-border hover:bg-accent hover:text-accent-foreground'
                     )}
+                    aria-label={`Navigate to ${item.label}`}
+                    aria-current={isActive ? 'page' : undefined}
                   >
                     <Icon className={cn('h-5 w-5 mt-0.5 flex-shrink-0', isActive && 'text-primary')} />
                     <div className="flex-1 space-y-1">
@@ -148,11 +160,16 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                   </button>
                 );
               })}
-            </div>
+            </nav>
           </div>
           <DrawerFooter className="border-t">
             <DrawerClose asChild>
-              <Button variant="outline" className="w-full">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full"
+                aria-label="Close navigation menu"
+              >
                 <X className="mr-2 h-4 w-4" />
                 Close
               </Button>
