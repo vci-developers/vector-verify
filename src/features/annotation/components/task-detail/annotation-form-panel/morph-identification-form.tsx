@@ -17,7 +17,7 @@ import {
   isSexEnabled,
 } from './validation/morph-identification-form-schema';
 import { toDomId } from '@/shared/core/utils/dom';
-import MorphIdSelectMenu from './morph-id-select-menu';
+import { AnnotationSelectMenu } from './annotation-select-menu';
 import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
@@ -63,7 +63,7 @@ export function MorphIdentificationForm({
     reValidateMode: 'onChange',
   });
 
-  const received = morphForm.watch('received');
+  const received = morphForm.watch('received') ?? false;
   const selectedSpecies = morphForm.watch('species');
   const selectedSex = morphForm.watch('sex');
   const abdomenStatus = morphForm.watch('abdomenStatus');
@@ -176,12 +176,12 @@ export function MorphIdentificationForm({
                   Species
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="species"
-                    morphIds={Object.values(SPECIES_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSpeciesSelect}
-                    inValid={!!fieldState.error && received}
+                    options={Object.values(SPECIES_MORPH_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSpeciesSelect}
+                    isInvalid={!!fieldState.error && received}
                     disabled={!received}
                   />
                 </FormControl>
@@ -199,12 +199,12 @@ export function MorphIdentificationForm({
                   Sex
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Sex"
-                    morphIds={Object.values(SEX_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSexSelect}
-                    inValid={!!fieldState.error && sexEnabled}
+                    options={Object.values(SEX_MORPH_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSexSelect}
+                    isInvalid={!!fieldState.error && sexEnabled}
                     disabled={!sexEnabled}
                   />
                 </FormControl>
@@ -222,12 +222,12 @@ export function MorphIdentificationForm({
                   Abdomen Status
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Abdomen Status"
-                    morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleAbdomenStatusSelect}
-                    inValid={!!fieldState.error && abdomenStatusEnabled}
+                    options={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleAbdomenStatusSelect}
+                    isInvalid={!!fieldState.error && abdomenStatusEnabled}
                     disabled={!abdomenStatusEnabled}
                   />
                 </FormControl>

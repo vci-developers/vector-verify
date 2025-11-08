@@ -6,6 +6,7 @@ import { Button } from '@/ui/button';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -19,7 +20,7 @@ import { notFound } from 'next/navigation';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
-import { AnnotationForm } from './annotation-form-panel/annotation-form';
+import { VisualIdentificationForm } from './annotation-form-panel/visual-identification-form';
 import { MorphIdentificationForm } from './annotation-form-panel/morph-identification-form';
 import { useShouldProcessFurther } from './hooks/use-should-process-further';
 
@@ -179,17 +180,17 @@ export function AnnotationTaskDetailPageClient({
         <CardHeader className="space-y-3">
           <div className="space-y-1">
             <CardTitle className="text-lg font-semibold">
-              Visual Annotation Form
+              Visual Identification Form
             </CardTitle>
-            <p className="text-muted-foreground text-sm">
+            <CardDescription>
               Identify the specimen by visually examining the image.
-            </p>
+            </CardDescription>
           </div>
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
 
         <CardContent className="pt-0">
-          <AnnotationForm
+          <VisualIdentificationForm
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
