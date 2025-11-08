@@ -1,9 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import Image from 'next/image';
-import { ImageOff } from 'lucide-react';
-
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
 import { usePagination } from '@/shared/core/hooks/use-pagination';
@@ -18,6 +15,7 @@ import {
   PaginationLink,
 } from '@/ui/pagination';
 import type { SpecimensQuery } from '@/features/review/types';
+import { SpecimenImage } from './specimen-image';
 
 interface SiteSpecimenContentProps {
   siteId: number;
@@ -27,17 +25,6 @@ interface SiteSpecimenContentProps {
   isOpen: boolean;
   onImageClick: (specimen: Specimen) => void;
   onPageChange: (siteId: number, page: number) => void;
-}
-
-function getImageUrl(specimen: Specimen): string | null {
-  if (specimen.thumbnailImageId) {
-    return `/api/bff/specimens/${specimen.id}/images/${specimen.thumbnailImageId}`;
-  }
-
-  const relativePath = specimen.thumbnailImage?.url ?? specimen.thumbnailUrl;
-  if (!relativePath) return null;
-  if (relativePath.startsWith('http')) return relativePath;
-  return `/api/bff${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
 }
 
 export function SiteSpecimenContent({
@@ -52,21 +39,14 @@ export function SiteSpecimenContent({
   const { district, startDate, endDate, species, sex, abdomenStatus } =
     queryParameters;
 
+  const prevIsOpenRef = useRef(isOpen);
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !prevIsOpenRef.current) {
       onPageChange(siteId, 1);
     }
-  }, [
-    siteId,
-    isOpen,
-    onPageChange,
-    district,
-    startDate,
-    endDate,
-    species,
-    sex,
-    abdomenStatus,
-  ]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, siteId, onPageChange]);
 
   const { data, isLoading } = useSpecimensQuery(
     {
@@ -87,54 +67,56 @@ export function SiteSpecimenContent({
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(species || sex || abdomenStatus);
 
-  const { setTotal, setPageSize, setPage, totalPages, createRange } =
-    usePagination({
-      initialTotal: total,
-      initialPage: currentPage,
-      initialPageSize: pageSize,
-    });
+  const { setTotal, setPage, totalPages, createRange } = usePagination({
+    initialTotal: total,
+    initialPage: currentPage,
+    initialPageSize: pageSize,
+  });
 
   useEffect(() => {
     setTotal(total);
-  }, [setTotal, total]);
-
-  useEffect(() => {
-    setPageSize(pageSize);
-  }, [pageSize, setPageSize]);
+  }, [total, setTotal]);
 
   useEffect(() => {
     setPage(currentPage);
   }, [currentPage, setPage]);
 
+  const pageItems = useMemo(
+    () => createRange(currentPage),
+    [createRange, currentPage]
+  );
+
   const isPagingDisabled = isLoading;
 
-  function handleNavigateToFirstPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && currentPage > 1) {
-      onPageChange(siteId, 1);
-    }
-  }
+  const handleNavigateToFirstPage = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      if (!isPagingDisabled && currentPage > 1) {
+        onPageChange(siteId, 1);
+      }
+    },
+    [isPagingDisabled, currentPage, onPageChange, siteId]
+  );
 
-  function handleNavigateToLastPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && currentPage < totalPages) {
-      onPageChange(siteId, totalPages);
-    }
-  }
+  const handleNavigateToLastPage = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      if (!isPagingDisabled && currentPage < totalPages) {
+        onPageChange(siteId, totalPages);
+      }
+    },
+    [isPagingDisabled, currentPage, totalPages, onPageChange, siteId]
+  );
 
-  function handleNavigateToPage(
-    event: React.MouseEvent<HTMLAnchorElement>,
-    pageNumber: number,
-  ) {
-    event.preventDefault();
-    if (!isPagingDisabled && pageNumber !== currentPage) {
-      onPageChange(siteId, pageNumber);
-    }
-  }
+  const handleNavigateToPage = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>, pageNumber: number) => {
+      event.preventDefault();
+      if (!isPagingDisabled && pageNumber !== currentPage) {
+        onPageChange(siteId, pageNumber);
+      }
+    },
+    [isPagingDisabled, currentPage, onPageChange, siteId]
+  );
 
   if (!isOpen) {
     return null;
@@ -145,14 +127,14 @@ export function SiteSpecimenContent({
       {isLoading ? (
         <SpecimenGridLoadingSkeleton />
       ) : total === 0 ? (
-        <div className="text-muted-foreground p-4 text-center text-sm">
+        <div className="p-4 text-center text-sm text-muted-foreground">
           {hasActiveFilters
             ? 'No specimens match the selected filters'
             : 'No specimens reported from this household'}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="text-muted-foreground flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
               Showing {(currentPage - 1) * pageSize + 1} –
               {` ${Math.min(currentPage * pageSize, total)} of ${total} specimens`}
@@ -161,40 +143,14 @@ export function SiteSpecimenContent({
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {specimens.map(specimen => {
-              const imageUrl = getImageUrl(specimen);
-
-              return (
-                <div
-                  key={specimen.id}
-                  className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
-                  onClick={() => imageUrl && onImageClick(specimen)}
-                >
-                  <div className="text-muted-foreground px-2 pt-2 text-xs">
-                    {specimen.specimenId}
-                  </div>
-                  <div className="relative aspect-[4/3] w-full">
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={`Specimen ${specimen.specimenId}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, 25vw"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="bg-muted flex h-full w-full items-center justify-center">
-                        <div className="text-muted-foreground flex flex-col items-center gap-2">
-                          <ImageOff className="h-8 w-8" />
-                          <span className="text-xs">Invalid image</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {specimens.map(specimen => (
+              <SpecimenImage
+                key={specimen.id}
+                specimen={specimen}
+                className="overflow-hidden rounded border transition-shadow hover:shadow-lg"
+                onClick={() => onImageClick(specimen)}
+              />
+            ))}
           </div>
 
           {totalPages > 1 && (
@@ -212,11 +168,9 @@ export function SiteSpecimenContent({
                       href="#"
                     />
                   </PaginationItem>
-                  {createRange(currentPage).map((pageItem, index) => (
+                  {pageItems.map((pageItem, index) => (
                     <PaginationItem
-                      key={
-                        pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
-                      }
+                      key={pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem}
                     >
                       {pageItem === 'ellipsis' ? (
                         <PaginationEllipsis />
@@ -224,9 +178,7 @@ export function SiteSpecimenContent({
                         <PaginationLink
                           href="#"
                           isActive={pageItem === currentPage}
-                          onClick={event =>
-                            handleNavigateToPage(event, pageItem)
-                          }
+                          onClick={event => handleNavigateToPage(event, pageItem)}
                         >
                           {pageItem}
                         </PaginationLink>
