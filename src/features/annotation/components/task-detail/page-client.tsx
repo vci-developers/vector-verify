@@ -80,81 +80,46 @@ export function AnnotationTaskDetailPageClient({
   }, [page, isFetching, isLoading]);
 
   const handleAnnotationSuccess = useCallback(async () => {
+    if (isFetching || isLoading) return;
+
     try {
-      const cachedAllAnnotations = queryClient.getQueriesData({
-        queryKey: annotationKeys.taskAnnotations(taskId),
-        exact: false,
-      });
+      let searchPage = page + 1;
+      const maxSearchPages = 50; 
+      let pagesSearched = 0;
 
-      let firstPendingId: number | null = null;
-      let cachedIndex = -1;
-
-      for (const [, data] of cachedAllAnnotations) {
-        if (data && typeof data === 'object' && 'items' in data) {
-          const items = (data as any).items;
-          cachedIndex = items.findIndex((item: any) => item.status === 'PENDING');
-          if (cachedIndex !== -1) {
-            firstPendingId = items[cachedIndex].id;
-            break;
-          }
-        }
-      }
-
-      if (firstPendingId !== null && cachedIndex !== -1) {
-        setPage(cachedIndex + 1);
-        return;
-      }
-
-      const pendingAnnotations = await getAnnotations({
-        taskId,
-        page: 1,
-        limit: 1,
-        status: 'PENDING',
-      });
-
-      if (pendingAnnotations.items && pendingAnnotations.items.length > 0) {
-        firstPendingId = pendingAnnotations.items[0].id;
-        
-        let found = false;
-        let currentBatch = 1;
-        const batchSize = 50;
-        
-        while (!found && currentBatch <= 10) {
-          const batch = await getAnnotations({
+      while (pagesSearched < maxSearchPages) {
+        try {
+          const data = await getAnnotations({
             taskId,
-            page: currentBatch,
-            limit: batchSize,
+            page: searchPage,
+            limit: 1,
           });
           
-          const indexInBatch = batch.items.findIndex(
-            (annotation) => annotation.id === firstPendingId
-          );
-          
-          if (indexInBatch !== -1) {
-            const overallIndex = (currentBatch - 1) * batchSize + indexInBatch;
-            setPage(overallIndex + 1);
-            found = true;
-          } else if (!batch.hasMore) {
-            if (hasMore) setPage(prev => prev + 1);
-            break;
+          if (data.items && data.items.length > 0 && data.items[0].status === 'PENDING') {
+            setPage(searchPage);
+            return;
           }
           
-          currentBatch++;
+          if (!data.hasMore) break;
+          
+          searchPage++;
+          pagesSearched++;
+        } catch (error) {
+          console.error('Error searching for next pending annotation:', error);
+          break;
         }
-        
-        if (!found && hasMore) {
-          setPage(prev => prev + 1);
-        }
-      } else if (hasMore) {
+      }
+
+      if (hasMore) {
         setPage(prev => prev + 1);
       }
     } catch (error) {
-      console.error('Error finding next pending annotation:', error);
+      console.error('Error in handleAnnotationSuccess:', error);
       if (hasMore) {
         setPage(prev => prev + 1);
       }
     }
-  }, [taskId, hasMore, queryClient]);
+  }, [page, taskId, hasMore, isFetching, isLoading]);
 
   if (isLoading) {
     return <AnnotationTaskDetailSkeleton />;
