@@ -16,6 +16,7 @@ export interface SpecimensQuery {
   species?: string | null;
   sex?: string | null;
   abdomenStatus?: string | null;
+  includeAllImages?: boolean;
 }
 
 export interface SpecimenCountsQuery {
