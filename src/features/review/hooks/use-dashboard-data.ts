@@ -1,4 +1,5 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+
 import {
   getDashboardMetrics,
   getSpecimenCounts,
@@ -7,6 +8,9 @@ import {
 import type { DashboardMetrics } from '@/features/review/types/model';
 import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
 import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
+
+const percentage = (value: number, total: number) =>
+  total ? Math.round((value / total) * 100) : 0;
 
 export function useDashboardDataQuery(
   request: DashboardMetricsRequestDto,
@@ -43,33 +47,29 @@ export function useDashboardDataQuery(
       let unfed = 0;
       let gravid = 0;
 
-      for (const site of specimenCounts.data) {
-        for (const specimenCount of site.counts) {
-          const species = (specimenCount.species ?? '').trim();
-          const sex = (specimenCount.sex ?? '').toLowerCase();
-          const abdomen = (specimenCount.abdomenStatus ?? '').toLowerCase();
+      specimenCounts.data.forEach(site => {
+        site.counts.forEach(entry => {
+          const species = (entry.species ?? '').trim();
+          const sex = (entry.sex ?? '').toLowerCase();
+          const abdomen = (entry.abdomenStatus ?? '').toLowerCase();
 
           if (species) {
             speciesTotals.set(
               species,
-              (speciesTotals.get(species) ?? 0) + specimenCount.count,
+              (speciesTotals.get(species) ?? 0) + entry.count,
             );
           }
-          if (sex === 'male') male += specimenCount.count;
-          if (sex === 'female') female += specimenCount.count;
 
-          // Only count abdomen status for female mosquitoes
-          if (sex === 'female' && abdomen) {
-            if (abdomen === 'fully fed') {
-              fed += specimenCount.count;
-            } else if (abdomen === 'unfed') {
-              unfed += specimenCount.count;
-            } else if (abdomen === 'gravid') {
-              gravid += specimenCount.count;
-            }
+          if (sex === 'male') {
+            male += entry.count;
+          } else if (sex === 'female') {
+            female += entry.count;
+            if (abdomen === 'fully fed') fed += entry.count;
+            else if (abdomen === 'unfed') unfed += entry.count;
+            else if (abdomen === 'gravid') gravid += entry.count;
           }
-        }
-      }
+        });
+      });
 
       const speciesDistribution = Array.from(speciesTotals.entries())
         .map(([speciesName, speciesCount]) => ({
@@ -81,41 +81,24 @@ export function useDashboardDataQuery(
       const safeTotalSex = male + female;
       const sexDistribution = {
         total: safeTotalSex,
-        male: {
-          count: male,
-          percentage: safeTotalSex
-            ? Math.round((male / safeTotalSex) * 100)
-            : 0,
-        },
+        male: { count: male, percentage: percentage(male, safeTotalSex) },
         female: {
           count: female,
-          percentage: safeTotalSex
-            ? Math.round((female / safeTotalSex) * 100)
-            : 0,
+          percentage: percentage(female, safeTotalSex),
         },
       } as const;
 
-      // Total should match female count (all female mosquitoes)
       const safeTotalAbdomen = female;
       const abdomenStatusDistribution = {
         total: safeTotalAbdomen,
-        fed: {
-          count: fed,
-          percentage: safeTotalAbdomen
-            ? Math.round((fed / safeTotalAbdomen) * 100)
-            : 0,
-        },
+        fed: { count: fed, percentage: percentage(fed, safeTotalAbdomen) },
         unfed: {
           count: unfed,
-          percentage: safeTotalAbdomen
-            ? Math.round((unfed / safeTotalAbdomen) * 100)
-            : 0,
+          percentage: percentage(unfed, safeTotalAbdomen),
         },
         gravid: {
           count: gravid,
-          percentage: safeTotalAbdomen
-            ? Math.round((gravid / safeTotalAbdomen) * 100)
-            : 0,
+          percentage: percentage(gravid, safeTotalAbdomen),
         },
       } as const;
 

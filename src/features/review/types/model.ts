@@ -1,4 +1,5 @@
 import type { SiteDto } from '@/shared/entities/site/dto';
+import type { Site } from '@/shared/entities/site/model';
 
 export interface MonthlySummary {
   district: string;
@@ -67,6 +68,42 @@ export interface HouseholdRowData {
 export interface HouseholdTableMeta {
   rows: HouseholdRowData[];
   minWidth: number;
+}
+
+export type DiscrepancyFieldKey =
+  | 'collectorName'
+  | 'collectorTitle'
+  | 'collectionMethod'
+  | 'numPeopleSleptInHouse'
+  | 'wasIrsConducted'
+  | 'monthsSinceIrs'
+  | 'numLlinsAvailable'
+  | 'llinType'
+  | 'llinBrand'
+  | 'numPeopleSleptUnderLlin';
+
+export interface DiscrepancyField {
+  key: DiscrepancyFieldKey;
+  label: string;
+  details: string;
+}
+
+export interface SiteDiscrepancySummary {
+  siteId: number;
+  sessionCount: number;
+  siteLabel: SiteLabel;
+  fields: DiscrepancyField[];
+}
+
+export interface MissingSiteSummary {
+  site: Site;
+  display: string;
+}
+
+export interface DataQualitySummary {
+  siteDiscrepancies: SiteDiscrepancySummary[];
+  missingSites: MissingSiteSummary[];
+  isLoading: boolean;
 }
 
 export interface MosquitoColumn {
