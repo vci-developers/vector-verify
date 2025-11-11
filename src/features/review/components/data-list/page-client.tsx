@@ -19,6 +19,7 @@ import { calculateDateRange, toDateOnly } from '@/shared/core/utils/date-range';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 import type { DateRangeOption } from '@/shared/core/utils/date-range';
 import type { MonthlySummary } from '@/features/review/types';
+import { SessionsCountCell } from './sessions-count-cell';
 
 export function ReviewDataListPageClient() {
   const router = useRouter();
@@ -136,16 +137,12 @@ export function ReviewDataListPageClient() {
         id: 'sessionCount',
         accessorKey: 'sessionCount',
         header: 'Sessions',
-        cell: ({ row }) => {
-          const summary = row.original;
-          return (
-            <div className="text-center">
-              <div className="text-foreground font-semibold">
-                {summary.sessionCount}
-              </div>
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <SessionsCountCell
+            district={row.original.district}
+            monthString={row.original.monthString}
+          />
+        ),
       },
       {
         id: 'actions',
