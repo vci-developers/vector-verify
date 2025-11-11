@@ -34,30 +34,6 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (!show) {
-    return <div className="w-20" />;
-  }
-
-  if (!district || !monthYear) {
-    const handleBackClick = () => {
-      router.back();
-    };
-
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={handleBackClick}
-        className="flex items-center gap-2"
-        aria-label="Go back to previous page"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Previous
-      </Button>
-    );
-  }
-
   const navItems: NavItem[] = useMemo(
     () => [
       {
@@ -94,6 +70,30 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
   };
 
   const isActivePath = (path: string) => pathname === path;
+
+  if (!show) {
+    return <div className="w-20" />;
+  }
+
+  if (!district || !monthYear) {
+    const handleBackClick = () => {
+      router.back();
+    };
+
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={handleBackClick}
+        className="flex items-center gap-2"
+        aria-label="Go back to previous page"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Previous
+      </Button>
+    );
+  }
 
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="left">
