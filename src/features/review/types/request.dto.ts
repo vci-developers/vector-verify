@@ -16,6 +16,7 @@ export interface SpecimensRequestDto {
   species?: string;
   sex?: string;
   abdomenStatus?: string;
+  includeAllImages?: boolean;
 }
 
 export interface SpecimenCountsRequestDto {
@@ -40,4 +41,10 @@ export interface SessionsRequestDto {
     | 'collectionDate';
   sortOrder?: 'asc' | 'desc';
   type?: string;
+}
+
+export interface DashboardMetricsRequestDto {
+  district: string;
+  startDate: string;
+  endDate: string;
 }

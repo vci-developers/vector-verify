@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select';
+import { Calendar } from 'lucide-react';
 import {
   DATE_RANGE_OPTIONS,
   type DateRangeOption,
@@ -25,18 +26,13 @@ export function DateRangeFilter({
 }: DateRangeFilterProps) {
   return (
     <div className="flex items-center gap-2">
-      <label
-        htmlFor="date-range"
-        className="text-muted-foreground text-sm font-medium"
-      >
-        Date Range:
-      </label>
+      <Calendar className="text-muted-foreground h-4 w-4" />
       <Select
         value={value ?? 'all-time'}
         onValueChange={onValueChange}
         disabled={disabled}
       >
-        <SelectTrigger id="date-range" className="w-[180px]">
+        <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select range" />
         </SelectTrigger>
         <SelectContent>

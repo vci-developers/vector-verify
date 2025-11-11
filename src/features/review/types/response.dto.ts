@@ -46,3 +46,29 @@ export interface SessionsResponseDto {
   offset: number;
   hasMore: boolean;
 }
+
+export interface DashboardMetricsResponseDto {
+  siteInformation: {
+    housesUsedForCollection: number;
+    peopleInAllHousesInspected: number;
+  };
+  entomologicalSummary: {
+    vectorDensity: number;
+    fedMosquitoesToPeopleSleptRatio: number;
+    totalLlins: number;
+    totalPeopleSleptUnderLlin: number;
+    llinsPerPerson: number;
+  };
+  speciesDistribution?: Array<{ species: string; count: number }>;
+  sexRatio?: {
+    total: number;
+    male: { count: number; percentage: number };
+    female: { count: number; percentage: number };
+  };
+  abdomenStatus?: {
+    total: number;
+    fed: { count: number; percentage: number };
+    unfed: { count: number; percentage: number };
+    gravid: { count: number; percentage: number };
+  };
+}

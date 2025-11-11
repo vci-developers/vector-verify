@@ -25,6 +25,7 @@ export const reviewKeys = {
     species?: string | null,
     sex?: string | null,
     abdomenStatus?: string | null,
+    includeAllImages?: boolean,
   ) =>
     [
       ...reviewKeys.root,
@@ -39,6 +40,7 @@ export const reviewKeys = {
         species,
         sex,
         abdomenStatus,
+        includeAllImages,
       },
     ] as const,
 
@@ -48,8 +50,6 @@ export const reviewKeys = {
     endDate?: string,
     limit?: number,
     offset?: number,
-    siteId?: number,
-    type?: string,
     sortBy?:
       | 'id'
       | 'frontendId'
@@ -58,6 +58,7 @@ export const reviewKeys = {
       | 'submittedAt'
       | 'collectionDate',
     sortOrder?: 'asc' | 'desc',
+    type?: string,
   ) =>
     [
       ...reviewKeys.root,
@@ -68,10 +69,9 @@ export const reviewKeys = {
         endDate,
         limit,
         offset,
-        siteId,
-        type,
         sortBy,
         sortOrder,
+        type,
       },
     ] as const,
   sessionsBySite: (

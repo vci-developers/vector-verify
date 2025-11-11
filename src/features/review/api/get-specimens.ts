@@ -9,7 +9,6 @@ import type {
 } from '@/features/review/types';
 import type { SpecimensListResponseDto } from '@/shared/entities/specimen/dto';
 
-
 export async function getSpecimens(
   filters: SpecimensQuery = {},
 ): Promise<OffsetPage<Specimen>> {
@@ -23,8 +22,8 @@ export async function getSpecimens(
     species,
     sex,
     abdomenStatus,
+    includeAllImages,
   } = filters;
-
 
   const query: SpecimensRequestDto = {
     ...(offset !== undefined ? { offset } : {}),
@@ -36,14 +35,17 @@ export async function getSpecimens(
     ...(species ? { species } : {}),
     ...(sex ? { sex } : {}),
     ...(abdomenStatus ? { abdomenStatus } : {}),
+    // Only include includeAllImages if it's explicitly true (omit if false/undefined)
+    ...(includeAllImages === true ? { includeAllImages: true } : {}),
   };
-
 
   const data = await bff<SpecimensListResponseDto>('/specimens', {
     method: 'GET',
-    query: query as Record<string, string | number | boolean | null | undefined>,
+    query: query as Record<
+      string,
+      string | number | boolean | null | undefined
+    >,
   });
-
 
   return mapSpecimenExpandedDtoToPage(data);
 }

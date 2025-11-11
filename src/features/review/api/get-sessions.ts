@@ -1,6 +1,8 @@
 import bff from '@/shared/infra/api/bff-client';
-import type { SessionsQuery, SessionsResponseDto } from '@/features/review/types';
-import { SessionsRequestDto } from '@/features/review/types';
+import type {
+  SessionsQuery,
+  SessionsResponseDto,
+} from '@/features/review/types';
 import { mapSessionsResponseDtoToModel } from '@/shared/entities/session';
 import type { Session } from '@/shared/entities/session/model';
 import { DEFAULT_PAGE_SIZE, OffsetPage } from '@/shared/entities/pagination';
@@ -22,21 +24,22 @@ async function requestSessions(
     type,
   } = params;
 
-  const query = {
-    limit: Math.min(limit, PAGE_LIMIT),
+  const query: Record<string, string | number> = {
+    limit: Math.min(limit ?? DEFAULT_PAGE_SIZE, PAGE_LIMIT),
     offset,
-    ...(district ? { district } : {}),
-    ...(siteId !== undefined ? { siteId } : {}),
-    ...(startDate ? { startDate } : {}),
-    ...(endDate ? { endDate } : {}),
-    ...(sortBy ? { sortBy } : {}),
-    ...(sortOrder ? { sortOrder } : {}),
-    ...(type ? { type } : {}),
   };
+
+  if (district) query.district = district;
+  if (siteId !== undefined) query.siteId = siteId;
+  if (startDate) query.startDate = startDate;
+  if (endDate) query.endDate = endDate;
+  if (sortBy) query.sortBy = sortBy;
+  if (sortOrder) query.sortOrder = sortOrder;
+  if (type) query.type = type;
 
   return bff<SessionsResponseDto>('/sessions', {
     method: 'GET',
-    query
+    query,
   });
 }
 
