@@ -12,7 +12,7 @@ import {
   getServerUserProfile,
   getServerUserPermissions,
 } from '@/features/user/server';
-import { ConditionalHeader } from '@/features/dashboard/components/conditional-header';
+import { DashboardHeader } from '@/features/dashboard/components/header';
 import { dehydrateWithSeed } from '@/shared/infra/react-query/server';
 import {
   Card,
@@ -108,7 +108,7 @@ export default async function DashboardLayout({
     return (
       <HydrationBoundary state={dehydratedState}>
         <Fragment>
-          <ConditionalHeader />
+          <DashboardHeader />
           {children}
         </Fragment>
       </HydrationBoundary>

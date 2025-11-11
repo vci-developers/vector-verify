@@ -34,7 +34,7 @@ export function DashboardPageClient() {
             VectorVerify
           </h1>
           <p className="text-2xl text-black">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Verify surveillance data quality and keep vector control insights on track.
           </p>
         </div>
         <div className="w-full max-w-3xl space-y-6">
