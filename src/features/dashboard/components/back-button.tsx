@@ -12,8 +12,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/shared/ui/drawer';
-import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, ArrowLeft } from 'lucide-react';
+import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, FileEdit } from 'lucide-react';
 import { cn } from '@/shared/core/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select';
 
 interface BackButtonProps {
   show: boolean;
@@ -75,34 +82,14 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
     return <div className="w-20" />;
   }
 
-  if (!district || !monthYear) {
-    const handleBackClick = () => {
-      router.back();
-    };
-
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={handleBackClick}
-        className="flex items-center gap-2"
-        aria-label="Go back to previous page"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Previous
-      </Button>
-    );
-  }
-
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="left">
       <DrawerTrigger asChild>
         <Button 
           variant="outline" 
-          size="icon" 
+          size="lg"
           className="shrink-0"
-          aria-label="Open review navigation menu"
+          aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open navigation menu</span>
@@ -114,7 +101,13 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1">
                 <DrawerTitle>
-                  {decodeURIComponent(district)} - {decodeURIComponent(monthYear)}
+                  {district && monthYear ? (
+                    <>
+                      {decodeURIComponent(district)} - {decodeURIComponent(monthYear)}
+                    </>
+                  ) : (
+                    'Navigation'
+                  )}
                 </DrawerTitle>
               </div>
               <Button
@@ -131,36 +124,73 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
             </div>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto p-4">
-            <nav className="space-y-2" aria-label="Review sections">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = isActivePath(item.path);
-                
-                return (
-                  <button
-                    key={item.path}
+            <div className="space-y-4">
+              {district && monthYear && (
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Review</label>
+                  <Select onValueChange={handleNavigate} value={pathname}>
+                    <SelectTrigger className="w-full h-12 text-base">
+                      <SelectValue placeholder="Select review feature" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = isActivePath(item.path);
+                        return (
+                          <SelectItem 
+                            key={item.path} 
+                            value={item.path} 
+                            className={cn(
+                              "h-12 text-base",
+                              isActive && "bg-green-50 text-green-700 data-[highlighted]:bg-green-100"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Icon className={cn("h-5 w-5", isActive && "text-green-600")} />
+                              <span>{item.label}</span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {(pathname === '/review' || pathname.startsWith('/annotate')) && (
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Data Review</label>
+                  <Button
                     type="button"
-                    onClick={() => handleNavigate(item.path)}
+                    variant="outline"
                     className={cn(
-                      'w-full flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
-                      isActive
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border hover:bg-accent hover:text-accent-foreground'
+                      "w-full h-12 justify-start gap-3 text-base",
+                      pathname === '/review' && "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
                     )}
-                    aria-label={`Navigate to ${item.label}`}
-                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => handleNavigate('/review')}
                   >
-                    <Icon className={cn('h-5 w-5 mt-0.5 flex-shrink-0', isActive && 'text-primary')} />
-                    <div className="flex-1 space-y-1">
-                      <div className="font-medium leading-none">{item.label}</div>
-                      <p className="text-sm text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
+                    <Table className={cn("h-5 w-5", pathname === '/review' && "text-green-600")} />
+                    <span>Review List</span>
+                  </Button>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Annotation</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full h-12 justify-start gap-3 text-base",
+                    pathname.startsWith('/annotate') && "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                  )}
+                  onClick={() => handleNavigate('/annotate')}
+                >
+                  <FileEdit className={cn("h-5 w-5", pathname.startsWith('/annotate') && "text-green-600")} />
+                  <span>Annotation Tasks</span>
+                </Button>
+              </div>
+            </div>
           </div>
           <DrawerFooter className="border-t">
             <DrawerClose asChild>
