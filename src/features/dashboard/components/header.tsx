@@ -13,6 +13,10 @@ export function DashboardHeader() {
   const pathname = usePathname();
   const showBackButton = pathname !== '/';
 
+  if (pathname === '/') {
+    return null;
+  }
+
   return (
     <header className="bg-background flex items-center justify-between border-b p-4">
       {/* Left side - Back button */}
