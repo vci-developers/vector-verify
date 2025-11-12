@@ -17,7 +17,6 @@ import {
   PaginationLink,
 } from '@/ui/pagination';
 import type { SpecimensQuery } from '@/features/review/types';
-import { SpecimenImage } from './specimen-image';
 
 interface SiteSpecimenContentProps {
   siteId: number;
