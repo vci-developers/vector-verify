@@ -23,13 +23,7 @@ import {
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select';
+import { Checkbox } from '@/shared/ui/checkbox';
 import { useEffect } from 'react';
 
 interface MorphIdentificationFormProps {
@@ -55,9 +49,15 @@ export function MorphIdentificationForm({
     resolver: zodResolver(morphIdentificationFormSchema),
     defaultValues: {
       received: defaultValues?.received ?? false,
-      species: defaultValues?.species ?? undefined,
-      sex: defaultValues?.sex ?? undefined,
-      abdomenStatus: defaultValues?.abdomenStatus ?? undefined,
+      species: defaultValues?.received
+        ? (defaultValues?.species ?? undefined)
+        : undefined,
+      sex: defaultValues?.received
+        ? (defaultValues?.sex ?? undefined)
+        : undefined,
+      abdomenStatus: defaultValues?.received
+        ? (defaultValues?.abdomenStatus ?? undefined)
+        : undefined,
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -66,26 +66,31 @@ export function MorphIdentificationForm({
   const received = morphForm.watch('received') ?? false;
   const selectedSpecies = morphForm.watch('species');
   const selectedSex = morphForm.watch('sex');
-  const abdomenStatus = morphForm.watch('abdomenStatus');
+  const selectedAbdomenStatus = morphForm.watch('abdomenStatus');
 
   useEffect(() => {
     onValuesChange?.({
       received,
       species: selectedSpecies,
       sex: selectedSex,
-      abdomenStatus,
+      abdomenStatus: selectedAbdomenStatus,
     });
-  }, [received, selectedSpecies, selectedSex, abdomenStatus, onValuesChange]);
+  }, [
+    received,
+    selectedSpecies,
+    selectedSex,
+    selectedAbdomenStatus,
+    onValuesChange,
+  ]);
 
   const sexEnabled = received && isSexEnabled(selectedSpecies);
   const abdomenStatusEnabled =
     received && isAbdomenStatusEnabled(selectedSpecies, selectedSex);
 
-  const handleReceivedChange = (value: string) => {
-    const newReceived = value === 'yes';
-    morphForm.setValue('received', newReceived, { shouldDirty: true });
+  const handleReceivedChange = (checked: boolean) => {
+    morphForm.setValue('received', checked, { shouldDirty: true });
 
-    if (!newReceived) {
+    if (!checked) {
       morphForm.setValue('species', '', { shouldDirty: true });
       morphForm.setValue('sex', '', { shouldDirty: true });
       morphForm.setValue('abdomenStatus', '', { shouldDirty: true });
@@ -130,39 +135,27 @@ export function MorphIdentificationForm({
             control={morphForm.control}
             name="received"
             render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel htmlFor={toDomId('received')} className="m-0">
-                  Did you receive the specimen for morphological
-                  identification?
-                </FormLabel>
+              <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                 <FormControl>
-                  <Select
-                    value={
-                      field.value === undefined
-                        ? ''
-                        : field.value
-                          ? 'yes'
-                          : 'no'
+                  <Checkbox
+                    checked={field.value ?? false}
+                    onCheckedChange={checked =>
+                      handleReceivedChange(checked === true)
                     }
-                    onValueChange={handleReceivedChange}
-                  >
-                    <SelectTrigger
-                      id={toDomId('received')}
-                      className={
-                        fieldState.error
-                          ? 'border-destructive focus:border-destructive focus:ring-destructive'
-                          : ''
-                      }
-                    >
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    id={toDomId('received')}
+                    aria-invalid={!!fieldState.error}
+                  />
                 </FormControl>
-                <FormMessage className="text-xs" />
+                <div className="space-y-1 leading-none">
+                  <FormLabel
+                    htmlFor={toDomId('received')}
+                    className="cursor-pointer font-normal"
+                  >
+                    Did you receive the specimen for morphological
+                    identification?
+                  </FormLabel>
+                  <FormMessage className="text-xs" />
+                </div>
               </FormItem>
             )}
           />
@@ -240,4 +233,3 @@ export function MorphIdentificationForm({
     </Form>
   );
 }
-

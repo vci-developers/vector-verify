@@ -6,8 +6,8 @@ import {
 import bff from '@/shared/infra/api/bff-client';
 
 export async function getSpecimen(specimenId: number): Promise<Specimen> {
-  const dto = await bff<SpecimenExpandedDto>(`/specimens/${specimenId}`);
+  const dto = await bff<SpecimenExpandedDto>(`/specimens/${specimenId}`, {
+    method: 'GET',
+  });
   return mapSpecimenExpandedDtoToModel(dto);
 }
-
-

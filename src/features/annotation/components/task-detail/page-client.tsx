@@ -23,6 +23,10 @@ import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewe
 import { VisualIdentificationForm } from './annotation-form-panel/visual-identification-form';
 import { MorphIdentificationForm } from './annotation-form-panel/morph-identification-form';
 import { useShouldProcessFurther } from './hooks/use-should-process-further';
+import {
+  getMorphFormDefaultValues,
+  type MorphFormDefaultValues,
+} from './utils/morph-form-defaults';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -32,12 +36,8 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
-  const [morphFormValues, setMorphFormValues] = useState<{
-    received: boolean;
-    species?: string;
-    sex?: string;
-    abdomenStatus?: string;
-  } | null>(null);
+  const [morphFormValues, setMorphFormValues] =
+    useState<MorphFormDefaultValues | null>(null);
 
   const {
     data: annotationsPage,
@@ -87,29 +87,22 @@ export function AnnotationTaskDetailPageClient({
   const { shouldProcessFurther, isLoading: isLoadingShouldProcessFurther } =
     useShouldProcessFurther(currentAnnotation?.specimen);
 
-  useEffect(() => {
-    if (!currentAnnotation) {
-      setMorphFormValues(null);
-      return;
+  const morphFormDefaultValues = useMemo<MorphFormDefaultValues | null>(() => {
+    if (!shouldProcessFurther || !currentAnnotation) {
+      return null;
     }
-
-    if (shouldProcessFurther) {
-      setMorphFormValues({
-        received: false,
-        species: currentAnnotation.morphSpecies ?? undefined,
-        sex: currentAnnotation.morphSex ?? undefined,
-        abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
-      });
-    } else {
-      setMorphFormValues(null);
-    }
+    return getMorphFormDefaultValues(currentAnnotation);
   }, [
-    currentAnnotation?.id,
     shouldProcessFurther,
+    currentAnnotation?.id,
     currentAnnotation?.morphSpecies,
     currentAnnotation?.morphSex,
     currentAnnotation?.morphAbdomenStatus,
   ]);
+
+  useEffect(() => {
+    setMorphFormValues(morphFormDefaultValues);
+  }, [morphFormDefaultValues]);
 
   if (isLoading || isLoadingShouldProcessFurther) {
     return (
@@ -243,13 +236,11 @@ export function AnnotationTaskDetailPageClient({
           <CardContent className="pt-0">
             <MorphIdentificationForm
               key={`morph-${currentAnnotation.id}`}
-              defaultValues={{
-                received: false,
-                species: currentAnnotation.morphSpecies ?? undefined,
-                sex: currentAnnotation.morphSex ?? undefined,
-                abdomenStatus:
-                  currentAnnotation.morphAbdomenStatus ?? undefined,
-              }}
+              defaultValues={
+                morphFormDefaultValues ?? {
+                  received: false,
+                }
+              }
               onValuesChange={setMorphFormValues}
             />
           </CardContent>
