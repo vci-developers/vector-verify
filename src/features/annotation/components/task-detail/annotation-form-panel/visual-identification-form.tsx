@@ -46,6 +46,9 @@ interface VisualIdentificationFormProps {
     abdomenStatus?: string;
   } | null;
   shouldProcessFurther?: boolean;
+  morphFormRef?: React.RefObject<{
+    validate: () => Promise<boolean>;
+  }>;
 }
 
 export function VisualIdentificationForm({
@@ -53,6 +56,7 @@ export function VisualIdentificationForm({
   defaultValues,
   morphFormValues,
   shouldProcessFurther = false,
+  morphFormRef,
 }: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
@@ -128,15 +132,30 @@ export function VisualIdentificationForm({
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    let morphSpecies: string | null = null;
-    let morphSex: string | null = null;
-    let morphAbdomenStatus: string | null = null;
-
-    if (shouldProcessFurther && morphFormValues?.received) {
-      morphSpecies = morphFormValues.species || null;
-      morphSex = morphFormValues.sex || null;
-      morphAbdomenStatus = morphFormValues.abdomenStatus || null;
+    if (
+      !formInput.flagged &&
+      shouldProcessFurther &&
+      morphFormValues?.received &&
+      morphFormRef?.current
+    ) {
+      const isValid = await morphFormRef.current.validate();
+      if (!isValid) {
+        return;
+      }
     }
+
+    const morphSpecies =
+      shouldProcessFurther && morphFormValues?.received
+        ? morphFormValues.species || null
+        : null;
+    const morphSex =
+      shouldProcessFurther && morphFormValues?.received
+        ? morphFormValues.sex || null
+        : null;
+    const morphAbdomenStatus =
+      shouldProcessFurther && morphFormValues?.received
+        ? morphFormValues.abdomenStatus || null
+        : null;
 
     await updateAnnotationMutation.mutateAsync({
       annotationId,
@@ -301,5 +320,3 @@ export function VisualIdentificationForm({
     </Form>
   );
 }
-
-

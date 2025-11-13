@@ -15,13 +15,16 @@ import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { notFound } from 'next/navigation';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
 import { VisualIdentificationForm } from './annotation-form-panel/visual-identification-form';
-import { MorphIdentificationForm } from './annotation-form-panel/morph-identification-form';
+import {
+  MorphIdentificationForm,
+  type MorphIdentificationFormRef,
+} from './annotation-form-panel/morph-identification-form';
 import { useShouldProcessFurther } from './hooks/use-should-process-further';
 import {
   getMorphFormDefaultValues,
@@ -38,6 +41,7 @@ export function AnnotationTaskDetailPageClient({
   const [page, setPage] = useState(1);
   const [morphFormValues, setMorphFormValues] =
     useState<MorphFormDefaultValues | null>(null);
+  const morphFormRef = useRef<MorphIdentificationFormRef>(null);
 
   const {
     data: annotationsPage,
@@ -195,6 +199,7 @@ export function AnnotationTaskDetailPageClient({
             }}
             morphFormValues={morphFormValues}
             shouldProcessFurther={shouldProcessFurther}
+            morphFormRef={morphFormRef}
           />
         </CardContent>
 
@@ -227,14 +232,15 @@ export function AnnotationTaskDetailPageClient({
               <CardTitle className="text-lg font-semibold">
                 Morph Identification Annotation Form
               </CardTitle>
-              <p className="text-muted-foreground text-sm">
+              <CardDescription>
                 Identify the specimen by examining it under a microscope.
-              </p>
+              </CardDescription>
             </div>
           </CardHeader>
 
           <CardContent className="pt-0">
             <MorphIdentificationForm
+              ref={morphFormRef}
               key={`morph-${currentAnnotation.id}`}
               defaultValues={
                 morphFormDefaultValues ?? {

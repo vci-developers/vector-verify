@@ -23,8 +23,12 @@ import {
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
-import { Checkbox } from '@/shared/ui/checkbox';
-import { useEffect } from 'react';
+import { Checkbox } from '@/ui/checkbox';
+import { useEffect, useImperativeHandle, forwardRef } from 'react';
+
+export interface MorphIdentificationFormRef {
+  validate: () => Promise<boolean>;
+}
 
 interface MorphIdentificationFormProps {
   defaultValues: {
@@ -41,10 +45,10 @@ interface MorphIdentificationFormProps {
   }) => void;
 }
 
-export function MorphIdentificationForm({
-  defaultValues,
-  onValuesChange,
-}: MorphIdentificationFormProps) {
+export const MorphIdentificationForm = forwardRef<
+  MorphIdentificationFormRef,
+  MorphIdentificationFormProps
+>(({ defaultValues, onValuesChange }, ref) => {
   const morphForm = useForm<MorphIdentificationFormInput>({
     resolver: zodResolver(morphIdentificationFormSchema),
     defaultValues: {
@@ -59,7 +63,7 @@ export function MorphIdentificationForm({
         ? (defaultValues?.abdomenStatus ?? undefined)
         : undefined,
     },
-    mode: 'onChange',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
   });
 
@@ -88,44 +92,78 @@ export function MorphIdentificationForm({
     received && isAbdomenStatusEnabled(selectedSpecies, selectedSex);
 
   const handleReceivedChange = (checked: boolean) => {
-    morphForm.setValue('received', checked, { shouldDirty: true });
+    morphForm.setValue('received', checked, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
 
     if (!checked) {
-      morphForm.setValue('species', '', { shouldDirty: true });
-      morphForm.setValue('sex', '', { shouldDirty: true });
-      morphForm.setValue('abdomenStatus', '', { shouldDirty: true });
-      morphForm.clearErrors(['species', 'sex', 'abdomenStatus']);
+      morphForm.setValue('species', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+      morphForm.setValue('sex', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+      morphForm.setValue('abdomenStatus', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+      morphForm.clearErrors(['species', 'sex', 'abdomenStatus', 'received']);
     }
-    morphForm.clearErrors('received');
   };
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    morphForm.setValue('species', newSpecies || '', { shouldDirty: true });
+    morphForm.setValue('species', newSpecies, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
 
     if (!isSexEnabled(newSpecies)) {
-      morphForm.setValue('sex', '', { shouldDirty: true });
-      morphForm.setValue('abdomenStatus', '', { shouldDirty: true });
+      morphForm.setValue('sex', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+      morphForm.setValue('abdomenStatus', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
       morphForm.clearErrors(['sex', 'abdomenStatus']);
     }
     morphForm.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
-    morphForm.setValue('sex', newSex || '', { shouldDirty: true });
+    morphForm.setValue('sex', newSex, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
 
     if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
-      morphForm.setValue('abdomenStatus', '', { shouldDirty: true });
+      morphForm.setValue('abdomenStatus', undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
       morphForm.clearErrors(['abdomenStatus']);
     }
     morphForm.clearErrors('sex');
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    morphForm.setValue('abdomenStatus', newAbdomenStatus || '', {
+    morphForm.setValue('abdomenStatus', newAbdomenStatus, {
       shouldDirty: true,
+      shouldValidate: false,
     });
     morphForm.clearErrors('abdomenStatus');
   };
+
+  useImperativeHandle(ref, () => ({
+    validate: async () => {
+      const isValid = await morphForm.trigger();
+      return isValid;
+    },
+  }));
 
   return (
     <Form {...morphForm}>
@@ -232,4 +270,6 @@ export function MorphIdentificationForm({
       </form>
     </Form>
   );
-}
+});
+
+MorphIdentificationForm.displayName = 'MorphIdentificationForm';
