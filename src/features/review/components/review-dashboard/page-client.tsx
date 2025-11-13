@@ -37,7 +37,7 @@ export function ReviewDashboardPageClient({
       </div>
 
       <div className="flex justify-center">
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
               <CardTitle className="text-xl">DHIS2 View</CardTitle>
@@ -75,7 +75,6 @@ export function ReviewDashboardPageClient({
             </CardContent>
           </Card>
 
-
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
               <CardTitle className="text-xl">Session View</CardTitle>
@@ -88,6 +87,24 @@ export function ReviewDashboardPageClient({
               <Button asChild className="w-full">
                 <Link href={`/review/${district}/${monthYear}/session-view`}>
                   Go to Session View
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl">Data Quality</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Review discrepancies and identify sites with missing household
+                data for this period.
+              </p>
+              <Button asChild className="w-full">
+                <Link href={`/review/${district}/${monthYear}/data-quality`}>
+                  Go to Data Quality
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

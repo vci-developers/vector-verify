@@ -9,7 +9,11 @@ function toURLSearchParams(query?: QueryInput): URLSearchParams | null {
   if (query instanceof URLSearchParams) return query;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value != null) params.set(key, String(value));
+    if (value != null) {
+      // Convert boolean to lowercase string to match standard query parameter format
+      const stringValue = typeof value === 'boolean' ? String(value).toLowerCase() : String(value);
+      params.set(key, stringValue);
+    }
   }
   return params;
 }

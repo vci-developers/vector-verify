@@ -30,6 +30,7 @@ export function useSpecimensQuery(
     species,
     sex,
     abdomenStatus,
+    includeAllImages,
   } = filters;
 
   const baseEnabled = Boolean(siteId && district && startDate && endDate);
@@ -46,6 +47,7 @@ export function useSpecimensQuery(
       species,
       sex,
       abdomenStatus,
+      includeAllImages,
     ) as SpecimensQueryKey,
     queryFn: () =>
       getSpecimens({
@@ -58,6 +60,7 @@ export function useSpecimensQuery(
         species,
         sex,
         abdomenStatus,
+        includeAllImages,
       }),
     enabled: (options?.enabled ?? true) && baseEnabled,
   });
