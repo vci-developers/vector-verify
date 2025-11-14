@@ -42,8 +42,9 @@
   --color-chart-green-dark: var(--chart-green-dark);
   --color-chart-green-medium: var(--chart-green-medium);
   --color-chart-green-light: var(--chart-green-light);
-  --color-auth-bg-gradient-start: var(--auth-bg-gradient-start);
-  --color-auth-bg-gradient-end: var(--auth-bg-gradient-end);
+  --color-auth-bg-gradient-top: var(--auth-bg-gradient-top);
+  --color-auth-bg-gradient-middle: var(--auth-bg-gradient-middle);
+  --color-auth-bg-gradient-bottom: var(--auth-bg-gradient-bottom);
   --color-auth-icon: var(--auth-icon);
   --color-auth-focus-border: var(--auth-focus-border);
   --color-auth-link: var(--auth-link);
@@ -93,8 +94,9 @@
   --chart-green-dark: #166534;
   --chart-green-medium: #22C55E;
   --chart-green-light: #86EFAC;
-  --auth-bg-gradient-start: #fbfdfc;
-  --auth-bg-gradient-end: #f5fbf7;
+  --auth-bg-gradient-top: #fbfdfc;
+  --auth-bg-gradient-middle: #f8fcfa;
+  --auth-bg-gradient-bottom: #f6fbf8;
   --auth-icon: #148376;
   --auth-focus-border: #6dcb81;
   --auth-link: #2f7b5e;

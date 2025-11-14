@@ -28,7 +28,7 @@ export function AuthLayout({
         className="relative hidden md:block"
         style={{
           background:
-            'linear-gradient(to bottom right, var(--auth-bg-gradient-start), var(--auth-bg-gradient-end))',
+            'linear-gradient(to bottom, var(--auth-bg-gradient-top) 0%, var(--auth-bg-gradient-middle) 50%, var(--auth-bg-gradient-bottom) 100%)',
         }}
       >
         <Image
@@ -78,4 +78,3 @@ export function AuthLayout({
     </div>
   );
 }
-
