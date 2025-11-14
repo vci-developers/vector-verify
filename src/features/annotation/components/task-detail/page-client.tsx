@@ -32,6 +32,7 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<'PENDING' | undefined>(undefined);
   const queryClient = useQueryClient();
 
   const {
@@ -42,6 +43,7 @@ export function AnnotationTaskDetailPageClient({
     taskId,
     page,
     limit: 1,
+    status: statusFilter,
   });
 
   const { data: taskProgress } = useAnnotationTaskProgressQuery(taskId);
@@ -82,44 +84,61 @@ export function AnnotationTaskDetailPageClient({
   const handleAnnotationSuccess = useCallback(async () => {
     if (isFetching || isLoading) return;
 
-    try {
-      let searchPage = page + 1;
-      const maxSearchPages = 50; 
-      let pagesSearched = 0;
+    await queryClient.invalidateQueries({
+      queryKey: annotationKeys.taskAnnotations(taskId),
+    });
 
-      while (pagesSearched < maxSearchPages) {
-        try {
-          const data = await getAnnotations({
-            taskId,
-            page: searchPage,
-            limit: 1,
-          });
-          
-          if (data.items && data.items.length > 0 && data.items[0].status === 'PENDING') {
-            setPage(searchPage);
-            return;
-          }
-          
-          if (!data.hasMore) break;
-          
-          searchPage++;
-          pagesSearched++;
-        } catch (error) {
-          console.error('Error searching for next pending annotation:', error);
-          break;
+    try {
+      const pendingData = await getAnnotations({
+        taskId,
+        page: 1,
+        limit: 1,
+        status: 'PENDING',
+      });
+      
+      if (!pendingData.items?.length) {
+        if (hasMore) {
+          setPage(prev => prev + 1);
         }
+        return;
       }
 
-      if (hasMore) {
+      const pendingId = pendingData.items[0].id;
+      
+      const totalPages = annotationsPage?.total ?? 0;
+      const startPage = Math.min(page + 1, totalPages || 1);
+      const maxPagesToCheck = Math.min(20, totalPages);
+      
+      const pagesToCheck = Array.from({ length: maxPagesToCheck }, (_, i) => {
+        const pageNum = startPage + i;
+        return pageNum <= totalPages ? pageNum : (pageNum % totalPages) || 1;
+      });
+      
+      const pageResults = await Promise.all(
+        pagesToCheck.map(async (pageNum) => {
+          try {
+            const data = await getAnnotations({ taskId, page: pageNum, limit: 1 });
+            return { pageNum, annotation: data.items?.[0] };
+          } catch {
+            return { pageNum, annotation: null };
+          }
+        })
+      );
+      
+      const foundPage = pageResults.find(result => result.annotation?.id === pendingId);
+      
+      if (foundPage) {
+        setPage(foundPage.pageNum);
+      } else if (hasMore) {
         setPage(prev => prev + 1);
       }
     } catch (error) {
-      console.error('Error in handleAnnotationSuccess:', error);
+      console.error('Error finding next pending annotation:', error);
       if (hasMore) {
         setPage(prev => prev + 1);
       }
     }
-  }, [page, taskId, hasMore, isFetching, isLoading]);
+  }, [taskId, page, hasMore, isFetching, isLoading, queryClient, annotationsPage?.total]);
 
   if (isLoading) {
     return <AnnotationTaskDetailSkeleton />;
