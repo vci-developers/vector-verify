@@ -12,7 +12,7 @@ import {
   getServerUserProfile,
   getServerUserPermissions,
 } from '@/features/user/server';
-import { DashboardHeader } from '@/features/dashboard';
+import { DashboardHeader } from '@/features/dashboard/components/header';
 import { dehydrateWithSeed } from '@/shared/infra/react-query/server';
 import {
   Card,

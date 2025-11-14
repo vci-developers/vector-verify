@@ -16,6 +16,7 @@ export interface SpecimensRequestDto {
   species?: string;
   sex?: string;
   abdomenStatus?: string;
+  includeAllImages?: boolean;
 }
 
 export interface SpecimenCountsRequestDto {

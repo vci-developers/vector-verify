@@ -59,6 +59,10 @@ export function SpecimenViewPageClient({
     () => districtSites.map(site => site.houseNumber ?? `Site ${site.siteId}`),
     [districtSites],
   );
+  const villageNames = useMemo(
+    () => districtSites.map(site => site.villageName ?? null),
+    [districtSites],
+  );
 
   const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString(
     'en-US',
@@ -135,6 +139,7 @@ export function SpecimenViewPageClient({
         <SpecimenReviewAccordion
           siteIds={siteIds}
           houseNumbers={houseNumbers}
+          villageNames={villageNames}
           district={formattedDistrict}
           startDate={startDate}
           endDate={endDate}
