@@ -20,6 +20,9 @@ import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-bre
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
 import { AnnotationForm } from './annotation-form-panel/annotation-form';
+import { getAnnotations } from '@/features/annotation/api/get-annotations';
+import { useQueryClient } from '@tanstack/react-query';
+import { annotationKeys } from '@/features/annotation/api/annotation-keys';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -29,6 +32,8 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<'PENDING' | undefined>(undefined);
+  const queryClient = useQueryClient();
 
   const {
     data: annotationsPage,
@@ -38,6 +43,7 @@ export function AnnotationTaskDetailPageClient({
     taskId,
     page,
     limit: 1,
+    status: statusFilter,
   });
 
   const { data: taskProgress } = useAnnotationTaskProgressQuery(taskId);
@@ -74,6 +80,65 @@ export function AnnotationTaskDetailPageClient({
       setPage(prev => Math.max(prev - 1, 1));
     }
   }, [page, isFetching, isLoading]);
+
+  const handleAnnotationSuccess = useCallback(async () => {
+    if (isFetching || isLoading) return;
+
+    await queryClient.invalidateQueries({
+      queryKey: annotationKeys.taskAnnotations(taskId),
+    });
+
+    try {
+      const pendingData = await getAnnotations({
+        taskId,
+        page: 1,
+        limit: 1,
+        status: 'PENDING',
+      });
+      
+      if (!pendingData.items?.length) {
+        if (hasMore) {
+          setPage(prev => prev + 1);
+        }
+        return;
+      }
+
+      const pendingId = pendingData.items[0].id;
+      
+      const totalPages = annotationsPage?.total ?? 0;
+      const startPage = Math.min(page + 1, totalPages || 1);
+      const maxPagesToCheck = Math.min(20, totalPages);
+      
+      const pagesToCheck = Array.from({ length: maxPagesToCheck }, (_, i) => {
+        const pageNum = startPage + i;
+        return pageNum <= totalPages ? pageNum : (pageNum % totalPages) || 1;
+      });
+      
+      const pageResults = await Promise.all(
+        pagesToCheck.map(async (pageNum) => {
+          try {
+            const data = await getAnnotations({ taskId, page: pageNum, limit: 1 });
+            return { pageNum, annotation: data.items?.[0] };
+          } catch {
+            return { pageNum, annotation: null };
+          }
+        })
+      );
+      
+      const foundPage = pageResults.find(result => result.annotation?.id === pendingId);
+      
+      if (foundPage) {
+        setPage(foundPage.pageNum);
+      } else if (hasMore) {
+        setPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error finding next pending annotation:', error);
+      if (hasMore) {
+        setPage(prev => prev + 1);
+      }
+    }
+  }, [taskId, page, hasMore, isFetching, isLoading, queryClient, annotationsPage?.total]);
 
   if (isLoading) {
     return <AnnotationTaskDetailSkeleton />;
@@ -141,6 +206,7 @@ export function AnnotationTaskDetailPageClient({
           <AnnotationForm
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
+            taskId={taskId}
             defaultValues={{
               species: currentAnnotation.morphSpecies ?? undefined,
               sex: currentAnnotation.morphSex ?? undefined,
@@ -148,6 +214,7 @@ export function AnnotationTaskDetailPageClient({
               notes: currentAnnotation.notes ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
+            onSuccess={handleAnnotationSuccess}
           />
         </CardContent>
 
