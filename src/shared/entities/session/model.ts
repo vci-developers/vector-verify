@@ -1,3 +1,4 @@
+import { Site } from "../site";
 
 export interface Session {
   sessionId: number;
@@ -16,5 +17,6 @@ export interface Session {
   latitude: number | null;
   longitude: number | null;
   type: string;
+  site?: Site;
   collectorLastTrainedOn: number | null;
 }
