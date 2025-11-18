@@ -21,12 +21,12 @@ async function requestSessions(
     offset = 0,
     sortBy,
     sortOrder,
-    type,
   } = params;
 
   const query: Record<string, string | number> = {
     limit: Math.min(limit ?? DEFAULT_PAGE_SIZE, PAGE_LIMIT),
     offset,
+    type: 'SURVEILLANCE',
   };
 
   if (district) query.district = district;
@@ -35,7 +35,6 @@ async function requestSessions(
   if (endDate) query.endDate = endDate;
   if (sortBy) query.sortBy = sortBy;
   if (sortOrder) query.sortOrder = sortOrder;
-  if (type) query.type = type;
 
   return bff<SessionsResponseDto>('/sessions', {
     method: 'GET',
