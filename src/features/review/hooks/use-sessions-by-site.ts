@@ -38,10 +38,13 @@ export function useSessionsBySiteQuery(
       params?.startDate,
       params?.endDate,
       params?.siteId,
-      params?.type,
+      'SURVEILLANCE',
     ) as SessionsBySiteQueryKey,
     queryFn: async () => {
-      const sessions = await getAllSessions(params);
+      const sessions = await getAllSessions({
+        ...params,
+        type: 'SURVEILLANCE',
+      });
       const grouped = new Map<number, Session[]>();
 
       for (const session of sessions) {

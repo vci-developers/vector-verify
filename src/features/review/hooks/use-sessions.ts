@@ -34,9 +34,15 @@ export function useSessionsQuery(
                 endDate,
                 limit,
                 offset,
+                filters.sortBy,
+                filters.sortOrder,
+                'SURVEILLANCE',
             ) as SessionsQueryKey,
             queryFn: async () => {
-                const response = await getSessions(filters);
+                const response = await getSessions({
+                    ...filters,
+                    type: 'SURVEILLANCE',
+                });
                 return {
                     items: response.items,
                     total: response.total,
