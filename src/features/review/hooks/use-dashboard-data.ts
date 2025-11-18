@@ -24,19 +24,26 @@ export function useDashboardDataQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
+  // Ensure type defaults to SURVEILLANCE if not specified
+  const queryRequest: DashboardMetricsRequestDto = {
+    ...request,
+    type: request.type ?? 'SURVEILLANCE',
+  };
+
   return useQuery({
     queryKey: dashboardKeys.metrics(
-      request.district,
-      request.startDate,
-      request.endDate,
+      queryRequest.district,
+      queryRequest.startDate,
+      queryRequest.endDate,
+      queryRequest.type,
     ),
     queryFn: async () => {
       const [metrics, specimenCounts] = await Promise.all([
-        getDashboardMetrics(request),
+        getDashboardMetrics(queryRequest),
         getSpecimenCounts({
-          district: request.district,
-          startDate: request.startDate,
-          endDate: request.endDate,
+          district: queryRequest.district,
+          startDate: queryRequest.startDate,
+          endDate: queryRequest.endDate,
         }),
       ]);
 

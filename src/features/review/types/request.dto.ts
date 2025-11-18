@@ -47,4 +47,5 @@ export interface DashboardMetricsRequestDto {
   district: string;
   startDate: string;
   endDate: string;
+  type?: string;
 }

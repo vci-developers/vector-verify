@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +8,7 @@ import {
   AccordionTrigger,
 } from '@/ui/accordion';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
-import { getSessions } from '@/features/review/api/get-sessions';
+import { useSessionsInfiniteQuery } from '@/features/review/hooks/use-sessions';
 import { CircleUserIcon } from 'lucide-react';
 import { SessionDataTable } from './session-data';
 import { SessionsAccordionSkeleton } from './loading-skeleton';
@@ -50,33 +49,18 @@ export function SessionsViewPageClient({
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: [
-      'sessions',
-      decodedDistrict,
+  } = useSessionsInfiniteQuery(
+    {
+      district: decodedDistrict,
       startDate,
       endDate,
-      DEFAULT_PAGE_SIZE,
-    ],
-    queryFn: async ({ pageParam = 0 }) => {
-      return getSessions({
-        district: decodedDistrict,
-        startDate,
-        endDate,
-        limit: DEFAULT_PAGE_SIZE,
-        offset: pageParam,
-      });
+      limit: DEFAULT_PAGE_SIZE,
+      // type defaults to 'SURVEILLANCE' in the hook
     },
-    getNextPageParam: (lastPage, allPages) => {
-      const loaded = allPages.reduce(
-        (sum, page) => sum + (page.items?.length ?? 0),
-        0
-      );
-      return loaded < (lastPage.total ?? 0) ? loaded : undefined;
-    },
-    enabled: Boolean(decodedDistrict && startDate && endDate),
-    initialPageParam: 0,
-  });
+    {
+      enabled: Boolean(decodedDistrict && startDate && endDate),
+    }
+  );
 
   const sessions =
     data?.pages.flatMap((page) => page.items ?? []) ?? [];

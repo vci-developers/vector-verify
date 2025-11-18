@@ -32,13 +32,17 @@ export function useSessionsBySiteQuery(
     (options?.enabled ?? true) &&
     Boolean(params?.district && params?.startDate && params?.endDate);
 
+  // Type defaults to SURVEILLANCE in getSessions() API layer
+  // Include in query key for proper cache invalidation
+  const sessionType = params?.type ?? 'SURVEILLANCE';
+
   return useQuery({
     queryKey: reviewKeys.sessionsBySite(
       params?.district,
       params?.startDate,
       params?.endDate,
       params?.siteId,
-      params?.type,
+      sessionType,
     ) as SessionsBySiteQueryKey,
     queryFn: async () => {
       const sessions = await getAllSessions(params);
