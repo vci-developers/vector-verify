@@ -42,6 +42,12 @@
   --color-chart-green-dark: var(--chart-green-dark);
   --color-chart-green-medium: var(--chart-green-medium);
   --color-chart-green-light: var(--chart-green-light);
+  --color-auth-bg-gradient-top: var(--auth-bg-gradient-top);
+  --color-auth-bg-gradient-middle: var(--auth-bg-gradient-middle);
+  --color-auth-bg-gradient-bottom: var(--auth-bg-gradient-bottom);
+  --color-auth-icon: var(--auth-icon);
+  --color-auth-focus-border: var(--auth-focus-border);
+  --color-auth-link: var(--auth-link);
   --color-white-green: var(--white-green);
   --color-grass-green: var(--grass-green);
   --radius-sm: calc(var(--radius) - 4px);
@@ -86,8 +92,14 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.606 0.25 292.717);
   --chart-green-dark: #166534;
-  --chart-green-medium: #22c55e;
-  --chart-green-light: #86efac;
+  --chart-green-medium: #22C55E;
+  --chart-green-light: #86EFAC;
+  --auth-bg-gradient-top: #fbfdfc;
+  --auth-bg-gradient-middle: #f8fcfa;
+  --auth-bg-gradient-bottom: #f6fbf8;
+  --auth-icon: #148376;
+  --auth-focus-border: #6dcb81;
+  --auth-link: #2f7b5e;
   --white-green: #e0f2f1;
   --grass-green: #4ebd8b;
 }

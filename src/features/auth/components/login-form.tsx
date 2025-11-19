@@ -16,7 +16,8 @@ import {
   LoginSchema,
 } from '@/features/auth/components/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Loader, Lock, Mail } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -25,7 +26,6 @@ import { useLoginMutation } from '@/features/auth/hooks/use-login';
 
 export function LoginForm() {
   const router = useRouter();
-
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLoginMutation();
 
@@ -37,7 +37,7 @@ export function LoginForm() {
 
   const rootError = form.formState.errors.root?.message;
 
-  async function loginHandler(data: LoginFormData) {
+  async function handleSubmit(data: LoginFormData) {
     try {
       const result = await loginMutation.mutateAsync({
         email: data.email,
@@ -56,24 +56,24 @@ export function LoginForm() {
     }
   }
 
-  function togglePasswordVisibilityHandler() {
-    setShowPassword(currentVisibility => !currentVisibility);
+  function togglePasswordVisibility() {
+    setShowPassword(prev => !prev);
   }
 
   return (
     <div className="grid gap-5">
-      {rootError ? (
+      {rootError && (
         <Alert
           variant="destructive"
           className="border-destructive/30 bg-destructive/10 mb-1"
         >
           <AlertDescription>{rootError}</AlertDescription>
         </Alert>
-      ) : null}
+      )}
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(loginHandler)}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-5"
           noValidate
         >
@@ -84,14 +84,17 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel className="text-foreground text-sm">Email</FormLabel>
                 <div className="relative">
-                  <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <Mail
+                    className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                    style={{ color: 'var(--auth-icon)' }}
+                  />
                   <FormControl>
                     <Input
                       {...field}
                       type="email"
                       autoComplete="email"
                       placeholder="you@example.com"
-                      className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pl-10 transition focus-visible:ring-2"
+                      className="bg-muted/20 placeholder:text-muted-foreground/60 border-input h-11 rounded-xl border pl-10 transition focus-visible:border-[var(--auth-focus-border)] focus-visible:ring-0"
                     />
                   </FormControl>
                 </div>
@@ -109,14 +112,17 @@ export function LoginForm() {
                   Password
                 </FormLabel>
                 <div className="relative">
-                  <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <Lock
+                    className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                    style={{ color: 'var(--auth-icon)' }}
+                  />
                   <FormControl>
                     <Input
                       {...field}
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       placeholder="••••••••"
-                      className="bg-muted/20 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60 h-11 rounded-xl pr-12 pl-10 transition focus-visible:ring-2"
+                      className="bg-muted/20 placeholder:text-muted-foreground/60 border-input h-11 rounded-xl border pr-12 pl-10 transition focus-visible:border-[var(--auth-focus-border)] focus-visible:ring-0"
                     />
                   </FormControl>
                   <Button
@@ -126,13 +132,19 @@ export function LoginForm() {
                     aria-label={
                       showPassword ? 'Hide password' : 'Show password'
                     }
-                    onClick={togglePasswordVisibilityHandler}
+                    onClick={togglePasswordVisibility}
                     className="hover:bg-muted absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-2"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff
+                        className="h-4 w-4"
+                        style={{ color: 'var(--auth-icon)' }}
+                      />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye
+                        className="h-4 w-4"
+                        style={{ color: 'var(--auth-icon)' }}
+                      />
                     )}
                   </Button>
                 </div>
@@ -143,15 +155,21 @@ export function LoginForm() {
 
           <Button
             type="submit"
-            className="h-11 w-full rounded-xl shadow-sm transition-all hover:shadow-md"
+            className="from-chart-green-medium/90 to-chart-green-light hover:from-chart-green-medium/80 hover:to-chart-green-light/90 h-11 w-full cursor-pointer rounded-xl bg-gradient-to-r text-white transition-all"
             disabled={loginMutation.isPending}
           >
             {loginMutation.isPending ? (
               <Loader className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <ArrowRight className="mr-2 h-4 w-4" />
+              <Image
+                src="/assets/auth/icons/Arrow_right.png"
+                alt=""
+                width={16}
+                height={16}
+                className="mr-2 h-4 w-4"
+              />
             )}
-            {loginMutation.isPending ? 'Signing in…' : 'Sign in'}
+            {loginMutation.isPending ? 'Signing in…' : 'Sign In'}
           </Button>
         </form>
       </Form>
