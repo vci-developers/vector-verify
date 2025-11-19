@@ -15,6 +15,9 @@ import {
   annotationFormSchema,
   isAbdomenStatusEnabled,
   isSexEnabled,
+  SPECIES_VISUAL_IDS,
+  SEX_VISUAL_IDS,
+  ABDOMEN_STATUS_VISUAL_IDS,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
 import { Textarea } from '@/ui/textarea';
@@ -22,17 +25,13 @@ import { Button } from '@/ui/button';
 import { Toggle } from '@/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/shared/core/utils/dom';
-import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
-import {
-  SPECIES_MORPH_IDS,
-  SEX_MORPH_IDS,
-  ABDOMEN_STATUS_MORPH_IDS,
-} from '@/shared/entities/specimen/morph-ids';
+import { AnnotationSelectMenu } from './annotation-select-menu';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
+import type { MorphIdentificationFormRef } from './morph-identification-form';
 
-interface AnnotationFormProps {
+interface VisualIdentificationFormProps {
   annotationId: number;
   defaultValues: {
     species?: string;
@@ -41,12 +40,23 @@ interface AnnotationFormProps {
     notes?: string;
     flagged?: boolean;
   };
+  morphFormValues?: {
+    received: boolean;
+    species?: string;
+    sex?: string;
+    abdomenStatus?: string;
+  } | null;
+  shouldProcessFurther?: boolean;
+  morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
 
-export function AnnotationForm({
+export function VisualIdentificationForm({
   annotationId,
   defaultValues,
-}: AnnotationFormProps) {
+  morphFormValues,
+  shouldProcessFurther = false,
+  morphFormRef,
+}: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
     onSuccess: () => {
@@ -56,7 +66,7 @@ export function AnnotationForm({
     },
   });
 
-  const annotationForm = useForm<AnnotationFormInput>({
+  const form = useForm<AnnotationFormInput>({
     resolver: zodResolver(annotationFormSchema),
     defaultValues: {
       species: defaultValues?.species ?? undefined,
@@ -69,9 +79,9 @@ export function AnnotationForm({
     reValidateMode: 'onChange',
   });
 
-  const selectedSpecies = annotationForm.watch('species');
-  const selectedSex = annotationForm.watch('sex');
-  const isFlagged = annotationForm.watch('flagged');
+  const selectedSpecies = form.watch('species');
+  const selectedSex = form.watch('sex');
+  const isFlagged = form.watch('flagged');
 
   const sexEnabled = isSexEnabled(selectedSpecies);
   const abdomenStatusEnabled = isAbdomenStatusEnabled(
@@ -80,31 +90,31 @@ export function AnnotationForm({
   );
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue('species', newSpecies || '', { shouldDirty: true });
+    form.setValue('species', newSpecies || '', { shouldDirty: true });
 
     if (!isSexEnabled(newSpecies)) {
-      annotationForm.setValue('sex', '', { shouldDirty: true });
-      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
-      annotationForm.clearErrors(['sex', 'abdomenStatus']);
+      form.setValue('sex', '', { shouldDirty: true });
+      form.setValue('abdomenStatus', '', { shouldDirty: true });
+      form.clearErrors(['sex', 'abdomenStatus']);
     }
-    annotationForm.clearErrors('species');
+    form.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue('sex', newSex || '', { shouldDirty: true });
+    form.setValue('sex', newSex || '', { shouldDirty: true });
 
     if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
-      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
-      annotationForm.clearErrors(['abdomenStatus']);
+      form.setValue('abdomenStatus', '', { shouldDirty: true });
+      form.clearErrors(['abdomenStatus']);
     }
-    annotationForm.clearErrors('sex');
+    form.clearErrors('sex');
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue('abdomenStatus', newAbdomenStatus || '', {
+    form.setValue('abdomenStatus', newAbdomenStatus || '', {
       shouldDirty: true,
     });
-    annotationForm.clearErrors('abdomenStatus');
+    form.clearErrors('abdomenStatus');
   };
 
   const handleFlagged = (
@@ -114,29 +124,50 @@ export function AnnotationForm({
     updateFormValue(newFlagged);
 
     if (newFlagged) {
-      annotationForm.clearErrors(['species', 'sex', 'abdomenStatus']);
+      form.clearErrors(['species', 'sex', 'abdomenStatus']);
     } else {
-      annotationForm.clearErrors(['notes']);
+      form.clearErrors(['notes']);
     }
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
+    const shouldValidateMorphForm =
+      !formInput.flagged &&
+      shouldProcessFurther &&
+      morphFormValues?.received &&
+      morphFormRef?.current;
+
+    if (shouldValidateMorphForm) {
+      const isValid = await morphFormRef.current!.validate();
+      if (!isValid) {
+        return;
+      }
+    }
+
+    const hasMorphData = shouldProcessFurther && morphFormValues?.received;
+    const normalizeToNull = (value?: string) => value || null;
+
     await updateAnnotationMutation.mutateAsync({
       annotationId,
       payload: {
-        morphSpecies: formInput.species || null,
-        morphSex: formInput.sex || null,
-        morphAbdomenStatus: formInput.abdomenStatus || null,
-        notes: formInput.notes || null,
+        visualSpecies: normalizeToNull(formInput.species),
+        visualSex: normalizeToNull(formInput.sex),
+        visualAbdomenStatus: normalizeToNull(formInput.abdomenStatus),
+        morphSpecies: hasMorphData ? normalizeToNull(morphFormValues.species) : null,
+        morphSex: hasMorphData ? normalizeToNull(morphFormValues.sex) : null,
+        morphAbdomenStatus: hasMorphData
+          ? normalizeToNull(morphFormValues.abdomenStatus)
+          : null,
+        notes: normalizeToNull(formInput.notes),
         status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
       },
     });
   };
 
   return (
-    <Form {...annotationForm}>
+    <Form {...form}>
       <form
-        onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
+        onSubmit={form.handleSubmit(handleValidSubmit)}
         className="space-y-3"
       >
         <fieldset
@@ -144,7 +175,7 @@ export function AnnotationForm({
           className="space-y-3"
         >
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="species"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -152,12 +183,12 @@ export function AnnotationForm({
                   Species
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="species"
-                    morphIds={Object.values(SPECIES_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSpeciesSelect}
-                    inValid={!!fieldState.error}
+                    options={Object.values(SPECIES_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSpeciesSelect}
+                    isInvalid={!!fieldState.error}
                   />
                 </FormControl>
                 <FormMessage className="text-xs" />
@@ -166,7 +197,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="sex"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -174,12 +205,12 @@ export function AnnotationForm({
                   Sex
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Sex"
-                    morphIds={Object.values(SEX_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSexSelect}
-                    inValid={!!fieldState.error && sexEnabled}
+                    options={Object.values(SEX_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSexSelect}
+                    isInvalid={!!fieldState.error && sexEnabled}
                     disabled={!sexEnabled}
                   />
                 </FormControl>
@@ -189,7 +220,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="abdomenStatus"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -197,12 +228,12 @@ export function AnnotationForm({
                   Abdomen Status
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Abdomen Status"
-                    morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleAbdomenStatusSelect}
-                    inValid={!!fieldState.error && abdomenStatusEnabled}
+                    options={Object.values(ABDOMEN_STATUS_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleAbdomenStatusSelect}
+                    isInvalid={!!fieldState.error && abdomenStatusEnabled}
                     disabled={!abdomenStatusEnabled}
                   />
                 </FormControl>
@@ -212,7 +243,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="notes"
             render={({ field }) => (
               <FormItem>
@@ -237,7 +268,7 @@ export function AnnotationForm({
 
           <div className="flex gap-3 pt-2">
             <FormField
-              control={annotationForm.control}
+              control={form.control}
               name="flagged"
               render={({ field }) => (
                 <Toggle

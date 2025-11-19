@@ -15,6 +15,7 @@ export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
     sessionId: dto.sessionId,
     thumbnailUrl: dto.thumbnailUrl,
     thumbnailImageId: dto.thumbnailImageId,
+    shouldProcessFurther: dto.shouldProcessFurther,
   };
 }
 
