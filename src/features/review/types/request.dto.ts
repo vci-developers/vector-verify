@@ -24,6 +24,7 @@ export interface SpecimenCountsRequestDto {
   district?: string;
   startDate?: string;
   endDate?: string;
+  sessionId?: string;
 }
 
 export interface SessionsRequestDto {
@@ -46,7 +47,7 @@ export interface SessionsRequestDto {
 
 export interface DashboardMetricsRequestDto {
   district: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   type?: string;
 }

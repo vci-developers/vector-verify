@@ -1,12 +1,11 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-
-import type { Session } from '@/shared/entities/session/model';
 import { getAllSessions } from '@/features/review/api/get-sessions';
 import {
   reviewKeys,
   type SessionsBySiteQueryKey,
 } from '@/features/review/api/review-keys';
 import type { SessionsQuery } from '@/features/review/types/query';
+import type { Session } from '@/shared/entities/session/model';
 
 export interface SessionsBySite {
   siteId: number;

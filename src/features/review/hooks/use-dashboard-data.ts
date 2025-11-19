@@ -1,13 +1,12 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-
 import {
   getDashboardMetrics,
   getSpecimenCounts,
   dashboardKeys,
 } from '@/features/review/api';
+import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 import type { DashboardMetrics } from '@/features/review/types/model';
 import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
-import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 
 const percentage = (value: number, total: number) =>
   total ? Math.round((value / total) * 100) : 0;
@@ -67,9 +66,13 @@ export function useDashboardDataQuery(
             male += entry.count;
           } else if (sex === 'female') {
             female += entry.count;
-            if (abdomen === 'fully fed') fed += entry.count;
-            else if (abdomen === 'unfed') unfed += entry.count;
-            else if (abdomen === 'gravid') gravid += entry.count;
+            if (abdomen === 'fully fed') {
+              fed += entry.count;
+            } else if (abdomen === 'unfed') {
+              unfed += entry.count;
+            } else if (abdomen === 'gravid') {
+              gravid += entry.count;
+            }
           }
         });
       });

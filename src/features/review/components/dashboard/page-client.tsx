@@ -26,8 +26,8 @@ export function DashboardPageClient({
 
   const { data, isLoading, error } = useDashboardDataQuery({
     district,
-    startDate,
-    endDate,
+    ...(startDate ? { startDate } : {}),
+    ...(endDate ? { endDate } : {}),
   });
 
   const monthName = useMemo(() => {

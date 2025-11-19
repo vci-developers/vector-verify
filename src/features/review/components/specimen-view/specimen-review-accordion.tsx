@@ -15,8 +15,8 @@ interface SpecimenReviewAccordionProps {
   houseNumbers: string[];
   villageNames: (string | null)[];
   district: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   pageSize: number;
   filters: SpecimenFilters;
 }

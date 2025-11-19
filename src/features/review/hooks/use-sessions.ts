@@ -3,6 +3,7 @@ import {
   useInfiniteQuery,
   type UseQueryOptions,
   type UseInfiniteQueryOptions,
+  type InfiniteData,
 } from '@tanstack/react-query';
 import { getSessions } from '../api/get-sessions';
 import { reviewKeys, type SessionsQueryKey } from '../api/review-keys';
@@ -47,9 +48,9 @@ export function useSessionsQuery(
       sortOrder,
       type,
     ) as SessionsQueryKey,
-    queryFn: async () => getSessions(filters),
+    queryFn: () => getSessions(filters),
     enabled: enabled && (options?.enabled ?? true),
-    placeholderData: (prev) => prev,
+    placeholderData: prev => prev,
     ...options,
   });
 }
@@ -60,8 +61,7 @@ export function useSessionsInfiniteQuery(
     UseInfiniteQueryOptions<
       OffsetPage<Session>,
       Error,
-      OffsetPage<Session>,
-      OffsetPage<Session>,
+      InfiniteData<OffsetPage<Session>, number>,
       SessionsQueryKey,
       number
     >,

@@ -53,7 +53,7 @@ export function useMonthlySummaryQuery(
         district,
         type,
       }),
-    placeholderData: previousData => previousData,
+    placeholderData: prev => prev,
     ...(options ?? {}),
   });
 }

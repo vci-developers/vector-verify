@@ -9,14 +9,17 @@ export async function getDashboardMetrics(
 ): Promise<DashboardMetrics> {
   const { district, startDate, endDate, type = 'SURVEILLANCE' } = request;
 
+  const query: Record<string, string> = {
+    district,
+    type,
+  };
+
+  if (startDate) query.startDate = startDate;
+  if (endDate) query.endDate = endDate;
+
   const response = await bff<DashboardMetricsResponseDto>('/sessions/metrics', {
     method: 'GET',
-    query: {
-      district,
-      startDate,
-      endDate,
-      type,
-    },
+    query,
   });
 
   return mapDashboardMetricsResponseDtoToModel(response);
