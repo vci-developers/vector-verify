@@ -75,9 +75,9 @@ export const MorphIdentificationForm = forwardRef<
   useEffect(() => {
     onValuesChange?.({
       received,
-      species: selectedSpecies,
-      sex: selectedSex,
-      abdomenStatus: selectedAbdomenStatus,
+      species: selectedSpecies || undefined,
+      sex: selectedSex || undefined,
+      abdomenStatus: selectedAbdomenStatus || undefined,
     });
   }, [
     received,
@@ -115,12 +115,12 @@ export const MorphIdentificationForm = forwardRef<
   };
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    morphForm.setValue('species', newSpecies, {
+    morphForm.setValue('species', newSpecies ?? undefined, {
       shouldDirty: true,
       shouldValidate: false,
     });
 
-    if (!isSexEnabled(newSpecies)) {
+    if (!newSpecies || !isSexEnabled(newSpecies)) {
       morphForm.setValue('sex', undefined, {
         shouldDirty: true,
         shouldValidate: false,
@@ -135,12 +135,12 @@ export const MorphIdentificationForm = forwardRef<
   };
 
   const handleSexSelect = (newSex?: string) => {
-    morphForm.setValue('sex', newSex, {
+    morphForm.setValue('sex', newSex ?? undefined, {
       shouldDirty: true,
       shouldValidate: false,
     });
 
-    if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
+    if (!newSex || !isAbdomenStatusEnabled(selectedSpecies, newSex)) {
       morphForm.setValue('abdomenStatus', undefined, {
         shouldDirty: true,
         shouldValidate: false,
@@ -151,7 +151,7 @@ export const MorphIdentificationForm = forwardRef<
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    morphForm.setValue('abdomenStatus', newAbdomenStatus, {
+    morphForm.setValue('abdomenStatus', newAbdomenStatus ?? undefined, {
       shouldDirty: true,
       shouldValidate: false,
     });
