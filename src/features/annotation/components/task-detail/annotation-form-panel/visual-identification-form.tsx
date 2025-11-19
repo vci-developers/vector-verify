@@ -29,6 +29,7 @@ import { AnnotationSelectMenu } from './annotation-select-menu';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
+import type { MorphIdentificationFormRef } from './morph-identification-form';
 
 interface VisualIdentificationFormProps {
   annotationId: number;
@@ -46,9 +47,7 @@ interface VisualIdentificationFormProps {
     abdomenStatus?: string;
   } | null;
   shouldProcessFurther?: boolean;
-  morphFormRef?: React.RefObject<{
-    validate: () => Promise<boolean>;
-  }>;
+  morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
 
 export function VisualIdentificationForm({
@@ -132,41 +131,34 @@ export function VisualIdentificationForm({
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    if (
+    const shouldValidateMorphForm =
       !formInput.flagged &&
       shouldProcessFurther &&
       morphFormValues?.received &&
-      morphFormRef?.current
-    ) {
-      const isValid = await morphFormRef.current.validate();
+      morphFormRef?.current;
+
+    if (shouldValidateMorphForm) {
+      const isValid = await morphFormRef.current!.validate();
       if (!isValid) {
         return;
       }
     }
 
-    const morphSpecies =
-      shouldProcessFurther && morphFormValues?.received
-        ? morphFormValues.species || null
-        : null;
-    const morphSex =
-      shouldProcessFurther && morphFormValues?.received
-        ? morphFormValues.sex || null
-        : null;
-    const morphAbdomenStatus =
-      shouldProcessFurther && morphFormValues?.received
-        ? morphFormValues.abdomenStatus || null
-        : null;
+    const hasMorphData = shouldProcessFurther && morphFormValues?.received;
+    const normalizeToNull = (value?: string) => value || null;
 
     await updateAnnotationMutation.mutateAsync({
       annotationId,
       payload: {
-        visualSpecies: formInput.species || null,
-        visualSex: formInput.sex || null,
-        visualAbdomenStatus: formInput.abdomenStatus || null,
-        morphSpecies,
-        morphSex,
-        morphAbdomenStatus,
-        notes: formInput.notes || null,
+        visualSpecies: normalizeToNull(formInput.species),
+        visualSex: normalizeToNull(formInput.sex),
+        visualAbdomenStatus: normalizeToNull(formInput.abdomenStatus),
+        morphSpecies: hasMorphData ? normalizeToNull(morphFormValues.species) : null,
+        morphSex: hasMorphData ? normalizeToNull(morphFormValues.sex) : null,
+        morphAbdomenStatus: hasMorphData
+          ? normalizeToNull(morphFormValues.abdomenStatus)
+          : null,
+        notes: normalizeToNull(formInput.notes),
         status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
       },
     });

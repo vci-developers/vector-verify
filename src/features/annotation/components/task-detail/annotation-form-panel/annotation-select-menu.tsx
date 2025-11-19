@@ -30,12 +30,18 @@ export function AnnotationSelectMenu({
   isInvalid,
   placeholder,
 }: AnnotationSelectMenuProps) {
-  const value = selectedValue || '';
+  const value = selectedValue ?? '';
 
   return (
     <Select
       value={value}
-      onValueChange={newValue => onSelect(newValue === 'clear' ? undefined : newValue)}
+      onValueChange={newValue => {
+        if (newValue === 'clear') {
+          onSelect(undefined);
+        } else {
+          onSelect(newValue);
+        }
+      }}
       disabled={disabled}
     >
       <SelectTrigger
