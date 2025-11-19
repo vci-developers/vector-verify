@@ -3,9 +3,6 @@
 import React, { useMemo } from 'react';
 import { useSpecimenCountsQuery } from '@/features/review/hooks/use-specimen-counts';
 import {
-  SPECIES_MORPH_IDS,
-} from '@/shared/entities/specimen/morph-ids';
-import {
   Table,
   TableBody,
   TableCell,
@@ -14,13 +11,6 @@ import {
   TableRow,
 } from '@/ui/table';
 import { TableSkeleton } from './loading-skeleton';
-
-const SEX_SORT_ORDER = [
-  'Male',
-  'Female Unfed',
-  'Female Fully-fed',
-  'Female Gravid',
-];
 
 interface SessionDataTableProps {
   district: string;
@@ -39,52 +29,77 @@ export function SessionDataTable({
     monthYear, 
   });
 
-  const allSpecies = Object.values(SPECIES_MORPH_IDS);
-
-  const countsBySpeciesAndSex = useMemo(() => {
-    const result: Record<string, Record<string, number>> = {};
-    allSpecies.forEach(species => {
-      result[species] = {};
-      if (species !== 'Non-Mosquito') {
-        SEX_SORT_ORDER.forEach(sex => {
-          result[species][sex] = 0;
-        });
-      } else {
-        result[species]['total'] = 0;
-      }
-    });
-    if (specimenCounts?.data) {
-      specimenCounts.data.forEach(site => {
-        (site.counts ?? []).forEach(count => {
-          const speciesKey = count.species ?? 'Unknown';
-          if (speciesKey === 'Non-Mosquito') {
-            result[speciesKey]['total'] += count.count || 0;
-          } else if (count.sex === 'Male') {
-            result[speciesKey]['Male'] += count.count || 0;
-          } else {
-            switch (count.abdomenStatus) {
-              case 'Unfed':
-                result[speciesKey]['Female Unfed'] += count.count || 0;
-                break;
-              case 'Fully Fed':
-                result[speciesKey]['Female Fully-fed'] += count.count || 0;
-                break;
-              case 'Gravid':
-                result[speciesKey]['Female Gravid'] += count.count || 0;
-                break;
-            }
-          }
-        });
-      });
+  const tableData = useMemo(() => {
+    if (!specimenCounts?.data || !specimenCounts?.columns) {
+      return { columns: [], rowLabels: [], data: {} };
     }
-    return result;
-  }, [specimenCounts, allSpecies]);
 
+    const speciesSet = new Set<string>();
+    const rowLabelsSet = new Set<string>();
+    const dataMap: Record<string, Record<string, number>> = {};
+
+    specimenCounts.data.forEach(site => {
+      site.counts.forEach(count => {
+        if (count.species) {
+          speciesSet.add(count.species);
+        }
+
+
+        let rowLabel = '';
+        
+        if (count.sex === 'Male') {
+          rowLabel = 'Male';
+        } else if (count.sex === 'Female') {
+          if (count.abdomenStatus) {
+            rowLabel = `Female ${count.abdomenStatus}`;
+          } else {
+            rowLabel = 'Female';
+          }
+        } else if (count.sex) {
+          rowLabel = count.sex;
+        } else {
+          return;
+        }
+
+        rowLabelsSet.add(rowLabel);
+
+        const columnKey = count.species || 'Unknown';
+
+        if (!dataMap[rowLabel]) {
+          dataMap[rowLabel] = {};
+        }
+        if (!dataMap[rowLabel][columnKey]) {
+          dataMap[rowLabel][columnKey] = 0;
+        }
+        dataMap[rowLabel][columnKey] += count.count || 0;
+      });
+    });
+
+    const columns = Array.from(speciesSet).sort();
+
+    const rowLabels = Array.from(rowLabelsSet).sort((a, b) => {
+      if (a === 'Male') return -1;
+      if (b === 'Male') return 1;
+      if (a.startsWith('Female') && !b.startsWith('Female')) return -1;
+      if (b.startsWith('Female') && !a.startsWith('Female')) return 1;
+      return a.localeCompare(b);
+    });
+
+    return { columns, rowLabels, data: dataMap };
+  }, [specimenCounts]);
 
   if (isLoading) {
     return (
       <div className="w-full flex justify-center py-8">
         <TableSkeleton />
+      </div>
+    );
+  }
+
+  if (!tableData.columns.length || !tableData.rowLabels.length) {
+    return (
+      <div className="border-border/60 bg-background w-full overflow-auto rounded-xl border shadow-sm p-8 text-center text-muted-foreground">
+        No specimen data available for this session.
       </div>
     );
   }
@@ -97,49 +112,45 @@ export function SessionDataTable({
             <TableHead className="bg-muted border-border sticky left-0 z-30 max-w-[10rem] border-r px-3 text-xs uppercase">
               Sex/Abdomen Status
             </TableHead>
-            {allSpecies.map(species => (
+            {tableData.columns.map(column => (
               <TableHead
-                key={species}
+                key={column}
                 className="bg-muted text-center text-xs uppercase"
               >
-                {species}
+                {column}
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {SEX_SORT_ORDER.map(sex => (
-            <TableRow key={sex}>
-              <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
-                {sex}
-              </TableCell>
-              {allSpecies.map(species =>
-                species === 'Non-Mosquito' ? (
-                  <TableCell key={species} className="bg-background text-center tabular-nums" />
-                ) : (
-                  <TableCell key={species} className="bg-background text-center tabular-nums">
-                    {countsBySpeciesAndSex[species]?.[sex]
-                      ? countsBySpeciesAndSex[species][sex].toLocaleString()
-                      : '0'}
+          {tableData.rowLabels.map(rowLabel => {
+            const rowData = tableData.data[rowLabel];
+            return (
+              <TableRow key={rowLabel}>
+                <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
+                  {rowLabel}
+                </TableCell>
+                {tableData.columns.map(column => (
+                  <TableCell key={column} className="bg-background text-center tabular-nums">
+                    {rowData[column] ? rowData[column].toLocaleString() : '0'}
                   </TableCell>
-                )
-              )}
-            </TableRow>
-          ))}
+                ))}
+              </TableRow>
+            );
+          })}
           <TableRow>
             <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
               Total
             </TableCell>
-            {allSpecies.map(species => {
-              const total = species === 'Non-Mosquito'
-                ? countsBySpeciesAndSex[species]?.['total'] || 0
-                : SEX_SORT_ORDER.reduce(
-                    (sum, sex) => sum + (countsBySpeciesAndSex[species]?.[sex] || 0),
-                    0
-                  );
+            {tableData.columns.map(column => {
+              const columnTotal = specimenCounts?.data.reduce((sum, site) => {
+                return sum + site.counts
+                  .filter(count => (count.species || 'Unknown') === column)
+                  .reduce((countSum, count) => countSum + (count.count || 0), 0);
+              }, 0) || 0;
               return (
-                <TableCell key={species} className="bg-background text-center tabular-nums font-semibold">
-                  {total ? total.toLocaleString() : '0'}
+                <TableCell key={column} className="bg-background text-center tabular-nums font-semibold">
+                  {columnTotal ? columnTotal.toLocaleString() : '0'}
                 </TableCell>
               );
             })}
