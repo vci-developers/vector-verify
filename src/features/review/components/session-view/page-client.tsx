@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +15,6 @@ import { SessionsAccordionSkeleton } from './loading-skeleton';
 import type { Session } from '@/shared/entities/session/model';
 import { Button } from '@/ui/button';
 import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
-
 
 interface SessionsViewPageClientProps {
   district: string;
@@ -55,11 +54,10 @@ export function SessionsViewPageClient({
       startDate,
       endDate,
       limit: DEFAULT_PAGE_SIZE,
-      // type defaults to 'SURVEILLANCE' in the hook
     },
     {
       enabled: Boolean(decodedDistrict && startDate && endDate),
-    }
+    },
   );
 
   const sessions =

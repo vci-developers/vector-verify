@@ -21,17 +21,13 @@ async function requestSessions(
     offset = 0,
     sortBy,
     sortOrder,
-    type,
+    type = 'SURVEILLANCE',
   } = params;
 
-  // All review-related session queries should default to SURVEILLANCE
-  // This ensures consistent data across all review pages
-  const sessionType = type ?? 'SURVEILLANCE';
-
   const query: Record<string, string | number> = {
-    limit: Math.min(limit ?? DEFAULT_PAGE_SIZE, PAGE_LIMIT),
+    limit: Math.min(limit, PAGE_LIMIT),
     offset,
-    type: sessionType, // Always include type (defaults to SURVEILLANCE for review pages)
+    type,
   };
 
   if (district) query.district = district;
@@ -62,13 +58,11 @@ export async function getAllSessions(
   const collected: Session[] = [];
   let hasMore = true;
 
-  // Type defaults to SURVEILLANCE in requestSessions(), no need to set here
   while (hasMore) {
     const page = await getSessions({ ...params, offset, limit });
-    const items = page.items;
-    collected.push(...items);
+    collected.push(...page.items);
 
-    hasMore = page.hasMore && items.length > 0;
+    hasMore = page.hasMore && page.items.length > 0;
     if (!hasMore) break;
 
     offset += limit;

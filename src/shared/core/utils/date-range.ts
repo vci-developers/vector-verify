@@ -18,9 +18,15 @@ export const DATE_RANGE_OPTIONS = [
   { value: 'all-time' as const, label: 'All Time' },
 ] as const;
 
+function getEndOfCurrentMonth(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0));
+}
+
 export function calculateDateRange(option: DateRangeOption): DateRange {
   const now = new Date();
-  const createdBefore = now.toISOString();
+  const endOfMonth = getEndOfCurrentMonth();
+  const createdBefore = endOfMonth.toISOString();
 
   if (option === 'all-time') {
     return { createdBefore };

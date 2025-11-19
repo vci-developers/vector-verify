@@ -4,6 +4,7 @@ export interface MonthlySummaryRequestDto {
   startDate?: string;
   endDate?: string;
   district?: string;
+  type?: string;
 }
 
 export interface SpecimensRequestDto {

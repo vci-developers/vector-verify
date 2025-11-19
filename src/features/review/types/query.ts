@@ -4,6 +4,7 @@ export interface MonthlySummaryQuery {
   startDate?: string;
   endDate?: string;
   district?: string;
+  type?: string;
 }
 
 export interface SpecimensQuery {

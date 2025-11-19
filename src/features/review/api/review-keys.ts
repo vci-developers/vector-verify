@@ -8,11 +8,12 @@ export const reviewKeys = {
     startDate?: string,
     endDate?: string,
     district?: string,
+    type?: string,
   ) =>
     [
       ...reviewKeys.root,
       'monthly-summary',
-      { offset, limit, startDate, endDate, district },
+      { offset, limit, startDate, endDate, district, type },
     ] as const,
 
   specimens: (

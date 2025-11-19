@@ -33,10 +33,11 @@ export function useSpecimensQuery(
     includeAllImages,
   } = filters;
 
-  const baseEnabled = Boolean(siteId && district && startDate && endDate);
+  const enabled =
+    (options?.enabled ?? true) &&
+    Boolean(siteId && district && startDate && endDate);
 
   return useQuery({
-    ...(options ?? {}),
     queryKey: reviewKeys.specimens(
       offset,
       limit,
@@ -49,19 +50,8 @@ export function useSpecimensQuery(
       abdomenStatus,
       includeAllImages,
     ) as SpecimensQueryKey,
-    queryFn: () =>
-      getSpecimens({
-        offset,
-        limit,
-        startDate,
-        endDate,
-        district,
-        siteId,
-        species,
-        sex,
-        abdomenStatus,
-        includeAllImages,
-      }),
-    enabled: (options?.enabled ?? true) && baseEnabled,
+    queryFn: () => getSpecimens(filters),
+    enabled,
+    ...(options ?? {}),
   });
 }

@@ -32,6 +32,7 @@ export function useMonthlySummaryQuery(
     startDate,
     endDate,
     district,
+    type = 'SURVEILLANCE',
   } = filters;
 
   return useQuery({
@@ -41,6 +42,7 @@ export function useMonthlySummaryQuery(
       startDate,
       endDate,
       district,
+      type,
     ) as MonthlySummaryQueryKey,
     queryFn: () =>
       getMonthlySummary({
@@ -49,8 +51,9 @@ export function useMonthlySummaryQuery(
         startDate,
         endDate,
         district,
+        type,
       }),
-    placeholderData: previousData => previousData, // Keep previous data while fetching
+    placeholderData: previousData => previousData,
     ...(options ?? {}),
   });
 }

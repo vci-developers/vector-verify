@@ -7,12 +7,7 @@ import { mapDashboardMetricsResponseDtoToModel } from '@/features/review/types/m
 export async function getDashboardMetrics(
   request: DashboardMetricsRequestDto,
 ): Promise<DashboardMetrics> {
-  const { 
-    district, 
-    startDate, 
-    endDate, 
-    type = 'SURVEILLANCE' // Default to SURVEILLANCE for review pages
-  } = request;
+  const { district, startDate, endDate, type = 'SURVEILLANCE' } = request;
 
   const response = await bff<DashboardMetricsResponseDto>('/sessions/metrics', {
     method: 'GET',
@@ -20,7 +15,7 @@ export async function getDashboardMetrics(
       district,
       startDate,
       endDate,
-      type, // Always include type parameter (defaults to SURVEILLANCE)
+      type,
     },
   });
 

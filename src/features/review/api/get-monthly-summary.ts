@@ -21,15 +21,18 @@ export async function getMonthlySummary(
     district,
     offset = 0,
     limit = DEFAULT_PAGE_SIZE,
+    type = 'SURVEILLANCE',
   } = filters;
 
   const requestDto: MonthlySummaryRequestDto = {
-    ...(offset !== undefined ? { offset } : {}),
-    ...(limit !== undefined ? { limit } : {}),
-    ...(startDate ? { startDate } : {}),
-    ...(endDate ? { endDate } : {}),
-    ...(district ? { district } : {}),
+    type,
   };
+
+  if (offset !== undefined) requestDto.offset = offset;
+  if (limit !== undefined) requestDto.limit = limit;
+  if (startDate) requestDto.startDate = startDate;
+  if (endDate) requestDto.endDate = endDate;
+  if (district) requestDto.district = district;
 
   const response = await bff<MonthlySummaryResponseDto>('/sessions/review/task', {
     method: 'GET',
