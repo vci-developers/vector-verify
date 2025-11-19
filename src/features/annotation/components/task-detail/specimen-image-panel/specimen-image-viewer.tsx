@@ -23,6 +23,7 @@ export function SpecimenImageViewer({ imageUrl }: SpecimenImageViewerProps) {
     <div className="w-full">
       <div
         {...viewerProps}
+        style={viewerProps.style}
         className={cn(
           'bg-muted/50 h-[380px] w-full overflow-hidden rounded-md select-none',
           viewerProps.className,
