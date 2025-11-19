@@ -24,8 +24,7 @@ export const MorphIdentificationBase = z.object({
 });
 
 export const isSexEnabled = (species?: string) =>
-  species !== SPECIES_MORPH_IDS.NON_MOSQUITO &&
-  species !== SPECIES_MORPH_IDS.CANNOT_BE_DETERMINED;
+  species !== SPECIES_MORPH_IDS.NON_MOSQUITO;
 export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
   isSexEnabled(species) && sex !== SEX_MORPH_IDS.MALE;
 

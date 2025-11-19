@@ -6,7 +6,6 @@ export const SPECIES_MORPH_IDS = {
   AEDES: 'Aedes',
   MANSIONIA: 'Mansonia',
   NON_MOSQUITO: 'Non-Mosquito',
-  CANNOT_BE_DETERMINED: 'Cannot be determined',
 } as const;
 
 export const SEX_MORPH_IDS = {
