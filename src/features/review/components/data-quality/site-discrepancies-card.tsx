@@ -139,7 +139,20 @@ export function SiteDiscrepanciesCard({
       return;
     }
 
-    const { resolvedData, resolvedSurveillanceForm } = mapDiscrepancyFields(site.fields, trimmedValues);
+    const enhancedValues = { ...trimmedValues };
+
+    if (enhancedValues.wasIrsConducted?.toLowerCase() === 'no') {
+      enhancedValues.monthsSinceIrs = 'null';
+    }
+
+    if (enhancedValues.numLlinsAvailable === '0' || 
+        enhancedValues.numLlinsAvailable?.toLowerCase() === 'zero') {
+      enhancedValues.numPeopleSleptUnderLlin = 'null';
+      enhancedValues.llinType = 'null';
+      enhancedValues.llinBrand = 'null';
+    }
+
+    const { resolvedData, resolvedSurveillanceForm } = mapDiscrepancyFields(site.fields, enhancedValues);
 
     const payload = {
       sessionIds: site.sessionIds,

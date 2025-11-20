@@ -19,39 +19,76 @@ export function mapDiscrepancyFields(
   const resolvedData: any = {};
   const resolvedSurveillanceForm: any = {};
 
+  const parseValue = (value: string | undefined, type: 'string' | 'number' | 'boolean' = 'string') => {
+    if (!value || value.toLowerCase() === 'null' || value.toLowerCase() === 'n/a') {
+      return null;
+    }
+    if (type === 'number') {
+      return parseInt(value) || null;
+    }
+    if (type === 'boolean') {
+      return value.toLowerCase() === 'yes';
+    }
+    return value;
+  };
+
   fields.forEach(field => {
     const value = values[field.key];
     
     switch (field.key) {
       case 'collectorName':
-        resolvedData.collectorName = value;
+        resolvedData.collectorName = parseValue(value, 'string');
         break;
       case 'collectorTitle':
-        resolvedData.collectorTitle = value;
+        resolvedData.collectorTitle = parseValue(value, 'string');
         break;
       case 'collectionMethod':
-        resolvedData.collectionMethod = value;
+        resolvedData.collectionMethod = parseValue(value, 'string');
         break;
       case 'numPeopleSleptInHouse':
-        resolvedSurveillanceForm.numPeopleSleptInHouse = parseInt(value) || null;
+        resolvedSurveillanceForm.numPeopleSleptInHouse = parseValue(value, 'number');
         break;
       case 'wasIrsConducted':
-        resolvedSurveillanceForm.wasIrsConducted = value.toLowerCase() === 'yes';
+        resolvedSurveillanceForm.wasIrsConducted = parseValue(value, 'boolean');
         break;
       case 'monthsSinceIrs':
-        resolvedSurveillanceForm.monthsSinceIrs = parseInt(value) || null;
+        resolvedSurveillanceForm.monthsSinceIrs = parseValue(value, 'number');
         break;
       case 'numLlinsAvailable':
-        resolvedSurveillanceForm.numLlinsAvailable = parseInt(value) || null;
+        resolvedSurveillanceForm.numLlinsAvailable = parseValue(value, 'number');
         break;
       case 'llinType':
-        resolvedSurveillanceForm.llinType = value;
+        resolvedSurveillanceForm.llinType = parseValue(value, 'string');
         break;
       case 'llinBrand':
-        resolvedSurveillanceForm.llinBrand = value;
+        resolvedSurveillanceForm.llinBrand = parseValue(value, 'string');
         break;
       case 'numPeopleSleptUnderLlin':
-        resolvedSurveillanceForm.numPeopleSleptUnderLlin = parseInt(value) || null;
+        resolvedSurveillanceForm.numPeopleSleptUnderLlin = parseValue(value, 'number');
+        break;
+    }
+  });
+
+  
+  Object.keys(values).forEach(key => {
+    const value = values[key];
+    
+    if (fields.some(f => f.key === key)) {
+      return;
+    }
+
+    switch (key) {
+      case 'monthsSinceIrs':
+        resolvedSurveillanceForm.monthsSinceIrs = parseValue(value, 'number');
+        break;
+      case 'numPeopleSleptUnderLlin':
+        resolvedSurveillanceForm.numPeopleSleptUnderLlin = parseValue(value, 'number');
+        break;
+      case 'llinType':
+        resolvedSurveillanceForm.llinType = parseValue(value, 'string');
+        break;
+      case 'llinBrand':
+        resolvedSurveillanceForm.llinBrand = parseValue(value, 'string');
         break;
     }
   });
