@@ -31,6 +31,7 @@ export function useSpecimensQuery(
     sex,
     abdomenStatus,
     includeAllImages,
+    sessionType = 'SURVEILLANCE',
   } = filters;
 
   const enabled =
@@ -49,8 +50,9 @@ export function useSpecimensQuery(
       sex,
       abdomenStatus,
       includeAllImages,
+      sessionType,
     ) as SpecimensQueryKey,
-    queryFn: () => getSpecimens(filters),
+    queryFn: () => getSpecimens({ ...filters, sessionType }),
     enabled,
     ...(options ?? {}),
   });

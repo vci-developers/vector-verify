@@ -27,6 +27,7 @@ export const reviewKeys = {
     sex?: string | null,
     abdomenStatus?: string | null,
     includeAllImages?: boolean,
+    sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION',
   ) =>
     [
       ...reviewKeys.root,
@@ -42,6 +43,7 @@ export const reviewKeys = {
         sex,
         abdomenStatus,
         includeAllImages,
+        sessionType,
       },
     ] as const,
 
@@ -87,6 +89,8 @@ export const reviewKeys = {
       'sessions-by-site',
       { district, startDate, endDate, siteId, type },
     ] as const,
+  specimenImages: (specimenId: number) =>
+    [...reviewKeys.root, 'specimen-images', { specimenId }] as const,
 } as const;
 
 export type MonthlySummaryQueryKey = ReturnType<
@@ -97,12 +101,15 @@ export type MonthlySummaryQueryKey = ReturnType<
 export type SpecimensQueryKey = ReturnType<typeof reviewKeys.specimens> &
   QueryKey;
 
-export type SessionsQueryKey = ReturnType<
-  typeof reviewKeys.sessions
-> &
+export type SessionsQueryKey = ReturnType<typeof reviewKeys.sessions> &
   QueryKey;
 
 export type SessionsBySiteQueryKey = ReturnType<
   typeof reviewKeys.sessionsBySite
+> &
+  QueryKey;
+
+export type SpecimenImagesQueryKey = ReturnType<
+  typeof reviewKeys.specimenImages
 > &
   QueryKey;

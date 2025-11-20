@@ -27,6 +27,8 @@ export function useSessionsBySiteQuery(
   params: SessionsQuery,
   options?: UseSessionsBySiteOptions,
 ) {
+  const type = params?.type ?? 'SURVEILLANCE';
+
   const enabled =
     (options?.enabled ?? true) &&
     Boolean(params?.district && params?.startDate && params?.endDate);
@@ -37,10 +39,13 @@ export function useSessionsBySiteQuery(
       params?.startDate,
       params?.endDate,
       params?.siteId,
-      params?.type ?? 'SURVEILLANCE',
+      type,
     ) as SessionsBySiteQueryKey,
     queryFn: async () => {
-      const sessions = await getAllSessions(params);
+      const sessions = await getAllSessions({
+        ...params,
+        type,
+      });
       const grouped = new Map<number, Session[]>();
 
       for (const session of sessions) {

@@ -23,9 +23,12 @@ export async function getSpecimens(
     sex,
     abdomenStatus,
     includeAllImages,
+    sessionType = 'SURVEILLANCE',
   } = filters;
 
-  const query: SpecimensRequestDto = {};
+  const query: SpecimensRequestDto = {
+    sessionType,
+  };
 
   if (offset !== undefined) query.offset = offset;
   if (limit !== undefined) query.limit = limit;

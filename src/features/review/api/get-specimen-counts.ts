@@ -10,9 +10,17 @@ import { mapSpecimenCountsResponseDtoToModel } from '@/features/review/types';
 export async function getSpecimenCounts(
   filters: SpecimenCountsQuery,
 ): Promise<SpecimenCountsSummary> {
-  const { district, startDate, endDate, sessionId } = filters;
+  const {
+    district,
+    startDate,
+    endDate,
+    sessionId,
+    sessionType = 'SURVEILLANCE',
+  } = filters;
 
-  const query: SpecimenCountsRequestDto = {};
+  const query: SpecimenCountsRequestDto = {
+    sessionType,
+  };
 
   if (district) query.district = district;
   if (startDate) query.startDate = startDate;

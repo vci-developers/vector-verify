@@ -23,7 +23,9 @@ export function useDashboardDataQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
-  const type = request.type ?? 'SURVEILLANCE';
+  const type: 'SURVEILLANCE' | 'DATA_COLLECTION' =
+    (request.type as 'SURVEILLANCE' | 'DATA_COLLECTION' | undefined) ??
+    'SURVEILLANCE';
 
   return useQuery({
     queryKey: dashboardKeys.metrics(
@@ -39,6 +41,7 @@ export function useDashboardDataQuery(
           district: request.district,
           startDate: request.startDate,
           endDate: request.endDate,
+          sessionType: type,
         }),
       ]);
 

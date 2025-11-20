@@ -18,6 +18,7 @@ export interface SpecimensQuery {
   sex?: string | null;
   abdomenStatus?: string | null;
   includeAllImages?: boolean;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SpecimenCountsQuery {
@@ -25,6 +26,7 @@ export interface SpecimenCountsQuery {
   sessionId?: string;
   startDate?: string;
   endDate?: string;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SessionsQuery {

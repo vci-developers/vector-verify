@@ -48,7 +48,11 @@ export function useSessionsQuery(
       sortOrder,
       type,
     ) as SessionsQueryKey,
-    queryFn: () => getSessions(filters),
+    queryFn: () =>
+      getSessions({
+        ...filters,
+        type,
+      }),
     enabled: enabled && (options?.enabled ?? true),
     placeholderData: prev => prev,
     ...options,
@@ -96,6 +100,7 @@ export function useSessionsInfiniteQuery(
         ...filters,
         limit,
         offset: pageParam,
+        type,
       }),
     getNextPageParam: (lastPage, allPages) => {
       const loaded = allPages.reduce(
