@@ -7,7 +7,6 @@ import {
 import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 import type { DashboardMetrics } from '@/features/review/types/model';
 import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
-import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 import {
   calculateSpeciesDistribution,
   calculateAnophelesSexDistribution,

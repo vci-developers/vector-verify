@@ -1,4 +1,5 @@
 import type { MonthlySummary, MonthlySummaryQuery, MonthlySummaryResponseDto } from '@/features/review/types';
+import type { MonthlySummaryRequestDto } from '@/features/review/types/request.dto';
 import { mapMonthlySummaryResponseDtoToPage } from '@/features/review/types';
 import type { OffsetPage } from '@/shared/entities/pagination';
 import bff from '@/shared/infra/api/bff-client';
@@ -31,7 +32,8 @@ export async function getMonthlySummary(
 
   const response = await bff<MonthlySummaryResponseDto>('/sessions/review/task', {
     method: 'GET',
-    query,
+    query:
+      requestDto as Record<string, string | number | boolean | null | undefined>,
   });
 
   return {
