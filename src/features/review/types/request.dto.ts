@@ -4,6 +4,7 @@ export interface MonthlySummaryRequestDto {
   startDate?: string;
   endDate?: string;
   district?: string;
+  type?: string;
 }
 
 export interface SpecimensRequestDto {
@@ -17,12 +18,15 @@ export interface SpecimensRequestDto {
   sex?: string;
   abdomenStatus?: string;
   includeAllImages?: boolean;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SpecimenCountsRequestDto {
   district?: string;
   startDate?: string;
   endDate?: string;
+  sessionId?: string;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SessionsRequestDto {
@@ -45,6 +49,7 @@ export interface SessionsRequestDto {
 
 export interface DashboardMetricsRequestDto {
   district: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
+  type?: string;
 }

@@ -13,6 +13,7 @@ import { PAGE_SIZES, DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 import { useUserPermissionsQuery } from '@/features/user';
 import { SpecimenAccordionLoadingSkeleton } from './loading-skeleton';
 import { SpecimenFilters, SpecimenFiltersBar } from './specimen-filters';
+import { getMonthDateRange } from '@/features/review/utils/master-table-view';
 
 interface SpecimenViewPageClientProps {
   district: string;
@@ -33,12 +34,11 @@ export function SpecimenViewPageClient({
     abdomenStatus: null,
   });
 
-  const [year, monthNum] = formattedMonthYear.split('-').map(Number);
-  const startOfMonth = new Date(year, monthNum - 1, 1);
-  const endOfMonth = new Date(year, monthNum, 0);
+  const dateRange = getMonthDateRange(formattedMonthYear);
+  const startDate = dateRange?.startDate;
+  const endDate = dateRange?.endDate;
 
-  const startDate = startOfMonth.toISOString().split('T')[0];
-  const endDate = endOfMonth.toISOString().split('T')[0];
+  const [year, monthNum] = formattedMonthYear.split('-').map(Number);
 
   const { data: permissions, isLoading: isLoadingPermissions } =
     useUserPermissionsQuery();

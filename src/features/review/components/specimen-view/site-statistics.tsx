@@ -60,10 +60,6 @@ export function useSiteStatistics({
   };
 }
 
-/**
- * Batched version of useSiteStatistics that fetches statistics for multiple sites
- * in parallel, avoiding N+1 query pattern.
- */
 export function useBatchedSiteStatistics({
   siteIds,
   queryParameters,
@@ -87,7 +83,8 @@ export function useBatchedSiteStatistics({
         species ?? undefined,
         sex ?? undefined,
         abdomenStatus ?? undefined,
-        true, // includeAllImages
+        true,
+        'SURVEILLANCE',
       ) as SpecimensQueryKey,
       queryFn: () =>
         getSpecimens({
@@ -101,6 +98,7 @@ export function useBatchedSiteStatistics({
           sex: sex ?? undefined,
           abdomenStatus: abdomenStatus ?? undefined,
           includeAllImages: true,
+          sessionType: 'SURVEILLANCE',
         }),
       enabled: baseEnabled,
     })),
@@ -112,9 +110,8 @@ export function useBatchedSiteStatistics({
     queries.forEach((query, index) => {
       const siteId = siteIds[index];
       const data = query.data;
-      
-      // Check if query is still loading or fetching (no data yet)
-      const isLoading = query.isLoading || query.isFetching || (!data && baseEnabled);
+      const isLoading =
+        query.isLoading || query.isFetching || (!data && baseEnabled);
 
       const totalSpecimens = data?.total ?? 0;
       const isPartial = totalSpecimens > MAX_SPECIMENS_PER_REQUEST;

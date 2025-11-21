@@ -26,12 +26,34 @@ export function useMonthlySummaryQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
-  const { offset = 0, limit = DEFAULT_PAGE_SIZE, district } = filters;
+  const {
+    offset = 0,
+    limit = DEFAULT_PAGE_SIZE,
+    startDate,
+    endDate,
+    district,
+    type = 'SURVEILLANCE',
+  } = filters;
 
   return useQuery({
-    queryKey: reviewKeys.monthlySummary(offset, limit, undefined, undefined, district) as MonthlySummaryQueryKey,
-    queryFn: () => getMonthlySummary({ offset, limit, district }),
-    placeholderData: previousData => previousData,
+    queryKey: reviewKeys.monthlySummary(
+      offset,
+      limit,
+      startDate,
+      endDate,
+      district,
+      type,
+    ) as MonthlySummaryQueryKey,
+    queryFn: () =>
+      getMonthlySummary({
+        offset,
+        limit,
+        startDate,
+        endDate,
+        district,
+        type,
+      }),
+    placeholderData: prev => prev,
     ...(options ?? {}),
   });
 }

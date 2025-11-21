@@ -1,13 +1,12 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-
 import {
   getDashboardMetrics,
   getSpecimenCounts,
   dashboardKeys,
 } from '@/features/review/api';
+import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 import type { DashboardMetrics } from '@/features/review/types/model';
 import type { DashboardMetricsRequestDto } from '@/features/review/types/request.dto';
-import type { DashboardMetricsQueryKey } from '@/features/review/api/dashboard-keys';
 import {
   calculateSpeciesDistribution,
   calculateAnophelesSexDistribution,
@@ -26,19 +25,25 @@ export function useDashboardDataQuery(
     'queryKey' | 'queryFn'
   >,
 ) {
+  const type: 'SURVEILLANCE' | 'DATA_COLLECTION' =
+    (request.type as 'SURVEILLANCE' | 'DATA_COLLECTION' | undefined) ??
+    'SURVEILLANCE';
+
   return useQuery({
     queryKey: dashboardKeys.metrics(
       request.district,
       request.startDate,
       request.endDate,
+      type,
     ),
     queryFn: async () => {
       const [metrics, specimenCounts] = await Promise.all([
-        getDashboardMetrics(request),
+        getDashboardMetrics({ ...request, type }),
         getSpecimenCounts({
           district: request.district,
           startDate: request.startDate,
           endDate: request.endDate,
+          sessionType: type,
         }),
       ]);
 

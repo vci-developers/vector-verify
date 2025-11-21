@@ -7,15 +7,19 @@ import { mapDashboardMetricsResponseDtoToModel } from '@/features/review/types/m
 export async function getDashboardMetrics(
   request: DashboardMetricsRequestDto,
 ): Promise<DashboardMetrics> {
-  const { district, startDate, endDate } = request;
+  const { district, startDate, endDate, type = 'SURVEILLANCE' } = request;
+
+  const query: Record<string, string> = {
+    district,
+    type,
+  };
+
+  if (startDate) query.startDate = startDate;
+  if (endDate) query.endDate = endDate;
 
   const response = await bff<DashboardMetricsResponseDto>('/sessions/metrics', {
     method: 'GET',
-    query: {
-      district,
-      startDate,
-      endDate,
-    },
+    query,
   });
 
   return mapDashboardMetricsResponseDtoToModel(response);
