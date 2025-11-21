@@ -100,6 +100,7 @@ export function useDataQualitySummary({
         return {
           siteId: siteGroup.siteId,
           sessionCount: siteGroup.sessions.length,
+          sessionIds: siteGroup.sessions.map(s => s.sessionId),
           siteLabel,
           fields,
         };

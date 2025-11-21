@@ -1,3 +1,5 @@
+import { SurveillanceForm } from "@/shared/entities/surveillance-form";
+
 export interface MonthlySummaryRequestDto {
   offset?: number;
   limit?: number;
@@ -52,4 +54,25 @@ export interface DashboardMetricsRequestDto {
   startDate?: string;
   endDate?: string;
   type?: string;
+}
+
+export interface ResolvedData{
+  collectorTitle?: string | null;
+  collectorName?: string | null;
+  collectionDate?: number | null;
+  collectionMethod?: string | null;
+  specimenCondition?: string | null;
+  createdAt?: number | null;
+  completedAt?: number | null;
+  notes?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  type:"SURVEILLANCE";
+  collectorLastTrainedOn?: number | null;
+}
+
+export interface DiscrepancyUpdateRequestDto {
+  sessionIds?: number[];
+  resolvedData?: ResolvedData;
+  resolvedSurveillanceForm?: SurveillanceForm;
 }
