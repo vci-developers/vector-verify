@@ -17,9 +17,9 @@ export interface SpecimenExpandedDto extends SpecimenDto {
 }
 
 export interface SpecimensListResponseDto {
- specimens: SpecimenExpandedDto[];
- total: number;
- limit: number;
- offset: number;
- hasMore: boolean;
+  specimens: SpecimenExpandedDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
 }

@@ -1,4 +1,8 @@
-import type { MonthlySummary, MonthlySummaryQuery, MonthlySummaryResponseDto } from '@/features/review/types';
+import type {
+  MonthlySummary,
+  MonthlySummaryQuery,
+  MonthlySummaryResponseDto,
+} from '@/features/review/types';
 import type { MonthlySummaryRequestDto } from '@/features/review/types/request.dto';
 import { mapMonthlySummaryResponseDtoToPage } from '@/features/review/types';
 import type { OffsetPage } from '@/shared/entities/pagination';
@@ -30,11 +34,16 @@ export async function getMonthlySummary(
   if (endDate) requestDto.endDate = endDate;
   if (district) requestDto.district = district;
 
-  const response = await bff<MonthlySummaryResponseDto>('/sessions/review/task', {
-    method: 'GET',
-    query:
-      requestDto as Record<string, string | number | boolean | null | undefined>,
-  });
+  const response = await bff<MonthlySummaryResponseDto>(
+    '/sessions/review/task',
+    {
+      method: 'GET',
+      query: requestDto as Record<
+        string,
+        string | number | boolean | null | undefined
+      >,
+    },
+  );
 
   return {
     data: mapMonthlySummaryResponseDtoToPage(response),

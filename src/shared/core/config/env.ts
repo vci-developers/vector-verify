@@ -3,7 +3,9 @@ const NODE_ENV = process.env.NODE_ENV ?? 'development';
 let NEXTAUTH_SECRET: string | undefined = process.env.NEXTAUTH_SECRET;
 if (!NEXTAUTH_SECRET) {
   if (NODE_ENV === 'production') {
-    throw new Error('NEXTAUTH_SECRET environment variable is required in production');
+    throw new Error(
+      'NEXTAUTH_SECRET environment variable is required in production',
+    );
   }
   NEXTAUTH_SECRET = 'development-nextauth-secret';
 }

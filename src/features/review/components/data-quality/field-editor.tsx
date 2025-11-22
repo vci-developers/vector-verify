@@ -39,9 +39,9 @@ export function FieldEditor({
         <Input
           type="text"
           value={value}
-          onChange={(e) => onCustomInputChange(e.target.value)}
+          onChange={e => onCustomInputChange(e.target.value)}
           placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="max-w-md bg-white border-amber-400 focus-visible:ring-amber-300"
+          className="max-w-md border-amber-400 bg-white focus-visible:ring-amber-300"
           disabled={isPending || isDisabled}
         />
         <Button
@@ -64,18 +64,16 @@ export function FieldEditor({
       onValueChange={onSelectChange}
       disabled={isPending || isDisabled}
     >
-      <SelectTrigger className="max-w-md bg-white border-amber-400 focus:ring-amber-300">
+      <SelectTrigger className="max-w-md border-amber-400 bg-white focus:ring-amber-300">
         <SelectValue placeholder={`Select ${field.label}`} />
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
+        {options.map(option => (
           <SelectItem key={option} value={option}>
             {option}
           </SelectItem>
         ))}
-        <SelectItem value="__OTHER__">
-          Other (type custom value)
-        </SelectItem>
+        <SelectItem value="__OTHER__">Other (type custom value)</SelectItem>
       </SelectContent>
     </Select>
   );

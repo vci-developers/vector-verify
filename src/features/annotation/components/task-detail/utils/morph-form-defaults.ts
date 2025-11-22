@@ -18,10 +18,10 @@ export function getMorphFormDefaultValues(
 
   return {
     received,
-    species: received ? annotation.morphSpecies ?? undefined : undefined,
-    sex: received ? annotation.morphSex ?? undefined : undefined,
+    species: received ? (annotation.morphSpecies ?? undefined) : undefined,
+    sex: received ? (annotation.morphSex ?? undefined) : undefined,
     abdomenStatus: received
-      ? annotation.morphAbdomenStatus ?? undefined
+      ? (annotation.morphAbdomenStatus ?? undefined)
       : undefined,
   };
 }

@@ -12,12 +12,7 @@ import type { AnnotationsListResponseDto } from '@/features/annotation/types';
 export async function getAnnotations(
   filters: AnnotationsQuery,
 ): Promise<OffsetPage<Annotation>> {
-  const {
-    taskId,
-    page = 1,
-    limit = DEFAULT_PAGE_SIZE,
-    status,
-  } = filters;
+  const { taskId, page = 1, limit = DEFAULT_PAGE_SIZE, status } = filters;
 
   const query: AnnotationsListRequestDto = {
     taskId,
@@ -28,7 +23,10 @@ export async function getAnnotations(
 
   const data = await bff<AnnotationsListResponseDto>('/annotations', {
     method: 'GET',
-    query: query as unknown as Record<string, string | number | boolean | null | undefined>,
+    query: query as unknown as Record<
+      string,
+      string | number | boolean | null | undefined
+    >,
   });
   return mapAnnotationsListResponseDtoToPage(data);
 }

@@ -17,7 +17,7 @@ export function ImageModalFooter({
   onReset,
 }: ImageModalFooterProps) {
   return (
-    <div className="flex justify-center gap-2 border-t pt-2 pb-3 px-3">
+    <div className="flex justify-center gap-2 border-t px-3 pt-2 pb-3">
       <Button
         variant="outline"
         size="sm"

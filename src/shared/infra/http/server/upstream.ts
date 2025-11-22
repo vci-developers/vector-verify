@@ -41,6 +41,6 @@ export async function upstreamFetch(
     redirect: 'manual',
     timeoutMs: init.timeoutMs,
   });
-  
+
   return response;
 }

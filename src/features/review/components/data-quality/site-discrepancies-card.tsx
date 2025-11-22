@@ -35,27 +35,32 @@ export function SiteDiscrepanciesCard({
 }) {
   const [editingSiteId, setEditingSiteId] = useState<number | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
-  const [customInputFields, setCustomInputFields] = useState<Record<string, boolean>>({});
-  
+  const [customInputFields, setCustomInputFields] = useState<
+    Record<string, boolean>
+  >({});
+
   const updateDiscrepanciesMutation = useUpdateDiscrepanciesMutation({
     onSuccess: () => {
       showSuccessToast('Discrepancies resolved successfully.');
       setEditingSiteId(null);
       setEditedValues({});
     },
-    onError: (error) => {
+    onError: error => {
       showErrorToast(`Failed to resolve discrepancies: ${error.message}`);
     },
   });
 
-  const handleEditClick = useCallback((siteId: number, fields: SiteDiscrepancySummary['fields']) => {
-    setEditingSiteId(siteId);
-    const initialValues: Record<string, string> = {};
-    fields.forEach(field => {
-      initialValues[field.key] = '';
-    });
-    setEditedValues(initialValues);
-  }, []);
+  const handleEditClick = useCallback(
+    (siteId: number, fields: SiteDiscrepancySummary['fields']) => {
+      setEditingSiteId(siteId);
+      const initialValues: Record<string, string> = {};
+      fields.forEach(field => {
+        initialValues[field.key] = '';
+      });
+      setEditedValues(initialValues);
+    },
+    [],
+  );
 
   const handleCancelEdit = useCallback(() => {
     setEditingSiteId(null);
@@ -63,56 +68,69 @@ export function SiteDiscrepanciesCard({
     setCustomInputFields({});
   }, []);
 
-  const handleValueChange = useCallback((
-    fieldKey: string,
-    value: string,
-    allFields: SiteDiscrepancySummary['fields']
-  ) => {
-    setEditedValues(prev => ({
-      ...prev,
-      [fieldKey]: value,
-    }));
-
-    const dependentUpdates = calculateDependentFields(fieldKey, value, allFields);
-    if (Object.keys(dependentUpdates).length > 0) {
+  const handleValueChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
       setEditedValues(prev => ({
         ...prev,
-        ...dependentUpdates,
-      }));
-    }
-  }, []);
-
-  const handleFieldChange = useCallback((
-    fieldKey: string,
-    value: string,
-    allFields: SiteDiscrepancySummary['fields']
-  ) => {
-    if (value === '__OTHER__') {
-      setCustomInputFields(prev => ({
-        ...prev,
-        [fieldKey]: true,
-      }));
-      setEditedValues(prev => ({
-        ...prev,
-        [fieldKey]: '',
-      }));
-    } else {
-      setCustomInputFields(prev => ({
-        ...prev,
-        [fieldKey]: false,
+        [fieldKey]: value,
       }));
 
+      const dependentUpdates = calculateDependentFields(
+        fieldKey,
+        value,
+        allFields,
+      );
+      if (Object.keys(dependentUpdates).length > 0) {
+        setEditedValues(prev => ({
+          ...prev,
+          ...dependentUpdates,
+        }));
+      }
+    },
+    [],
+  );
+
+  const handleFieldChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
+      if (value === '__OTHER__') {
+        setCustomInputFields(prev => ({
+          ...prev,
+          [fieldKey]: true,
+        }));
+        setEditedValues(prev => ({
+          ...prev,
+          [fieldKey]: '',
+        }));
+      } else {
+        setCustomInputFields(prev => ({
+          ...prev,
+          [fieldKey]: false,
+        }));
+
+        handleValueChange(fieldKey, value, allFields);
+      }
+    },
+    [handleValueChange],
+  );
+
+  const handleCustomInputChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
       handleValueChange(fieldKey, value, allFields);
-    }
-  }, [handleValueChange]);
-
-  const handleCustomInputChange = useCallback((
-    fieldKey: string,
-    value: string,
-    allFields: SiteDiscrepancySummary['fields']
-  ) => {
-    handleValueChange(fieldKey, value, allFields);
-  }, [handleValueChange]);
+    },
+    [handleValueChange],
+  );
 
   const handleBackToOptions = useCallback((fieldKey: string) => {
     setCustomInputFields(prev => ({
@@ -125,47 +143,57 @@ export function SiteDiscrepanciesCard({
     }));
   }, []);
 
-  const handleSubmit = useCallback(async (site: SiteDiscrepancySummary) => {
-    const trimmedValues = Object.fromEntries(
-      Object.entries(editedValues).map(([key, value]) => [key, value.trim()])
-    );
+  const handleSubmit = useCallback(
+    async (site: SiteDiscrepancySummary) => {
+      const trimmedValues = Object.fromEntries(
+        Object.entries(editedValues).map(([key, value]) => [key, value.trim()]),
+      );
 
-    const allFieldsFilled = site.fields.every(
-      field => trimmedValues[field.key]?.length > 0
-    );
+      const allFieldsFilled = site.fields.every(
+        field => trimmedValues[field.key]?.length > 0,
+      );
 
-    if (!allFieldsFilled) {
-      showErrorToast('Please select a value for all fields before submitting.');
-      return;
-    }
+      if (!allFieldsFilled) {
+        showErrorToast(
+          'Please select a value for all fields before submitting.',
+        );
+        return;
+      }
 
-    const enhancedValues = { ...trimmedValues };
+      const enhancedValues = { ...trimmedValues };
 
-    if (enhancedValues.wasIrsConducted?.toLowerCase() === 'no') {
-      enhancedValues.monthsSinceIrs = 'null';
-    }
+      if (enhancedValues.wasIrsConducted?.toLowerCase() === 'no') {
+        enhancedValues.monthsSinceIrs = 'null';
+      }
 
-    if (enhancedValues.numLlinsAvailable === '0' || 
-        enhancedValues.numLlinsAvailable?.toLowerCase() === 'zero') {
-      enhancedValues.numPeopleSleptUnderLlin = 'null';
-      enhancedValues.llinType = 'null';
-      enhancedValues.llinBrand = 'null';
-    }
+      if (
+        enhancedValues.numLlinsAvailable === '0' ||
+        enhancedValues.numLlinsAvailable?.toLowerCase() === 'zero'
+      ) {
+        enhancedValues.numPeopleSleptUnderLlin = 'null';
+        enhancedValues.llinType = 'null';
+        enhancedValues.llinBrand = 'null';
+      }
 
-    const { resolvedData, resolvedSurveillanceForm } = mapDiscrepancyFields(site.fields, enhancedValues);
+      const { resolvedData, resolvedSurveillanceForm } = mapDiscrepancyFields(
+        site.fields,
+        enhancedValues,
+      );
 
-    const payload = {
-      sessionIds: site.sessionIds,
-      resolvedData,
-      resolvedSurveillanceForm,
-    };
+      const payload = {
+        sessionIds: site.sessionIds,
+        resolvedData,
+        resolvedSurveillanceForm,
+      };
 
-    await updateDiscrepanciesMutation.mutateAsync({ payload });
-    setCustomInputFields({});
-  }, [editedValues, updateDiscrepanciesMutation]);
+      await updateDiscrepanciesMutation.mutateAsync({ payload });
+      setCustomInputFields({});
+    },
+    [editedValues, updateDiscrepanciesMutation],
+  );
 
   return (
-    <Card className="shadow-lg border-amber-300 bg-amber-50/60">
+    <Card className="border-amber-300 bg-amber-50/60 shadow-lg">
       <CardHeader className="border-b border-amber-200/70 pb-6">
         <CardTitle className="flex flex-wrap items-center gap-2 text-amber-900">
           Site Discrepancies
@@ -202,8 +230,8 @@ export function SiteDiscrepanciesCard({
                       variant="outline"
                       className="border-amber-300 text-amber-900"
                     >
-                      {site.sessionCount}{' '}
-                      session{site.sessionCount === 1 ? '' : 's'}
+                      {site.sessionCount} session
+                      {site.sessionCount === 1 ? '' : 's'}
                     </Badge>
                     <Badge
                       variant="secondary"
@@ -236,17 +264,38 @@ export function SiteDiscrepanciesCard({
                           <TableCell className="text-sm font-medium text-amber-900">
                             {field.label}
                           </TableCell>
-                          <TableCell className="text-sm text-foreground">
+                          <TableCell className="text-foreground text-sm">
                             {editingSiteId === site.siteId ? (
                               <FieldEditor
                                 field={field}
                                 value={editedValues[field.key] || ''}
-                                isCustomInput={customInputFields[field.key] || false}
-                                isDisabled={shouldDisableField(field.key, editedValues)}
-                                isPending={updateDiscrepanciesMutation.isPending}
-                                onSelectChange={(value) => handleFieldChange(field.key, value, site.fields)}
-                                onCustomInputChange={(value) => handleCustomInputChange(field.key, value, site.fields)}
-                                onBackToOptions={() => handleBackToOptions(field.key)}
+                                isCustomInput={
+                                  customInputFields[field.key] || false
+                                }
+                                isDisabled={shouldDisableField(
+                                  field.key,
+                                  editedValues,
+                                )}
+                                isPending={
+                                  updateDiscrepanciesMutation.isPending
+                                }
+                                onSelectChange={value =>
+                                  handleFieldChange(
+                                    field.key,
+                                    value,
+                                    site.fields,
+                                  )
+                                }
+                                onCustomInputChange={value =>
+                                  handleCustomInputChange(
+                                    field.key,
+                                    value,
+                                    site.fields,
+                                  )
+                                }
+                                onBackToOptions={() =>
+                                  handleBackToOptions(field.key)
+                                }
                               />
                             ) : (
                               field.details
@@ -268,7 +317,7 @@ export function SiteDiscrepanciesCard({
                         onClick={handleCancelEdit}
                         disabled={updateDiscrepanciesMutation.isPending}
                       >
-                        <X className="h-4 w-4 mr-1" />
+                        <X className="mr-1 h-4 w-4" />
                         Cancel
                       </Button>
                       <Button
@@ -278,8 +327,10 @@ export function SiteDiscrepanciesCard({
                         disabled={updateDiscrepanciesMutation.isPending}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        <Check className="h-4 w-4 mr-1" />
-                        {updateDiscrepanciesMutation.isPending ? 'Submitting...' : 'Submit'}
+                        <Check className="mr-1 h-4 w-4" />
+                        {updateDiscrepanciesMutation.isPending
+                          ? 'Submitting...'
+                          : 'Submit'}
                       </Button>
                     </>
                   ) : (
@@ -289,7 +340,7 @@ export function SiteDiscrepanciesCard({
                       size="sm"
                       onClick={() => handleEditClick(site.siteId, site.fields)}
                     >
-                      <Pencil className="h-4 w-4 mr-1" />
+                      <Pencil className="mr-1 h-4 w-4" />
                       Edit
                     </Button>
                   )}

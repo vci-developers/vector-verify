@@ -48,7 +48,9 @@ export function mapMonthlySummaryResponseDtoToPage(
   };
 }
 
-function mapSpecimenEntryDtoToModel(dto: SpecimenCountsSiteDto['counts'][number]): SpecimenCountEntry {
+function mapSpecimenEntryDtoToModel(
+  dto: SpecimenCountsSiteDto['counts'][number],
+): SpecimenCountEntry {
   return {
     species: dto.species,
     sex: dto.sex,
@@ -58,7 +60,9 @@ function mapSpecimenEntryDtoToModel(dto: SpecimenCountsSiteDto['counts'][number]
   };
 }
 
-function mapSpecimenCountsSiteDtoToModel(dto: SpecimenCountsSiteDto): SpecimenCountsSite {
+function mapSpecimenCountsSiteDtoToModel(
+  dto: SpecimenCountsSiteDto,
+): SpecimenCountsSite {
   return {
     siteId: dto.siteId,
     siteInfo: dto.siteInfo,

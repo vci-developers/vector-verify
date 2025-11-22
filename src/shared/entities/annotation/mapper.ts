@@ -3,7 +3,10 @@ import type {
   AnnotationExpandedDto,
   AnnotationTaskDto,
 } from '@/shared/entities/annotation/dto';
-import type { Annotation, AnnotationTask } from '@/shared/entities/annotation/model';
+import type {
+  Annotation,
+  AnnotationTask,
+} from '@/shared/entities/annotation/model';
 import { mapSpecimenExpandedDtoToModel } from '@/shared/entities/specimen/mapper';
 
 export function mapAnnotationDtoToModel(

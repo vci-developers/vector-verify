@@ -23,4 +23,3 @@ export interface BatchedSiteStatisticsData {
   statisticsMap: Map<number, SiteStatisticsData>;
   isLoading: boolean;
 }
-

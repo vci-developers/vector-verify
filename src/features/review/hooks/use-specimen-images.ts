@@ -21,7 +21,9 @@ export function useSpecimenImagesQuery(
   >,
 ) {
   return useQuery({
-    queryKey: reviewKeys.specimenImages(specimenId ?? 0) as SpecimenImagesQueryKey,
+    queryKey: reviewKeys.specimenImages(
+      specimenId ?? 0,
+    ) as SpecimenImagesQueryKey,
     queryFn: () => getSpecimenImages(specimenId!),
     enabled: Boolean(specimenId) && (options?.enabled ?? true),
     ...options,

@@ -20,7 +20,8 @@ export const ABDOMEN_STATUS_MORPH_IDS = {
   GRAVID: 'Gravid',
 } as const;
 
-export type SpeciesMorphId = (typeof SPECIES_MORPH_IDS)[keyof typeof SPECIES_MORPH_IDS];
+export type SpeciesMorphId =
+  (typeof SPECIES_MORPH_IDS)[keyof typeof SPECIES_MORPH_IDS];
 export type SexMorphId = (typeof SEX_MORPH_IDS)[keyof typeof SEX_MORPH_IDS];
 export type AbdomenStatusMorphId =
   (typeof ABDOMEN_STATUS_MORPH_IDS)[keyof typeof ABDOMEN_STATUS_MORPH_IDS];

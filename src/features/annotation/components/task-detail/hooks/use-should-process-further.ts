@@ -28,4 +28,3 @@ export function useShouldProcessFurther(specimen?: Specimen | null) {
     isLoading: shouldFetch && query.isPending,
   };
 }
-

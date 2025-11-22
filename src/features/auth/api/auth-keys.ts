@@ -5,5 +5,5 @@ export const authKeys = {
   session: () => [...authKeys.root, 'session'] as const,
 };
 
-export type AuthSessionQueryKey = ReturnType<typeof authKeys.session> & QueryKey;
-
+export type AuthSessionQueryKey = ReturnType<typeof authKeys.session> &
+  QueryKey;

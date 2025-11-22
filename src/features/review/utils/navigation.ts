@@ -4,7 +4,9 @@ export function buildReviewPath(district: string, monthYear: string): string {
   return `/review/${encodedDistrict}/${encodedMonthYear}`;
 }
 
-export function buildDashboardPath(district: string, monthYear: string): string {
+export function buildDashboardPath(
+  district: string,
+  monthYear: string,
+): string {
   return `${buildReviewPath(district, monthYear)}/dashboard`;
 }
-
