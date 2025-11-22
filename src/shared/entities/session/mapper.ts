@@ -14,6 +14,7 @@ export function mapSessionDtoToModel(
     frontendId: dto.frontendId,
     collectorTitle: dto.collectorTitle,
     collectorName: dto.collectorName,
+    collectorLastTrainedOn: dto.collectorLastTrainedOn,
     collectionDate: dto.collectionDate,
     collectionMethod: dto.collectionMethod,
     specimenCondition: dto.specimenCondition,
