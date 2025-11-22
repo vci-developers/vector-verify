@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
     ],
   },
   env: {
+    ç: process.env.NEXTAUTH_URL || 'http://localhost:3000',
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || '',
     API_BASE_URL: process.env.API_BASE_URL || '',
   },
