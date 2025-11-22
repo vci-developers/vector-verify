@@ -29,14 +29,14 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
     const requestHeaders = forwardRequestHeaders(request);
     const accept = request.headers.get('accept') ?? '';
     const isSSE = accept.toLowerCase().includes(MEDIA_TYPE.EVENT_STREAM);
-    
+
     // Convert URLSearchParams to a plain object for proper query parameter handling
     const searchParams = request.nextUrl.searchParams;
     const queryParams: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       queryParams[key] = value;
     });
-    
+
     const upstreamResponse = await upstreamFetch(path, {
       method: request.method,
       headers: requestHeaders,

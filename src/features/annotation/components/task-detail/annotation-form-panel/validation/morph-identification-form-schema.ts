@@ -29,8 +29,8 @@ export const isSexEnabled = (species?: string) =>
 export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
   isSexEnabled(species) && sex !== SEX_MORPH_IDS.MALE;
 
-export const morphIdentificationFormSchema = MorphIdentificationBase.superRefine(
-  (formFields, context) => {
+export const morphIdentificationFormSchema =
+  MorphIdentificationBase.superRefine((formFields, context) => {
     if (!formFields.received) {
       return;
     }
@@ -65,8 +65,7 @@ export const morphIdentificationFormSchema = MorphIdentificationBase.superRefine
         });
       }
     }
-  },
-);
+  });
 
 export type MorphIdentificationFormInput = z.input<
   typeof morphIdentificationFormSchema
@@ -74,4 +73,3 @@ export type MorphIdentificationFormInput = z.input<
 export type MorphIdentificationFormOutput = z.output<
   typeof morphIdentificationFormSchema
 >;
-

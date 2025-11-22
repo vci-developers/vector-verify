@@ -35,7 +35,10 @@ export const authOptions: NextAuthOptions = {
         const password = String(credentials?.password ?? '');
         if (!email || !password) return null;
 
-        const loginResponse: LoginResponseDto = await loginToBackend(email, password);
+        const loginResponse: LoginResponseDto = await loginToBackend(
+          email,
+          password,
+        );
         const authPayload = mapAuthResponseDtoToPayload(loginResponse);
         const domainUser: DomainUser = authPayload.user;
 
@@ -83,7 +86,8 @@ export const authOptions: NextAuthOptions = {
       const refreshToken = token.refreshToken as string | undefined;
       if (!refreshToken) return token;
       try {
-        const { accessToken: newAccessToken } = await refreshAccessToken(refreshToken);
+        const { accessToken: newAccessToken } =
+          await refreshAccessToken(refreshToken);
         const newAccessTokenExpires =
           decodeJwtExp(newAccessToken) ?? Date.now() + ACCESS_FALLBACK_MS;
         return {

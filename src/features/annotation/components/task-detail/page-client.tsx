@@ -96,10 +96,7 @@ export function AnnotationTaskDetailPageClient({
       return null;
     }
     return getMorphFormDefaultValues(currentAnnotation);
-  }, [
-    shouldProcessFurther,
-    currentAnnotation
-  ]);
+  }, [shouldProcessFurther, currentAnnotation]);
 
   useEffect(() => {
     setMorphFormValues(morphFormDefaultValues);

@@ -40,7 +40,7 @@ export interface SessionsResponseModel {
 }
 
 export function mapSessionsResponseDtoToModel(
-  dto: SessionsResponseDto
+  dto: SessionsResponseDto,
 ): SessionsResponseModel {
   return {
     items: dto.sessions.map(mapSessionDtoToModel),

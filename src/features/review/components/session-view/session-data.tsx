@@ -26,7 +26,7 @@ export function SessionDataTable({
   const { data: specimenCounts, isLoading } = useSpecimenCountsQuery({
     district,
     sessionId,
-    monthYear, 
+    monthYear,
   });
 
   const tableData = useMemo(() => {
@@ -44,9 +44,8 @@ export function SessionDataTable({
           speciesSet.add(count.species);
         }
 
-
         let rowLabel = '';
-        
+
         if (count.sex === 'Male') {
           rowLabel = 'Male';
         } else if (count.sex === 'Female') {
@@ -90,7 +89,7 @@ export function SessionDataTable({
 
   if (isLoading) {
     return (
-      <div className="w-full flex justify-center py-8">
+      <div className="flex w-full justify-center py-8">
         <TableSkeleton />
       </div>
     );
@@ -98,7 +97,7 @@ export function SessionDataTable({
 
   if (!tableData.columns.length || !tableData.rowLabels.length) {
     return (
-      <div className="border-border/60 bg-background w-full overflow-auto rounded-xl border shadow-sm p-8 text-center text-muted-foreground">
+      <div className="border-border/60 bg-background text-muted-foreground w-full overflow-auto rounded-xl border p-8 text-center shadow-sm">
         No specimen data available for this session.
       </div>
     );
@@ -106,7 +105,7 @@ export function SessionDataTable({
 
   return (
     <div className="border-border/60 bg-background w-full overflow-auto rounded-xl border shadow-sm">
-      <Table className="text-sm min-w-[640px]">
+      <Table className="min-w-[640px] text-sm">
         <TableHeader>
           <TableRow className="bg-muted">
             <TableHead className="bg-muted border-border sticky left-0 z-30 max-w-[10rem] border-r px-3 text-xs uppercase">
@@ -131,7 +130,10 @@ export function SessionDataTable({
                   {rowLabel}
                 </TableCell>
                 {tableData.columns.map(column => (
-                  <TableCell key={column} className="bg-background text-center tabular-nums">
+                  <TableCell
+                    key={column}
+                    className="bg-background text-center tabular-nums"
+                  >
                     {rowData[column] ? rowData[column].toLocaleString() : '0'}
                   </TableCell>
                 ))}
@@ -143,13 +145,23 @@ export function SessionDataTable({
               Total
             </TableCell>
             {tableData.columns.map(column => {
-              const columnTotal = specimenCounts?.data.reduce((sum, site) => {
-                return sum + site.counts
-                  .filter(count => (count.species || 'Unknown') === column)
-                  .reduce((countSum, count) => countSum + (count.count || 0), 0);
-              }, 0) || 0;
+              const columnTotal =
+                specimenCounts?.data.reduce((sum, site) => {
+                  return (
+                    sum +
+                    site.counts
+                      .filter(count => (count.species || 'Unknown') === column)
+                      .reduce(
+                        (countSum, count) => countSum + (count.count || 0),
+                        0,
+                      )
+                  );
+                }, 0) || 0;
               return (
-                <TableCell key={column} className="bg-background text-center tabular-nums font-semibold">
+                <TableCell
+                  key={column}
+                  className="bg-background text-center font-semibold tabular-nums"
+                >
                   {columnTotal ? columnTotal.toLocaleString() : '0'}
                 </TableCell>
               );

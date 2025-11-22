@@ -12,12 +12,7 @@ import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 export async function getAnnotationTasks(
   filters: AnnotationTasksQuery = {},
 ): Promise<OffsetPage<AnnotationTask>> {
-  const {
-    page = 1,
-    limit = DEFAULT_PAGE_SIZE,
-    startDate,
-    endDate,
-  } = filters;
+  const { page = 1, limit = DEFAULT_PAGE_SIZE, startDate, endDate } = filters;
 
   const query: AnnotationTasksListRequestDto = {
     ...(page !== undefined ? { page } : {}),
@@ -28,8 +23,10 @@ export async function getAnnotationTasks(
 
   const data = await bff<AnnotationTasksListResponseDto>('/annotations/task', {
     method: 'GET',
-    query:
-      query as unknown as Record<string, string | number | boolean | null | undefined>,
+    query: query as unknown as Record<
+      string,
+      string | number | boolean | null | undefined
+    >,
   });
 
   return mapAnnotationTasksListResponseDtoToPage(data);

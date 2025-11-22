@@ -19,7 +19,9 @@ export function useAnnotationTaskProgressQuery(
   >,
 ) {
   return useQuery({
-    queryKey: annotationKeys.taskProgress(taskId) as AnnotationTaskProgressQueryKey,
+    queryKey: annotationKeys.taskProgress(
+      taskId,
+    ) as AnnotationTaskProgressQueryKey,
     queryFn: () => getAnnotationTaskProgress(taskId),
     enabled: Number.isFinite(taskId) && taskId > 0,
     ...(options ?? {}),

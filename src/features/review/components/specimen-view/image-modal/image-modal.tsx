@@ -38,7 +38,7 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
   return (
     <Dialog open={!!specimen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-[57vw] h-[57vh] p-0 !grid !grid-rows-[auto_1fr_auto]"
+        className="!grid h-[57vh] max-w-[57vw] !grid-rows-[auto_1fr_auto] p-0"
         showCloseButton={false}
         overlayClassName="bg-white/80"
       >

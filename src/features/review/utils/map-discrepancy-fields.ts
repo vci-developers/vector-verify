@@ -11,10 +11,9 @@ interface MappedDiscrepancyData {
   resolvedSurveillanceForm?: SurveillanceForm;
 }
 
-
 export function mapDiscrepancyFields(
   fields: SiteDiscrepancySummary['fields'],
-  values: Record<string, string>
+  values: Record<string, string>,
 ): MappedDiscrepancyData {
   const resolvedData: Partial<MappedDiscrepancyData['resolvedData']> = {};
   const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
@@ -23,7 +22,11 @@ export function mapDiscrepancyFields(
     value: string | undefined,
     type: 'string' | 'number' | 'boolean' = 'string',
   ) => {
-    if (!value || value.toLowerCase() === 'null' || value.toLowerCase() === 'n/a') {
+    if (
+      !value ||
+      value.toLowerCase() === 'null' ||
+      value.toLowerCase() === 'n/a'
+    ) {
       return null;
     }
     if (type === 'number') {
@@ -105,7 +108,6 @@ export function mapDiscrepancyFields(
     }
   });
 
-  
   Object.keys(values).forEach(key => {
     if (fields.some(f => f.key === key)) {
       return;
@@ -144,11 +146,13 @@ export function mapDiscrepancyFields(
   });
 
   return {
-    resolvedData: Object.keys(resolvedData).length > 0 
-      ? { ...resolvedData, type: 'SURVEILLANCE' as const }
-      : { type: 'SURVEILLANCE' as const },
-    resolvedSurveillanceForm: Object.keys(resolvedSurveillanceForm).length > 0 
-      ? (resolvedSurveillanceForm as SurveillanceForm)
-      : undefined,
+    resolvedData:
+      Object.keys(resolvedData).length > 0
+        ? { ...resolvedData, type: 'SURVEILLANCE' as const }
+        : { type: 'SURVEILLANCE' as const },
+    resolvedSurveillanceForm:
+      Object.keys(resolvedSurveillanceForm).length > 0
+        ? (resolvedSurveillanceForm as SurveillanceForm)
+        : undefined,
   };
 }

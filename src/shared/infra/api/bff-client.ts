@@ -23,7 +23,10 @@ export async function bff<T>(path: string, init: BffInit = {}): Promise<T> {
       timeoutMs,
     });
   } catch {
-    throw new HttpError('Network error. Please try again.', HTTP_STATUS.NETWORK_ERROR);
+    throw new HttpError(
+      'Network error. Please try again.',
+      HTTP_STATUS.NETWORK_ERROR,
+    );
   }
 
   if (!response.ok) {

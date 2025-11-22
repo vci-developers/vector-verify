@@ -1,4 +1,4 @@
-import { SurveillanceForm } from "@/shared/entities/surveillance-form";
+import { SurveillanceForm } from '@/shared/entities/surveillance-form';
 
 export interface MonthlySummaryRequestDto {
   offset?: number;
@@ -56,7 +56,7 @@ export interface DashboardMetricsRequestDto {
   type?: string;
 }
 
-export interface ResolvedData{
+export interface ResolvedData {
   collectorTitle?: string | null;
   collectorName?: string | null;
   collectionDate?: number | null;
@@ -67,7 +67,7 @@ export interface ResolvedData{
   notes?: string | null;
   latitude?: number | null;
   longitude?: number | null;
-  type:"SURVEILLANCE";
+  type: 'SURVEILLANCE';
   collectorLastTrainedOn?: number | null;
 }
 

@@ -17,9 +17,10 @@ export function decodeJwtExp(token?: string): number | null {
   try {
     const [, payload] = token.split('.');
     const payloadJson = JSON.parse(
-      Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString(
-        'utf-8',
-      ),
+      Buffer.from(
+        payload.replace(/-/g, '+').replace(/_/g, '/'),
+        'base64',
+      ).toString('utf-8'),
     );
     const expiresEpochMs =
       typeof payloadJson?.exp === 'number' ? payloadJson.exp * 1000 : null; // ms
@@ -53,7 +54,9 @@ export async function getAccessToken(): Promise<string | null> {
     'localhost';
   const origin = `${protocol}://${host}`;
   const requestHeaders = new Headers(incomingHeaders);
-  const request = new NextRequest(new Request(origin, { headers: requestHeaders }));
+  const request = new NextRequest(
+    new Request(origin, { headers: requestHeaders }),
+  );
   const token = await getToken({ req: request, secret: ENV.NEXTAUTH_SECRET });
   const accessToken = (token as Record<string, unknown> | null)?.accessToken;
   return typeof accessToken === 'string' ? accessToken : null;

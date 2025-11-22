@@ -153,7 +153,9 @@ export function VisualIdentificationForm({
         visualSpecies: normalizeToNull(formInput.species),
         visualSex: normalizeToNull(formInput.sex),
         visualAbdomenStatus: normalizeToNull(formInput.abdomenStatus),
-        morphSpecies: hasMorphData ? normalizeToNull(morphFormValues.species) : null,
+        morphSpecies: hasMorphData
+          ? normalizeToNull(morphFormValues.species)
+          : null,
         morphSex: hasMorphData ? normalizeToNull(morphFormValues.sex) : null,
         morphAbdomenStatus: hasMorphData
           ? normalizeToNull(morphFormValues.abdomenStatus)

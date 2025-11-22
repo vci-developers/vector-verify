@@ -37,7 +37,7 @@ export function mapSpecimenExpandedDtoToModel(
 }
 
 export function mapSpecimenExpandedDtoToPage(
-  dto: SpecimensListResponseDto
+  dto: SpecimensListResponseDto,
 ): OffsetPage<Specimen> {
   return {
     items: dto.specimens.map(mapSpecimenExpandedDtoToModel),

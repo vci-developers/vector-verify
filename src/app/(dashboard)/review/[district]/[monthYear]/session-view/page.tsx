@@ -1,4 +1,4 @@
-import { SessionsViewPageClient } from "@/features/review/components/session-view/page-client";
+import { SessionsViewPageClient } from '@/features/review/components/session-view/page-client';
 
 interface SessionsViewPageProps {
   params: {
