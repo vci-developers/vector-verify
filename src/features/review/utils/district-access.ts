@@ -43,7 +43,9 @@ export function getAccessibleDistricts(
   return uniqueDistricts.filter(district => accessibleDistricts.has(district));
 }
 
-export function normalizeDistrictList(districts: string[] | undefined): string[] {
+export function normalizeDistrictList(
+  districts: string[] | undefined,
+): string[] {
   if (!districts?.length) return [];
   return Array.from(new Set(districts.filter(Boolean))).sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: 'base' }),

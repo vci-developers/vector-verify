@@ -7,6 +7,7 @@ export interface Specimen {
   sessionId: number;
   thumbnailUrl: string | null;
   thumbnailImageId: number | null;
+  shouldProcessFurther: boolean;
   images?: SpecimenImage[];
   thumbnailImage?: SpecimenImage | null;
   session?: Session;

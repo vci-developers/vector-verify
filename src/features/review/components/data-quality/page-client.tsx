@@ -18,8 +18,10 @@ export function ReviewDataQualityPageClient({
   const decodedMonthYear = decodeURIComponent(monthYear);
   const dateRange = getMonthDateRange(decodedMonthYear);
 
-  const { siteDiscrepancies, missingSites, isLoading } =
-    useDataQualitySummary({ district, monthYear });
+  const { siteDiscrepancies, missingSites, isLoading } = useDataQualitySummary({
+    district,
+    monthYear,
+  });
 
   if (isLoading) {
     return <DataQualityLoading />;
@@ -28,7 +30,7 @@ export function ReviewDataQualityPageClient({
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-10">
       <header className="space-y-1 border-b pb-4">
-        <p className="text-muted-foreground text-xs uppercase tracking-wide">
+        <p className="text-muted-foreground text-xs tracking-wide uppercase">
           DHIS2 Review – Data Quality
         </p>
         <h1 className="text-3xl font-semibold">{decodedDistrict}</h1>

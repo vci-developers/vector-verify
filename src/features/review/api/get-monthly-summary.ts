@@ -1,9 +1,9 @@
-import type { MonthlySummary } from '@/features/review/types';
 import type {
+  MonthlySummary,
   MonthlySummaryQuery,
-  MonthlySummaryRequestDto,
   MonthlySummaryResponseDto,
 } from '@/features/review/types';
+import type { MonthlySummaryRequestDto } from '@/features/review/types/request.dto';
 import { mapMonthlySummaryResponseDtoToPage } from '@/features/review/types';
 import type { OffsetPage } from '@/shared/entities/pagination';
 import bff from '@/shared/infra/api/bff-client';
@@ -21,21 +21,29 @@ export async function getMonthlySummary(
     district,
     offset = 0,
     limit = DEFAULT_PAGE_SIZE,
+    type = 'SURVEILLANCE',
   } = filters;
 
   const requestDto: MonthlySummaryRequestDto = {
-    ...(offset !== undefined ? { offset } : {}),
-    ...(limit !== undefined ? { limit } : {}),
-    ...(startDate ? { startDate } : {}),
-    ...(endDate ? { endDate } : {}),
-    ...(district ? { district } : {}),
+    type,
   };
 
-  const response = await bff<MonthlySummaryResponseDto>('/sessions/review/task', {
-    method: 'GET',
-    query:
-      requestDto as Record<string, string | number | boolean | null | undefined>,
-  });
+  if (offset !== undefined) requestDto.offset = offset;
+  if (limit !== undefined) requestDto.limit = limit;
+  if (startDate) requestDto.startDate = startDate;
+  if (endDate) requestDto.endDate = endDate;
+  if (district) requestDto.district = district;
+
+  const response = await bff<MonthlySummaryResponseDto>(
+    '/sessions/review/task',
+    {
+      method: 'GET',
+      query: requestDto as Record<
+        string,
+        string | number | boolean | null | undefined
+      >,
+    },
+  );
 
   return {
     data: mapMonthlySummaryResponseDtoToPage(response),

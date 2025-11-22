@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
+import { ImageOff } from 'lucide-react';
+import { Specimen, getSpecimenImageUrl } from '@/shared/entities/specimen';
 import { useEffect, useRef, useMemo, useCallback } from 'react';
-import { Specimen } from '@/shared/entities/specimen';
 import { useSpecimensQuery } from '@/features/review/hooks/use-specimens';
 import { usePagination } from '@/shared/core/hooks/use-pagination';
 import { SpecimenGridLoadingSkeleton } from './loading-skeleton';
@@ -15,7 +17,6 @@ import {
   PaginationLink,
 } from '@/ui/pagination';
 import type { SpecimensQuery } from '@/features/review/types';
-import { SpecimenImage } from './specimen-image';
 
 interface SiteSpecimenContentProps {
   siteId: number;
@@ -83,7 +84,7 @@ export function SiteSpecimenContent({
 
   const pageItems = useMemo(
     () => createRange(currentPage),
-    [createRange, currentPage]
+    [createRange, currentPage],
   );
 
   const isPagingDisabled = isLoading;
@@ -95,7 +96,7 @@ export function SiteSpecimenContent({
         onPageChange(siteId, 1);
       }
     },
-    [isPagingDisabled, currentPage, onPageChange, siteId]
+    [isPagingDisabled, currentPage, onPageChange, siteId],
   );
 
   const handleNavigateToLastPage = useCallback(
@@ -105,7 +106,7 @@ export function SiteSpecimenContent({
         onPageChange(siteId, totalPages);
       }
     },
-    [isPagingDisabled, currentPage, totalPages, onPageChange, siteId]
+    [isPagingDisabled, currentPage, totalPages, onPageChange, siteId],
   );
 
   const handleNavigateToPage = useCallback(
@@ -115,7 +116,7 @@ export function SiteSpecimenContent({
         onPageChange(siteId, pageNumber);
       }
     },
-    [isPagingDisabled, currentPage, onPageChange, siteId]
+    [isPagingDisabled, currentPage, onPageChange, siteId],
   );
 
   if (!isOpen) {
@@ -127,14 +128,14 @@ export function SiteSpecimenContent({
       {isLoading ? (
         <SpecimenGridLoadingSkeleton />
       ) : total === 0 ? (
-        <div className="p-4 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground p-4 text-center text-sm">
           {hasActiveFilters
             ? 'No specimens match the selected filters'
             : 'No specimens reported from this household'}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-between text-sm">
             <span>
               Showing {(currentPage - 1) * pageSize + 1} –
               {` ${Math.min(currentPage * pageSize, total)} of ${total} specimens`}
@@ -143,14 +144,40 @@ export function SiteSpecimenContent({
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {specimens.map(specimen => (
-              <SpecimenImage
-                key={specimen.id}
-                specimen={specimen}
-                className="overflow-hidden rounded border transition-shadow hover:shadow-lg"
-                onClick={() => onImageClick(specimen)}
-              />
-            ))}
+            {specimens.map(specimen => {
+              const imageUrl = getSpecimenImageUrl(specimen);
+
+              return (
+                <div
+                  key={specimen.id}
+                  className="cursor-pointer overflow-hidden rounded border transition-shadow hover:shadow-lg"
+                  onClick={() => imageUrl && onImageClick(specimen)}
+                >
+                  <div className="text-muted-foreground px-2 pt-2 text-xs">
+                    {specimen.specimenId}
+                  </div>
+                  <div className="relative aspect-[4/3] w-full">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={`Specimen ${specimen.specimenId}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="bg-muted flex h-full w-full items-center justify-center">
+                        <div className="text-muted-foreground flex flex-col items-center gap-2">
+                          <ImageOff className="h-8 w-8" />
+                          <span className="text-xs">Invalid image</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {totalPages > 1 && (
@@ -170,7 +197,9 @@ export function SiteSpecimenContent({
                   </PaginationItem>
                   {pageItems.map((pageItem, index) => (
                     <PaginationItem
-                      key={pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem}
+                      key={
+                        pageItem === 'ellipsis' ? `ellipsis-${index}` : pageItem
+                      }
                     >
                       {pageItem === 'ellipsis' ? (
                         <PaginationEllipsis />
@@ -178,7 +207,9 @@ export function SiteSpecimenContent({
                         <PaginationLink
                           href="#"
                           isActive={pageItem === currentPage}
-                          onClick={event => handleNavigateToPage(event, pageItem)}
+                          onClick={event =>
+                            handleNavigateToPage(event, pageItem)
+                          }
                         >
                           {pageItem}
                         </PaginationLink>

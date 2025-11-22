@@ -8,15 +8,14 @@ import { SiteAccordionTrigger } from './site-accordion-trigger';
 import { useBatchedSiteStatistics } from './site-statistics';
 import type { Specimen } from '@/shared/entities/specimen';
 import type { SpecimenFilters } from './specimen-filters';
-import type { SpecimensQuery } from '@/features/review/types';
 
 interface SpecimenReviewAccordionProps {
   siteIds: number[];
   houseNumbers: string[];
   villageNames: (string | null)[];
   district: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   pageSize: number;
   filters: SpecimenFilters;
 }
@@ -90,7 +89,6 @@ export function SpecimenReviewAccordion({
     ],
   );
 
-  // Fetch statistics for all sites in parallel using batched hook
   const { statisticsMap } = useBatchedSiteStatistics({
     siteIds,
     queryParameters: filterQuery,
@@ -115,7 +113,6 @@ export function SpecimenReviewAccordion({
               siteId={siteId}
               houseNumber={houseNumber}
               villageName={villageName}
-              filterQuery={filterQuery}
               statistics={statisticsMap.get(siteId)}
             />
             <AccordionContent className="px-4 pb-4">

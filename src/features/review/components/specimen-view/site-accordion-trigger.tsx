@@ -2,13 +2,12 @@
 
 import { AccordionTrigger } from '@/ui/accordion';
 import { formatHouseNumber } from './utils';
-import type { SpecimensQuery, SiteStatisticsData } from '@/features/review/types';
+import type { SiteStatisticsData } from '@/features/review/types';
 
 interface SiteAccordionTriggerProps {
   siteId: number;
   houseNumber: string;
   villageName?: string | null;
-  filterQuery: SpecimensQuery;
   statistics?: SiteStatisticsData;
 }
 
@@ -16,7 +15,6 @@ export function SiteAccordionTrigger({
   siteId,
   houseNumber,
   villageName,
-  filterQuery,
   statistics,
 }: SiteAccordionTriggerProps) {
   const { totalSpecimens, totalImages, isLoading, isPartial } = statistics ?? {

@@ -5,6 +5,7 @@ export interface SessionDto {
   frontendId: string;
   collectorTitle: string | null;
   collectorName: string | null;
+  collectorLastTrainedOn: number | null;
   collectionDate: number | null;
   collectionMethod: string | null;
   specimenCondition: string | null;

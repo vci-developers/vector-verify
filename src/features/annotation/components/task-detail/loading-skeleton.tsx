@@ -1,8 +1,12 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/ui/card';
 import { Skeleton } from '@/ui/skeleton';
 
-const layoutClass =
-  'mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]';
+const getLayoutClass = (shouldProcessFurther: boolean) => {
+  if (shouldProcessFurther) {
+    return 'mx-auto grid h-full w-full max-w-[1800px] gap-6 p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]';
+  }
+  return 'mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[1fr_1fr]';
+};
 const statusGridClass =
   'grid gap-2 justify-items-center sm:grid-cols-2 sm:justify-items-stretch lg:grid-cols-3';
 const statusCardClass =
@@ -18,7 +22,15 @@ const StatusSkeleton = () => (
   </div>
 );
 
-export function AnnotationTaskDetailSkeleton() {
+interface AnnotationTaskDetailSkeletonProps {
+  shouldProcessFurther?: boolean;
+}
+
+export function AnnotationTaskDetailSkeleton({
+  shouldProcessFurther = false,
+}: AnnotationTaskDetailSkeletonProps) {
+  const layoutClass = getLayoutClass(shouldProcessFurther);
+
   return (
     <div className={layoutClass}>
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
@@ -68,6 +80,25 @@ export function AnnotationTaskDetailSkeleton() {
           ))}
         </CardFooter>
       </Card>
+
+      {shouldProcessFurther && (
+        <Card className="flex h-full flex-col overflow-hidden shadow-sm">
+          <CardHeader className="space-y-3">
+            <div className="space-y-1">
+              <Skeleton className="h-5 w-64" />
+              <Skeleton className="h-4 w-72" />
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 space-y-3 text-sm">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full rounded-md" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full rounded-md" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -21,6 +21,9 @@ export interface AnnotationDto {
   annotationTaskId: number;
   annotatorId: number;
   specimenId: number;
+  visualSpecies: string | null;
+  visualSex: string | null;
+  visualAbdomenStatus: string | null;
   morphSpecies: string | null;
   morphSex: string | null;
   morphAbdomenStatus: string | null;

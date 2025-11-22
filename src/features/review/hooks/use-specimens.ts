@@ -1,24 +1,24 @@
-import type { OffsetPage } from '@/shared/entities/pagination';
-import type { Specimen } from '@/shared/entities/specimen/model';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { getSpecimens } from '@/features/review/api/get-specimens';
 import {
   reviewKeys,
   type SpecimensQueryKey,
 } from '@/features/review/api/review-keys';
+import type { OffsetPage } from '@/shared/entities/pagination';
+import type { Specimen } from '@/shared/entities/specimen/model';
 import type { SpecimensQuery } from '@/features/review/types';
 
 export function useSpecimensQuery(
   filters: SpecimensQuery = {},
   options?: Omit<
     UseQueryOptions<
-    OffsetPage<Specimen>, 
-    Error, 
-    OffsetPage<Specimen>, 
-    SpecimensQueryKey
+      OffsetPage<Specimen>,
+      Error,
+      OffsetPage<Specimen>,
+      SpecimensQueryKey
     >,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) {
   const {
     offset,
@@ -31,12 +31,14 @@ export function useSpecimensQuery(
     sex,
     abdomenStatus,
     includeAllImages,
+    sessionType = 'SURVEILLANCE',
   } = filters;
 
-  const baseEnabled = Boolean(siteId && district && startDate && endDate);
+  const enabled =
+    (options?.enabled ?? true) &&
+    Boolean(siteId && district && startDate && endDate);
 
   return useQuery({
-    ...(options ?? {}),
     queryKey: reviewKeys.specimens(
       offset,
       limit,
@@ -48,20 +50,10 @@ export function useSpecimensQuery(
       sex,
       abdomenStatus,
       includeAllImages,
+      sessionType,
     ) as SpecimensQueryKey,
-    queryFn: () =>
-      getSpecimens({
-        offset,
-        limit,
-        startDate,
-        endDate,
-        district,
-        siteId,
-        species,
-        sex,
-        abdomenStatus,
-        includeAllImages,
-      }),
-    enabled: (options?.enabled ?? true) && baseEnabled,
+    queryFn: () => getSpecimens({ ...filters, sessionType }),
+    enabled,
+    ...(options ?? {}),
   });
 }

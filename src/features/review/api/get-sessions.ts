@@ -21,12 +21,13 @@ async function requestSessions(
     offset = 0,
     sortBy,
     sortOrder,
-    type,
+    type = 'SURVEILLANCE',
   } = params;
 
   const query: Record<string, string | number> = {
-    limit: Math.min(limit ?? DEFAULT_PAGE_SIZE, PAGE_LIMIT),
+    limit: Math.min(limit, PAGE_LIMIT),
     offset,
+    type,
   };
 
   if (district) query.district = district;
@@ -35,7 +36,6 @@ async function requestSessions(
   if (endDate) query.endDate = endDate;
   if (sortBy) query.sortBy = sortBy;
   if (sortOrder) query.sortOrder = sortOrder;
-  if (type) query.type = type;
 
   return bff<SessionsResponseDto>('/sessions', {
     method: 'GET',
@@ -60,10 +60,9 @@ export async function getAllSessions(
 
   while (hasMore) {
     const page = await getSessions({ ...params, offset, limit });
-    const items = page.items;
-    collected.push(...items);
+    collected.push(...page.items);
 
-    hasMore = page.hasMore && items.length > 0;
+    hasMore = page.hasMore && page.items.length > 0;
     if (!hasMore) break;
 
     offset += limit;

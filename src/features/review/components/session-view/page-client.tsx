@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionContent,
@@ -9,14 +8,13 @@ import {
   AccordionTrigger,
 } from '@/ui/accordion';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
-import { getSessions } from '@/features/review/api/get-sessions';
+import { useSessionsInfiniteQuery } from '@/features/review/hooks/use-sessions';
 import { CircleUserIcon } from 'lucide-react';
 import { SessionDataTable } from './session-data';
 import { SessionsAccordionSkeleton } from './loading-skeleton';
 import type { Session } from '@/shared/entities/session/model';
 import { Button } from '@/ui/button';
 import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
-
 
 interface SessionsViewPageClientProps {
   district: string;
@@ -44,42 +42,20 @@ export function SessionsViewPageClient({
   const dateRange = getMonthDateRange(decodedMonthYear);
   const { startDate, endDate } = dateRange ?? {};
 
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: [
-      'sessions',
-      decodedDistrict,
-      startDate,
-      endDate,
-      DEFAULT_PAGE_SIZE,
-    ],
-    queryFn: async ({ pageParam = 0 }) => {
-      return getSessions({
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useSessionsInfiniteQuery(
+      {
         district: decodedDistrict,
         startDate,
         endDate,
         limit: DEFAULT_PAGE_SIZE,
-        offset: pageParam,
-      });
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      const loaded = allPages.reduce(
-        (sum, page) => sum + (page.items?.length ?? 0),
-        0
-      );
-      return loaded < (lastPage.total ?? 0) ? loaded : undefined;
-    },
-    enabled: Boolean(decodedDistrict && startDate && endDate),
-    initialPageParam: 0,
-  });
+      },
+      {
+        enabled: Boolean(decodedDistrict && startDate && endDate),
+      },
+    );
 
-  const sessions =
-    data?.pages.flatMap((page) => page.items ?? []) ?? [];
+  const sessions = data?.pages.flatMap(page => page.items ?? []) ?? [];
   const total = data?.pages[0]?.total ?? 0;
 
   const monthLabel = useMemo(
@@ -95,18 +71,13 @@ export function SessionsViewPageClient({
             Sessions View
           </p>
           <h1 className="text-3xl font-semibold">{decodedDistrict}</h1>
-          <p className="text-muted-foreground text-sm">
-            {monthLabel}
-          </p>
+          <p className="text-muted-foreground text-sm">{monthLabel}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-muted-foreground text-sm">
-            <span className="text-2xl font-semibold">
-              {sessions.length.toLocaleString()}
-            </span>
-            {' '}
-            of {total.toLocaleString()} session{total === 1 ? '' : 's'} loaded
-          </div>
+        <div className="text-muted-foreground text-sm">
+          <span className="text-2xl font-semibold">
+            {sessions.length.toLocaleString()}
+          </span>{' '}
+          of {total.toLocaleString()} session{total === 1 ? '' : 's'} loaded
         </div>
       </header>
 
@@ -130,9 +101,15 @@ export function SessionsViewPageClient({
           )}
 
           {sessions.length > 0 && (
-            <Accordion type="single" collapsible className="w-full border rounded-xl shadow-sm">
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full rounded-xl border shadow-sm"
+            >
               {sessions.map((session: Session) => {
-                const collectionDateObj = session.collectionDate ? new Date(session.collectionDate) : null;
+                const collectionDateObj = session.collectionDate
+                  ? new Date(session.collectionDate)
+                  : null;
                 return (
                   <AccordionItem
                     key={session.sessionId}
@@ -140,22 +117,23 @@ export function SessionsViewPageClient({
                     className="px-4 py-3"
                   >
                     <AccordionTrigger>
-                      <div className="grid grid-cols-12 items-center w-full gap-8">
+                      <div className="grid w-full grid-cols-12 items-center gap-8">
                         <div className="col-span-2 flex items-center">
                           <span className="font-semibold">
-                            Collection Date: {collectionDateObj
+                            Collection Date:{' '}
+                            {collectionDateObj
                               ? `${String(collectionDateObj.getMonth() + 1).padStart(2, '0')}/${String(collectionDateObj.getDate()).padStart(2, '0')}`
                               : 'No Date'}
                           </span>
                         </div>
-                        <div className="col-span-5 flex items-center gap-2 min-w-0">
-                          <CircleUserIcon className="w-5 h-5 text-muted-foreground shrink-0" />
+                        <div className="col-span-5 flex min-w-0 items-center gap-2">
+                          <CircleUserIcon className="text-muted-foreground h-5 w-5 shrink-0" />
                           <span className="truncate font-medium">
                             {session.collectorName || 'Unknown'}
                           </span>
                         </div>
-                        <div className="col-span-5 flex items-center min-w-0">
-                          <span className="text-sm text-muted-foreground truncate">
+                        <div className="col-span-5 flex min-w-0 items-center">
+                          <span className="text-muted-foreground truncate text-sm">
                             Method: {session.collectionMethod || '—'}
                           </span>
                         </div>
@@ -164,22 +142,25 @@ export function SessionsViewPageClient({
                     <AccordionContent>
                       <div className="p-4">
                         <div className="mb-4">
-                          <div className="rounded-lg border bg-card p-4 shadow-sm">
-                            <h3 className="text-lg font-semibold mb-1">Specimen Condition</h3>
-                            <p className="text-muted-foreground text-sm mb-4">
-                              {session.specimenCondition || 'No specimen condition recorded.'}
+                          <div className="bg-card rounded-lg border p-4 shadow-sm">
+                            <h3 className="mb-1 text-lg font-semibold">
+                              Specimen Condition
+                            </h3>
+                            <p className="text-muted-foreground mb-4 text-sm">
+                              {session.specimenCondition ||
+                                'No specimen condition recorded.'}
                             </p>
                             <SessionDataTable
                               district={decodedDistrict}
                               sessionId={String(session.sessionId)}
                               monthYear={monthYear}
                             />
-                            <div className="border-t mt-6 pt-4">
-                              <label className="block text-sm font-medium mb-1 text-foreground">
+                            <div className="mt-6 border-t pt-4">
+                              <label className="text-foreground mb-1 block text-sm font-medium">
                                 Notes
                               </label>
                               <textarea
-                                className="w-full rounded border bg-background p-2 text-sm text-foreground resize-none"
+                                className="bg-background text-foreground w-full resize-none rounded border p-2 text-sm"
                                 rows={3}
                                 value={session.notes || ''}
                                 readOnly

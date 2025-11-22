@@ -6,6 +6,7 @@ import { Button } from '@/ui/button';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -14,12 +15,21 @@ import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { notFound } from 'next/navigation';
 import { TaskProgressBreakdown } from './annotation-form-panel/task-progress-breakdown';
 import { SpecimenMetadata } from './specimen-image-panel/specimen-metadata';
 import { SpecimenImageViewer } from './specimen-image-panel/specimen-image-viewer';
-import { AnnotationForm } from './annotation-form-panel/annotation-form';
+import { VisualIdentificationForm } from './annotation-form-panel/visual-identification-form';
+import {
+  MorphIdentificationForm,
+  type MorphIdentificationFormRef,
+} from './annotation-form-panel/morph-identification-form';
+import { useShouldProcessFurther } from './hooks/use-should-process-further';
+import {
+  getMorphFormDefaultValues,
+  type MorphFormDefaultValues,
+} from './utils/morph-form-defaults';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -29,6 +39,9 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
+  const [morphFormValues, setMorphFormValues] =
+    useState<MorphFormDefaultValues | null>(null);
+  const morphFormRef = useRef<MorphIdentificationFormRef>(null);
 
   const {
     data: annotationsPage,
@@ -75,8 +88,26 @@ export function AnnotationTaskDetailPageClient({
     }
   }, [page, isFetching, isLoading]);
 
-  if (isLoading) {
-    return <AnnotationTaskDetailSkeleton />;
+  const { shouldProcessFurther, isLoading: isLoadingShouldProcessFurther } =
+    useShouldProcessFurther(currentAnnotation?.specimen);
+
+  const morphFormDefaultValues = useMemo<MorphFormDefaultValues | null>(() => {
+    if (!shouldProcessFurther || !currentAnnotation) {
+      return null;
+    }
+    return getMorphFormDefaultValues(currentAnnotation);
+  }, [shouldProcessFurther, currentAnnotation]);
+
+  useEffect(() => {
+    setMorphFormValues(morphFormDefaultValues);
+  }, [morphFormDefaultValues]);
+
+  if (isLoading || isLoadingShouldProcessFurther) {
+    return (
+      <AnnotationTaskDetailSkeleton
+        shouldProcessFurther={shouldProcessFurther}
+      />
+    );
   }
 
   if (!currentAnnotation) {
@@ -93,8 +124,15 @@ export function AnnotationTaskDetailPageClient({
       ? `#${currentAnnotation.specimen.id}`
       : null);
 
+  const gridCols = shouldProcessFurther
+    ? 'md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]'
+    : 'md:grid-cols-[1fr_1fr]';
+  const maxWidth = shouldProcessFurther ? 'max-w-[1800px]' : 'max-w-6xl';
+
   return (
-    <div className="mx-auto grid h-full w-full max-w-6xl gap-6 p-6 md:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)]">
+    <div
+      className={`mx-auto grid h-full w-full ${maxWidth} gap-6 p-6 ${gridCols}`}
+    >
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -131,23 +169,31 @@ export function AnnotationTaskDetailPageClient({
 
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-3">
-          <CardTitle className="text-lg font-semibold">
-            Annotation Form
-          </CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold">
+              Visual Identification Form
+            </CardTitle>
+            <CardDescription>
+              Identify the specimen by visually examining the image.
+            </CardDescription>
+          </div>
           <TaskProgressBreakdown taskProgress={taskProgress} />
         </CardHeader>
 
         <CardContent className="pt-0">
-          <AnnotationForm
+          <VisualIdentificationForm
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
-              species: currentAnnotation.morphSpecies ?? undefined,
-              sex: currentAnnotation.morphSex ?? undefined,
-              abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
+              species: currentAnnotation.visualSpecies ?? undefined,
+              sex: currentAnnotation.visualSex ?? undefined,
+              abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
               notes: currentAnnotation.notes ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
+            morphFormValues={morphFormValues}
+            shouldProcessFurther={shouldProcessFurther}
+            morphFormRef={morphFormRef}
           />
         </CardContent>
 
@@ -172,6 +218,34 @@ export function AnnotationTaskDetailPageClient({
           </Button>
         </CardFooter>
       </Card>
+
+      {shouldProcessFurther && (
+        <Card className="flex h-full flex-col overflow-hidden shadow-sm">
+          <CardHeader className="space-y-3">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-semibold">
+                Morph Identification Annotation Form
+              </CardTitle>
+              <CardDescription>
+                Identify the specimen by examining it under a microscope.
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pt-0">
+            <MorphIdentificationForm
+              ref={morphFormRef}
+              key={`morph-${currentAnnotation.id}`}
+              defaultValues={
+                morphFormDefaultValues ?? {
+                  received: false,
+                }
+              }
+              onValuesChange={setMorphFormValues}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
