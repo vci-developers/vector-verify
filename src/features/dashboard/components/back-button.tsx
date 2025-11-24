@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/ui/button';
 import {
@@ -12,15 +12,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/shared/ui/drawer';
-import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, FileEdit } from 'lucide-react';
+import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, List, ChevronRight, AlertCircle } from 'lucide-react';
 import { cn } from '@/shared/core/utils';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select';
 
 interface BackButtonProps {
   show: boolean;
@@ -28,48 +21,10 @@ interface BackButtonProps {
   monthYear?: string;
 }
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: React.ComponentType<{ className?: string }>;
-  description: string;
-}
-
-
 export function BackButton({ show, district, monthYear }: BackButtonProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-
-  const navItems: NavItem[] = useMemo(
-    () => [
-      {
-        label: 'Dashboard',
-        path: `/review/${district}/${monthYear}/dashboard`,
-        icon: LayoutDashboard,
-        description: 'Overview and statistics',
-      },
-      {
-        label: 'Master Table View',
-        path: `/review/${district}/${monthYear}/master-table-view`,
-        icon: Table,
-        description: 'Detailed data table',
-      },
-      {
-        label: 'Session View',
-        path: `/review/${district}/${monthYear}/session-view`,
-        icon: Users,
-        description: 'Session details and forms',
-      },
-      {
-        label: 'Specimen View',
-        path: `/review/${district}/${monthYear}/specimen-view`,
-        icon: Microscope,
-        description: 'Specimen images and data',
-      },
-    ],
-    [district, monthYear],
-  );
 
   const handleNavigate = (path: string) => {
     router.push(path);
@@ -77,6 +32,11 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
   };
 
   const isActivePath = (path: string) => pathname === path;
+
+  const isInReview = district && monthYear;
+  const isOnReviewList = pathname === '/review';
+  const isInAnnotation = pathname.startsWith('/annotate');
+  const isOnAnnotationList = pathname === '/annotate';
 
   if (!show) {
     return <div className="w-20" />;
@@ -99,17 +59,7 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
         <div className="flex h-full flex-col">
           <DrawerHeader className="border-b">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex-1">
-                <DrawerTitle>
-                  {district && monthYear ? (
-                    <>
-                      {decodeURIComponent(district)} - {decodeURIComponent(monthYear)}
-                    </>
-                  ) : (
-                    'Navigation'
-                  )}
-                </DrawerTitle>
-              </div>
+              <DrawerTitle>Navigation</DrawerTitle>
               <Button
                 type="button"
                 variant="ghost"
@@ -123,75 +73,161 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
               </Button>
             </div>
           </DrawerHeader>
+          
           <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-4">
-              {district && monthYear && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Review</label>
-                  <Select onValueChange={handleNavigate} value={pathname}>
-                    <SelectTrigger className="w-full h-12 text-base">
-                      <SelectValue placeholder="Select review feature" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {navItems.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = isActivePath(item.path);
-                        return (
-                          <SelectItem 
-                            key={item.path} 
-                            value={item.path} 
-                            className={cn(
-                              "h-12 text-base",
-                              isActive && "bg-green-50 text-green-700 data-[highlighted]:bg-green-100"
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Icon className={cn("h-5 w-5", isActive && "text-green-600")} />
-                              <span>{item.label}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {(pathname === '/review' || pathname.startsWith('/annotate')) && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Data Review</label>
+            <div className="space-y-6">
+              
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  Data Review
+                </h3>
+                <div className="space-y-1">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     className={cn(
-                      "w-full h-12 justify-start gap-3 text-base",
-                      pathname === '/review' && "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                      "w-full justify-start gap-3 h-10",
+                      isOnReviewList && "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
                     )}
                     onClick={() => handleNavigate('/review')}
                   >
-                    <Table className={cn("h-5 w-5", pathname === '/review' && "text-green-600")} />
+                    <List className={cn("h-4 w-4", isOnReviewList && "text-green-600")} />
                     <span>Review List</span>
                   </Button>
-                </div>
-              )}
+                  
+                  {isInReview && (
+                    <>
+                      <div className="pl-4 pt-1 pb-1">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                          <ChevronRight className="h-3 w-3" />
+                          <span className="font-medium">{decodeURIComponent(district)} - {decodeURIComponent(monthYear)}</span>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start gap-3 h-10 pl-8",
+                          isActivePath(`/review/${district}/${monthYear}/dashboard`) && 
+                          "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                        )}
+                        onClick={() => handleNavigate(`/review/${district}/${monthYear}/dashboard`)}
+                      >
+                        <LayoutDashboard className={cn(
+                          "h-4 w-4",
+                          isActivePath(`/review/${district}/${monthYear}/dashboard`) && "text-green-600"
+                        )} />
+                        <span>Dashboard</span>
+                      </Button>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Annotation</label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full h-12 justify-start gap-3 text-base",
-                    pathname.startsWith('/annotate') && "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start gap-3 h-10 pl-8",
+                          isActivePath(`/review/${district}/${monthYear}/master-table-view`) && 
+                          "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                        )}
+                        onClick={() => handleNavigate(`/review/${district}/${monthYear}/master-table-view`)}
+                      >
+                        <Table className={cn(
+                          "h-4 w-4",
+                          isActivePath(`/review/${district}/${monthYear}/master-table-view`) && "text-green-600"
+                        )} />
+                        <span>Master Table View</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start gap-3 h-10 pl-8",
+                          isActivePath(`/review/${district}/${monthYear}/session-view`) && 
+                          "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                        )}
+                        onClick={() => handleNavigate(`/review/${district}/${monthYear}/session-view`)}
+                      >
+                        <Users className={cn(
+                          "h-4 w-4",
+                          isActivePath(`/review/${district}/${monthYear}/session-view`) && "text-green-600"
+                        )} />
+                        <span>Session View</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start gap-3 h-10 pl-8",
+                          isActivePath(`/review/${district}/${monthYear}/specimen-view`) && 
+                          "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                        )}
+                        onClick={() => handleNavigate(`/review/${district}/${monthYear}/specimen-view`)}
+                      >
+                        <Microscope className={cn(
+                          "h-4 w-4",
+                          isActivePath(`/review/${district}/${monthYear}/specimen-view`) && "text-green-600"
+                        )} />
+                        <span>Specimen View</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start gap-3 h-10 pl-8",
+                          isActivePath(`/review/${district}/${monthYear}/data-quality`) && 
+                          "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                        )}
+                        onClick={() => handleNavigate(`/review/${district}/${monthYear}/data-quality`)}
+                      >
+                        <AlertCircle className={cn(
+                          "h-4 w-4",
+                          isActivePath(`/review/${district}/${monthYear}/data-quality`) && "text-green-600"
+                        )} />
+                        <span>Data Quality</span>
+                      </Button>
+                    </>
                   )}
-                  onClick={() => handleNavigate('/annotate')}
-                >
-                  <FileEdit className={cn("h-5 w-5", pathname.startsWith('/annotate') && "text-green-600")} />
-                  <span>Annotation Tasks</span>
-                </Button>
+                </div>
               </div>
+
+              <div className="border-t" />
+
+              {/* Annotation Section */}
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  Annotation
+                </h3>
+                <div className="space-y-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-3 h-10",
+                      isOnAnnotationList && "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                    )}
+                    onClick={() => handleNavigate('/annotate')}
+                  >
+                    <List className={cn("h-4 w-4", isOnAnnotationList && "text-green-600")} />
+                    <span>Annotation Tasks</span>
+                  </Button>
+                  
+                  {isInAnnotation && !isOnAnnotationList && (
+                    <div className="pl-4 pt-1">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <ChevronRight className="h-3 w-3" />
+                        <span className="font-medium">Currently annotating</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           </div>
+          
           <DrawerFooter className="border-t">
             <DrawerClose asChild>
               <Button 
