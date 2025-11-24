@@ -9,6 +9,7 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from '@/shared/ui/drawer';
 import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, List, ChevronRight, AlertCircle } from 'lucide-react';
@@ -78,6 +79,7 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                 Home
               </Button>
             </div>
+            <DrawerTitle className="sr-only">Navigation Menu</DrawerTitle>
           </DrawerHeader>
           
           <div className="flex-1 overflow-y-auto p-4">
