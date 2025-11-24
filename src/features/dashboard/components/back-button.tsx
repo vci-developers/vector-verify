@@ -9,11 +9,11 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerTitle,
   DrawerTrigger,
 } from '@/shared/ui/drawer';
 import { Menu, LayoutDashboard, Table, Users, Microscope, X, Home, List, ChevronRight, AlertCircle } from 'lucide-react';
 import { cn } from '@/shared/core/utils';
+import Image from 'next/image';
 
 interface BackButtonProps {
   show: boolean;
@@ -59,7 +59,13 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
         <div className="flex h-full flex-col">
           <DrawerHeader className="border-b">
             <div className="flex items-center justify-between gap-2">
-              <DrawerTitle>Navigation</DrawerTitle>
+              <Image 
+                src="/assets/auth/images/logo.png" 
+                alt="VectorCheck Logo" 
+                width={45} 
+                height={15}
+                className="object-contain"
+              />
               <Button
                 type="button"
                 variant="ghost"
