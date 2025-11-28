@@ -108,7 +108,7 @@ export function SessionDataTable({
       <Table className="min-w-[640px] text-sm">
         <TableHeader>
           <TableRow className="bg-muted">
-            <TableHead className="bg-muted border-border sticky left-0 z-30 max-w-[10rem] border-r px-3 text-xs uppercase">
+            <TableHead className="bg-muted border-border sticky left-0 z-30 max-w-40 border-r px-3 text-xs uppercase">
               Sex/Abdomen Status
             </TableHead>
             {tableData.columns.map(column => (
@@ -126,7 +126,7 @@ export function SessionDataTable({
             const rowData = tableData.data[rowLabel];
             return (
               <TableRow key={rowLabel}>
-                <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
+                <TableCell className="bg-background border-border sticky left-0 z-20 max-w-40 border-r align-top font-semibold">
                   {rowLabel}
                 </TableCell>
                 {tableData.columns.map(column => (
@@ -141,7 +141,7 @@ export function SessionDataTable({
             );
           })}
           <TableRow>
-            <TableCell className="bg-background border-border sticky left-0 z-20 max-w-[10rem] border-r align-top font-semibold">
+            <TableCell className="bg-background border-border sticky left-0 z-20 max-w-40 border-r align-top font-semibold">
               Total
             </TableCell>
             {tableData.columns.map(column => {

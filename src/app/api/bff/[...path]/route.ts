@@ -37,12 +37,17 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
       queryParams[key] = value;
     });
 
+    // Determine timeout based on endpoint
+    // DHIS2 sync can take a long time, so give it 10 minutes
+    const isLongRunning = path.includes('dhis2/sync');
+    const timeoutMs = isSSE ? 0 : isLongRunning ? 10 * 60 * 1000 : undefined;
+
     const upstreamResponse = await upstreamFetch(path, {
       method: request.method,
       headers: requestHeaders,
       ...(body !== null ? { body } : {}),
       query: queryParams,
-      timeoutMs: isSSE ? 0 : undefined,
+      timeoutMs,
     });
 
     if (!upstreamResponse.ok) {
