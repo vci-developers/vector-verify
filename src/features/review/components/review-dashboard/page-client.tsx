@@ -114,16 +114,18 @@ export function ReviewDashboardPageClient({
       )
       .map(site => {
         const villageIrs = villageToIrsMap.get(site.villageName!)!;
+        if (!villageIrs.wasIrsSprayed) {
+          return {
+            siteId: site.siteId,
+            wasIrsSprayed: false,
+          } satisfies SiteIrsData;
+        }
         return {
           siteId: site.siteId,
-          wasIrsSprayed: villageIrs.wasIrsSprayed,
-          insecticideSprayed: villageIrs.wasIrsSprayed && villageIrs.insecticideSprayed 
-            ? villageIrs.insecticideSprayed 
-            : null,
-          dateLastSprayed: villageIrs.wasIrsSprayed && villageIrs.dateLastSprayed 
-            ? villageIrs.dateLastSprayed 
-            : null,
-        };
+          wasIrsSprayed: true,
+          insecticideSprayed: villageIrs.insecticideSprayed,
+          dateLastSprayed: villageIrs.dateLastSprayed,
+        } satisfies SiteIrsData;
       });
 
     console.log('Submitting DHIS2 sync with IRS data:', { 

@@ -1,11 +1,12 @@
 /**
- * IRS (Indoor Residual Spraying) data for a single site
+ * IRS (Indoor Residual Spraying) data for a single site.
+ * If not sprayed, simply omit the optional fields.
  */
 export interface SiteIrsData {
   siteId: number;
   wasIrsSprayed: boolean;
-  insecticideSprayed: string | null;
-  dateLastSprayed: string | null; // ISO date string "YYYY-MM-DD"
+  insecticideSprayed?: string; // present only when sprayed
+  dateLastSprayed?: string; // ISO date string "YYYY-MM-DD"; present only when sprayed
 }
 
 /**
