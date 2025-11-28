@@ -21,8 +21,13 @@
 /build
 
 # misc
+.vscode/
+.idea/
 .DS_Store
 *.pem
+Thumbs.db
+.AppleDouble
+.LSOverride
 
 # debug
 npm-debug.log*
