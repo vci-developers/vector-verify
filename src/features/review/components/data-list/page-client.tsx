@@ -12,10 +12,7 @@ import { createMonthlySummaryColumns } from './columns';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import { useDistrictManagement } from '@/features/review/hooks/use-district-management';
-import {
-  buildReviewPath,
-  buildDashboardPath,
-} from '@/features/review/utils/navigation';
+import { buildDashboardPath } from '@/features/review/utils/navigation';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 
 export function ReviewDataListPageClient() {
@@ -83,13 +80,6 @@ export function ReviewDataListPageClient() {
     [handleDistrictSelected, setPage],
   );
 
-  const handleNavigateToReview = useCallback(
-    (district: string, monthYear: string) => {
-      router.push(buildReviewPath(district, monthYear));
-    },
-    [router],
-  );
-
   const handleNavigateToDashboard = useCallback(
     (district: string, monthYear: string) => {
       router.push(buildDashboardPath(district, monthYear));
@@ -100,10 +90,9 @@ export function ReviewDataListPageClient() {
   const columns = useMemo(
     () =>
       createMonthlySummaryColumns({
-        onNavigateToReview: handleNavigateToReview,
         onNavigateToDashboard: handleNavigateToDashboard,
       }),
-    [handleNavigateToReview, handleNavigateToDashboard],
+    [handleNavigateToDashboard],
   );
 
   if (isLoading || isFetching) {

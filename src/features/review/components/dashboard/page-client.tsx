@@ -83,10 +83,8 @@ export function DashboardPageClient({
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
-            <p className="mt-2 text-lg text-gray-600">{monthName}</p>
-          </div>
+          <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
+          <p className="mt-2 text-lg text-gray-600">{monthName}</p>
         </div>
 
         <div className="space-y-12">
