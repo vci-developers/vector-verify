@@ -1,4 +1,4 @@
-import type { Site } from '@/shared/entities/site/model';
+import { Site } from '../site';
 
 export interface Session {
   sessionId: number;
@@ -18,4 +18,5 @@ export interface Session {
   longitude: number | null;
   type: string;
   site?: Site;
+  collectorLastTrainedOn: number | null;
 }

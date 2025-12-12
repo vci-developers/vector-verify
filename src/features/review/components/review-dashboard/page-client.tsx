@@ -81,8 +81,7 @@ export function ReviewDashboardPageClient({
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Access the session review interface for this district and
-                month.
+                Access the session review interface for this district and month.
               </p>
               <Button asChild className="w-full">
                 <Link href={`/review/${district}/${monthYear}/session-view`}>

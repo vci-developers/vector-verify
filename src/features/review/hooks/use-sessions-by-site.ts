@@ -1,12 +1,11 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-
-import type { Session } from '@/shared/entities/session/model';
 import { getAllSessions } from '@/features/review/api/get-sessions';
 import {
   reviewKeys,
   type SessionsBySiteQueryKey,
 } from '@/features/review/api/review-keys';
 import type { SessionsQuery } from '@/features/review/types/query';
+import type { Session } from '@/shared/entities/session/model';
 
 export interface SessionsBySite {
   siteId: number;
@@ -28,6 +27,8 @@ export function useSessionsBySiteQuery(
   params: SessionsQuery,
   options?: UseSessionsBySiteOptions,
 ) {
+  const type = params?.type ?? 'SURVEILLANCE';
+
   const enabled =
     (options?.enabled ?? true) &&
     Boolean(params?.district && params?.startDate && params?.endDate);
@@ -49,9 +50,9 @@ export function useSessionsBySiteQuery(
 
       for (const session of sessions) {
         const siteId = session.siteId;
-        const list = grouped.get(siteId) ?? [];
-        list.push(session);
-        grouped.set(siteId, list);
+        const existing = grouped.get(siteId) ?? [];
+        existing.push(session);
+        grouped.set(siteId, existing);
       }
 
       return Array.from(grouped.entries()).map(([siteId, siteSessions]) => ({

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/ui/card';
 import { useDashboardDataQuery } from '@/features/review/hooks';
+import { getMonthDateRange } from '@/features/review/utils/master-table-view';
 import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
@@ -17,17 +18,16 @@ export function DashboardPageClient({
   district,
   monthYear,
 }: DashboardPageClientProps) {
-  const [year, monthNum] = monthYear.split('-').map(Number);
-  const startOfMonth = new Date(year, monthNum - 1, 1);
-  const endOfMonth = new Date(year, monthNum, 0);
+  const dateRange = getMonthDateRange(monthYear);
+  const startDate = dateRange?.startDate;
+  const endDate = dateRange?.endDate;
 
-  const startDate = startOfMonth.toISOString().split('T')[0];
-  const endDate = endOfMonth.toISOString().split('T')[0];
+  const [year, monthNum] = monthYear.split('-').map(Number);
 
   const { data, isLoading, error } = useDashboardDataQuery({
     district,
-    startDate,
-    endDate,
+    ...(startDate ? { startDate } : {}),
+    ...(endDate ? { endDate } : {}),
   });
 
   const monthName = useMemo(() => {
@@ -83,10 +83,8 @@ export function DashboardPageClient({
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
-            <p className="mt-2 text-lg text-gray-600">{monthName}</p>
-          </div>
+          <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
+          <p className="mt-2 text-lg text-gray-600">{monthName}</p>
         </div>
 
         <div className="space-y-12">

@@ -3,7 +3,10 @@ import type {
   AnnotationExpandedDto,
   AnnotationTaskDto,
 } from '@/shared/entities/annotation/dto';
-import type { Annotation, AnnotationTask } from '@/shared/entities/annotation/model';
+import type {
+  Annotation,
+  AnnotationTask,
+} from '@/shared/entities/annotation/model';
 import { mapSpecimenExpandedDtoToModel } from '@/shared/entities/specimen/mapper';
 
 export function mapAnnotationDtoToModel(
@@ -14,6 +17,9 @@ export function mapAnnotationDtoToModel(
     annotationTaskId: dto.annotationTaskId,
     annotatorId: dto.annotatorId,
     specimenId: dto.specimenId,
+    visualSpecies: dto.visualSpecies,
+    visualSex: dto.visualSex,
+    visualAbdomenStatus: dto.visualAbdomenStatus,
     morphSpecies: dto.morphSpecies,
     morphSex: dto.morphSex,
     morphAbdomenStatus: dto.morphAbdomenStatus,

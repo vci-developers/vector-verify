@@ -9,7 +9,9 @@ export function createJsonHeaders(): HeadersInit {
   return { ...BASE_JSON_HEADERS } satisfies HeadersInit;
 }
 
-export function createJsonRequestInit(payload: unknown): Pick<RequestInit, 'headers' | 'body'> {
+export function createJsonRequestInit(
+  payload: unknown,
+): Pick<RequestInit, 'headers' | 'body'> {
   return {
     headers: createJsonHeaders(),
     body: JSON.stringify(payload),

@@ -1,9 +1,12 @@
+import { SurveillanceForm } from '@/shared/entities/surveillance-form';
+
 export interface MonthlySummaryRequestDto {
   offset?: number;
   limit?: number;
   startDate?: string;
   endDate?: string;
   district?: string;
+  type?: string;
 }
 
 export interface SpecimensRequestDto {
@@ -17,12 +20,15 @@ export interface SpecimensRequestDto {
   sex?: string;
   abdomenStatus?: string;
   includeAllImages?: boolean;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SpecimenCountsRequestDto {
   district?: string;
   startDate?: string;
   endDate?: string;
+  sessionId?: string;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 export interface SessionsRequestDto {
@@ -45,6 +51,28 @@ export interface SessionsRequestDto {
 
 export interface DashboardMetricsRequestDto {
   district: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+}
+
+export interface ResolvedData {
+  collectorTitle?: string | null;
+  collectorName?: string | null;
+  collectionDate?: number | null;
+  collectionMethod?: string | null;
+  specimenCondition?: string | null;
+  createdAt?: number | null;
+  completedAt?: number | null;
+  notes?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  type: 'SURVEILLANCE';
+  collectorLastTrainedOn?: number | null;
+}
+
+export interface DiscrepancyUpdateRequestDto {
+  sessionIds?: number[];
+  resolvedData?: ResolvedData;
+  resolvedSurveillanceForm?: SurveillanceForm;
 }

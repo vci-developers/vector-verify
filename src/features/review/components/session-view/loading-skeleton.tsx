@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import { Skeleton } from '@/ui/skeleton';
 import {
   Table,
@@ -11,25 +11,25 @@ import {
 
 export function SessionsAccordionSkeleton() {
   return (
-    <div className="w-full border rounded-xl shadow-sm animate-pulse">
+    <div className="w-full animate-pulse rounded-xl border shadow-sm">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="border-b last:border-b-0 px-4 py-3">
+        <div key={i} className="border-b px-4 py-3 last:border-b-0">
           <div className="flex items-center gap-4">
-            <div className="h-5 w-16 bg-muted rounded" />
-            <div className="h-5 w-32 bg-muted rounded" />
-            <div className="h-4 w-24 bg-muted rounded ml-auto" />
+            <div className="bg-muted h-5 w-16 rounded" />
+            <div className="bg-muted h-5 w-32 rounded" />
+            <div className="bg-muted ml-auto h-4 w-24 rounded" />
           </div>
           <div className="mt-4">
-            <div className="rounded-lg border bg-card p-4 shadow-sm min-h-[400px] flex flex-col">
-              <div className="h-4 w-40 bg-muted rounded mb-4" />
-              <div className="flex-1 flex flex-col justify-center">
+            <div className="bg-card flex min-h-[400px] flex-col rounded-lg border p-4 shadow-sm">
+              <div className="bg-muted mb-4 h-4 w-40 rounded" />
+              <div className="flex flex-1 flex-col justify-center">
                 <TableSkeleton fill />
               </div>
-              <div className="border-t mt-6 pt-4">
-                <div className="block text-sm font-medium mb-1 text-foreground">
+              <div className="mt-6 border-t pt-4">
+                <div className="text-foreground mb-1 block text-sm font-medium">
                   <Skeleton className="h-4 w-16" />
                 </div>
-                <Skeleton className="w-full h-16 rounded border bg-background" />
+                <Skeleton className="bg-background h-16 w-full rounded border" />
               </div>
             </div>
           </div>
@@ -44,12 +44,12 @@ export function TableSkeleton({ fill }: { fill?: boolean }) {
   const numSexRows = 4;
   return (
     <div
-      className={`overflow-auto rounded-xl border shadow-sm w-full ${
-        fill ? "flex-1 flex flex-col justify-center" : ""
+      className={`w-full overflow-auto rounded-xl border shadow-sm ${
+        fill ? 'flex flex-1 flex-col justify-center' : ''
       }`}
       style={fill ? { minHeight: 220 } : undefined}
     >
-      <Table className="text-sm min-w-[640px] h-full">
+      <Table className="h-full min-w-[640px] text-sm">
         <TableHeader>
           <TableRow className="bg-muted">
             <TableHead className="sticky left-0 z-30 max-w-[10rem] border-r px-3">

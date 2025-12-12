@@ -12,5 +12,7 @@ export default async function ReviewDashboardPage({
 }: ReviewDashboardPageProps) {
   const { district, monthYear } = await params;
 
-  return <ReviewDashboardPageClient district={district} monthYear={monthYear} />;
+  return (
+    <ReviewDashboardPageClient district={district} monthYear={monthYear} />
+  );
 }

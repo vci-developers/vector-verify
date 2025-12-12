@@ -7,3 +7,9 @@ export interface SpecimenImageDto {
   capturedAt: number | null;
   submittedAt: number;
 }
+
+export interface SpecimenImagesResponseDto {
+  images: SpecimenImageDto[];
+  thumbnailUrl: string | null;
+  thumbnailImageId: number | null;
+}

@@ -1,5 +1,9 @@
 import bff from '@/shared/infra/api/bff-client';
-import type { SignupRequestDto, AuthPayload, SignupResponseDto } from '@/features/auth/types';
+import type {
+  SignupRequestDto,
+  AuthPayload,
+  SignupResponseDto,
+} from '@/features/auth/types';
 import { mapAuthResponseDtoToPayload } from '@/features/auth/types';
 import { createJsonRequestInit } from '@/shared/infra/http/core/json';
 

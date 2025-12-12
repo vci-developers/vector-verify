@@ -11,7 +11,8 @@ import type { SpecimenCountsSummary } from '@/features/review/types';
 interface UseSpecimenCountsParams {
   district?: string | null;
   monthYear?: string | null;
-  sessionId?: string | null; 
+  sessionId?: string | null;
+  sessionType?: 'SURVEILLANCE' | 'DATA_COLLECTION';
 }
 
 type SpecimenCountsQueryOptions = Omit<
@@ -28,21 +29,22 @@ export function useSpecimenCountsQuery(
   params: UseSpecimenCountsParams = {},
   options?: SpecimenCountsQueryOptions,
 ) {
-  const { district, monthYear, sessionId } = params; 
+  const { district, monthYear, sessionId, sessionType } = params;
   const dateRange = useMemo(() => getMonthDateRange(monthYear), [monthYear]);
 
-  const startDate = dateRange?.startDate ?? null;
-  const endDate = dateRange?.endDate ?? null;
+  const startDate = dateRange?.startDate;
+  const endDate = dateRange?.endDate;
   const { enabled: optionsEnabled, ...restOptions } = options ?? {};
 
-  const isReady = Boolean(district && startDate && endDate);
+  const isReady = Boolean(sessionId || (district && startDate && endDate));
 
   return useQuery({
     queryKey: masterTableViewKeys.specimenCounts(
       district ?? null,
-      startDate,
-      endDate,
-      sessionId ?? null 
+      startDate ?? null,
+      endDate ?? null,
+      sessionId ?? null,
+      sessionType ?? null,
     ) as SpecimenCountsQueryKey,
     queryFn: () =>
       getSpecimenCounts({
@@ -50,6 +52,7 @@ export function useSpecimenCountsQuery(
         startDate: startDate ?? undefined,
         endDate: endDate ?? undefined,
         sessionId: sessionId ?? undefined,
+        sessionType: sessionType ?? 'SURVEILLANCE',
       }),
     enabled: isReady && (optionsEnabled ?? true),
     ...restOptions,

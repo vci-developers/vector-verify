@@ -9,7 +9,11 @@ export const annotationKeys = {
     startDate?: string,
     endDate?: string,
   ) =>
-    [...annotationKeys.root, 'tasks', { page, limit, startDate, endDate }] as const,
+    [
+      ...annotationKeys.root,
+      'tasks',
+      { page, limit, startDate, endDate },
+    ] as const,
   taskProgress: (taskId: number) =>
     [...annotationKeys.root, 'task-progress', taskId] as const,
   taskAnnotations: (
@@ -18,7 +22,13 @@ export const annotationKeys = {
     limit?: number,
     status?: AnnotationStatus,
   ) =>
-    [...annotationKeys.root, 'task-annotations', { taskId, page, limit, status }] as const,
+    [
+      ...annotationKeys.root,
+      'task-annotations',
+      { taskId, page, limit, status },
+    ] as const,
+  specimen: (specimenId: number) =>
+    [...annotationKeys.root, 'specimen', specimenId] as const,
 };
 
 export type AnnotationTasksQueryKey = ReturnType<typeof annotationKeys.tasks> &
@@ -29,5 +39,9 @@ export type AnnotationTaskProgressQueryKey = ReturnType<
   QueryKey;
 export type TaskAnnotationsQueryKey = ReturnType<
   typeof annotationKeys.taskAnnotations
+> &
+  QueryKey;
+export type AnnotationSpecimenQueryKey = ReturnType<
+  typeof annotationKeys.specimen
 > &
   QueryKey;

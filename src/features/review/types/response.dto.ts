@@ -72,3 +72,9 @@ export interface DashboardMetricsResponseDto {
     gravid: { count: number; percentage: number };
   };
 }
+
+export interface DiscrepancyUpdateResponseDto {
+  message: string;
+  resolutionId: number;
+  updatedSessionCount: number;
+}

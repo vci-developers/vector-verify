@@ -24,11 +24,8 @@ export function ImageModalContent({
   transformStyle,
 }: ImageModalContentProps) {
   return (
-    <div className="relative overflow-hidden min-h-0">
-      <div
-        {...viewerProps}
-        className="h-full w-full overflow-hidden bg-white"
-      >
+    <div className="relative min-h-0 overflow-hidden">
+      <div {...viewerProps} className="h-full w-full overflow-hidden bg-white">
         {imageUrl ? (
           <div className="relative h-full w-full" style={transformStyle}>
             <Image
@@ -42,7 +39,7 @@ export function ImageModalContent({
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <div className="flex flex-col items-center gap-4 text-muted-foreground">
+            <div className="text-muted-foreground flex flex-col items-center gap-4">
               <ImageOff className="h-16 w-16" />
               <div className="text-center">
                 <p className="text-lg font-medium">No Image Available</p>
