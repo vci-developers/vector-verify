@@ -35,6 +35,11 @@ import {
   getMorphFormDefaultValues,
   type MorphFormDefaultValues,
 } from './utils/morph-form-defaults';
+import {
+  GENUS_VISUAL_IDS,
+  ARTIFACT_VISUAL_IDS,
+} from './annotation-form-panel/validation/annotation-form-schema';
+import { cn } from '@/shared/core/utils';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -46,10 +51,10 @@ function parseMorphSpecies(morphSpecies?: string | null): {
 } {
   if (!morphSpecies) return {};
 
-  if (morphSpecies.startsWith(GENUS_MORPH_IDS.ANOPHELES)) {
-    const species = morphSpecies.substring(GENUS_MORPH_IDS.ANOPHELES.length);
+  if (morphSpecies.startsWith(GENUS_VISUAL_IDS.ANOPHELES)) {
+    const species = morphSpecies.substring(GENUS_VISUAL_IDS.ANOPHELES.length);
     return {
-      genus: GENUS_MORPH_IDS.ANOPHELES,
+      genus: GENUS_VISUAL_IDS.ANOPHELES,
       species: species || undefined,
     };
   }
@@ -66,12 +71,12 @@ function parseNotesForArtifact(
 } {
   if (!isFlagged || !notes) return { notes: notes ?? undefined };
 
-  const artifactValues = Object.values(MORPH_ARTIFACTS);
+  const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
   if (artifactValues.includes(notes as any)) {
     return { artifact: notes, notes: undefined };
   }
 
-  return { artifact: MORPH_ARTIFACTS.OTHER, notes };
+  return { artifact: ARTIFACT_VISUAL_IDS.OTHER, notes };
 }
 
 export function AnnotationTaskDetailPageClient({
@@ -81,6 +86,8 @@ export function AnnotationTaskDetailPageClient({
   const [morphFormValues, setMorphFormValues] =
     useState<MorphFormDefaultValues | null>(null);
   const morphFormRef = useRef<MorphIdentificationFormRef>(null);
+  const genusChangeHandlerRef = useRef<((genus: string) => void) | null>(null);
+  const [selectedGenus, setSelectedGenus] = useState<string | undefined>(undefined);
 
   const {
     data: annotationsPage,
@@ -100,10 +107,6 @@ export function AnnotationTaskDetailPageClient({
     () => annotationsPage?.items?.[0] ?? null,
     [annotationsPage],
   );
-
-  useEffect(() => {
-    setSelectedGenus(undefined);
-  }, [currentAnnotation?.id]);
 
   const imageUrl = useMemo(() => {
     if (!currentAnnotation?.specimen) return null;
@@ -144,6 +147,23 @@ export function AnnotationTaskDetailPageClient({
   useEffect(() => {
     setMorphFormValues(morphFormDefaultValues);
   }, [morphFormDefaultValues]);
+
+  // Sync selected genus with current annotation
+  useEffect(() => {
+    const genus = parseMorphSpecies(currentAnnotation?.morphSpecies).genus;
+    setSelectedGenus(genus);
+  }, [currentAnnotation]);
+
+  const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
+    genusChangeHandlerRef.current = handler;
+  }, []);
+
+  const handleGenusButtonClick = useCallback((genus: string) => {
+    setSelectedGenus(genus);
+    if (genusChangeHandlerRef.current) {
+      genusChangeHandlerRef.current(genus);
+    }
+  }, []);
 
   if (isLoading || isLoadingShouldProcessFurther) {
     return (
@@ -217,58 +237,45 @@ export function AnnotationTaskDetailPageClient({
         <CardContent className="flex-1 space-y-4">
           <SpecimenImageViewer imageUrl={imageUrl} />
           
-          {(() => {
-            const { genus } = parseMorphSpecies(currentAnnotation.morphSpecies);
-            const currentGenus = selectedGenus ?? genus;
-            const genusValues = Object.values(GENUS_MORPH_IDS);
-            
-            const handleGenusClick = (genusOption: string) => {
-              setSelectedGenus(genusOption);
-              genusChangeHandler?.(genusOption);
-            };
-            
-            return (
-              <div className="space-y-2">
-                <p className="text-white text-sm font-medium text-muted-foreground">Genus</p>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-3 gap-2">
-                    {genusValues.slice(0, 3).map(genusOption => (
-                      <Button
-                        key={genusOption}
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          'w-full',
-                          currentGenus === genusOption && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
-                        )}
-                        onClick={() => handleGenusClick(genusOption)}
-                        disabled={!genusChangeHandler}
-                      >
-                        {genusOption}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {genusValues.slice(3).map(genusOption => (
-                      <Button
-                        key={genusOption}
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          'w-full',
-                          currentGenus === genusOption && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
-                        )}
-                        onClick={() => handleGenusClick(genusOption)}
-                        disabled={!genusChangeHandler}
-                      >
-                        {genusOption}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Select Genus</p>
+            <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-2">
+                {Object.values(GENUS_VISUAL_IDS).slice(0, 3).map((genus) => (
+                  <Button
+                    key={genus}
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full',
+                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
+                    )}
+                    onClick={() => handleGenusButtonClick(genus)}
+                    disabled={isLoading || isFetching}
+                  >
+                    {genus}
+                  </Button>
+                ))}
               </div>
-            );
-          })()}
+              <div className="grid grid-cols-2 gap-2">
+                {Object.values(GENUS_VISUAL_IDS).slice(3).map((genus) => (
+                  <Button
+                    key={genus}
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full',
+                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
+                    )}
+                    onClick={() => handleGenusButtonClick(genus)}
+                    disabled={isLoading || isFetching}
+                  >
+                    {genus}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -290,12 +297,16 @@ export function AnnotationTaskDetailPageClient({
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
-              species: currentAnnotation.visualSpecies ?? undefined,
-              sex: currentAnnotation.visualSex ?? undefined,
-              abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
-              notes: currentAnnotation.notes ?? undefined,
+              ...parseMorphSpecies(currentAnnotation.morphSpecies),
+              ...parseNotesForArtifact(
+                currentAnnotation.notes,
+                currentAnnotation.status === 'FLAGGED',
+              ),
+              sex: currentAnnotation.morphSex ?? undefined,
+              abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
+            onGenusChange={handleGenusChangeCallback}
             morphFormValues={morphFormValues}
             shouldProcessFurther={shouldProcessFurther}
             morphFormRef={morphFormRef}

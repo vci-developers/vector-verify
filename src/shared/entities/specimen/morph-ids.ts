@@ -24,7 +24,7 @@ export const ABDOMEN_STATUS_MORPH_IDS = {
   GRAVID: 'Gravid',
 } as const;
 
-export const MORPH_ARTIFACTS = {
+export const ARTIFACT_MORPH_IDS = {
   BLURRY_IMAGE: 'Blurry Image',
   MISSING_BODY_PARTS: 'Missing Body Parts',
   BAD_POSE: 'Bad Pose',
@@ -37,4 +37,4 @@ export type SpeciesMorphId = (typeof SPECIES_MORPH_IDS)[keyof typeof SPECIES_MOR
 export type SexMorphId = (typeof SEX_MORPH_IDS)[keyof typeof SEX_MORPH_IDS];
 export type AbdomenStatusMorphId =
   (typeof ABDOMEN_STATUS_MORPH_IDS)[keyof typeof ABDOMEN_STATUS_MORPH_IDS];
-export type MorphArtifact = (typeof MORPH_ARTIFACTS)[keyof typeof MORPH_ARTIFACTS];
+export type MorphArtifact = (typeof ARTIFACT_MORPH_IDS)[keyof typeof ARTIFACT_MORPH_IDS];

@@ -234,31 +234,6 @@ export function VisualIdentificationForm({
         >
           <FormField
             control={form.control}
-            name="genus"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel htmlFor={toDomId(field.name)} className="m-0">
-                  Genus
-                  {!isFlagged && (
-                    <span className="text-destructive ml-1">(Required)*</span>
-                  )}
-                </FormLabel>
-                <FormControl>
-                  <AnnotationSelectMenu
-                    label="Genus"
-                    options={Object.values(GENUS_VISUAL_IDS)}
-                    selectedValue={field.value}
-                    onSelect={handleGenusSelect}
-                    isInvalid={!!fieldState.error}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="species"
             render={({ field, fieldState }) => (
               <FormItem>
