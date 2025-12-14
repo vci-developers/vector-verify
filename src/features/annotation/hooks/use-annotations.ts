@@ -4,10 +4,7 @@ import {
   type TaskAnnotationsQueryKey,
 } from '@/features/annotation/api/annotation-keys';
 import { getAnnotations } from '@/features/annotation/api/get-annotations';
-import type {
-  AnnotationsQuery,
-  Annotation,
-} from '@/features/annotation/types';
+import type { AnnotationsQuery, Annotation } from '@/features/annotation/types';
 import type { OffsetPage } from '@/shared/entities/pagination';
 import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 

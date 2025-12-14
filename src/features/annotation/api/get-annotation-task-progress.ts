@@ -7,26 +7,28 @@ import { mapAnnotationTaskProgressDtoToModel } from '@/features/annotation/types
 import bff from '@/shared/infra/api/bff-client';
 
 export async function getAnnotationTaskProgress(
-  taskId: number
+  taskId: number,
 ): Promise<AnnotationTaskProgress> {
   const baseQuery = { taskId, limit: 1 } as const;
   const annotatedQuery = { ...baseQuery, status: 'ANNOTATED' } as const;
   const flaggedQuery = { ...baseQuery, status: 'FLAGGED' } as const;
 
-  const [totalResponse, annotatedResponse, flaggedResponse] = await Promise.all([
-    bff<AnnotationsListResponseDto>('/annotations', {
-      method: 'GET',
-      query: baseQuery,
-    }),
-    bff<AnnotationsListResponseDto>('/annotations', {
-      method: 'GET',
-      query: annotatedQuery,
-    }),
-    bff<AnnotationsListResponseDto>('/annotations', {
-      method: 'GET',
-      query: flaggedQuery,
-    }),
-  ]);
+  const [totalResponse, annotatedResponse, flaggedResponse] = await Promise.all(
+    [
+      bff<AnnotationsListResponseDto>('/annotations', {
+        method: 'GET',
+        query: baseQuery,
+      }),
+      bff<AnnotationsListResponseDto>('/annotations', {
+        method: 'GET',
+        query: annotatedQuery,
+      }),
+      bff<AnnotationsListResponseDto>('/annotations', {
+        method: 'GET',
+        query: flaggedQuery,
+      }),
+    ],
+  );
 
   const totalCount = totalResponse.total ?? 0;
   const annotatedCount = annotatedResponse.total ?? 0;

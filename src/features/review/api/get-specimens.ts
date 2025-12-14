@@ -23,21 +23,23 @@ export async function getSpecimens(
     sex,
     abdomenStatus,
     includeAllImages,
+    sessionType = 'SURVEILLANCE',
   } = filters;
 
   const query: SpecimensRequestDto = {
-    ...(offset !== undefined ? { offset } : {}),
-    ...(limit !== undefined ? { limit } : {}),
-    ...(startDate ? { startDate } : {}),
-    ...(endDate ? { endDate } : {}),
-    ...(district ? { district } : {}),
-    ...(siteId ? { siteId } : {}),
-    ...(species ? { species } : {}),
-    ...(sex ? { sex } : {}),
-    ...(abdomenStatus ? { abdomenStatus } : {}),
-    // Only include includeAllImages if it's explicitly true (omit if false/undefined)
-    ...(includeAllImages === true ? { includeAllImages: true } : {}),
+    sessionType,
   };
+
+  if (offset !== undefined) query.offset = offset;
+  if (limit !== undefined) query.limit = limit;
+  if (startDate) query.startDate = startDate;
+  if (endDate) query.endDate = endDate;
+  if (district) query.district = district;
+  if (siteId) query.siteId = siteId;
+  if (species) query.species = species;
+  if (sex) query.sex = sex;
+  if (abdomenStatus) query.abdomenStatus = abdomenStatus;
+  if (includeAllImages === true) query.includeAllImages = true;
 
   const data = await bff<SpecimensListResponseDto>('/specimens', {
     method: 'GET',

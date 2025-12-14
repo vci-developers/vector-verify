@@ -14,7 +14,10 @@ import type {
   AnnotationTasksListResponseDto,
 } from './response.dto';
 
-export { mapAnnotationDtoToModel, mapAnnotationTaskDtoToModel } from '@/shared/entities/annotation/mapper';
+export {
+  mapAnnotationDtoToModel,
+  mapAnnotationTaskDtoToModel,
+} from '@/shared/entities/annotation/mapper';
 
 export function mapAnnotationsListResponseDtoToPage(
   dto: AnnotationsListResponseDto,

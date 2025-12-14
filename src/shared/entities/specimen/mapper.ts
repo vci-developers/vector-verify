@@ -15,6 +15,7 @@ export function mapSpecimenDtoToModel(dto: SpecimenDto): Specimen {
     sessionId: dto.sessionId,
     thumbnailUrl: dto.thumbnailUrl,
     thumbnailImageId: dto.thumbnailImageId,
+    shouldProcessFurther: dto.shouldProcessFurther,
   };
 }
 
@@ -36,7 +37,7 @@ export function mapSpecimenExpandedDtoToModel(
 }
 
 export function mapSpecimenExpandedDtoToPage(
-  dto: SpecimensListResponseDto
+  dto: SpecimensListResponseDto,
 ): OffsetPage<Specimen> {
   return {
     items: dto.specimens.map(mapSpecimenExpandedDtoToModel),

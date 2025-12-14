@@ -3,22 +3,29 @@ import {
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
-  MORPH_ARTIFACTS,
+  ARTIFACT_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
 
 import { z } from 'zod';
 
+export const GENUS_VISUAL_IDS = GENUS_MORPH_IDS;
+export const SPECIES_VISUAL_IDS = SPECIES_MORPH_IDS;
+export const SEX_VISUAL_IDS = SEX_MORPH_IDS;
+export const ABDOMEN_STATUS_VISUAL_IDS = ABDOMEN_STATUS_MORPH_IDS;
+export const ARTIFACT_VISUAL_IDS = ARTIFACT_MORPH_IDS;  
+
 const GENUS_VALUES = Object.values(GENUS_MORPH_IDS) as [string, ...string[]];
-const SPECIES_VALUES = Object.values(SPECIES_MORPH_IDS) as [
+
+const SPECIES_VALUES = Object.values(SPECIES_VISUAL_IDS) as [
   string,
   ...string[],
 ];
-const SEX_VALUES = Object.values(SEX_MORPH_IDS) as [string, ...string[]];
-const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_MORPH_IDS) as [
+const SEX_VALUES = Object.values(SEX_VISUAL_IDS) as [string, ...string[]];
+const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_VISUAL_IDS) as [
   string,
   ...string[],
 ];
-const ARTIFACT_VALUES = Object.values(MORPH_ARTIFACTS) as [
+const ARTIFACT_VALUES = Object.values(ARTIFACT_VISUAL_IDS) as [
   string,
   ...string[],
 ];
@@ -36,14 +43,15 @@ export const AnnotationBase = z.object({
 export const isSpeciesEnabled = (genus?: string) =>
   genus === GENUS_MORPH_IDS.ANOPHELES;
 
-export const isSexEnabled = (genus?: string) =>
-  genus !== GENUS_MORPH_IDS.NON_MOSQUITO && !!genus;
-
-export const isAbdomenStatusEnabled = (genus?: string, sex?: string) =>
-  isSexEnabled(genus) && sex === SEX_MORPH_IDS.FEMALE;
 
 export const isNotesRequired = (artifact?: string) =>
-  artifact === MORPH_ARTIFACTS.OTHER;
+  artifact === ARTIFACT_MORPH_IDS.OTHER;
+
+export const isSexEnabled = (genus?: string) =>
+  genus !== GENUS_VISUAL_IDS.NON_MOSQUITO;
+
+export const isAbdomenStatusEnabled = (genus?: string, sex?: string) =>
+  isSexEnabled(genus) && sex !== SEX_VISUAL_IDS.MALE;
 
 export const annotationFormSchema = AnnotationBase.superRefine(
   (formFields, context) => {

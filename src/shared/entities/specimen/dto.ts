@@ -7,6 +7,7 @@ export interface SpecimenDto {
   sessionId: number;
   thumbnailUrl: string | null;
   thumbnailImageId: number | null;
+  shouldProcessFurther: boolean;
 }
 
 export interface SpecimenExpandedDto extends SpecimenDto {
@@ -16,9 +17,9 @@ export interface SpecimenExpandedDto extends SpecimenDto {
 }
 
 export interface SpecimensListResponseDto {
- specimens: SpecimenExpandedDto[];
- total: number;
- limit: number;
- offset: number;
- hasMore: boolean;
+  specimens: SpecimenExpandedDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
 }

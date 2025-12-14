@@ -14,6 +14,7 @@ export function mapSessionDtoToModel(
     frontendId: dto.frontendId,
     collectorTitle: dto.collectorTitle,
     collectorName: dto.collectorName,
+    collectorLastTrainedOn: dto.collectorLastTrainedOn,
     collectionDate: dto.collectionDate,
     collectionMethod: dto.collectionMethod,
     specimenCondition: dto.specimenCondition,
@@ -39,7 +40,7 @@ export interface SessionsResponseModel {
 }
 
 export function mapSessionsResponseDtoToModel(
-  dto: SessionsResponseDto
+  dto: SessionsResponseDto,
 ): SessionsResponseModel {
   return {
     items: dto.sessions.map(mapSessionDtoToModel),

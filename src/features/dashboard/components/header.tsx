@@ -1,33 +1,35 @@
 'use client';
 
+import { useMemo } from 'react';
 import { LogoutButton } from '@/features/auth';
 import { BackButton } from './back-button';
 import { Brand } from './brand';
 import { usePathname } from 'next/navigation';
 
-/**
- * DashboardHeader component responsible for the main navigation layout
- * Single responsibility: Compose header layout with navigation elements
- */
+
 export function DashboardHeader() {
   const pathname = usePathname();
   const showBackButton = pathname !== '/';
 
-  if (pathname === '/') {
-    return null;
-  }
+  const { district, monthYear } = useMemo(() => {
+    const reviewMatch = pathname.match(/\/review\/([^/]+)\/([^/]+)/);
+    if (reviewMatch) {
+      return {
+        district: reviewMatch[1],
+        monthYear: reviewMatch[2],
+      };
+    }
+    return { district: undefined, monthYear: undefined };
+  }, [pathname]);
 
   return (
     <header className="bg-background flex items-center justify-between border-b p-4">
-      {/* Left side - Back button */}
       <div className="flex items-center">
-        <BackButton show={showBackButton} />
+        <BackButton show={showBackButton} district={district} monthYear={monthYear} />
       </div>
 
-      {/* Center - Brand name */}
       <Brand />
 
-      {/* Right side - Logout button */}
       <div className="flex items-center">
         <LogoutButton />
       </div>

@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
-
 import { useSessionsBySiteQuery } from '@/features/review/hooks/use-sessions-by-site';
 import { useSurveillanceFormsQuery } from '@/features/review/hooks/use-surveillance-forms';
 import { collectDiscrepanciesForSite } from '@/features/review/utils/data-quality';
-import { getMonthDateRange, formatSiteLabel } from '@/features/review/utils/master-table-view';
+import {
+  getMonthDateRange,
+  formatSiteLabel,
+} from '@/features/review/utils/master-table-view';
 import type {
   DataQualitySummary,
   MissingSiteSummary,
@@ -87,8 +89,7 @@ export function useDataQualitySummary({
       return [];
     }
 
-    const formsMap =
-      surveillanceForms ?? new Map<number, SurveillanceForm>();
+    const formsMap = surveillanceForms ?? new Map<number, SurveillanceForm>();
 
     return sessionsBySite
       .map(siteGroup => {
@@ -101,6 +102,7 @@ export function useDataQualitySummary({
         return {
           siteId: siteGroup.siteId,
           sessionCount: siteGroup.sessions.length,
+          sessionIds: siteGroup.sessions.map(s => s.sessionId),
           siteLabel,
           fields,
         };
@@ -132,7 +134,9 @@ export function useDataQualitySummary({
           site,
           display: [
             site.villageName?.trim(),
-            site.houseNumber?.trim() ? `House ${site.houseNumber.trim()}` : null,
+            site.houseNumber?.trim()
+              ? `House ${site.houseNumber.trim()}`
+              : null,
           ]
             .filter(Boolean)
             .join(', ')

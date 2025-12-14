@@ -4,7 +4,10 @@ import {
   type MonthlySummaryQueryKey,
 } from '@/features/review/api/review-keys';
 import { getMonthlySummary } from '@/features/review/api/get-monthly-summary';
-import type { MonthlySummary, MonthlySummaryQuery } from '@/features/review/types';
+import type {
+  MonthlySummary,
+  MonthlySummaryQuery,
+} from '@/features/review/types';
 import type { OffsetPage } from '@/shared/entities/pagination';
 import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
 
@@ -32,6 +35,7 @@ export function useMonthlySummaryQuery(
     startDate,
     endDate,
     district,
+    type = 'SURVEILLANCE',
   } = filters;
 
   return useQuery({
@@ -41,6 +45,7 @@ export function useMonthlySummaryQuery(
       startDate,
       endDate,
       district,
+      type,
     ) as MonthlySummaryQueryKey,
     queryFn: () =>
       getMonthlySummary({
@@ -49,8 +54,9 @@ export function useMonthlySummaryQuery(
         startDate,
         endDate,
         district,
+        type,
       }),
-    placeholderData: previousData => previousData, // Keep previous data while fetching
+    placeholderData: prev => prev,
     ...(options ?? {}),
   });
 }

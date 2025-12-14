@@ -18,6 +18,11 @@ import {
   isSexEnabled,
   isSpeciesEnabled,
   isNotesRequired,
+  GENUS_VISUAL_IDS,
+  SPECIES_VISUAL_IDS,
+  SEX_VISUAL_IDS,
+  ABDOMEN_STATUS_VISUAL_IDS,
+  ARTIFACT_VISUAL_IDS,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
 import { Textarea } from '@/ui/textarea';
@@ -25,19 +30,13 @@ import { Button } from '@/ui/button';
 import { Toggle } from '@/ui/toggle';
 import { Flag, Save } from 'lucide-react';
 import { toDomId } from '@/shared/core/utils/dom';
-import MorphIdSelectMenu from '../annotation-form-panel/morph-id-select-menu';
-import {
-  GENUS_MORPH_IDS,
-  SPECIES_MORPH_IDS,
-  SEX_MORPH_IDS,
-  ABDOMEN_STATUS_MORPH_IDS,
-  MORPH_ARTIFACTS,
-} from '@/shared/entities/specimen/morph-ids';
+import { AnnotationSelectMenu } from './annotation-select-menu';
 import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-update-annotation';
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
+import type { MorphIdentificationFormRef } from './morph-identification-form';
 
-interface AnnotationFormProps {
+interface VisualIdentificationFormProps {
   annotationId: number;
   defaultValues: {
     genus?: string;
@@ -49,13 +48,24 @@ interface AnnotationFormProps {
     flagged?: boolean;
   };
   onGenusChange?: (handler: (genus: string) => void) => void;
+  morphFormValues?: {
+    received: boolean;
+    species?: string;
+    sex?: string;
+    abdomenStatus?: string;
+  } | null;
+  shouldProcessFurther?: boolean;
+  morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
 
-export function AnnotationForm({
+export function VisualIdentificationForm({
   annotationId,
   defaultValues,
   onGenusChange,
-}: AnnotationFormProps) {
+  morphFormValues,
+  shouldProcessFurther = false,
+  morphFormRef,
+}: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
   const updateAnnotationMutation = useUpdateAnnotationMutation({
     onSuccess: () => {
@@ -65,7 +75,7 @@ export function AnnotationForm({
     },
   });
 
-  const annotationForm = useForm<AnnotationFormInput>({
+  const form = useForm<AnnotationFormInput>({
     resolver: zodResolver(annotationFormSchema),
     defaultValues: {
       genus: defaultValues?.genus ?? undefined,
@@ -80,10 +90,10 @@ export function AnnotationForm({
     reValidateMode: 'onChange',
   });
 
-  const selectedGenus = annotationForm.watch('genus');
-  const selectedSex = annotationForm.watch('sex');
-  const selectedArtifact = annotationForm.watch('artifact');
-  const isFlagged = annotationForm.watch('flagged');
+  const selectedGenus = form.watch('genus');
+  const selectedSex = form.watch('sex');
+  const selectedArtifact = form.watch('artifact');
+  const isFlagged = form.watch('flagged');
 
   const speciesEnabled = isSpeciesEnabled(selectedGenus);
   const sexEnabled = isSexEnabled(selectedGenus);
@@ -91,23 +101,23 @@ export function AnnotationForm({
   const notesRequired = isNotesRequired(selectedArtifact);
 
   const handleGenusSelect = useCallback((newGenus?: string) => {
-    annotationForm.setValue('genus', newGenus || '', { shouldDirty: true });
+    form.setValue('genus', newGenus || '', { shouldDirty: true });
 
     // Clear species if not Anopheles
     if (!isSpeciesEnabled(newGenus)) {
-      annotationForm.setValue('species', '', { shouldDirty: true });
-      annotationForm.clearErrors(['species']);
+      form.setValue('species', '', { shouldDirty: true });
+      form.clearErrors(['species']);
     }
 
     // Clear sex if Non-Mosquito
     if (!isSexEnabled(newGenus)) {
-      annotationForm.setValue('sex', '', { shouldDirty: true });
-      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
-      annotationForm.clearErrors(['sex', 'abdomenStatus']);
+      form.setValue('sex', '', { shouldDirty: true });
+      form.setValue('abdomenStatus', '', { shouldDirty: true });
+      form.clearErrors(['sex', 'abdomenStatus']);
     }
-    
-    annotationForm.clearErrors('genus');
-  }, [annotationForm]);
+
+    form.clearErrors('genus');
+  }, [form]);
 
   // Expose the handleGenusSelect function to parent via callback
   useEffect(() => {
@@ -117,36 +127,36 @@ export function AnnotationForm({
   }, [onGenusChange, handleGenusSelect]);
 
   const handleSpeciesSelect = (newSpecies?: string) => {
-    annotationForm.setValue('species', newSpecies || '', { shouldDirty: true });
-    annotationForm.clearErrors('species');
+    form.setValue('species', newSpecies || '', { shouldDirty: true });
+    form.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
-    annotationForm.setValue('sex', newSex || '', { shouldDirty: true });
+    form.setValue('sex', newSex || '', { shouldDirty: true });
 
     if (!isAbdomenStatusEnabled(selectedGenus, newSex)) {
-      annotationForm.setValue('abdomenStatus', '', { shouldDirty: true });
-      annotationForm.clearErrors(['abdomenStatus']);
+      form.setValue('abdomenStatus', '', { shouldDirty: true });
+      form.clearErrors(['abdomenStatus']);
     }
-    annotationForm.clearErrors('sex');
+    form.clearErrors('sex');
   };
 
   const handleAbdomenStatusSelect = (newAbdomenStatus?: string) => {
-    annotationForm.setValue('abdomenStatus', newAbdomenStatus || '', {
+    form.setValue('abdomenStatus', newAbdomenStatus || '', {
       shouldDirty: true,
     });
-    annotationForm.clearErrors('abdomenStatus');
+    form.clearErrors('abdomenStatus');
   };
 
   const handleArtifactSelect = (newArtifact?: string) => {
-    annotationForm.setValue('artifact', newArtifact || '', { shouldDirty: true });
-    
+    form.setValue('artifact', newArtifact || '', { shouldDirty: true });
+
     // Clear notes if artifact is not "Other"
     if (!isNotesRequired(newArtifact)) {
-      annotationForm.setValue('notes', '', { shouldDirty: true });
+      form.setValue('notes', '', { shouldDirty: true });
     }
-    
-    annotationForm.clearErrors('artifact');
+
+    form.clearErrors('artifact');
   };
 
   const handleFlagged = (
@@ -157,10 +167,10 @@ export function AnnotationForm({
 
     if (newFlagged) {
       // When flagging, just clear genus/species/sex/abdomen errors since they're not required
-      annotationForm.clearErrors(['genus', 'species', 'sex', 'abdomenStatus']);
+      form.clearErrors(['genus', 'species', 'sex', 'abdomenStatus']);
     } else {
       // When unflagging, clear artifact/notes errors since they're not required
-      annotationForm.clearErrors(['artifact', 'notes']);
+      form.clearErrors(['artifact', 'notes']);
     }
   };
 
@@ -169,28 +179,28 @@ export function AnnotationForm({
     let notes = null;
 
     if (formInput.flagged) {
-      if (formInput.artifact === MORPH_ARTIFACTS.OTHER) {
+      if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
         notes = formInput.notes || null;
       } else {
         notes = formInput.artifact || null;
       }
-      
+
       if (formInput.genus) {
-        if (formInput.genus === GENUS_MORPH_IDS.ANOPHELES && formInput.species) {
+        if (formInput.genus === GENUS_VISUAL_IDS.ANOPHELES && formInput.species) {
           morphSpecies = `${formInput.genus}${formInput.species}`;
         } else {
           morphSpecies = formInput.genus;
         }
       }
     } else {
-      if (formInput.genus === GENUS_MORPH_IDS.ANOPHELES && formInput.species) {
+      if (formInput.genus === GENUS_VISUAL_IDS.ANOPHELES && formInput.species) {
         morphSpecies = `${formInput.genus}${formInput.species}`;
       } else {
         morphSpecies = formInput.genus || null;
       }
-      
+
       if (formInput.artifact) {
-        if (formInput.artifact === MORPH_ARTIFACTS.OTHER) {
+        if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
           notes = formInput.notes || null;
         } else {
           notes = formInput.artifact;
@@ -213,9 +223,9 @@ export function AnnotationForm({
   };
 
   return (
-    <Form {...annotationForm}>
+    <Form {...form}>
       <form
-        onSubmit={annotationForm.handleSubmit(handleValidSubmit)}
+        onSubmit={form.handleSubmit(handleValidSubmit)}
         className="space-y-3"
       >
         <fieldset
@@ -223,7 +233,32 @@ export function AnnotationForm({
           className="space-y-3"
         >
           <FormField
-            control={annotationForm.control}
+            control={form.control}
+            name="genus"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel htmlFor={toDomId(field.name)} className="m-0">
+                  Genus
+                  {!isFlagged && (
+                    <span className="text-destructive ml-1">(Required)*</span>
+                  )}
+                </FormLabel>
+                <FormControl>
+                  <AnnotationSelectMenu
+                    label="Genus"
+                    options={Object.values(GENUS_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleGenusSelect}
+                    isInvalid={!!fieldState.error}
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="species"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -231,12 +266,12 @@ export function AnnotationForm({
                   Species
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
-                    label="species"
-                    morphIds={Object.values(SPECIES_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSpeciesSelect}
-                    inValid={!!fieldState.error && speciesEnabled}
+                  <AnnotationSelectMenu
+                    label="Species"
+                    options={Object.values(SPECIES_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSpeciesSelect}
+                    isInvalid={!!fieldState.error && speciesEnabled}
                     disabled={!speciesEnabled}
                   />
                 </FormControl>
@@ -246,7 +281,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="sex"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -254,12 +289,12 @@ export function AnnotationForm({
                   Sex
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Sex"
-                    morphIds={Object.values(SEX_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleSexSelect}
-                    inValid={!!fieldState.error && sexEnabled}
+                    options={Object.values(SEX_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleSexSelect}
+                    isInvalid={!!fieldState.error && sexEnabled}
                     disabled={!sexEnabled}
                   />
                 </FormControl>
@@ -269,7 +304,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="abdomenStatus"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -277,12 +312,12 @@ export function AnnotationForm({
                   Abdomen Status
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Abdomen Status"
-                    morphIds={Object.values(ABDOMEN_STATUS_MORPH_IDS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleAbdomenStatusSelect}
-                    inValid={!!fieldState.error && abdomenStatusEnabled}
+                    options={Object.values(ABDOMEN_STATUS_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleAbdomenStatusSelect}
+                    isInvalid={!!fieldState.error && abdomenStatusEnabled}
                     disabled={!abdomenStatusEnabled}
                   />
                 </FormControl>
@@ -292,7 +327,7 @@ export function AnnotationForm({
           />
 
           <FormField
-            control={annotationForm.control}
+            control={form.control}
             name="artifact"
             render={({ field, fieldState }) => (
               <FormItem>
@@ -303,12 +338,12 @@ export function AnnotationForm({
                   )}
                 </FormLabel>
                 <FormControl>
-                  <MorphIdSelectMenu
+                  <AnnotationSelectMenu
                     label="Artifact"
-                    morphIds={Object.values(MORPH_ARTIFACTS)}
-                    selectedMorphId={field.value}
-                    onMorphSelect={handleArtifactSelect}
-                    inValid={!!fieldState.error}
+                    options={Object.values(ARTIFACT_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleArtifactSelect}
+                    isInvalid={!!fieldState.error}
                   />
                 </FormControl>
                 <FormMessage className="text-xs" />
@@ -318,7 +353,7 @@ export function AnnotationForm({
 
           {notesRequired && (
             <FormField
-              control={annotationForm.control}
+              control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
@@ -342,7 +377,7 @@ export function AnnotationForm({
 
           <div className="flex gap-3 pt-2">
             <FormField
-              control={annotationForm.control}
+              control={form.control}
               name="flagged"
               render={({ field }) => (
                 <Toggle

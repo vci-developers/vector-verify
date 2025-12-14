@@ -91,6 +91,7 @@ export interface DiscrepancyField {
 export interface SiteDiscrepancySummary {
   siteId: number;
   sessionCount: number;
+  sessionIds: number[];
   siteLabel: SiteLabel;
   fields: DiscrepancyField[];
 }

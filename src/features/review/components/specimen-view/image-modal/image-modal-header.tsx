@@ -21,7 +21,7 @@ export function ImageModalHeader({
   const abdomenStatus = thumbnailImage?.abdomenStatus;
 
   return (
-    <div className="px-4 pt-3 pb-2 border-b">
+    <div className="border-b px-4 pt-3 pb-2">
       <div className="flex items-center justify-between">
         <DialogTitle className="text-lg font-semibold">
           {specimenId}
@@ -29,7 +29,7 @@ export function ImageModalHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-foreground hover:bg-muted"
+          className="text-foreground hover:bg-muted h-6 w-6"
           onClick={onClose}
         >
           <X className="h-5 w-5" />
@@ -37,7 +37,7 @@ export function ImageModalHeader({
         </Button>
       </div>
       {(species || sex || abdomenStatus) && (
-        <div className="flex items-center gap-4 text-sm text-muted-foreground pt-1">
+        <div className="text-muted-foreground flex items-center gap-4 pt-1 text-sm">
           {species && <div>Species: {species}</div>}
           {sex && <div>Sex: {sex}</div>}
           {abdomenStatus && <div>Abdomen Status: {abdomenStatus}</div>}

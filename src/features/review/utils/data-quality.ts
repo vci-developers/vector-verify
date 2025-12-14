@@ -1,10 +1,17 @@
 import type { SessionsBySite } from '@/features/review/hooks/use-sessions-by-site';
-import type { DiscrepancyField, DiscrepancyFieldKey } from '@/features/review/types';
+import type {
+  DiscrepancyField,
+  DiscrepancyFieldKey,
+} from '@/features/review/types';
 import type { SurveillanceForm } from '@/shared/entities/surveillance-form/model';
 
-const uniqueNonNull = <T,>(values: (T | null | undefined)[]) =>
+const uniqueNonNull = <T>(values: (T | null | undefined)[]) =>
   Array.from(
-    new Set(values.filter((value): value is T => value !== null && value !== undefined)),
+    new Set(
+      values.filter(
+        (value): value is T => value !== null && value !== undefined,
+      ),
+    ),
   );
 
 const uniqueStringValues = (values: (string | null | undefined)[]) =>
@@ -30,9 +37,7 @@ const formatValueList = (values: (string | number | boolean)[]) =>
 const formatMonthsSinceIrsConflict = (forms: SurveillanceForm[]) => {
   const segments: string[] = [];
   const yesValues = uniqueNonNull(
-    forms
-      .filter(f => f.wasIrsConducted === true)
-      .map(f => f.monthsSinceIrs),
+    forms.filter(f => f.wasIrsConducted === true).map(f => f.monthsSinceIrs),
   );
 
   if (forms.some(f => f.wasIrsConducted === true)) {
@@ -60,16 +65,24 @@ export const collectDiscrepanciesForSite = (
     .filter((form): form is SurveillanceForm => Boolean(form));
 
   const collectorNames = uniqueStringValues(sessions.map(s => s.collectorName));
-  const collectorTitles = uniqueStringValues(sessions.map(s => s.collectorTitle));
-  const collectionMethods = uniqueStringValues(sessions.map(s => s.collectionMethod));
+  const collectorTitles = uniqueStringValues(
+    sessions.map(s => s.collectorTitle),
+  );
+  const collectionMethods = uniqueStringValues(
+    sessions.map(s => s.collectionMethod),
+  );
 
-  const numPeopleSleptInHouse = uniqueNonNull(forms.map(f => f.numPeopleSleptInHouse));
+  const numPeopleSleptInHouse = uniqueNonNull(
+    forms.map(f => f.numPeopleSleptInHouse),
+  );
   const wasIrsConducted = uniqueNonNull(forms.map(f => f.wasIrsConducted));
   const monthsSinceIrsRaw = uniqueNonNull(forms.map(f => f.monthsSinceIrs));
   const numLlinsAvailable = uniqueNonNull(forms.map(f => f.numLlinsAvailable));
   const llinType = uniqueStringValues(forms.map(f => f.llinType));
   const llinBrand = uniqueStringValues(forms.map(f => f.llinBrand));
-  const numPeopleSleptUnderLlin = uniqueNonNull(forms.map(f => f.numPeopleSleptUnderLlin));
+  const numPeopleSleptUnderLlin = uniqueNonNull(
+    forms.map(f => f.numPeopleSleptUnderLlin),
+  );
 
   const fields: DiscrepancyField[] = [];
   const push = (
@@ -88,9 +101,24 @@ export const collectDiscrepanciesForSite = (
     });
   };
 
-  push('collectorName', 'Collector Name', collectorNames, collectorNames.length > 1);
-  push('collectorTitle', 'Collector Title', collectorTitles, collectorTitles.length > 1);
-  push('collectionMethod', 'Collection Method', collectionMethods, collectionMethods.length > 1);
+  push(
+    'collectorName',
+    'Collector Name',
+    collectorNames,
+    collectorNames.length > 1,
+  );
+  push(
+    'collectorTitle',
+    'Collector Title',
+    collectorTitles,
+    collectorTitles.length > 1,
+  );
+  push(
+    'collectionMethod',
+    'Collection Method',
+    collectionMethods,
+    collectionMethods.length > 1,
+  );
   push(
     'numPeopleSleptInHouse',
     'People In House',
@@ -100,7 +128,9 @@ export const collectDiscrepanciesForSite = (
 
   const hasIrsDiscrepancy = wasIrsConducted.length > 1;
   const hasYesAndNo =
-    hasIrsDiscrepancy && wasIrsConducted.includes(true) && wasIrsConducted.includes(false);
+    hasIrsDiscrepancy &&
+    wasIrsConducted.includes(true) &&
+    wasIrsConducted.includes(false);
 
   push('wasIrsConducted', 'IRS Conducted', wasIrsConducted, hasIrsDiscrepancy);
   const monthsSinceIrsValues = hasYesAndNo

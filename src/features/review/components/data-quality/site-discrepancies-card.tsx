@@ -14,15 +14,186 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+import { Button } from '@/shared/ui/button';
+import { Pencil, Check, X } from 'lucide-react';
 import type { SiteDiscrepancySummary } from '@/features/review/types';
+import { useState, useCallback } from 'react';
+import { useUpdateDiscrepanciesMutation } from '@/features/review/hooks/use-update-discrepancies';
+import { mapDiscrepancyFields } from '@/features/review/utils/map-discrepancy-fields';
+import { showSuccessToast } from '@/shared/ui/show-success-toast';
+import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { FieldEditor } from './field-editor';
+import {
+  calculateDependentFields,
+  shouldDisableField,
+} from '@/features/review/utils/discrepancy-field-dependencies';
 
 export function SiteDiscrepanciesCard({
   siteDiscrepancies,
 }: {
   siteDiscrepancies: SiteDiscrepancySummary[];
 }) {
+  const [editingSiteId, setEditingSiteId] = useState<number | null>(null);
+  const [editedValues, setEditedValues] = useState<Record<string, string>>({});
+  const [customInputFields, setCustomInputFields] = useState<
+    Record<string, boolean>
+  >({});
+
+  const updateDiscrepanciesMutation = useUpdateDiscrepanciesMutation({
+    onSuccess: () => {
+      showSuccessToast('Discrepancies resolved successfully.');
+      setEditingSiteId(null);
+      setEditedValues({});
+    },
+    onError: error => {
+      showErrorToast(`Failed to resolve discrepancies: ${error.message}`);
+    },
+  });
+
+  const handleEditClick = useCallback(
+    (siteId: number, fields: SiteDiscrepancySummary['fields']) => {
+      setEditingSiteId(siteId);
+      const initialValues: Record<string, string> = {};
+      fields.forEach(field => {
+        initialValues[field.key] = '';
+      });
+      setEditedValues(initialValues);
+    },
+    [],
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingSiteId(null);
+    setEditedValues({});
+    setCustomInputFields({});
+  }, []);
+
+  const handleValueChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
+      setEditedValues(prev => ({
+        ...prev,
+        [fieldKey]: value,
+      }));
+
+      const dependentUpdates = calculateDependentFields(
+        fieldKey,
+        value,
+        allFields,
+      );
+      if (Object.keys(dependentUpdates).length > 0) {
+        setEditedValues(prev => ({
+          ...prev,
+          ...dependentUpdates,
+        }));
+      }
+    },
+    [],
+  );
+
+  const handleFieldChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
+      if (value === '__OTHER__') {
+        setCustomInputFields(prev => ({
+          ...prev,
+          [fieldKey]: true,
+        }));
+        setEditedValues(prev => ({
+          ...prev,
+          [fieldKey]: '',
+        }));
+      } else {
+        setCustomInputFields(prev => ({
+          ...prev,
+          [fieldKey]: false,
+        }));
+
+        handleValueChange(fieldKey, value, allFields);
+      }
+    },
+    [handleValueChange],
+  );
+
+  const handleCustomInputChange = useCallback(
+    (
+      fieldKey: string,
+      value: string,
+      allFields: SiteDiscrepancySummary['fields'],
+    ) => {
+      handleValueChange(fieldKey, value, allFields);
+    },
+    [handleValueChange],
+  );
+
+  const handleBackToOptions = useCallback((fieldKey: string) => {
+    setCustomInputFields(prev => ({
+      ...prev,
+      [fieldKey]: false,
+    }));
+    setEditedValues(prev => ({
+      ...prev,
+      [fieldKey]: '',
+    }));
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (site: SiteDiscrepancySummary) => {
+      const trimmedValues = Object.fromEntries(
+        Object.entries(editedValues).map(([key, value]) => [key, value.trim()]),
+      );
+
+      const allFieldsFilled = site.fields.every(
+        field => trimmedValues[field.key]?.length > 0,
+      );
+
+      if (!allFieldsFilled) {
+        showErrorToast(
+          'Please select a value for all fields before submitting.',
+        );
+        return;
+      }
+
+      const enhancedValues = { ...trimmedValues };
+
+      if (enhancedValues.wasIrsConducted?.toLowerCase() === 'no') {
+        enhancedValues.monthsSinceIrs = 'null';
+      }
+
+      if (
+        enhancedValues.numLlinsAvailable === '0' ||
+        enhancedValues.numLlinsAvailable?.toLowerCase() === 'zero'
+      ) {
+        enhancedValues.numPeopleSleptUnderLlin = 'null';
+        enhancedValues.llinType = 'null';
+        enhancedValues.llinBrand = 'null';
+      }
+
+      const { resolvedData, resolvedSurveillanceForm } = mapDiscrepancyFields(
+        site.fields,
+        enhancedValues,
+      );
+
+      const payload = {
+        sessionIds: site.sessionIds,
+        resolvedData,
+        resolvedSurveillanceForm,
+      };
+
+      await updateDiscrepanciesMutation.mutateAsync({ payload });
+      setCustomInputFields({});
+    },
+    [editedValues, updateDiscrepanciesMutation],
+  );
+
   return (
-    <Card className="shadow-lg border-amber-300 bg-amber-50/60">
+    <Card className="border-amber-300 bg-amber-50/60 shadow-lg">
       <CardHeader className="border-b border-amber-200/70 pb-6">
         <CardTitle className="flex flex-wrap items-center gap-2 text-amber-900">
           Site Discrepancies
@@ -45,32 +216,30 @@ export function SiteDiscrepanciesCard({
                 key={site.siteId}
                 className="rounded-xl border border-amber-200/80 bg-white/80 p-5 shadow-sm"
               >
-                <header className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-foreground text-base font-semibold">
-                      {site.siteLabel.topLine}
+                <header className="space-y-1">
+                  <p className="text-foreground text-base font-semibold">
+                    {site.siteLabel.topLine}
+                  </p>
+                  {site.siteLabel.bottomLine && (
+                    <p className="text-muted-foreground text-sm">
+                      {site.siteLabel.bottomLine}
                     </p>
-                    {site.siteLabel.bottomLine && (
-                      <p className="text-muted-foreground text-sm">
-                        {site.siteLabel.bottomLine}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <Badge
-                        variant="outline"
-                        className="border-amber-300 text-amber-900"
-                      >
-                        {site.sessionCount}{' '}
-                        session{site.sessionCount === 1 ? '' : 's'}
-                      </Badge>
-                      <Badge
-                        variant="secondary"
-                        className="bg-amber-200 text-amber-900"
-                      >
-                        {site.fields.length} field
-                        {site.fields.length === 1 ? '' : 's'}
-                      </Badge>
-                    </div>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <Badge
+                      variant="outline"
+                      className="border-amber-300 text-amber-900"
+                    >
+                      {site.sessionCount} session
+                      {site.sessionCount === 1 ? '' : 's'}
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-amber-200 text-amber-900"
+                    >
+                      {site.fields.length} field
+                      {site.fields.length === 1 ? '' : 's'}
+                    </Badge>
                   </div>
                 </header>
 
@@ -95,13 +264,86 @@ export function SiteDiscrepanciesCard({
                           <TableCell className="text-sm font-medium text-amber-900">
                             {field.label}
                           </TableCell>
-                          <TableCell className="text-sm text-foreground">
-                            {field.details}
+                          <TableCell className="text-foreground text-sm">
+                            {editingSiteId === site.siteId ? (
+                              <FieldEditor
+                                field={field}
+                                value={editedValues[field.key] || ''}
+                                isCustomInput={
+                                  customInputFields[field.key] || false
+                                }
+                                isDisabled={shouldDisableField(
+                                  field.key,
+                                  editedValues,
+                                )}
+                                isPending={
+                                  updateDiscrepanciesMutation.isPending
+                                }
+                                onSelectChange={value =>
+                                  handleFieldChange(
+                                    field.key,
+                                    value,
+                                    site.fields,
+                                  )
+                                }
+                                onCustomInputChange={value =>
+                                  handleCustomInputChange(
+                                    field.key,
+                                    value,
+                                    site.fields,
+                                  )
+                                }
+                                onBackToOptions={() =>
+                                  handleBackToOptions(field.key)
+                                }
+                              />
+                            ) : (
+                              field.details
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  {editingSiteId === site.siteId ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        disabled={updateDiscrepanciesMutation.isPending}
+                      >
+                        <X className="mr-1 h-4 w-4" />
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleSubmit(site)}
+                        disabled={updateDiscrepanciesMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Check className="mr-1 h-4 w-4" />
+                        {updateDiscrepanciesMutation.isPending
+                          ? 'Submitting...'
+                          : 'Submit'}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditClick(site.siteId, site.fields)}
+                    >
+                      <Pencil className="mr-1 h-4 w-4" />
+                      Edit
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
