@@ -1,6 +1,6 @@
 'use client';
 
-import { Bug, Moon } from 'lucide-react';
+import Image from 'next/image';
 import { SectionHeader, InfoCard } from './shared';
 import { RadialChartCard, BarChartCard } from './charts';
 import type { DashboardMetrics } from '@/features/review/types/model';
@@ -31,9 +31,8 @@ export function EntomologicalSummarySection({
     sexDistribution.total > 0 ||
     abdomenStatusDistribution.total > 0;
 
-  // Using hex color values from globals.css (chart-green-dark: #166534, chart-green-medium: #22C55E, chart-green-light: #86EFAC)
-  const sexColors = ['#166534', '#22C55E'];
-  const abdomenColors = ['#166534', '#22C55E', '#86EFAC'];
+  const sexColors = ['#6ccb81', '#a9e4ba'];
+  const abdomenColors = ['#4faf8c', '#6ccb81', '#a9e4ba'];
 
   const sexDistributionChartData = [
     {
@@ -109,7 +108,7 @@ export function EntomologicalSummarySection({
 
   return (
     <div className="space-y-6">
-      <SectionHeader title="Entomological Summary" />
+      <SectionHeader title="Entomological Summary" showBreakline={false} />
 
       {!hasData ? (
         <div className="py-8 text-center text-gray-500">
@@ -137,19 +136,22 @@ export function EntomologicalSummarySection({
               <BarChartCard
                 title="Species Distribution"
                 data={speciesDistribution}
+                tooltipContent="This chart displays the distribution of different mosquito species collected during the survey. Understanding species composition is important because different species have varying roles in disease transmission. Anopheles species are primary malaria vectors, while other species may have different ecological roles."
               />
             </div>
 
             <div className="space-y-6">
               <InfoCard
-                icon={<Bug className="h-8 w-8" />}
+                icon={<Image src="/assets/auth/icons/Mosquito.png" alt="Mosquito" width={24} height={24} className="object-contain" />}
                 title="No. of LLINs"
                 value={data.totalLlins}
+                tooltipContent="LLINs (Long-Lasting Insecticidal Nets) are bednets treated with insecticides that remain effective for multiple years. This count represents the total number of LLINs reported in the surveyed houses. LLINs are a key intervention tool for preventing mosquito bites and reducing malaria transmission."
               />
               <InfoCard
-                icon={<Moon className="h-8 w-8" />}
+                icon={<Image src="/assets/auth/icons/Moon.png" alt="Moon" width={20} height={20} className="object-contain" />}
                 title="Fed Mosquitoes to People who Slept Ratio"
                 value={data.fedMosquitoesToPeopleSleptRatio.toFixed(1)}
+                tooltipContent="This ratio compares the number of blood-fed mosquitoes collected to the number of people who slept in the surveyed houses. A higher ratio may indicate increased biting activity and potential transmission risk. This metric helps assess the effectiveness of protective measures like bednets."
               />
             </div>
           </div>
