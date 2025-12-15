@@ -151,6 +151,7 @@ export function Dhis2SyncDialog({
                 >
                   <div className="flex items-center space-x-2">
                     <Checkbox
+                      className="data-[state=checked]:border-chart-green-medium data-[state=checked]:bg-chart-green-medium data-[state=checked]:text-white focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40"
                       id={`irs-${village}`}
                       checked={data.wasIrsSprayed}
                       onCheckedChange={checked =>
@@ -220,6 +221,7 @@ export function Dhis2SyncDialog({
             Cancel
           </Button>
           <Button
+            className="bg-chart-green-medium text-white shadow-xs hover:bg-chart-green-dark focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40"
             onClick={handleSubmit}
             disabled={!isValid() || isSubmitting}
           >
