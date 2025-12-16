@@ -33,6 +33,7 @@ import {
 import { useShouldProcessFurther } from './hooks/use-should-process-further';
 import {
   getMorphFormDefaultValues,
+  parseMorphSpecies,
   type MorphFormDefaultValues,
 } from './utils/morph-form-defaults';
 import {
@@ -43,23 +44,6 @@ import { cn } from '@/shared/core/utils';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
-}
-
-function parseMorphSpecies(morphSpecies?: string | null): {
-  genus?: string;
-  species?: string;
-} {
-  if (!morphSpecies) return {};
-
-  if (morphSpecies.startsWith(GENUS_VISUAL_IDS.ANOPHELES)) {
-    const species = morphSpecies.substring(GENUS_VISUAL_IDS.ANOPHELES.length);
-    return {
-      genus: GENUS_VISUAL_IDS.ANOPHELES,
-      species: species || undefined,
-    };
-  }
-
-  return { genus: morphSpecies };
 }
 
 function parseNotesForArtifact(
@@ -87,7 +71,7 @@ export function AnnotationTaskDetailPageClient({
     useState<MorphFormDefaultValues | null>(null);
   const morphFormRef = useRef<MorphIdentificationFormRef>(null);
   const genusChangeHandlerRef = useRef<((genus: string) => void) | null>(null);
-  const [selectedGenus, setSelectedGenus] = useState<string | undefined>(undefined);
+  const [selectedGenus, setSelectedGenus] = useState<string | undefined>();
 
   const {
     data: annotationsPage,
@@ -148,18 +132,21 @@ export function AnnotationTaskDetailPageClient({
     setMorphFormValues(morphFormDefaultValues);
   }, [morphFormDefaultValues]);
 
-  // Sync selected genus with current annotation
   useEffect(() => {
-    const genus = parseMorphSpecies(currentAnnotation?.morphSpecies).genus;
-    setSelectedGenus(genus);
-  }, [currentAnnotation]);
-
+    if (currentAnnotation) {
+      const { genus } = parseMorphSpecies(currentAnnotation.visualSpecies);
+      setSelectedGenus(genus);
+    }
+  }, [currentAnnotation?.id]);
   const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
     genusChangeHandlerRef.current = handler;
   }, []);
 
-  const handleGenusButtonClick = useCallback((genus: string) => {
+  const handleGenusValueChange = useCallback((genus: string | undefined) => {
     setSelectedGenus(genus);
+  }, []);
+
+  const handleGenusButtonClick = useCallback((genus: string) => {
     if (genusChangeHandlerRef.current) {
       genusChangeHandlerRef.current(genus);
     }
@@ -297,16 +284,17 @@ export function AnnotationTaskDetailPageClient({
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
-              ...parseMorphSpecies(currentAnnotation.morphSpecies),
+              ...parseMorphSpecies(currentAnnotation.visualSpecies),
               ...parseNotesForArtifact(
                 currentAnnotation.notes,
                 currentAnnotation.status === 'FLAGGED',
               ),
-              sex: currentAnnotation.morphSex ?? undefined,
-              abdomenStatus: currentAnnotation.morphAbdomenStatus ?? undefined,
+              sex: currentAnnotation.visualSex ?? undefined,
+              abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
             onGenusChange={handleGenusChangeCallback}
+            onGenusValueChange={handleGenusValueChange}
             morphFormValues={morphFormValues}
             shouldProcessFurther={shouldProcessFurther}
             morphFormRef={morphFormRef}

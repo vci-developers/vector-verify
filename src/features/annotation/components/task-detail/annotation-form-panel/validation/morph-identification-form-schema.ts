@@ -1,4 +1,5 @@
 import {
+  GENUS_MORPH_IDS,
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
@@ -6,6 +7,7 @@ import {
 
 import { z } from 'zod';
 
+const GENUS_VALUES = Object.values(GENUS_MORPH_IDS) as [string, ...string[]];
 const SPECIES_VALUES = Object.values(SPECIES_MORPH_IDS) as [
   string,
   ...string[],
@@ -18,16 +20,20 @@ const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_MORPH_IDS) as [
 
 export const MorphIdentificationBase = z.object({
   received: z.boolean().default(false),
+  genus: z.string().optional(),
   species: z.string().optional(),
   sex: z.string().optional(),
   abdomenStatus: z.string().optional(),
 });
 
-export const isSexEnabled = (species?: string) =>
-  species !== SPECIES_MORPH_IDS.NON_MOSQUITO &&
-  species !== SPECIES_MORPH_IDS.CANNOT_BE_DETERMINED;
-export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
-  isSexEnabled(species) && sex !== SEX_MORPH_IDS.MALE;
+export const isSpeciesEnabled = (genus?: string) =>
+  genus === GENUS_MORPH_IDS.ANOPHELES;
+
+export const isSexEnabled = (genus?: string) =>
+  genus !== GENUS_MORPH_IDS.NON_MOSQUITO;
+
+export const isAbdomenStatusEnabled = (genus?: string, sex?: string) =>
+  isSexEnabled(genus) && sex !== SEX_MORPH_IDS.MALE;
 
 export const morphIdentificationFormSchema =
   MorphIdentificationBase.superRefine((formFields, context) => {
@@ -35,15 +41,28 @@ export const morphIdentificationFormSchema =
       return;
     }
 
-    if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
+    // Validate genus
+    if (!formFields.genus || !GENUS_VALUES.includes(formFields.genus)) {
       context.addIssue({
         code: 'custom',
-        path: ['species'],
-        message: 'Species is required when specimen is received.',
+        path: ['genus'],
+        message: 'Genus is required when specimen is received.',
       });
     }
 
-    if (isSexEnabled(formFields.species)) {
+    // Validate species (only for Anopheles)
+    if (isSpeciesEnabled(formFields.genus)) {
+      if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['species'],
+          message: 'Species is required for Anopheles genus.',
+        });
+      }
+    }
+
+    // Validate sex (required for mosquitos)
+    if (isSexEnabled(formFields.genus)) {
       if (!formFields.sex || !SEX_VALUES.includes(formFields.sex)) {
         context.addIssue({
           code: 'custom',
@@ -53,7 +72,8 @@ export const morphIdentificationFormSchema =
       }
     }
 
-    if (isAbdomenStatusEnabled(formFields.species, formFields.sex)) {
+    // Validate abdomen status (required for female specimens)
+    if (isAbdomenStatusEnabled(formFields.genus, formFields.sex)) {
       if (
         !formFields.abdomenStatus ||
         !ABDOMEN_STATUS_VALUES.includes(formFields.abdomenStatus)
@@ -61,7 +81,7 @@ export const morphIdentificationFormSchema =
         context.addIssue({
           code: 'custom',
           path: ['abdomenStatus'],
-          message: 'Abdomen status is required when specimen is received.',
+          message: 'Abdomen status is required for female specimens.',
         });
       }
     }

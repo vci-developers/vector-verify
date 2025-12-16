@@ -35,6 +35,7 @@ import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-upd
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
 import type { MorphIdentificationFormRef } from './morph-identification-form';
+import { buildSpeciesString } from '../utils/morph-form-defaults';
 
 interface VisualIdentificationFormProps {
   annotationId: number;
@@ -48,6 +49,7 @@ interface VisualIdentificationFormProps {
     flagged?: boolean;
   };
   onGenusChange?: (handler: (genus: string) => void) => void;
+  onGenusValueChange?: (genus: string | undefined) => void;
   morphFormValues?: {
     received: boolean;
     species?: string;
@@ -62,8 +64,9 @@ export function VisualIdentificationForm({
   annotationId,
   defaultValues,
   onGenusChange,
+  onGenusValueChange,
   morphFormValues,
-  shouldProcessFurther = false,
+  shouldProcessFurther,
   morphFormRef,
 }: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
@@ -103,13 +106,11 @@ export function VisualIdentificationForm({
   const handleGenusSelect = useCallback((newGenus?: string) => {
     form.setValue('genus', newGenus || '', { shouldDirty: true });
 
-    // Clear species if not Anopheles
     if (!isSpeciesEnabled(newGenus)) {
       form.setValue('species', '', { shouldDirty: true });
       form.clearErrors(['species']);
     }
 
-    // Clear sex if Non-Mosquito
     if (!isSexEnabled(newGenus)) {
       form.setValue('sex', '', { shouldDirty: true });
       form.setValue('abdomenStatus', '', { shouldDirty: true });
@@ -119,12 +120,17 @@ export function VisualIdentificationForm({
     form.clearErrors('genus');
   }, [form]);
 
-  // Expose the handleGenusSelect function to parent via callback
   useEffect(() => {
     if (onGenusChange) {
       onGenusChange(handleGenusSelect);
     }
   }, [onGenusChange, handleGenusSelect]);
+
+  useEffect(() => {
+    if (onGenusValueChange) {
+      onGenusValueChange(selectedGenus);
+    }
+  }, [selectedGenus, onGenusValueChange]);
 
   const handleSpeciesSelect = (newSpecies?: string) => {
     form.setValue('species', newSpecies || '', { shouldDirty: true });
@@ -151,7 +157,6 @@ export function VisualIdentificationForm({
   const handleArtifactSelect = (newArtifact?: string) => {
     form.setValue('artifact', newArtifact || '', { shouldDirty: true });
 
-    // Clear notes if artifact is not "Other"
     if (!isNotesRequired(newArtifact)) {
       form.setValue('notes', '', { shouldDirty: true });
     }
@@ -166,39 +171,47 @@ export function VisualIdentificationForm({
     updateFormValue(newFlagged);
 
     if (newFlagged) {
-      // When flagging, just clear genus/species/sex/abdomen errors since they're not required
       form.clearErrors(['genus', 'species', 'sex', 'abdomenStatus']);
     } else {
-      // When unflagging, clear artifact/notes errors since they're not required
       form.clearErrors(['artifact', 'notes']);
     }
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    let morphSpecies = null;
-    let notes = null;
+    if (shouldProcessFurther && morphFormRef?.current) {
+      const isMorphFormValid = await morphFormRef.current.validate();
+      if (!isMorphFormValid) {
+        return;
+      }
+    }
 
+    const morphData = shouldProcessFurther && morphFormRef?.current 
+      ? morphFormRef.current.getValues() 
+      : null;
+
+    // Build Visual Form data (from visual identification form)
+    const visualSpecies = !formInput.flagged 
+      ? buildSpeciesString(formInput.genus, formInput.species) 
+      : null;
+    const visualSex = !formInput.flagged ? (formInput.sex || null) : null;
+    const visualAbdomenStatus = !formInput.flagged ? (formInput.abdomenStatus || null) : null;
+
+    // Build Morph Form data (from morph identification form)
+    const morphSpecies = morphData?.received 
+      ? buildSpeciesString(morphData.genus, morphData.species) 
+      : null;
+    const morphSex = morphData?.received ? (morphData.sex || null) : null;
+    const morphAbdomenStatus = morphData?.received ? (morphData.abdomenStatus || null) : null;
+
+    // Build notes field
+    let notes = null;
     if (formInput.flagged) {
       if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
         notes = formInput.notes || null;
       } else {
         notes = formInput.artifact || null;
       }
-
-      if (formInput.genus) {
-        if (formInput.genus === GENUS_VISUAL_IDS.ANOPHELES && formInput.species) {
-          morphSpecies = `${formInput.genus}${formInput.species}`;
-        } else {
-          morphSpecies = formInput.genus;
-        }
-      }
     } else {
-      if (formInput.genus === GENUS_VISUAL_IDS.ANOPHELES && formInput.species) {
-        morphSpecies = `${formInput.genus}${formInput.species}`;
-      } else {
-        morphSpecies = formInput.genus || null;
-      }
-
       if (formInput.artifact) {
         if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
           notes = formInput.notes || null;
@@ -213,9 +226,12 @@ export function VisualIdentificationForm({
     await updateAnnotationMutation.mutateAsync({
       annotationId,
       payload: {
+        visualSpecies,
+        visualSex,
+        visualAbdomenStatus,
         morphSpecies,
-        morphSex: formInput.sex || null,
-        morphAbdomenStatus: formInput.abdomenStatus || null,
+        morphSex,
+        morphAbdomenStatus,
         notes,
         status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
       },
