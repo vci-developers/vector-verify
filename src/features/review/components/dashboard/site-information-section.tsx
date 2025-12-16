@@ -33,7 +33,7 @@ export function SiteInformationSection({
           icon={<Image src="/assets/auth/icons/Mosquito.png" alt="Mosquito" width={24} height={24} className="object-contain" />}
           title="Vector Density"
           value={vectorDensity}
-          tooltipContent="Vector density is calculated as the average number of mosquitoes collected per house. This metric is crucial for assessing the intensity of vector populations and understanding the risk of disease transmission. Higher densities may indicate increased transmission risk."
+          tooltipContent="Vector density is average number of mosquitoes collected per house per day. This metric is crucial for assessing the intensity of vector populations and understanding the risk of disease transmission. Higher densities may indicate increased transmission risk."
         />
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from '@/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useRef, useEffect, useState } from 'react';
 
 interface RadialChartData {
   name: string;
@@ -30,13 +31,52 @@ export function RadialChartCard({
   total,
   legendItems,
 }: RadialChartCardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartSize, setChartSize] = useState(256);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        const size = Math.min(width || 256, height || 256, 256);
+        setChartSize(size);
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Calculate responsive radii - use percentage for automatic scaling
+  // Base sizes on a 256px container, scale proportionally
+  const baseSize = 256;
+  const scale = chartSize / baseSize;
+  const outerRadius = Math.max(110 * scale, 60);
+  const innerRadius = Math.max(70 * scale, 45);
+
   return (
     <Card className="relative py-0">
       <CardContent className="p-0">
         <div className="px-6 pt-6 pb-6">
-          <div className="flex items-center justify-center gap-8">
-            <div className="max-w-md flex-1">
-              <div className="relative h-64 w-full">
+          <div className="flex flex-col items-center justify-center gap-8 lg:flex-row">
+            <div className="w-full flex-1 lg:max-w-md">
+              <div
+                ref={containerRef}
+                className="relative w-full"
+                style={{
+                  minHeight: '200px',
+                  height: 'clamp(200px, 30vw, 256px)',
+                }}
+              >
                 {data.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -44,8 +84,8 @@ export function RadialChartCard({
                         data={data}
                         cx="50%"
                         cy="50%"
-                        innerRadius={70}
-                        outerRadius={110}
+                        innerRadius={innerRadius}
+                        outerRadius={outerRadius}
                         paddingAngle={2}
                         dataKey="value"
                       >
@@ -54,19 +94,28 @@ export function RadialChartCard({
                         ))}
                       </Pie>
                       <Tooltip
-                        content={({ active, payload, coordinate }) => {
+                        content={({ active, payload, coordinate, viewBox }) => {
                           if (
                             !active ||
                             !payload?.length ||
                             !coordinate ||
                             coordinate.x === undefined ||
-                            coordinate.y === undefined
+                            coordinate.y === undefined ||
+                            !viewBox
                           )
                             return null;
 
                           const data = payload[0];
-                          const chartCenter = { x: 128, y: 128 };
-                          const minDistance = 80;
+                          // Calculate chart center from viewBox
+                          const chartCenter = {
+                            x:
+                              (viewBox.x ?? 0) +
+                              (viewBox.width ?? chartSize) / 2,
+                            y:
+                              (viewBox.y ?? 0) +
+                              (viewBox.height ?? chartSize) / 2,
+                          };
+                          const minDistance = outerRadius * 0.73;
 
                           const dx = coordinate.x - chartCenter.x;
                           const dy = coordinate.y - chartCenter.y;
@@ -116,10 +165,10 @@ export function RadialChartCard({
                 {data.length > 0 && (
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-lg font-medium text-gray-800">
+                      <div className="text-sm font-medium text-gray-800 lg:text-lg">
                         Total:
                       </div>
-                      <div className="text-3xl font-bold text-gray-800">
+                      <div className="text-2xl font-bold text-gray-800 lg:text-3xl">
                         {total.toLocaleString()}
                       </div>
                     </div>
@@ -128,7 +177,7 @@ export function RadialChartCard({
               </div>
             </div>
 
-            <div className="max-w-md flex-1">
+            <div className="w-full flex-1 lg:max-w-md">
               <h3 className="mb-4 text-lg font-bold text-gray-800">{title}</h3>
               <div className="space-y-3">
                 {legendItems.map((item, index: number) => (

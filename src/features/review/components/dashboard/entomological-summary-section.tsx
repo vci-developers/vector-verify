@@ -151,7 +151,7 @@ export function EntomologicalSummarySection({
                 icon={<Image src="/assets/auth/icons/Moon.png" alt="Moon" width={20} height={20} className="object-contain" />}
                 title="Fed Mosquitoes to People who Slept Ratio"
                 value={data.fedMosquitoesToPeopleSleptRatio.toFixed(1)}
-                tooltipContent="This ratio compares the number of blood-fed mosquitoes collected to the number of people who slept in the surveyed houses. A higher ratio may indicate increased biting activity and potential transmission risk. This metric helps assess the effectiveness of protective measures like bednets."
+                tooltipContent="Fed mosquitoes to people who slept ratio is averaged across all houses. This ratio compares the number of blood-fed mosquitoes collected to the number of people who slept in the surveyed houses. A higher ratio may indicate increased biting activity and potential transmission risk. This metric helps assess the effectiveness of protective measures like bednets."
               />
             </div>
           </div>

@@ -27,8 +27,8 @@ export function InfoCard({
         <div className="px-6 pt-6 pb-6">
           <div className="mb-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg" style={{ backgroundColor: '#E0F2F1' }}>
-              {icon}
-            </div>
+            {icon}
+          </div>
             <div 
               className="absolute top-6 right-6 cursor-pointer"
               onMouseEnter={() => setShowTooltip(true)}
@@ -49,12 +49,12 @@ export function InfoCard({
                   </p>
                 </div>
               )}
-            </div>
           </div>
-          <div className="space-y-2">
+        </div>
+        <div className="space-y-2">
             <h3 className="text-sm font-medium" style={{ color: '#98a3b2' }}>{title}</h3>
-            <div className="text-3xl font-bold text-gray-800">
-              {typeof value === 'number' ? value.toLocaleString() : value}
+          <div className="text-3xl font-bold text-gray-800">
+            {typeof value === 'number' ? value.toLocaleString() : value}
             </div>
           </div>
         </div>

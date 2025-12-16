@@ -45,37 +45,37 @@ export function DashboardPageClient({
         <div className="px-12 py-8 pb-12">
           {isLoading && <DashboardLoadingSkeleton />}
           {error && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <h2 className="mb-2 text-lg font-semibold text-red-600">
-                    Error Loading Dashboard
-                  </h2>
-                  <p className="text-gray-600">
-                    {error?.message || 'An unexpected error occurred'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h2 className="mb-2 text-lg font-semibold text-red-600">
+                Error Loading Dashboard
+              </h2>
+              <p className="text-gray-600">
+                {error?.message || 'An unexpected error occurred'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
           )}
           {!data && !isLoading && !error && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <h2 className="mb-2 text-lg font-semibold text-gray-600">
-                    No Data Available
-                  </h2>
-                  <p className="text-gray-500">
-                    No data found for {district} in {monthName}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h2 className="mb-2 text-lg font-semibold text-gray-600">
+                No Data Available
+              </h2>
+              <p className="text-gray-500">
+                No data found for {district} in {monthName}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
           )}
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
 
   if (isLoading || error || !data) {
     return sidebarLayout;
@@ -87,21 +87,21 @@ export function DashboardPageClient({
       <div className="flex-1 min-w-0">
         <div className="px-12 py-8 pb-24">
           <div className="mb-4">
-            <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
+          <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
             <p className="mt-2 text-lg" style={{ color: '#98a3b2' }}>{monthName}</p>
-          </div>
+        </div>
 
           <div className="h-px bg-gray-200 mb-6"></div>
 
           <div className="space-y-8">
-            <SiteInformationSection
-              data={data.siteInformation}
-              vectorDensity={data.entomologicalSummary.vectorDensity}
-            />
+          <SiteInformationSection
+            data={data.siteInformation}
+            vectorDensity={data.entomologicalSummary.vectorDensity}
+          />
 
-            <EntomologicalSummarySection metrics={data} />
+          <EntomologicalSummarySection metrics={data} />
 
-            <BednetsDataSection data={data.entomologicalSummary} />
+          <BednetsDataSection data={data.entomologicalSummary} />
           </div>
         </div>
       </div>
