@@ -189,21 +189,18 @@ export function VisualIdentificationForm({
       ? morphFormRef.current.getValues() 
       : null;
 
-    // Build Visual Form data (from visual identification form)
     const visualSpecies = !formInput.flagged 
       ? buildSpeciesString(formInput.genus, formInput.species) 
       : null;
     const visualSex = !formInput.flagged ? (formInput.sex || null) : null;
     const visualAbdomenStatus = !formInput.flagged ? (formInput.abdomenStatus || null) : null;
 
-    // Build Morph Form data (from morph identification form)
     const morphSpecies = morphData?.received 
       ? buildSpeciesString(morphData.genus, morphData.species) 
       : null;
     const morphSex = morphData?.received ? (morphData.sex || null) : null;
     const morphAbdomenStatus = morphData?.received ? (morphData.abdomenStatus || null) : null;
 
-    // Build notes field
     let notes = null;
     if (formInput.flagged) {
       if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
