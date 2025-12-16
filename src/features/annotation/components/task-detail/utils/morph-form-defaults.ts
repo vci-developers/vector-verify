@@ -1,5 +1,9 @@
 import type { Annotation } from '@/shared/entities/annotation/model';
 import { GENUS_VISUAL_IDS } from '../annotation-form-panel/validation/annotation-form-schema';
+import { 
+  isSexEnabled, 
+  isAbdomenStatusEnabled 
+} from '../annotation-form-panel/validation/morph-identification-form-schema';
 
 export interface MorphFormDefaultValues {
   received: boolean;
@@ -39,13 +43,26 @@ export function buildSpeciesString(genus?: string, species?: string): string | n
 export function getMorphFormDefaultValues(
   annotation: Annotation,
 ): MorphFormDefaultValues {
-  const hasMorphData =
-    annotation.morphSpecies &&
-    annotation.morphSex &&
-    annotation.morphAbdomenStatus;
-  const received = Boolean(hasMorphData);
-
   const { genus, species } = parseMorphSpecies(annotation.morphSpecies);
+  
+
+  const hasMorphData = (() => {
+    if (!genus) return false;
+    
+    if (!isSexEnabled(genus)) {
+      return true;
+    }
+    
+    if (!annotation.morphSex) return false;
+    
+    if (isAbdomenStatusEnabled(genus, annotation.morphSex)) {
+      return Boolean(annotation.morphAbdomenStatus);
+    }
+    
+    return true;
+  })();
+  
+  const received = hasMorphData;
 
   return {
     received,

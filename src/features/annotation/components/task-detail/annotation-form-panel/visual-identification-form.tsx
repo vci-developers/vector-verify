@@ -50,12 +50,6 @@ interface VisualIdentificationFormProps {
   };
   onGenusChange?: (handler: (genus: string) => void) => void;
   onGenusValueChange?: (genus: string | undefined) => void;
-  morphFormValues?: {
-    received: boolean;
-    species?: string;
-    sex?: string;
-    abdomenStatus?: string;
-  } | null;
   shouldProcessFurther?: boolean;
   morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
@@ -65,7 +59,6 @@ export function VisualIdentificationForm({
   defaultValues,
   onGenusChange,
   onGenusValueChange,
-  morphFormValues,
   shouldProcessFurther,
   morphFormRef,
 }: VisualIdentificationFormProps) {

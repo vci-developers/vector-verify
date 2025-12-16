@@ -67,8 +67,6 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
-  const [morphFormValues, setMorphFormValues] =
-    useState<MorphFormDefaultValues | null>(null);
   const morphFormRef = useRef<MorphIdentificationFormRef>(null);
   const genusChangeHandlerRef = useRef<((genus: string) => void) | null>(null);
   const [selectedGenus, setSelectedGenus] = useState<string | undefined>();
@@ -129,15 +127,12 @@ export function AnnotationTaskDetailPageClient({
   }, [shouldProcessFurther, currentAnnotation]);
 
   useEffect(() => {
-    setMorphFormValues(morphFormDefaultValues);
-  }, [morphFormDefaultValues]);
-
-  useEffect(() => {
     if (currentAnnotation) {
       const { genus } = parseMorphSpecies(currentAnnotation.visualSpecies);
       setSelectedGenus(genus);
     }
   }, [currentAnnotation?.id]);
+
   const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
     genusChangeHandlerRef.current = handler;
   }, []);
@@ -295,7 +290,6 @@ export function AnnotationTaskDetailPageClient({
             }}
             onGenusChange={handleGenusChangeCallback}
             onGenusValueChange={handleGenusValueChange}
-            morphFormValues={morphFormValues}
             shouldProcessFurther={shouldProcessFurther}
             morphFormRef={morphFormRef}
           />
@@ -345,7 +339,6 @@ export function AnnotationTaskDetailPageClient({
                   received: false,
                 }
               }
-              onValuesChange={setMorphFormValues}
             />
           </CardContent>
         </Card>

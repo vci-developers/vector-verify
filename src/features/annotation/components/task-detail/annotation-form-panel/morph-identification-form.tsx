@@ -26,7 +26,7 @@ import {
   ABDOMEN_STATUS_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
 import { Checkbox } from '@/ui/checkbox';
-import { useEffect, useImperativeHandle, forwardRef, useMemo } from 'react';
+import { useImperativeHandle, forwardRef, useMemo } from 'react';
 
 export interface MorphIdentificationFormRef {
   validate: () => Promise<boolean>;
@@ -41,19 +41,12 @@ interface MorphIdentificationFormProps {
     sex?: string;
     abdomenStatus?: string;
   };
-  onValuesChange?: (values: {
-    received: boolean;
-    genus?: string;
-    species?: string;
-    sex?: string;
-    abdomenStatus?: string;
-  }) => void;
 }
 
 export const MorphIdentificationForm = forwardRef<
   MorphIdentificationFormRef,
   MorphIdentificationFormProps
->(({ defaultValues, onValuesChange }, ref) => {
+>(({ defaultValues }, ref) => {
   const computedDefaultValues = useMemo(
     () => ({
       received: defaultValues?.received ?? false,
@@ -82,28 +75,7 @@ export const MorphIdentificationForm = forwardRef<
 
   const received = morphForm.watch('received') ?? false;
   const selectedGenus = morphForm.watch('genus');
-  const selectedSpecies = morphForm.watch('species');
   const selectedSex = morphForm.watch('sex');
-  const selectedAbdomenStatus = morphForm.watch('abdomenStatus');
-
-  const normalizeValue = (value: string | undefined) =>
-    value === '' || value === undefined ? undefined : value;
-
-  useEffect(() => {
-    onValuesChange?.({
-      received,
-      genus: normalizeValue(selectedGenus),
-      species: normalizeValue(selectedSpecies),
-      sex: normalizeValue(selectedSex),
-      abdomenStatus: normalizeValue(selectedAbdomenStatus),
-    });
-  }, [
-    received,
-    selectedSpecies,
-    selectedSex,
-    selectedAbdomenStatus,
-    onValuesChange,
-  ]);
 
   const speciesEnabled = received && isSpeciesEnabled(selectedGenus);
   const sexEnabled = received && selectedGenus !== '' && isSexEnabled(selectedGenus);

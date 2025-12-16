@@ -41,7 +41,6 @@ export const morphIdentificationFormSchema =
       return;
     }
 
-    // Validate genus
     if (!formFields.genus || !GENUS_VALUES.includes(formFields.genus)) {
       context.addIssue({
         code: 'custom',
@@ -50,7 +49,6 @@ export const morphIdentificationFormSchema =
       });
     }
 
-    // Validate species (only for Anopheles)
     if (isSpeciesEnabled(formFields.genus)) {
       if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
         context.addIssue({
@@ -61,7 +59,6 @@ export const morphIdentificationFormSchema =
       }
     }
 
-    // Validate sex (required for mosquitos)
     if (isSexEnabled(formFields.genus)) {
       if (!formFields.sex || !SEX_VALUES.includes(formFields.sex)) {
         context.addIssue({
@@ -72,7 +69,6 @@ export const morphIdentificationFormSchema =
       }
     }
 
-    // Validate abdomen status (required for female specimens)
     if (isAbdomenStatusEnabled(formFields.genus, formFields.sex)) {
       if (
         !formFields.abdomenStatus ||
