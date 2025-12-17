@@ -7,3 +7,4 @@ export * from './get-specimen-counts';
 export * from './get-specimen-images';
 export * from './get-dashboard-metrics';
 export * from './get-surveillance-form';
+export * from './sync-dhis2';
