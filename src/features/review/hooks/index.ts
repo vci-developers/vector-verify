@@ -9,3 +9,4 @@ export * from './use-data-quality';
 export * from './use-surveillance-forms';
 export * from './use-district-management';
 export * from './use-dhis2-sync';
+export * from './use-dhis2-sync-handler';
