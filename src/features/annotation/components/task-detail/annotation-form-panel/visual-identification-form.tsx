@@ -182,11 +182,9 @@ export function VisualIdentificationForm({
       ? morphFormRef.current.getValues() 
       : null;
 
-    const visualSpecies = !formInput.flagged 
-      ? buildSpeciesString(formInput.genus, formInput.species) 
-      : null;
-    const visualSex = !formInput.flagged ? (formInput.sex || null) : null;
-    const visualAbdomenStatus = !formInput.flagged ? (formInput.abdomenStatus || null) : null;
+    const visualSpecies = buildSpeciesString(formInput.genus, formInput.species);
+    const visualSex = formInput.sex || null;
+    const visualAbdomenStatus = formInput.abdomenStatus || null;
 
     const morphSpecies = morphData?.received 
       ? buildSpeciesString(morphData.genus, morphData.species) 
