@@ -11,6 +11,8 @@ import {
   calculateSpeciesDistribution,
   calculateAnophelesSexDistribution,
   calculateAnophelesAbdomenStatusDistribution,
+  calculateTotalMosquitoes,
+  calculateTotalAnopheles,
 } from '@/features/review/utils/dashboard';
 
 export function useDashboardDataQuery(
@@ -51,12 +53,16 @@ export function useDashboardDataQuery(
       const sexDistribution = calculateAnophelesSexDistribution(specimenCounts);
       const abdomenStatusDistribution =
         calculateAnophelesAbdomenStatusDistribution(specimenCounts);
+      const totalMosquitoes = calculateTotalMosquitoes(specimenCounts);
+      const totalAnopheles = calculateTotalAnopheles(specimenCounts);
 
       return {
         ...metrics,
         speciesDistribution,
         sexDistribution,
         abdomenStatusDistribution,
+        totalMosquitoes,
+        totalAnopheles,
       } as DashboardMetrics;
     },
     ...options,

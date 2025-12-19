@@ -103,7 +103,6 @@ export function DashboardPageClient({
       );
     },
     onError: error => {
-      console.error('DHIS2 sync error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to sync with DHIS2';
       showErrorToast(errorMessage);
     },
@@ -137,14 +136,6 @@ export function DashboardPageClient({
           dateLastSprayed: villageIrs.dateLastSprayed,
         } satisfies SiteIrsData;
       });
-
-    console.log('Submitting DHIS2 sync with IRS data:', {
-      district,
-      year,
-      month: monthNum,
-      irsDataCount: irsData.length,
-      irsData,
-    });
 
     setDialogOpen(false);
 
@@ -209,7 +200,26 @@ export function DashboardPageClient({
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
-            <p className="mt-2 text-lg text-gray-600">{monthName}</p>
+            <div className="mt-2 flex flex-col gap-1">
+              <p className="text-lg text-gray-600">{monthName}</p>
+              {typeof data.totalMosquitoes === 'number' &&
+                typeof data.totalAnopheles === 'number' && (
+                  <div className="flex gap-4 text-sm text-gray-500">
+                    <span>
+                      Total mosquitoes:{' '}
+                      <span className="font-semibold text-gray-700">
+                        {data.totalMosquitoes.toLocaleString()}
+                      </span>
+                    </span>
+                    <span>
+                      Total anopheles:{' '}
+                      <span className="font-semibold text-gray-700">
+                        {data.totalAnopheles.toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                )}
+            </div>
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">
             <Button
