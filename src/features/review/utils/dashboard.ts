@@ -128,3 +128,27 @@ export function calculateAnophelesAbdomenStatusDistribution(
     },
   };
 }
+
+export function calculateTotalMosquitoes(
+  specimenCounts: SpecimenCountsSummary,
+): number {
+  return specimenCounts.data.reduce(
+    (total, site) => total + site.totalSpecimens,
+    0,
+  );
+}
+
+export function calculateTotalAnopheles(
+  specimenCounts: SpecimenCountsSummary,
+): number {
+  return specimenCounts.data.reduce((total, site) => {
+    return (
+      total +
+      site.counts.reduce((siteTotal, entry) => {
+        return isAnophelesGenus(entry.species)
+          ? siteTotal + entry.count
+          : siteTotal;
+      }, 0)
+    );
+  }, 0);
+}

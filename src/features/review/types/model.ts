@@ -147,6 +147,8 @@ export interface DashboardMetrics {
   speciesDistribution?: SpeciesDistribution[];
   sexDistribution?: SexDistribution;
   abdomenStatusDistribution?: AbdomenStatusDistribution;
+  totalMosquitoes?: number;
+  totalAnopheles?: number;
 }
 
 export interface SpecimenData {
