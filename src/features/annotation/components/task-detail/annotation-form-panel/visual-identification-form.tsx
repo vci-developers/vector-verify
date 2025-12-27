@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useEffect, useCallback } from 'react';
 import {
   Form,
   FormField,
@@ -15,9 +16,13 @@ import {
   annotationFormSchema,
   isAbdomenStatusEnabled,
   isSexEnabled,
+  isSpeciesEnabled,
+  isNotesRequired,
+  GENUS_VISUAL_IDS,
   SPECIES_VISUAL_IDS,
   SEX_VISUAL_IDS,
   ABDOMEN_STATUS_VISUAL_IDS,
+  ARTIFACT_VISUAL_IDS,
 } from './validation/annotation-form-schema';
 import { cn } from '@/shared/core/utils';
 import { Textarea } from '@/ui/textarea';
@@ -30,22 +35,21 @@ import { useUpdateAnnotationMutation } from '@/features/annotation/hooks/use-upd
 import { useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '@/ui/show-success-toast';
 import type { MorphIdentificationFormRef } from './morph-identification-form';
+import { buildSpeciesString } from '../utils/morph-form-defaults';
 
 interface VisualIdentificationFormProps {
   annotationId: number;
   defaultValues: {
+    genus?: string;
     species?: string;
     sex?: string;
     abdomenStatus?: string;
+    artifact?: string;
     notes?: string;
     flagged?: boolean;
   };
-  morphFormValues?: {
-    received: boolean;
-    species?: string;
-    sex?: string;
-    abdomenStatus?: string;
-  } | null;
+  onGenusChange?: (handler: (genus: string) => void) => void;
+  onGenusValueChange?: (genus: string | undefined) => void;
   shouldProcessFurther?: boolean;
   morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
@@ -53,8 +57,9 @@ interface VisualIdentificationFormProps {
 export function VisualIdentificationForm({
   annotationId,
   defaultValues,
-  morphFormValues,
-  shouldProcessFurther = false,
+  onGenusChange,
+  onGenusValueChange,
+  shouldProcessFurther,
   morphFormRef,
 }: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
@@ -69,9 +74,11 @@ export function VisualIdentificationForm({
   const form = useForm<AnnotationFormInput>({
     resolver: zodResolver(annotationFormSchema),
     defaultValues: {
+      genus: defaultValues?.genus ?? undefined,
       species: defaultValues?.species ?? undefined,
       sex: defaultValues?.sex ?? undefined,
       abdomenStatus: defaultValues?.abdomenStatus ?? undefined,
+      artifact: defaultValues?.artifact ?? undefined,
       notes: defaultValues?.notes ?? undefined,
       flagged: defaultValues?.flagged ?? false,
     },
@@ -79,31 +86,54 @@ export function VisualIdentificationForm({
     reValidateMode: 'onChange',
   });
 
-  const selectedSpecies = form.watch('species');
+  const selectedGenus = form.watch('genus');
   const selectedSex = form.watch('sex');
+  const selectedArtifact = form.watch('artifact');
   const isFlagged = form.watch('flagged');
 
-  const sexEnabled = isSexEnabled(selectedSpecies);
-  const abdomenStatusEnabled = isAbdomenStatusEnabled(
-    selectedSpecies,
-    selectedSex,
-  );
+  const speciesEnabled = isSpeciesEnabled(selectedGenus);
+  const sexEnabled = isSexEnabled(selectedGenus);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(selectedGenus, selectedSex);
+  const notesRequired = isNotesRequired(selectedArtifact);
 
-  const handleSpeciesSelect = (newSpecies?: string) => {
-    form.setValue('species', newSpecies || '', { shouldDirty: true });
+  const handleGenusSelect = useCallback((newGenus?: string) => {
+    form.setValue('genus', newGenus || '', { shouldDirty: true });
 
-    if (!isSexEnabled(newSpecies)) {
+    if (!isSpeciesEnabled(newGenus)) {
+      form.setValue('species', '', { shouldDirty: true });
+      form.clearErrors(['species']);
+    }
+
+    if (!isSexEnabled(newGenus)) {
       form.setValue('sex', '', { shouldDirty: true });
       form.setValue('abdomenStatus', '', { shouldDirty: true });
       form.clearErrors(['sex', 'abdomenStatus']);
     }
+
+    form.clearErrors('genus');
+  }, [form]);
+
+  useEffect(() => {
+    if (onGenusChange) {
+      onGenusChange(handleGenusSelect);
+    }
+  }, [onGenusChange, handleGenusSelect]);
+
+  useEffect(() => {
+    if (onGenusValueChange) {
+      onGenusValueChange(selectedGenus);
+    }
+  }, [selectedGenus, onGenusValueChange]);
+
+  const handleSpeciesSelect = (newSpecies?: string) => {
+    form.setValue('species', newSpecies || '', { shouldDirty: true });
     form.clearErrors('species');
   };
 
   const handleSexSelect = (newSex?: string) => {
     form.setValue('sex', newSex || '', { shouldDirty: true });
 
-    if (!isAbdomenStatusEnabled(selectedSpecies, newSex)) {
+    if (!isAbdomenStatusEnabled(selectedGenus, newSex)) {
       form.setValue('abdomenStatus', '', { shouldDirty: true });
       form.clearErrors(['abdomenStatus']);
     }
@@ -117,6 +147,16 @@ export function VisualIdentificationForm({
     form.clearErrors('abdomenStatus');
   };
 
+  const handleArtifactSelect = (newArtifact?: string) => {
+    form.setValue('artifact', newArtifact || '', { shouldDirty: true });
+
+    if (!isNotesRequired(newArtifact)) {
+      form.setValue('notes', '', { shouldDirty: true });
+    }
+
+    form.clearErrors('artifact');
+  };
+
   const handleFlagged = (
     newFlagged: boolean,
     updateFormValue: (value: boolean) => void,
@@ -124,43 +164,63 @@ export function VisualIdentificationForm({
     updateFormValue(newFlagged);
 
     if (newFlagged) {
-      form.clearErrors(['species', 'sex', 'abdomenStatus']);
+      form.clearErrors(['genus', 'species', 'sex', 'abdomenStatus']);
     } else {
-      form.clearErrors(['notes']);
+      form.clearErrors(['artifact', 'notes']);
     }
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    const shouldValidateMorphForm =
-      !formInput.flagged &&
-      shouldProcessFurther &&
-      morphFormValues?.received &&
-      morphFormRef?.current;
-
-    if (shouldValidateMorphForm) {
-      const isValid = await morphFormRef.current!.validate();
-      if (!isValid) {
+    if (shouldProcessFurther && morphFormRef?.current) {
+      const isMorphFormValid = await morphFormRef.current.validate();
+      if (!isMorphFormValid) {
         return;
       }
     }
 
-    const hasMorphData = shouldProcessFurther && morphFormValues?.received;
-    const normalizeToNull = (value?: string) => value || null;
+    const morphData = shouldProcessFurther && morphFormRef?.current 
+      ? morphFormRef.current.getValues() 
+      : null;
+
+    const visualSpecies = buildSpeciesString(formInput.genus, formInput.species);
+    const visualSex = formInput.sex || null;
+    const visualAbdomenStatus = formInput.abdomenStatus || null;
+
+    const morphSpecies = morphData?.received 
+      ? buildSpeciesString(morphData.genus, morphData.species) 
+      : null;
+    const morphSex = morphData?.received ? (morphData.sex || null) : null;
+    const morphAbdomenStatus = morphData?.received ? (morphData.abdomenStatus || null) : null;
+
+    let notes = null;
+    if (formInput.flagged) {
+      if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
+        notes = formInput.notes || null;
+      } else {
+        notes = formInput.artifact || null;
+      }
+    } else {
+      if (formInput.artifact) {
+        if (formInput.artifact === ARTIFACT_VISUAL_IDS.OTHER) {
+          notes = formInput.notes || null;
+        } else {
+          notes = formInput.artifact;
+        }
+      } else {
+        notes = formInput.notes || null;
+      }
+    }
 
     await updateAnnotationMutation.mutateAsync({
       annotationId,
       payload: {
-        visualSpecies: normalizeToNull(formInput.species),
-        visualSex: normalizeToNull(formInput.sex),
-        visualAbdomenStatus: normalizeToNull(formInput.abdomenStatus),
-        morphSpecies: hasMorphData
-          ? normalizeToNull(morphFormValues.species)
-          : null,
-        morphSex: hasMorphData ? normalizeToNull(morphFormValues.sex) : null,
-        morphAbdomenStatus: hasMorphData
-          ? normalizeToNull(morphFormValues.abdomenStatus)
-          : null,
-        notes: normalizeToNull(formInput.notes),
+        visualSpecies,
+        visualSex,
+        visualAbdomenStatus,
+        morphSpecies,
+        morphSex,
+        morphAbdomenStatus,
+        notes,
         status: formInput.flagged ? 'FLAGGED' : 'ANNOTATED',
       },
     });
@@ -186,11 +246,12 @@ export function VisualIdentificationForm({
                 </FormLabel>
                 <FormControl>
                   <AnnotationSelectMenu
-                    label="species"
+                    label="Species"
                     options={Object.values(SPECIES_VISUAL_IDS)}
                     selectedValue={field.value}
                     onSelect={handleSpeciesSelect}
-                    isInvalid={!!fieldState.error}
+                    isInvalid={!!fieldState.error && speciesEnabled}
+                    disabled={!speciesEnabled}
                   />
                 </FormControl>
                 <FormMessage className="text-xs" />
@@ -246,27 +307,52 @@ export function VisualIdentificationForm({
 
           <FormField
             control={form.control}
-            name="notes"
-            render={({ field }) => (
+            name="artifact"
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel htmlFor={toDomId(field.name)} className="m-0">
-                  Notes
+                  Artifact
                   {isFlagged && (
-                    <span className="text-destructive">(Required)*</span>
+                    <span className="text-destructive ml-1">(Required)*</span>
                   )}
                 </FormLabel>
                 <FormControl>
-                  <Textarea
-                    id={toDomId(field.name)}
-                    className="h-[70px] resize-none overflow-y-auto text-sm"
-                    placeholder="Add observations..."
-                    {...field}
+                  <AnnotationSelectMenu
+                    label="Artifact"
+                    options={Object.values(ARTIFACT_VISUAL_IDS)}
+                    selectedValue={field.value}
+                    onSelect={handleArtifactSelect}
+                    isInvalid={!!fieldState.error}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
+
+          {notesRequired && (
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor={toDomId(field.name)} className="m-0">
+                    Notes
+                    <span className="text-destructive ml-1">(Required)*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id={toDomId(field.name)}
+                      className="h-[70px] resize-none overflow-y-auto text-sm"
+                      placeholder="Add observations..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <div className="flex gap-3 pt-2">
             <FormField
@@ -302,7 +388,7 @@ export function VisualIdentificationForm({
 
             <Button
               type="submit"
-              className="flex flex-1 items-center justify-center gap-1.5"
+              className="flex flex-1 items-center justify-center gap-1.5 bg-[#22c55e] text-white hover:bg-[#86efac]"
               disabled={updateAnnotationMutation.isPending}
             >
               <Save className="h-4 w-4" />

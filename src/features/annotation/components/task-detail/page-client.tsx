@@ -11,6 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/card';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/ui/hover-card';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
@@ -28,20 +33,43 @@ import {
 import { useShouldProcessFurther } from './hooks/use-should-process-further';
 import {
   getMorphFormDefaultValues,
+  parseMorphSpecies,
   type MorphFormDefaultValues,
 } from './utils/morph-form-defaults';
+import {
+  GENUS_VISUAL_IDS,
+  ARTIFACT_VISUAL_IDS,
+} from './annotation-form-panel/validation/annotation-form-schema';
+import { cn } from '@/shared/core/utils';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
+}
+
+function parseNotesForArtifact(
+  notes?: string | null,
+  isFlagged?: boolean,
+): {
+  artifact?: string;
+  notes?: string;
+} {
+  if (!isFlagged || !notes) return { notes: notes ?? undefined };
+
+  const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
+  if (artifactValues.includes(notes as any)) {
+    return { artifact: notes, notes: undefined };
+  }
+
+  return { artifact: ARTIFACT_VISUAL_IDS.OTHER, notes };
 }
 
 export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
-  const [morphFormValues, setMorphFormValues] =
-    useState<MorphFormDefaultValues | null>(null);
   const morphFormRef = useRef<MorphIdentificationFormRef>(null);
+  const genusChangeHandlerRef = useRef<((genus: string) => void) | null>(null);
+  const [selectedGenus, setSelectedGenus] = useState<string | undefined>();
 
   const {
     data: annotationsPage,
@@ -99,8 +127,25 @@ export function AnnotationTaskDetailPageClient({
   }, [shouldProcessFurther, currentAnnotation]);
 
   useEffect(() => {
-    setMorphFormValues(morphFormDefaultValues);
-  }, [morphFormDefaultValues]);
+    if (currentAnnotation) {
+      const { genus } = parseMorphSpecies(currentAnnotation.visualSpecies);
+      setSelectedGenus(genus);
+    }
+  }, [currentAnnotation?.id]);
+
+  const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
+    genusChangeHandlerRef.current = handler;
+  }, []);
+
+  const handleGenusValueChange = useCallback((genus: string | undefined) => {
+    setSelectedGenus(genus);
+  }, []);
+
+  const handleGenusButtonClick = useCallback((genus: string) => {
+    if (genusChangeHandlerRef.current) {
+      genusChangeHandlerRef.current(genus);
+    }
+  }, []);
 
   if (isLoading || isLoadingShouldProcessFurther) {
     return (
@@ -153,18 +198,67 @@ export function AnnotationTaskDetailPageClient({
             )}
           </div>
           {specimenId && (
-            <p className="text-muted-foreground text-sm">ID: {specimenId}</p>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <button className="text-muted-foreground text-left text-sm underline decoration-dotted underline-offset-4 hover:text-foreground transition-colors">
+                  More Information
+                </button>
+              </HoverCardTrigger>
+              <HoverCardContent align="start" className="w-80">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Specimen ID: {specimenId}</p>
+                  <SpecimenMetadata
+                    session={currentAnnotation.specimen?.session}
+                    site={currentAnnotation.specimen?.session?.site}
+                  />
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           )}
         </CardHeader>
-        <CardContent className="flex-1">
+        <CardContent className="flex-1 space-y-4">
           <SpecimenImageViewer imageUrl={imageUrl} />
+          
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Select Genus</p>
+            <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-2">
+                {Object.values(GENUS_VISUAL_IDS).slice(0, 3).map((genus) => (
+                  <Button
+                    key={genus}
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full',
+                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
+                    )}
+                    onClick={() => handleGenusButtonClick(genus)}
+                    disabled={isLoading || isFetching}
+                  >
+                    {genus}
+                  </Button>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.values(GENUS_VISUAL_IDS).slice(3).map((genus) => (
+                  <Button
+                    key={genus}
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full',
+                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
+                    )}
+                    onClick={() => handleGenusButtonClick(genus)}
+                    disabled={isLoading || isFetching}
+                  >
+                    {genus}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
         </CardContent>
-        <CardFooter className="border-border/70 bg-muted/5 mt-auto border-t px-6 py-4">
-          <SpecimenMetadata
-            session={currentAnnotation.specimen?.session}
-            site={currentAnnotation.specimen?.session?.site}
-          />
-        </CardFooter>
       </Card>
 
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
@@ -185,13 +279,17 @@ export function AnnotationTaskDetailPageClient({
             key={`annotation-${currentAnnotation.id}`}
             annotationId={currentAnnotation.id}
             defaultValues={{
-              species: currentAnnotation.visualSpecies ?? undefined,
+              ...parseMorphSpecies(currentAnnotation.visualSpecies),
+              ...parseNotesForArtifact(
+                currentAnnotation.notes,
+                currentAnnotation.status === 'FLAGGED',
+              ),
               sex: currentAnnotation.visualSex ?? undefined,
               abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
-              notes: currentAnnotation.notes ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
             }}
-            morphFormValues={morphFormValues}
+            onGenusChange={handleGenusChangeCallback}
+            onGenusValueChange={handleGenusValueChange}
             shouldProcessFurther={shouldProcessFurther}
             morphFormRef={morphFormRef}
           />
@@ -241,7 +339,6 @@ export function AnnotationTaskDetailPageClient({
                   received: false,
                 }
               }
-              onValuesChange={setMorphFormValues}
             />
           </CardContent>
         </Card>

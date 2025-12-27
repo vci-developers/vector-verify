@@ -1,14 +1,20 @@
 import {
+  GENUS_MORPH_IDS,
   SPECIES_MORPH_IDS,
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
+  ARTIFACT_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
 
 import { z } from 'zod';
 
+export const GENUS_VISUAL_IDS = GENUS_MORPH_IDS;
 export const SPECIES_VISUAL_IDS = SPECIES_MORPH_IDS;
 export const SEX_VISUAL_IDS = SEX_MORPH_IDS;
 export const ABDOMEN_STATUS_VISUAL_IDS = ABDOMEN_STATUS_MORPH_IDS;
+export const ARTIFACT_VISUAL_IDS = ARTIFACT_MORPH_IDS;  
+
+const GENUS_VALUES = Object.values(GENUS_MORPH_IDS) as [string, ...string[]];
 
 const SPECIES_VALUES = Object.values(SPECIES_VISUAL_IDS) as [
   string,
@@ -19,41 +25,85 @@ const ABDOMEN_STATUS_VALUES = Object.values(ABDOMEN_STATUS_VISUAL_IDS) as [
   string,
   ...string[],
 ];
+const ARTIFACT_VALUES = Object.values(ARTIFACT_VISUAL_IDS) as [
+  string,
+  ...string[],
+];
 
 export const AnnotationBase = z.object({
+  genus: z.string().optional(),
   species: z.string().optional(),
   sex: z.string().optional(),
   abdomenStatus: z.string().optional(),
+  artifact: z.string().optional(),
   notes: z.string().optional(),
   flagged: z.boolean().default(false),
 });
-export const isSexEnabled = (species?: string) =>
-  species !== SPECIES_VISUAL_IDS.NON_MOSQUITO;
-export const isAbdomenStatusEnabled = (species?: string, sex?: string) =>
-  isSexEnabled(species) && sex !== SEX_VISUAL_IDS.MALE;
+
+export const isSpeciesEnabled = (genus?: string) =>
+  genus === GENUS_MORPH_IDS.ANOPHELES;
+
+
+export const isNotesRequired = (artifact?: string) =>
+  artifact === ARTIFACT_MORPH_IDS.OTHER;
+
+export const isSexEnabled = (genus?: string) =>
+  genus !== GENUS_VISUAL_IDS.NON_MOSQUITO;
+
+export const isAbdomenStatusEnabled = (genus?: string, sex?: string) =>
+  isSexEnabled(genus) && sex !== SEX_VISUAL_IDS.MALE;
 
 export const annotationFormSchema = AnnotationBase.superRefine(
   (formFields, context) => {
+    if (isSpeciesEnabled(formFields.genus)) {
+      if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['species'],
+          message: 'Species is required for Anopheles genus.',
+        });
+      }
+    }
+    
     if (formFields.flagged) {
-      if (!formFields.notes?.trim()) {
+      if (!formFields.artifact || !ARTIFACT_VALUES.includes(formFields.artifact)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['artifact'],
+          message: 'Artifact is required when the specimen is flagged.',
+        });
+      }
+      
+      if (isNotesRequired(formFields.artifact) && !formFields.notes?.trim()) {
         context.addIssue({
           code: 'custom',
           path: ['notes'],
-          message: 'Notes are required when the specimen is flagged.',
+          message: 'Notes are required when artifact is "Other".',
         });
       }
+      
       return;
     }
 
-    if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
+    if (!formFields.genus || !GENUS_VALUES.includes(formFields.genus)) {
       context.addIssue({
         code: 'custom',
-        path: ['species'],
-        message: 'Species is required when the specimen is not flagged.',
+        path: ['genus'],
+        message: 'Genus is required when the specimen is not flagged.',
       });
     }
 
-    if (isSexEnabled(formFields.species)) {
+    if (isSpeciesEnabled(formFields.genus)) {
+      if (!formFields.species || !SPECIES_VALUES.includes(formFields.species)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['species'],
+          message: 'Species is required for Anopheles genus.',
+        });
+      }
+    }
+
+    if (isSexEnabled(formFields.genus)) {
       if (!formFields.sex || !SEX_VALUES.includes(formFields.sex)) {
         context.addIssue({
           code: 'custom',
@@ -63,7 +113,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
       }
     }
 
-    if (isAbdomenStatusEnabled(formFields.species, formFields.sex)) {
+    if (isAbdomenStatusEnabled(formFields.genus, formFields.sex)) {
       if (
         !formFields.abdomenStatus ||
         !ABDOMEN_STATUS_VALUES.includes(formFields.abdomenStatus)
@@ -71,12 +121,11 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         context.addIssue({
           code: 'custom',
           path: ['abdomenStatus'],
-          message:
-            'Abdomen status is required when the specimen is not flagged.',
+          message: 'Abdomen status is required for female specimens.',
         });
       }
     }
-  },
+      },
 );
 
 export type AnnotationFormInput = z.input<typeof annotationFormSchema>;
