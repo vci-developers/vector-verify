@@ -83,6 +83,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
           message: 'Notes are required when artifact is "Other".',
         });
       }
+      
 
       return;
     }
@@ -105,7 +106,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
       }
     }
 
-    if (isSexEnabled(formFields.genus)) {
+    if (isSexEnabled(formFields.species)) {
       if (!formFields.sex || !SEX_VALUES.includes(formFields.sex)) {
         context.addIssue({
           code: 'custom',
@@ -127,7 +128,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         });
       }
     }
-  },
+      },
 );
 
 export type AnnotationFormInput = z.input<typeof annotationFormSchema>;

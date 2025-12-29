@@ -190,11 +190,11 @@ export function HouseholdInfoTable({ tableMeta }: HouseholdInfoTableProps) {
                 className="hover:bg-muted/30 border-b transition-colors last:border-b-0"
               >
                 <TableCell className="bg-background sticky left-0 z-20 w-[280px] max-w-[280px] min-w-[280px] border-r-2 px-4 py-4 text-center font-medium">
-                  <div className="text-foreground text-sm font-semibold break-words whitespace-normal">
+                  <div className="text-foreground text-sm font-semibold wrap-break-word whitespace-normal">
                     {row.siteLabel.topLine}
                   </div>
                   {row.siteLabel.bottomLine && (
-                    <div className="text-muted-foreground mt-1 text-xs break-words whitespace-normal">
+                    <div className="text-muted-foreground mt-1 text-xs wrap-break-word whitespace-normal">
                       {row.siteLabel.bottomLine}
                     </div>
                   )}

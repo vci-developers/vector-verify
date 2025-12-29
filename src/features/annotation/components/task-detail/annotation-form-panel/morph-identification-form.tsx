@@ -78,8 +78,7 @@ export const MorphIdentificationForm = forwardRef<
   const selectedSex = morphForm.watch('sex');
 
   const speciesEnabled = received && isSpeciesEnabled(selectedGenus);
-  const sexEnabled =
-    received && selectedGenus !== '' && isSexEnabled(selectedGenus);
+  const sexEnabled = received && selectedGenus !== '' && isSexEnabled(selectedGenus);
   const abdomenStatusEnabled =
     received &&
     selectedGenus !== '' &&

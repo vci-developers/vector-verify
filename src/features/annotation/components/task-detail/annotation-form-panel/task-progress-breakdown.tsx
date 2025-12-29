@@ -18,7 +18,7 @@ export function TaskProgressBreakdown({
       </div>
       <Progress
         value={progressPercent}
-        className="h-2 overflow-hidden rounded-full bg-[#22c55e]/40 [&>div]:bg-[#22c55e]"
+        className="h-2 overflow-hidden rounded-full [&>div]:bg-[#22c55e] bg-[#22c55e]/40"
       />
     </div>
   );
