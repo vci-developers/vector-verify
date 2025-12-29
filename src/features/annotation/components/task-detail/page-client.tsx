@@ -11,11 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/card';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/ui/hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/ui/hover-card';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
@@ -56,7 +52,11 @@ function parseNotesForArtifact(
   if (!isFlagged || !notes) return { notes: notes ?? undefined };
 
   const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
-  if (artifactValues.includes(notes as any)) {
+  if (
+    artifactValues.includes(
+      notes as (typeof ARTIFACT_VISUAL_IDS)[keyof typeof ARTIFACT_VISUAL_IDS],
+    )
+  ) {
     return { artifact: notes, notes: undefined };
   }
 
@@ -131,11 +131,14 @@ export function AnnotationTaskDetailPageClient({
       const { genus } = parseMorphSpecies(currentAnnotation.visualSpecies);
       setSelectedGenus(genus);
     }
-  }, [currentAnnotation?.id]);
+  }, [currentAnnotation]);
 
-  const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
-    genusChangeHandlerRef.current = handler;
-  }, []);
+  const handleGenusChangeCallback = useCallback(
+    (handler: (genus: string) => void) => {
+      genusChangeHandlerRef.current = handler;
+    },
+    [],
+  );
 
   const handleGenusValueChange = useCallback((genus: string | undefined) => {
     setSelectedGenus(genus);

@@ -117,7 +117,10 @@ export function Dhis2SyncDialog({
           return false;
         }
         // Check date is filled and in valid format (YYYY-MM-DD)
-        if (!data.dateLastSprayed || !data.dateLastSprayed.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        if (
+          !data.dateLastSprayed ||
+          !data.dateLastSprayed.match(/^\d{4}-\d{2}-\d{2}$/)
+        ) {
           return false;
         }
       }
@@ -151,7 +154,7 @@ export function Dhis2SyncDialog({
                 >
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      className="data-[state=checked]:border-chart-green-medium data-[state=checked]:bg-chart-green-medium data-[state=checked]:text-white focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40"
+                      className="data-[state=checked]:border-chart-green-medium data-[state=checked]:bg-chart-green-medium focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40 data-[state=checked]:text-white"
                       id={`irs-${village}`}
                       checked={data.wasIrsSprayed}
                       onCheckedChange={checked =>
@@ -221,7 +224,7 @@ export function Dhis2SyncDialog({
             Cancel
           </Button>
           <Button
-            className="bg-chart-green-medium text-white shadow-xs hover:bg-chart-green-dark focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40"
+            className="bg-chart-green-medium hover:bg-chart-green-dark focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40 text-white shadow-xs"
             onClick={handleSubmit}
             disabled={!isValid() || isSubmitting}
           >

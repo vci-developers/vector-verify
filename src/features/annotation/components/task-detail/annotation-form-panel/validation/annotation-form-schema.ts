@@ -83,7 +83,6 @@ export const annotationFormSchema = AnnotationBase.superRefine(
           message: 'Notes are required when artifact is "Other".',
         });
       }
-      
 
       return;
     }
@@ -128,7 +127,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         });
       }
     }
-      },
+  },
 );
 
 export type AnnotationFormInput = z.input<typeof annotationFormSchema>;
