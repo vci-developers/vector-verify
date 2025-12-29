@@ -12,7 +12,7 @@ export const GENUS_VISUAL_IDS = GENUS_MORPH_IDS;
 export const SPECIES_VISUAL_IDS = SPECIES_MORPH_IDS;
 export const SEX_VISUAL_IDS = SEX_MORPH_IDS;
 export const ABDOMEN_STATUS_VISUAL_IDS = ABDOMEN_STATUS_MORPH_IDS;
-export const ARTIFACT_VISUAL_IDS = ARTIFACT_MORPH_IDS;  
+export const ARTIFACT_VISUAL_IDS = ARTIFACT_MORPH_IDS;
 
 const GENUS_VALUES = Object.values(GENUS_MORPH_IDS) as [string, ...string[]];
 
@@ -43,7 +43,6 @@ export const AnnotationBase = z.object({
 export const isSpeciesEnabled = (genus?: string) =>
   genus === GENUS_MORPH_IDS.ANOPHELES;
 
-
 export const isNotesRequired = (artifact?: string) =>
   artifact === ARTIFACT_MORPH_IDS.OTHER;
 
@@ -64,16 +63,19 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         });
       }
     }
-    
+
     if (formFields.flagged) {
-      if (!formFields.artifact || !ARTIFACT_VALUES.includes(formFields.artifact)) {
+      if (
+        !formFields.artifact ||
+        !ARTIFACT_VALUES.includes(formFields.artifact)
+      ) {
         context.addIssue({
           code: 'custom',
           path: ['artifact'],
           message: 'Artifact is required when the specimen is flagged.',
         });
       }
-      
+
       if (isNotesRequired(formFields.artifact) && !formFields.notes?.trim()) {
         context.addIssue({
           code: 'custom',
@@ -81,7 +83,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
           message: 'Notes are required when artifact is "Other".',
         });
       }
-      
+
       return;
     }
 
@@ -125,7 +127,7 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         });
       }
     }
-      },
+  },
 );
 
 export type AnnotationFormInput = z.input<typeof annotationFormSchema>;
