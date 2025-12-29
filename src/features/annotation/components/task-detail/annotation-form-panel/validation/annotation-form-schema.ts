@@ -127,6 +127,14 @@ export const annotationFormSchema = AnnotationBase.superRefine(
         });
       }
     }
+
+    if (isNotesRequired(formFields.artifact) && !formFields.notes?.trim()) {
+      context.addIssue({
+        code: 'custom',
+        path: ['notes'],
+        message: 'Notes are required when artifact is "Other".',
+      });
+    }
   },
 );
 

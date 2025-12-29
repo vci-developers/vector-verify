@@ -42,20 +42,18 @@ interface AnnotationTaskDetailPageClientProps {
   taskId: number;
 }
 
-function parseNotesForArtifact(
-  notes?: string | null,
-  isFlagged?: boolean,
-): {
+function parseNotesForArtifact(notes?: string | null): {
   artifact?: string;
   notes?: string;
 } {
-  if (!isFlagged || !notes) return { notes: notes ?? undefined };
+  if (!notes) return { artifact: undefined, notes: undefined };
 
   const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
   if (
     artifactValues.includes(
       notes as (typeof ARTIFACT_VISUAL_IDS)[keyof typeof ARTIFACT_VISUAL_IDS],
-    )
+    ) &&
+    notes !== ARTIFACT_VISUAL_IDS.OTHER
   ) {
     return { artifact: notes, notes: undefined };
   }
@@ -293,10 +291,7 @@ export function AnnotationTaskDetailPageClient({
             annotationId={currentAnnotation.id}
             defaultValues={{
               ...parseMorphSpecies(currentAnnotation.visualSpecies),
-              ...parseNotesForArtifact(
-                currentAnnotation.notes,
-                currentAnnotation.status === 'FLAGGED',
-              ),
+              ...parseNotesForArtifact(currentAnnotation.notes),
               sex: currentAnnotation.visualSex ?? undefined,
               abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',
