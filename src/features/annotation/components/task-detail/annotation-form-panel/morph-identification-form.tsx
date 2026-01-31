@@ -30,7 +30,7 @@ import { useImperativeHandle, forwardRef, useMemo } from 'react';
 
 export interface MorphIdentificationFormRef {
   validate: () => Promise<boolean>;
-  getValues: () => any;
+  getValues: () => MorphIdentificationFormInput;
 }
 
 interface MorphIdentificationFormProps {
@@ -78,7 +78,8 @@ export const MorphIdentificationForm = forwardRef<
   const selectedSex = morphForm.watch('sex');
 
   const speciesEnabled = received && isSpeciesEnabled(selectedGenus);
-  const sexEnabled = received && selectedGenus !== '' && isSexEnabled(selectedGenus);
+  const sexEnabled =
+    received && selectedGenus !== '' && isSexEnabled(selectedGenus);
   const abdomenStatusEnabled =
     received &&
     selectedGenus !== '' &&
@@ -108,7 +109,13 @@ export const MorphIdentificationForm = forwardRef<
         shouldDirty: true,
         shouldValidate: false,
       });
-      morphForm.clearErrors(['species', 'sex', 'abdomenStatus', 'received', 'genus']);
+      morphForm.clearErrors([
+        'species',
+        'sex',
+        'abdomenStatus',
+        'received',
+        'genus',
+      ]);
     }
   };
 
@@ -224,7 +231,6 @@ export const MorphIdentificationForm = forwardRef<
                 <FormMessage className="text-xs" />
               </FormItem>
             )}
-          
           />
 
           <FormField

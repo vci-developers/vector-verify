@@ -10,14 +10,14 @@ import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
 import { DashboardLoadingSkeleton } from './loading-skeleton';
-import {
-  useUserPermissionsQuery,
-  canPushSites,
-} from '@/features/user';
+import { useUserPermissionsQuery, canPushSites } from '@/features/user';
 import { showSuccessToast } from '@/shared/ui/show-success-toast';
 import { showErrorToast } from '@/shared/ui/show-error-toast';
 import { Dhis2SyncDialog } from '@/features/review/components/review-dashboard/dhis2-sync-dialog';
-import type { VillageIrsFormData, SiteIrsData } from '@/features/review/types/dhis2-sync';
+import type {
+  VillageIrsFormData,
+  SiteIrsData,
+} from '@/features/review/types/dhis2-sync';
 
 interface DashboardPageClientProps {
   district: string;
@@ -87,40 +87,41 @@ export function DashboardPageClient({
     return null;
   };
 
-  const { mutateAsync: triggerSync, isPending: isSyncing } = useDhis2SyncMutation({
-    onSuccess: data => {
-      const summary = extractSummary(data);
-      if (summary) {
+  const { mutateAsync: triggerSync, isPending: isSyncing } =
+    useDhis2SyncMutation({
+      onSuccess: data => {
+        const summary = extractSummary(data);
+        if (summary) {
+          showSuccessToast(
+            `DHIS2 sync processed ${summary.totalHouseholds} household${
+              summary.totalHouseholds === 1 ? '' : 's'
+            }: ${summary.successfulSyncs} succeeded, ${summary.failedSyncs} failed, ${summary.skippedHouseholds} skipped.`,
+          );
+          return;
+        }
         showSuccessToast(
-          `DHIS2 sync processed ${summary.totalHouseholds} household${
-            summary.totalHouseholds === 1 ? '' : 's'
-          }: ${summary.successfulSyncs} succeeded, ${summary.failedSyncs} failed, ${summary.skippedHouseholds} skipped.`,
+          'DHIS2 sync started. You will receive a notification when it finishes.',
         );
-        return;
-      }
-      showSuccessToast(
-        'DHIS2 sync started. You will receive a notification when it finishes.',
-      );
-    },
-    onError: error => {
-      console.error('DHIS2 sync error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sync with DHIS2';
-      showErrorToast(errorMessage);
-    },
-  });
+      },
+      onError: error => {
+        console.error('DHIS2 sync error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to sync with DHIS2';
+        showErrorToast(errorMessage);
+      },
+    });
 
   const handleSyncSubmit = (villageData: VillageIrsFormData[]) => {
     if (!permissions?.sites?.canAccessSites) return;
 
-    const villageToIrsMap = new Map(
-      villageData.map(v => [v.villageName, v])
-    );
+    const villageToIrsMap = new Map(villageData.map(v => [v.villageName, v]));
 
     const irsData: SiteIrsData[] = permissions.sites.canAccessSites
-      .filter(site =>
-        site.villageName &&
-        site.district === district &&
-        villageToIrsMap.has(site.villageName)
+      .filter(
+        site =>
+          site.villageName &&
+          site.district === district &&
+          villageToIrsMap.has(site.villageName),
       )
       .map(site => {
         const villageIrs = villageToIrsMap.get(site.villageName!)!;
@@ -213,7 +214,7 @@ export function DashboardPageClient({
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">
             <Button
-              className="bg-chart-green-medium text-white shadow-xs hover:bg-chart-green-dark focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40"
+              className="bg-chart-green-medium hover:bg-chart-green-dark focus-visible:border-chart-green-medium focus-visible:ring-chart-green-medium/40 text-white shadow-xs"
               onClick={handleSyncButtonClick}
               disabled={isSyncing || !canSync}
             >

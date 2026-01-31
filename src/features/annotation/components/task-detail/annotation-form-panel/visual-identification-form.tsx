@@ -18,7 +18,6 @@ import {
   isSexEnabled,
   isSpeciesEnabled,
   isNotesRequired,
-  GENUS_VISUAL_IDS,
   SPECIES_VISUAL_IDS,
   SEX_VISUAL_IDS,
   ABDOMEN_STATUS_VISUAL_IDS,
@@ -93,25 +92,31 @@ export function VisualIdentificationForm({
 
   const speciesEnabled = isSpeciesEnabled(selectedGenus);
   const sexEnabled = isSexEnabled(selectedGenus);
-  const abdomenStatusEnabled = isAbdomenStatusEnabled(selectedGenus, selectedSex);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(
+    selectedGenus,
+    selectedSex,
+  );
   const notesRequired = isNotesRequired(selectedArtifact);
 
-  const handleGenusSelect = useCallback((newGenus?: string) => {
-    form.setValue('genus', newGenus || '', { shouldDirty: true });
+  const handleGenusSelect = useCallback(
+    (newGenus?: string) => {
+      form.setValue('genus', newGenus || '', { shouldDirty: true });
 
-    if (!isSpeciesEnabled(newGenus)) {
-      form.setValue('species', '', { shouldDirty: true });
-      form.clearErrors(['species']);
-    }
+      if (!isSpeciesEnabled(newGenus)) {
+        form.setValue('species', '', { shouldDirty: true });
+        form.clearErrors(['species']);
+      }
 
-    if (!isSexEnabled(newGenus)) {
-      form.setValue('sex', '', { shouldDirty: true });
-      form.setValue('abdomenStatus', '', { shouldDirty: true });
-      form.clearErrors(['sex', 'abdomenStatus']);
-    }
+      if (!isSexEnabled(newGenus)) {
+        form.setValue('sex', '', { shouldDirty: true });
+        form.setValue('abdomenStatus', '', { shouldDirty: true });
+        form.clearErrors(['sex', 'abdomenStatus']);
+      }
 
-    form.clearErrors('genus');
-  }, [form]);
+      form.clearErrors('genus');
+    },
+    [form],
+  );
 
   useEffect(() => {
     if (onGenusChange) {
@@ -178,19 +183,25 @@ export function VisualIdentificationForm({
       }
     }
 
-    const morphData = shouldProcessFurther && morphFormRef?.current 
-      ? morphFormRef.current.getValues() 
-      : null;
+    const morphData =
+      shouldProcessFurther && morphFormRef?.current
+        ? morphFormRef.current.getValues()
+        : null;
 
-    const visualSpecies = buildSpeciesString(formInput.genus, formInput.species);
+    const visualSpecies = buildSpeciesString(
+      formInput.genus,
+      formInput.species,
+    );
     const visualSex = formInput.sex || null;
     const visualAbdomenStatus = formInput.abdomenStatus || null;
 
-    const morphSpecies = morphData?.received 
-      ? buildSpeciesString(morphData.genus, morphData.species) 
+    const morphSpecies = morphData?.received
+      ? buildSpeciesString(morphData.genus, morphData.species)
       : null;
-    const morphSex = morphData?.received ? (morphData.sex || null) : null;
-    const morphAbdomenStatus = morphData?.received ? (morphData.abdomenStatus || null) : null;
+    const morphSex = morphData?.received ? morphData.sex || null : null;
+    const morphAbdomenStatus = morphData?.received
+      ? morphData.abdomenStatus || null
+      : null;
 
     let notes = null;
     if (formInput.flagged) {

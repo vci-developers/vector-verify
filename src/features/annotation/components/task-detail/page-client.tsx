@@ -11,11 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/card';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/ui/hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/ui/hover-card';
 import { useAnnotationTaskProgressQuery } from '@/features/annotation/hooks/use-annotation-task-progress';
 import { useTaskAnnotationsQuery } from '@/features/annotation/hooks/use-annotations';
 import { formatDate } from '@/shared/core/utils/date';
@@ -46,17 +42,19 @@ interface AnnotationTaskDetailPageClientProps {
   taskId: number;
 }
 
-function parseNotesForArtifact(
-  notes?: string | null,
-  isFlagged?: boolean,
-): {
+function parseNotesForArtifact(notes?: string | null): {
   artifact?: string;
   notes?: string;
 } {
-  if (!isFlagged || !notes) return { notes: notes ?? undefined };
+  if (!notes) return { artifact: undefined, notes: undefined };
 
   const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
-  if (artifactValues.includes(notes as any)) {
+  if (
+    artifactValues.includes(
+      notes as (typeof ARTIFACT_VISUAL_IDS)[keyof typeof ARTIFACT_VISUAL_IDS],
+    ) &&
+    notes !== ARTIFACT_VISUAL_IDS.OTHER
+  ) {
     return { artifact: notes, notes: undefined };
   }
 
@@ -67,7 +65,7 @@ export function AnnotationTaskDetailPageClient({
   taskId,
 }: AnnotationTaskDetailPageClientProps) {
   const [page, setPage] = useState(1);
-  const morphFormRef = useRef<MorphIdentificationFormRef>(null);
+  const morphFormRef = useRef<MorphIdentificationFormRef | null>(null);
   const genusChangeHandlerRef = useRef<((genus: string) => void) | null>(null);
   const [selectedGenus, setSelectedGenus] = useState<string | undefined>();
 
@@ -131,11 +129,14 @@ export function AnnotationTaskDetailPageClient({
       const { genus } = parseMorphSpecies(currentAnnotation.visualSpecies);
       setSelectedGenus(genus);
     }
-  }, [currentAnnotation?.id]);
+  }, [currentAnnotation]);
 
-  const handleGenusChangeCallback = useCallback((handler: (genus: string) => void) => {
-    genusChangeHandlerRef.current = handler;
-  }, []);
+  const handleGenusChangeCallback = useCallback(
+    (handler: (genus: string) => void) => {
+      genusChangeHandlerRef.current = handler;
+    },
+    [],
+  );
 
   const handleGenusValueChange = useCallback((genus: string | undefined) => {
     setSelectedGenus(genus);
@@ -200,13 +201,15 @@ export function AnnotationTaskDetailPageClient({
           {specimenId && (
             <HoverCard>
               <HoverCardTrigger asChild>
-                <button className="text-muted-foreground text-left text-sm underline decoration-dotted underline-offset-4 hover:text-foreground transition-colors">
+                <button className="text-muted-foreground hover:text-foreground text-left text-sm underline decoration-dotted underline-offset-4 transition-colors">
                   More Information
                 </button>
               </HoverCardTrigger>
               <HoverCardContent align="start" className="w-80">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Specimen ID: {specimenId}</p>
+                  <p className="text-sm font-medium">
+                    Specimen ID: {specimenId}
+                  </p>
                   <SpecimenMetadata
                     session={currentAnnotation.specimen?.session}
                     site={currentAnnotation.specimen?.session?.site}
@@ -218,43 +221,51 @@ export function AnnotationTaskDetailPageClient({
         </CardHeader>
         <CardContent className="flex-1 space-y-4">
           <SpecimenImageViewer imageUrl={imageUrl} />
-          
+
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Select Genus</p>
+            <p className="text-muted-foreground text-sm font-medium">
+              Select Genus
+            </p>
             <div className="space-y-2">
               <div className="grid grid-cols-3 gap-2">
-                {Object.values(GENUS_VISUAL_IDS).slice(0, 3).map((genus) => (
-                  <Button
-                    key={genus}
-                    type="button"
-                    variant="outline"
-                    className={cn(
-                      'w-full',
-                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
-                    )}
-                    onClick={() => handleGenusButtonClick(genus)}
-                    disabled={isLoading || isFetching}
-                  >
-                    {genus}
-                  </Button>
-                ))}
+                {Object.values(GENUS_VISUAL_IDS)
+                  .slice(0, 3)
+                  .map(genus => (
+                    <Button
+                      key={genus}
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'w-full',
+                        selectedGenus === genus &&
+                          'border-[#22c55e] bg-[#22c55e] text-white hover:bg-[#22c55e]/90',
+                      )}
+                      onClick={() => handleGenusButtonClick(genus)}
+                      disabled={isLoading || isFetching}
+                    >
+                      {genus}
+                    </Button>
+                  ))}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {Object.values(GENUS_VISUAL_IDS).slice(3).map((genus) => (
-                  <Button
-                    key={genus}
-                    type="button"
-                    variant="outline"
-                    className={cn(
-                      'w-full',
-                      selectedGenus === genus && 'bg-[#22c55e] text-white hover:bg-[#22c55e]/90 border-[#22c55e]',
-                    )}
-                    onClick={() => handleGenusButtonClick(genus)}
-                    disabled={isLoading || isFetching}
-                  >
-                    {genus}
-                  </Button>
-                ))}
+                {Object.values(GENUS_VISUAL_IDS)
+                  .slice(3)
+                  .map(genus => (
+                    <Button
+                      key={genus}
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'w-full',
+                        selectedGenus === genus &&
+                          'border-[#22c55e] bg-[#22c55e] text-white hover:bg-[#22c55e]/90',
+                      )}
+                      onClick={() => handleGenusButtonClick(genus)}
+                      disabled={isLoading || isFetching}
+                    >
+                      {genus}
+                    </Button>
+                  ))}
               </div>
             </div>
           </div>
@@ -280,10 +291,7 @@ export function AnnotationTaskDetailPageClient({
             annotationId={currentAnnotation.id}
             defaultValues={{
               ...parseMorphSpecies(currentAnnotation.visualSpecies),
-              ...parseNotesForArtifact(
-                currentAnnotation.notes,
-                currentAnnotation.status === 'FLAGGED',
-              ),
+              ...parseNotesForArtifact(currentAnnotation.notes),
               sex: currentAnnotation.visualSex ?? undefined,
               abdomenStatus: currentAnnotation.visualAbdomenStatus ?? undefined,
               flagged: currentAnnotation.status === 'FLAGGED',

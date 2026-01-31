@@ -1,4 +1,3 @@
-
 export const GENUS_MORPH_IDS = {
   ANOPHELES: 'Anopheles',
   CULEX: 'Culex',
@@ -32,9 +31,12 @@ export const ARTIFACT_MORPH_IDS = {
   OTHER: 'Other',
 } as const;
 
-export type GenusMorphId = (typeof GENUS_MORPH_IDS)[keyof typeof GENUS_MORPH_IDS];
-export type SpeciesMorphId = (typeof SPECIES_MORPH_IDS)[keyof typeof SPECIES_MORPH_IDS];
+export type GenusMorphId =
+  (typeof GENUS_MORPH_IDS)[keyof typeof GENUS_MORPH_IDS];
+export type SpeciesMorphId =
+  (typeof SPECIES_MORPH_IDS)[keyof typeof SPECIES_MORPH_IDS];
 export type SexMorphId = (typeof SEX_MORPH_IDS)[keyof typeof SEX_MORPH_IDS];
 export type AbdomenStatusMorphId =
   (typeof ABDOMEN_STATUS_MORPH_IDS)[keyof typeof ABDOMEN_STATUS_MORPH_IDS];
-export type MorphArtifact = (typeof ARTIFACT_MORPH_IDS)[keyof typeof ARTIFACT_MORPH_IDS];
+export type MorphArtifact =
+  (typeof ARTIFACT_MORPH_IDS)[keyof typeof ARTIFACT_MORPH_IDS];
