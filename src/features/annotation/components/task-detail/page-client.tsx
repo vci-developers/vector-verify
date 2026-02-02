@@ -26,39 +26,18 @@ import {
   MorphIdentificationForm,
   type MorphIdentificationFormRef,
 } from './annotation-form-panel/morph-identification-form';
-import { useShouldProcessFurther } from './hooks/use-should-process-further';
 import {
   getMorphFormDefaultValues,
   parseMorphSpecies,
   type MorphFormDefaultValues,
 } from './utils/morph-form-defaults';
-import {
-  GENUS_VISUAL_IDS,
-  ARTIFACT_VISUAL_IDS,
-} from './annotation-form-panel/validation/annotation-form-schema';
+import { parseNotesForArtifact } from './utils/parse-notes-for-artifact';
+import { GENUS_VISUAL_IDS } from './annotation-form-panel/validation/annotation-form-schema';
+import { ANNOTATION_TASK_DETAIL_LAYOUT_CLASS } from './constants';
 import { cn } from '@/shared/core/utils';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
-}
-
-function parseNotesForArtifact(notes?: string | null): {
-  artifact?: string;
-  notes?: string;
-} {
-  if (!notes) return { artifact: undefined, notes: undefined };
-
-  const artifactValues = Object.values(ARTIFACT_VISUAL_IDS);
-  if (
-    artifactValues.includes(
-      notes as (typeof ARTIFACT_VISUAL_IDS)[keyof typeof ARTIFACT_VISUAL_IDS],
-    ) &&
-    notes !== ARTIFACT_VISUAL_IDS.OTHER
-  ) {
-    return { artifact: notes, notes: undefined };
-  }
-
-  return { artifact: ARTIFACT_VISUAL_IDS.OTHER, notes };
 }
 
 export function AnnotationTaskDetailPageClient({
@@ -114,15 +93,12 @@ export function AnnotationTaskDetailPageClient({
     }
   }, [page, isFetching, isLoading]);
 
-  const { shouldProcessFurther, isLoading: isLoadingShouldProcessFurther } =
-    useShouldProcessFurther(currentAnnotation?.specimen);
-
   const morphFormDefaultValues = useMemo<MorphFormDefaultValues | null>(() => {
-    if (!shouldProcessFurther || !currentAnnotation) {
+    if (!currentAnnotation) {
       return null;
     }
     return getMorphFormDefaultValues(currentAnnotation);
-  }, [shouldProcessFurther, currentAnnotation]);
+  }, [currentAnnotation]);
 
   useEffect(() => {
     if (currentAnnotation) {
@@ -148,12 +124,8 @@ export function AnnotationTaskDetailPageClient({
     }
   }, []);
 
-  if (isLoading || isLoadingShouldProcessFurther) {
-    return (
-      <AnnotationTaskDetailSkeleton
-        shouldProcessFurther={shouldProcessFurther}
-      />
-    );
+  if (isLoading) {
+    return <AnnotationTaskDetailSkeleton />;
   }
 
   if (!currentAnnotation) {
@@ -170,15 +142,8 @@ export function AnnotationTaskDetailPageClient({
       ? `#${currentAnnotation.specimen.id}`
       : null);
 
-  const gridCols = shouldProcessFurther
-    ? 'md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]'
-    : 'md:grid-cols-[1fr_1fr]';
-  const maxWidth = shouldProcessFurther ? 'max-w-[1800px]' : 'max-w-6xl';
-
   return (
-    <div
-      className={`mx-auto grid h-full w-full ${maxWidth} gap-6 p-6 ${gridCols}`}
-    >
+    <div className={ANNOTATION_TASK_DETAIL_LAYOUT_CLASS}>
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -298,7 +263,6 @@ export function AnnotationTaskDetailPageClient({
             }}
             onGenusChange={handleGenusChangeCallback}
             onGenusValueChange={handleGenusValueChange}
-            shouldProcessFurther={shouldProcessFurther}
             morphFormRef={morphFormRef}
           />
         </CardContent>
@@ -325,32 +289,30 @@ export function AnnotationTaskDetailPageClient({
         </CardFooter>
       </Card>
 
-      {shouldProcessFurther && (
-        <Card className="flex h-full flex-col overflow-hidden shadow-sm">
-          <CardHeader className="space-y-3">
-            <div className="space-y-1">
-              <CardTitle className="text-lg font-semibold">
-                Morph Identification Annotation Form
-              </CardTitle>
-              <CardDescription>
-                Identify the specimen by examining it under a microscope.
-              </CardDescription>
-            </div>
-          </CardHeader>
+      <Card className="flex h-full flex-col overflow-hidden shadow-sm">
+        <CardHeader className="space-y-3">
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold">
+              Morph Identification Annotation Form
+            </CardTitle>
+            <CardDescription>
+              Identify the specimen by examining it under a microscope.
+            </CardDescription>
+          </div>
+        </CardHeader>
 
-          <CardContent className="pt-0">
-            <MorphIdentificationForm
-              ref={morphFormRef}
-              key={`morph-${currentAnnotation.id}`}
-              defaultValues={
-                morphFormDefaultValues ?? {
-                  received: false,
-                }
+        <CardContent className="pt-0">
+          <MorphIdentificationForm
+            ref={morphFormRef}
+            key={`morph-${currentAnnotation.id}`}
+            defaultValues={
+              morphFormDefaultValues ?? {
+                received: false,
               }
-            />
-          </CardContent>
-        </Card>
-      )}
+            }
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
