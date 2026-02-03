@@ -10,12 +10,6 @@ export function DashboardHeader() {
   const pathname = usePathname();
   const showBackButton = pathname !== '/';
 
-  // Hide header on metrics dashboard page
-  const isMetricsDashboard = pathname.match(/\/review\/[^/]+\/[^/]+\/dashboard$/);
-  if (isMetricsDashboard) {
-    return null;
-  }
-
   const { district, monthYear } = useMemo(() => {
     const reviewMatch = pathname.match(/\/review\/([^/]+)\/([^/]+)/);
     if (reviewMatch) {
