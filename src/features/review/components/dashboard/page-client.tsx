@@ -102,17 +102,13 @@ export function DashboardPageClient({
         showSuccessToast(
           'DHIS2 sync started. You will receive a notification when it finishes.',
         );
-        return;
-      }
-      showSuccessToast(
-        'DHIS2 sync started. You will receive a notification when it finishes.',
-      );
-    },
-    onError: error => {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sync with DHIS2';
-      showErrorToast(errorMessage);
-    },
-  });
+      },
+      onError: error => {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to sync with DHIS2';
+        showErrorToast(errorMessage);
+      },
+    });
 
   const handleSyncSubmit = (villageData: VillageIrsFormData[]) => {
     if (!permissions?.sites?.canAccessSites) return;
