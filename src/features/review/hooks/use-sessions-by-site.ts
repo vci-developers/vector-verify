@@ -27,8 +27,6 @@ export function useSessionsBySiteQuery(
   params: SessionsQuery,
   options?: UseSessionsBySiteOptions,
 ) {
-  const type = params?.type ?? 'SURVEILLANCE';
-
   const enabled =
     (options?.enabled ?? true) &&
     Boolean(params?.district && params?.startDate && params?.endDate);

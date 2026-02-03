@@ -6,7 +6,6 @@ import { BackButton } from './back-button';
 import { Brand } from './brand';
 import { usePathname } from 'next/navigation';
 
-
 export function DashboardHeader() {
   const pathname = usePathname();
   const showBackButton = pathname !== '/';
@@ -25,7 +24,11 @@ export function DashboardHeader() {
   return (
     <header className="bg-background flex items-center justify-between border-b p-4">
       <div className="flex items-center">
-        <BackButton show={showBackButton} district={district} monthYear={monthYear} />
+        <BackButton
+          show={showBackButton}
+          district={district}
+          monthYear={monthYear}
+        />
       </div>
 
       <Brand />

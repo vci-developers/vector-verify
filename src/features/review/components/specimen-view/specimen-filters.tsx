@@ -70,7 +70,7 @@ export function SpecimenFiltersBar({
         onValueChange={handleSpeciesChange}
         disabled={disabled}
       >
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="All Species" />
         </SelectTrigger>
         <SelectContent>
@@ -88,7 +88,7 @@ export function SpecimenFiltersBar({
         onValueChange={handleSexChange}
         disabled={disabled || !sexEnabled}
       >
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="All Sexes" />
         </SelectTrigger>
         <SelectContent>
@@ -106,7 +106,7 @@ export function SpecimenFiltersBar({
         onValueChange={handleAbdomenStatusChange}
         disabled={disabled || !abdomenStatusEnabled}
       >
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="All Statuses" />
         </SelectTrigger>
         <SelectContent>
