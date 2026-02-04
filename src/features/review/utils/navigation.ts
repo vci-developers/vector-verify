@@ -10,3 +10,10 @@ export function buildDashboardPath(
 ): string {
   return `${buildReviewPath(district, monthYear)}/dashboard`;
 }
+
+export function buildMasterTableViewPath(
+  district: string,
+  monthYear: string,
+): string {
+  return `${buildReviewPath(district, monthYear)}/master-table-view`;
+}
