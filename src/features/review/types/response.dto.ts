@@ -1,6 +1,6 @@
 import type { SiteDto } from '@/shared/entities/site/dto';
 import type { SessionDto } from '@/shared/entities/session/dto';
-
+import type { SpecimenImage } from '@/shared/entities/specimen-image';
 export interface ReviewItemDto {
   district: string;
   year: number;
@@ -77,4 +77,9 @@ export interface DiscrepancyUpdateResponseDto {
   message: string;
   resolutionId: number;
   updatedSessionCount: number;
+}
+
+export interface SpecimenUpdateResponseDto{
+  message: string;
+  image: SpecimenImage;
 }

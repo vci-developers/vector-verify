@@ -6,4 +6,6 @@ export interface SpecimenImage {
   abdomenStatus: string | null;
   capturedAt: number | null;
   submittedAt: number;
+  inferenceResult: string | null;
+  filemd5: string;
 }

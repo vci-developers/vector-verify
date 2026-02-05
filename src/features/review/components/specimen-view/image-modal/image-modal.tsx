@@ -19,6 +19,13 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
   const { data: imagesData, isLoading: isLoadingImages } =
     useSpecimenImagesQuery(specimen.id);
 
+  const thumbnailImage = useMemo(() => {
+    if (imagesData?.images && imagesData.images.length > 0) {
+      return imagesData.images[0];
+    }
+    return specimen.thumbnailImage;
+  }, [imagesData, specimen.thumbnailImage]);
+
   const imageUrl = useMemo(() => {
     if (imagesData?.images && imagesData.images.length > 0) {
       const firstImage = imagesData.images[0];
@@ -43,8 +50,9 @@ export function ImageModal({ specimen, onClose }: ImageModalProps) {
         overlayClassName="bg-white/80"
       >
         <ImageModalHeader
-          specimenId={specimen.specimenId}
-          thumbnailImage={specimen.thumbnailImage}
+          specimenId={specimen.id}
+          thumbnailImage={thumbnailImage}
+          thumbnailImageId={specimen.thumbnailImageId}
           onClose={onClose}
         />
         <ImageModalContent
