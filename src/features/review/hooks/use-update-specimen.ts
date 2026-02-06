@@ -12,7 +12,11 @@ export function useUpdateSpecimennMutation(
     UseMutationOptions<
       SpecimenUpdateResponseDto,
       Error,
-      { specimenId: number; thumbnailImageId: number; payload: SpecimenUpdateRequestDto },
+      {
+        specimenId: number;
+        thumbnailImageId: number;
+        payload: SpecimenUpdateRequestDto;
+      },
       unknown
     >,
     'mutationFn'
@@ -21,7 +25,11 @@ export function useUpdateSpecimennMutation(
   return useMutation<
     SpecimenUpdateResponseDto,
     Error,
-    { specimenId: number; thumbnailImageId: number; payload: SpecimenUpdateRequestDto }
+    {
+      specimenId: number;
+      thumbnailImageId: number;
+      payload: SpecimenUpdateRequestDto;
+    }
   >({
     mutationFn: ({ specimenId, thumbnailImageId, payload }) =>
       updateSpecimen(specimenId, thumbnailImageId, payload),

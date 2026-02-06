@@ -79,7 +79,7 @@ export interface DiscrepancyUpdateResponseDto {
   updatedSessionCount: number;
 }
 
-export interface SpecimenUpdateResponseDto{
+export interface SpecimenUpdateResponseDto {
   message: string;
   image: SpecimenImage;
 }

@@ -66,11 +66,15 @@ export function ImageModalHeader({
   const [isEditing, setIsEditing] = useState(false);
   const [editSpecies, setEditSpecies] = useState<string | null>(null);
   const [editSex, setEditSex] = useState<string | null>(null);
-  const [editAbdomenStatus, setEditAbdomenStatus] = useState<string | null>(null);
+  const [editAbdomenStatus, setEditAbdomenStatus] = useState<string | null>(
+    null,
+  );
 
   const updateMutation = useUpdateSpecimennMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: reviewKeys.specimenImages(specimenId) });
+      queryClient.invalidateQueries({
+        queryKey: reviewKeys.specimenImages(specimenId),
+      });
       showSuccessToast('Specimen updated successfully.');
       setIsEditing(false);
     },
@@ -84,7 +88,10 @@ export function ImageModalHeader({
   const currentSex = isEditing ? editSex : sex;
 
   const sexEnabled = isSexEnabled(currentGenus);
-  const abdomenStatusEnabled = isAbdomenStatusEnabled(currentGenus, currentSex ?? undefined);
+  const abdomenStatusEnabled = isAbdomenStatusEnabled(
+    currentGenus,
+    currentSex ?? undefined,
+  );
 
   function handleEditClick() {
     setEditSpecies(species ?? null);
@@ -103,9 +110,9 @@ export function ImageModalHeader({
   function handleSpeciesChange(value: string) {
     const newSpecies = value === 'none' ? null : value;
     setEditSpecies(newSpecies);
-    
+
     const newGenus = parseGenus(newSpecies);
-    
+
     if (!isSexEnabled(newGenus)) {
       setEditSex(null);
       setEditAbdomenStatus(null);
@@ -115,7 +122,7 @@ export function ImageModalHeader({
   function handleSexChange(value: string) {
     const newSex = value === 'none' ? null : value;
     setEditSex(newSex);
-    
+
     if (!isAbdomenStatusEnabled(currentGenus, newSex ?? undefined)) {
       setEditAbdomenStatus(null);
     }
@@ -200,7 +207,9 @@ export function ImageModalHeader({
               <SelectValue placeholder="Abdomen Status" />
             </SelectTrigger>
             <SelectContent>
-              {!abdomenStatusEnabled && <SelectItem value="none">None</SelectItem>}
+              {!abdomenStatusEnabled && (
+                <SelectItem value="none">None</SelectItem>
+              )}
               {ABDOMEN_STATUS_OPTIONS.map(opt => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
@@ -239,7 +248,9 @@ export function ImageModalHeader({
             {sex && <div>Sex: {sex}</div>}
             {abdomenStatus && <div>Abdomen Status: {abdomenStatus}</div>}
             {!species && !sex && !abdomenStatus && (
-              <div className="text-muted-foreground/60 italic">No classification data</div>
+              <div className="text-muted-foreground/60 italic">
+                No classification data
+              </div>
             )}
           </div>
           <Button

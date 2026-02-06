@@ -77,7 +77,7 @@ export interface DiscrepancyUpdateRequestDto {
   resolvedSurveillanceForm?: SurveillanceForm;
 }
 
-export interface SpecimenUpdateRequestDto{
+export interface SpecimenUpdateRequestDto {
   species?: string | null;
   sex?: string | null;
   abdomenStatus?: string | null;
