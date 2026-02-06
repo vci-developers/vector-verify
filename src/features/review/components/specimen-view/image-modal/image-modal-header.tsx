@@ -165,7 +165,6 @@ export function ImageModalHeader({
               <SelectValue placeholder="Select Species" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
               {SPECIES_OPTIONS.map(opt => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
@@ -183,7 +182,7 @@ export function ImageModalHeader({
               <SelectValue placeholder="Select Sex" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
+              {!sexEnabled && <SelectItem value="none">None</SelectItem>}
               {SEX_OPTIONS.map(opt => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
@@ -201,7 +200,7 @@ export function ImageModalHeader({
               <SelectValue placeholder="Abdomen Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
+              {!abdomenStatusEnabled && <SelectItem value="none">None</SelectItem>}
               {ABDOMEN_STATUS_OPTIONS.map(opt => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
