@@ -1,7 +1,8 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/ui/card';
 import { Skeleton } from '@/ui/skeleton';
-import { ANNOTATION_TASK_DETAIL_LAYOUT_CLASS } from './constants';
 
+const layoutClass =
+  'mx-auto grid h-full w-full max-w-[1800px] gap-6 p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]';
 const statusGridClass =
   'grid gap-2 justify-items-center sm:grid-cols-2 sm:justify-items-stretch lg:grid-cols-3';
 const statusCardClass =
@@ -19,7 +20,7 @@ const StatusSkeleton = () => (
 
 export function AnnotationTaskDetailSkeleton() {
   return (
-    <div className={ANNOTATION_TASK_DETAIL_LAYOUT_CLASS}>
+    <div className={layoutClass}>
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-2">
           <div className="flex items-center justify-between gap-3">

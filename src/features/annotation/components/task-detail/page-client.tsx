@@ -33,8 +33,10 @@ import {
 } from './utils/morph-form-defaults';
 import { parseNotesForArtifact } from './utils/parse-notes-for-artifact';
 import { GENUS_VISUAL_IDS } from './annotation-form-panel/validation/annotation-form-schema';
-import { ANNOTATION_TASK_DETAIL_LAYOUT_CLASS } from './constants';
 import { cn } from '@/shared/core/utils';
+
+const layoutClass =
+  'mx-auto grid h-full w-full max-w-[1800px] gap-6 p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(380px,1fr)_minmax(380px,1fr)]';
 
 interface AnnotationTaskDetailPageClientProps {
   taskId: number;
@@ -143,7 +145,7 @@ export function AnnotationTaskDetailPageClient({
       : null);
 
   return (
-    <div className={ANNOTATION_TASK_DETAIL_LAYOUT_CLASS}>
+    <div className={layoutClass}>
       <Card className="flex h-full flex-col overflow-hidden shadow-sm">
         <CardHeader className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
