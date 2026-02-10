@@ -203,23 +203,20 @@ export function DashboardPageClient({
             <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
             <div className="mt-2 flex flex-col gap-1">
               <p className="text-lg text-gray-600">{monthName}</p>
-              {typeof data.totalMosquitoes === 'number' &&
-                typeof data.totalAnopheles === 'number' && (
-                  <div className="flex gap-4 text-sm text-gray-500">
-                    <span>
-                      Total mosquitoes:{' '}
-                      <span className="font-semibold text-gray-700">
-                        {data.totalMosquitoes.toLocaleString()}
-                      </span>
-                    </span>
-                    <span>
-                      Total anopheles:{' '}
-                      <span className="font-semibold text-gray-700">
-                        {data.totalAnopheles.toLocaleString()}
-                      </span>
-                    </span>
-                  </div>
-                )}
+              <div className="flex gap-4 text-sm text-gray-500">
+                <span>
+                  Total mosquitoes:{' '}
+                  <span className="font-semibold text-gray-700">
+                    {data.totalMosquitoes}
+                  </span>
+                </span>
+                <span>
+                  Total anopheles:{' '}
+                  <span className="font-semibold text-gray-700">
+                    {data.totalAnopheles}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">
