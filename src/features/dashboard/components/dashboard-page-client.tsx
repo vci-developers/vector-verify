@@ -27,7 +27,6 @@ export function DashboardPageClient() {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <LogoutButton />
       <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center justify-center px-6 py-16">
         <div className="mb-16 text-center">
           <h1 className="mb-4 bg-gradient-to-r from-[#86EFAC] to-[#22C55E] bg-clip-text text-5xl font-bold text-transparent">
