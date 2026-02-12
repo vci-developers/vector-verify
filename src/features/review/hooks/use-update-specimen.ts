@@ -7,7 +7,7 @@ import type {
   SpecimenUpdateResponseDto,
 } from '@/features/review/types';
 
-export function useUpdateSpecimennMutation(
+export function useUpdateSpecimenMutation(
   options?: Omit<
     UseMutationOptions<
       SpecimenUpdateResponseDto,

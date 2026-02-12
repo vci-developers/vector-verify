@@ -18,7 +18,7 @@ import {
   SEX_MORPH_IDS,
   ABDOMEN_STATUS_MORPH_IDS,
 } from '@/shared/entities/specimen/morph-ids';
-import { useUpdateSpecimennMutation } from '@/features/review/hooks/use-update-specimen';
+import { useUpdateSpecimenMutation } from '@/features/review/hooks/use-update-specimen';
 import {
   isSpeciesEnabled,
   isSexEnabled,
@@ -70,7 +70,7 @@ export function ImageModalHeader({
     null,
   );
 
-  const updateMutation = useUpdateSpecimennMutation({
+  const updateMutation = useUpdateSpecimenMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: reviewKeys.specimenImages(specimenId),
