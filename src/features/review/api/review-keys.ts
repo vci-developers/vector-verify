@@ -46,7 +46,10 @@ export const reviewKeys = {
         sessionType,
       },
     ] as const,
-
+  session: (
+    sessionId: string,
+  ) =>
+    [...reviewKeys.root, 'session', { sessionId }] as const,
   sessions: (
     district?: string,
     startDate?: string,
@@ -102,6 +105,9 @@ export type SpecimensQueryKey = ReturnType<typeof reviewKeys.specimens> &
   QueryKey;
 
 export type SessionsQueryKey = ReturnType<typeof reviewKeys.sessions> &
+  QueryKey;
+
+export type SessionQueryKey = ReturnType<typeof reviewKeys.session> & 
   QueryKey;
 
 export type SessionsBySiteQueryKey = ReturnType<

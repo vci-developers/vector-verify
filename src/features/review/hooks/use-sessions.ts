@@ -5,12 +5,31 @@ import {
   type UseInfiniteQueryOptions,
   type InfiniteData,
 } from '@tanstack/react-query';
-import { getSessions } from '../api/get-sessions';
-import { reviewKeys, type SessionsQueryKey } from '../api/review-keys';
+import { getSessions, getSession } from '../api/get-sessions';
+import { reviewKeys, SessionQueryKey, type SessionsQueryKey } from '../api/review-keys';
 import type { SessionsQuery } from '../types';
 import type { OffsetPage } from '@/shared/entities/pagination/model';
 import type { Session } from '@/shared/entities/session/model';
 import { DEFAULT_PAGE_SIZE } from '@/shared/entities/pagination';
+
+export function useSessionQuery(
+  sessionId: string,
+  options?: Omit<
+    UseQueryOptions<
+    Session, 
+    Error,
+    Session,
+    SessionQueryKey
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) {
+  return useQuery({
+    queryKey: reviewKeys.session(sessionId),
+    queryFn: () => getSession(sessionId),
+    ...options,
+  });
+}
 
 export function useSessionsQuery(
   filters: SessionsQuery = {},

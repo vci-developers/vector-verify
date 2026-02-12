@@ -10,7 +10,7 @@ import {
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
 import { useSessionsInfiniteQuery } from '@/features/review/hooks/use-sessions';
 import { CircleUserIcon } from 'lucide-react';
-import { SessionDataTable } from './session-data';
+import { SessionData } from './session-data';
 import { SessionsAccordionSkeleton } from './loading-skeleton';
 import type { Session } from '@/shared/entities/session/model';
 import { Button } from '@/ui/button';
@@ -140,36 +140,11 @@ export function SessionsViewPageClient({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="p-4">
-                        <div className="mb-4">
-                          <div className="bg-card rounded-lg border p-4 shadow-sm">
-                            <h3 className="mb-1 text-lg font-semibold">
-                              Specimen Condition
-                            </h3>
-                            <p className="text-muted-foreground mb-4 text-sm">
-                              {session.specimenCondition ||
-                                'No specimen condition recorded.'}
-                            </p>
-                            <SessionDataTable
-                              district={decodedDistrict}
-                              sessionId={String(session.sessionId)}
-                              monthYear={monthYear}
-                            />
-                            <div className="mt-6 border-t pt-4">
-                              <label className="text-foreground mb-1 block text-sm font-medium">
-                                Notes
-                              </label>
-                              <textarea
-                                className="bg-background text-foreground w-full resize-none rounded border p-2 text-sm"
-                                rows={3}
-                                value={session.notes || ''}
-                                readOnly
-                                placeholder="No notes recorded."
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <SessionData
+                        session={session}
+                        district={decodedDistrict}
+                        monthYear={monthYear}
+                      />
                     </AccordionContent>
                   </AccordionItem>
                 );

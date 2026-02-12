@@ -3,8 +3,9 @@ import type {
   SessionsQuery,
   SessionsResponseDto,
 } from '@/features/review/types';
-import { mapSessionsResponseDtoToModel } from '@/shared/entities/session';
+import { mapSessionDtoToModel, mapSessionsResponseDtoToModel } from '@/shared/entities/session';
 import type { Session } from '@/shared/entities/session/model';
+import type { SessionWithSiteDto } from '@/shared/entities/session/dto';
 import { DEFAULT_PAGE_SIZE, OffsetPage } from '@/shared/entities/pagination';
 
 const PAGE_LIMIT = 100;
@@ -42,6 +43,17 @@ async function requestSessions(
     query,
   });
 }
+
+export async function getSession(
+  sessionId: string,
+): Promise<Session> {
+  const data = await bff<SessionWithSiteDto>(`/sessions/${sessionId}`, {
+    method: 'GET',
+  });
+  return mapSessionDtoToModel(data);
+}
+
+
 
 export async function getSessions(
   filters: SessionsQuery,
