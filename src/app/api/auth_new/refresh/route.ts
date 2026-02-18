@@ -1,7 +1,12 @@
 import { refresh } from '@/features/auth_new/api/refresh';
 import { setAccessCookie } from '@/features/auth_new/lib/cookies';
-import type { RefreshNetworkRequestBody } from '@/features/auth_new/validation/network/refresh-network-schema';
-import { err, ok } from '@/lib/result/result';
+import type {
+    RefreshNetworkRequestBody,
+    RefreshNetworkResponseBody,
+    RefreshNetworkSuccessPayload,
+} from '@/features/auth_new/validation/network/refresh-network-schema';
+import type { NetworkError } from '@/lib/network/network-error';
+import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
@@ -18,17 +23,19 @@ export async function POST() {
     }
 
     const requestBody: RefreshNetworkRequestBody = { refreshToken };
-    const refreshResult = await refresh(requestBody);
+    const refreshResult: Result<RefreshNetworkResponseBody, NetworkError> =
+        await refresh(requestBody);
     if (!refreshResult.ok) {
         return NextResponse.json(refreshResult, {
             status: refreshResult.error.status ?? 401,
         });
     }
 
-    const response = NextResponse.json(
-        ok({ message: refreshResult.data.message }),
-        { status: 200 },
-    );
+    const successPayload: RefreshNetworkSuccessPayload = {
+        message: refreshResult.data.message,
+    };
+
+    const response = NextResponse.json(ok(successPayload), { status: 200 });
 
     setAccessCookie(response, refreshResult.data.accessToken);
     return response;

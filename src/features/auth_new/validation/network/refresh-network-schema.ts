@@ -11,3 +11,8 @@ export const refreshResponseSchema = z.object({
 
 export type RefreshNetworkRequestBody = z.infer<typeof refreshRequestSchema>;
 export type RefreshNetworkResponseBody = z.infer<typeof refreshResponseSchema>;
+
+export type RefreshNetworkSuccessPayload = Pick<
+    RefreshNetworkResponseBody,
+    'message'
+>;

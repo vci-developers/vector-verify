@@ -11,7 +11,7 @@ export const loginResponseSchema = z.object({
         id: z.number(),
         email: z.email(),
         privilege: z.number(),
-        programId: z.number(),
+        programId: z.number().nullable(),
         isActive: z.boolean(),
     }),
     tokens: z.object({
@@ -22,3 +22,8 @@ export const loginResponseSchema = z.object({
 
 export type LoginNetworkRequestBody = z.infer<typeof loginRequestSchema>;
 export type LoginNetworkResponseBody = z.infer<typeof loginResponseSchema>;
+
+export type LoginNetworkSuccessPayload = Pick<
+    LoginNetworkResponseBody,
+    'message' | 'user'
+>;

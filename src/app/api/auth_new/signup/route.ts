@@ -3,8 +3,13 @@ import {
     setAccessCookie,
     setRefreshCookie,
 } from '@/features/auth_new/lib/cookies';
-import type { SignupNetworkRequestBody } from '@/features/auth_new/validation/network/signup-network-schema';
-import { err, ok } from '@/lib/result/result';
+import type {
+    SignupNetworkRequestBody,
+    SignupNetworkResponseBody,
+    SignupNetworkSuccessPayload,
+} from '@/features/auth_new/validation/network/signup-network-schema';
+import type { NetworkError } from '@/lib/network/network-error';
+import { err, ok, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -21,20 +26,20 @@ export async function POST(request: Request) {
         return NextResponse.json(requestBodyErrorResult, { status: 400 });
     }
 
-    const signupResult = await signup(requestBody);
+    const signupResult: Result<SignupNetworkResponseBody, NetworkError> =
+        await signup(requestBody);
     if (!signupResult.ok) {
         return NextResponse.json(signupResult, {
             status: signupResult.error.status ?? 400,
         });
     }
 
-    const response = NextResponse.json(
-        ok({
-            message: signupResult.data.message,
-            user: signupResult.data.user,
-        }),
-        { status: 200 },
-    );
+    const successPayload: SignupNetworkSuccessPayload = {
+        message: signupResult.data.message,
+        user: signupResult.data.user,
+    };
+
+    const response = NextResponse.json(ok(successPayload), { status: 200 });
 
     setAccessCookie(response, signupResult.data.tokens.accessToken);
     setRefreshCookie(response, signupResult.data.tokens.refreshToken);
