@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import '@/styles/globals.css';
-import Providers from './providers';
+import '@/app/globals.css';
+import Providers from '@/app/providers';
 import { Toaster } from '@/ui/sonner';
 import { RouteErrorToaster } from '@/shared/components/route-error-toaster';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
   description:
     'Role-aware web app for monthly data quality control of mosquito-surveillance data',
 };
+
+const queryClient = new QueryClient({
+    
+})
 
 export default function RootLayout({
   children,
