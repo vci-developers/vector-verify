@@ -28,7 +28,6 @@ export async function POST(request: Request) {
 
     const loginResult: Result<LoginNetworkResponseBody, NetworkError> =
         await login(requestBody);
-
     if (!loginResult.ok) {
         return NextResponse.json(loginResult, {
             status: loginResult.error.status ?? 400,

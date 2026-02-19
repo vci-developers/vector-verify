@@ -31,7 +31,7 @@ const eslintConfig = [
                     type: 'shared',
                     pattern: [
                         'src/components/**/*',
-                        'src/data/**/*',
+                        'src/api/**/*',
                         'src/hooks/**/*',
                         'src/lib/**/*',
                         'src/utils/**/*',

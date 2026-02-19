@@ -1,47 +1,36 @@
+import '@/app/globals.css';
+import { TanstackProvider } from '@/components/providers/tanstack-provider';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import '@/app/globals.css';
-import Providers from '@/app/providers';
-import { Toaster } from '@/ui/sonner';
-import { RouteErrorToaster } from '@/shared/components/route-error-toaster';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+    variable: '--font-geist-sans',
+    subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+    variable: '--font-geist-mono',
+    subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: 'VectorVerify',
-  description:
-    'Role-aware web app for monthly data quality control of mosquito-surveillance data',
+    title: 'VectorVerify',
+    description:
+        'Role-aware web app for monthly data quality control of mosquito-surveillance data',
 };
 
-const queryClient = new QueryClient({
-    
-})
-
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
-      >
-        <Toaster richColors position="top-center" />
-        <Providers>
-          <RouteErrorToaster />
-          {children}
-        </Providers>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" className="h-full">
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
+            >
+                <TanstackProvider>{children}</TanstackProvider>
+            </body>
+        </html>
+    );
 }

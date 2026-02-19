@@ -1,3 +1,4 @@
+import { userProfileSchema } from '@/api/user/validation/user-profile-schema';
 import { z } from 'zod';
 
 export const loginRequestSchema = z.object({
@@ -7,13 +8,7 @@ export const loginRequestSchema = z.object({
 
 export const loginResponseSchema = z.object({
     message: z.string(),
-    user: z.object({
-        id: z.number(),
-        email: z.email(),
-        privilege: z.number(),
-        programId: z.number().nullable(),
-        isActive: z.boolean(),
-    }),
+    user: userProfileSchema,
     tokens: z.object({
         accessToken: z.string(),
         refreshToken: z.string(),

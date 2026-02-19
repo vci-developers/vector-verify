@@ -5,4 +5,5 @@ export const logoutResponseSchema = z.object({
 });
 
 export type LogoutNetworkResponseBody = z.infer<typeof logoutResponseSchema>;
+
 export type LogoutNetworkSuccessPayload = LogoutNetworkResponseBody;
