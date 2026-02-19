@@ -1,5 +1,6 @@
 import '@/app/globals.css';
 import { TanstackProvider } from '@/components/providers/tanstack-provider';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -29,7 +30,9 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
             >
-                <TanstackProvider>{children}</TanstackProvider>
+                <TooltipProvider delayDuration={200}>
+                    <TanstackProvider>{children}</TanstackProvider>
+                </TooltipProvider>
             </body>
         </html>
     );

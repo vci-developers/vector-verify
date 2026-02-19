@@ -6,7 +6,7 @@ import {
     type LoginNetworkResponseBody,
 } from '@/features/auth_new/validation/network/login-network-schema';
 import { err, type Result } from '@/lib/result/result';
-import { safeApiCall } from '@/lib/network/client';
+import { safeApiCall } from '@/lib/network/safe-api-call';
 
 export async function login(
     requestBody: LoginNetworkRequestBody,

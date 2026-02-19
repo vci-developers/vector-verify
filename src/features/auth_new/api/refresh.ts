@@ -4,7 +4,7 @@ import {
     type RefreshNetworkRequestBody,
     type RefreshNetworkResponseBody,
 } from '@/features/auth_new/validation/network/refresh-network-schema';
-import { safeApiCall } from '@/lib/network/client';
+import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 

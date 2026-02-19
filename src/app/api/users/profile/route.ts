@@ -1,5 +1,5 @@
-import { getUserPermissions } from '@/api/user/get-user-permissions';
-import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
+import { getUserProfile } from '@/api/user/get-user-profile';
+import type { GetUserProfileResponseBody } from '@/api/user/validation/get-user-profile-schema';
 import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
@@ -17,18 +17,18 @@ export async function GET() {
         return NextResponse.json(sessionExpiredErrorResult, { status: 401 });
     }
 
-    const getUserPermissionsResult: Result<
-        GetUserPermissionsResponseBody,
+    const getUserProfileResult: Result<
+        GetUserProfileResponseBody,
         NetworkError
-    > = await getUserPermissions(accessToken);
+    > = await getUserProfile(accessToken);
 
-    if (!getUserPermissionsResult.ok) {
-        return NextResponse.json(err(getUserPermissionsResult.error), {
-            status: getUserPermissionsResult.error.status ?? 400,
+    if (!getUserProfileResult.ok) {
+        return NextResponse.json(err(getUserProfileResult), {
+            status: getUserProfileResult.error.status ?? 400,
         });
     }
 
-    return NextResponse.json(ok(getUserPermissionsResult.data), {
+    return NextResponse.json(ok(getUserProfileResult.data), {
         status: 200,
     });
 }

@@ -6,6 +6,7 @@ export const userProfileSchema = z.object({
     privilege: z.number(),
     programId: z.number().nullable().optional(),
     isActive: z.boolean(),
+    isWhitelisted: z.boolean().optional(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;

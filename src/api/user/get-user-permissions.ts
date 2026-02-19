@@ -1,7 +1,10 @@
 import type { NetworkError } from '@/lib/network/network-error';
-import { getUserPermissionsSchema, type GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
+import {
+    getUserPermissionsSchema,
+    type GetUserPermissionsResponseBody,
+} from '@/api/user/validation/get-user-permissions-schema';
 import type { Result } from '@/lib/result/result';
-import { safeApiCall } from '@/lib/network/client';
+import { safeApiCall } from '@/lib/network/safe-api-call';
 
 export async function getUserPermissions(
     accessToken: string,
@@ -14,6 +17,6 @@ export async function getUserPermissions(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getUserPermissionsSchema
+        getUserPermissionsSchema,
     );
 }
