@@ -5,7 +5,7 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import { constructUrl } from '@/lib/network/construct-url';
-import { backendErrorSchema } from './validation/contracts';
+import { backendErrorSchema } from '@/lib/network/validation/backend-error-schema';
 
 async function readJson(response: Response): Promise<unknown | null> {
     try {
@@ -19,7 +19,7 @@ export async function safeApiCall<T>(
     path: string,
     options?: RequestInit,
     validationSchema?: z.ZodType<T>,
-): Promise<Result<T, NetworkError>> {    
+): Promise<Result<T, NetworkError>> {
     let response: Response;
     try {
         response = await fetch(constructUrl(path), {
