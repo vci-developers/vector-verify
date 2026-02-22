@@ -13,7 +13,7 @@ export default async function ReviewDistrictPage({
 
     return (
         <Fragment>
-            <h1>Reviewing {district}</h1>
+            <h1>Review District: {district}</h1>
         </Fragment>
     );
 }

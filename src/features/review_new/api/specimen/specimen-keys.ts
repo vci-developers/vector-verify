@@ -1,0 +1,6 @@
+import type { GetSpecimensQueryParams } from './validation/get-specimens-schema';
+
+export const specimenKeys = {
+    specimens: (queryParams?: GetSpecimensQueryParams) =>
+        ['specimens', queryParams] as const,
+};
