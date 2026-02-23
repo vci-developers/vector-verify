@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export const ACCESS_COOKIE_NAME = 'accessToken';
@@ -28,7 +29,7 @@ export function setRefreshCookie(response: NextResponse, refreshToken: string) {
     });
 }
 
-export function clearAuthCookies(response: NextResponse) {
-    response.cookies.delete(ACCESS_COOKIE_NAME);
-    response.cookies.delete(REFRESH_COOKIE_NAME);
+export async function clearAuthCookies() {
+    (await cookies()).delete(ACCESS_COOKIE_NAME);
+    (await cookies()).delete(REFRESH_COOKIE_NAME);
 }
