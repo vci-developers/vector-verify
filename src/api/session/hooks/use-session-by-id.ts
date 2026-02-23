@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { sessionKeys } from '@/features/review_new/api/session/session-keys';
+import { sessionKeys } from '@/api/session/session-keys';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 import type { GetSessionByIdSuccessPayload } from '../validation/get-session-by-id-schema';

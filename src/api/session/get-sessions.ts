@@ -4,7 +4,7 @@ import {
     getSessionsSchema,
     type GetSessionsQueryParams,
     type GetSessionsResponseBody,
-} from '@/features/review_new/api/session/validation/get-sessions-schema';
+} from '@/api/session/validation/get-sessions-schema';
 import type { Result } from '@/lib/result/result';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { safeApiCall } from '@/lib/network/safe-api-call';

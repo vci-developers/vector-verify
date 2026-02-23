@@ -1,9 +1,9 @@
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import { getSpecimens } from '@/api/specimen/get-specimens';
+import { getAnnotations } from '@/api/annotation/get-annotations';
 import {
-    getSpecimensQueryParamsSchema,
-    type GetSpecimensResponseBody,
-} from '@/api/specimen/validation/get-specimens-schema';
+    getAnnotationsQueryParamsSchema,
+    type GetAnnotationsResponseBody,
+} from '@/api/annotation/validation/get-annotations-schema';
+import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
     const parsedQueryParams =
-        getSpecimensQueryParamsSchema.safeParse(queryParams);
+        getAnnotationsQueryParamsSchema.safeParse(queryParams);
     if (!parsedQueryParams.success) {
         return NextResponse.json(
             err({
@@ -36,14 +36,16 @@ export async function GET(request: Request) {
         );
     }
 
-    const getSpecimensResult: Result<GetSpecimensResponseBody, NetworkError> =
-        await getSpecimens(accessToken, parsedQueryParams.data);
+    const getAnnotationsResult: Result<
+        GetAnnotationsResponseBody,
+        NetworkError
+    > = await getAnnotations(accessToken, parsedQueryParams.data);
 
-    if (!getSpecimensResult.ok) {
-        return NextResponse.json(err(getSpecimensResult.error), {
-            status: getSpecimensResult.error.status ?? 400,
+    if (!getAnnotationsResult.ok) {
+        return NextResponse.json(err(getAnnotationsResult.error), {
+            status: getAnnotationsResult.error.status ?? 400,
         });
     }
 
-    return NextResponse.json(ok(getSpecimensResult.data), { status: 200 });
+    return NextResponse.json(ok(getAnnotationsResult.data), { status: 200 });
 }

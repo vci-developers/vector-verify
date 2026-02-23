@@ -3,7 +3,7 @@ import {
     getSpecimensQueryParamsSchema,
     type GetSpecimensQueryParams,
     type GetSpecimensSuccessPayload,
-} from '@/features/review_new/api/specimen/validation/get-specimens-schema';
+} from '@/api/specimen/validation/get-specimens-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { useQuery } from '@tanstack/react-query';

@@ -1,4 +1,4 @@
-import type { GetSessionsQueryParams } from '@/features/review_new/api/session/validation/get-sessions-schema';
+import type { GetSessionsQueryParams } from '@/api/session/validation/get-sessions-schema';
 
 export const sessionKeys = {
     sessionById: (sessionId: number) => ['sessions', sessionId] as const,

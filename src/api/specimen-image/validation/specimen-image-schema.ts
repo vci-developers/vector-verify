@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { inferenceResultSchema } from '@/features/review_new/api/inference-result/validation/inference-result-schema';
+import { inferenceResultSchema } from '@/api/inference-result/validation/inference-result-schema';
 
 export const specimenImageSchema = z.object({
     id: z.number(),

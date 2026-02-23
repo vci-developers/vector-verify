@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { sessionSchema } from '@/features/review_new/api/session/validation/session-schema';
+import { sessionSchema } from '@/api/session/validation/session-schema';
 
 export const getSessionsQueryParamsSchema = z.object({
     siteId: z.coerce.number().optional(),
@@ -16,14 +16,16 @@ export const getSessionsQueryParamsSchema = z.object({
     endDate: z.string().optional(),
     limit: z.coerce.number().min(1).max(100).optional(),
     offset: z.coerce.number().min(0).optional(),
-    sortBy: z.enum([
-        'id',
-        'frontendId',
-        'createdAt',
-        'completedAt',
-        'submittedAt',
-        'collectionDate',
-    ]).optional(),
+    sortBy: z
+        .enum([
+            'id',
+            'frontendId',
+            'createdAt',
+            'completedAt',
+            'submittedAt',
+            'collectionDate',
+        ])
+        .optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 

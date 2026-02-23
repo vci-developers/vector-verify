@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { specimenImageSchema } from '../../specimen-image/validation/specimen-image-schema';
-import { sessionSchema } from '../../session/validation/session-schema';
+import { specimenImageSchema } from '@/api/specimen-image/validation/specimen-image-schema';
+import { sessionSchema } from '@/api/session/validation/session-schema';
 
 export const specimenSchema = z.object({
     id: z.number(),
@@ -11,7 +11,7 @@ export const specimenSchema = z.object({
     shouldProcessFurther: z.boolean(),
     images: z.array(specimenImageSchema),
     thumbnailImage: specimenImageSchema.nullable(),
-    session: sessionSchema.optional()
-})
+    session: sessionSchema.optional(),
+});
 
 export type Specimen = z.infer<typeof specimenSchema>;

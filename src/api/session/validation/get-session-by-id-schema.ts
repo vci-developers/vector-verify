@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { sessionSchema } from '@/features/review_new/api/session/validation/session-schema';
+import { sessionSchema } from '@/api/session/validation/session-schema';
 
 export const getSessionByIdSchema = sessionSchema;
 

@@ -1,6 +1,6 @@
 import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import { getSessionById } from '@/features/review_new/api/session/get-session-by-id';
-import type { GetSessionByIdResponseBody } from '@/features/review_new/api/session/validation/get-session-by-id-schema';
+import { getSessionById } from '@/api/session/get-session-by-id';
+import type { GetSessionByIdResponseBody } from '@/api/session/validation/get-session-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';

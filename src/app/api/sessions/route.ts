@@ -1,9 +1,9 @@
 import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import { getSessions } from '@/features/review_new/api/session/get-sessions';
+import { getSessions } from '@/api/session/get-sessions';
 import {
     getSessionsQueryParamsSchema,
     type GetSessionsResponseBody,
-} from '@/features/review_new/api/session/validation/get-sessions-schema';
+} from '@/api/session/validation/get-sessions-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';

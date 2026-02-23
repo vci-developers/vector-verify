@@ -1,9 +1,9 @@
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import { getSpecimens } from '@/api/specimen/get-specimens';
+import { getAnnotationTasks } from '@/api/annotation-task/get-annotation-tasks';
 import {
-    getSpecimensQueryParamsSchema,
-    type GetSpecimensResponseBody,
-} from '@/api/specimen/validation/get-specimens-schema';
+    getAnnotationTasksQueryParamsSchema,
+    type GetAnnotationTasksResponseBody,
+} from '@/api/annotation-task/validation/get-annotation-tasks-schema';
+import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
     const parsedQueryParams =
-        getSpecimensQueryParamsSchema.safeParse(queryParams);
+        getAnnotationTasksQueryParamsSchema.safeParse(queryParams);
     if (!parsedQueryParams.success) {
         return NextResponse.json(
             err({
@@ -36,14 +36,18 @@ export async function GET(request: Request) {
         );
     }
 
-    const getSpecimensResult: Result<GetSpecimensResponseBody, NetworkError> =
-        await getSpecimens(accessToken, parsedQueryParams.data);
+    const getAnnotationTasksResult: Result<
+        GetAnnotationTasksResponseBody,
+        NetworkError
+    > = await getAnnotationTasks(accessToken, parsedQueryParams.data);
 
-    if (!getSpecimensResult.ok) {
-        return NextResponse.json(err(getSpecimensResult.error), {
-            status: getSpecimensResult.error.status ?? 400,
+    if (!getAnnotationTasksResult.ok) {
+        return NextResponse.json(err(getAnnotationTasksResult.error), {
+            status: getAnnotationTasksResult.error.status ?? 400,
         });
     }
 
-    return NextResponse.json(ok(getSpecimensResult.data), { status: 200 });
+    return NextResponse.json(ok(getAnnotationTasksResult.data), {
+        status: 200,
+    });
 }

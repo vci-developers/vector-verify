@@ -4,7 +4,7 @@ import {
     getSpecimensSchema,
     type GetSpecimensQueryParams,
     type GetSpecimensResponseBody,
-} from '@/features/review_new/api/specimen/validation/get-specimens-schema';
+} from '@/api/specimen/validation/get-specimens-schema';
 import type { Result } from '@/lib/result/result';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { safeApiCall } from '@/lib/network/safe-api-call';

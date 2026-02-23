@@ -2,7 +2,7 @@ import type { Result } from '@/lib/result/result';
 import {
     getSessionByIdSchema,
     type GetSessionByIdResponseBody,
-} from '@/features/review_new/api/session/validation/get-session-by-id-schema';
+} from '@/api/session/validation/get-session-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 

@@ -3,10 +3,10 @@ import {
     getSessionsQueryParamsSchema,
     type GetSessionsQueryParams,
     type GetSessionsSuccessPayload,
-} from '@/features/review_new/api/session/validation/get-sessions-schema';
+} from '@/api/session/validation/get-sessions-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { useQuery } from '@tanstack/react-query';
-import { sessionKeys } from '@/features/review_new/api/session/session-keys';
+import { sessionKeys } from '@/api/session/session-keys';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 
 async function fetchSessions(

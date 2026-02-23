@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { specimenSchema } from '@/features/review_new/api/specimen/validation/specimen-schema';
+import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 
 export const getSpecimensQueryParamsSchema = z.object({
     sessionId: z.coerce.number().optional(),
