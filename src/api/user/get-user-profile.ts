@@ -1,6 +1,6 @@
 import type { Result } from '@/lib/result/result';
 import {
-    getUserProfileSchema,
+    getUserProfileResponseSchema,
     type GetUserProfileResponseBody,
 } from '@/api/user/validation/get-user-profile-schema';
 import type { NetworkError } from '@/lib/network/network-error';
@@ -17,6 +17,6 @@ export async function getUserProfile(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getUserProfileSchema,
+        getUserProfileResponseSchema,
     );
 }

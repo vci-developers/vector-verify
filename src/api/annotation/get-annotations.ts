@@ -1,6 +1,6 @@
 import {
     getAnnotationsQueryParamsSchema,
-    getAnnotationsSchema,
+    getAnnotationsResponseSchema,
     type GetAnnotationsQueryParams,
     type GetAnnotationsResponseBody,
 } from '@/api/annotation/validation/get-annotations-schema';
@@ -24,6 +24,6 @@ export async function getAnnotations(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getAnnotationsSchema,
+        getAnnotationsResponseSchema,
     );
 }

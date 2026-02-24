@@ -18,9 +18,9 @@ export const annotationSchema = z.object({
     status: z.enum(['PENDING', 'ANNOTATED', 'FLAGGED']),
     createdAt: z.number(),
     updatedAt: z.number(),
-    annotationTask: annotationTaskSchema,
-    annotator: userProfileSchema,
-    specimen: specimenSchema,
+    annotationTask: annotationTaskSchema.optional(),
+    annotator: userProfileSchema.optional(),
+    specimen: specimenSchema.optional(),
 });
 
 export type Annotation = z.infer<typeof annotationSchema>;

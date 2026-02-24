@@ -1,7 +1,7 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
 import {
-    getSurveillanceFormBySessionIdSchema,
+    getSurveillanceFormBySessionIdResponseSchema,
     type GetSurveillanceFormBySessionIdResponseBody,
 } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
 import { safeApiCall } from '@/lib/network/safe-api-call';
@@ -18,6 +18,6 @@ export async function getSurveillanceFormBySessionId(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getSurveillanceFormBySessionIdSchema,
+        getSurveillanceFormBySessionIdResponseSchema,
     );
 }

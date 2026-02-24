@@ -1,7 +1,7 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import {
     getSessionsQueryParamsSchema,
-    getSessionsSchema,
+    getSessionsResponseSchema,
     type GetSessionsQueryParams,
     type GetSessionsResponseBody,
 } from '@/api/session/validation/get-sessions-schema';
@@ -26,6 +26,6 @@ export async function getSessions(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getSessionsSchema,
+        getSessionsResponseSchema,
     );
 }

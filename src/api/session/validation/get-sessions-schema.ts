@@ -29,7 +29,7 @@ export const getSessionsQueryParamsSchema = z.object({
     sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
-export const getSessionsSchema = z.object({
+export const getSessionsResponseSchema = z.object({
     sessions: z.array(sessionSchema),
     total: z.number(),
     limit: z.number(),
@@ -40,6 +40,6 @@ export const getSessionsSchema = z.object({
 export type GetSessionsQueryParams = z.infer<
     typeof getSessionsQueryParamsSchema
 >;
-export type GetSessionsResponseBody = z.infer<typeof getSessionsSchema>;
+export type GetSessionsResponseBody = z.infer<typeof getSessionsResponseSchema>;
 
 export type GetSessionsSuccessPayload = GetSessionsResponseBody;

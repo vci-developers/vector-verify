@@ -1,6 +1,6 @@
 import type { Result } from '@/lib/result/result';
 import {
-    getSessionByIdSchema,
+    getSessionByIdResponseSchema,
     type GetSessionByIdResponseBody,
 } from '@/api/session/validation/get-session-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
@@ -18,6 +18,6 @@ export async function getSessionById(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getSessionByIdSchema,
+        getSessionByIdResponseSchema,
     );
 }

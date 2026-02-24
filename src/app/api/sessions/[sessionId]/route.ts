@@ -6,7 +6,7 @@ import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-interface GetSessionByIdRouteParams {
+interface RouteParams {
     params: Promise<{
         sessionId: string;
     }>;
@@ -14,7 +14,7 @@ interface GetSessionByIdRouteParams {
 
 export async function GET(
     _request: Request,
-    { params }: GetSessionByIdRouteParams,
+    { params }: RouteParams,
 ) {
     const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
     if (!accessToken) {

@@ -18,9 +18,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Eye, Lock, Mail } from 'lucide-react';
+import { useState } from 'react';
 
 export default function LoginForm() {
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -52,7 +55,11 @@ export default function LoginForm() {
     }
 
     return (
-        <form id="login-rhf" onSubmit={loginForm.handleSubmit(onSubmit)}>
+        <form
+            id="login-rhf"
+            onSubmit={loginForm.handleSubmit(onSubmit)}
+            className="space-y-6"
+        >
             <FieldGroup>
                 <Controller
                     name="email"
@@ -62,13 +69,17 @@ export default function LoginForm() {
                             <FieldLabel htmlFor="login-rhf-email">
                                 Email
                             </FieldLabel>
-                            <Input
-                                {...field}
-                                id="login-rhf-email"
-                                aria-invalid={fieldState.invalid}
-                                placeholder="name@example.com"
-                                autoComplete="off"
-                            />
+                            <div className="relative">
+                                <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                                <Input
+                                    {...field}
+                                    id="login-rhf-email"
+                                    aria-invalid={fieldState.invalid}
+                                    placeholder="name@example.com"
+                                    autoComplete="off"
+                                    className="pl-10"
+                                />
+                            </div>
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -83,13 +94,28 @@ export default function LoginForm() {
                             <FieldLabel htmlFor="login-rhf-password">
                                 Password
                             </FieldLabel>
-                            <Input
-                                {...field}
-                                id="login-rhf-password"
-                                aria-invalid={fieldState.invalid}
-                                placeholder="••••••••"
-                                autoComplete="off"
-                            />
+                            <div className="relative">
+                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                                <Input
+                                    {...field}
+                                    id="login-rhf-password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    aria-invalid={fieldState.invalid}
+                                    placeholder="••••••••"
+                                    autoComplete="off"
+                                    className="pl-10"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onMouseEnter={() => setShowPassword(true)}
+                                    onMouseLeave={() => setShowPassword(false)}
+                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
+                                >
+                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
+                                </Button>
+                            </div>
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -98,8 +124,13 @@ export default function LoginForm() {
                 />
             </FieldGroup>
             <Field orientation="horizontal">
-                <Button type="submit" form="login-rhf">
-                    Submit
+                <Button
+                    type="submit"
+                    form="login-rhf"
+                    className="w-full"
+                    disabled={loginForm.formState.isSubmitting}
+                >
+                    Login
                 </Button>
             </Field>
         </form>

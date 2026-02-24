@@ -2,7 +2,7 @@
 
 import { useUserPermissions } from '@/api/user/hooks/use-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { ClipboardCheck, PencilRuler } from 'lucide-react';
+import { ChevronUp, ClipboardCheck, LogOut, PencilRuler } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import {
     Sidebar,
@@ -14,7 +14,18 @@ import {
     SidebarRail,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import type { UserProfile } from '@/api/user/validation/user-profile-schema';
+import { useQueryClient } from '@tanstack/react-query';
 
 type NavigationItem = {
     name: string;
@@ -39,7 +50,13 @@ const navigation: NavigationItem[] = [
     },
 ];
 
-export default function AppSidebar() {
+interface AppSidebarProps {
+    userProfile: UserProfile;
+    onLogout: () => Promise<void>;
+}
+
+export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
+    const queryClient = useQueryClient();
     const pathname = usePathname();
     const { data: userPermissionsResult, isPending: isUserPermissionsPending } =
         useUserPermissions();
@@ -54,6 +71,11 @@ export default function AppSidebar() {
 
     const userPermissions: UserPermissions =
         userPermissionsResult.data.permissions;
+
+    async function handleLogout() {
+        queryClient.clear();
+        await onLogout();
+    }
 
     return (
         <Sidebar collapsible="icon">
@@ -95,6 +117,49 @@ export default function AppSidebar() {
                             ))}
                     </SidebarMenu>
                 </SidebarGroup>
+
+                <div className="mt-auto p-3">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="hover:bg-accent/60 h-auto w-full justify-start gap-3 px-2 py-2 group-data-[state=collapsed]:justify-center"
+                            >
+                                <Avatar className="border-primary/40 h-9 w-9 border">
+                                    <AvatarFallback className="font-semibold">
+                                        {userProfile.email
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+
+                                <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
+                                    <div className="truncate text-sm font-medium">
+                                        {userProfile.email.split('@')[0]}
+                                    </div>
+                                </div>
+
+                                <ChevronUp className="text-muted-foreground h-4 w-4 group-data-[state=collapsed]:hidden" />
+                            </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="space-y-1">
+                                <div className="text-sm leading-none font-medium">
+                                    {userProfile.email}
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={handleLogout}
+                                className="text-destructive"
+                            >
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Log out
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </SidebarContent>
 
             <SidebarRail />

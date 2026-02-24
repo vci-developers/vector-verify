@@ -1,6 +1,6 @@
 import {
     getAnnotationTasksQueryParamsSchema,
-    getAnnotationTasksSchema,
+    getAnnotationTasksResponseSchema,
     type GetAnnotationTasksQueryParams,
     type GetAnnotationTasksResponseBody,
 } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
@@ -24,6 +24,6 @@ export async function getAnnotationTasks(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getAnnotationTasksSchema,
+        getAnnotationTasksResponseSchema,
     );
 }

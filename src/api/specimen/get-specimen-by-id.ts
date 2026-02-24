@@ -1,6 +1,6 @@
 import type { Result } from '@/lib/result/result';
 import {
-    getSpecimenByIdSchema,
+    getSpecimenByIdResponseSchema,
     type GetSpecimenByIdResponseBody,
 } from '@/api/specimen/validation/get-specimen-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
@@ -18,6 +18,6 @@ export async function getSpecimenById(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getSpecimenByIdSchema,
+        getSpecimenByIdResponseSchema,
     );
 }

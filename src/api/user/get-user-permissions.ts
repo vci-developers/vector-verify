@@ -1,6 +1,6 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import {
-    getUserPermissionsSchema,
+    getUserPermissionsResponseSchema,
     type GetUserPermissionsResponseBody,
 } from '@/api/user/validation/get-user-permissions-schema';
 import type { Result } from '@/lib/result/result';
@@ -17,6 +17,6 @@ export async function getUserPermissions(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getUserPermissionsSchema,
+        getUserPermissionsResponseSchema,
     );
 }

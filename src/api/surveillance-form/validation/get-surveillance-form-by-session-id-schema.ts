@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { surveillanceFormSchema } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
-export const getSurveillanceFormBySessionIdSchema = surveillanceFormSchema;
+export const getSurveillanceFormBySessionIdResponseSchema =
+    surveillanceFormSchema;
 
 export type GetSurveillanceFormBySessionIdResponseBody = z.infer<
-    typeof getSurveillanceFormBySessionIdSchema
+    typeof getSurveillanceFormBySessionIdResponseSchema
 >;
 
 export type GetSurveillanceFormBySessionIdSuccessPayload =

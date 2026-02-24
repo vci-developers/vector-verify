@@ -1,7 +1,7 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import {
     getSpecimensQueryParamsSchema,
-    getSpecimensSchema,
+    getSpecimensResponseSchema,
     type GetSpecimensQueryParams,
     type GetSpecimensResponseBody,
 } from '@/api/specimen/validation/get-specimens-schema';
@@ -26,6 +26,6 @@ export async function getSpecimens(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        getSpecimensSchema,
+        getSpecimensResponseSchema,
     );
 }

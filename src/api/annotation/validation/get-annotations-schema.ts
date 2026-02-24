@@ -6,9 +6,9 @@ export const getAnnotationsQueryParamsSchema = z.object({
     annotatorId: z.coerce.number().optional(),
     page: z.coerce.number().min(1).optional(),
     limit: z.coerce.number().min(1).max(100).optional(),
-})
+});
 
-export const getAnnotationsSchema = z.object({
+export const getAnnotationsResponseSchema = z.object({
     annotations: z.array(annotationSchema),
     total: z.number(),
     limit: z.number(),
@@ -19,6 +19,8 @@ export const getAnnotationsSchema = z.object({
 export type GetAnnotationsQueryParams = z.infer<
     typeof getAnnotationsQueryParamsSchema
 >;
-export type GetAnnotationsResponseBody = z.infer<typeof getAnnotationsSchema>;
+export type GetAnnotationsResponseBody = z.infer<
+    typeof getAnnotationsResponseSchema
+>;
 
 export type GetAnnotationsSuccessPayload = GetAnnotationsResponseBody;

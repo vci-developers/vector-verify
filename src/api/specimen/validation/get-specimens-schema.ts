@@ -22,7 +22,7 @@ export const getSpecimensQueryParamsSchema = z.object({
     sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
-export const getSpecimensSchema = z.object({
+export const getSpecimensResponseSchema = z.object({
     specimens: z.array(specimenSchema),
     total: z.number(),
     limit: z.number(),
@@ -33,6 +33,8 @@ export const getSpecimensSchema = z.object({
 export type GetSpecimensQueryParams = z.infer<
     typeof getSpecimensQueryParamsSchema
 >;
-export type GetSpecimensResponseBody = z.infer<typeof getSpecimensSchema>;
+export type GetSpecimensResponseBody = z.infer<
+    typeof getSpecimensResponseSchema
+>;
 
 export type GetSpecimensSuccessPayload = GetSpecimensResponseBody;

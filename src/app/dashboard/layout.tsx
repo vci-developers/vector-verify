@@ -1,6 +1,5 @@
 import { getUserProfile } from '@/api/user/get-user-profile';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
-import AppHeader from '@/components/layout/app-header';
 import AppSidebar from '@/components/layout/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
@@ -36,9 +35,8 @@ export default async function DashboardLayout({
 
     return (
         <SidebarProvider>
-            <AppSidebar />
+            <AppSidebar userProfile={userProfile} onLogout={logout} />
             <SidebarInset className="flex min-h-screen flex-col">
-                <AppHeader userProfile={userProfile} onLogout={logout} />
                 <main className="flex-1 p-6">{children}</main>
             </SidebarInset>
         </SidebarProvider>

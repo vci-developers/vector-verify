@@ -10,7 +10,7 @@ export const getAnnotationTasksQueryParamsSchema = z.object({
     limit: z.number().optional(),
 });
 
-export const getAnnotationTasksSchema = z.object({
+export const getAnnotationTasksResponseSchema = z.object({
     tasks: z.array(annotationTaskSchema),
     total: z.number(),
     limit: z.number(),
@@ -22,7 +22,7 @@ export type GetAnnotationTasksQueryParams = z.infer<
     typeof getAnnotationTasksQueryParamsSchema
 >;
 export type GetAnnotationTasksResponseBody = z.infer<
-    typeof getAnnotationTasksSchema
+    typeof getAnnotationTasksResponseSchema
 >;
 
 export type GetAnnotationTasksSuccessPayload = GetAnnotationTasksResponseBody;

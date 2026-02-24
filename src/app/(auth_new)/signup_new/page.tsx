@@ -1,5 +1,26 @@
-import SignupForm from "@/features/auth_new/components/signup-form";
+import { Separator } from '@/components/ui/separator';
+import AuthShell from '@/features/auth_new/components/auth-shell';
+import SignupForm from '@/features/auth_new/components/signup-form';
+import Link from 'next/link';
 
 export default function SignupPage() {
-    return <SignupForm />
+    return (
+        <AuthShell
+            title="Create your account"
+            description="Set up access to your VectorVerify workspace."
+            imageSrc="/assets/auth/images/signup.png"
+        >
+            <SignupForm />
+            <Separator className="my-6" />
+            <p className="text-muted-foreground text-center text-sm">
+                Already have an account?{' '}
+                <Link
+                    href="/login_new"
+                    className="text-primary font-medium hover:underline"
+                >
+                    Login instead
+                </Link>
+            </p>
+        </AuthShell>
+    );
 }
