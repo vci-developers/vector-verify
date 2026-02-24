@@ -1,4 +1,3 @@
-import type { SiteDto } from '@/shared/entities/site/dto';
 import type { UserPermissions } from '@/shared/entities/user/model';
 
 export interface Dhis2SyncSummary {
@@ -16,12 +15,8 @@ export function extractDhis2SyncSummary(
   const summary = (payload as Record<string, unknown>).summary;
   if (!summary || typeof summary !== 'object') return null;
 
-  const {
-    totalHouseholds,
-    successfulSyncs,
-    failedSyncs,
-    skippedHouseholds,
-  } = summary as Record<string, unknown>;
+  const { totalHouseholds, successfulSyncs, failedSyncs, skippedHouseholds } =
+    summary as Record<string, unknown>;
 
   if (
     [totalHouseholds, successfulSyncs, failedSyncs, skippedHouseholds].every(
@@ -54,4 +49,3 @@ export function getUniqueVillagesForDistrict(
 
   return Array.from(villages).sort();
 }
-

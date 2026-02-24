@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useDashboardDataQuery } from '@/features/review/hooks';
 import { useDhis2SyncHandler } from '@/features/review/hooks/use-dhis2-sync-handler';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
+import { formatMonthName } from '@/shared/core/utils/date';
 import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
@@ -36,12 +36,7 @@ export function DashboardPageClient({
     ...(endDate ? { endDate } : {}),
   });
 
-  const monthName = useMemo(() => {
-    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric',
-    });
-  }, [year, month]);
+  const monthName = formatMonthName(year, month);
 
   const {
     dialogOpen,

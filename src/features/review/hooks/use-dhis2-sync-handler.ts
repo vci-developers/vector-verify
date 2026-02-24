@@ -58,9 +58,7 @@ export function useDhis2SyncHandler({
   const handleSyncSubmit = (villageData: VillageIrsFormData[]) => {
     if (!permissions?.sites?.canAccessSites) return;
 
-    const villageToIrsMap = new Map(
-      villageData.map(v => [v.villageName, v]),
-    );
+    const villageToIrsMap = new Map(villageData.map(v => [v.villageName, v]));
 
     const irsData: SiteIrsData[] = permissions.sites.canAccessSites
       .filter(
@@ -110,4 +108,3 @@ export function useDhis2SyncHandler({
     handleSyncButtonClick,
   };
 }
-

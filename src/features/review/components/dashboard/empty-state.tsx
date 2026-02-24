@@ -23,4 +23,3 @@ export function EmptyState({ district, monthName }: EmptyStateProps) {
     </div>
   );
 }
-
