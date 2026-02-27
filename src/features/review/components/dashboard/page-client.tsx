@@ -1,23 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Card, CardContent } from '@/ui/card';
-import { Button } from '@/ui/button';
 import { useDashboardDataQuery } from '@/features/review/hooks';
-import { useDhis2SyncMutation } from '@/features/review/hooks/use-dhis2-sync';
+import { useDhis2SyncHandler } from '@/features/review/hooks/use-dhis2-sync-handler';
 import { getMonthDateRange } from '@/features/review/utils/master-table-view';
+import { formatMonthName } from '@/shared/core/utils/date';
 import { SiteInformationSection } from './site-information-section';
 import { EntomologicalSummarySection } from './entomological-summary-section';
 import { BednetsDataSection } from './bednets-data-section';
 import { DashboardLoadingSkeleton } from './loading-skeleton';
-import { useUserPermissionsQuery, canPushSites } from '@/features/user';
-import { showSuccessToast } from '@/shared/ui/show-success-toast';
-import { showErrorToast } from '@/shared/ui/show-error-toast';
+import { ErrorState } from './error-state';
+import { EmptyState } from './empty-state';
 import { Dhis2SyncDialog } from '@/features/review/components/review-dashboard/dhis2-sync-dialog';
-import type {
-  VillageIrsFormData,
-  SiteIrsData,
-} from '@/features/review/types/dhis2-sync';
+import { Button } from '@/ui/button';
 
 interface DashboardPageClientProps {
   district: string;
@@ -34,11 +28,7 @@ export function DashboardPageClient({
 
   const [yearString, monthString] = monthYear.split('-');
   const year = Number.parseInt(yearString, 10);
-  const monthNum = Number.parseInt(monthString, 10);
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const { data: permissions } = useUserPermissionsQuery();
-  const canSync = permissions ? canPushSites(permissions) : false;
+  const month = Number.parseInt(monthString, 10);
 
   const { data, isLoading, error } = useDashboardDataQuery({
     district,
@@ -154,50 +144,38 @@ export function DashboardPageClient({
   };
 
   if (isLoading) {
-    return <DashboardLoadingSkeleton />;
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-12 py-8">
+          <DashboardLoadingSkeleton />
+        </div>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h2 className="mb-2 text-lg font-semibold text-red-600">
-                Error Loading Dashboard
-              </h2>
-              <p className="text-gray-600">
-                {error?.message || 'An unexpected error occurred'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-12 py-8">
+          <ErrorState message={error?.message} />
+        </div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h2 className="mb-2 text-lg font-semibold text-gray-600">
-                No Data Available
-              </h2>
-              <p className="text-gray-500">
-                No data found for {district} in {monthName}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-12 py-8">
+          <EmptyState district={district} monthName={monthName} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-12 py-8 pb-24">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">{district}</h1>
@@ -235,7 +213,9 @@ export function DashboardPageClient({
           </div>
         </div>
 
-        <div className="space-y-12">
+        <div className="mb-6 h-px bg-gray-200" />
+
+        <div className="space-y-8">
           <SiteInformationSection
             data={data.siteInformation}
             vectorDensity={data.entomologicalSummary.vectorDensity}
