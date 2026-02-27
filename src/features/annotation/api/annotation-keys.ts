@@ -27,8 +27,6 @@ export const annotationKeys = {
       'task-annotations',
       { taskId, page, limit, status },
     ] as const,
-  specimen: (specimenId: number) =>
-    [...annotationKeys.root, 'specimen', specimenId] as const,
 };
 
 export type AnnotationTasksQueryKey = ReturnType<typeof annotationKeys.tasks> &
@@ -39,9 +37,5 @@ export type AnnotationTaskProgressQueryKey = ReturnType<
   QueryKey;
 export type TaskAnnotationsQueryKey = ReturnType<
   typeof annotationKeys.taskAnnotations
-> &
-  QueryKey;
-export type AnnotationSpecimenQueryKey = ReturnType<
-  typeof annotationKeys.specimen
 > &
   QueryKey;
