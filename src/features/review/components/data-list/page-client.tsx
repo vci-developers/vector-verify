@@ -12,7 +12,7 @@ import { createMonthlySummaryColumns } from './columns';
 import { useMonthlySummaryQuery } from '@/features/review/hooks/use-monthly-summary';
 import { useTablePagination } from '@/shared/core/hooks/use-table-pagination';
 import { useDistrictManagement } from '@/features/review/hooks/use-district-management';
-import { buildDashboardPath } from '@/features/review/utils/navigation';
+import { buildMasterTableViewPath } from '@/features/review/utils/navigation';
 import { PAGE_SIZES } from '@/shared/entities/pagination';
 
 export function ReviewDataListPageClient() {
@@ -82,7 +82,7 @@ export function ReviewDataListPageClient() {
 
   const handleNavigateToDashboard = useCallback(
     (district: string, monthYear: string) => {
-      router.push(buildDashboardPath(district, monthYear));
+      router.push(buildMasterTableViewPath(district, monthYear));
     },
     [router],
   );

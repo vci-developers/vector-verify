@@ -137,33 +137,6 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                         className={cn(
                           'h-10 w-full justify-start gap-3 pl-8',
                           isActivePath(
-                            `/review/${district}/${monthYear}/dashboard`,
-                          ) &&
-                            'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700',
-                        )}
-                        onClick={() =>
-                          handleNavigate(
-                            `/review/${district}/${monthYear}/dashboard`,
-                          )
-                        }
-                      >
-                        <LayoutDashboard
-                          className={cn(
-                            'h-4 w-4',
-                            isActivePath(
-                              `/review/${district}/${monthYear}/dashboard`,
-                            ) && 'text-green-600',
-                          )}
-                        />
-                        <span>Dashboard</span>
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className={cn(
-                          'h-10 w-full justify-start gap-3 pl-8',
-                          isActivePath(
                             `/review/${district}/${monthYear}/master-table-view`,
                           ) &&
                             'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700',
@@ -183,6 +156,33 @@ export function BackButton({ show, district, monthYear }: BackButtonProps) {
                           )}
                         />
                         <span>Master Table View</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn(
+                          'h-10 w-full justify-start gap-3 pl-8',
+                          isActivePath(
+                            `/review/${district}/${monthYear}/dashboard`,
+                          ) &&
+                            'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700',
+                        )}
+                        onClick={() =>
+                          handleNavigate(
+                            `/review/${district}/${monthYear}/dashboard`,
+                          )
+                        }
+                      >
+                        <LayoutDashboard
+                          className={cn(
+                            'h-4 w-4',
+                            isActivePath(
+                              `/review/${district}/${monthYear}/dashboard`,
+                            ) && 'text-green-600',
+                          )}
+                        />
+                        <span>Metrics Dashboard</span>
                       </Button>
 
                       <Button
