@@ -10,7 +10,6 @@ import { LuPen } from 'react-icons/lu';
 import { Search } from 'lucide-react';
 import { LandingPageCard } from './landing-page-card';
 import { NoAccessView } from './no-access-view';
-import { LogoutButton } from './logout-button';
 
 export function DashboardPageClient() {
   const router = useRouter();
