@@ -6,6 +6,11 @@ import type {
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 
+type PutAnnotationByIdMutationResult = Result<
+    PutAnnotationByIdSuccessPayload,
+    NetworkError
+>;
+
 type PutAnnotationByIdVariables = {
     annotationId: number;
     requestBody: PutAnnotationByIdRequestBody;
@@ -14,7 +19,7 @@ type PutAnnotationByIdVariables = {
 async function updateAnnotationById(
     annotationId: number,
     requestBody: PutAnnotationByIdRequestBody,
-): Promise<Result<PutAnnotationByIdSuccessPayload, NetworkError>> {
+): Promise<PutAnnotationByIdMutationResult> {
     const response = await fetch(`/api/annotations/${annotationId}`, {
         method: 'PUT',
         credentials: 'include',
@@ -24,11 +29,9 @@ async function updateAnnotationById(
         body: JSON.stringify(requestBody),
     });
 
-    const annotationByIdResult: Result<
-        PutAnnotationByIdSuccessPayload,
-        NetworkError
-    > = await response.json();
-    return annotationByIdResult;
+    const putAnnotationByIdResult: PutAnnotationByIdMutationResult =
+        await response.json();
+    return putAnnotationByIdResult;
 }
 
 export function usePutAnnotationById() {

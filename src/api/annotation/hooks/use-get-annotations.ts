@@ -9,19 +9,19 @@ import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 
-type AnnotationsQueryResult = Result<
+type GetAnnotationsQueryResult = Result<
     GetAnnotationsSuccessPayload,
     NetworkError
 >;
 
-type AnnotationsQueryOptions = Omit<
-    UseQueryOptions<AnnotationsQueryResult, NetworkError>,
+type GetAnnotationsQueryOptions = Omit<
+    UseQueryOptions<GetAnnotationsQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
 async function fetchAnnotations(
     queryParams?: GetAnnotationsQueryParams,
-): Promise<AnnotationsQueryResult> {
+): Promise<GetAnnotationsQueryResult> {
     const queryString = constructQueryString<GetAnnotationsQueryParams>(
         queryParams,
         getAnnotationsQueryParamsSchema,
@@ -35,13 +35,14 @@ async function fetchAnnotations(
         },
     });
 
-    const annotationsResult: AnnotationsQueryResult = await response.json();
-    return annotationsResult;
+    const getAnnotationsResult: GetAnnotationsQueryResult =
+        await response.json();
+    return getAnnotationsResult;
 }
 
-export function useAnnotations(
+export function useGetAnnotations(
     queryParams?: GetAnnotationsQueryParams,
-    options?: AnnotationsQueryOptions,
+    options?: GetAnnotationsQueryOptions,
 ) {
     return useQuery({
         queryKey: annotationKeys.annotations(queryParams),

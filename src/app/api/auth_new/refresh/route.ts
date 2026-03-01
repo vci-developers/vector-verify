@@ -1,5 +1,8 @@
 import { refresh } from '@/features/auth_new/api/refresh';
-import { setAccessCookie } from '@/features/auth_new/lib/cookies';
+import {
+    REFRESH_COOKIE_NAME,
+    setAccessCookie,
+} from '@/lib/auth-session/cookies';
 import type {
     RefreshNetworkRequestBody,
     RefreshNetworkResponseBody,
@@ -11,7 +14,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST() {
-    const refreshToken = (await cookies()).get('refreshToken')?.value;
+    const refreshToken = (await cookies()).get(REFRESH_COOKIE_NAME)?.value;
 
     if (!refreshToken) {
         const requestBodyErrorResult = err({

@@ -4,19 +4,19 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import type { GetSurveillanceFormBySessionIdSuccessPayload } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
 import { surveillanceFormKeys } from '../surveillance-form-keys';
 
-type SurveillanceFormBySessionIdQueryResult = Result<
+type GetSurveillanceFormBySessionIdQueryResult = Result<
     GetSurveillanceFormBySessionIdSuccessPayload,
     NetworkError
 >;
 
-type SurveillanceFormBySessionIdQueryOptions = Omit<
-    UseQueryOptions<SurveillanceFormBySessionIdQueryResult, NetworkError>,
+type GetSurveillanceFormBySessionIdQueryOptions = Omit<
+    UseQueryOptions<GetSurveillanceFormBySessionIdQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
 async function fetchSurveillanceFormBySessionId(
     sessionId: number,
-): Promise<SurveillanceFormBySessionIdQueryResult> {
+): Promise<GetSurveillanceFormBySessionIdQueryResult> {
     const response = await fetch(`/api/sessions/${sessionId}/survey`, {
         method: 'GET',
         credentials: 'include',
@@ -25,14 +25,14 @@ async function fetchSurveillanceFormBySessionId(
         },
     });
 
-    const surveillanceFormBySessionIdResult: SurveillanceFormBySessionIdQueryResult =
+    const getSurveillanceFormBySessionIdResult: GetSurveillanceFormBySessionIdQueryResult =
         await response.json();
-    return surveillanceFormBySessionIdResult;
+    return getSurveillanceFormBySessionIdResult;
 }
 
-export function useSurveillanceFormBySessionId(
+export function useGetSurveillanceFormBySessionId(
     sessionId: number,
-    options?: SurveillanceFormBySessionIdQueryOptions,
+    options?: GetSurveillanceFormBySessionIdQueryOptions,
 ) {
     return useQuery({
         queryKey: surveillanceFormKeys.surveillanceFormBySessionId(sessionId),

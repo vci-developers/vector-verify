@@ -9,16 +9,16 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 
-type SessionsQueryResult = Result<GetSessionsSuccessPayload, NetworkError>;
+type GetSessionsQueryResult = Result<GetSessionsSuccessPayload, NetworkError>;
 
-type SessionsQueryOptions = Omit<
-    UseQueryOptions<SessionsQueryResult, NetworkError>,
+type GetSessionsQueryOptions = Omit<
+    UseQueryOptions<GetSessionsQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
 async function fetchSessions(
     queryParams?: GetSessionsQueryParams,
-): Promise<SessionsQueryResult> {
+): Promise<GetSessionsQueryResult> {
     const queryString = constructQueryString(
         queryParams,
         getSessionsQueryParamsSchema,
@@ -32,13 +32,13 @@ async function fetchSessions(
         },
     });
 
-    const sessionsResult: SessionsQueryResult = await response.json();
-    return sessionsResult;
+    const getSessionsResult: GetSessionsQueryResult = await response.json();
+    return getSessionsResult;
 }
 
-export function useSessions(
+export function useGetSessions(
     queryParams?: GetSessionsQueryParams,
-    options?: SessionsQueryOptions,
+    options?: GetSessionsQueryOptions,
 ) {
     return useQuery({
         queryKey: sessionKeys.sessions(queryParams),

@@ -9,19 +9,19 @@ import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { Result } from '@/lib/result/result';
 
-type AnnotationTasksQueryResult = Result<
+type GetAnnotationTasksQueryResult = Result<
     GetAnnotationTasksSuccessPayload,
     NetworkError
 >;
 
-type AnnotationTasksQueryOptions = Omit<
-    UseQueryOptions<AnnotationTasksQueryResult, NetworkError>,
+type GetAnnotationTasksQueryOptions = Omit<
+    UseQueryOptions<GetAnnotationTasksQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
 async function fetchAnnotationTasks(
     queryParams?: GetAnnotationTasksQueryParams,
-): Promise<AnnotationTasksQueryResult> {
+): Promise<GetAnnotationTasksQueryResult> {
     const queryString = constructQueryString<GetAnnotationTasksQueryParams>(
         queryParams,
         getAnnotationTasksQueryParamsSchema,
@@ -35,14 +35,14 @@ async function fetchAnnotationTasks(
         },
     });
 
-    const annotationTasksResult: AnnotationTasksQueryResult =
+    const getAnnotationTasksResult: GetAnnotationTasksQueryResult =
         await response.json();
-    return annotationTasksResult;
+    return getAnnotationTasksResult;
 }
 
-export function useAnnotationTasks(
+export function useGetAnnotationTasks(
     queryParams?: GetAnnotationTasksQueryParams,
-    options?: AnnotationTasksQueryOptions,
+    options?: GetAnnotationTasksQueryOptions,
 ) {
     return useQuery({
         queryKey: annotationTaskKeys.annotationTasks(queryParams),

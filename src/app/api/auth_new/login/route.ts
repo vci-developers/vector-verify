@@ -1,8 +1,5 @@
 import { login } from '@/features/auth_new/api/login';
-import {
-    setAccessCookie,
-    setRefreshCookie,
-} from '@/features/auth_new/lib/cookies';
+import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
     LoginNetworkRequestBody,
     LoginNetworkResponseBody,

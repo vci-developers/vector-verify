@@ -1,7 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { ACCESS_COOKIE_NAME } from './features/auth_new/lib/cookies';
+import { ACCESS_COOKIE_NAME } from './lib/auth-session/cookies';
 
-const PUBLIC_ROUTES = new Set(['/login', '/signup', '/login_new', '/signup_new']);
+const PUBLIC_ROUTES = new Set([
+    '/login',
+    '/signup',
+    '/login_new',
+    '/signup_new',
+]);
 
 export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;

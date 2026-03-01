@@ -1,10 +1,10 @@
 'use client';
 
-import { useAnnotationTasks } from '@/api/annotation-task/hooks/use-annotation-tasks';
+import { useGetAnnotationTasks } from '@/api/annotation-task/hooks/use-get-annotation-tasks';
 
 export default function AnnotationTasksList() {
     const { data: annotationTasksResult, isPending: isAnnotationTasksPending } =
-        useAnnotationTasks();
+        useGetAnnotationTasks();
 
     if (isAnnotationTasksPending || !annotationTasksResult) {
         return <h1>LOADING...</h1>;

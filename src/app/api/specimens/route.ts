@@ -1,25 +1,13 @@
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
 import { getSpecimens } from '@/api/specimen/get-specimens';
 import {
     getSpecimensQueryParamsSchema,
     type GetSpecimensResponseBody,
 } from '@/api/specimen/validation/get-specimens-schema';
-import type { NetworkError } from '@/lib/network/network-error';
-import { err, ok, type Result } from '@/lib/result/result';
-import { cookies } from 'next/headers';
+import { err } from '@/lib/result/result';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-    const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
-    if (!accessToken) {
-        const sessionExpiredErrorResult = err({
-            kind: 'unauthorized',
-            status: 401,
-            message: 'Please sign in again',
-        });
-        return NextResponse.json(sessionExpiredErrorResult, { status: 401 });
-    }
-
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
@@ -36,14 +24,14 @@ export async function GET(request: Request) {
         );
     }
 
-    const getSpecimensResult: Result<GetSpecimensResponseBody, NetworkError> =
-        await getSpecimens(accessToken, parsedQueryParams.data);
+    const authorizedGetSpecimensResult =
+        await withAuthSession<GetSpecimensResponseBody>(accessToken =>
+            getSpecimens(accessToken, parsedQueryParams.data),
+        );
 
-    if (!getSpecimensResult.ok) {
-        return NextResponse.json(err(getSpecimensResult.error), {
-            status: getSpecimensResult.error.status ?? 400,
-        });
-    }
-
-    return NextResponse.json(ok(getSpecimensResult.data), { status: 200 });
+    return NextResponse.json(authorizedGetSpecimensResult, {
+        status: authorizedGetSpecimensResult.ok
+            ? 200
+            : (authorizedGetSpecimensResult.error.status ?? 400),
+    });
 }

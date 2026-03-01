@@ -1,25 +1,13 @@
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
 import { getSessions } from '@/api/session/get-sessions';
 import {
     getSessionsQueryParamsSchema,
     type GetSessionsResponseBody,
 } from '@/api/session/validation/get-sessions-schema';
-import type { NetworkError } from '@/lib/network/network-error';
-import { err, ok, type Result } from '@/lib/result/result';
-import { cookies } from 'next/headers';
+import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
 export async function GET(request: Request) {
-    const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
-    if (!accessToken) {
-        const sessionExpiredErrorResult = err({
-            kind: 'unauthorized',
-            status: 401,
-            message: 'Please sign in again',
-        });
-        return NextResponse.json(sessionExpiredErrorResult, { status: 401 });
-    }
-
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
@@ -36,14 +24,14 @@ export async function GET(request: Request) {
         );
     }
 
-    const getSessionsResult: Result<GetSessionsResponseBody, NetworkError> =
-        await getSessions(accessToken, parsedQueryParams.data);
+    const authorizedGetSessionsResult =
+        await withAuthSession<GetSessionsResponseBody>(accessToken =>
+            getSessions(accessToken, parsedQueryParams.data),
+        );
 
-    if (!getSessionsResult.ok) {
-        return NextResponse.json(err(getSessionsResult.error), {
-            status: getSessionsResult.error.status ?? 400,
-        });
-    }
-
-    return NextResponse.json(ok(getSessionsResult.data), { status: 200 });
+    return NextResponse.json(authorizedGetSessionsResult, {
+        status: authorizedGetSessionsResult.ok
+            ? 200
+            : (authorizedGetSessionsResult.error.status ?? 400),
+    });
 }

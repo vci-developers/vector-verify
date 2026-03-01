@@ -3,11 +3,9 @@ import type {
     PutAnnotationByIdRequestBody,
     PutAnnotationByIdResponseBody,
 } from '@/api/annotation/validation/put-annotation-by-id-schema';
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import type { NetworkError } from '@/lib/network/network-error';
-import { err, ok, type Result } from '@/lib/result/result';
-import { cookies } from 'next/headers';
+import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
 interface RouteParams {
     params: Promise<{
@@ -15,19 +13,8 @@ interface RouteParams {
     }>;
 }
 
-export async function PUT(
-    request: Request,
-    { params }: RouteParams,
-) {
-    const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
-    if (!accessToken) {
-        const sessionExpiredErrorResult = err({
-            kind: 'unauthorized',
-            status: 401,
-            message: 'Please sign in again',
-        });
-        return NextResponse.json(sessionExpiredErrorResult, { status: 401 });
-    }
+export async function PUT(request: Request, { params }: RouteParams) {
+    const annotationId = Number((await params).annotationId);
 
     let requestBody: PutAnnotationByIdRequestBody;
     try {
@@ -41,18 +28,14 @@ export async function PUT(
         return NextResponse.json(requestBodyErrorResult, { status: 400 });
     }
 
-    const annotationId = Number((await params).annotationId);
+    const authorizedPutAnnotationByIdResult =
+        await withAuthSession<PutAnnotationByIdResponseBody>(accessToken =>
+            putAnnotationById(accessToken, annotationId, requestBody),
+        );
 
-    const putAnnotationByIdResult: Result<
-        PutAnnotationByIdResponseBody,
-        NetworkError
-    > = await putAnnotationById(accessToken, annotationId, requestBody);
-
-    if (!putAnnotationByIdResult.ok) {
-        return NextResponse.json(err(putAnnotationByIdResult.error), {
-            status: putAnnotationByIdResult.error.status ?? 400,
-        });
-    }
-
-    return NextResponse.json(ok(putAnnotationByIdResult.data), { status: 200 });
+    return NextResponse.json(authorizedPutAnnotationByIdResult, {
+        status: authorizedPutAnnotationByIdResult.ok
+            ? 200
+            : (authorizedPutAnnotationByIdResult.error.status ?? 400),
+    });
 }

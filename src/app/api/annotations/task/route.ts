@@ -3,23 +3,11 @@ import {
     getAnnotationTasksQueryParamsSchema,
     type GetAnnotationTasksResponseBody,
 } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
-import { ACCESS_COOKIE_NAME } from '@/features/auth_new/lib/cookies';
-import type { NetworkError } from '@/lib/network/network-error';
-import { err, ok, type Result } from '@/lib/result/result';
-import { cookies } from 'next/headers';
+import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
 export async function GET(request: Request) {
-    const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
-    if (!accessToken) {
-        const sessionExpiredErrorResult = err({
-            kind: 'unauthorized',
-            status: 401,
-            message: 'Please sign in again',
-        });
-        return NextResponse.json(sessionExpiredErrorResult, { status: 401 });
-    }
-
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
@@ -36,18 +24,14 @@ export async function GET(request: Request) {
         );
     }
 
-    const getAnnotationTasksResult: Result<
-        GetAnnotationTasksResponseBody,
-        NetworkError
-    > = await getAnnotationTasks(accessToken, parsedQueryParams.data);
+    const authorizedGetAnnotationTasksResult =
+        await withAuthSession<GetAnnotationTasksResponseBody>(accessToken =>
+            getAnnotationTasks(accessToken, parsedQueryParams.data),
+        );
 
-    if (!getAnnotationTasksResult.ok) {
-        return NextResponse.json(err(getAnnotationTasksResult.error), {
-            status: getAnnotationTasksResult.error.status ?? 400,
-        });
-    }
-
-    return NextResponse.json(ok(getAnnotationTasksResult.data), {
-        status: 200,
+    return NextResponse.json(authorizedGetAnnotationTasksResult, {
+        status: authorizedGetAnnotationTasksResult.ok
+            ? 200
+            : (authorizedGetAnnotationTasksResult.error.status ?? 400),
     });
 }

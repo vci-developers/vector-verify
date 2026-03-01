@@ -4,19 +4,19 @@ import type { Result } from '@/lib/result/result';
 import type { GetSpecimenByIdSuccessPayload } from '@/api/specimen/validation/get-specimen-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 
-type SpecimenByIdQueryResult = Result<
+type GetSpecimenByIdQueryResult = Result<
     GetSpecimenByIdSuccessPayload,
     NetworkError
 >;
 
-type SpecimenByIdQueryOptions = Omit<
-    UseQueryOptions<SpecimenByIdQueryResult, NetworkError>,
+type GetSpecimenByIdQueryOptions = Omit<
+    UseQueryOptions<GetSpecimenByIdQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
 async function fetchSpecimenById(
     specimenId: number,
-): Promise<SpecimenByIdQueryResult> {
+): Promise<GetSpecimenByIdQueryResult> {
     const response = await fetch(`/api/specimens/${specimenId}`, {
         method: 'GET',
         credentials: 'include',
@@ -25,13 +25,14 @@ async function fetchSpecimenById(
         },
     });
 
-    const specimenByIdResult: SpecimenByIdQueryResult = await response.json();
-    return specimenByIdResult;
+    const getSpecimenByIdResult: GetSpecimenByIdQueryResult =
+        await response.json();
+    return getSpecimenByIdResult;
 }
 
-export function useSpecimenById(
+export function useGetSpecimenById(
     specimenId: number,
-    options?: SpecimenByIdQueryOptions,
+    options?: GetSpecimenByIdQueryOptions,
 ) {
     return useQuery({
         queryKey: specimenKeys.specimenById(specimenId),

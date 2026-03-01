@@ -1,6 +1,6 @@
 'use client';
 
-import { useUserPermissions } from '@/api/user/hooks/use-user-permissions';
+import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { ChevronUp, ClipboardCheck, LogOut, PencilRuler } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -59,7 +59,7 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
     const queryClient = useQueryClient();
     const pathname = usePathname();
     const { data: userPermissionsResult, isPending: isUserPermissionsPending } =
-        useUserPermissions();
+        useGetUserPermissions();
 
     if (isUserPermissionsPending || !userPermissionsResult) {
         return <h1>LOADING...</h1>;

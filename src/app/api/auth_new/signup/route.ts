@@ -1,8 +1,5 @@
 import { signup } from '@/features/auth_new/api/signup';
-import {
-    setAccessCookie,
-    setRefreshCookie,
-} from '@/features/auth_new/lib/cookies';
+import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
     SignupNetworkRequestBody,
     SignupNetworkResponseBody,

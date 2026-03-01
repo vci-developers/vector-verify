@@ -1,6 +1,6 @@
 'use client';
 
-import { useUserPermissions } from '@/api/user/hooks/use-user-permissions';
+import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,11 +17,11 @@ import { Fragment, useState } from 'react';
 
 export default function ReviewPage() {
     const router = useRouter();
-    const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(
-        undefined,
-    );
+    const [selectedDistrict, setSelectedDistrict] = useState<
+        string | undefined
+    >(undefined);
     const { data: userPermissionsResult, isPending: isUserPermissionsPending } =
-        useUserPermissions();
+        useGetUserPermissions();
 
     if (isUserPermissionsPending || !userPermissionsResult) {
         return <h1>LOADING...</h1>;
@@ -31,7 +31,8 @@ export default function ReviewPage() {
         return <h1>ERROR: {userPermissionsResult.error.message}</h1>;
     }
 
-    const userPermissions: UserPermissions = userPermissionsResult.data.permissions;
+    const userPermissions: UserPermissions =
+        userPermissionsResult.data.permissions;
     const districts = [
         ...new Set(
             userPermissions.sites.canAccessSites
@@ -42,7 +43,10 @@ export default function ReviewPage() {
 
     return (
         <Fragment>
-            <Select onValueChange={setSelectedDistrict} value={selectedDistrict}>
+            <Select
+                onValueChange={setSelectedDistrict}
+                value={selectedDistrict}
+            >
                 <SelectTrigger>
                     <SelectValue placeholder="Select a district to review" />
                 </SelectTrigger>
@@ -57,11 +61,16 @@ export default function ReviewPage() {
                     </SelectGroup>
                 </SelectContent>
             </Select>
-            <Button disabled={!selectedDistrict} onClick={() => {
-                if (selectedDistrict) {
-                    router.push(`/review_new/${encodeURIComponent(selectedDistrict)}`);
-                }
-            }}>
+            <Button
+                disabled={!selectedDistrict}
+                onClick={() => {
+                    if (selectedDistrict) {
+                        router.push(
+                            `/review_new/${encodeURIComponent(selectedDistrict)}`,
+                        );
+                    }
+                }}
+            >
                 View Data
             </Button>
         </Fragment>

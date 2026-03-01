@@ -4,13 +4,13 @@ import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 import type { GetSessionByIdSuccessPayload } from '../validation/get-session-by-id-schema';
 
-type SessionByIdQueryResult = Result<
+type GetSessionByIdQueryResult = Result<
     GetSessionByIdSuccessPayload,
     NetworkError
 >;
 
-type SessionByIdQueryOptions = Omit<
-    UseQueryOptions<SessionByIdQueryResult, NetworkError>,
+type GetSessionByIdQueryOptions = Omit<
+    UseQueryOptions<GetSessionByIdQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
@@ -25,13 +25,14 @@ async function fetchSessionById(
         },
     });
 
-    const sessionByIdResult: SessionByIdQueryResult = await response.json();
-    return sessionByIdResult;
+    const getSessionByIdResult: GetSessionByIdQueryResult =
+        await response.json();
+    return getSessionByIdResult;
 }
 
-export function useSessionById(
+export function useGetSessionById(
     sessionId: number,
-    options?: SessionByIdQueryOptions,
+    options?: GetSessionByIdQueryOptions,
 ) {
     return useQuery({
         queryKey: sessionKeys.sessionById(sessionId),

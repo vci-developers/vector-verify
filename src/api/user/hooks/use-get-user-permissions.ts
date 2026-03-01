@@ -4,17 +4,17 @@ import type { GetUserPermissionsSuccessPayload } from '@/api/user/validation/get
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 
-type UserPermissionsQueryResult = Result<
+type GetUserPermissionsQueryResult = Result<
     GetUserPermissionsSuccessPayload,
     NetworkError
 >;
 
-type UserPermissionsQueryOptions = Omit<
-    UseQueryOptions<UserPermissionsQueryResult, NetworkError>,
+type GetUserPermissionsQueryOptions = Omit<
+    UseQueryOptions<GetUserPermissionsQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
-async function fetchUserPermissions(): Promise<UserPermissionsQueryResult> {
+async function fetchUserPermissions(): Promise<GetUserPermissionsQueryResult> {
     const response = await fetch('/api/users/permissions', {
         method: 'GET',
         credentials: 'include',
@@ -23,12 +23,14 @@ async function fetchUserPermissions(): Promise<UserPermissionsQueryResult> {
         },
     });
 
-    const userPermissionsResult: UserPermissionsQueryResult =
+    const getUserPermissionsResult: GetUserPermissionsQueryResult =
         await response.json();
-    return userPermissionsResult;
+    return getUserPermissionsResult;
 }
 
-export function useUserPermissions(options?: UserPermissionsQueryOptions) {
+export function useGetUserPermissions(
+    options?: GetUserPermissionsQueryOptions,
+) {
     return useQuery({
         queryKey: userKeys.permissions(),
         queryFn: fetchUserPermissions,

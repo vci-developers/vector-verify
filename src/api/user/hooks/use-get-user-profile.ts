@@ -4,17 +4,17 @@ import type { Result } from '@/lib/result/result';
 import type { GetUserProfileSuccessPayload } from '../validation/get-user-profile-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 
-type UserProfileQueryResult = Result<
+type GetUserProfileQueryResult = Result<
     GetUserProfileSuccessPayload,
     NetworkError
 >;
 
-type UserProfileQueryOptions = Omit<
-    UseQueryOptions<UserProfileQueryResult, NetworkError>,
+type GetUserProfileQueryOptions = Omit<
+    UseQueryOptions<GetUserProfileQueryResult, NetworkError>,
     'queryKey' | 'queryFn'
 >;
 
-async function fetchUserProfile(): Promise<UserProfileQueryResult> {
+async function fetchUserProfile(): Promise<GetUserProfileQueryResult> {
     const response = await fetch('/api/users/profile', {
         method: 'GET',
         credentials: 'include',
@@ -23,11 +23,12 @@ async function fetchUserProfile(): Promise<UserProfileQueryResult> {
         },
     });
 
-    const userProfileResult: UserProfileQueryResult = await response.json();
-    return userProfileResult;
+    const getUserProfileResult: GetUserProfileQueryResult =
+        await response.json();
+    return getUserProfileResult;
 }
 
-export function useUserProfile(options?: UserProfileQueryOptions) {
+export function useGetUserProfile(options?: GetUserProfileQueryOptions) {
     return useQuery({
         queryKey: userKeys.profile(),
         queryFn: fetchUserProfile,

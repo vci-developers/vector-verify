@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type z from 'zod';
 import { err, ok, type Result } from '@/lib/result/result';
 import {
