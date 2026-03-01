@@ -15,10 +15,7 @@ export const loginResponseSchema = z.object({
     }),
 });
 
-export type LoginNetworkRequestBody = z.infer<typeof loginRequestSchema>;
-export type LoginNetworkResponseBody = z.infer<typeof loginResponseSchema>;
+export type LoginRequestBody = z.infer<typeof loginRequestSchema>;
+export type LoginResponseBody = z.infer<typeof loginResponseSchema>;
 
-export type LoginNetworkSuccessPayload = Pick<
-    LoginNetworkResponseBody,
-    'message' | 'user'
->;
+export type LoginSuccessPayload = Pick<LoginResponseBody, 'message' | 'user'>;

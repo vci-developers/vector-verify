@@ -15,10 +15,7 @@ export const signupResponseSchema = z.object({
     }),
 });
 
-export type SignupNetworkRequestBody = z.infer<typeof signupRequestSchema>;
-export type SignupNetworkResponseBody = z.infer<typeof signupResponseSchema>;
+export type SignupRequestBody = z.infer<typeof signupRequestSchema>;
+export type SignupResponseBody = z.infer<typeof signupResponseSchema>;
 
-export type SignupNetworkSuccessPayload = Pick<
-    SignupNetworkResponseBody,
-    'message' | 'user'
->;
+export type SignupSuccessPayload = Pick<SignupResponseBody, 'message' | 'user'>;

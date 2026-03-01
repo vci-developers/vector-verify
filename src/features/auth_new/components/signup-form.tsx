@@ -10,7 +10,7 @@ import {
     FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import type { SignupNetworkSuccessPayload } from '@/features/auth_new/validation/network/signup-network-schema';
+import type { SignupSuccessPayload } from '@/features/auth_new/validation/network/signup-network-schema';
 import {
     signupFormSchema,
     type SignupFormInput,
@@ -45,7 +45,7 @@ export default function SignupForm() {
             body: JSON.stringify(data),
         });
 
-        const signupResult: Result<SignupNetworkSuccessPayload, NetworkError> =
+        const signupResult: Result<SignupSuccessPayload, NetworkError> =
             await response.json();
 
         if (!response.ok || !signupResult.ok) {

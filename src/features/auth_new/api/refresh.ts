@@ -1,22 +1,22 @@
 import {
     refreshRequestSchema,
     refreshResponseSchema,
-    type RefreshNetworkRequestBody,
-    type RefreshNetworkResponseBody,
+    type RefreshRequestBody,
+    type RefreshResponseBody,
 } from '@/features/auth_new/validation/network/refresh-network-schema';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 
 export async function refresh(
-    requestBody: RefreshNetworkRequestBody,
-): Promise<Result<RefreshNetworkResponseBody, NetworkError>> {
+    requestBody: RefreshRequestBody,
+): Promise<Result<RefreshResponseBody, NetworkError>> {
     const parsedRequestBody = refreshRequestSchema.safeParse(requestBody);
     if (!parsedRequestBody.success) {
         return err({ kind: 'client' });
     }
 
-    return safeApiCall<RefreshNetworkResponseBody>(
+    return safeApiCall<RefreshResponseBody>(
         '/auth/refresh',
         {
             method: 'POST',

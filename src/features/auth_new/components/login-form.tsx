@@ -8,7 +8,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
-import type { LoginNetworkSuccessPayload } from '@/features/auth_new/validation/network/login-network-schema';
+import type { LoginSuccessPayload } from '@/features/auth_new/validation/network/login-network-schema';
 import {
     Field,
     FieldError,
@@ -43,7 +43,7 @@ export default function LoginForm() {
             body: JSON.stringify(data),
         });
 
-        const loginResult: Result<LoginNetworkSuccessPayload, NetworkError> =
+        const loginResult: Result<LoginSuccessPayload, NetworkError> =
             await response.json();
         if (!response.ok || !loginResult.ok) {
             console.error('Login Failed');

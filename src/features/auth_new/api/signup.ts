@@ -1,22 +1,22 @@
 import {
     signupRequestSchema,
     signupResponseSchema,
-    type SignupNetworkRequestBody,
-    type SignupNetworkResponseBody,
+    type SignupRequestBody,
+    type SignupResponseBody,
 } from '@/features/auth_new/validation/network/signup-network-schema';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 
 export async function signup(
-    requestBody: SignupNetworkRequestBody,
-): Promise<Result<SignupNetworkResponseBody, NetworkError>> {
+    requestBody: SignupRequestBody,
+): Promise<Result<SignupResponseBody, NetworkError>> {
     const parsedRequestBody = signupRequestSchema.safeParse(requestBody);
     if (!parsedRequestBody.success) {
         return err({ kind: 'client' });
     }
 
-    return safeApiCall<SignupNetworkResponseBody>(
+    return safeApiCall<SignupResponseBody>(
         '/auth/signup',
         {
             method: 'POST',

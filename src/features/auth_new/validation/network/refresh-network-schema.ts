@@ -9,10 +9,7 @@ export const refreshResponseSchema = z.object({
     accessToken: z.string(),
 });
 
-export type RefreshNetworkRequestBody = z.infer<typeof refreshRequestSchema>;
-export type RefreshNetworkResponseBody = z.infer<typeof refreshResponseSchema>;
+export type RefreshRequestBody = z.infer<typeof refreshRequestSchema>;
+export type RefreshResponseBody = z.infer<typeof refreshResponseSchema>;
 
-export type RefreshNetworkSuccessPayload = Pick<
-    RefreshNetworkResponseBody,
-    'message'
->;
+export type RefreshSuccessPayload = Pick<RefreshResponseBody, 'message'>;

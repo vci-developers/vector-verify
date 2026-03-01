@@ -1,16 +1,16 @@
 import { signup } from '@/features/auth_new/api/signup';
 import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
-    SignupNetworkRequestBody,
-    SignupNetworkResponseBody,
-    SignupNetworkSuccessPayload,
+    SignupRequestBody,
+    SignupResponseBody,
+    SignupSuccessPayload,
 } from '@/features/auth_new/validation/network/signup-network-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    let requestBody: SignupNetworkRequestBody;
+    let requestBody: SignupRequestBody;
 
     try {
         requestBody = await request.json();
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         return NextResponse.json(requestBodyErrorResult, { status: 400 });
     }
 
-    const signupResult: Result<SignupNetworkResponseBody, NetworkError> =
+    const signupResult: Result<SignupResponseBody, NetworkError> =
         await signup(requestBody);
     if (!signupResult.ok) {
         return NextResponse.json(signupResult, {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         });
     }
 
-    const successPayload: SignupNetworkSuccessPayload = {
+    const successPayload: SignupSuccessPayload = {
         message: signupResult.data.message,
         user: signupResult.data.user,
     };

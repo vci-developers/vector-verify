@@ -1,16 +1,16 @@
 import { login } from '@/features/auth_new/api/login';
 import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
-    LoginNetworkRequestBody,
-    LoginNetworkResponseBody,
-    LoginNetworkSuccessPayload,
+    LoginRequestBody,
+    LoginResponseBody,
+    LoginSuccessPayload,
 } from '@/features/auth_new/validation/network/login-network-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    let requestBody: LoginNetworkRequestBody;
+    let requestBody: LoginRequestBody;
 
     try {
         requestBody = await request.json();
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         return NextResponse.json(requestBodyErrorResult, { status: 400 });
     }
 
-    const loginResult: Result<LoginNetworkResponseBody, NetworkError> =
+    const loginResult: Result<LoginResponseBody, NetworkError> =
         await login(requestBody);
     if (!loginResult.ok) {
         return NextResponse.json(loginResult, {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         });
     }
 
-    const successPayload: LoginNetworkSuccessPayload = {
+    const successPayload: LoginSuccessPayload = {
         message: loginResult.data.message,
         user: loginResult.data.user,
     };

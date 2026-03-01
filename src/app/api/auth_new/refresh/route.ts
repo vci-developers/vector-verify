@@ -4,9 +4,9 @@ import {
     setAccessCookie,
 } from '@/lib/auth-session/cookies';
 import type {
-    RefreshNetworkRequestBody,
-    RefreshNetworkResponseBody,
-    RefreshNetworkSuccessPayload,
+    RefreshRequestBody,
+    RefreshResponseBody,
+    RefreshSuccessPayload,
 } from '@/features/auth_new/validation/network/refresh-network-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
@@ -25,8 +25,8 @@ export async function POST() {
         return NextResponse.json(requestBodyErrorResult, { status: 401 });
     }
 
-    const requestBody: RefreshNetworkRequestBody = { refreshToken };
-    const refreshResult: Result<RefreshNetworkResponseBody, NetworkError> =
+    const requestBody: RefreshRequestBody = { refreshToken };
+    const refreshResult: Result<RefreshResponseBody, NetworkError> =
         await refresh(requestBody);
     if (!refreshResult.ok) {
         return NextResponse.json(refreshResult, {
@@ -34,7 +34,7 @@ export async function POST() {
         });
     }
 
-    const successPayload: RefreshNetworkSuccessPayload = {
+    const successPayload: RefreshSuccessPayload = {
         message: refreshResult.data.message,
     };
 
