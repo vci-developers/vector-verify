@@ -19,6 +19,8 @@ export const sessionSchema = z.object({
     deviceId: z.number(),
     hardwareId: z.string().nullable(),
     type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']),
+    expectedSpecimens: z.number(),
+    state: z.enum(['NEEDS_REVIEW', 'IN_REVIEW', 'CERTIFIED', 'NOT_APPLICABLE']),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
     site: siteSchema.optional(),

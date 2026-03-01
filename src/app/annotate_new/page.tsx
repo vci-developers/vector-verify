@@ -1,3 +1,5 @@
+import AnnotationTasksList from '@/features/annotation_new/components/annotation-task-list';
+
 export default function AnnotatePage() {
-    return <h1>Annotate Page</h1>;
+    return <AnnotationTasksList />;
 }

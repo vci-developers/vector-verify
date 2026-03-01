@@ -154,7 +154,7 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
                                 onClick={handleLogout}
                                 className="text-destructive"
                             >
-                                <LogOut className="mr-2 h-4 w-4" />
+                                <LogOut className="mr-2 h-4 w-4 text-inherit" />
                                 Log out
                             </DropdownMenuItem>
                         </DropdownMenuContent>

@@ -3,15 +3,25 @@ import {
     type GetAnnotationTasksQueryParams,
     type GetAnnotationTasksSuccessPayload,
 } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { annotationTaskKeys } from '@/api/annotation-task/annotation-task-keys';
 import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { Result } from '@/lib/result/result';
 
+type AnnotationTasksQueryResult = Result<
+    GetAnnotationTasksSuccessPayload,
+    NetworkError
+>;
+
+type AnnotationTasksQueryOptions = Omit<
+    UseQueryOptions<AnnotationTasksQueryResult, NetworkError>,
+    'queryKey' | 'queryFn'
+>;
+
 async function fetchAnnotationTasks(
     queryParams?: GetAnnotationTasksQueryParams,
-): Promise<Result<GetAnnotationTasksSuccessPayload, NetworkError>> {
+): Promise<AnnotationTasksQueryResult> {
     const queryString = constructQueryString<GetAnnotationTasksQueryParams>(
         queryParams,
         getAnnotationTasksQueryParamsSchema,
@@ -25,18 +35,18 @@ async function fetchAnnotationTasks(
         },
     });
 
-    const annotationTasksResult: Result<
-        GetAnnotationTasksSuccessPayload,
-        NetworkError
-    > = await response.json();
+    const annotationTasksResult: AnnotationTasksQueryResult =
+        await response.json();
     return annotationTasksResult;
 }
 
 export function useAnnotationTasks(
     queryParams?: GetAnnotationTasksQueryParams,
+    options?: AnnotationTasksQueryOptions,
 ) {
     return useQuery({
         queryKey: annotationTaskKeys.annotationTasks(queryParams),
         queryFn: () => fetchAnnotationTasks(queryParams),
+        ...options,
     });
 }

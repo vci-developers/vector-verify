@@ -10,6 +10,7 @@ export const specimenSchema = z.object({
     thumbnailImageId: z.string().nullable(),
     shouldProcessFurther: z.boolean(),
     images: z.array(specimenImageSchema),
+    expectedImages: z.number(),
     thumbnailImage: specimenImageSchema.nullable(),
     session: sessionSchema.optional(),
 });

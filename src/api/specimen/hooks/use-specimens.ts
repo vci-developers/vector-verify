@@ -6,12 +6,19 @@ import {
 } from '@/api/specimen/validation/get-specimens-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { specimenKeys } from '../specimen-keys';
+
+type SpecimensQueryResult = Result<GetSpecimensSuccessPayload, NetworkError>;
+
+type SpecimensQueryOptions = Omit<
+    UseQueryOptions<SpecimensQueryResult, NetworkError>,
+    'queryKey' | 'queryFn'
+>;
 
 async function fetchSpecimens(
     queryParams?: GetSpecimensQueryParams,
-): Promise<Result<GetSpecimensSuccessPayload, NetworkError>> {
+): Promise<SpecimensQueryResult> {
     const queryString = constructQueryString(
         queryParams,
         getSpecimensQueryParamsSchema,
@@ -25,14 +32,17 @@ async function fetchSpecimens(
         },
     });
 
-    const specimensResult: Result<GetSpecimensSuccessPayload, NetworkError> =
-        await response.json();
+    const specimensResult: SpecimensQueryResult = await response.json();
     return specimensResult;
 }
 
-export function useSpecimens(queryParams?: GetSpecimensQueryParams) {
+export function useSpecimens(
+    queryParams?: GetSpecimensQueryParams,
+    options?: SpecimensQueryOptions,
+) {
     return useQuery({
         queryKey: specimenKeys.specimens(queryParams),
         queryFn: () => fetchSpecimens(queryParams),
+        ...options,
     });
 }

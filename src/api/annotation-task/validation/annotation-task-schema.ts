@@ -3,13 +3,13 @@ import { z } from 'zod';
 
 export const annotationTaskSchema = z.object({
     id: z.number(),
-    userId: z.number(),
+    annotatorId: z.number(),
     title: z.string(),
     description: z.string(),
     status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']),
     createdAt: z.number(),
     updatedAt: z.number(),
-    user: userProfileSchema,
+    annotator: userProfileSchema,
 });
 
 export type AnnotationTask = z.infer<typeof annotationTaskSchema>;

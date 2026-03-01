@@ -5,13 +5,20 @@ import {
     type GetSessionsSuccessPayload,
 } from '@/api/session/validation/get-sessions-schema';
 import type { NetworkError } from '@/lib/network/network-error';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 
+type SessionsQueryResult = Result<GetSessionsSuccessPayload, NetworkError>;
+
+type SessionsQueryOptions = Omit<
+    UseQueryOptions<SessionsQueryResult, NetworkError>,
+    'queryKey' | 'queryFn'
+>;
+
 async function fetchSessions(
     queryParams?: GetSessionsQueryParams,
-): Promise<Result<GetSessionsSuccessPayload, NetworkError>> {
+): Promise<SessionsQueryResult> {
     const queryString = constructQueryString(
         queryParams,
         getSessionsQueryParamsSchema,
@@ -25,14 +32,17 @@ async function fetchSessions(
         },
     });
 
-    const sessionsResult: Result<GetSessionsSuccessPayload, NetworkError> =
-        await response.json();
+    const sessionsResult: SessionsQueryResult = await response.json();
     return sessionsResult;
 }
 
-export function useSessions(queryParams?: GetSessionsQueryParams) {
+export function useSessions(
+    queryParams?: GetSessionsQueryParams,
+    options?: SessionsQueryOptions,
+) {
     return useQuery({
         queryKey: sessionKeys.sessions(queryParams),
         queryFn: () => fetchSessions(queryParams),
+        ...options,
     });
 }

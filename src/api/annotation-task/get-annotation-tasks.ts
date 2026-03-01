@@ -17,7 +17,7 @@ export async function getAnnotationTasks(
     );
 
     return safeApiCall<GetAnnotationTasksResponseBody>(
-        `/annotation-tasks${queryString}`,
+        `/annotations/task${queryString}`,
         {
             method: 'GET',
             headers: {
