@@ -3,6 +3,8 @@ import { annotationTaskSchema } from '@/api/annotation-task/validation/annotatio
 import { userProfileSchema } from '@/api/user/validation/user-profile-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 
+export const annotationStatusSchema = z.enum(['PENDING', 'ANNOTATED', 'FLAGGED']);
+
 export const annotationSchema = z.object({
     id: z.number(),
     annotationTaskId: z.number(),
@@ -15,7 +17,7 @@ export const annotationSchema = z.object({
     visualSex: z.string().nullable(),
     visualAbdomenStatus: z.string().nullable(),
     notes: z.string().nullable(),
-    status: z.enum(['PENDING', 'ANNOTATED', 'FLAGGED']),
+    status: annotationStatusSchema,
     createdAt: z.number(),
     updatedAt: z.number(),
     annotationTask: annotationTaskSchema.optional(),
@@ -24,3 +26,4 @@ export const annotationSchema = z.object({
 });
 
 export type Annotation = z.infer<typeof annotationSchema>;
+export type AnnotationStatus = z.infer<typeof annotationStatusSchema>;
