@@ -10,21 +10,25 @@ import { Fragment } from 'react';
 export default function DashboardPage() {
     const router = useRouter();
 
-    const { data: userPermissionsResult, isPending: isUserPermissionsPending } =
-        useGetUserPermissions();
-    if (isUserPermissionsPending || !userPermissionsResult) {
+    const {
+        data: getUserPermissionsResult,
+        isPending: isGetUserPermissionsPending,
+    } = useGetUserPermissions();
+    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return <h1>LOADING...</h1>;
     }
 
-    if (!userPermissionsResult.ok) {
+    if (!getUserPermissionsResult.ok) {
         // SHOW TOAST MESSAGE
         return (
-            <h1>ERROR: {networkErrorMessage(userPermissionsResult.error)}</h1>
+            <h1>
+                ERROR: {networkErrorMessage(getUserPermissionsResult.error)}
+            </h1>
         );
     }
 
     const userPermissions: UserPermissions =
-        userPermissionsResult.data.permissions;
+        getUserPermissionsResult.data.permissions;
 
     return (
         <Fragment>

@@ -20,19 +20,21 @@ export default function ReviewPage() {
     const [selectedDistrict, setSelectedDistrict] = useState<
         string | undefined
     >(undefined);
-    const { data: userPermissionsResult, isPending: isUserPermissionsPending } =
-        useGetUserPermissions();
+    const {
+        data: getUserPermissionsResult,
+        isPending: isGetUserPermissionsPending,
+    } = useGetUserPermissions();
 
-    if (isUserPermissionsPending || !userPermissionsResult) {
+    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return <h1>LOADING...</h1>;
     }
 
-    if (!userPermissionsResult.ok) {
-        return <h1>ERROR: {userPermissionsResult.error.message}</h1>;
+    if (!getUserPermissionsResult.ok) {
+        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
     }
 
     const userPermissions: UserPermissions =
-        userPermissionsResult.data.permissions;
+        getUserPermissionsResult.data.permissions;
     const districts = [
         ...new Set(
             userPermissions.sites.canAccessSites

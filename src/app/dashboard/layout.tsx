@@ -42,25 +42,20 @@ export default async function DashboardLayout({
         });
 
     if (!authorizedGetUserProfileResult.ok) {
-        switch (authorizedGetUserProfileResult.error.kind) {
-            case 'unauthorized':
-                return redirect('/login_new');
-            case 'forbidden':
-                return (
-                    <h1>
-                        ERROR: {authorizedGetUserProfileResult.error.message}
-                    </h1>
-                );
-            default:
-                return (
-                    <h1>
-                        ERROR:{' '}
-                        {networkErrorMessage(
-                            authorizedGetUserProfileResult.error,
-                        )}
-                    </h1>
-                );
+        if (authorizedGetUserProfileResult.error.kind === 'unauthorized') {
+            redirect('/login_new');
         }
+        if (authorizedGetUserProfileResult.error.kind === 'forbidden') {
+            return (
+                <h1>ERROR: {authorizedGetUserProfileResult.error.message}</h1>
+            );
+        }
+        return (
+            <h1>
+                ERROR:{' '}
+                {networkErrorMessage(authorizedGetUserProfileResult.error)}
+            </h1>
+        );
     }
 
     const authorizedUserProfile = authorizedGetUserProfileResult.data.user;

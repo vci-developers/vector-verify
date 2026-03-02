@@ -1,13 +1,16 @@
 import { z } from 'zod';
-import { annotationTaskSchema } from '@/api/annotation-task/validation/annotation-task-schema';
+import {
+    annotationTaskSchema,
+    annotationTaskStatusSchema,
+} from '@/api/annotation-task/validation/annotation-task-schema';
 
 export const getAnnotationTasksQueryParamsSchema = z.object({
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     title: z.string().optional(),
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']).optional(),
-    page: z.number().optional(),
-    limit: z.number().optional(),
+    status: annotationTaskStatusSchema.optional(),
+    page: z.coerce.number().optional(),
+    limit: z.coerce.number().optional(),
 });
 
 export const getAnnotationTasksResponseSchema = z.object({
