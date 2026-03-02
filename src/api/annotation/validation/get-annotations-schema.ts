@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { annotationSchema } from '@/api/annotation/validation/annotation-schema';
+import { annotationSchema, annotationStatusSchema } from '@/api/annotation/validation/annotation-schema';
 
 export const getAnnotationsQueryParamsSchema = z.object({
     taskId: z.coerce.number().optional(),
     annotatorId: z.coerce.number().optional(),
-    status: annotationSchema.optional(),
+    status: annotationStatusSchema.optional(),
     page: z.coerce.number().min(1).optional(),
     limit: z.coerce.number().min(1).max(100).optional(),
 });

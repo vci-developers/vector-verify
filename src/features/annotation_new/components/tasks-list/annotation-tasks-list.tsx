@@ -33,7 +33,7 @@ export default function AnnotationTasksList({
         resetPage();
     }, [status, startDate, endDate, resetPage]);
 
-    const queryParams: GetAnnotationTasksQueryParams = {
+    const getAnnotationTasksQueryParams: GetAnnotationTasksQueryParams = {
         status,
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
@@ -44,7 +44,7 @@ export default function AnnotationTasksList({
     const {
         data: getAnnotationTasksResult,
         isPending: isGetAnnotationTasksPending,
-    } = useGetAnnotationTasks(queryParams);
+    } = useGetAnnotationTasks(getAnnotationTasksQueryParams);
 
     if (isGetAnnotationTasksPending || !getAnnotationTasksResult) {
         return <h1>LOADING...</h1>;
@@ -60,7 +60,6 @@ export default function AnnotationTasksList({
 
     return (
         <div className="space-y-4">
-
             {annotationTasks.length === 0 ? (
                 <h1>No annotation tasks found</h1>
             ) : (

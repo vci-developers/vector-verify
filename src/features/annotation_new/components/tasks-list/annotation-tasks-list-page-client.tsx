@@ -9,7 +9,7 @@ import type { DateRange } from 'react-day-picker';
 import AnnotationTasksFilters from './annotation-tasks-filters';
 import AnnotationTasksList from './annotation-tasks-list';
 
-export default function AnnotationTasksListClient() {
+export default function AnnotationTasksListPageClient() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>(
         undefined,
     );
