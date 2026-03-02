@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/ui/button';
-import { BarChart3 } from 'lucide-react';
+import { Table } from 'lucide-react';
 import type { MonthlySummary } from '@/features/review/types';
 
 interface CreateColumnsParams {
@@ -60,8 +60,8 @@ export function createMonthlySummaryColumns({
               }
               className="h-auto p-0 font-normal text-blue-600 hover:text-blue-800"
             >
-              <BarChart3 className="mr-1 h-3 w-3" />
-              Dashboard
+              <Table className="mr-1 h-3 w-3" />
+              View Table
             </Button>
           </div>
         );

@@ -49,7 +49,6 @@ interface VisualIdentificationFormProps {
   };
   onGenusChange?: (handler: (genus: string) => void) => void;
   onGenusValueChange?: (genus: string | undefined) => void;
-  shouldProcessFurther?: boolean;
   morphFormRef?: React.RefObject<MorphIdentificationFormRef | null>;
 }
 
@@ -58,7 +57,6 @@ export function VisualIdentificationForm({
   defaultValues,
   onGenusChange,
   onGenusValueChange,
-  shouldProcessFurther,
   morphFormRef,
 }: VisualIdentificationFormProps) {
   const queryClient = useQueryClient();
@@ -176,17 +174,16 @@ export function VisualIdentificationForm({
   };
 
   const handleValidSubmit = async (formInput: AnnotationFormInput) => {
-    if (shouldProcessFurther && morphFormRef?.current) {
+    if (morphFormRef?.current) {
       const isMorphFormValid = await morphFormRef.current.validate();
       if (!isMorphFormValid) {
         return;
       }
     }
 
-    const morphData =
-      shouldProcessFurther && morphFormRef?.current
-        ? morphFormRef.current.getValues()
-        : null;
+    const morphData = morphFormRef?.current
+      ? morphFormRef.current.getValues()
+      : null;
 
     const visualSpecies = buildSpeciesString(
       formInput.genus,
