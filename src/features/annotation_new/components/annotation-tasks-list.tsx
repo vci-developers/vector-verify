@@ -2,31 +2,13 @@
 
 import { useGetAnnotationTasks } from '@/api/annotation-task/hooks/use-get-annotation-tasks';
 import type { GetAnnotationTasksQueryParams } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
-import {
-    annotationTaskStatusSchema,
-    type AnnotationTaskStatus,
-} from '@/api/annotation-task/validation/annotation-task-schema';
-import { useState } from 'react';
+import { type AnnotationTaskStatus } from '@/api/annotation-task/validation/annotation-task-schema';
+import { Fragment, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { Card } from '@/components/ui/card';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
 import { usePagination } from '@/lib/hooks/use-pagination';
+import AnnotationTasksFilters from './annotation-tasks-filters';
+import AnnotationTaskCard from './annotation-task-card';
+import AnnotationTasksPagination from './annotation-tasks-pagination';
 
 export default function AnnotationTasksList() {
     const {
@@ -39,11 +21,15 @@ export default function AnnotationTasksList() {
         createPageRange,
     } = usePagination();
 
-    const [range, setRange] = useState<DateRange | undefined>(undefined);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(
+        undefined,
+    );
     const [status, setStatus] = useState<AnnotationTaskStatus>('PENDING');
 
-    const startDate = range?.from ? range.from.toISOString() : undefined;
-    const endDate = range?.to ? range.to.toISOString() : undefined;
+    const startDate = dateRange?.from
+        ? dateRange.from.toISOString()
+        : undefined;
+    const endDate = dateRange?.to ? dateRange.to.toISOString() : undefined;
 
     const queryParams: GetAnnotationTasksQueryParams = {
         status,
@@ -63,13 +49,13 @@ export default function AnnotationTasksList() {
         resetPage();
     }
 
-    function handleChangeDateRange(newRange: DateRange | undefined) {
-        setRange(newRange);
+    function handleDateRangeChange(newRange: DateRange | undefined) {
+        setDateRange(newRange);
         resetPage();
     }
 
     function handleClearDateRange() {
-        setRange(undefined);
+        setDateRange(undefined);
         resetPage();
     }
 
@@ -87,128 +73,40 @@ export default function AnnotationTasksList() {
 
     return (
         <div className="space-y-4">
-            <Tabs
-                value={status}
-                onValueChange={value =>
-                    handleStatusChange(value as AnnotationTaskStatus)
-                }
-            >
-                <TabsList>
-                    {annotationTaskStatusSchema.options.map(status => (
-                        <TabsTrigger key={status} value={status}>
-                            {status.replaceAll('_', ' ')}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
+            <AnnotationTasksFilters
+                status={status}
+                dateRange={dateRange}
+                onStatusChange={handleStatusChange}
+                onDateRangeChange={handleDateRangeChange}
+                onClearDateRange={handleClearDateRange}
+            />
 
-            <Card className="p-4">
-                <div className="flex flex-col gap-1">
-                    <div className="text-sm font-medium">Date</div>
-                    <div className="flex gap-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="justify-start"
-                                >
-                                    {!startDate && !endDate
-                                        ? 'Select date range'
-                                        : `${startDate ?? '...'} - ${endDate ?? '...'}`}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                            >
-                                <Calendar
-                                    mode="range"
-                                    numberOfMonths={2}
-                                    selected={range}
-                                    onSelect={handleChangeDateRange}
-                                    disabled={{ after: new Date() }}
-                                    autoFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-
-                        <Button
-                            variant="secondary"
-                            onClick={handleClearDateRange}
-                            disabled={!startDate && !endDate}
-                        >
-                            Clear
-                        </Button>
-                    </div>
-                </div>
-            </Card>
+            <div className="border-border/50 border-t" />
 
             {annotationTasks.length === 0 ? (
                 <h1>No annotation tasks found</h1>
             ) : (
-                annotationTasks.map(task => <h1 key={task.id}>{task.title}</h1>)
+                <div className="space-y-3">
+                    {annotationTasks.map(task => (
+                        <AnnotationTaskCard key={task.id} task={task} />
+                    ))}
+                </div>
             )}
 
-            <Card className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                    <div className="text-muted-foreground text-sm">
-                        Page {page} of {totalPages}
-                    </div>
-
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    onClick={() => previousPage(totalPages)}
-                                    aria-disabled={page === 1}
-                                    className={
-                                        page === 1
-                                            ? 'pointer-events-none opacity-50'
-                                            : undefined
-                                    }
-                                />
-                            </PaginationItem>
-
-                            {createPageRange(totalPages).map(
-                                (pageNumber, index) =>
-                                    pageNumber === 'ellipsis' ? (
-                                        <PaginationItem
-                                            key={`ellipsis-${index}`}
-                                        >
-                                            <PaginationEllipsis />
-                                        </PaginationItem>
-                                    ) : (
-                                        <PaginationItem key={pageNumber}>
-                                            <PaginationLink
-                                                isActive={page === pageNumber}
-                                                onClick={() =>
-                                                    goToPage(
-                                                        pageNumber,
-                                                        totalPages,
-                                                    )
-                                                }
-                                            >
-                                                {pageNumber}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    ),
-                            )}
-
-                            <PaginationItem>
-                                <PaginationNext
-                                    onClick={() => nextPage(totalPages)}
-                                    aria-disabled={page === totalPages}
-                                    className={
-                                        page === totalPages
-                                            ? 'pointer-events-none opacity-50'
-                                            : undefined
-                                    }
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                </div>
-            </Card>
+            {totalPages > 1 && (
+                <Fragment>
+                    <div className="border-border/50 border-t" />
+                    <AnnotationTasksPagination
+                        page={page}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        pageRange={createPageRange(totalPages)}
+                        onPageChange={newPage => goToPage(newPage, totalPages)}
+                        onPrevious={() => previousPage(totalPages)}
+                        onNext={() => nextPage(totalPages)}
+                    />
+                </Fragment>
+            )}
         </div>
     );
 }

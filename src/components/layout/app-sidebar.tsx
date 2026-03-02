@@ -2,7 +2,7 @@
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { ChevronUp, ClipboardCheck, LogOut, PencilRuler } from 'lucide-react';
+import { ChevronUp, ClipboardCheck, LogOut, PencilRuler, type LucideIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import {
     Sidebar,
@@ -30,7 +30,7 @@ import { useQueryClient } from '@tanstack/react-query';
 type NavigationItem = {
     name: string;
     href: string;
-    icon: React.ComponentType;
+    icon: LucideIcon;
     canAccess: (permissions: UserPermissions) => boolean;
 };
 

@@ -2,6 +2,7 @@ import { annotationTaskKeys } from '@/api/annotation-task/annotation-task-keys';
 import { getAnnotationTasks } from '@/api/annotation-task/get-annotation-tasks';
 import type { GetAnnotationTasksResponseBody } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
 import AnnotationTasksList from '@/features/annotation_new/components/annotation-tasks-list';
+import AnnotationTasksListShell from '@/features/annotation_new/components/annotation-tasks-list-shell';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -38,7 +39,9 @@ export default async function AnnotatePage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <AnnotationTasksList />
+            <AnnotationTasksListShell>
+                <AnnotationTasksList />
+            </AnnotationTasksListShell>
         </HydrationBoundary>
     );
 }
