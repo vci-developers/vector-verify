@@ -4,8 +4,6 @@ import { ACCESS_COOKIE_NAME } from './lib/auth-session/cookies';
 const PUBLIC_ROUTES = new Set([
     '/login',
     '/signup',
-    '/login',
-    '/signup',
 ]);
 
 export async function proxy(request: NextRequest) {
