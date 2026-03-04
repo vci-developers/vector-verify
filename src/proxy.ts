@@ -4,8 +4,8 @@ import { ACCESS_COOKIE_NAME } from './lib/auth-session/cookies';
 const PUBLIC_ROUTES = new Set([
     '/login',
     '/signup',
-    '/login_new',
-    '/signup_new',
+    '/login',
+    '/signup',
 ]);
 
 export async function proxy(request: NextRequest) {
@@ -13,11 +13,11 @@ export async function proxy(request: NextRequest) {
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
 
     if (PUBLIC_ROUTES.has(pathname) && accessToken) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     if (!accessToken && !PUBLIC_ROUTES.has(pathname)) {
-        return NextResponse.redirect(new URL('/login_new', request.url));
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     return NextResponse.next();

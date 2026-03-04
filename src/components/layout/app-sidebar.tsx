@@ -2,7 +2,14 @@
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { ChevronUp, ClipboardCheck, LogOut, PencilRuler, type LucideIcon } from 'lucide-react';
+import {
+    ChevronUp,
+    ClipboardCheck,
+    LayoutDashboard,
+    LogOut,
+    PencilRuler,
+    type LucideIcon,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import {
     Sidebar,
@@ -36,14 +43,20 @@ type NavigationItem = {
 
 const navigation: NavigationItem[] = [
     {
+        name: 'Dashboard',
+        href: '/',
+        icon: LayoutDashboard,
+        canAccess: () => true,
+    },
+    {
         name: 'Review',
-        href: '/review_new',
+        href: '/review',
         icon: ClipboardCheck,
         canAccess: permissions => permissions.sites.viewSiteMetadata,
     },
     {
         name: 'Annotate',
-        href: '/annotate_new',
+        href: '/annotate',
         icon: PencilRuler,
         canAccess: permissions =>
             permissions.annotations.viewAndWriteAnnotationTasks,
@@ -106,9 +119,11 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
                                 <SidebarMenuItem key={item.href}>
                                     <SidebarMenuButton
                                         asChild
-                                        isActive={pathname.startsWith(
-                                            item.href,
-                                        )}
+                                        isActive={
+                                            item.href === '/'
+                                                ? pathname === '/'
+                                                : pathname.startsWith(item.href)
+                                        }
                                     >
                                         <Link href={item.href}>
                                             <item.icon />

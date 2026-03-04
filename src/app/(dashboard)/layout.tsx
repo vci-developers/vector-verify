@@ -1,127 +1,71 @@
-import { Fragment } from 'react';
+import { getUserProfile } from '@/api/user/get-user-profile';
+import AppSidebar from '@/components/layout/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { logout } from '@/features/auth/server-actions/logout';
 import { redirect } from 'next/navigation';
-import { HydrationBoundary } from '@tanstack/react-query';
-import { HttpError } from '@/shared/infra/http/core/http-error';
-import { withRouteError } from '@/shared/infra/http/core';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
+import { err, ok, type Result } from '@/lib/result/result';
+import type { GetUserProfileResponseBody } from '@/api/user/validation/get-user-profile-schema';
 import {
-  userKeys,
-  type UserProfileQueryKey,
-  type UserPermissionsQueryKey,
-} from '@/features/user';
-import {
-  getServerUserProfile,
-  getServerUserPermissions,
-} from '@/features/user/server';
-import { DashboardHeader } from '@/features/dashboard/components/header';
-import { dehydrateWithSeed } from '@/shared/infra/react-query/server';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/ui/card';
-import { ShieldAlert } from 'lucide-react';
-import { LogoutButton } from '@/features/auth';
-import { getAccessToken } from '@/features/auth/server/tokens';
+    networkErrorMessage,
+    type NetworkError,
+} from '@/lib/network/network-error';
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 export default async function DashboardLayout({
-  children,
+    children,
 }: DashboardLayoutProps) {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      redirect('/login');
-    }
-    const user = await getServerUserProfile();
+    const authorizedGetUserProfileResult =
+        await withAuthSession<GetUserProfileResponseBody>(async accessToken => {
+            const getUserProfileResult: Result<
+                GetUserProfileResponseBody,
+                NetworkError
+            > = await getUserProfile(accessToken);
 
-    if (!user) {
-      redirect('/login');
-    }
+            if (!getUserProfileResult.ok) {
+                return err(getUserProfileResult.error);
+            }
 
-    const baseSeed = [
-      { key: userKeys.profile() as UserProfileQueryKey, data: user },
-    ];
+            const userProfile = getUserProfileResult.data.user;
+            if (!userProfile.isWhitelisted) {
+                return err({
+                    kind: 'forbidden',
+                    status: 403,
+                    message: 'User is not whitelisted',
+                });
+            }
 
-    if (!user.isWhitelisted) {
-      const dehydratedState = dehydrateWithSeed(baseSeed);
+            return ok(getUserProfileResult.data);
+        });
 
-      return (
-        <HydrationBoundary state={dehydratedState}>
-          <div className="mx-auto w-full max-w-2xl px-6 py-10">
-            <Card className="rounded-2xl border shadow-sm">
-              <CardHeader className="space-y-3">
-                <div className="bg-warning/15 text-warning ring-warning/30 inline-flex h-10 w-10 items-center justify-center rounded-full ring-1">
-                  <ShieldAlert className="h-5 w-5" />
-                </div>
-                <CardTitle className="tracking-tight">
-                  Access restricted
-                </CardTitle>
-                <CardDescription>
-                  Your account (
-                  <span className="text-foreground font-medium">
-                    {user.email}
-                  </span>
-                  ) isn’t authorized yet. Please contact a member of our
-                  technical team to request access.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-muted-foreground text-sm">
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>
-                    If you recently signed up, it may take up to 24 hours for us
-                    to review your request.
-                  </li>
-                  <li>
-                    You can sign out below and switch to an authorized account.
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter className="flex items-end justify-end">
-                <LogoutButton />
-              </CardFooter>
-            </Card>
-          </div>
-        </HydrationBoundary>
-      );
+    if (!authorizedGetUserProfileResult.ok) {
+        if (authorizedGetUserProfileResult.error.kind === 'unauthorized') {
+            redirect('/login');
+        }
+        if (authorizedGetUserProfileResult.error.kind === 'forbidden') {
+            return (
+                <h1>ERROR: {authorizedGetUserProfileResult.error.message}</h1>
+            );
+        }
+        return (
+            <h1>
+                ERROR:{' '}
+                {networkErrorMessage(authorizedGetUserProfileResult.error)}
+            </h1>
+        );
     }
 
-    const permissions = await getServerUserPermissions();
-
-    if (!permissions) {
-      redirect('/login');
-    }
-
-    const dehydratedState = dehydrateWithSeed([
-      ...baseSeed,
-      {
-        key: userKeys.permissions() as UserPermissionsQueryKey,
-        data: permissions,
-      },
-    ]);
+    const authorizedUserProfile = authorizedGetUserProfileResult.data.user;
 
     return (
-      <HydrationBoundary state={dehydratedState}>
-        <Fragment>
-          <DashboardHeader />
-          {children}
-        </Fragment>
-      </HydrationBoundary>
+        <SidebarProvider>
+            <AppSidebar userProfile={authorizedUserProfile} onLogout={logout} />
+            <SidebarInset className="flex min-h-screen flex-col">
+                <main className="flex-1 p-6">{children}</main>
+            </SidebarInset>
+        </SidebarProvider>
     );
-  } catch (error) {
-    if (error instanceof HttpError) {
-      redirect(
-        withRouteError('/login', {
-          message: error.message,
-          status: error.status,
-        }),
-      );
-    }
-    redirect(withRouteError('/login', 'Failed to fetch your profile.'));
-  }
 }
