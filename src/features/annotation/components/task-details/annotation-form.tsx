@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
     type AnnotationFormInput,
     annotationFormSchema,
-} from '../../validation/annotation-form-schema';
+} from '@/features/annotation/validation/annotation-form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     abdomenStatusSchema,
@@ -256,11 +256,12 @@ export default function AnnotationForm({
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="annotation-rhf-sex">
                                             Sex
-                                            {!watchIsFlagged && !isNonMosquito && (
-                                                <span className="text-destructive">
-                                                    (Required)
-                                                </span>
-                                            )}
+                                            {!watchIsFlagged &&
+                                                !isNonMosquito && (
+                                                    <span className="text-destructive">
+                                                        (Required)
+                                                    </span>
+                                                )}
                                         </FieldLabel>
                                         <Select
                                             disabled={isNonMosquito}
@@ -305,11 +306,13 @@ export default function AnnotationForm({
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="annotation-rhf-abdomen">
                                             Abdomen Status
-                                            {!watchIsFlagged && !isNonMosquito && !isMale && (
-                                                <span className="text-destructive">
-                                                    (Required)
-                                                </span>
-                                            )}
+                                            {!watchIsFlagged &&
+                                                !isNonMosquito &&
+                                                !isMale && (
+                                                    <span className="text-destructive">
+                                                        (Required)
+                                                    </span>
+                                                )}
                                         </FieldLabel>
                                         <Select
                                             disabled={isNonMosquito || isMale}

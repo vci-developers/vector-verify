@@ -4,7 +4,7 @@ import type {
     GetAnnotationsResponseBody,
     GetAnnotationsQueryParams,
 } from '@/api/annotation/validation/get-annotations-schema';
-import AnnotationTaskDetailsPageClient from '@/features/annotation/components/task-details/annotation-task-details-page-client';
+import AnnotationTaskDetailsPageClient from '@/features/annotation/components/task-details/page-client/annotation-task-details-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,

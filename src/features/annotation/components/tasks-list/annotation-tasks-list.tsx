@@ -5,8 +5,8 @@ import type { GetAnnotationTasksQueryParams } from '@/api/annotation-task/valida
 import { type AnnotationTaskStatus } from '@/api/annotation-task/validation/annotation-task-schema';
 import { Fragment, useEffect } from 'react';
 import { usePagination } from '@/lib/hooks/use-pagination';
-import AnnotationTaskCard from './annotation-task-card';
-import AnnotationTasksPagination from './annotation-tasks-pagination';
+import AnnotationTaskCard from '@/features/annotation/components/tasks-list/annotation-task-card';
+import AnnotationTasksPagination from '@/features/annotation/components/tasks-list/annotation-tasks-pagination';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
