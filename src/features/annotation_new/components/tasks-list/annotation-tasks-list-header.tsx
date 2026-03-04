@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { X } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
-interface AnnotationTasksFiltersProps {
+interface AnnotationTasksListHeaderProps {
     status: AnnotationTaskStatus;
     dateRange: DateRange | undefined;
     onStatusChange: (status: AnnotationTaskStatus) => void;
@@ -24,29 +24,29 @@ interface AnnotationTasksFiltersProps {
     onClearDateRange: () => void;
 }
 
-export default function AnnotationTasksFilters({
+export default function AnnotationTasksListHeader({
     status,
     dateRange,
     onStatusChange,
     onDateRangeChange,
     onClearDateRange,
-}: AnnotationTasksFiltersProps) {
+}: AnnotationTasksListHeaderProps) {
     const hasDateFilter = dateRange?.from || dateRange?.to;
 
     return (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex items-center justify-between">
             <Tabs
                 value={status}
                 onValueChange={value =>
                     onStatusChange(value as AnnotationTaskStatus)
                 }
             >
-                <TabsList className="bg-muted/50">
+                <TabsList className="bg-muted/50 rounded-full p-1">
                     {annotationTaskStatusSchema.options.map(statusOption => (
                         <TabsTrigger
                             key={statusOption}
                             value={statusOption}
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
                         >
                             {statusOption.replaceAll('_', ' ')}
                         </TabsTrigger>
@@ -62,8 +62,8 @@ export default function AnnotationTasksFilters({
                             className="gap-2"
                         >
                             {!dateRange?.from && !dateRange?.to
-                                ? 'Filter by date range'
-                                : `${dateRange.from ? format(dateRange.from, 'MM/dd/yyyy') : '...'} - ${dateRange.to ? format(dateRange.to, 'MM/dd/yyyy') : '...'}`}
+                                ? 'Filter by date when task was assigned'
+                                : `${dateRange.from ? format(dateRange.from, 'dd MMMM yyyy') : '...'} - ${dateRange.to ? format(dateRange.to, 'dd MMMM yyyy') : '...'}`}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="end">

@@ -38,7 +38,6 @@ export async function safeApiCall<T>(
     }
 
     const responseBody = await readJson(response);
-    console.log(responseBody);
 
     if (!response.ok) {
         const parsedError = backendErrorSchema.safeParse(responseBody);
@@ -51,7 +50,6 @@ export async function safeApiCall<T>(
 
     if (validationSchema) {
         const parsedData = validationSchema.safeParse(responseBody);
-        console.log(parsedData);
         if (!parsedData.success) return err({ kind: 'client' });
         return ok(parsedData.data);
     }

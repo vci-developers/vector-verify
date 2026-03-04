@@ -1,0 +1,151 @@
+'use client';
+
+import { annotationKeys } from '@/api/annotation/annotation-keys';
+import { useGetAnnotations } from '@/api/annotation/hooks/use-get-annotations';
+import { usePutAnnotationById } from '@/api/annotation/hooks/use-put-annotation-by-id';
+import type { AnnotationStatus } from '@/api/annotation/validation/annotation-schema';
+import type { GetAnnotationsQueryParams } from '@/api/annotation/validation/get-annotations-schema';
+import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
+import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import SpecimenImageViewer from './specimen-image-viewer';
+import AnnotationReadonlyView from './annotation-readonly-view';
+import AnnotationForm from './annotation-form';
+
+interface AnnotationWorkspaceProps {
+    taskId: number;
+    status: AnnotationStatus;
+    page: number;
+    onPageChange: (page: number) => void;
+}
+
+export default function AnnotationWorkspace({
+    taskId,
+    status,
+    page,
+    onPageChange,
+}: AnnotationWorkspaceProps) {
+    const [isEditing, setIsEditing] = useState(false);
+    const queryClient = useQueryClient();
+
+    const getAnnotationsQueryParams: GetAnnotationsQueryParams = {
+        taskId,
+        status,
+        page: status === 'PENDING' ? 1 : page,
+        limit: 1,
+    };
+
+    const { data: getAnnotationsResult, isPending: isGetAnnotationsPending } =
+        useGetAnnotations(getAnnotationsQueryParams);
+    const { mutate: updateAnnotation, isPending: isUpdateAnnotationPending } =
+        usePutAnnotationById();
+
+    function handleSubmitAnnotation(
+        annotationId: number,
+        requestBody: PutAnnotationByIdRequestBody,
+    ) {
+        updateAnnotation(
+            { annotationId, requestBody },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: annotationKeys.root,
+                    });
+                    setIsEditing(false);
+                },
+            },
+        );
+    }
+
+    function handlePageChange(newPage: number) {
+        setIsEditing(false);
+        onPageChange(newPage);
+    }
+
+    if (!getAnnotationsResult || isGetAnnotationsPending) {
+        return <h1>Loading annotations...</h1>;
+    }
+
+    if (!getAnnotationsResult.ok) {
+        return <h1>Error loading annotations</h1>;
+    }
+
+    const annotation = getAnnotationsResult.data.annotations[0];
+    const total = getAnnotationsResult.data.total;
+
+    if (!annotation || total === 0) {
+        return <h1>No annotations found</h1>;
+    }
+
+    const showForm = status === 'PENDING' || isEditing;
+
+    return (
+        <div className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+                {status === 'PENDING'
+                    ? `${total} remaining`
+                    : `${page} of ${total}`}
+            </p>
+
+            <div className="grid grid-cols-2 gap-6">
+                {annotation.specimen ? (
+                    <SpecimenImageViewer specimen={annotation.specimen} />
+                ) : (
+                    <p className="text-muted-foreground text-sm">
+                        No specimen data
+                    </p>
+                )}
+
+                {showForm ? (
+                    <AnnotationForm
+                        annotation={annotation}
+                        isSubmitting={isUpdateAnnotationPending}
+                        onSubmit={formData =>
+                            handleSubmitAnnotation(annotation.id, formData)
+                        }
+                        onCancel={
+                            status !== 'PENDING' && isEditing
+                                ? () => setIsEditing(false)
+                                : undefined
+                        }
+                    />
+                ) : (
+                    <AnnotationReadonlyView
+                        annotation={annotation}
+                        onEdit={() => setIsEditing(true)}
+                    />
+                )}
+            </div>
+
+            {status !== 'PENDING' && !isEditing && (
+                <div className="flex items-center justify-between border-t pt-4">
+                    <p className="text-muted-foreground text-sm">
+                        {page} of {total}
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page <= 1}
+                        >
+                            <ChevronLeft className="mr-1 h-4 w-4" />
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={page >= total}
+                        >
+                            Next
+                            <ChevronRight className="ml-1 h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

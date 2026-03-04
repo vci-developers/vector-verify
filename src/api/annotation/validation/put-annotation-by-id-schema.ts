@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { annotationSchema } from '@/api/annotation/validation/annotation-schema';
+import { annotationSchema, annotationStatusSchema } from '@/api/annotation/validation/annotation-schema';
 
 export const putAnnotationByIdRequestSchema = z.object({
     morphSpecies: z.string().optional(),
@@ -9,7 +9,7 @@ export const putAnnotationByIdRequestSchema = z.object({
     visualSex: z.string().optional(),
     visualAbdomenStatus: z.string().optional(),
     notes: z.string().optional(),
-    status: z.string(),
+    status: annotationStatusSchema,
 });
 
 export const putAnnotationByIdResponseSchema = z.object({

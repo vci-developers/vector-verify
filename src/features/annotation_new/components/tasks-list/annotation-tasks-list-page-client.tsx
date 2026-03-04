@@ -6,8 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import AnnotationTasksFilters from './annotation-tasks-filters';
+import AnnotationTasksListHeader from './annotation-tasks-list-header';
 import AnnotationTasksList from './annotation-tasks-list';
+import { format } from 'date-fns';
+import { Separator } from '@/components/ui/separator';
 
 export default function AnnotationTasksListPageClient() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>(
@@ -15,8 +17,12 @@ export default function AnnotationTasksListPageClient() {
     );
     const [status, setStatus] = useState<AnnotationTaskStatus>('PENDING');
 
-    const startDate = dateRange?.from?.toISOString();
-    const endDate = dateRange?.to?.toISOString();
+    const startDate = dateRange?.from
+        ? format(dateRange?.from, 'yyyy-MM-dd')
+        : undefined;
+    const endDate = dateRange?.to
+        ? format(dateRange?.to, 'yyyy-MM-dd')
+        : undefined;
 
     return (
         <PageShell
@@ -26,7 +32,7 @@ export default function AnnotationTasksListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <AnnotationTasksFilters
+                    <AnnotationTasksListHeader
                         status={status}
                         dateRange={dateRange}
                         onStatusChange={setStatus}
@@ -34,7 +40,7 @@ export default function AnnotationTasksListPageClient() {
                         onClearDateRange={() => setDateRange(undefined)}
                     />
 
-                    <div className="border-border/50 border-t" />
+                    <Separator />
 
                     <AnnotationTasksList
                         status={status}

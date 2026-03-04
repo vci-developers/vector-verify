@@ -25,6 +25,16 @@ const STATUS_VARIANT: Record<
 };
 
 export default function AnnotationTaskCard({ task }: AnnotationTaskCardProps) {
+    const totalAnnotations = task.annotationCounts?.total ?? 0;
+    const annotatedCount = task.annotationCounts?.annotated ?? 0;
+    const flaggedCount = task.annotationCounts?.flagged ?? 0;
+    const progress =
+        totalAnnotations > 0
+            ? Math.round(
+                  ((annotatedCount + flaggedCount) / totalAnnotations) * 100,
+              )
+            : 0;
+
     return (
         <Link href={`/annotate_new/${task.id}`} className="block">
             <Card className="group border-border/50 hover:border-primary/30 cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg">
@@ -62,14 +72,14 @@ export default function AnnotationTaskCard({ task }: AnnotationTaskCardProps) {
                                         Progress
                                     </span>
                                     <span className="text-xs font-medium">
-                                        {30}%
+                                        {progress}%
                                     </span>
                                 </div>
-                                <Progress value={30} className="h-2" />
+                                <Progress value={progress} className="h-2" />
                             </div>
                         </div>
 
-                        <div className="bg-muted/70 group-hover:bg-primary/30 flex rounded-lg w-12 items-center justify-center transition-colors">
+                        <div className="bg-muted/70 group-hover:bg-primary/30 flex w-12 items-center justify-center rounded-lg transition-colors">
                             <ChevronRight className="text-muted-foreground group-hover:text-primary h-5 w-5 transition-colors" />
                         </div>
                     </div>
