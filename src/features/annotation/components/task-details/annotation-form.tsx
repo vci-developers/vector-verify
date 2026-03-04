@@ -4,6 +4,8 @@ import type { Annotation } from '@/api/annotation/validation/annotation-schema';
 import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
 import { Controller, useForm } from 'react-hook-form';
 import {
+    type AnnotationFormArtifact,
+    annotationFormArtifactSchema,
     type AnnotationFormInput,
     annotationFormSchema,
 } from '@/features/annotation/validation/annotation-form-schema';
@@ -37,6 +39,13 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Flag } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import {
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from '@/components/ui/multi-select';
 
 interface AnnotationFormProps {
     annotation: Annotation;
@@ -45,6 +54,7 @@ interface AnnotationFormProps {
     onCancel?: () => void;
 }
 
+// TODO: HANDLE ARTIFACTS AS SOON AS THE BACKEND MAKES IT AVAILABLE
 export default function AnnotationForm({
     annotation,
     isSubmitting,
@@ -104,6 +114,14 @@ export default function AnnotationForm({
         annotationForm.clearErrors(['visualAbdomenStatus']);
     }
 
+    function handleArtifactSelected(values: string[]) {
+        annotationForm.setValue(
+            'artifacts',
+            values as AnnotationFormArtifact[],
+        );
+        annotationForm.clearErrors('artifacts');
+    }
+
     function handleIsFlaggedChange(value: boolean) {
         annotationForm.setValue('isFlagged', value);
         if (value) {
@@ -114,6 +132,7 @@ export default function AnnotationForm({
                 'visualAbdomenStatus',
             ]);
         } else {
+            annotationForm.clearErrors('artifacts');
             annotationForm.clearErrors('notes');
         }
     }
@@ -352,6 +371,48 @@ export default function AnnotationForm({
                                 )}
                             />
                         </div>
+
+                        <Controller
+                            name="artifacts"
+                            control={annotationForm.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel htmlFor="annotation-rhf-artifacts">
+                                        Artifacts
+                                        {watchIsFlagged && (
+                                            <span className="text-destructive">
+                                                (Required)
+                                            </span>
+                                        )}
+                                    </FieldLabel>
+                                    <MultiSelect
+                                        values={field.value ?? []}
+                                        onValuesChange={handleArtifactSelected}
+                                    >
+                                        <MultiSelectTrigger className="w-full">
+                                            <MultiSelectValue placeholder="Select artifacts..." />
+                                        </MultiSelectTrigger>
+                                        <MultiSelectContent>
+                                            {annotationFormArtifactSchema.options.map(
+                                                option => (
+                                                    <MultiSelectItem
+                                                        key={option}
+                                                        value={option}
+                                                    >
+                                                        {option}
+                                                    </MultiSelectItem>
+                                                ),
+                                            )}
+                                        </MultiSelectContent>
+                                    </MultiSelect>
+                                    {fieldState.invalid && (
+                                        <FieldError
+                                            errors={[fieldState.error]}
+                                        />
+                                    )}
+                                </Field>
+                            )}
+                        />
 
                         <Controller
                             name="notes"
