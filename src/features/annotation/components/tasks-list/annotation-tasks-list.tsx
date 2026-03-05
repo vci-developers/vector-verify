@@ -27,7 +27,7 @@ export default function AnnotationTasksList({
         previousPage,
         resetPage,
         createPageRange,
-    } = usePagination();
+    } = usePagination({ limit: 10 });
 
     useEffect(() => {
         resetPage();
@@ -76,7 +76,6 @@ export default function AnnotationTasksList({
                     <AnnotationTasksPagination
                         page={page}
                         totalPages={totalPages}
-                        totalItems={totalItems}
                         pageRange={createPageRange(totalPages)}
                         onPageChange={newPage => goToPage(newPage, totalPages)}
                         onPrevious={() => previousPage(totalPages)}
