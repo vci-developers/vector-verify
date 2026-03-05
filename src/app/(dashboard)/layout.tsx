@@ -1,7 +1,6 @@
 import { getUserProfile } from '@/api/user/get-user-profile';
 import AppSidebar from '@/components/layout/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { logout } from '@/features/auth/server-actions/logout';
 import { redirect } from 'next/navigation';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { err, ok, type Result } from '@/lib/result/result';
@@ -46,9 +45,7 @@ export default async function DashboardLayout({
             redirect('/login');
         }
         if (authorizedGetUserProfileResult.error.kind === 'forbidden') {
-            return (
-                <h1>ERROR: {authorizedGetUserProfileResult.error.message}</h1>
-            );
+            redirect('/forbidden');
         }
         return (
             <h1>
@@ -62,7 +59,7 @@ export default async function DashboardLayout({
 
     return (
         <SidebarProvider>
-            <AppSidebar userProfile={authorizedUserProfile} onLogout={logout} />
+            <AppSidebar userProfile={authorizedUserProfile} />
             <SidebarInset className="flex min-h-screen flex-col">
                 <main className="flex-1 p-6">{children}</main>
             </SidebarInset>

@@ -32,7 +32,7 @@ export default async function AnnotationTasksListPage() {
             redirect('/login');
         }
         if (authorizedGetAnnotationTasksResult.error.kind === 'forbidden') {
-            return <h1>FORBIDDEN</h1>;
+            redirect('/forbidden');
         }
     }
 
