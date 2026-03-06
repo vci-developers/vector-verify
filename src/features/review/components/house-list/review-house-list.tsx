@@ -14,73 +14,48 @@ interface HouseReview {
 }
 
 interface ReviewHouseListProps {
-    district: string | null;
-    startDate: string;
-    endDate: string;
+    district: string;
 }
 
-export default function ReviewHouseList({
-    district,
-    startDate,
-    endDate,
-}: ReviewHouseListProps) {
-    const {
-        data: permissionsResult,
-        isPending: isPermissionsPending,
-    } = useGetUserPermissions();
+export default function ReviewHouseList({ district }: ReviewHouseListProps) {
+    const { data: getUserPermissionsResult, isPending: isGetUserPermissionsPending } =
+        useGetUserPermissions();
 
-    const queryParams: GetSessionsQueryParams = {
-        ...(district && { district }),
-        startDate,
-        endDate,
+    const getSessionsQueryParams: GetSessionsQueryParams = {
+        district,
         limit: 100,
     };
 
-    const {
-        data: sessionsResult,
-        isPending: isSessionsPending,
-    } = useGetSessions(queryParams, { enabled: !!district });
+    const { data: getSessionsResult, isPending: isGetSessionsPending } =
+        useGetSessions(getSessionsQueryParams);
 
-    if (!district) {
+    if (isGetUserPermissionsPending || isGetSessionsPending || !getUserPermissionsResult || !getSessionsResult) {
+        return <p>LOADING...</p>;
+    }
+
+    if (!getUserPermissionsResult.ok) {
+        return <p>ERROR: {getUserPermissionsResult.error.message}</p>;
+    }
+
+    if (!getSessionsResult.ok) {
+        return <p>ERROR: {getSessionsResult.error.message}</p>;
+    }
+
+    const accessibleSites = getUserPermissionsResult.data.permissions.sites.canAccessSites;
+    const sitesInDistrict = accessibleSites.filter(
+        site => site.district?.trim() === district.trim(),
+    );
+
+    if (sitesInDistrict.length === 0) {
         return (
             <p className="text-muted-foreground text-sm">
-                Select a district to begin reviewing.
+                No houses found for this district.
             </p>
         );
     }
 
-    if (
-        isPermissionsPending ||
-        isSessionsPending ||
-        !permissionsResult ||
-        !sessionsResult
-    ) {
-        return <h1>LOADING...</h1>;
-    }
-
-    if (!permissionsResult.ok) {
-        return <h1>ERROR: {permissionsResult.error.message}</h1>;
-    }
-
-    if (!sessionsResult.ok) {
-        return <h1>ERROR: {sessionsResult.error.message}</h1>;
-    }
-
-    const sitesInDistrict =
-        permissionsResult.data.permissions.sites.canAccessSites.filter(
-            site => site.district?.trim() === district.trim(),
-        );
-
-    if (sitesInDistrict.length === 0) {
-        return <h1>No houses found for this district.</h1>;
-    }
-
-    const sessionMap = new Map<
-        number,
-        { sessionCount: number; state: SessionState | undefined }
-    >();
-
-    for (const session of sessionsResult.data.sessions) {
+    const sessionMap = new Map<number, { sessionCount: number; state: SessionState | undefined }>();
+    for (const session of getSessionsResult.data.sessions) {
         const existing = sessionMap.get(session.siteId);
         if (existing) {
             existing.sessionCount += 1;
