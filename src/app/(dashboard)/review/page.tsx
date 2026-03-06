@@ -1,80 +1,43 @@
-'use client';
-
-import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { Button } from '@/components/ui/button';
+import { getUserPermissions } from '@/api/user/get-user-permissions';
+import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
+import { userKeys } from '@/api/user/user-keys';
+import ReviewHouseListPageClient from '@/features/review/components/house-list/review-house-list-page-client';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { useRouter } from 'next/navigation';
-import { Fragment, useState } from 'react';
+    dehydrate,
+    HydrationBoundary,
+    QueryClient,
+} from '@tanstack/react-query';
+import { redirect } from 'next/navigation';
 
-export default function ReviewPage() {
-    const router = useRouter();
-    const [selectedDistrict, setSelectedDistrict] = useState<
-        string | undefined
-    >(undefined);
-    const {
-        data: getUserPermissionsResult,
-        isPending: isGetUserPermissionsPending,
-    } = useGetUserPermissions();
+export default async function ReviewPage() {
+    const queryClient = new QueryClient();
 
-    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+    const authorizedResult =
+        await withAuthSession<GetUserPermissionsResponseBody>(
+            async accessToken => {
+                const permissionsResult =
+                    await getUserPermissions(accessToken);
+                queryClient.setQueryData(
+                    userKeys.permissions(),
+                    permissionsResult,
+                );
+                return permissionsResult;
+            },
+        );
+
+    if (!authorizedResult.ok) {
+        if (authorizedResult.error.kind === 'unauthorized') {
+            redirect('/login');
+        }
+        if (authorizedResult.error.kind === 'forbidden') {
+            return <h1>FORBIDDEN</h1>;
+        }
     }
-
-    if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
-    }
-
-    const userPermissions: UserPermissions =
-        getUserPermissionsResult.data.permissions;
-    const districts = [
-        ...new Set(
-            userPermissions.sites.canAccessSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
-        ),
-    ].sort();
 
     return (
-        <Fragment>
-            <Select
-                onValueChange={setSelectedDistrict}
-                value={selectedDistrict}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Select a district to review" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectLabel>Accessible Sites</SelectLabel>
-                        {districts.map(district => (
-                            <SelectItem key={district} value={district}>
-                                {district}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
-            <Button
-                disabled={!selectedDistrict}
-                onClick={() => {
-                    if (selectedDistrict) {
-                        router.push(
-                            `/review/${encodeURIComponent(selectedDistrict)}`,
-                        );
-                    }
-                }}
-            >
-                View Data
-            </Button>
-        </Fragment>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <ReviewHouseListPageClient />
+        </HydrationBoundary>
     );
 }
