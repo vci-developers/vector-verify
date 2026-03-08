@@ -5,7 +5,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckSquareIcon } from 'lucide-react';
-import OperationsTasksDetailsHeader, { type ViewValue } from './operations-tasks-details-header';
+import OperationsTasksDetailsHeader, { type ViewValue } from './operations-details-header';
 import OperationsDetailsList from './operations-details-list';
 import type { DateRange } from 'react-day-picker';
 
@@ -34,8 +34,8 @@ export default function ReviewTasksListPageClient({
 
     return (
         <PageShell
-            title="Review Tasks"
-            description="Review and annotate"
+            title="Operations Details"
+            description="View operations details for each district"
             icon={CheckSquareIcon}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">

@@ -6,6 +6,24 @@ import type { GetSessionsQueryParams } from "@/api/session/validation/get-sessio
 import { useGetSessions } from "@/api/session/hooks/use-get-sessions";
 import { useGetSpecimens } from "@/api/specimen/hooks/use-get-specimens";
 import { TableRow, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+
+function getCompletenessColor(percentage: number): string {
+    if (percentage >= 80) return "bg-success/10 text-success border-success/50";
+    if (percentage >= 50) return "bg-warning/20 text-warning-foreground border-warning/50";
+    return "bg-destructive/20 text-destructive border-destructive/50";
+}
+
+function CompletenessBox({ percentage, isLoading }: { percentage: number; isLoading: boolean }) {
+    if (isLoading) {
+        return <span className="px-2 py-1 rounded border bg-muted text-muted-foreground border-border">...%</span>;
+    }
+    return (
+        <span className={`px-2 py-1 rounded border ${getCompletenessColor(percentage)}`}>
+            {percentage}%
+        </span>
+    );
+}
 
 function useSiteTotals(siteId: number) {
     const getSessionsQueryParams: GetSessionsQueryParams = { siteId };
@@ -35,9 +53,13 @@ export function HouseRow({ siteId, label }: { siteId: number; label: string }) {
     return (
         <TableRow className="hover:bg-muted/50 cursor-pointer">
             <TableCell className="font-medium">{label}</TableCell>
-            <TableCell>{isLoading ? "—" : sessions}</TableCell>
-            <TableCell>{isLoading ? "—" : specimens}</TableCell>
-            <TableCell>{isLoading ? "—" : `${completeness}%`}</TableCell>
+            <TableCell>{isLoading ? "..." : sessions}</TableCell>
+            <TableCell>{isLoading ? "..." : specimens}</TableCell>
+            <TableCell><CompletenessBox percentage={completeness} isLoading={isLoading} /></TableCell>
+            <TableCell>
+                {/* TODO: Add onClick handler for routing */}
+                <Button variant="link" className="text-blue-600 p-0 h-auto">View &rarr;</Button>
+            </TableCell>
         </TableRow>
     );
 }
@@ -108,7 +130,12 @@ export function VillageRow({ siteIds, label }: { siteIds: number[]; label: strin
                 <TableCell className="font-medium">{label}</TableCell>
                 <TableCell>{isLoading ? `${totalSessions}...` : totalSessions}</TableCell>
                 <TableCell>{isLoading ? `${totalSpecimens}...` : totalSpecimens}</TableCell>
-                <TableCell>{isLoading ? `${completedHouses}/${totalHouses}...` : `${completedHouses}/${totalHouses} (${completeness}%)`}</TableCell>
+                <TableCell><CompletenessBox percentage={completeness} isLoading={isLoading} /></TableCell>
+                <TableCell>
+                    {/*Add onClick handler for routing */}
+                    <Button variant="link" className="text-blue-600 p-0 h-auto">View &rarr;</Button>
+                </TableCell>
+
             </TableRow>
         </>
     );

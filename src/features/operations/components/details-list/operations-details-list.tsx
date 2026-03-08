@@ -3,7 +3,7 @@
 import type { Site } from "@/api/site/validation/site-schema";
 import { usePagination } from "@/lib/hooks/use-pagination";
 import { useEffect, useMemo } from "react";
-import type { ViewValue } from "./operations-tasks-details-header";
+import type { ViewValue } from "./operations-details-header";
 import OperationsDetailPagination from "./operations-details-pagination";
 import { HouseRow, VillageRow } from "./operations-details-list-data";
 
@@ -90,6 +90,7 @@ export default function OperationsDetailsList({
                             <TableHead>Total Sessions</TableHead>
                             <TableHead>Total Specimens</TableHead>
                             <TableHead>Completeness</TableHead>
+                            <TableHead>View</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -8,7 +8,7 @@ import {
     HydrationBoundary,
     QueryClient,
 } from '@tanstack/react-query';
-import ReviewTasksListPageClient from '@/features/operations/components/details-list/operations-tasks-list-page-client-';
+import ReviewTasksListPageClient from '@/features/operations/components/details-list/operations-details-list-page-client-';
 
 export default function ReviewPage() {
     const queryClient = new QueryClient();
