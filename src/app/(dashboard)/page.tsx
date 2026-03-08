@@ -33,8 +33,8 @@ export default function DashboardPage() {
     return (
         <Fragment>
             {userPermissions.sites.viewSiteMetadata && (
-                <Button onClick={() => router.push('/review')}>
-                    Review
+                <Button onClick={() => router.push('/operations')}>
+                    Operations
                 </Button>
             )}
             {userPermissions.annotations.viewAndWriteAnnotationTasks && (
