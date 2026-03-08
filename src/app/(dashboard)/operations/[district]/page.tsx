@@ -1,5 +1,3 @@
-'use client';
-
 import { useParams } from 'next/navigation';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
