@@ -36,7 +36,7 @@ export default function ReviewPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewTasksListPageClient accessibleSites={accessibleSites} />
+            <ReviewTasksListPageClient accessibleSites={accessibleSites} district={district} />
         </HydrationBoundary>
     );
 }

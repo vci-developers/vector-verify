@@ -16,7 +16,7 @@ type GetSpecimensQueryOptions = Omit<
     'queryKey' | 'queryFn'
 >;
 
-export async function fetchSpecimens(
+async function fetchSpecimens(
     queryParams?: GetSpecimensQueryParams,
 ): Promise<GetSpecimensQueryResult> {
     const queryString = constructQueryString(

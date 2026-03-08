@@ -13,7 +13,6 @@ import {
 interface OperationsDetailPaginationProps {
     page: number;
     totalPages: number;
-    totalItems: number;
     pageRange: (number | 'ellipsis')[];
     onPageChange: (page: number) => void;
     onPrevious: () => void;
@@ -23,7 +22,6 @@ interface OperationsDetailPaginationProps {
 export default function OperationsDetailPagination({
     page,
     totalPages,
-    totalItems,
     pageRange,
     onPageChange,
     onPrevious,
@@ -83,9 +81,6 @@ export default function OperationsDetailPagination({
                     </PaginationItem>
                 </PaginationContent>
             </Pagination>
-            <p className="text-muted-foreground/70 text-sm">
-                {totalItems} total
-            </p>
         </div>
     );
 }

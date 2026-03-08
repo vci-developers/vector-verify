@@ -29,7 +29,7 @@ export default function ReviewPage() {
     const accessibleSites = userPermissions.sites.canAccessSites;
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewTasksListPageClient accessibleSites={accessibleSites} />
+            <ReviewTasksListPageClient accessibleSites={accessibleSites} district={''} />
         </HydrationBoundary>
     );
 }
