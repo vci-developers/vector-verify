@@ -1,16 +1,17 @@
 'use client';
 
+import type { Site } from '@/api/site/validation/site-schema';
 import type { SessionState } from '@/api/session/validation/session-schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Home, Lock } from 'lucide-react';
 
-interface ReviewHouseCardProps {
-    siteId: number;
-    houseNumber: string | undefined;
+interface ReviewSiteCardProps {
+    site: Site;
     sessionCount: number;
     state: SessionState | undefined;
+    onClick: () => void;
 }
 
 const STATE_BADGE_VARIANT: Record<
@@ -24,35 +25,35 @@ const STATE_BADGE_VARIANT: Record<
     NOT_APPLICABLE: 'secondary',
 };
 
-function ActionButton({ state }: { state: SessionState | undefined }) {
-    if (!state || state === 'NEEDS_REVIEW') {
-        return (
-            <Button size="sm" className="w-full">
-                Begin Review
-            </Button>
-        );
-    }
-    if (state === 'IN_REVIEW') {
-        return (
-            <Button size="sm" variant="outline" className="w-full">
-                Continue Review
-            </Button>
-        );
-    }
-    return (
-        <Button size="sm" variant="ghost" className="w-full" disabled>
-            <Lock className="mr-2 h-3.5 w-3.5" />
-            Locked
-        </Button>
-    );
-}
+const ACTION_BUTTON_VARIANT: Record<
+    SessionState,
+    'default' | 'outline' | 'ghost'
+> = {
+    NEEDS_REVIEW: 'default',
+    IN_REVIEW: 'outline',
+    CERTIFIED: 'ghost',
+    SUBMITTED: 'ghost',
+    NOT_APPLICABLE: 'ghost',
+};
 
-export default function ReviewHouseCard({
-    siteId,
-    houseNumber,
+export default function ReviewSiteCard({
+    site,
     sessionCount,
     state,
-}: ReviewHouseCardProps) {
+    onClick,
+}: ReviewSiteCardProps) {
+    const isLocked =
+        state === 'CERTIFIED' ||
+        state === 'SUBMITTED' ||
+        state === 'NOT_APPLICABLE';
+
+    const buttonLabel =
+        !state || state === 'NEEDS_REVIEW'
+            ? 'Begin Review'
+            : state === 'IN_REVIEW'
+              ? 'Continue Review'
+              : 'Locked';
+
     return (
         <Card className="border-border/50 bg-card/50 transition-all duration-200 hover:shadow-md">
             <CardContent className="p-4">
@@ -62,15 +63,9 @@ export default function ReviewHouseCard({
                             <Home className="text-muted-foreground h-4 w-4" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">
-                                House ID
+                            <p className="font-semibold">
+                                {site.houseNumber ?? `Site ${site.siteId}`}
                             </p>
-                            <p className="font-semibold">{siteId}</p>
-                            {houseNumber && (
-                                <p className="text-muted-foreground text-xs">
-                                    {houseNumber}
-                                </p>
-                            )}
                         </div>
                     </div>
 
@@ -90,7 +85,24 @@ export default function ReviewHouseCard({
                     </div>
 
                     <div className="w-36">
-                        <ActionButton state={state} />
+                        <Button
+                            size="sm"
+                            variant={
+                                isLocked
+                                    ? 'ghost'
+                                    : ACTION_BUTTON_VARIANT[
+                                          state ?? 'NEEDS_REVIEW'
+                                      ]
+                            }
+                            className="w-full"
+                            disabled={isLocked}
+                            onClick={onClick}
+                        >
+                            {isLocked && (
+                                <Lock className="mr-2 h-3.5 w-3.5" />
+                            )}
+                            {buttonLabel}
+                        </Button>
                     </div>
                 </div>
             </CardContent>

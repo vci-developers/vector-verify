@@ -2,6 +2,14 @@ import { deviceSchema } from '@/api/device/validation/device-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
 import { z } from 'zod';
 
+export const sessionStateSchema = z.enum([
+    'NEEDS_REVIEW',
+    'IN_REVIEW',
+    'CERTIFIED',
+    'SUBMITTED',
+    'NOT_APPLICABLE',
+]);
+
 export const sessionSchema = z.object({
     sessionId: z.number(),
     frontendId: z.string(),
@@ -20,9 +28,7 @@ export const sessionSchema = z.object({
     hardwareId: z.string().nullable().optional(),
     type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']),
     expectedSpecimens: z.number().optional(),
-    state: z
-        .enum(['NEEDS_REVIEW', 'IN_REVIEW', 'CERTIFIED', 'SUBMITTED', 'NOT_APPLICABLE'])
-        .optional(),
+    state: sessionStateSchema.optional(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
     site: siteSchema.optional(),
@@ -30,4 +36,4 @@ export const sessionSchema = z.object({
 });
 
 export type Session = z.infer<typeof sessionSchema>;
-export type SessionState = NonNullable<Session['state']>;
+export type SessionState = z.infer<typeof sessionStateSchema>;

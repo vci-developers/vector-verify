@@ -4,13 +4,13 @@ import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import ReviewHouseListHeader from '@/features/review/components/house-list/review-house-list-header';
-import ReviewHouseList from '@/features/review/components/house-list/review-house-list';
+import ReviewSiteListHeader from '@/features/review/components/site-list/review-site-list-header';
+import ReviewSiteList from '@/features/review/components/site-list/review-site-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 
-export default function ReviewHouseListPageClient() {
+export default function ReviewSiteListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string | null>(
         null,
     );
@@ -18,16 +18,31 @@ export default function ReviewHouseListPageClient() {
         startOfMonth(new Date()),
     );
 
-    const { data: permissionsResult } = useGetUserPermissions();
+    const {
+        data: getUserPermissionsResult,
+        isPending,
+    } = useGetUserPermissions();
 
-    const districts = permissionsResult?.ok
-        ? [
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+        : [];
+
+    const districts = isPending
+        ? []
+        : [
               ...new Set(
-                  permissionsResult.data.permissions.sites.canAccessSites
+                  accessibleSites
                       .map(site => site.district?.trim())
-                      .filter((d): d is string => Boolean(d)),
+                      .filter((district): district is string =>
+                          Boolean(district),
+                      ),
               ),
-          ].sort()
+          ].sort();
+
+    const sitesInDistrict = selectedDistrict
+        ? accessibleSites.filter(
+              site => site.district?.trim() === selectedDistrict,
+          )
         : [];
 
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
@@ -41,7 +56,7 @@ export default function ReviewHouseListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <ReviewHouseListHeader
+                    <ReviewSiteListHeader
                         districts={districts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
@@ -49,7 +64,8 @@ export default function ReviewHouseListPageClient() {
                         onMonthChange={setSelectedMonth}
                     />
                     <Separator />
-                    <ReviewHouseList
+                    <ReviewSiteList
+                        sites={sitesInDistrict}
                         district={selectedDistrict}
                         startDate={startDate}
                         endDate={endDate}
