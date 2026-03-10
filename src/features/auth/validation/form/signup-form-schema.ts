@@ -3,6 +3,13 @@ import { z } from 'zod';
 export const signupFormSchema = z
     .object({
         email: z.email('Enter a valid email'),
+        name: z
+            .string()
+            .min(1, 'Name is required')
+            .max(128, 'Name is too long'),
+
+        // TODO: This should be a select input with options fetched from the server
+        programId: z.string().min(1, 'Program is required'),
         password: z
             .string()
             .min(1, 'Password is required')

@@ -20,8 +20,20 @@ import type { Result } from '@/lib/result/result';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import type { Program } from '@/api/program/validation/program-schema';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
-export default function SignupForm() {
+interface SignupFormProps {
+    programs: Program[];
+}
+
+export default function SignupForm({ programs }: SignupFormProps) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,6 +42,8 @@ export default function SignupForm() {
         resolver: zodResolver(signupFormSchema),
         defaultValues: {
             email: '',
+            name: '',
+            programId: '',
             password: '',
             confirmPassword: '',
         },
@@ -89,6 +103,66 @@ export default function SignupForm() {
                         </Field>
                     )}
                 />
+                <div className="flex gap-4">
+                    <Controller
+                        name="name"
+                        control={signupForm.control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel htmlFor="signup-name">
+                                    Name
+                                </FieldLabel>
+                                <Input
+                                    {...field}
+                                    id="signup-name"
+                                    aria-invalid={fieldState.invalid}
+                                    placeholder="Your name here"
+                                    autoComplete="off"
+                                />
+                            </Field>
+                        )}
+                    />
+
+                    <Controller
+                        name="programId"
+                        control={signupForm.control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel htmlFor="signup-program">
+                                    Program
+                                </FieldLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                >
+                                    <SelectTrigger
+                                        id="signup-program"
+                                        aria-invalid={fieldState.invalid}
+                                        className="w-full"
+                                    >
+                                        <SelectValue placeholder="Select a program" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {programs.map(program => (
+                                            <SelectItem
+                                                key={program.programId}
+                                                value={String(
+                                                    program.programId,
+                                                )}
+                                            >
+                                                {program.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {fieldState.invalid && (
+                                    <FieldError errors={[fieldState.error]} />
+                                )}
+                            </Field>
+                        )}
+                    />
+                </div>
+
                 <Controller
                     name="password"
                     control={signupForm.control}
