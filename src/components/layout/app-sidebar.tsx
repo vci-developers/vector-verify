@@ -3,6 +3,7 @@
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import {
+    Activity,
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
@@ -47,6 +48,12 @@ const navigation: NavigationItem[] = [
         href: '/',
         icon: LayoutDashboard,
         canAccess: () => true,
+    },
+    {
+        name: 'Operations',
+        href: '/operations',
+        icon: Activity,
+        canAccess: permissions => permissions.sites.viewSiteMetadata,
     },
     {
         name: 'Review',

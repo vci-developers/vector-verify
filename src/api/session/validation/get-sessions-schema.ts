@@ -10,7 +10,7 @@ export const getSessionsQueryParamsSchema = z.object({
     collectorName: z.string().optional(),
     collectionMethod: z.string().optional(),
     specimenCondition: z.string().optional(),
-    status: z.enum(['pending', 'completed', 'submitted']).optional(),
+    state: z.enum(['NEEDS_REVIEW', 'IN_REVIEW', 'CERTIFIED', 'SUBMITTED', 'NOT_APPLICABLE']).optional(),
     type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']).optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
