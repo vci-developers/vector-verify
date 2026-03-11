@@ -125,6 +125,9 @@ export default function SignupForm({ programs }: SignupFormProps) {
                                     placeholder="Your name here"
                                     autoComplete="off"
                                 />
+                                {fieldState.invalid && (
+                                    <FieldError errors={[fieldState.error]} />
+                                )}
                             </Field>
                         )}
                     />
