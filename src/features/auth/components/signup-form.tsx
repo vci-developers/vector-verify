@@ -56,14 +56,17 @@ export default function SignupForm({ programs }: SignupFormProps) {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+                ...data,
+                programId: parseInt(data.programId),
+            }),
         });
 
         const signupResult: Result<SignupSuccessPayload, NetworkError> =
             await response.json();
 
         if (!response.ok || !signupResult.ok) {
-            console.error('Signup failed');
+            console.error('Signup failed', signupResult);
             return;
         }
 
@@ -108,7 +111,10 @@ export default function SignupForm({ programs }: SignupFormProps) {
                         name="name"
                         control={signupForm.control}
                         render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
+                            <Field
+                                className="flex-1"
+                                data-invalid={fieldState.invalid}
+                            >
                                 <FieldLabel htmlFor="signup-name">
                                     Name
                                 </FieldLabel>
@@ -127,7 +133,10 @@ export default function SignupForm({ programs }: SignupFormProps) {
                         name="programId"
                         control={signupForm.control}
                         render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
+                            <Field
+                                className="min-w-0 flex-1"
+                                data-invalid={fieldState.invalid}
+                            >
                                 <FieldLabel htmlFor="signup-program">
                                     Program
                                 </FieldLabel>
