@@ -7,8 +7,6 @@ export const signupFormSchema = z
             .string()
             .min(1, 'Name is required')
             .max(128, 'Name is too long'),
-
-        // TODO: This should be a select input with options fetched from the server
         programId: z.string().min(1, 'Program is required'),
         password: z
             .string()
