@@ -27,7 +27,7 @@ interface OperationsTasksDetailsHeaderProps {
   activeView: ViewValue;
   onViewChange: (view: ViewValue) => void;
   district: string;
-  totalItems: number;
+  totalEntries: number;
   dateRange: DateRange | undefined;
   onDateRangeChange: (dateRange: DateRange | undefined) => void;
   onClearDateRange: () => void;
@@ -37,7 +37,7 @@ export default function OperationsDataHeader({
   activeView,
   onViewChange,
   district,
-  totalItems,
+  totalEntries,
   dateRange,
   onDateRangeChange,
   onClearDateRange,
@@ -50,7 +50,7 @@ export default function OperationsDataHeader({
         <h1 className="text-2xl font-bold capitalize">{district}</h1>
         <div className="flex items-center gap-2">
           <p className="text-muted-foreground/70 text-sm">
-            {totalItems} {activeView === "village" ? "villages" : "houses"}
+            {totalEntries} {activeView === "village" ? "villages" : "houses"}
           </p>
           <Popover>
             <PopoverTrigger asChild>
