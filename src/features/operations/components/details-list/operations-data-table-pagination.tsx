@@ -19,7 +19,7 @@ interface OperationsDetailPaginationProps {
     onNext: () => void;
 }
 
-export default function OperationsDetailPagination({
+export default function OperationsDataTablePagination({
     page,
     totalPages,
     pageRange,
@@ -36,33 +36,33 @@ export default function OperationsDetailPagination({
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onPrevious();
-                            }}
+                            onClick={onPrevious}
                             aria-disabled={isFirstPage}
-                            className={isFirstPage ? 'pointer-events-none opacity-50' : 'hover:bg-primary/10 cursor-pointer'}
+                            className={
+                                isFirstPage
+                                    ? 'pointer-events-none opacity-50'
+                                    : 'hover:bg-primary/10 cursor-pointer'
+                            }
                         />
                     </PaginationItem>
 
-                    {pageRange.map((pageNum, idx) =>
-                        pageNum === 'ellipsis' ? (
-                            <PaginationItem key={`ellipsis-${idx}`}>
+                    {pageRange.map((pageNumber, index) =>
+                        pageNumber === 'ellipsis' ? (
+                            <PaginationItem key={`ellipsis-${index}`}>
                                 <PaginationEllipsis />
                             </PaginationItem>
                         ) : (
-                            <PaginationItem key={pageNum}>
+                            <PaginationItem key={pageNumber}>
                                 <PaginationLink
-                                    href="#"
-                                    isActive={page === pageNum}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        onPageChange(pageNum);
-                                    }}
-                                    className={page === pageNum ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'hover:bg-primary/10 cursor-pointer'}
+                                    isActive={page === pageNumber}
+                                    onClick={() => onPageChange(pageNumber)}
+                                    className={
+                                        page === pageNumber
+                                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                            : 'hover:bg-primary/10 cursor-pointer'
+                                    }
                                 >
-                                    {pageNum}
+                                    {pageNumber}
                                 </PaginationLink>
                             </PaginationItem>
                         )
@@ -70,13 +70,13 @@ export default function OperationsDetailPagination({
 
                     <PaginationItem>
                         <PaginationNext
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onNext();
-                            }}
+                            onClick={onNext}
                             aria-disabled={isLastPage}
-                            className={isLastPage ? 'pointer-events-none opacity-50' : 'hover:bg-primary/10 cursor-pointer'}
+                            className={
+                                isLastPage
+                                    ? 'pointer-events-none opacity-50'
+                                    : 'hover:bg-primary/10 cursor-pointer'
+                            }
                         />
                     </PaginationItem>
                 </PaginationContent>

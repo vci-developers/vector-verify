@@ -2,11 +2,8 @@
 
 import type { Site } from "@/api/site/validation/site-schema";
 import { usePagination } from "@/lib/hooks/use-pagination";
-import { useEffect, useMemo } from "react";
-import type { ViewValue } from "./operations-details-header";
-import OperationsDetailPagination from "./operations-details-pagination";
-import { HouseRow, VillageRow } from "./operations-details-list-data";
-
+import { Fragment, useEffect } from "react";
+import type { ViewValue } from "./operations-data-table-page-client";
 import {
     Table,
     TableHeader,
@@ -14,13 +11,15 @@ import {
     TableHead,
     TableRow,
 } from "@/components/ui/table";
+import { HouseRow, VillageRow } from "./operations-data-table-row";
+import OperationsDataTablePagination from "@/features/operations/components/details-list/operations-data-table-pagination";
 
 interface OperationsDetailsListProps {
     accessibleSites: Site[];
     activeView: ViewValue;
 }
 
-export default function OperationsDetailsList({
+export default function OperationsDataTable({
     accessibleSites,
     activeView,
 }: OperationsDetailsListProps) {
@@ -36,31 +35,26 @@ export default function OperationsDetailsList({
 
     useEffect(() => {
         resetPage();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessibleSites, activeView]);
 
-    const houseItems = useMemo(() => {
-        return accessibleSites
-            .filter(site => site.houseNumber?.trim())
-            .sort((a, b) => (a.houseNumber ?? '').localeCompare(b.houseNumber ?? ''));
-    }, [accessibleSites]);
+    const houseItems = accessibleSites
+        .filter(site => site.houseNumber?.trim())
+        .sort((a, b) => (a.houseNumber ?? '').localeCompare(b.houseNumber ?? ''));
 
-    const villageItems = useMemo(() => {
-        const map = new Map<string, number[]>();
-        for (const site of accessibleSites) {
-            const village = site.villageName?.trim();
-            if (!village) continue;
-            const existing = map.get(village);
-            if (existing) {
-                existing.push(site.siteId);
-            } else {
-                map.set(village, [site.siteId]);
-            }
+    const villageMap = new Map<string, number[]>();
+    for (const site of accessibleSites) {
+        const village = site.villageName?.trim();
+        if (!village) continue;
+        const existing = villageMap.get(village);
+        if (existing) {
+            existing.push(site.siteId);
+        } else {
+            villageMap.set(village, [site.siteId]);
         }
-        return [...map.entries()]
-            .map(([name, siteIds]) => ({ name, siteIds }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, [accessibleSites]);
+    }
+    const villageItems = [...villageMap.entries()]
+        .map(([name, siteIds]) => ({ name, siteIds }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     const items = activeView === "village" ? villageItems : houseItems;
     const totalPages = Math.max(1, Math.ceil(items.length / limit));
@@ -116,9 +110,9 @@ export default function OperationsDetailsList({
             )}
 
             {totalPages > 1 && (
-                <>
+                <Fragment>
                     <div className="border-border/50 border-t" />
-                    <OperationsDetailPagination
+                    <OperationsDataTablePagination
                         page={page}
                         totalPages={totalPages}
                         pageRange={createPageRange(totalPages)}
@@ -126,7 +120,7 @@ export default function OperationsDetailsList({
                         onPrevious={() => previousPage(totalPages)}
                         onNext={() => nextPage(totalPages)}
                     />
-                </>
+                </Fragment>
             )}
         </div>
     );

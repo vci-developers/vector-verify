@@ -1,46 +1,47 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import type { Site } from '@/api/site/validation/site-schema';
+import { useState } from 'react';
+import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckSquareIcon } from 'lucide-react';
-import OperationsTasksDetailsHeader, { type ViewValue } from './operations-details-header';
-import OperationsDetailsList from './operations-details-list';
+import { Microscope } from 'lucide-react';
+export type ViewValue = "village" | "house" | "";
 import type { DateRange } from 'react-day-picker';
+import OperationsDataHeader from './operations-data-header';
+import OperationsDataTable from './operations-data-table';
 
-interface ReviewTasksListPageClientProps {
-    accessibleSites: Site[];
+
+interface OperationsDataTablePageClientProps {
     district: string;
 }
 
-export default function ReviewTasksListPageClient({
-    accessibleSites,
+export default function OperationsDataTablePageClient({
     district,
-}: ReviewTasksListPageClientProps) {
+}: OperationsDataTablePageClientProps) {
     const [activeView, setActiveView] = useState<ViewValue>("house");
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
-    const totalItems = useMemo(() => {
-        if (activeView === "village") {
-            return new Set(
-                accessibleSites
-                    .map(s => s.villageName?.trim())
-                    .filter(Boolean)
-            ).size;
-        }
-        return accessibleSites.filter(s => s.houseNumber?.trim()).length;
-    }, [accessibleSites, activeView]);
+    const { data: getUserPermissionsResult } = useGetUserPermissions();
+
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites.filter(
+            site => site.district?.toLowerCase() === district.toLowerCase()
+        )
+        : [];
+
+    const totalItems = activeView === "village"
+        ? new Set(accessibleSites.map(s => s.villageName?.trim()).filter(Boolean)).size
+        : accessibleSites.filter(s => s.houseNumber?.trim()).length;
 
     return (
         <PageShell
             title="Operations Details"
             description="View operations details for each district"
-            icon={CheckSquareIcon}
+            icon={Microscope}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <OperationsTasksDetailsHeader
+                    <OperationsDataHeader
                         activeView={activeView}
                         onViewChange={setActiveView}
                         district={district}
@@ -51,7 +52,7 @@ export default function ReviewTasksListPageClient({
                     />
 
 
-                    <OperationsDetailsList
+                    <OperationsDataTable
                         accessibleSites={accessibleSites}
                         activeView={activeView}
                     />

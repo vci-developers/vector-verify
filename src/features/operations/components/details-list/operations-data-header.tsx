@@ -21,8 +21,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import type { DateRange } from "react-day-picker";
-
-export type ViewValue = "village" | "house" | "";
+import type { ViewValue } from "./operations-data-table-page-client";
 
 interface OperationsTasksDetailsHeaderProps {
   activeView: ViewValue;
@@ -34,7 +33,7 @@ interface OperationsTasksDetailsHeaderProps {
   onClearDateRange: () => void;
 }
 
-export default function OperationsTasksDetailsHeader({
+export default function OperationsDataHeader({
   activeView,
   onViewChange,
   district,
