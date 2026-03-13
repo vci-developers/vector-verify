@@ -44,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local development notes (not for sharing)
+IMPLEMENTATION_GUIDELINES.md
