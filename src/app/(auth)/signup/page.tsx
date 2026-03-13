@@ -3,13 +3,15 @@ import AuthShell from '@/features/auth/components/auth-shell';
 import SignupForm from '@/features/auth/components/signup-form';
 import Link from 'next/link';
 
-export default function SignupPage() {
+export default async function SignupPage() {
+    const authShellProps = {
+        title: 'Create your account',
+        description: 'Set up access to your VectorVerify workspace.',
+        imageSrc: '/assets/auth/images/signup.png',
+    };
+
     return (
-        <AuthShell
-            title="Create your account"
-            description="Set up access to your VectorVerify workspace."
-            imageSrc="/assets/auth/images/signup.png"
-        >
+        <AuthShell {...authShellProps}>
             <SignupForm />
             <Separator className="my-6" />
             <p className="text-muted-foreground text-center text-sm">

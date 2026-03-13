@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 export const signupRequestSchema = z.object({
     email: z.email(),
+    name: z.string().min(1),
+    programId: z.number().int().positive(),
     password: z.string().min(1).max(128),
 });
 
