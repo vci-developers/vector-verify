@@ -4,7 +4,7 @@ import type { Result } from '@/lib/result/result';
 import {
     getProgramsResponseSchema,
     type GetProgramsResponseBody,
-} from './validation/get-programs-schema';
+} from '@/api/program/validation/get-programs-schema';
 
 export async function getPrograms(): Promise<
     Result<GetProgramsResponseBody, NetworkError>
