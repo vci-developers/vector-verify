@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { sessionSchema } from '@/api/session/validation/session-schema';
+import {
+    sessionSchema,
+    sessionStateSchema,
+    sessionTypeSchema,
+} from '@/api/session/validation/session-schema';
 
 export const getSessionsQueryParamsSchema = z.object({
     siteId: z.coerce.number().optional(),
@@ -10,8 +14,8 @@ export const getSessionsQueryParamsSchema = z.object({
     collectorName: z.string().optional(),
     collectionMethod: z.string().optional(),
     specimenCondition: z.string().optional(),
-    state: z.enum(['NEEDS_REVIEW', 'IN_REVIEW', 'CERTIFIED', 'SUBMITTED', 'NOT_APPLICABLE']).optional(),
-    type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']).optional(),
+    state: sessionStateSchema.optional(),
+    type: sessionTypeSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     limit: z.coerce.number().min(1).max(100).optional(),

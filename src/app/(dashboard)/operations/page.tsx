@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import { userKeys } from '@/api/user/user-keys';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
-import OperationsDistrictListPageClient from '@/features/operations/components/district-list/operations-district-list-page-client';
+import OperationsLocationListPageClient from '@/features/operations/components/district-list/operations-location-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -40,7 +40,7 @@ export default async function OperationsPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <OperationsDistrictListPageClient />
+            <OperationsLocationListPageClient />
         </HydrationBoundary>
     );
 }

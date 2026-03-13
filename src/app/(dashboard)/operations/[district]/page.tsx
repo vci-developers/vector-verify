@@ -5,8 +5,7 @@ interface OperationsDistrictPageProps {
 export default async function OperationsDistrictPage({
     params,
 }: OperationsDistrictPageProps) {
-    const { district } = await params;
-    const decodedDistrict = decodeURIComponent(district);
+    const district = decodeURIComponent((await params).district);
 
-    return <h1>{decodedDistrict}</h1>;
+    return <h1>{district}</h1>;
 }
