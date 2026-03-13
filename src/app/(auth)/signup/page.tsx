@@ -5,8 +5,10 @@ import SignupForm from '@/features/auth/components/signup-form';
 import Link from 'next/link';
 
 export default async function SignupPage() {
-    const programsResult = await getPrograms();
-    const programs = programsResult.ok ? programsResult.data.programs : [];
+    const getProgramsResult = await getPrograms();
+    const programs = getProgramsResult.ok
+        ? getProgramsResult.data.programs
+        : [];
 
     return (
         <AuthShell
