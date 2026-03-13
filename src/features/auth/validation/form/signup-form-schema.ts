@@ -7,7 +7,7 @@ export const signupFormSchema = z
             .string()
             .min(1, 'Name is required')
             .max(128, 'Name is too long'),
-        programId: z.string().min(1, 'Program is required'),
+        programId: z.number().nonnegative('Program is required'),
         password: z
             .string()
             .min(1, 'Password is required')

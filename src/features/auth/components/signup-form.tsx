@@ -43,7 +43,7 @@ export default function SignupForm({ programs }: SignupFormProps) {
         defaultValues: {
             email: '',
             name: '',
-            programId: '',
+            programId: -1,
             password: '',
             confirmPassword: '',
         },
@@ -56,10 +56,7 @@ export default function SignupForm({ programs }: SignupFormProps) {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({
-                ...data,
-                programId: parseInt(data.programId),
-            }),
+            body: JSON.stringify({ ...data }),
         });
 
         const signupResult: Result<SignupSuccessPayload, NetworkError> =
@@ -144,8 +141,14 @@ export default function SignupForm({ programs }: SignupFormProps) {
                                     Program
                                 </FieldLabel>
                                 <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
+                                    onValueChange={val =>
+                                        field.onChange(Number(val))
+                                    }
+                                    value={
+                                        field.value === -1
+                                            ? ''
+                                            : String(field.value)
+                                    }
                                 >
                                     <SelectTrigger
                                         id="signup-program"
