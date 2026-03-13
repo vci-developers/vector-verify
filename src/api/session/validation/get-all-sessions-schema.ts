@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
     sessionSchema,
     sessionStateSchema,
+    sessionTypeSchema,
 } from '@/api/session/validation/session-schema';
 
 export const getAllSessionsQueryParamsSchema = z.object({
@@ -9,12 +10,12 @@ export const getAllSessionsQueryParamsSchema = z.object({
     startDate: z.string(),
     endDate: z.string(),
     state: sessionStateSchema.optional(),
-    type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']).optional(),
+    type: sessionTypeSchema.optional(),
 });
 
 export const getAllSessionsResponseSchema = z.object({
-    sessions: z.array(sessionSchema),
     message: z.string(),
+    sessions: z.array(sessionSchema),
 });
 
 export type GetAllSessionsQueryParams = z.infer<

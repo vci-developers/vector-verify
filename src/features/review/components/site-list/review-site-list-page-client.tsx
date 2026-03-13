@@ -20,33 +20,36 @@ export default function ReviewSiteListPageClient() {
 
     const {
         data: getUserPermissionsResult,
-        isPending,
+        isPending: isGetUserPending,
     } = useGetUserPermissions();
 
-    const accessibleSites = getUserPermissionsResult?.ok
-        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
-        : [];
+    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
-    const districts = isPending
-        ? []
-        : [
-              ...new Set(
-                  accessibleSites
-                      .map(site => site.district?.trim())
-                      .filter((district): district is string =>
-                          Boolean(district),
-                      ),
-              ),
-          ].sort();
+    if (isGetUserPending || !getUserPermissionsResult) {
+        return <h1>LOADING...</h1>;
+    }
+
+    if (!getUserPermissionsResult.ok) {
+        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
+    }
+
+    const accessibleSites =
+        getUserPermissionsResult.data.permissions.sites.canAccessSites;
+
+    const districts = [
+        ...new Set(
+            accessibleSites
+                .map(site => site.district?.trim())
+                .filter((district): district is string => Boolean(district)),
+        ),
+    ].sort();
 
     const sitesInDistrict = selectedDistrict
         ? accessibleSites.filter(
               site => site.district?.trim() === selectedDistrict,
           )
         : [];
-
-    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
     return (
         <PageShell

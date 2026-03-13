@@ -20,8 +20,9 @@ export async function getAllSessions(
 ): Promise<Result<GetAllSessionsResponseBody, NetworkError>> {
     const allSessions: Session[] = [];
     let offset = 0;
+    let hasMore = false;
 
-    while (true) {
+    do {
         const queryString = constructQueryString(
             { ...queryParams, limit: PAGE_SIZE, offset },
             getSessionsQueryParamsSchema,
@@ -41,14 +42,12 @@ export async function getAllSessions(
         if (!result.ok) return result;
 
         allSessions.push(...result.data.sessions);
-
-        if (!result.data.hasMore) break;
-
+        hasMore = result.data.hasMore;
         offset += PAGE_SIZE;
-    }
+    } while (hasMore);
 
     return ok({
-        sessions: allSessions,
         message: `Retrieved ${allSessions.length} sessions`,
+        sessions: allSessions,
     });
 }

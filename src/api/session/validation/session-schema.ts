@@ -10,6 +10,13 @@ export const sessionStateSchema = z.enum([
     'NOT_APPLICABLE',
 ]);
 
+export const sessionTypeSchema = z.enum([
+    'SURVEILLANCE',
+    'DATA_COLLECTION',
+    'PRACTICE',
+    'CALIBRATION',
+]);
+
 export const sessionSchema = z.object({
     sessionId: z.number(),
     frontendId: z.string(),
@@ -26,7 +33,7 @@ export const sessionSchema = z.object({
     siteId: z.number(),
     deviceId: z.number(),
     hardwareId: z.string().nullable().optional(),
-    type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']),
+    type: sessionTypeSchema,
     expectedSpecimens: z.number().optional(),
     state: sessionStateSchema.optional(),
     latitude: z.number().nullable(),

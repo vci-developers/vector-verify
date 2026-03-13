@@ -1,42 +1,10 @@
 'use client';
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import type { Session, SessionState } from '@/api/session/validation/session-schema';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import ReviewSiteCard from '@/features/review/components/site-list/review-site-card';
 import { useRouter } from 'next/navigation';
-
-const STATE_PRIORITY: Record<SessionState, number> = {
-    NEEDS_REVIEW: 4,
-    IN_REVIEW: 3,
-    CERTIFIED: 2,
-    SUBMITTED: 1,
-    NOT_APPLICABLE: 0,
-};
-
-type SiteSessionSummary = { sessionCount: number; state: SessionState | undefined };
-
-function buildSessionMap(sessions: Session[]): Map<number, SiteSessionSummary> {
-    const sessionMap = new Map<number, SiteSessionSummary>();
-
-    for (const session of sessions) {
-        const existing = sessionMap.get(session.siteId);
-        if (existing) {
-            existing.sessionCount += 1;
-            if (
-                session.state !== undefined &&
-                (existing.state === undefined ||
-                    STATE_PRIORITY[session.state] > STATE_PRIORITY[existing.state])
-            ) {
-                existing.state = session.state;
-            }
-        } else {
-            sessionMap.set(session.siteId, { sessionCount: 1, state: session.state });
-        }
-    }
-
-    return sessionMap;
-}
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -81,7 +49,18 @@ export default function ReviewSiteList({
         return <h1>No sites found for this district.</h1>;
     }
 
-    const sessionMap = buildSessionMap(getAllSessionsResult.data.sessions);
+    const sessionMap = new Map<number, { sessionCount: number; state: SessionState | undefined }>();
+    for (const session of getAllSessionsResult.data.sessions) {
+        const existing = sessionMap.get(session.siteId);
+        if (existing) {
+            existing.sessionCount += 1;
+        } else {
+            sessionMap.set(session.siteId, {
+                sessionCount: 1,
+                state: session.state,
+            });
+        }
+    }
 
     return (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
