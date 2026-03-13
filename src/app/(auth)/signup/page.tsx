@@ -24,11 +24,7 @@ export default async function SignupPage() {
     const programs = getProgramsResult.data.programs;
 
     return (
-        <AuthShell
-            title="Create your account"
-            description="Set up access to your VectorVerify workspace."
-            imageSrc="/assets/auth/images/signup.png"
-        >
+        <AuthShell {...authShellProps}>
             <SignupForm programs={programs} />
             <Separator className="my-6" />
             <p className="text-muted-foreground text-center text-sm">
