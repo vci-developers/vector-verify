@@ -37,13 +37,13 @@ export default function SignupForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data: getProgramsResult, isLoading: isProgramsLoading } =
+    const { data: getProgramsResult, isPending: isGetsProgramsPending } =
         useGetPrograms();
     const programs = getProgramsResult?.ok
         ? getProgramsResult.data.programs
         : [];
     const hasProgramsError =
-        !isProgramsLoading && getProgramsResult?.ok === false;
+        !isGetsProgramsPending && getProgramsResult?.ok === false;
 
     const signupForm = useForm<SignupFormInput>({
         resolver: zodResolver(signupFormSchema),
@@ -63,7 +63,7 @@ export default function SignupForm() {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ ...data }),
+            body: JSON.stringify(data),
         });
 
         const signupResult: Result<SignupSuccessPayload, NetworkError> =
@@ -167,13 +167,13 @@ export default function SignupForm() {
                                         }
                                         className="w-full"
                                         disabled={
-                                            isProgramsLoading ||
+                                            isGetsProgramsPending ||
                                             hasProgramsError
                                         }
                                     >
                                         <SelectValue
                                             placeholder={
-                                                isProgramsLoading
+                                                isGetsProgramsPending
                                                     ? 'Loading programs...'
                                                     : hasProgramsError
                                                       ? 'Unable to load programs'
