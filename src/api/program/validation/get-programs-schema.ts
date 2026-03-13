@@ -9,4 +9,12 @@ export const getProgramsResponseSchema = z.object({
     hasMore: z.boolean(),
 });
 
+export const getProgramsQueryParamsSchema = z.object({
+    programId: z.coerce.number().optional(),
+    name: z.string().optional(),
+    country: z.string().optional(),
+    limit: z.coerce.number().min(1).max(100).optional(),
+    offset: z.coerce.number().min(0).optional(),
+});
+
 export type GetProgramsResponseBody = z.infer<typeof getProgramsResponseSchema>;
