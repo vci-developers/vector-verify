@@ -18,3 +18,6 @@ export const getProgramsQueryParamsSchema = z.object({
 });
 
 export type GetProgramsResponseBody = z.infer<typeof getProgramsResponseSchema>;
+export type GetProgramsQueryParams = z.infer<
+    typeof getProgramsQueryParamsSchema
+>;

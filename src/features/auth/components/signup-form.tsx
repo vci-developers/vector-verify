@@ -15,12 +15,14 @@ import {
     signupFormSchema,
     type SignupFormInput,
 } from '@/features/auth/validation/form/signup-form-schema';
-import type { NetworkError } from '@/lib/network/network-error';
+import {
+    networkErrorMessage,
+    type NetworkError,
+} from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
-import type { Program } from '@/api/program/validation/program-schema';
 import {
     Select,
     SelectContent,
@@ -28,15 +30,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 
-interface SignupFormProps {
-    programs: Program[];
-}
-
-export default function SignupForm({ programs }: SignupFormProps) {
+export default function SignupForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const { data: getProgramsResult, isLoading: isProgramsLoading } =
+        useGetPrograms();
+    const programs = getProgramsResult?.ok
+        ? getProgramsResult.data.programs
+        : [];
+    const hasProgramsError =
+        !isProgramsLoading && getProgramsResult?.ok === false;
 
     const signupForm = useForm<SignupFormInput>({
         resolver: zodResolver(signupFormSchema),
@@ -135,7 +142,9 @@ export default function SignupForm({ programs }: SignupFormProps) {
                         render={({ field, fieldState }) => (
                             <Field
                                 className="min-w-0 flex-1"
-                                data-invalid={fieldState.invalid}
+                                data-invalid={
+                                    fieldState.invalid || hasProgramsError
+                                }
                             >
                                 <FieldLabel htmlFor="signup-program">
                                     Program
@@ -152,10 +161,25 @@ export default function SignupForm({ programs }: SignupFormProps) {
                                 >
                                     <SelectTrigger
                                         id="signup-program"
-                                        aria-invalid={fieldState.invalid}
+                                        aria-invalid={
+                                            fieldState.invalid ||
+                                            hasProgramsError
+                                        }
                                         className="w-full"
+                                        disabled={
+                                            isProgramsLoading ||
+                                            hasProgramsError
+                                        }
                                     >
-                                        <SelectValue placeholder="Select a program" />
+                                        <SelectValue
+                                            placeholder={
+                                                isProgramsLoading
+                                                    ? 'Loading programs...'
+                                                    : hasProgramsError
+                                                      ? 'Unable to load programs'
+                                                      : 'Select a program'
+                                            }
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {programs.map(program => (
@@ -170,8 +194,24 @@ export default function SignupForm({ programs }: SignupFormProps) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
+                                {hasProgramsError &&
+                                getProgramsResult &&
+                                !getProgramsResult.ok ? (
+                                    <FieldError
+                                        errors={[
+                                            {
+                                                message: networkErrorMessage(
+                                                    getProgramsResult.error,
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                ) : (
+                                    fieldState.invalid && (
+                                        <FieldError
+                                            errors={[fieldState.error]}
+                                        />
+                                    )
                                 )}
                             </Field>
                         )}
