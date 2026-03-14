@@ -11,22 +11,17 @@ import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ReviewSiteListPageClient() {
-    const [selectedDistrict, setSelectedDistrict] = useState<string | null>(
-        null,
-    );
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
     );
 
     const {
         data: getUserPermissionsResult,
-        isPending: isGetUserPending,
+        isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
 
-    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
-
-    if (isGetUserPending || !getUserPermissionsResult) {
+    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return <h1>LOADING...</h1>;
     }
 
@@ -34,10 +29,13 @@ export default function ReviewSiteListPageClient() {
         return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
     }
 
+    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
+
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
-    const districts = [
+    const accessibleDistricts = [
         ...new Set(
             accessibleSites
                 .map(site => site.district?.trim())
@@ -45,7 +43,7 @@ export default function ReviewSiteListPageClient() {
         ),
     ].sort();
 
-    const sitesInDistrict = selectedDistrict
+    const sitesInAccessibleDistrict = selectedDistrict
         ? accessibleSites.filter(
               site => site.district?.trim() === selectedDistrict,
           )
@@ -60,15 +58,17 @@ export default function ReviewSiteListPageClient() {
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
                     <ReviewSiteListHeader
-                        districts={districts}
+                        districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
                     />
+
                     <Separator />
+                    
                     <ReviewSiteList
-                        sites={sitesInDistrict}
+                        sites={sitesInAccessibleDistrict}
                         district={selectedDistrict}
                         startDate={startDate}
                         endDate={endDate}

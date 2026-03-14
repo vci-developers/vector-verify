@@ -9,12 +9,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import MonthPicker from '@/features/review/components/site-list/month-picker';
+import MonthPicker from '@/components/ui/month-picker';
 
 interface ReviewSiteListHeaderProps {
     districts: string[];
-    selectedDistrict: string | null;
-    onDistrictChange: (district: string | null) => void;
+    selectedDistrict: string;
+    onDistrictChange: (district: string) => void;
     selectedMonth: Date;
     onMonthChange: (month: Date) => void;
 }
@@ -28,10 +28,7 @@ export default function ReviewSiteListHeader({
 }: ReviewSiteListHeaderProps) {
     return (
         <div className="flex items-center justify-between">
-            <Select
-                value={selectedDistrict ?? ''}
-                onValueChange={value => onDistrictChange(value || null)}
-            >
+            <Select value={selectedDistrict} onValueChange={onDistrictChange}>
                 <SelectTrigger className="w-52">
                     <SelectValue placeholder="Select a district" />
                 </SelectTrigger>
@@ -50,6 +47,7 @@ export default function ReviewSiteListHeader({
             <MonthPicker
                 selectedMonth={selectedMonth}
                 onMonthChange={onMonthChange}
+                maxDate={new Date()}
             />
         </div>
     );

@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
 import { userKeys } from '@/api/user/user-keys';
-import ReviewSiteListPageClient from '@/features/review/components/site-list/review-site-list-page-client';
+import ReviewSiteListPageClient from '@/features/review/components/site-list/page-client/review-site-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,

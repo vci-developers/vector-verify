@@ -3,18 +3,16 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import type { SessionState } from '@/api/session/validation/session-schema';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Home, Lock } from 'lucide-react';
+import { ChevronRight, Lock, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 interface ReviewSiteCardProps {
     site: Site;
     sessionCount: number;
-    state: SessionState | undefined;
-    onClick: () => void;
+    state?: SessionState;
 }
 
-const STATE_BADGE_VARIANT: Record<
+const STATE_VARIANTS: Record<
     SessionState,
     'default' | 'destructive' | 'outline' | 'secondary'
 > = {
@@ -25,87 +23,75 @@ const STATE_BADGE_VARIANT: Record<
     NOT_APPLICABLE: 'secondary',
 };
 
-const ACTION_BUTTON_VARIANT: Record<
-    SessionState,
-    'default' | 'outline' | 'ghost'
-> = {
-    NEEDS_REVIEW: 'default',
-    IN_REVIEW: 'outline',
-    CERTIFIED: 'ghost',
-    SUBMITTED: 'ghost',
-    NOT_APPLICABLE: 'ghost',
-};
+const LOCKED_STATES: SessionState[] = [
+    'CERTIFIED',
+    'SUBMITTED',
+    'NOT_APPLICABLE',
+];
 
 export default function ReviewSiteCard({
     site,
     sessionCount,
     state,
-    onClick,
 }: ReviewSiteCardProps) {
-    const isLocked =
-        state === 'CERTIFIED' ||
-        state === 'SUBMITTED' ||
-        state === 'NOT_APPLICABLE';
+    const isLocked = sessionCount === 0 || (state && LOCKED_STATES.includes(state));
 
-    const buttonLabel =
-        !state || state === 'NEEDS_REVIEW'
-            ? 'Begin Review'
-            : state === 'IN_REVIEW'
-              ? 'Continue Review'
-              : 'Locked';
-
-    return (
-        <Card className="border-border/50 bg-card/50 transition-all duration-200 hover:shadow-md">
-            <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
+    if (isLocked) {
+        return (
+            <div className="cursor-not-allowed opacity-60">
+                <div className="border-border/50 bg-card/50 flex items-center justify-between gap-4 rounded-lg border p-4">
                     <div className="flex items-center gap-3">
-                        <div className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                            <Home className="text-muted-foreground h-4 w-4" />
+                        <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                            <MapPin className="text-primary h-5 w-5" />
                         </div>
                         <div>
-                            <p className="font-semibold">
+                            <p className="font-medium">
                                 {site.houseNumber ?? `Site ${site.siteId}`}
+                            </p>
+                            <p className="text-muted-foreground text-sm">
+                                {sessionCount} session
+                                {sessionCount !== 1 && 's'}
                             </p>
                         </div>
                     </div>
+                    <div className="flex items-center gap-3">
+                        {state && (
+                            <Badge variant={STATE_VARIANTS[state]}>
+                                {state.replaceAll('_', ' ')}
+                            </Badge>
+                        )}
+                        <Lock className="text-muted-foreground h-4 w-4" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
+    return (
+        <Link href={`/review/${site.district}/${site.siteId}`}>
+            <div className="border-border/50 bg-card/50 hover:bg-muted/50 flex items-center justify-between gap-4 rounded-lg border p-4 transition-colors">
+                <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                        <MapPin className="text-primary h-5 w-5" />
+                    </div>
+                    <div>
+                        <p className="font-medium">
+                            {site.houseNumber ?? `Site ${site.siteId}`}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                            {sessionCount} session{sessionCount !== 1 && 's'}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
                     {state && (
-                        <Badge variant={STATE_BADGE_VARIANT[state]}>
+                        <Badge variant={STATE_VARIANTS[state]}>
                             {state.replaceAll('_', ' ')}
                         </Badge>
                     )}
+                    <ChevronRight className="text-muted-foreground h-4 w-4" />
                 </div>
-
-                <div className="mt-4 flex items-center justify-between gap-4">
-                    <div>
-                        <p className="text-xs text-muted-foreground">
-                            Sessions
-                        </p>
-                        <p className="text-sm font-medium">{sessionCount}</p>
-                    </div>
-
-                    <div className="w-36">
-                        <Button
-                            size="sm"
-                            variant={
-                                isLocked
-                                    ? 'ghost'
-                                    : ACTION_BUTTON_VARIANT[
-                                          state ?? 'NEEDS_REVIEW'
-                                      ]
-                            }
-                            className="w-full"
-                            disabled={isLocked}
-                            onClick={onClick}
-                        >
-                            {isLocked && (
-                                <Lock className="mr-2 h-3.5 w-3.5" />
-                            )}
-                            {buttonLabel}
-                        </Button>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+            </div>
+        </Link>
     );
 }
