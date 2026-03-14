@@ -1,14 +1,14 @@
 interface ErrorBannerProps {
-    errorMessage: string;
+    message: string;
 }
 
-export default function ErrorBanner({ errorMessage }: ErrorBannerProps) {
+export default function ErrorBanner({ message }: ErrorBannerProps) {
     return (
         <div
             role="alert"
             className="bg-destructive/10 text-destructive rounded-md p-4 text-sm"
         >
-            {errorMessage}
+            {message}
         </div>
     );
 }

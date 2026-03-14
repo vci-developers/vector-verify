@@ -144,7 +144,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
 
                                 <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
                                     <div className="truncate text-sm font-medium">
-                                        {userProfile.email.split('@')[0]}
+                                        {userProfile.name ??
+                                            userProfile.email.split('@')[0]}
                                     </div>
                                 </div>
 
