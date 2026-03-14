@@ -4,11 +4,11 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { SessionState } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { Separator } from '@/components/ui/separator';
-import ReviewSiteCard from '@/features/review/components/site-list/review-site-card';
+import ReviewSiteCard from '@/features/review/components/sites-list/review-site-card';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ClipboardList } from 'lucide-react';
 import { Fragment, useEffect, useMemo } from 'react';
-import ReviewSitesListPagination from '@/features/review/components/site-list/review-site-list-pagination';
+import ReviewSitesListPagination from '@/features/review/components/sites-list/review-sites-list-pagination';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -17,7 +17,7 @@ interface ReviewSiteListProps {
     endDate: string;
 }
 
-export default function ReviewSiteList({
+export default function ReviewSitesList({
     sites,
     district,
     startDate,

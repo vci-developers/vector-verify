@@ -19,7 +19,7 @@ interface ReviewSiteListHeaderProps {
     onMonthChange: (month: Date) => void;
 }
 
-export default function ReviewSiteListHeader({
+export default function ReviewSitesListHeader({
     districts,
     selectedDistrict,
     onDistrictChange,

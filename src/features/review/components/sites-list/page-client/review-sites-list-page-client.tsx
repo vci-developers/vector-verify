@@ -4,13 +4,13 @@ import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import ReviewSiteListHeader from '@/features/review/components/site-list/review-site-list-header';
-import ReviewSiteList from '@/features/review/components/site-list/review-site-list';
+import ReviewSitesListHeader from '@/features/review/components/sites-list/review-sites-list-header';
+import ReviewSitesList from '@/features/review/components/sites-list/review-sites-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 
-export default function ReviewSiteListPageClient() {
+export default function ReviewSitesListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
@@ -57,7 +57,7 @@ export default function ReviewSiteListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <ReviewSiteListHeader
+                    <ReviewSitesListHeader
                         districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
@@ -66,8 +66,8 @@ export default function ReviewSiteListPageClient() {
                     />
 
                     <Separator />
-                    
-                    <ReviewSiteList
+
+                    <ReviewSitesList
                         sites={sitesInAccessibleDistrict}
                         district={selectedDistrict}
                         startDate={startDate}
