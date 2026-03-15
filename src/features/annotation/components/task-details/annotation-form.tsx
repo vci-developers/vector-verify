@@ -46,6 +46,10 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from '@/components/ui/multi-select';
+import {
+    deserializeAnnotationFormArtifacts,
+    serializeAnnotationFormArtifacts,
+} from '@/features/annotation/lib/annotation-form-artifacts-serializer';
 
 interface AnnotationFormProps {
     annotation: Annotation;
@@ -54,7 +58,6 @@ interface AnnotationFormProps {
     onCancel?: () => void;
 }
 
-// TODO: HANDLE ARTIFACTS AS SOON AS THE BACKEND MAKES IT AVAILABLE
 export default function AnnotationForm({
     annotation,
     isSubmitting,
@@ -72,6 +75,7 @@ export default function AnnotationForm({
             visualSex: (annotation.visualSex as Sex) ?? undefined,
             visualAbdomenStatus:
                 (annotation.visualAbdomenStatus as AbdomenStatus) ?? undefined,
+            artifacts: deserializeAnnotationFormArtifacts(annotation.artifacts),
             notes: annotation.notes ?? undefined,
             isFlagged: annotation.status === 'FLAGGED',
         },
@@ -148,6 +152,7 @@ export default function AnnotationForm({
             visualSpecies,
             visualSex: formInput.visualSex,
             visualAbdomenStatus: formInput.visualAbdomenStatus,
+            artifacts: serializeAnnotationFormArtifacts(formInput.artifacts),
             notes: formInput.notes,
             status: formInput.isFlagged ? 'FLAGGED' : 'ANNOTATED',
         });
@@ -455,9 +460,10 @@ export default function AnnotationForm({
                                     pressed={field.value}
                                     onPressedChange={handleIsFlaggedChange}
                                     aria-label="Flag for review"
+                                    className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
                                 >
                                     <Flag className="mr-2 h-4 w-4" />
-                                    Flag Specimen
+                                    {field.value ? "Specimen Flagged" : "Flag Specimen"}
                                 </Toggle>
                             )}
                         />
