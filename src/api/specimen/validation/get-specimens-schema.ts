@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
+import { sessionTypeSchema } from '@/api/session/validation/session-schema';
 
 export const getSpecimensQueryParamsSchema = z.object({
     sessionId: z.coerce.number().optional(),
@@ -13,7 +14,7 @@ export const getSpecimensQueryParamsSchema = z.object({
     species: z.string().optional(),
     sex: z.string().optional(),
     abdomenStatus: z.string().optional(),
-    sessionType: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']).optional(),
+    sessionType: sessionTypeSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     limit: z.coerce.number().min(1).max(100).optional(),

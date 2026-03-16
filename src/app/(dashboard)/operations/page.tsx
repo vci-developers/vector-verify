@@ -1,81 +1,43 @@
-'use client';
-
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { Fragment, useState } from 'react';
-import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
+import { getUserPermissions } from '@/api/user/get-user-permissions';
+import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
+import { userKeys } from '@/api/user/user-keys';
+import ReviewSitesListPageClient from '@/features/review/components/sites-list/page-client/review-sites-list-page-client';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select';
+    dehydrate,
+    HydrationBoundary,
+    QueryClient,
+} from '@tanstack/react-query';
+import { redirect } from 'next/navigation';
 
-export default function OperationsPage() {
+export default async function ReviewSiteListPage() {
+    const queryClient = new QueryClient();
 
-    const router = useRouter();
-    const [selectedDistrict, setSelectedDistrict] = useState<
-        string | undefined
-    >(undefined);
-    const {
-        data: getUserPermissionsResult,
-        isPending: isGetUserPermissionsPending,
-    } = useGetUserPermissions();
+    const authorizedGetUserPermissionsResult =
+        await withAuthSession<GetUserPermissionsResponseBody>(
+            async accessToken => {
+                const getUserPermissionsResult =
+                    await getUserPermissions(accessToken);
+                queryClient.setQueryData(
+                    userKeys.permissions(),
+                    getUserPermissionsResult,
+                );
+                return getUserPermissionsResult;
+            },
+        );
 
-    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+    if (!authorizedGetUserPermissionsResult.ok) {
+        if (authorizedGetUserPermissionsResult.error.kind === 'unauthorized') {
+            redirect('/login');
+        }
+        if (authorizedGetUserPermissionsResult.error.kind === 'forbidden') {
+            redirect('/forbidden');
+        }
     }
-
-    if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
-    }
-
-    const userPermissions: UserPermissions =
-        getUserPermissionsResult.data.permissions;
-    const districts = [
-        ...new Set(
-            userPermissions.sites.canAccessSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
-        ),
-    ].sort();
 
     return (
-        <Fragment>
-            <Select
-                onValueChange={setSelectedDistrict}
-                value={selectedDistrict}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Select a district to review" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectLabel>Accessible Sites</SelectLabel>
-                        {districts.map(district => (
-                            <SelectItem key={district} value={district}>
-                                {district}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
-            <Button
-                disabled={!selectedDistrict}
-                onClick={() => {
-                    if (selectedDistrict) {
-                        router.push(
-                            `/operations/${encodeURIComponent(selectedDistrict)}`,
-                        );
-                    }
-                }}
-            >
-                View Data
-            </Button>
-        </Fragment>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <ReviewSitesListPageClient />
+        </HydrationBoundary>
     );
 }

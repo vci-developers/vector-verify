@@ -16,7 +16,7 @@ export function constructQueryString<T extends Record<string, QueryValue>>(
 
     const params = contract.safeParse(queryParams);
     if (!params.success) {
-        return '';
+        throw new Error(`Invalid query parameters: ${params.error.message}`);
     }
 
     const searchParams = new URLSearchParams();

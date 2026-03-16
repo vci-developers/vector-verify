@@ -13,7 +13,6 @@ import {
 interface AnnotationTasksPaginationProps {
     page: number;
     totalPages: number;
-    totalItems: number;
     pageRange: (number | 'ellipsis')[];
     onPageChange: (page: number) => void;
     onPrevious: () => void;
@@ -23,7 +22,6 @@ interface AnnotationTasksPaginationProps {
 export default function AnnotationTasksPagination({
     page,
     totalPages,
-    totalItems,
     pageRange,
     onPageChange,
     onPrevious,
@@ -34,14 +32,11 @@ export default function AnnotationTasksPagination({
 
     return (
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm whitespace-nowrap">
                 Page <span className="text-foreground font-medium">{page}</span>{' '}
                 of{' '}
                 <span className="text-foreground font-medium">
                     {totalPages}
-                </span>{' '}
-                <span className="text-muted-foreground/70">
-                    {totalItems} total
                 </span>
             </p>
 

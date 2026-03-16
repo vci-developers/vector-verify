@@ -2,6 +2,21 @@ import { deviceSchema } from '@/api/device/validation/device-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
 import { z } from 'zod';
 
+export const sessionStateSchema = z.enum([
+    'NEEDS_REVIEW',
+    'IN_REVIEW',
+    'CERTIFIED',
+    'SUBMITTED',
+    'NOT_APPLICABLE',
+]);
+
+export const sessionTypeSchema = z.enum([
+    'SURVEILLANCE',
+    'DATA_COLLECTION',
+    'PRACTICE',
+    'CALIBRATION',
+]);
+
 export const sessionSchema = z.object({
     sessionId: z.number(),
     frontendId: z.string(),
@@ -18,9 +33,9 @@ export const sessionSchema = z.object({
     siteId: z.number(),
     deviceId: z.number(),
     hardwareId: z.string().nullable().optional(),
-    type: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']),
+    type: sessionTypeSchema,
     expectedSpecimens: z.number().optional(),
-    state: z.enum(['NEEDS_REVIEW', 'IN_REVIEW', 'CERTIFIED', 'NOT_APPLICABLE']).optional(),
+    state: sessionStateSchema.optional(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
     site: siteSchema.optional(),
@@ -28,3 +43,4 @@ export const sessionSchema = z.object({
 });
 
 export type Session = z.infer<typeof sessionSchema>;
+export type SessionState = z.infer<typeof sessionStateSchema>;

@@ -4,9 +4,11 @@ import type { Annotation } from '@/api/annotation/validation/annotation-schema';
 import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
 import { Controller, useForm } from 'react-hook-form';
 import {
+    type AnnotationFormArtifact,
+    annotationFormArtifactSchema,
     type AnnotationFormInput,
     annotationFormSchema,
-} from '../../validation/annotation-form-schema';
+} from '@/features/annotation/validation/annotation-form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     abdomenStatusSchema,
@@ -37,6 +39,17 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Flag } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import {
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from '@/components/ui/multi-select';
+import {
+    deserializeAnnotationFormArtifacts,
+    serializeAnnotationFormArtifacts,
+} from '@/features/annotation/lib/annotation-form-artifacts-serializer';
 
 interface AnnotationFormProps {
     annotation: Annotation;
@@ -62,6 +75,7 @@ export default function AnnotationForm({
             visualSex: (annotation.visualSex as Sex) ?? undefined,
             visualAbdomenStatus:
                 (annotation.visualAbdomenStatus as AbdomenStatus) ?? undefined,
+            artifacts: deserializeAnnotationFormArtifacts(annotation.artifacts),
             notes: annotation.notes ?? undefined,
             isFlagged: annotation.status === 'FLAGGED',
         },
@@ -104,6 +118,14 @@ export default function AnnotationForm({
         annotationForm.clearErrors(['visualAbdomenStatus']);
     }
 
+    function handleArtifactSelected(values: string[]) {
+        annotationForm.setValue(
+            'artifacts',
+            values as AnnotationFormArtifact[],
+        );
+        annotationForm.clearErrors('artifacts');
+    }
+
     function handleIsFlaggedChange(value: boolean) {
         annotationForm.setValue('isFlagged', value);
         if (value) {
@@ -114,6 +136,7 @@ export default function AnnotationForm({
                 'visualAbdomenStatus',
             ]);
         } else {
+            annotationForm.clearErrors('artifacts');
             annotationForm.clearErrors('notes');
         }
     }
@@ -129,6 +152,7 @@ export default function AnnotationForm({
             visualSpecies,
             visualSex: formInput.visualSex,
             visualAbdomenStatus: formInput.visualAbdomenStatus,
+            artifacts: serializeAnnotationFormArtifacts(formInput.artifacts),
             notes: formInput.notes,
             status: formInput.isFlagged ? 'FLAGGED' : 'ANNOTATED',
         });
@@ -256,11 +280,12 @@ export default function AnnotationForm({
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="annotation-rhf-sex">
                                             Sex
-                                            {!watchIsFlagged && !isNonMosquito && (
-                                                <span className="text-destructive">
-                                                    (Required)
-                                                </span>
-                                            )}
+                                            {!watchIsFlagged &&
+                                                !isNonMosquito && (
+                                                    <span className="text-destructive">
+                                                        (Required)
+                                                    </span>
+                                                )}
                                         </FieldLabel>
                                         <Select
                                             disabled={isNonMosquito}
@@ -305,11 +330,13 @@ export default function AnnotationForm({
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="annotation-rhf-abdomen">
                                             Abdomen Status
-                                            {!watchIsFlagged && !isNonMosquito && !isMale && (
-                                                <span className="text-destructive">
-                                                    (Required)
-                                                </span>
-                                            )}
+                                            {!watchIsFlagged &&
+                                                !isNonMosquito &&
+                                                !isMale && (
+                                                    <span className="text-destructive">
+                                                        (Required)
+                                                    </span>
+                                                )}
                                         </FieldLabel>
                                         <Select
                                             disabled={isNonMosquito || isMale}
@@ -349,6 +376,48 @@ export default function AnnotationForm({
                                 )}
                             />
                         </div>
+
+                        <Controller
+                            name="artifacts"
+                            control={annotationForm.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel htmlFor="annotation-rhf-artifacts">
+                                        Artifacts
+                                        {watchIsFlagged && (
+                                            <span className="text-destructive">
+                                                (Required)
+                                            </span>
+                                        )}
+                                    </FieldLabel>
+                                    <MultiSelect
+                                        values={field.value ?? []}
+                                        onValuesChange={handleArtifactSelected}
+                                    >
+                                        <MultiSelectTrigger className="w-full">
+                                            <MultiSelectValue placeholder="Select artifacts..." />
+                                        </MultiSelectTrigger>
+                                        <MultiSelectContent>
+                                            {annotationFormArtifactSchema.options.map(
+                                                option => (
+                                                    <MultiSelectItem
+                                                        key={option}
+                                                        value={option}
+                                                    >
+                                                        {option}
+                                                    </MultiSelectItem>
+                                                ),
+                                            )}
+                                        </MultiSelectContent>
+                                    </MultiSelect>
+                                    {fieldState.invalid && (
+                                        <FieldError
+                                            errors={[fieldState.error]}
+                                        />
+                                    )}
+                                </Field>
+                            )}
+                        />
 
                         <Controller
                             name="notes"
@@ -391,9 +460,10 @@ export default function AnnotationForm({
                                     pressed={field.value}
                                     onPressedChange={handleIsFlaggedChange}
                                     aria-label="Flag for review"
+                                    className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
                                 >
                                     <Flag className="mr-2 h-4 w-4" />
-                                    Flag Specimen
+                                    {field.value ? "Specimen Flagged" : "Flag Specimen"}
                                 </Toggle>
                             )}
                         />

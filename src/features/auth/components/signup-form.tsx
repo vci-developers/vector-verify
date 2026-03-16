@@ -15,21 +15,42 @@ import {
     signupFormSchema,
     type SignupFormInput,
 } from '@/features/auth/validation/form/signup-form-schema';
-import type { NetworkError } from '@/lib/network/network-error';
+import {
+    networkErrorMessage,
+    type NetworkError,
+} from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 
 export default function SignupForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const { data: getProgramsResult, isPending: isGetsProgramsPending } =
+        useGetPrograms();
+    const programs = getProgramsResult?.ok
+        ? getProgramsResult.data.programs
+        : [];
+    const hasProgramsError =
+        !isGetsProgramsPending && getProgramsResult?.ok === false;
+
     const signupForm = useForm<SignupFormInput>({
         resolver: zodResolver(signupFormSchema),
         defaultValues: {
             email: '',
+            name: '',
+            programId: -1,
             password: '',
             confirmPassword: '',
         },
@@ -49,7 +70,7 @@ export default function SignupForm() {
             await response.json();
 
         if (!response.ok || !signupResult.ok) {
-            console.error('Signup failed');
+            console.error('Signup failed', signupResult);
             return;
         }
 
@@ -89,6 +110,114 @@ export default function SignupForm() {
                         </Field>
                     )}
                 />
+                <div className="flex gap-4">
+                    <Controller
+                        name="name"
+                        control={signupForm.control}
+                        render={({ field, fieldState }) => (
+                            <Field
+                                className="flex-1"
+                                data-invalid={fieldState.invalid}
+                            >
+                                <FieldLabel htmlFor="signup-name">
+                                    Name
+                                </FieldLabel>
+                                <Input
+                                    {...field}
+                                    id="signup-name"
+                                    aria-invalid={fieldState.invalid}
+                                    placeholder="Your name here"
+                                    autoComplete="off"
+                                />
+                                {fieldState.invalid && (
+                                    <FieldError errors={[fieldState.error]} />
+                                )}
+                            </Field>
+                        )}
+                    />
+
+                    <Controller
+                        name="programId"
+                        control={signupForm.control}
+                        render={({ field, fieldState }) => (
+                            <Field
+                                className="min-w-0 flex-1"
+                                data-invalid={
+                                    fieldState.invalid || hasProgramsError
+                                }
+                            >
+                                <FieldLabel htmlFor="signup-program">
+                                    Program
+                                </FieldLabel>
+                                <Select
+                                    onValueChange={val =>
+                                        field.onChange(Number(val))
+                                    }
+                                    value={
+                                        field.value === -1
+                                            ? ''
+                                            : String(field.value)
+                                    }
+                                >
+                                    <SelectTrigger
+                                        id="signup-program"
+                                        aria-invalid={
+                                            fieldState.invalid ||
+                                            hasProgramsError
+                                        }
+                                        className="w-full"
+                                        disabled={
+                                            isGetsProgramsPending ||
+                                            hasProgramsError
+                                        }
+                                    >
+                                        <SelectValue
+                                            placeholder={
+                                                isGetsProgramsPending
+                                                    ? 'Loading programs...'
+                                                    : hasProgramsError
+                                                      ? 'Unable to load programs'
+                                                      : 'Select a program'
+                                            }
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {programs.map(program => (
+                                            <SelectItem
+                                                key={program.programId}
+                                                value={String(
+                                                    program.programId,
+                                                )}
+                                            >
+                                                {program.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {hasProgramsError &&
+                                getProgramsResult &&
+                                !getProgramsResult.ok ? (
+                                    <FieldError
+                                        errors={[
+                                            {
+                                                message: networkErrorMessage(
+                                                    getProgramsResult.error,
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                ) : (
+                                    fieldState.invalid && (
+                                        <FieldError
+                                            errors={[fieldState.error]}
+                                        />
+                                    )
+                                )}
+                            </Field>
+                        )}
+                    />
+                </div>
+
                 <Controller
                     name="password"
                     control={signupForm.control}
