@@ -4,7 +4,7 @@ import type {
     GetAnnotationsResponseBody,
     GetAnnotationsQueryParams,
 } from '@/api/annotation/validation/get-annotations-schema';
-import AnnotationTaskDetailsPageClient from '@/features/annotation/components/task-details/annotation-task-details-page-client';
+import AnnotationTaskDetailsPageClient from '@/features/annotation/components/task-details/page-client/annotation-task-details-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -53,7 +53,7 @@ export default async function AnnotationTaskDetailsPage({
             redirect('/login');
         }
         if (authorizedGetPendingAnnotationsResult.error.kind === 'forbidden') {
-            return <h1>FORBIDDEN</h1>;
+            redirect('/forbidden');
         }
     }
 

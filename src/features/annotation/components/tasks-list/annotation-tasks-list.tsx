@@ -5,8 +5,9 @@ import type { GetAnnotationTasksQueryParams } from '@/api/annotation-task/valida
 import { type AnnotationTaskStatus } from '@/api/annotation-task/validation/annotation-task-schema';
 import { Fragment, useEffect } from 'react';
 import { usePagination } from '@/lib/hooks/use-pagination';
-import AnnotationTaskCard from './annotation-task-card';
-import AnnotationTasksPagination from './annotation-tasks-pagination';
+import AnnotationTaskCard from '@/features/annotation/components/tasks-list/annotation-task-card';
+import AnnotationTasksPagination from '@/features/annotation/components/tasks-list/annotation-tasks-pagination';
+import { Separator } from '@/components/ui/separator';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -27,7 +28,7 @@ export default function AnnotationTasksList({
         previousPage,
         resetPage,
         createPageRange,
-    } = usePagination();
+    } = usePagination({ limit: 10 });
 
     useEffect(() => {
         resetPage();
@@ -72,11 +73,11 @@ export default function AnnotationTasksList({
 
             {totalPages > 1 && (
                 <Fragment>
-                    <div className="border-border/50 border-t" />
+                    <Separator />
+                    
                     <AnnotationTasksPagination
                         page={page}
                         totalPages={totalPages}
-                        totalItems={totalItems}
                         pageRange={createPageRange(totalPages)}
                         onPageChange={newPage => goToPage(newPage, totalPages)}
                         onPrevious={() => previousPage(totalPages)}

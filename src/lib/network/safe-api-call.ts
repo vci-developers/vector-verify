@@ -26,7 +26,7 @@ export async function safeApiCall<T>(
     try {
         response = await fetch(constructUrl(path), {
             ...options,
-            cache: 'no-store',
+            cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
                 ...(options?.headers || {}),
