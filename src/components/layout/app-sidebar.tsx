@@ -6,6 +6,7 @@ import {
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
+    LogOut,
     PencilRuler,
     Microscope,
     type LucideIcon,
@@ -32,7 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
-import LogoutButton from '../auth-session/logout-button';
+import { useQueryClient } from '@tanstack/react-query';
 
 type NavigationItem = {
     name: string;
@@ -71,9 +72,11 @@ const navigation: NavigationItem[] = [
 
 interface AppSidebarProps {
     userProfile: UserProfile;
+    onLogout: () => Promise<void>;
 }
 
-export default function AppSidebar({ userProfile }: AppSidebarProps) {
+export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
+    const queryClient = useQueryClient();
     const pathname = usePathname();
     const {
         data: getUserPermissionsResult,
@@ -90,6 +93,11 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
 
     const userPermissions: UserPermissions =
         getUserPermissionsResult.data.permissions;
+
+    async function handleLogout() {
+        queryClient.clear();
+        await onLogout();
+    }
 
     return (
         <Sidebar collapsible="icon">
@@ -151,8 +159,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
 
                                 <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
                                     <div className="truncate text-sm font-medium">
-                                        {userProfile.name ??
-                                            userProfile.email.split('@')[0]}
+                                        {userProfile.email.split('@')[0]}
                                     </div>
                                 </div>
 
@@ -167,8 +174,12 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <LogoutButton />
+                            <DropdownMenuItem
+                                onClick={handleLogout}
+                                className="text-destructive"
+                            >
+                                <LogOut className="mr-2 h-4 w-4 text-inherit" />
+                                Log out
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

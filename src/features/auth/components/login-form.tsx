@@ -45,7 +45,6 @@ export default function LoginForm() {
 
         const loginResult: Result<LoginSuccessPayload, NetworkError> =
             await response.json();
-            
         if (!response.ok || !loginResult.ok) {
             console.error('Login Failed');
             return;

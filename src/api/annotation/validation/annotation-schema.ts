@@ -16,7 +16,6 @@ export const annotationSchema = z.object({
     visualSpecies: z.string().nullable(),
     visualSex: z.string().nullable(),
     visualAbdomenStatus: z.string().nullable(),
-    artifacts: z.string().nullable(),
     notes: z.string().nullable(),
     status: annotationStatusSchema,
     createdAt: z.number(),

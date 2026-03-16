@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Pencil } from 'lucide-react';
 import { Fragment } from 'react';
-import { deserializeAnnotationFormArtifacts } from '@/features/annotation/lib/annotation-form-artifacts-serializer';
-import { Badge } from '@/components/ui/badge';
 
 interface AnnotationReadonlyViewProps {
     annotation: Annotation;
@@ -18,9 +16,6 @@ export default function AnnotationReadonlyView({
     annotation,
     onEdit,
 }: AnnotationReadonlyViewProps) {
-    const annotationFormArtifacts = deserializeAnnotationFormArtifacts(
-        annotation.artifacts,
-    );
     return (
         <Card className="h-full">
             <CardHeader className="pb-2">
@@ -36,17 +31,13 @@ export default function AnnotationReadonlyView({
                     <div className="flex items-center justify-between">
                         <p className="text-muted-foreground text-sm">Species</p>
                         <p className="text-sm font-medium">
-                            {annotation.visualSpecies
-                                ? annotation.visualSpecies
-                                : '---'}
+                            {annotation.visualSpecies ?? '---'}
                         </p>
                     </div>
                     <div className="flex items-center justify-between">
                         <p className="text-muted-foreground text-sm">Sex</p>
                         <p className="text-sm font-medium">
-                            {annotation.visualSex
-                                ? annotation.visualSex
-                                : '---'}
+                            {annotation.visualSex ?? '---'}
                         </p>
                     </div>
                     <div className="flex items-center justify-between">
@@ -54,30 +45,10 @@ export default function AnnotationReadonlyView({
                             Abdomen Status
                         </p>
                         <p className="text-sm font-medium">
-                            {annotation.visualAbdomenStatus
-                                ? annotation.visualAbdomenStatus
-                                : '---'}
+                            {annotation.visualAbdomenStatus ?? '---'}
                         </p>
                     </div>
                 </div>
-
-                {annotationFormArtifacts.length > 0 && (
-                    <Fragment>
-                        <Separator />
-                        <div>
-                            <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
-                                Artifacts
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                {annotationFormArtifacts.map(artifact => (
-                                    <Badge key={artifact} variant="secondary">
-                                        {artifact}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
-                    </Fragment>
-                )}
 
                 {annotation.notes && (
                     <Fragment>

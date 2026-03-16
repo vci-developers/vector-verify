@@ -1,40 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 function clamp(currentPage: number, firstPage: number, lastPage: number) {
     return Math.min(Math.max(currentPage, firstPage), lastPage);
 }
 
-interface UsePaginationOptions {
-    limit?: number;
-}
-
-export function usePagination({ limit = 20 }: UsePaginationOptions = {}) {
+export function usePagination() {
+    const limit = 20 as const;
     const [page, setPage] = useState(1);
 
-    const goToPage = useCallback(
-        (newPage: number, totalPages: number) => {
-            setPage(clamp(newPage, 1, totalPages));
-        },
-        [setPage],
-    );
+    function goToPage(newPage: number, totalPages: number) {
+        setPage(clamp(newPage, 1, totalPages));
+    }
 
-    const nextPage = useCallback(
-        (totalPages: number) => {
-            setPage(previousPage => clamp(previousPage + 1, 1, totalPages));
-        },
-        [setPage],
-    );
+    function nextPage(totalPages: number) {
+        setPage(previousPage => clamp(previousPage + 1, 1, totalPages));
+    }
 
-    const previousPage = useCallback(
-        (totalPages: number) => {
-            setPage(previousPage => clamp(previousPage - 1, 1, totalPages));
-        },
-        [setPage],
-    );
+    function previousPage(totalPages: number) {
+        setPage(previousPage => clamp(previousPage - 1, 1, totalPages));
+    }
 
-    const resetPage = useCallback(() => {
+    function resetPage() {
         setPage(1);
-    }, [setPage]);
+    }
 
     function createPageRange(totalPages: number): (number | 'ellipsis')[] {
         const maxVisiblePages = 5;
