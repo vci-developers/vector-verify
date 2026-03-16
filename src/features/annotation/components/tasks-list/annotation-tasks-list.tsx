@@ -28,7 +28,7 @@ export default function AnnotationTasksList({
         previousPage,
         resetPage,
         createPageRange,
-    } = usePagination({ limit: 1 });
+    } = usePagination({ limit: 10 });
 
     useEffect(() => {
         resetPage();
