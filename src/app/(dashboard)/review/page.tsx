@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
 import { userKeys } from '@/api/user/user-keys';
-import ReviewSiteListPageClient from '@/features/review/components/site-list/review-site-list-page-client';
+import ReviewSitesListPageClient from '@/features/review/components/sites-list/page-client/review-sites-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -31,13 +31,13 @@ export default async function ReviewSiteListPage() {
             redirect('/login');
         }
         if (authorizedGetUserPermissionsResult.error.kind === 'forbidden') {
-            return <h1>FORBIDDEN</h1>;
+            redirect('/forbidden');
         }
     }
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewSiteListPageClient />
+            <ReviewSitesListPageClient />
         </HydrationBoundary>
     );
 }
