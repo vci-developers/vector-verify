@@ -6,6 +6,7 @@ import {
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
+    Microscope,
     PencilRuler,
     type LucideIcon,
 } from 'lucide-react';
@@ -48,10 +49,16 @@ const navigation: NavigationItem[] = [
         canAccess: () => true,
     },
     {
+        name: 'Operations',
+        href: '/operations',
+        icon: Microscope,
+        canAccess: permissions => permissions.sites.viewSiteMetadata,
+    },
+    {
         name: 'Review',
         href: '/review',
         icon: ClipboardCheck,
-        canAccess: permissions => permissions.sites.viewSiteMetadata,
+        canAccess: permissions => permissions.sites.writeSiteMetadata,
     },
     {
         name: 'Annotate',

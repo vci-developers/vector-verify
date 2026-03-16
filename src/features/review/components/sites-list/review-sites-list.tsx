@@ -39,7 +39,11 @@ export default function ReviewSitesList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions(
-            { district, startDate, endDate },
+            {
+                district,
+                ...(startDate && { startDate }),
+                ...(endDate && { endDate }),
+            },
             { enabled: !!district },
         );
 
