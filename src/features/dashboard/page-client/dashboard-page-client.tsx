@@ -5,7 +5,7 @@ export default function DashboardPageClient() {
     return (
         <PageShell
             title="Dashboard"
-            description="Welcome to VectorVerify! Use the navigation links to access different sections."
+            description="THIS IS TO TEST THAT PULL PREVIEW IS WORKING CORRECTLY."
             icon={LayoutDashboard}
         >
             <h1>Dashboard</h1>
