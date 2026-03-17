@@ -12,7 +12,7 @@ import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 
-const PAGE_SIZE = 100;
+const LIMIT = 100;
 
 export async function getAllSessions(
     accessToken: string,
@@ -20,11 +20,11 @@ export async function getAllSessions(
 ): Promise<Result<GetAllSessionsResponseBody, NetworkError>> {
     const allSessions: Session[] = [];
     let offset = 0;
-    let hasMore = false;
+    let hasMore = true;
 
-    do {
+    while (hasMore) {
         const queryString = constructQueryString(
-            { ...queryParams, limit: PAGE_SIZE, offset },
+            { ...queryParams, limit: LIMIT, offset },
             getSessionsQueryParamsSchema,
         );
 
@@ -43,11 +43,11 @@ export async function getAllSessions(
 
         allSessions.push(...result.data.sessions);
         hasMore = result.data.hasMore;
-        offset += PAGE_SIZE;
-    } while (hasMore);
-
+        offset += LIMIT;
+    }
+    
     return ok({
-        message: `Retrieved ${allSessions.length} sessions`,
+        message: `Retrieved ${allSessions.length} sessions successfully`,
         sessions: allSessions,
     });
 }
