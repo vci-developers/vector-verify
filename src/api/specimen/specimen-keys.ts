@@ -1,3 +1,4 @@
+import type { GetSpecimensCountQueryParams } from '@/api/specimen/validation/get-specimens-count-schema';
 import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
 
 export const specimenKeys = {
@@ -5,4 +6,6 @@ export const specimenKeys = {
     specimenById: (specimenId: number) => ['specimens', specimenId] as const,
     specimens: (queryParams?: GetSpecimensQueryParams) =>
         ['specimens', queryParams] as const,
+    specimensCount: (queryParams?: GetSpecimensCountQueryParams) =>
+        ['specimens', 'count', queryParams] as const,
 };
