@@ -45,7 +45,7 @@ export async function getAllSessions(
         hasMore = result.data.hasMore;
         offset += LIMIT;
     }
-    
+
     return ok({
         message: `Retrieved ${allSessions.length} sessions successfully`,
         sessions: allSessions,

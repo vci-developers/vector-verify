@@ -74,7 +74,7 @@ export default function AnnotationTasksList({
             {totalPages > 1 && (
                 <Fragment>
                     <Separator />
-                    
+
                     <AnnotationTasksPagination
                         page={page}
                         totalPages={totalPages}

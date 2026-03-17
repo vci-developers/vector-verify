@@ -7,7 +7,11 @@ export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
 
-    if (!pathname.includes('/forbidden') && PUBLIC_ROUTES.has(pathname) && accessToken) {
+    if (
+        !pathname.includes('/forbidden') &&
+        PUBLIC_ROUTES.has(pathname) &&
+        accessToken
+    ) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
