@@ -54,7 +54,6 @@ export default function OperationsSiteList({
         });
     }
 
-
     if (isGetAllSessionsPending || !getAllSessionsResult) {
         return <h1>LOADING...</h1>;
     }

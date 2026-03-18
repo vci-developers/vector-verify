@@ -13,12 +13,14 @@ export const annotationTaskSchema = z.object({
     title: z.string(),
     description: z.string(),
     status: annotationTaskStatusSchema,
-    annotationCounts: z.object({
-        total: z.number(),
-        pending: z.number(),
-        annotated: z.number(),
-        flagged: z.number(),
-    }).optional(),
+    annotationCounts: z
+        .object({
+            total: z.number(),
+            pending: z.number(),
+            annotated: z.number(),
+            flagged: z.number(),
+        })
+        .optional(),
     createdAt: z.number(),
     updatedAt: z.number(),
     annotator: userProfileSchema.optional(),

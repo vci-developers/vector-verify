@@ -463,7 +463,9 @@ export default function AnnotationForm({
                                     className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
                                 >
                                     <Flag className="mr-2 h-4 w-4" />
-                                    {field.value ? "Specimen Flagged" : "Flag Specimen"}
+                                    {field.value
+                                        ? 'Specimen Flagged'
+                                        : 'Flag Specimen'}
                                 </Toggle>
                             )}
                         />

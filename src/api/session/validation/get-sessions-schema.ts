@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { sessionSchema, sessionStateSchema, sessionTypeSchema } from '@/api/session/validation/session-schema';
+import {
+    sessionSchema,
+    sessionStateSchema,
+    sessionTypeSchema,
+} from '@/api/session/validation/session-schema';
 
 export const getSessionsQueryParamsSchema = z.object({
     siteId: z.coerce.number().optional(),

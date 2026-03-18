@@ -13,7 +13,9 @@ import OperationsSiteList from '../operations-site-list';
 export default function OperationsSiteListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [activeTab, setActiveTab] = useState('sites');
-    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(
+        undefined,
+    );
 
     const startDate = dateRange?.from
         ? format(dateRange.from, 'yyyy-MM-dd')
@@ -39,7 +41,9 @@ export default function OperationsSiteListPageClient() {
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
     const filteredAccessibleSites = selectedDistrict
-        ? accessibleSites.filter(site => site.district?.trim() === selectedDistrict)
+        ? accessibleSites.filter(
+              site => site.district?.trim() === selectedDistrict,
+          )
         : accessibleSites;
 
     const accessibleDistricts = [
@@ -49,7 +53,6 @@ export default function OperationsSiteListPageClient() {
                 .filter((district): district is string => Boolean(district)),
         ),
     ].sort();
-
 
     return (
         <PageShell

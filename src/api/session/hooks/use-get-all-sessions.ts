@@ -35,7 +35,8 @@ async function fetchAllSessions(
         },
     });
 
-    const getAllSessionsResult: GetAllSessionsQueryResult = await response.json();
+    const getAllSessionsResult: GetAllSessionsQueryResult =
+        await response.json();
     return getAllSessionsResult;
 }
 

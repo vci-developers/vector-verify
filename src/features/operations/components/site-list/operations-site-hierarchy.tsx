@@ -18,7 +18,8 @@ function getCompletenessBackgroundColor(
     mediumThreshold = 50,
 ): string {
     if (percentage >= highThreshold) return 'bg-success/10 hover:bg-success/20';
-    if (percentage >= mediumThreshold) return 'bg-warning/10 hover:bg-warning/20';
+    if (percentage >= mediumThreshold)
+        return 'bg-warning/10 hover:bg-warning/20';
     return 'bg-destructive/10 hover:bg-destructive/20';
 }
 
@@ -48,9 +49,20 @@ export default function SiteHierarchy({
     onToggle,
 }: SiteHierarchyProps) {
     const currentLevel = HIERARCHY_LEVELS[depth];
-    if (!currentLevel) return null;
-
     const isLeafLevel = depth === HIERARCHY_LEVELS.length - 1;
+
+    const sortedLocationEntries = useMemo(() => {
+        if (!currentLevel) return [];
+        const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
+            const locationName = site[currentLevel.key] ?? 'Unknown';
+            groups[locationName] ??= [];
+            groups[locationName].push(site);
+            return groups;
+        }, {});
+        return Object.entries(grouped).sort();
+    }, [sites, currentLevel]);
+
+    if (!currentLevel) return null;
 
     if (isLeafLevel) {
         return (
@@ -61,10 +73,11 @@ export default function SiteHierarchy({
                     const hasSessions = sessionCount > 0;
 
                     return (
-                        <Link key={site.siteId} href={`/operations/${site.district}/${site.siteId}`}>
-                            <div
-                                className="group hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-2 transition-colors"
-                            >
+                        <Link
+                            key={site.siteId}
+                            href={`/operations/${site.district}/${site.siteId}`}
+                        >
+                            <div className="group hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-2 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div
                                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
@@ -86,7 +99,9 @@ export default function SiteHierarchy({
                                     </span>
                                 </div>
                                 <Badge
-                                    variant={hasSessions ? 'default' : 'outline'}
+                                    variant={
+                                        hasSessions ? 'default' : 'outline'
+                                    }
                                 >
                                     {hasSessions
                                         ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
@@ -100,16 +115,6 @@ export default function SiteHierarchy({
         );
     }
 
-    const sortedLocationEntries = useMemo(() => {
-        const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
-            const locationName = site[currentLevel.key] ?? 'Unknown';
-            groups[locationName] ??= [];
-            groups[locationName].push(site);
-            return groups;
-        }, {});
-        return Object.entries(grouped).sort();
-    }, [sites, currentLevel]);
-
     return (
         <div className="space-y-1">
             {sortedLocationEntries.map(([locationName, sitesInLocation]) => {
@@ -118,9 +123,13 @@ export default function SiteHierarchy({
                 const coveredSites = sitesInLocation.filter(
                     site => (siteIdToSessionCounts.get(site.siteId) ?? 0) > 0,
                 );
-                const completenessPercentage = sitesInLocation.length > 0
-                    ? Math.round((coveredSites.length / sitesInLocation.length) * 100)
-                    : 0;
+                const completenessPercentage =
+                    sitesInLocation.length > 0
+                        ? Math.round(
+                              (coveredSites.length / sitesInLocation.length) *
+                                  100,
+                          )
+                        : 0;
 
                 return (
                     <Collapsible
@@ -152,7 +161,9 @@ export default function SiteHierarchy({
                                         {coveredSites.length} of{' '}
                                         {sitesInLocation.length} visited
                                     </span>
-                                    <CompletenessBox percentage={completenessPercentage} />
+                                    <CompletenessBox
+                                        percentage={completenessPercentage}
+                                    />
                                 </div>
                             </div>
                         </CollapsibleTrigger>
@@ -163,7 +174,9 @@ export default function SiteHierarchy({
                                         sites={sitesInLocation}
                                         depth={depth + 1}
                                         parentPath={currentPath}
-                                        siteIdToSessionCounts={siteIdToSessionCounts}
+                                        siteIdToSessionCounts={
+                                            siteIdToSessionCounts
+                                        }
                                         expandedSitePaths={expandedSitePaths}
                                         onToggle={onToggle}
                                     />
