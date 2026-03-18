@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import type { DateRange } from 'react-day-picker';
+import { format } from 'date-fns';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,8 +13,14 @@ import OperationsSiteList from '../operations-site-list';
 export default function OperationsSiteListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [activeTab, setActiveTab] = useState('sites');
-    const [startDate, setStartDate] = useState<string | undefined>(undefined);
-    const [endDate, setEndDate] = useState<string | undefined>(undefined);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+    const startDate = dateRange?.from
+        ? format(dateRange.from, 'yyyy-MM-dd')
+        : undefined;
+    const endDate = dateRange?.to
+        ? format(dateRange.to, 'yyyy-MM-dd')
+        : undefined;
 
     const {
         data: getUserPermissionsResult,
@@ -30,7 +38,7 @@ export default function OperationsSiteListPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
-    const filteredSites = selectedDistrict
+    const filteredAccessibleSites = selectedDistrict
         ? accessibleSites.filter(site => site.district?.trim() === selectedDistrict)
         : accessibleSites;
 
@@ -42,10 +50,6 @@ export default function OperationsSiteListPageClient() {
         ),
     ].sort();
 
-    function handleDateRangeChange(newStartDate?: string, newEndDate?: string) {
-        setStartDate(newStartDate);
-        setEndDate(newEndDate);
-    }
 
     return (
         <PageShell
@@ -59,13 +63,15 @@ export default function OperationsSiteListPageClient() {
                         districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
-                        onDateRangeChange={handleDateRangeChange}
+                        dateRange={dateRange}
+                        onDateRangeChange={setDateRange}
+                        onClearDateRange={() => setDateRange(undefined)}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                     />
 
                     <OperationsSiteList
-                        sites={filteredSites}
+                        sites={filteredAccessibleSites}
                         district={selectedDistrict}
                         startDate={startDate}
                         endDate={endDate}

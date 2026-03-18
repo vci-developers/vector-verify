@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import { userKeys } from '@/api/user/user-keys';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
-import OperationsSiteListPageClient from '@/features/operations/components/details-list/page-client/operations-site-list-page-client';
+import OperationsSiteListPageClient from '@/features/operations/components/site-list/page-client/operations-site-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';

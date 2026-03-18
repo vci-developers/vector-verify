@@ -54,6 +54,15 @@ export default function OperationsSiteList({
         });
     }
 
+
+    if (isGetAllSessionsPending || !getAllSessionsResult) {
+        return <h1>LOADING...</h1>;
+    }
+
+    if (!getAllSessionsResult.ok) {
+        return <h1>ERROR: {getAllSessionsResult.error.message}</h1>;
+    }
+
     if (!district) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -63,14 +72,6 @@ export default function OperationsSiteList({
                 <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
             </div>
         );
-    }
-
-    if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return <h1>LOADING...</h1>;
-    }
-
-    if (!getAllSessionsResult.ok) {
-        return <h1>ERROR: {getAllSessionsResult.error.message}</h1>;
     }
 
     if (sites.length === 0) {

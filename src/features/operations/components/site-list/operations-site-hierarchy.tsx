@@ -7,7 +7,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { CompletenessBox } from '@/components/ui/completeness-box';
+import { CompletenessBox } from '@/features/operations/components/site-list/completeness-box';
 import { ChevronRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';

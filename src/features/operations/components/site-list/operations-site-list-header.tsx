@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -26,7 +25,9 @@ interface OperationsDataHeaderProps {
   districts: string[];
   selectedDistrict: string;
   onDistrictChange: (district: string) => void;
-  onDateRangeChange: (startDate?: string, endDate?: string) => void;
+  dateRange: DateRange | undefined;
+  onDateRangeChange: (dateRange: DateRange | undefined) => void;
+  onClearDateRange: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
@@ -37,26 +38,11 @@ export default function OperationsDataHeader({
   districts,
   selectedDistrict,
   onDistrictChange,
+  dateRange,
   onDateRangeChange,
+  onClearDateRange,
 }: OperationsDataHeaderProps) {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const hasDateFilter = dateRange?.from || dateRange?.to;
-
-  function handleDateSelect(newRange: DateRange | undefined) {
-    setDateRange(newRange);
-    const startDate = newRange?.from
-      ? format(newRange.from, 'yyyy-MM-dd')
-      : undefined;
-    const endDate = newRange?.to
-      ? format(newRange.to, 'yyyy-MM-dd')
-      : undefined;
-    onDateRangeChange(startDate, endDate);
-  }
-
-  function handleClearDateRange() {
-    setDateRange(undefined);
-    onDateRangeChange(undefined, undefined);
-  }
 
   return (
     <div className="space-y-4">
@@ -97,7 +83,7 @@ export default function OperationsDataHeader({
                 mode="range"
                 numberOfMonths={2}
                 selected={dateRange}
-                onSelect={handleDateSelect}
+                onSelect={onDateRangeChange}
                 defaultMonth={dateRange?.to ?? dateRange?.from}
                 disabled={{ after: new Date() }}
                 autoFocus
@@ -108,7 +94,7 @@ export default function OperationsDataHeader({
           {hasDateFilter && (
             <Button
               variant="outline"
-              onClick={handleClearDateRange}
+              onClick={onClearDateRange}
               size="icon"
               className="text-muted-foreground hover:text-foreground h-8 w-8"
             >

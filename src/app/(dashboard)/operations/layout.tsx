@@ -43,7 +43,7 @@ export default async function OperationsLayout({
     }
 
     const userPermissions = authorizedGetUserPermissionsResult.data.permissions;
-    if (!userPermissions.annotations.viewAndWriteAnnotationTasks) {
+    if (!userPermissions.sites.viewSiteMetadata) {
         redirect('/forbidden');
     }
 
