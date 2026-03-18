@@ -1,3 +1,5 @@
+import { Spinner } from "@/components/ui/spinner";
+
 interface CompletenessBoxProps {
     percentage: number;
     isLoading?: boolean;
@@ -22,11 +24,11 @@ export function CompletenessBox({
     mediumThreshold = 50,
 }: CompletenessBoxProps) {
     if (isLoading) {
-        return <span className="px-2 py-1 rounded border bg-muted text-muted-foreground border-border">...%</span>;
+        return <span className="px-2 py-1 rounded border bg-muted text-muted-foreground border-border"><Spinner className="size-3" /></span>;
     }
     return (
         <span className={`px-2 py-1 rounded border ${getCompletenessColor(percentage, highThreshold, mediumThreshold)}`}>
-            {percentage}%
+            {Math.round(percentage)}%
         </span>
     );
 }
