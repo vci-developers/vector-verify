@@ -46,17 +46,13 @@ export default function AuthShell({
                         <span className="text-muted-foreground text-xl font-semibold">
                             VectorVerify
                         </span>
-                        <CardTitle className="mt-2 text-2xl">
-                            {title}
-                        </CardTitle>
+                        <CardTitle className="mt-2 text-2xl">{title}</CardTitle>
                         <CardDescription className="text-muted-foreground">
                             {description}
                         </CardDescription>
                     </CardHeader>
 
-                    <CardContent>
-                        {children}
-                    </CardContent>
+                    <CardContent>{children}</CardContent>
                 </Card>
             </div>
         </div>

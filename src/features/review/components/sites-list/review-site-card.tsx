@@ -34,7 +34,8 @@ export default function ReviewSiteCard({
     sessionCount,
     state,
 }: ReviewSiteCardProps) {
-    const isLocked = sessionCount === 0 || (state && LOCKED_STATES.includes(state));
+    const isLocked =
+        sessionCount === 0 || (state && LOCKED_STATES.includes(state));
 
     if (isLocked) {
         return (

@@ -15,6 +15,6 @@ export const inferenceResultSchema = z.object({
     sexInferenceDuration: z.number().nullable(),
     abdomenStatusLogits: z.array(z.number()),
     abdomenStatusInferenceDuration: z.number().nullable(),
-})
+});
 
 export type InferenceResult = z.infer<typeof inferenceResultSchema>;

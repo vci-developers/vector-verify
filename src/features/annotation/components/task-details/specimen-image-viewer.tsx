@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
