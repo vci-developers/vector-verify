@@ -6,7 +6,7 @@ export const getAllSpecimensQueryParamsSchema = z.object({
     sessionId: z.coerce.number().optional(),
     siteId: z.coerce.number().optional(),
     programId: z.coerce.number().optional(),
-    district: z.string().optional(),
+    district: z.string(),
     specimenId: z.string().optional(),
     shouldProcessFurther: z.coerce.boolean().optional(),
     hasImages: z.coerce.boolean().optional(),

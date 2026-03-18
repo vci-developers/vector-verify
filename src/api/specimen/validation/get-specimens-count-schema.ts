@@ -1,3 +1,5 @@
+import { sessionTypeSchema } from '@/api/session/validation/session-schema';
+import { siteSchema } from '@/api/site/validation/site-schema';
 import { z } from 'zod';
 
 export const getSpecimensCountQueryParamsSchema = z.object({
@@ -11,7 +13,7 @@ export const getSpecimensCountQueryParamsSchema = z.object({
     species: z.string().optional(),
     sex: z.string().optional(),
     abdomenStatus: z.string().optional(),
-    sessionType: z.enum(['SURVEILLANCE', 'DATA_COLLECTION']).optional(),
+    sessionType: sessionTypeSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
 });
@@ -26,24 +28,7 @@ export const specimensCountSchema = z.object({
 
 export const specimensCountDataSchema = z.object({
     siteId: z.number().optional(),
-    siteInfo: z
-        .object({
-            siteId: z.number().optional(),
-            programId: z.number(),
-            locationTypeId: z.number().optional(),
-            parentId: z.number().optional(),
-            name: z.string().optional(),
-            district: z.string().optional(),
-            subCounty: z.string().optional(),
-            parish: z.string().optional(),
-            villageName: z.string().optional(),
-            houseNumber: z.string().optional(),
-            isActive: z.boolean(),
-            hasData: z.boolean().optional(),
-            healthCenter: z.string().optional(),
-            locationHierarchy: z.record(z.string(), z.string()),
-        })
-        .optional(),
+    siteInfo: siteSchema.optional(),
     counts: z.array(specimensCountSchema),
     totalSpecimens: z.number(),
 });

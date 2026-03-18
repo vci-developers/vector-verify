@@ -9,6 +9,6 @@ export const specimenKeys = {
         ['specimens', queryParams] as const,
     specimensCount: (queryParams?: GetSpecimensCountQueryParams) =>
         ['specimens', 'count', queryParams] as const,
-    allSpecimens: (queryParams?: GetAllSpecimensQueryParams) =>
+    allSpecimens: (queryParams: GetAllSpecimensQueryParams) =>
         ['specimens', 'all', queryParams] as const,
 };

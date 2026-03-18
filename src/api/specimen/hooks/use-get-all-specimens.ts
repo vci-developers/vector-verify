@@ -20,7 +20,7 @@ type GetAllSpecimensQueryOptions = Omit<
 >;
 
 async function fetchAllSpecimens(
-    queryParams?: GetAllSpecimensQueryParams,
+    queryParams: GetAllSpecimensQueryParams,
 ): Promise<GetAllSpecimensQueryResult> {
     const queryString = constructQueryString(
         queryParams,
@@ -41,7 +41,7 @@ async function fetchAllSpecimens(
 }
 
 export function useGetAllSpecimens(
-    queryParams?: GetAllSpecimensQueryParams,
+    queryParams: GetAllSpecimensQueryParams,
     options?: GetAllSpecimensQueryOptions,
 ) {
     return useQuery({

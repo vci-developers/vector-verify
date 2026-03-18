@@ -12,7 +12,7 @@ import type { Result } from '@/lib/result/result';
 
 export async function getAllSpecimens(
     accessToken: string,
-    queryParams?: GetAllSpecimensQueryParams,
+    queryParams: GetAllSpecimensQueryParams,
 ): Promise<Result<GetAllSpecimensResponseBody, NetworkError>> {
     const queryString = constructQueryString<GetAllSpecimensQueryParams>(
         queryParams,
