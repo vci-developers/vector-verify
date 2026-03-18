@@ -93,4 +93,6 @@ export const annotationFormSchema = z
     });
 
 export type AnnotationFormInput = z.infer<typeof annotationFormSchema>;
-export type AnnotationFormArtifact = z.infer<typeof annotationFormArtifactSchema>;
+export type AnnotationFormArtifact = z.infer<
+    typeof annotationFormArtifactSchema
+>;
