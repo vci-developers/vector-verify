@@ -52,7 +52,7 @@ const navigation: NavigationItem[] = [
         name: 'Review',
         href: '/review',
         icon: ClipboardCheck,
-        canAccess: permissions => permissions.sites.viewSiteMetadata,
+        canAccess: permissions => permissions.sites.writeSiteMetadata,
     },
     {
         name: 'Operations',
