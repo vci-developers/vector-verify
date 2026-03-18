@@ -10,6 +10,7 @@ import {
 import { CompletenessBox } from '@/components/ui/completeness-box';
 import { ChevronRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
 function getCompletenessBackgroundColor(
     percentage: number,
@@ -99,19 +100,15 @@ export default function SiteHierarchy({
         );
     }
 
-    const sitesByLocationName = sites.reduce<Record<string, Site[]>>(
-        (groups, site) => {
+    const sortedLocationEntries = useMemo(() => {
+        const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
             const locationName = site[currentLevel.key] ?? 'Unknown';
             groups[locationName] ??= [];
             groups[locationName].push(site);
             return groups;
-        },
-        {},
-    );
-
-    const sortedLocationEntries = Object.entries(sitesByLocationName).sort(
-        ([a], [b]) => a.localeCompare(b),
-    );
+        }, {});
+        return Object.entries(grouped).sort();
+    }, [sites, currentLevel]);
 
     return (
         <div className="space-y-1">
