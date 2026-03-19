@@ -18,7 +18,7 @@ export const getSpecimensCountQueryParamsSchema = z.object({
     endDate: z.string().optional(),
 });
 
-export const specimensCountSchema = z.object({
+const specimensCountSchema = z.object({
     species: z.string(),
     sex: z.string(),
     abdomenStatus: z.string(),
@@ -26,7 +26,7 @@ export const specimensCountSchema = z.object({
     columnName: z.string(),
 });
 
-export const specimensCountDataSchema = z.object({
+const specimensCountDataSchema = z.object({
     siteId: z.number().optional(),
     siteInfo: siteSchema.optional(),
     counts: z.array(specimensCountSchema),
