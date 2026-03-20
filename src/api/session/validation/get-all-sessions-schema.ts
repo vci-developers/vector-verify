@@ -7,8 +7,8 @@ import {
 
 export const getAllSessionsQueryParamsSchema = z.object({
     district: z.string(),
-    startDate: z.string(),
-    endDate: z.string(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
     state: sessionStateSchema.optional(),
     type: sessionTypeSchema.optional(),
 });
