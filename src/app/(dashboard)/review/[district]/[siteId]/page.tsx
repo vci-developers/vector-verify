@@ -1,7 +1,7 @@
 import { getSessions } from '@/api/session/get-sessions';
 import type { GetSessionsResponseBody } from '@/api/session/validation/get-sessions-schema';
 import { sessionKeys } from '@/api/session/session-keys';
-import ReviewHousePageClient from '@/features/review/components/house-review/review-house-page-client';
+import ReviewSitePageClient from '@/features/review/components/site-review/review-site-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
 
-interface ReviewHousePageProps {
+interface ReviewSitePageProps {
     params: Promise<{
         district: string;
         siteId: string;
@@ -21,14 +21,12 @@ interface ReviewHousePageProps {
     }>;
 }
 
-export default async function ReviewHousePage({
+export default async function ReviewSitePage({
     params,
     searchParams,
-}: ReviewHousePageProps) {
-    const { district, siteId: siteIdParam } = await params;
+}: ReviewSitePageProps) {
+    const siteId = Number((await params).siteId);
     const { startDate, endDate } = await searchParams;
-
-    const siteId = Number(siteIdParam);
 
     const queryClient = new QueryClient();
     const queryParams = {
@@ -52,9 +50,8 @@ export default async function ReviewHousePage({
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewHousePageClient
+            <ReviewSitePageClient
                 siteId={siteId}
-                district={decodeURIComponent(district)}
                 startDate={startDate ?? ''}
                 endDate={endDate ?? ''}
             />

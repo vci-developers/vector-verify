@@ -4,27 +4,24 @@ import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useUpdateSession } from '@/api/session/hooks/use-update-session';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import ReviewStepIndicator from '@/features/review/components/house-review/review-step-indicator';
-import ReviewCertificationStep from '@/features/review/components/house-review/review-certification-step';
+import ReviewStepIndicator from '@/features/review/components/site-review/review-step-indicator';
+import ReviewCertificationStep from '@/features/review/components/site-review/review-certification-step';
 import { ClipboardCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
-interface ReviewHousePageClientProps {
+interface ReviewSitePageClientProps {
     siteId: number;
-    district: string;
     startDate: string;
     endDate: string;
 }
 
-export default function ReviewHousePageClient({
+export default function ReviewSitePageClient({
     siteId,
-    district,
     startDate,
     endDate,
-}: ReviewHousePageClientProps) {
+}: ReviewSitePageClientProps) {
     const router = useRouter();
     const { mutateAsync: updateSession, isPending: isUpdatingSession } =
         useUpdateSession();
@@ -36,7 +33,7 @@ export default function ReviewHousePageClient({
         return (
             <PageShell
                 title="Review"
-                description="Loading house data..."
+                description="Loading site data..."
                 icon={ClipboardCheck}
             >
                 <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
@@ -56,7 +53,7 @@ export default function ReviewHousePageClient({
         return (
             <PageShell
                 title="Review"
-                description="Error loading house data"
+                description="Error loading site data"
                 icon={ClipboardCheck}
             >
                 <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
@@ -120,7 +117,6 @@ export default function ReviewHousePageClient({
 
                 <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                     <CardContent className="p-6">
-                        <Separator className="mb-6" />
                         <ReviewCertificationStep
                             houseNumber={houseNumber}
                             startDate={startDate}
