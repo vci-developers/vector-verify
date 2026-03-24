@@ -10,6 +10,8 @@ interface ReviewSiteCardProps {
     site: Site;
     sessionCount: number;
     state?: SessionState;
+    startDate?: string;
+    endDate?: string;
 }
 
 const STATE_VARIANTS: Record<
@@ -33,7 +35,13 @@ export default function ReviewSiteCard({
     site,
     sessionCount,
     state,
+    startDate,
+    endDate,
 }: ReviewSiteCardProps) {
+    const dateParams =
+        startDate && endDate
+            ? `?startDate=${startDate}&endDate=${endDate}`
+            : '';
     const isLocked =
         sessionCount === 0 || (state && LOCKED_STATES.includes(state));
 
@@ -69,7 +77,7 @@ export default function ReviewSiteCard({
     }
 
     return (
-        <Link href={`/review/${site.district}/${site.siteId}`}>
+        <Link href={`/review/${site.district}/${site.siteId}${dateParams}`}>
             <div className="border-border/50 bg-card/50 hover:bg-muted/50 flex items-center justify-between gap-4 rounded-lg border p-4 transition-colors">
                 <div className="flex items-center gap-3">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">

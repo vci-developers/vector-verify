@@ -101,6 +101,8 @@ export default function ReviewSitesList({
                             site={site}
                             sessionCount={count ?? 0}
                             state={state}
+                            startDate={startDate}
+                            endDate={endDate}
                         />
                     );
                 })}
