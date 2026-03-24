@@ -18,7 +18,6 @@ export default async function OperationsPage() {
             async accessToken => {
                 const getUserPermissionsResult =
                     await getUserPermissions(accessToken);
-
                 queryClient.setQueryData(
                     userKeys.permissions(),
                     getUserPermissionsResult,
@@ -28,13 +27,11 @@ export default async function OperationsPage() {
         );
 
     if (!authorizedGetUserPermissionsResult.ok) {
-        if (
-            authorizedGetUserPermissionsResult.error.kind === 'unauthorized'
-        ) {
+        if (authorizedGetUserPermissionsResult.error.kind === 'unauthorized') {
             redirect('/login');
         }
         if (authorizedGetUserPermissionsResult.error.kind === 'forbidden') {
-            return <h1>FORBIDDEN</h1>;
+            redirect('/forbidden');
         }
     }
 

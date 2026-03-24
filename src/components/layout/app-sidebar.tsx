@@ -7,8 +7,8 @@ import {
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
-    LogOut,
     PencilRuler,
+    Microscope,
     type LucideIcon,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
-import { useQueryClient } from '@tanstack/react-query';
+import LogoutButton from '../auth-session/logout-button';
 
 type NavigationItem = {
     name: string;
@@ -59,6 +59,12 @@ const navigation: NavigationItem[] = [
         name: 'Review',
         href: '/review',
         icon: ClipboardCheck,
+        canAccess: permissions => permissions.sites.writeSiteMetadata,
+    },
+    {
+        name: 'Operations',
+        href: '/operations',
+        icon: Microscope,
         canAccess: permissions => permissions.sites.viewSiteMetadata,
     },
     {
@@ -72,11 +78,9 @@ const navigation: NavigationItem[] = [
 
 interface AppSidebarProps {
     userProfile: UserProfile;
-    onLogout: () => Promise<void>;
 }
 
-export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
-    const queryClient = useQueryClient();
+export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const pathname = usePathname();
     const {
         data: getUserPermissionsResult,
@@ -93,11 +97,6 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
 
     const userPermissions: UserPermissions =
         getUserPermissionsResult.data.permissions;
-
-    async function handleLogout() {
-        queryClient.clear();
-        await onLogout();
-    }
 
     return (
         <Sidebar collapsible="icon">
@@ -159,7 +158,8 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
 
                                 <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
                                     <div className="truncate text-sm font-medium">
-                                        {userProfile.email.split('@')[0]}
+                                        {userProfile.name ??
+                                            userProfile.email.split('@')[0]}
                                     </div>
                                 </div>
 
@@ -174,12 +174,8 @@ export default function AppSidebar({ userProfile, onLogout }: AppSidebarProps) {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={handleLogout}
-                                className="text-destructive"
-                            >
-                                <LogOut className="mr-2 h-4 w-4 text-inherit" />
-                                Log out
+                            <DropdownMenuItem asChild>
+                                <LogoutButton />
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
