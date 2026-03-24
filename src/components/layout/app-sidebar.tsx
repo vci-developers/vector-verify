@@ -8,7 +8,6 @@ import {
     ClipboardCheck,
     LayoutDashboard,
     PencilRuler,
-    Microscope,
     type LucideIcon,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -60,12 +59,6 @@ const navigation: NavigationItem[] = [
         href: '/review',
         icon: ClipboardCheck,
         canAccess: permissions => permissions.sites.writeSiteMetadata,
-    },
-    {
-        name: 'Operations',
-        href: '/operations',
-        icon: Microscope,
-        canAccess: permissions => permissions.sites.viewSiteMetadata,
     },
     {
         name: 'Annotate',
