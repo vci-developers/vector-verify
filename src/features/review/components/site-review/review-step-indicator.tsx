@@ -45,7 +45,7 @@ export default function ReviewStepIndicator({
                         </span>
                     </div>
                     {index < STEPS.length - 1 && (
-                        <div className="bg-border mb-5 mx-3 h-px w-16 shrink-0" />
+                        <div className="bg-border mx-3 mb-5 h-px w-16 shrink-0" />
                     )}
                 </div>
             ))}

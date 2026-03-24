@@ -13,8 +13,7 @@ export async function updateSession(
     sessionId: number,
     requestBody: UpdateSessionRequestBody,
 ): Promise<Result<UpdateSessionResponseBody, NetworkError>> {
-    const parsedRequestBody =
-        updateSessionRequestSchema.safeParse(requestBody);
+    const parsedRequestBody = updateSessionRequestSchema.safeParse(requestBody);
     if (!parsedRequestBody.success) {
         return err({ kind: 'client' });
     }

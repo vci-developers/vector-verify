@@ -68,8 +68,7 @@ export default function ReviewSitePageClient({
     }
 
     const sessions = getSessionsResult.data.sessions;
-    const houseNumber =
-        sessions[0]?.site?.houseNumber ?? `Site ${siteId}`;
+    const houseNumber = sessions[0]?.site?.houseNumber ?? `Site ${siteId}`;
     const formattedMonth = format(
         new Date(startDate + 'T00:00:00'),
         'MMMM yyyy',

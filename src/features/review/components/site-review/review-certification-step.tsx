@@ -24,7 +24,10 @@ export default function ReviewCertificationStep({
 }: ReviewCertificationStepProps) {
     const [isConfirmed, setIsConfirmed] = useState(false);
 
-    const formattedMonth = format(new Date(startDate + 'T00:00:00'), 'MMMM yyyy');
+    const formattedMonth = format(
+        new Date(startDate + 'T00:00:00'),
+        'MMMM yyyy',
+    );
 
     return (
         <div className="space-y-6">
@@ -75,7 +78,11 @@ export default function ReviewCertificationStep({
             </div>
 
             <div className="flex items-center justify-between">
-                <Button variant="outline" onClick={onBack} disabled={isCertifying}>
+                <Button
+                    variant="outline"
+                    onClick={onBack}
+                    disabled={isCertifying}
+                >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
