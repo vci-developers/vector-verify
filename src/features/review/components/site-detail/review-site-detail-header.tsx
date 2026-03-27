@@ -1,27 +1,30 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { Fragment } from 'react';
 import { cn } from '@/utils/cn';
 
+const Steps = [
+    { label: 'Form Comparison' },
+    { label: 'Image Review' },
+    { label: 'Certification' },
+];
+
 interface ReviewSiteDetailHeaderProps {
-    steps: { label: string }[];
     currentStep: number;
 }
 
 export default function ReviewSiteDetailHeader({
-    steps,
     currentStep,
 }: ReviewSiteDetailHeaderProps) {
     return (
-        <div className="flex items-center justify-center">
-            {steps.map((step, index) => {
+        <div className="flex items-center justify-center gap-4">
+            {Steps.map((step, index) => {
                 const stepNumber = index + 1;
                 const isCompleted = stepNumber < currentStep;
                 const isActive = stepNumber === currentStep;
 
                 return (
-                    <Fragment key={step.label}>
+                    <div key={step.label} className="flex items-center gap-4">
                         <div className="flex flex-col items-center gap-1">
                             <div
                                 className={cn(
@@ -53,15 +56,15 @@ export default function ReviewSiteDetailHeader({
                             </span>
                         </div>
 
-                        {index < steps.length - 1 && (
+                        {index < Steps.length - 1 && (
                             <div
                                 className={cn(
-                                    'mx-4 mb-5 h-px w-12',
+                                    'h-px w-12',
                                     isCompleted ? 'bg-primary' : 'bg-border',
                                 )}
                             />
                         )}
-                    </Fragment>
+                    </div>
                 );
             })}
         </div>
