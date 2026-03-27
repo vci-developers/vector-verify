@@ -42,8 +42,7 @@ const DATA_FIELDS: {
     },
     {
         label: 'LLINs Available',
-        render: (_, form) =>
-            form ? String(form.numLlinsAvailable) : 'N/A',
+        render: (_, form) => (form ? String(form.numLlinsAvailable) : 'N/A'),
     },
     {
         label: 'LLIN Type',
@@ -56,9 +55,7 @@ const DATA_FIELDS: {
     {
         label: 'People Under LLIN',
         render: (_, form) =>
-            form
-                ? (form.numPeopleSleptUnderLlin?.toString() ?? 'N/A')
-                : 'N/A',
+            form ? (form.numPeopleSleptUnderLlin?.toString() ?? 'N/A') : 'N/A',
     },
 ];
 

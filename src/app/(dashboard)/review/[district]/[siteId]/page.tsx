@@ -66,7 +66,11 @@ export default async function ReviewSiteDetailPage({
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <SurveillanceFormReviewPageClient siteId={siteId} startDate={startDate} endDate={endDate} />
+            <SurveillanceFormReviewPageClient
+                siteId={siteId}
+                startDate={startDate}
+                endDate={endDate}
+            />
         </HydrationBoundary>
     );
 }
