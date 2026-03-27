@@ -42,8 +42,7 @@ const DATA_FIELDS: {
     },
     {
         label: 'LLINs Available',
-        render: (_, form) =>
-            form ? String(form.numLlinsAvailable) : 'N/A',
+        render: (_, form) => (form ? String(form.numLlinsAvailable) : 'N/A'),
     },
     {
         label: 'LLIN Type',
@@ -56,9 +55,7 @@ const DATA_FIELDS: {
     {
         label: 'People Under LLIN',
         render: (_, form) =>
-            form
-                ? (form.numPeopleSleptUnderLlin?.toString() ?? 'N/A')
-                : 'N/A',
+            form ? (form.numPeopleSleptUnderLlin?.toString() ?? 'N/A') : 'N/A',
     },
 ];
 
@@ -76,12 +73,15 @@ export default function SurveillanceFormReviewTable({
     }
 
     return (
-        <Table className="border border-border rounded-md">
+        <Table className="border-border rounded-md border">
             <TableHeader>
                 <TableRow className="h-14">
-                    <TableHead className="w-48 border border-border" />
+                    <TableHead className="border-border w-48 border" />
                     {surveillanceForms.map(({ session }) => (
-                        <TableHead key={session.sessionId} className="border border-border">
+                        <TableHead
+                            key={session.sessionId}
+                            className="border-border border"
+                        >
                             {format(
                                 new Date(session.collectionDate),
                                 'MMM d, yyyy',
@@ -93,7 +93,7 @@ export default function SurveillanceFormReviewTable({
             <TableBody>
                 {DATA_FIELDS.map(field => (
                     <TableRow key={field.label} className="h-14">
-                        <TableCell className="w-48 border border-border font-medium">
+                        <TableCell className="border-border w-48 border font-medium">
                             {field.label}
                         </TableCell>
                         {surveillanceForms.map(({ session, form }) => {
@@ -109,7 +109,10 @@ export default function SurveillanceFormReviewTable({
                             }
 
                             return (
-                                <TableCell key={session.sessionId} className="border border-border">
+                                <TableCell
+                                    key={session.sessionId}
+                                    className="border-border border"
+                                >
                                     {value}
                                 </TableCell>
                             );

@@ -49,9 +49,7 @@ export default function SurveillanceFormReviewPageClient({
     }
 
     if (!getAllSurveillanceFormsResult.ok) {
-        return (
-            <h1>ERROR: {getAllSurveillanceFormsResult.error.message}</h1>
-        );
+        return <h1>ERROR: {getAllSurveillanceFormsResult.error.message}</h1>;
     }
 
     const formsMap = new Map(

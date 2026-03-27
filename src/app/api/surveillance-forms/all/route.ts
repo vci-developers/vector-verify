@@ -10,8 +10,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
     const body = await request.json();
 
-    const parsedBody =
-        getAllSurveillanceFormsQueryParamsSchema.safeParse(body);
+    const parsedBody = getAllSurveillanceFormsQueryParamsSchema.safeParse(body);
     if (!parsedBody.success) {
         return NextResponse.json(
             err({
