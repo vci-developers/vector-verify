@@ -1,14 +1,17 @@
 'use client';
 
+import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
+import ErrorBanner from '@/components/ui/error-banner';
 import { Separator } from '@/components/ui/separator';
 import ReviewSitesListHeader from '@/features/review/components/sites-list/review-sites-list-header';
 import ReviewSitesList from '@/features/review/components/sites-list/review-sites-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function ReviewSitesListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
@@ -22,11 +25,42 @@ export default function ReviewSitesListPageClient() {
     } = useGetUserPermissions();
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+        return (
+            <PageShell
+                title="Review"
+                description="Loading accessible review sites..."
+                icon={ClipboardList}
+            >
+                <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
+                    <CardContent className="p-6">
+                        <p className="text-muted-foreground text-sm">
+                            Loading accessible review sites...
+                        </p>
+                    </CardContent>
+                </Card>
+            </PageShell>
+        );
     }
 
     if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
+        return (
+            <PageShell
+                title="Review"
+                description="Unable to load review sites"
+                icon={ClipboardList}
+            >
+                <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
+                    <CardContent className="p-6">
+                        <ErrorBanner
+                            message={
+                                getUserPermissionsResult.error.message ??
+                                'Unable to load review sites.'
+                            }
+                        />
+                    </CardContent>
+                </Card>
+            </PageShell>
+        );
     }
 
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
@@ -49,6 +83,33 @@ export default function ReviewSitesListPageClient() {
           )
         : [];
 
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
+        useGetAllSessions(
+            { district: selectedDistrict, startDate, endDate },
+            { enabled: !!selectedDistrict },
+        );
+
+    const sessionsBySiteId = useMemo(() => {
+        const sessionsBySiteIdMap = new Map<
+            number,
+            { count: number; state?: SessionState }
+        >();
+
+        if (!getAllSessionsResult?.ok) {
+            return sessionsBySiteIdMap;
+        }
+
+        for (const { siteId, state } of getAllSessionsResult.data.sessions) {
+            const existingSiteData = sessionsBySiteIdMap.get(siteId);
+            sessionsBySiteIdMap.set(siteId, {
+                count: (existingSiteData?.count ?? 0) + 1,
+                state: existingSiteData?.state ?? state,
+            });
+        }
+
+        return sessionsBySiteIdMap;
+    }, [getAllSessionsResult]);
+
     return (
         <PageShell
             title="Review"
@@ -67,12 +128,40 @@ export default function ReviewSitesListPageClient() {
 
                     <Separator />
 
-                    <ReviewSitesList
-                        sites={sitesInAccessibleDistrict}
-                        district={selectedDistrict}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
+                    {!selectedDistrict ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                Select a district to begin reviewing.
+                            </p>
+                        </div>
+                    ) : isGetAllSessionsPending || !getAllSessionsResult ? (
+                        <div className="flex justify-center py-12">
+                            <p className="text-muted-foreground text-sm">
+                                Loading review sessions...
+                            </p>
+                        </div>
+                    ) : !getAllSessionsResult.ok ? (
+                        <ErrorBanner
+                            message={
+                                getAllSessionsResult.error.message ??
+                                'Unable to load review sessions.'
+                            }
+                        />
+                    ) : sitesInAccessibleDistrict.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <p className="text-muted-foreground text-sm">
+                                No sites found for this district.
+                            </p>
+                        </div>
+                    ) : (
+                        <ReviewSitesList
+                            sites={sitesInAccessibleDistrict}
+                            startDate={startDate}
+                            endDate={endDate}
+                            sessionsBySiteId={sessionsBySiteId}
+                        />
+                    )}
                 </CardContent>
             </Card>
         </PageShell>

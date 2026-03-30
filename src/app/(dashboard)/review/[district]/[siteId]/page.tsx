@@ -12,7 +12,6 @@ import { redirect } from 'next/navigation';
 
 interface ReviewSitePageProps {
     params: Promise<{
-        district: string;
         siteId: string;
     }>;
     searchParams: Promise<{
@@ -52,8 +51,8 @@ export default async function ReviewSitePage({
         <HydrationBoundary state={dehydrate(queryClient)}>
             <ReviewSitePageClient
                 siteId={siteId}
-                startDate={startDate ?? ''}
-                endDate={endDate ?? ''}
+                startDate={startDate}
+                endDate={endDate}
             />
         </HydrationBoundary>
     );

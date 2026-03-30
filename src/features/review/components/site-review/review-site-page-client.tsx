@@ -4,17 +4,19 @@ import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useUpdateSession } from '@/api/session/hooks/use-update-session';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
+import ErrorBanner from '@/components/ui/error-banner';
 import ReviewStepIndicator from '@/features/review/components/site-review/review-step-indicator';
 import ReviewCertificationStep from '@/features/review/components/site-review/review-certification-step';
 import { ClipboardCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useState } from 'react';
 
 interface ReviewSitePageClientProps {
     siteId: number;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export default function ReviewSitePageClient({
@@ -23,6 +25,9 @@ export default function ReviewSitePageClient({
     endDate,
 }: ReviewSitePageClientProps) {
     const router = useRouter();
+    const [certificationError, setCertificationError] = useState<string | null>(
+        null,
+    );
     const { mutateAsync: updateSession, isPending: isUpdatingSession } =
         useUpdateSession();
 
@@ -69,12 +74,36 @@ export default function ReviewSitePageClient({
 
     const sessions = getSessionsResult.data.sessions;
     const houseNumber = sessions[0]?.site?.houseNumber ?? `Site ${siteId}`;
-    const formattedMonth = format(
-        new Date(startDate + 'T00:00:00'),
-        'MMMM yyyy',
-    );
+    const periodLabel = startDate
+        ? format(new Date(startDate + 'T00:00:00'), 'MMMM yyyy')
+        : 'the selected period';
+    const workflowDescription = startDate
+        ? `${periodLabel} Certification Workflow`
+        : 'Certification Workflow';
+
+    if (sessions.length === 0) {
+        return (
+            <PageShell
+                title={`Review - Site ${siteId}`}
+                description={workflowDescription}
+                icon={ClipboardCheck}
+            >
+                <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
+                    <CardContent className="p-6">
+                        <p className="text-muted-foreground text-sm">
+                            No sessions were found for this site in{' '}
+                            {periodLabel}. Certification cannot be completed
+                            until reviewable sessions exist.
+                        </p>
+                    </CardContent>
+                </Card>
+            </PageShell>
+        );
+    }
 
     const handleCertify = async () => {
+        setCertificationError(null);
+
         const results = await Promise.allSettled(
             sessions.map(session =>
                 updateSession({
@@ -84,19 +113,33 @@ export default function ReviewSitePageClient({
             ),
         );
 
-        const allSucceeded = results.every(
-            r => r.status === 'fulfilled' && r.value.ok,
-        );
+        const failedMessages = results.flatMap(result => {
+            if (result.status === 'rejected') {
+                return ['Unable to certify one or more sessions.'];
+            }
 
-        if (allSucceeded) {
-            router.push('/review');
+            if (!result.value.ok) {
+                return [result.value.error.message];
+            }
+
+            return [];
+        });
+
+        if (failedMessages.length > 0) {
+            setCertificationError(
+                failedMessages[0] ??
+                    'Some sessions could not be certified. Please try again.',
+            );
+            return;
         }
+
+        router.push('/review');
     };
 
     return (
         <PageShell
             title={`Review - House ${houseNumber}`}
-            description={`${formattedMonth} Certification Workflow`}
+            description={workflowDescription}
             icon={ClipboardCheck}
             headerAction={
                 <Link
@@ -116,9 +159,13 @@ export default function ReviewSitePageClient({
 
                 <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                     <CardContent className="p-6">
+                        {certificationError && (
+                            <div className="mb-4">
+                                <ErrorBanner message={certificationError} />
+                            </div>
+                        )}
                         <ReviewCertificationStep
-                            houseNumber={houseNumber}
-                            startDate={startDate}
+                            periodLabel={periodLabel}
                             onBack={() => router.push('/review')}
                             onCertify={handleCertify}
                             isCertifying={isUpdatingSession}
