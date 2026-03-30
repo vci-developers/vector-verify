@@ -4,7 +4,10 @@ import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { getSiteTopLevelLocation, getSiteLocationLabel } from '@/api/site/utils';
+import {
+    getSiteTopLevelLocation,
+    getSiteLocationLabel,
+} from '@/api/site/utils';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Microscope } from 'lucide-react';

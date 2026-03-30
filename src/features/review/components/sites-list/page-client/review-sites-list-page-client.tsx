@@ -1,7 +1,10 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { getSiteTopLevelLocation, getSiteLocationLabel } from '@/api/site/utils';
+import {
+    getSiteTopLevelLocation,
+    getSiteLocationLabel,
+} from '@/api/site/utils';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';

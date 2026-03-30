@@ -32,7 +32,9 @@ export default function ReviewSitesListHeader({
         <div className="flex items-center justify-between">
             <Select value={selectedDistrict} onValueChange={onDistrictChange}>
                 <SelectTrigger className="w-52">
-                    <SelectValue placeholder={`Select a ${locationLabel.toLowerCase()}`} />
+                    <SelectValue
+                        placeholder={`Select a ${locationLabel.toLowerCase()}`}
+                    />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>

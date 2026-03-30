@@ -54,7 +54,9 @@ export default function OperationsDataHeader({
                     onValueChange={onDistrictChange}
                 >
                     <SelectTrigger className="w-52">
-                        <SelectValue placeholder={`Select a ${locationLabel.toLowerCase()}`} />
+                        <SelectValue
+                            placeholder={`Select a ${locationLabel.toLowerCase()}`}
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>

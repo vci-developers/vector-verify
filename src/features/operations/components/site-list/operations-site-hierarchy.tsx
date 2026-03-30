@@ -54,7 +54,6 @@ function getSiteValueAtLevel(site: Site, levelKey: string): string | undefined {
     return (site as Record<string, unknown>)[levelKey] as string | undefined;
 }
 
-
 interface SiteHierarchyProps {
     sites: Site[];
     depth: number;
