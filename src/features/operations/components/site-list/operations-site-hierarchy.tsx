@@ -1,6 +1,7 @@
 'use client';
 
 import type { Site } from '@/api/site/validation/site-schema';
+import { getSiteTopLevelLocation } from '@/api/site/utils';
 import { Badge } from '@/components/ui/badge';
 import {
     Collapsible,
@@ -23,13 +24,36 @@ function getCompletenessBackgroundColor(
     return 'bg-destructive/10 hover:bg-destructive/20';
 }
 
-const HIERARCHY_LEVELS = [
+const LEGACY_HIERARCHY_LEVELS = [
     { key: 'subCounty', label: 'Subcounty' },
     { key: 'healthCenter', label: 'Health Center' },
     { key: 'parish', label: 'Parish' },
     { key: 'villageName', label: 'Village' },
     { key: 'houseNumber', label: 'House' },
-] as const;
+];
+
+export function getHierarchyLevels(
+    sites: Site[],
+): { key: string; label: string }[] {
+    const firstSite = sites[0];
+    if (!firstSite) return LEGACY_HIERARCHY_LEVELS;
+
+    const hierarchyKeys = Object.keys(firstSite.locationHierarchy);
+    if (hierarchyKeys.length > 0) {
+        return hierarchyKeys.slice(1).map(key => ({ key, label: key }));
+    }
+
+    return LEGACY_HIERARCHY_LEVELS;
+}
+
+function getSiteValueAtLevel(site: Site, levelKey: string): string | undefined {
+    const hierarchyKeys = Object.keys(site.locationHierarchy);
+    if (hierarchyKeys.length > 0) {
+        return site.locationHierarchy[levelKey];
+    }
+    return (site as Record<string, unknown>)[levelKey] as string | undefined;
+}
+
 
 interface SiteHierarchyProps {
     sites: Site[];
@@ -38,6 +62,7 @@ interface SiteHierarchyProps {
     siteIdToSessionCounts: Map<number, number>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
+    hierarchyLevels: { key: string; label: string }[];
 }
 
 export default function SiteHierarchy({
@@ -47,14 +72,16 @@ export default function SiteHierarchy({
     siteIdToSessionCounts,
     expandedSitePaths,
     onToggle,
+    hierarchyLevels,
 }: SiteHierarchyProps) {
-    const currentLevel = HIERARCHY_LEVELS[depth];
-    const isLeafLevel = depth === HIERARCHY_LEVELS.length - 1;
+    const currentLevel = hierarchyLevels[depth];
+    const isLeafLevel = depth === hierarchyLevels.length - 1;
 
     const sortedLocationEntries = useMemo(() => {
         if (!currentLevel) return [];
         const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
-            const locationName = site[currentLevel.key] ?? 'Unknown';
+            const locationName =
+                getSiteValueAtLevel(site, currentLevel.key) ?? 'Unknown';
             groups[locationName] ??= [];
             groups[locationName].push(site);
             return groups;
@@ -75,7 +102,7 @@ export default function SiteHierarchy({
                     return (
                         <Link
                             key={site.siteId}
-                            href={`/operations/${site.district}/${site.siteId}`}
+                            href={`/operations/${getSiteTopLevelLocation(site)}/${site.siteId}`}
                         >
                             <div className="group hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-2 transition-colors">
                                 <div className="flex items-center gap-3">
@@ -95,7 +122,10 @@ export default function SiteHierarchy({
                                         />
                                     </div>
                                     <span className="text-sm">
-                                        {site[currentLevel.key] ?? 'Unknown'}
+                                        {getSiteValueAtLevel(
+                                            site,
+                                            currentLevel.key,
+                                        ) ?? 'Unknown'}
                                     </span>
                                 </div>
                                 <Badge
@@ -179,6 +209,7 @@ export default function SiteHierarchy({
                                         }
                                         expandedSitePaths={expandedSitePaths}
                                         onToggle={onToggle}
+                                        hierarchyLevels={hierarchyLevels}
                                     />
                                 </div>
                             </CollapsibleContent>

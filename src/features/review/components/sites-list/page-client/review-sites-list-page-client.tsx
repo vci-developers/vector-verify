@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { getSiteTopLevelLocation, getSiteLocationLabel } from '@/api/site/utils';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -35,17 +36,19 @@ export default function ReviewSitesListPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
+    const locationLabel = getSiteLocationLabel(accessibleSites);
+
     const accessibleDistricts = [
         ...new Set(
             accessibleSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
+                .map(site => getSiteTopLevelLocation(site))
+                .filter((location): location is string => Boolean(location)),
         ),
     ].sort();
 
     const sitesInAccessibleDistrict = selectedDistrict
         ? accessibleSites.filter(
-              site => site.district?.trim() === selectedDistrict,
+              site => getSiteTopLevelLocation(site) === selectedDistrict,
           )
         : [];
 
@@ -61,6 +64,7 @@ export default function ReviewSitesListPageClient() {
                         districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
+                        locationLabel={locationLabel}
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
                     />

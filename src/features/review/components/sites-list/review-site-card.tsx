@@ -4,6 +4,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { SessionState } from '@/api/session/validation/session-schema';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Lock, MapPin } from 'lucide-react';
+import { getSiteTopLevelLocation } from '@/api/site/utils';
 import Link from 'next/link';
 
 interface ReviewSiteCardProps {
@@ -47,7 +48,9 @@ export default function ReviewSiteCard({
                         </div>
                         <div>
                             <p className="font-medium">
-                                {site.houseNumber ?? `Site ${site.siteId}`}
+                                {site.name ??
+                                    site.houseNumber ??
+                                    `Site ${site.siteId}`}
                             </p>
                             <p className="text-muted-foreground text-sm">
                                 {sessionCount} session
@@ -68,8 +71,10 @@ export default function ReviewSiteCard({
         );
     }
 
+    const topLevelLocation = getSiteTopLevelLocation(site);
+
     return (
-        <Link href={`/review/${site.district}/${site.siteId}`}>
+        <Link href={`/review/${topLevelLocation}/${site.siteId}`}>
             <div className="border-border/50 bg-card/50 hover:bg-muted/50 flex items-center justify-between gap-4 rounded-lg border p-4 transition-colors">
                 <div className="flex items-center gap-3">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
@@ -77,7 +82,9 @@ export default function ReviewSiteCard({
                     </div>
                     <div>
                         <p className="font-medium">
-                            {site.houseNumber ?? `Site ${site.siteId}`}
+                            {site.name ??
+                                site.houseNumber ??
+                                `Site ${site.siteId}`}
                         </p>
                         <p className="text-muted-foreground text-sm">
                             {sessionCount} session{sessionCount !== 1 && 's'}

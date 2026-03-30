@@ -4,7 +4,7 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
 import { Microscope } from 'lucide-react';
-import SiteHierarchy from './operations-site-hierarchy';
+import SiteHierarchy, { getHierarchyLevels } from './operations-site-hierarchy';
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -32,6 +32,8 @@ export default function OperationsSiteList({
             },
             { enabled: !!district },
         );
+
+    const hierarchyLevels = useMemo(() => getHierarchyLevels(sites), [sites]);
 
     const siteIdToSessionCounts = useMemo(() => {
         const counts = new Map<number, number>();
@@ -91,6 +93,7 @@ export default function OperationsSiteList({
             siteIdToSessionCounts={siteIdToSessionCounts}
             expandedSitePaths={expandedSitePaths}
             onToggle={toggleSiteRow}
+            hierarchyLevels={hierarchyLevels}
         />
     );
 }

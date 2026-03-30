@@ -25,6 +25,7 @@ interface OperationsDataHeaderProps {
     districts: string[];
     selectedDistrict: string;
     onDistrictChange: (district: string) => void;
+    locationLabel: string;
     dateRange: DateRange | undefined;
     onDateRangeChange: (dateRange: DateRange | undefined) => void;
     onClearDateRange: () => void;
@@ -38,6 +39,7 @@ export default function OperationsDataHeader({
     districts,
     selectedDistrict,
     onDistrictChange,
+    locationLabel,
     dateRange,
     onDateRangeChange,
     onClearDateRange,
@@ -52,11 +54,11 @@ export default function OperationsDataHeader({
                     onValueChange={onDistrictChange}
                 >
                     <SelectTrigger className="w-52">
-                        <SelectValue placeholder="Select a district" />
+                        <SelectValue placeholder={`Select a ${locationLabel.toLowerCase()}`} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>District</SelectLabel>
+                            <SelectLabel>{locationLabel}</SelectLabel>
                             {districts.map(district => (
                                 <SelectItem key={district} value={district}>
                                     {district}
