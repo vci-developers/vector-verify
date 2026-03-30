@@ -173,10 +173,10 @@ export default function OperationsAiPerformanceTab() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="max-w-3xl">
-                        <Table className="border-collapse overflow-hidden rounded-lg">
+                        <Table className="w-full table-fixed border-collapse overflow-hidden rounded-lg">
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent">
-                                    <TableHead className="bg-muted/40 h-12 border" />
+                                    <TableHead className="bg-muted/40 h-12 w-1/5 border" />
                                     <TableHead
                                         className="bg-muted/40 h-12 border text-center font-semibold"
                                         colSpan={4}
@@ -185,19 +185,19 @@ export default function OperationsAiPerformanceTab() {
                                     </TableHead>
                                 </TableRow>
                                 <TableRow className="hover:bg-transparent">
-                                    <TableHead className="bg-muted/20 border text-sm font-semibold">
+                                    <TableHead className="bg-muted/20 w-1/5 border text-center text-sm font-semibold">
                                         Ground Truth
                                     </TableHead>
-                                    <TableHead className="bg-muted/20 border text-center text-xs font-semibold">
+                                    <TableHead className="bg-muted/20 w-1/5 border text-center text-xs font-semibold">
                                         An. gambiae s.s.
                                     </TableHead>
-                                    <TableHead className="bg-muted/20 border text-center text-xs font-semibold">
+                                    <TableHead className="bg-muted/20 w-1/5 border text-center text-xs font-semibold">
                                         An. arabiensis
                                     </TableHead>
-                                    <TableHead className="bg-muted/20 border text-center text-xs font-semibold">
+                                    <TableHead className="bg-muted/20 w-1/5 border text-center text-xs font-semibold">
                                         An. funestus
                                     </TableHead>
-                                    <TableHead className="bg-muted/20 border text-center text-xs font-semibold">
+                                    <TableHead className="bg-muted/20 w-1/5 border text-center text-xs font-semibold">
                                         Culex sp.
                                     </TableHead>
                                 </TableRow>
@@ -208,12 +208,12 @@ export default function OperationsAiPerformanceTab() {
                                         key={row.label}
                                         className="hover:bg-transparent"
                                     >
-                                        <TableCell className="bg-background border text-xs font-medium">
+                                        <TableCell className="bg-background border text-center text-xs font-medium">
                                             {row.label}
                                         </TableCell>
-                                        {row.cells.map(cell => (
+                                        {row.cells.map((cell, cellIndex) => (
                                             <TableCell
-                                                key={`${row.label}-${cell.value}`}
+                                                key={`${row.label}-${cellIndex}`}
                                                 className={`border p-0 ${cell.className}`}
                                             >
                                                 <div className="flex min-h-18 flex-col items-center justify-center px-2 py-3 text-center">

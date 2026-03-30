@@ -29,17 +29,23 @@ export default function OperationsLocationPage({
                 <Tabs defaultValue="ai-performance">
                     <TabsList
                         variant="line"
-                        className="h-auto gap-5 border-b px-5 py-3"
+                        className="h-auto gap-5 border-b px-5 py-0"
                     >
-                        <TabsTrigger value="houses" className="px-1 py-2">
+                        <TabsTrigger
+                            value="houses"
+                            className="rounded-none px-1 py-4 after:-bottom-px"
+                        >
                             Houses
                         </TabsTrigger>
-                        <TabsTrigger value="metrics" className="px-1 py-2">
+                        <TabsTrigger
+                            value="metrics"
+                            className="rounded-none px-1 py-4 after:-bottom-px"
+                        >
                             Metrics
                         </TabsTrigger>
                         <TabsTrigger
                             value="ai-performance"
-                            className="px-1 py-2"
+                            className="rounded-none px-1 py-4 after:-bottom-px"
                         >
                             AI Performance
                         </TabsTrigger>
