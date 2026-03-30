@@ -1,5 +1,3 @@
-'use client';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';

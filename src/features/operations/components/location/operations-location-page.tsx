@@ -1,22 +1,15 @@
-'use client';
-
 import PageShell from '@/components/layout/page-shell';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Activity } from 'lucide-react';
 import OperationsMetricsTab from './metrics/operations-metrics-tab';
 
-interface OperationsLocationPageClientProps {
+interface OperationsLocationPageProps {
     location: string;
 }
 
-export default function OperationsLocationPageClient({
+export default function OperationsLocationPage({
     location,
-}: OperationsLocationPageClientProps) {
+}: OperationsLocationPageProps) {
     return (
         <PageShell title={`View - ${location}`} icon={Activity}>
             <Tabs defaultValue="metrics">
