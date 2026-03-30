@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import { annotationSchema, annotationStatusSchema } from '@/api/annotation/validation/annotation-schema';
+import {
+    annotationSchema,
+    annotationStatusSchema,
+} from '@/api/annotation/validation/annotation-schema';
 
 export const getAnnotationsQueryParamsSchema = z.object({
     taskId: z.coerce.number().optional(),

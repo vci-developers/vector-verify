@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const userProfileSchema = z.object({
     id: z.number(),
+    name: z.string().nullable(),
     email: z.email(),
     privilege: z.number(),
     programId: z.number().nullable().optional(),

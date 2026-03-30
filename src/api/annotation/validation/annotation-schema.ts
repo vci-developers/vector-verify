@@ -3,7 +3,11 @@ import { annotationTaskSchema } from '@/api/annotation-task/validation/annotatio
 import { userProfileSchema } from '@/api/user/validation/user-profile-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 
-export const annotationStatusSchema = z.enum(['PENDING', 'ANNOTATED', 'FLAGGED']);
+export const annotationStatusSchema = z.enum([
+    'PENDING',
+    'ANNOTATED',
+    'FLAGGED',
+]);
 
 export const annotationSchema = z.object({
     id: z.number(),
@@ -16,6 +20,7 @@ export const annotationSchema = z.object({
     visualSpecies: z.string().nullable(),
     visualSex: z.string().nullable(),
     visualAbdomenStatus: z.string().nullable(),
+    artifacts: z.string().nullable(),
     notes: z.string().nullable(),
     status: annotationStatusSchema,
     createdAt: z.number(),
