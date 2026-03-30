@@ -18,11 +18,40 @@ export default function ReviewSitesListPageClient() {
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
     );
+    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
     const {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
+        useGetAllSessions(
+            { district: selectedDistrict, startDate, endDate },
+            { enabled: !!selectedDistrict },
+        );
+
+    const sessionsBySiteId = useMemo(() => {
+        const sessionsBySiteIdMap = new Map<
+            number,
+            { count: number; state?: SessionState }
+        >();
+
+        if (!getAllSessionsResult?.ok) {
+            return sessionsBySiteIdMap;
+        }
+
+        for (const { siteId, state } of getAllSessionsResult.data.sessions) {
+            const existingSiteData = sessionsBySiteIdMap.get(siteId);
+            sessionsBySiteIdMap.set(siteId, {
+                count: (existingSiteData?.count ?? 0) + 1,
+                state: existingSiteData?.state ?? state,
+            });
+        }
+
+        return sessionsBySiteIdMap;
+    }, [getAllSessionsResult]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -63,9 +92,6 @@ export default function ReviewSitesListPageClient() {
         );
     }
 
-    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
-
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
@@ -82,33 +108,6 @@ export default function ReviewSitesListPageClient() {
               site => site.district?.trim() === selectedDistrict,
           )
         : [];
-
-    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions(
-            { district: selectedDistrict, startDate, endDate },
-            { enabled: !!selectedDistrict },
-        );
-
-    const sessionsBySiteId = useMemo(() => {
-        const sessionsBySiteIdMap = new Map<
-            number,
-            { count: number; state?: SessionState }
-        >();
-
-        if (!getAllSessionsResult?.ok) {
-            return sessionsBySiteIdMap;
-        }
-
-        for (const { siteId, state } of getAllSessionsResult.data.sessions) {
-            const existingSiteData = sessionsBySiteIdMap.get(siteId);
-            sessionsBySiteIdMap.set(siteId, {
-                count: (existingSiteData?.count ?? 0) + 1,
-                state: existingSiteData?.state ?? state,
-            });
-        }
-
-        return sessionsBySiteIdMap;
-    }, [getAllSessionsResult]);
 
     return (
         <PageShell
