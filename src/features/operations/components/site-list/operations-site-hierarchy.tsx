@@ -75,7 +75,7 @@ export default function SiteHierarchy({
                     return (
                         <Link
                             key={site.siteId}
-                            href={`/operations/${site.district}/${site.siteId}`}
+                            href={`/operations/${encodeURIComponent(site.district ?? 'Unknown')}/${site.siteId}`}
                         >
                             <div className="group hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-2 transition-colors">
                                 <div className="flex items-center gap-3">
