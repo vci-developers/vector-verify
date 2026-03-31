@@ -265,11 +265,11 @@ export default function OperationsAiPerformanceTab() {
                                 Interpretation
                             </h3>
                             <p className="text-muted-foreground text-sm leading-6">
-                                The model performs strongly on the core Anopheles
-                                classes, with the largest error concentration in
-                                Culex predictions. This view is intended as a
-                                quick operational snapshot while a fuller metrics
-                                surface is still being built.
+                                The model performs strongly on the core
+                                Anopheles classes, with the largest error
+                                concentration in Culex predictions. This view is
+                                intended as a quick operational snapshot while a
+                                fuller metrics surface is still being built.
                             </p>
                         </div>
                     </div>

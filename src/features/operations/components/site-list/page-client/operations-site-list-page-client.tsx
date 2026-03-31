@@ -102,9 +102,7 @@ export default function OperationsSiteListPageClient() {
                         />
                     )}
 
-                    {activeTab === 'metrics' && (
-                        <OperationsMetricsTab />
-                    )}
+                    {activeTab === 'metrics' && <OperationsMetricsTab />}
 
                     {activeTab === 'ai-performance' && (
                         <OperationsAiPerformanceTab />
