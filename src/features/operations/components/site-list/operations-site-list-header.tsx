@@ -112,6 +112,18 @@ export default function OperationsDataHeader({
                     >
                         Sites
                     </TabsTrigger>
+                    <TabsTrigger
+                        value="metrics"
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
+                    >
+                        Metrics
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="ai-performance"
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
+                    >
+                        AI Performance
+                    </TabsTrigger>
                 </TabsList>
             </Tabs>
         </div>

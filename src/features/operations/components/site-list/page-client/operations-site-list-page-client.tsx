@@ -7,6 +7,8 @@ import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Microscope } from 'lucide-react';
+import OperationsAiPerformanceTab from '../../ai-performance/operations-ai-performance-tab';
+import OperationsMetricsTab from '../../metrics/operations-metrics-tab';
 import OperationsDataHeader from '../operations-site-list-header';
 import OperationsSiteList from '../operations-site-list';
 
@@ -30,11 +32,29 @@ export default function OperationsSiteListPageClient() {
     } = useGetUserPermissions();
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+        return (
+            <PageShell
+                title="Operations"
+                description="Monitor field operations by location"
+                icon={Microscope}
+            >
+                <p className="text-muted-foreground text-sm">Loading...</p>
+            </PageShell>
+        );
     }
 
     if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
+        return (
+            <PageShell
+                title="Operations"
+                description="Monitor field operations by location"
+                icon={Microscope}
+            >
+                <p className="text-sm">
+                    ERROR: {getUserPermissionsResult.error.message}
+                </p>
+            </PageShell>
+        );
     }
 
     const accessibleSites =
@@ -73,12 +93,22 @@ export default function OperationsSiteListPageClient() {
                         onTabChange={setActiveTab}
                     />
 
-                    <OperationsSiteList
-                        sites={filteredAccessibleSites}
-                        district={selectedDistrict}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
+                    {activeTab === 'sites' && (
+                        <OperationsSiteList
+                            sites={filteredAccessibleSites}
+                            district={selectedDistrict}
+                            startDate={startDate}
+                            endDate={endDate}
+                        />
+                    )}
+
+                    {activeTab === 'metrics' && (
+                        <OperationsMetricsTab />
+                    )}
+
+                    {activeTab === 'ai-performance' && (
+                        <OperationsAiPerformanceTab />
+                    )}
                 </CardContent>
             </Card>
         </PageShell>

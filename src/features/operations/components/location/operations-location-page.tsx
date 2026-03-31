@@ -1,8 +1,6 @@
 import PageShell from '@/components/layout/page-shell';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Activity, CalendarDays } from 'lucide-react';
-import OperationsAiPerformanceTab from './ai-performance/operations-ai-performance-tab';
 
 interface OperationsLocationPageProps {
     district: string;
@@ -25,48 +23,10 @@ export default function OperationsLocationPage({
                 </div>
             }
         >
-            <Card className="overflow-hidden py-0">
-                <Tabs defaultValue="ai-performance">
-                    <TabsList
-                        variant="line"
-                        className="h-auto gap-5 border-b px-5 py-0"
-                    >
-                        <TabsTrigger
-                            value="houses"
-                            className="rounded-none px-1 py-4 after:-bottom-px"
-                        >
-                            Houses
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="metrics"
-                            className="rounded-none px-1 py-4 after:-bottom-px"
-                        >
-                            Metrics
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="ai-performance"
-                            className="rounded-none px-1 py-4 after:-bottom-px"
-                        >
-                            AI Performance
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="houses" className="p-5">
-                        <p className="text-muted-foreground text-sm">
-                            House detail content will appear here.
-                        </p>
-                    </TabsContent>
-
-                    <TabsContent value="metrics" className="p-5">
-                        <p className="text-muted-foreground text-sm">
-                            Metrics content will appear here.
-                        </p>
-                    </TabsContent>
-
-                    <TabsContent value="ai-performance" className="p-5">
-                        <OperationsAiPerformanceTab />
-                    </TabsContent>
-                </Tabs>
+            <Card className="overflow-hidden p-5">
+                <p className="text-muted-foreground text-sm">
+                    House detail content will appear here.
+                </p>
             </Card>
         </PageShell>
     );

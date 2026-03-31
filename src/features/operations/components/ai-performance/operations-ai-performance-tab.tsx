@@ -220,7 +220,7 @@ export default function OperationsAiPerformanceTab() {
                                                     <span className="text-base font-semibold">
                                                         {cell.value}
                                                     </span>
-                                                    <span className="text-[11px] font-medium opacity-90">
+                                                    <span className="text-xs opacity-90">
                                                         {cell.percent}
                                                     </span>
                                                 </div>
@@ -232,51 +232,46 @@ export default function OperationsAiPerformanceTab() {
                         </Table>
                     </div>
 
-                    <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
-                        <Card className="gap-0 border-0 py-0 shadow-none">
-                            <CardHeader className="px-0 pb-3">
-                                <CardTitle className="text-base">
-                                    Overall Accuracy
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="px-0">
-                                <div className="flex items-end gap-3">
-                                    <span className="text-5xl font-semibold tracking-tight text-emerald-500">
-                                        94.2%
-                                    </span>
-                                    <span className="text-muted-foreground pb-1 text-sm">
-                                        901 correct out of 1024 predictions
-                                    </span>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="gap-0 border-0 py-0 shadow-none">
-                            <CardHeader className="px-0 pb-3">
-                                <CardTitle className="text-base">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                        <div className="space-y-3 rounded-xl border p-4">
+                            <div className="flex items-center gap-2">
+                                <Bot className="h-4 w-4" />
+                                <h3 className="text-sm font-semibold">
                                     Per-Class Performance
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="px-0">
-                                <div className="space-y-3">
-                                    {CLASS_PERFORMANCE.map(item => (
-                                        <div
-                                            key={item.label}
-                                            className="flex items-center justify-between gap-4 text-sm"
-                                        >
-                                            <div className="text-muted-foreground flex items-center gap-2">
-                                                <Bot className="h-4 w-4" />
-                                                <span>{item.label}</span>
-                                            </div>
-                                            <div className="font-medium">
-                                                P: {item.precision} | R:{' '}
-                                                {item.recall}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </h3>
+                            </div>
+                            <div className="space-y-3">
+                                {CLASS_PERFORMANCE.map(species => (
+                                    <div
+                                        key={species.label}
+                                        className="grid grid-cols-[minmax(0,1fr)_88px_88px] items-center gap-3 text-sm"
+                                    >
+                                        <span className="font-medium">
+                                            {species.label}
+                                        </span>
+                                        <span className="text-muted-foreground text-right">
+                                            P: {species.precision}
+                                        </span>
+                                        <span className="text-muted-foreground text-right">
+                                            R: {species.recall}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 rounded-xl border p-4">
+                            <h3 className="text-sm font-semibold">
+                                Interpretation
+                            </h3>
+                            <p className="text-muted-foreground text-sm leading-6">
+                                The model performs strongly on the core Anopheles
+                                classes, with the largest error concentration in
+                                Culex predictions. This view is intended as a
+                                quick operational snapshot while a fuller metrics
+                                surface is still being built.
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
