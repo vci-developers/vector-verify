@@ -1,28 +1,34 @@
 'use client';
 
 import { useState } from 'react';
-import type { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Microscope } from 'lucide-react';
+import OperationsMetricsTab from '../../location/metrics/operations-metrics-tab';
 import OperationsDataHeader from '../operations-site-list-header';
 import OperationsSiteList from '../operations-site-list';
 
-export default function OperationsSiteListPageClient() {
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-    const [activeTab, setActiveTab] = useState('sites');
-    const [dateRange, setDateRange] = useState<DateRange | undefined>(
-        undefined,
-    );
+interface OperationsSiteListPageClientProps {
+    initialDistrict?: string;
+}
 
-    const startDate = dateRange?.from
-        ? format(dateRange.from, 'yyyy-MM-dd')
-        : undefined;
-    const endDate = dateRange?.to
-        ? format(dateRange.to, 'yyyy-MM-dd')
-        : undefined;
+function DistrictTabEmptyState({ message }: { message: string }) {
+    return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-muted-foreground text-sm">{message}</p>
+            <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
+        </div>
+    );
+}
+
+export default function OperationsSiteListPageClient({
+    initialDistrict = '',
+}: OperationsSiteListPageClientProps) {
+    const [selectedDistrict, setSelectedDistrict] =
+        useState<string>(initialDistrict);
+    const [activeTab, setActiveTab] = useState('sites');
 
     const {
         data: getUserPermissionsResult,
@@ -62,23 +68,46 @@ export default function OperationsSiteListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <OperationsDataHeader
-                        districts={accessibleDistricts}
-                        selectedDistrict={selectedDistrict}
-                        onDistrictChange={setSelectedDistrict}
-                        dateRange={dateRange}
-                        onDateRangeChange={setDateRange}
-                        onClearDateRange={() => setDateRange(undefined)}
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
-                    />
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={setActiveTab}
+                        className="space-y-4"
+                    >
+                        <OperationsDataHeader
+                            districts={accessibleDistricts}
+                            selectedDistrict={selectedDistrict}
+                            onDistrictChange={setSelectedDistrict}
+                        />
 
-                    <OperationsSiteList
-                        sites={filteredAccessibleSites}
-                        district={selectedDistrict}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
+                        <TabsContent value="sites" className="mt-0">
+                            <OperationsSiteList
+                                sites={filteredAccessibleSites}
+                                district={selectedDistrict}
+                            />
+                        </TabsContent>
+
+                        <TabsContent value="review" className="mt-0">
+                            <DistrictTabEmptyState message="Review is not wired into the operations dashboard yet." />
+                        </TabsContent>
+
+                        <TabsContent value="metrics" className="mt-0">
+                            {selectedDistrict ? (
+                                <OperationsMetricsTab />
+                            ) : (
+                                <DistrictTabEmptyState message="Select a district to view district-level metrics." />
+                            )}
+                        </TabsContent>
+
+                        <TabsContent value="ai-performance" className="mt-0">
+                            <DistrictTabEmptyState
+                                message={
+                                    selectedDistrict
+                                        ? 'AI Performance is coming soon.'
+                                        : 'Select a district to view AI performance.'
+                                }
+                            />
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </PageShell>
