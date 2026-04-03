@@ -39,7 +39,7 @@ interface SiteHierarchyProps {
     onToggle: (path: string) => void;
 }
 
-export default function SiteHierarchy({
+export default function OperationsSiteHierarchy({
     sites,
     depth,
     parentPath,
@@ -96,7 +96,9 @@ export default function SiteHierarchy({
                                     {site[currentLevel.key] ?? 'Unknown'}
                                 </span>
                             </div>
-                            <Badge variant={hasSessions ? 'default' : 'outline'}>
+                            <Badge
+                                variant={hasSessions ? 'default' : 'outline'}
+                            >
                                 {hasSessions
                                     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
                                     : 'No sessions'}
@@ -163,7 +165,7 @@ export default function SiteHierarchy({
                         {isExpanded && (
                             <CollapsibleContent>
                                 <div className="border-border/60 ml-4.5 border-l pl-4">
-                                    <SiteHierarchy
+                                    <OperationsSiteHierarchy
                                         sites={sitesInLocation}
                                         depth={depth + 1}
                                         parentPath={currentPath}

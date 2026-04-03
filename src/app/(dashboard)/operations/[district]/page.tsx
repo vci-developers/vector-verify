@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import { userKeys } from '@/api/user/user-keys';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
-import OperationsSiteListPageClient from '@/features/operations/components/site-list/page-client/operations-site-list-page-client';
+import OperationsLocationPageClient from '@/features/operations/components/location/page-client/operations-location-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -18,7 +18,7 @@ export default async function OperationsLocationPage({
     params,
 }: OperationsLocationPageProps) {
     const queryClient = new QueryClient();
-    const location = decodeURIComponent((await params).district);
+    const district = decodeURIComponent((await params).district);
 
     const authorizedGetUserPermissionsResult =
         await withAuthSession<GetUserPermissionsResponseBody>(
@@ -44,7 +44,7 @@ export default async function OperationsLocationPage({
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <OperationsSiteListPageClient initialDistrict={location} />
+            <OperationsLocationPageClient district={district} />
         </HydrationBoundary>
     );
 }
