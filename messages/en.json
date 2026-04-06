@@ -1,0 +1,109 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "appName": "VectorVerify",
+        "appLogoAlt": "VectorVerify logo",
+        "required": "(Required)",
+        "selectPlaceholder": "Select...",
+        "naPlaceholder": "N/A",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "selectDistrictPlaceholder": "Select a district",
+        "districtLabel": "District",
+        "sessionSingular": "session",
+        "sessionPlural": "sessions",
+        "siteFallbackLabel": "Site {id}"
+    },
+    "appSidebar": {
+        "dashboard": "Dashboard",
+        "review": "Review",
+        "operations": "Operations",
+        "annotate": "Annotate"
+    },
+    "loginForm": {
+        "emailLabel": "Email",
+        "emailPlaceholder": "name@example.com",
+        "passwordLabel": "Password",
+        "submitButton": "Login"
+    },
+    "signupForm": {
+        "emailLabel": "Email",
+        "emailPlaceholder": "name@example.com",
+        "nameLabel": "Name",
+        "namePlaceholder": "Your name here",
+        "programLabel": "Program",
+        "programLoadingPlaceholder": "Loading programs...",
+        "programErrorPlaceholder": "Unable to load programs",
+        "programSelectPlaceholder": "Select a program",
+        "passwordLabel": "Password",
+        "confirmPasswordLabel": "Confirm Password",
+        "submitButton": "Create Account"
+    },
+    "dashboardPageClient": {
+        "title": "Dashboard",
+        "description": "Welcome to VectorVerify! Use the navigation links to access different sections."
+    },
+    "reviewQueuePageClient": {
+        "title": "Review",
+        "description": "Certify submitted session data.",
+        "loadingSessions": "Loading sessions...",
+        "sitesNeedReviewSingular": "{count} site needs review",
+        "sitesNeedReviewPlural": "{count} sites need review",
+        "allCaughtUp": "All caught up",
+        "noSessionsThisMonth": "No sessions to review this month."
+    },
+    "reviewSitesListHeader": {
+        "selectDistrictPlaceholder": "Select a district",
+        "districtLabel": "District"
+    },
+    "reviewSiteCard": {
+        "siteFallbackLabel": "Site {id}",
+        "sessionSingular": "session",
+        "sessionPlural": "sessions"
+    },
+    "operationsSiteListPageClient": {
+        "title": "Operations",
+        "description": "Monitor field operations by location"
+    },
+    "operationsSiteList": {
+        "selectDistrictPrompt": "Please select a district to view sites.",
+        "noSitesFound": "No sites found for this district."
+    },
+    "operationsSiteListHeader": {
+        "selectDistrictPlaceholder": "Select a district",
+        "districtLabel": "District",
+        "filterByDate": "Filter by date",
+        "sitesTab": "Sites"
+    },
+    "annotationTasksListPageClient": {
+        "title": "Annotation Tasks",
+        "description": "Review and annotate pending specimens"
+    },
+    "annotationTasksList": {
+        "noTasksFound": "No annotation tasks found"
+    },
+    "annotationTasksListHeader": {
+        "filterByDatePlaceholder": "Filter by date when task was assigned"
+    },
+    "annotationTaskDetailsPageClient": {
+        "title": "Annotate Specimens",
+        "description": "Review and annotate specimens for this task"
+    },
+    "annotationForm": {
+        "newAnnotation": "New Annotation",
+        "editAnnotation": "Edit Annotation",
+        "genusLabel": "Genus",
+        "speciesLabel": "Species",
+        "sexLabel": "Sex",
+        "abdomenStatusLabel": "Abdomen Status",
+        "artifactsLabel": "Artifacts",
+        "notesLabel": "Notes",
+        "selectArtifactsPlaceholder": "Select artifacts...",
+        "flaggedNotesPlaceholder": "Describe why this specimen is flagged...",
+        "generalNotesPlaceholder": "Any additional observations...",
+        "flagSpecimenButton": "Flag Specimen",
+        "specimenFlaggedButton": "Specimen Flagged",
+        "saveChangesButton": "Save Changes",
+        "submitAndNextButton": "Submit & Next"
+    }
+}
