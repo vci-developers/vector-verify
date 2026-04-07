@@ -1,9 +1,13 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest, type ProxyConfig } from 'next/server';
 import { ACCESS_COOKIE_NAME } from './lib/auth-session/cookies';
+import createMiddleware from 'next-intl/middleware';
+import { routing } from '@/i18n/routing';
 
 const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
 
-export async function proxy(request: NextRequest) {
+const handleI18nRouting = createMiddleware(routing);
+
+export default async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
 
@@ -19,9 +23,9 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    return NextResponse.next();
+    return handleI18nRouting(request);
 }
 
-export const config = {
+export const config: ProxyConfig = {
     matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
 };
