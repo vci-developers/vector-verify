@@ -28,7 +28,7 @@ function DonutSkeleton() {
     );
 }
 
-export default function OperationsMetricsTab() {
+export default function OperationsMetrics() {
     return (
         <div className="mt-4 space-y-8">
             <div className="space-y-3">

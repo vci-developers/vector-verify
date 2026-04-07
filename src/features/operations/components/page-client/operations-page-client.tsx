@@ -5,14 +5,11 @@ import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { Microscope } from 'lucide-react';
-import OperationsMetricsTab from '../../location/metrics/operations-metrics-tab';
-import OperationsDataHeader from '../operations-site-list-header';
-import OperationsSiteList from '../operations-site-list';
-
-interface OperationsSiteListPageClientProps {
-    initialDistrict?: string;
-}
+import OperationsMetrics from '../location/metrics/operations-metrics';
+import OperationsHeader from '../site-list/operations-header';
+import OperationsSiteList from '../site-list/operations-site-list';
 
 function DistrictTabEmptyState({ message }: { message: string }) {
     return (
@@ -23,12 +20,12 @@ function DistrictTabEmptyState({ message }: { message: string }) {
     );
 }
 
-export default function OperationsSiteListPageClient({
-    initialDistrict = '',
-}: OperationsSiteListPageClientProps) {
-    const [selectedDistrict, setSelectedDistrict] =
-        useState<string>(initialDistrict);
+export default function OperationsPageClient() {
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [activeTab, setActiveTab] = useState('sites');
+    const [selectedMonth, setSelectedMonth] = useState(() =>
+        startOfMonth(new Date()),
+    );
 
     const {
         data: getUserPermissionsResult,
@@ -36,11 +33,29 @@ export default function OperationsSiteListPageClient({
     } = useGetUserPermissions();
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+        return (
+            <PageShell
+                title="Operations"
+                description="Monitor field operations by location"
+                icon={Microscope}
+            >
+                <p className="text-muted-foreground text-sm">Loading...</p>
+            </PageShell>
+        );
     }
 
     if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
+        return (
+            <PageShell
+                title="Operations"
+                description="Monitor field operations by location"
+                icon={Microscope}
+            >
+                <p className="text-destructive text-sm">
+                    {getUserPermissionsResult.error.message}
+                </p>
+            </PageShell>
+        );
     }
 
     const accessibleSites =
@@ -60,6 +75,9 @@ export default function OperationsSiteListPageClient({
         ),
     ].sort();
 
+    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
+
     return (
         <PageShell
             title="Operations"
@@ -73,16 +91,20 @@ export default function OperationsSiteListPageClient({
                         onValueChange={setActiveTab}
                         className="space-y-4"
                     >
-                        <OperationsDataHeader
+                        <OperationsHeader
                             districts={accessibleDistricts}
                             selectedDistrict={selectedDistrict}
                             onDistrictChange={setSelectedDistrict}
+                            selectedMonth={selectedMonth}
+                            onMonthChange={setSelectedMonth}
                         />
 
                         <TabsContent value="sites" className="mt-0">
                             <OperationsSiteList
                                 sites={filteredAccessibleSites}
                                 district={selectedDistrict}
+                                startDate={startDate}
+                                endDate={endDate}
                             />
                         </TabsContent>
 
@@ -92,7 +114,7 @@ export default function OperationsSiteListPageClient({
 
                         <TabsContent value="metrics" className="mt-0">
                             {selectedDistrict ? (
-                                <OperationsMetricsTab />
+                                <OperationsMetrics />
                             ) : (
                                 <DistrictTabEmptyState message="Select a district to view district-level metrics." />
                             )}

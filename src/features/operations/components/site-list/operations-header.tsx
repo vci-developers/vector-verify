@@ -1,5 +1,6 @@
 'use client';
 
+import MonthPicker from '@/components/ui/month-picker';
 import {
     Select,
     SelectContent,
@@ -11,34 +12,49 @@ import {
 } from '@/components/ui/select';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface OperationsDataHeaderProps {
+interface OperationsHeaderProps {
     districts: string[];
     selectedDistrict: string;
     onDistrictChange: (district: string) => void;
+    selectedMonth: Date;
+    onMonthChange: (month: Date) => void;
 }
 
-export default function OperationsDataHeader({
+export default function OperationsHeader({
     districts,
     selectedDistrict,
     onDistrictChange,
-}: OperationsDataHeaderProps) {
+    selectedMonth,
+    onMonthChange,
+}: OperationsHeaderProps) {
     return (
         <div className="space-y-4">
-            <Select value={selectedDistrict} onValueChange={onDistrictChange}>
-                <SelectTrigger className="w-52">
-                    <SelectValue placeholder="Select a district" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectLabel>District</SelectLabel>
-                        {districts.map(district => (
-                            <SelectItem key={district} value={district}>
-                                {district}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
+            <div className="flex items-center justify-between">
+                <Select
+                    value={selectedDistrict}
+                    onValueChange={onDistrictChange}
+                >
+                    <SelectTrigger className="w-52">
+                        <SelectValue placeholder="Select a district" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>District</SelectLabel>
+                            {districts.map(district => (
+                                <SelectItem key={district} value={district}>
+                                    {district}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+                <MonthPicker
+                    selectedMonth={selectedMonth}
+                    onMonthChange={onMonthChange}
+                    maxDate={new Date()}
+                />
+            </div>
 
             <TabsList className="bg-muted/50 rounded-full p-1">
                 <TabsTrigger
