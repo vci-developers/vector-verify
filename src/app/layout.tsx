@@ -28,7 +28,7 @@ export default function RootLayout({
     return (
         <html lang="en" className="h-full">
             <body
-                className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} flex h-full flex-col overflow-hidden antialiased`}
             >
                 <TooltipProvider delayDuration={200}>
                     <TanstackProvider>{children}</TanstackProvider>
