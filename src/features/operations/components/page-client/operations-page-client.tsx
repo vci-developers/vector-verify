@@ -75,7 +75,7 @@ export default function OperationsPageClient() {
         ),
     ].sort();
 
-    const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const startDate = format(selectedMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
     return (
