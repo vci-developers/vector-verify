@@ -56,7 +56,7 @@ export default function ReviewSitesListPageClient() {
             icon={ClipboardList}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-                <CardContent className="space-y-4 p-6">
+                <CardContent className="gap-4 p-6">
                     <ReviewSitesListHeader
                         districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}

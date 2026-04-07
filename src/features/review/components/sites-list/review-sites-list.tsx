@@ -90,20 +90,22 @@ export default function ReviewSitesList({
     const paginatedSites = sites.slice((page - 1) * limit, page * limit);
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedSites.map(site => {
-                    const { count, state } =
-                        sessionsBySiteId.get(site.siteId) ?? {};
-                    return (
-                        <ReviewSiteCard
-                            key={site.siteId}
-                            site={site}
-                            sessionCount={count ?? 0}
-                            state={state}
-                        />
-                    );
-                })}
+        <div className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-auto">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {paginatedSites.map(site => {
+                        const { count, state } =
+                            sessionsBySiteId.get(site.siteId) ?? {};
+                        return (
+                            <ReviewSiteCard
+                                key={site.siteId}
+                                site={site}
+                                sessionCount={count ?? 0}
+                                state={state}
+                            />
+                        );
+                    })}
+                </div>
             </div>
 
             {totalPages > 1 && (

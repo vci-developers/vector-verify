@@ -29,7 +29,7 @@ export default function ReviewSitesListPagination({
     const isLastPage = page === totalPages;
 
     return (
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-4 pt-6 sm:flex-row">
             <p className="text-muted-foreground text-sm whitespace-nowrap">
                 Page <span className="text-foreground font-medium">{page}</span>{' '}
                 of{' '}
