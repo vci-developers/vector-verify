@@ -40,7 +40,7 @@ interface SiteHierarchyProps {
     onToggle: (path: string) => void;
 }
 
-export default function SiteHierarchy({
+export default function OperationsSiteHierarchy({
     sites,
     depth,
     parentPath,
@@ -76,38 +76,35 @@ export default function SiteHierarchy({
                         <Link
                             key={site.siteId}
                             href={`/operations/${encodeURIComponent(site.district ?? 'Unknown')}/${site.siteId}`}
+                            className="flex items-center justify-between rounded-md px-3 py-2"
                         >
-                            <div className="group hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-2 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                            hasSessions
-                                                ? 'bg-primary/10'
-                                                : 'bg-muted'
-                                        }`}
-                                    >
-                                        <MapPin
-                                            className={`h-4 w-4 ${
-                                                hasSessions
-                                                    ? 'text-primary'
-                                                    : 'text-muted-foreground'
-                                            }`}
-                                        />
-                                    </div>
-                                    <span className="text-sm">
-                                        {site[currentLevel.key] ?? 'Unknown'}
-                                    </span>
-                                </div>
-                                <Badge
-                                    variant={
-                                        hasSessions ? 'default' : 'outline'
-                                    }
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                                        hasSessions
+                                            ? 'bg-primary/10'
+                                            : 'bg-muted'
+                                    }`}
                                 >
-                                    {hasSessions
-                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                        : 'No sessions'}
-                                </Badge>
+                                    <MapPin
+                                        className={`h-4 w-4 ${
+                                            hasSessions
+                                                ? 'text-primary'
+                                                : 'text-muted-foreground'
+                                        }`}
+                                    />
+                                </div>
+                                <span className="text-sm">
+                                    {site[currentLevel.key] ?? 'Unknown'}
+                                </span>
                             </div>
+                            <Badge
+                                variant={hasSessions ? 'default' : 'outline'}
+                            >
+                                {hasSessions
+                                    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
+                                    : 'No sessions'}
+                            </Badge>
                         </Link>
                     );
                 })}
@@ -170,7 +167,7 @@ export default function SiteHierarchy({
                         {isExpanded && (
                             <CollapsibleContent>
                                 <div className="border-border/60 ml-4.5 border-l pl-4">
-                                    <SiteHierarchy
+                                    <OperationsSiteHierarchy
                                         sites={sitesInLocation}
                                         depth={depth + 1}
                                         parentPath={currentPath}
