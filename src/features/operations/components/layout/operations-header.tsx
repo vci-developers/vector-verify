@@ -10,9 +10,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { OperationsTab } from '@/features/operations/components/page-client/operations-page-client';
 
 interface OperationsHeaderProps {
+    tabs: readonly { value: OperationsTab; label: string }[];
+    activeTab: OperationsTab;
+    onTabChange: (tab: OperationsTab) => void;
     districts: string[];
     selectedDistrict: string;
     onDistrictChange: (district: string) => void;
@@ -21,6 +25,9 @@ interface OperationsHeaderProps {
 }
 
 export default function OperationsHeader({
+    tabs,
+    activeTab,
+    onTabChange,
     districts,
     selectedDistrict,
     onDistrictChange,
@@ -56,32 +63,22 @@ export default function OperationsHeader({
                 />
             </div>
 
-            <TabsList className="bg-muted/50 rounded-full p-1">
-                <TabsTrigger
-                    value="sites"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
-                >
-                    Sites
-                </TabsTrigger>
-                <TabsTrigger
-                    value="review"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
-                >
-                    Review
-                </TabsTrigger>
-                <TabsTrigger
-                    value="metrics"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
-                >
-                    Metrics
-                </TabsTrigger>
-                <TabsTrigger
-                    value="ai-performance"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium uppercase"
-                >
-                    AI Performance
-                </TabsTrigger>
-            </TabsList>
+            <Tabs
+                value={activeTab}
+                onValueChange={value => onTabChange(value as OperationsTab)}
+            >
+                <TabsList className="bg-muted/50 rounded-full p-1">
+                    {tabs.map(tab => (
+                        <TabsTrigger
+                            key={tab.value}
+                            value={tab.value}
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                        >
+                            {tab.label}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </Tabs>
         </div>
     );
 }
