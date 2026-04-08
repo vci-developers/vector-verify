@@ -62,16 +62,18 @@ export default function OperationsSiteListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <OperationsDataHeader
-                        districts={accessibleDistricts}
-                        selectedDistrict={selectedDistrict}
-                        onDistrictChange={setSelectedDistrict}
-                        dateRange={dateRange}
-                        onDateRangeChange={setDateRange}
-                        onClearDateRange={() => setDateRange(undefined)}
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
-                    />
+                    <div className="bg-card sticky top-0 z-10 backdrop-blur-sm">
+                        <OperationsDataHeader
+                            districts={accessibleDistricts}
+                            selectedDistrict={selectedDistrict}
+                            onDistrictChange={setSelectedDistrict}
+                            dateRange={dateRange}
+                            onDateRangeChange={setDateRange}
+                            onClearDateRange={() => setDateRange(undefined)}
+                            activeTab={activeTab}
+                            onTabChange={setActiveTab}
+                        />
+                    </div>
 
                     <OperationsSiteList
                         sites={filteredAccessibleSites}
