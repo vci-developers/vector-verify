@@ -3,7 +3,7 @@
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import {
     getSiteTopLevelLocation,
-    getSiteLocationLabel,
+    getSitesLocationLabel,
 } from '@/api/site/utils';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,7 +39,7 @@ export default function ReviewSitesListPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
-    const locationLabel = getSiteLocationLabel(accessibleSites);
+    const locationLabel = getSitesLocationLabel(accessibleSites);
 
     const accessibleDistricts = [
         ...new Set(

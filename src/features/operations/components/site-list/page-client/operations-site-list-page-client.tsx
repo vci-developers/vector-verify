@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import {
     getSiteTopLevelLocation,
-    getSiteLocationLabel,
+    getSitesLocationLabel,
 } from '@/api/site/utils';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
