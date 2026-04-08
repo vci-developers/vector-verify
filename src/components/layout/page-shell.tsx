@@ -5,7 +5,6 @@ interface PageShellProps {
     icon: LucideIcon;
     description?: string;
     children: React.ReactNode;
-    headerAction?: React.ReactNode;
 }
 
 export default function PageShell({
@@ -13,28 +12,24 @@ export default function PageShell({
     icon: Icon,
     description,
     children,
-    headerAction,
 }: PageShellProps) {
     return (
         <div className="from-background via-background to-muted/30 min-h-screen bg-linear-to-br">
             <div className="container mx-auto max-w-6xl space-y-6 px-4 py-8">
-                <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
-                            <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">
-                                {title}
-                            </h1>
-                            {description && (
-                                <p className="text-muted-foreground text-sm">
-                                    {description}
-                                </p>
-                            )}
-                        </div>
+                <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+                        <Icon className="h-5 w-5" />
                     </div>
-                    {headerAction}
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {title}
+                        </h1>
+                        {description && (
+                            <p className="text-muted-foreground text-sm">
+                                {description}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {children}

@@ -55,15 +55,11 @@ export default function OperationsSiteList({
     }
 
     if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return <p className="text-muted-foreground text-sm">Loading...</p>;
+        return <h1>LOADING...</h1>;
     }
 
     if (!getAllSessionsResult.ok) {
-        return (
-            <p className="text-sm">
-                ERROR: {getAllSessionsResult.error.message}
-            </p>
-        );
+        return <h1>ERROR: {getAllSessionsResult.error.message}</h1>;
     }
 
     if (!district) {

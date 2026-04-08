@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/collapsible';
 import { CompletenessBox } from '@/features/operations/components/site-list/completeness-box';
 import { ChevronRight, MapPin } from 'lucide-react';
-import Link from 'next/link';
 import { useMemo } from 'react';
 
 function getCompletenessBackgroundColor(
@@ -73,9 +72,8 @@ export default function OperationsSiteHierarchy({
                     const hasSessions = sessionCount > 0;
 
                     return (
-                        <Link
+                        <div
                             key={site.siteId}
-                            href={`/operations/${encodeURIComponent(site.district ?? 'Unknown')}/${site.siteId}`}
                             className="flex items-center justify-between rounded-md px-3 py-2"
                         >
                             <div className="flex items-center gap-3">
@@ -105,7 +103,7 @@ export default function OperationsSiteHierarchy({
                                     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
                                     : 'No sessions'}
                             </Badge>
-                        </Link>
+                        </div>
                     );
                 })}
             </div>
