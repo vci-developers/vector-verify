@@ -44,7 +44,7 @@ export default function OperationsSiteListPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
-    const locationLabel = getSiteLocationLabel(accessibleSites);
+    const locationLabel = getSitesLocationLabel(accessibleSites);
 
     const filteredAccessibleSites = selectedDistrict
         ? accessibleSites.filter(
