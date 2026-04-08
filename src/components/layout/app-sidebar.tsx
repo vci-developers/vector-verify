@@ -79,16 +79,17 @@ interface AppSidebarProps {
 export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
+    const {
+        data: getUserPermissionsResult,
+        isPending: isGetUserPermissionsPending,
+    } = useGetUserPermissions();
+
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
 
     function handleThemeToggle() {
         setTheme(isDark ? 'light' : 'dark');
     }
-    const {
-        data: getUserPermissionsResult,
-        isPending: isGetUserPermissionsPending,
-    } = useGetUserPermissions();
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return <h1>LOADING...</h1>;
