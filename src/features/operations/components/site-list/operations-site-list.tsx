@@ -5,6 +5,9 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
 import { Microscope } from 'lucide-react';
 import SiteHierarchy from './operations-site-hierarchy';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const DEFAULT_SKELETON_COUNT = 5;
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -54,21 +57,51 @@ export default function OperationsSiteList({
         });
     }
 
-    if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return <h1>LOADING...</h1>;
+    const skeletonCount =
+        sites.length > 0
+            ? new Set(sites.map(s => s.subCounty)).size
+            : DEFAULT_SKELETON_COUNT;
+
+    if (!district || isGetAllSessionsPending || !getAllSessionsResult) {
+        return (
+            <div className="relative">
+                <div className="space-y-1">
+                    {Array.from({ length: skeletonCount }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="flex items-center justify-between rounded-lg"
+                        >
+                            <Skeleton height="xl" width="full" />
+                        </div>
+                    ))}
+                </div>
+                {!district && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                        <p className="text-muted-foreground text-sm">
+                            Select a district to view sites.
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
     }
 
     if (!getAllSessionsResult.ok) {
-        return <h1>ERROR: {getAllSessionsResult.error.message}</h1>;
-    }
-
-    if (!district) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground text-sm">
-                    Please select a district to view sites.
-                </p>
-                <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
+            <div className="space-y-1">
+                {Array.from({ length: skeletonCount }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="flex items-center justify-between rounded-lg"
+                    >
+                        <Skeleton
+                            height="xl"
+                            width="full"
+                            variant="destructive"
+                        />
+                    </div>
+                ))}
             </div>
         );
     }
