@@ -4,7 +4,8 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
 import { Microscope } from 'lucide-react';
-import SiteHierarchy, { getHierarchyLevels } from './operations-site-hierarchy';
+import SiteHierarchy from './operations-site-hierarchy';
+import { getHierarchyLevels } from '@/api/site/utils';
 
 interface OperationsSiteListProps {
     sites: Site[];
