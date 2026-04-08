@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { Microscope } from 'lucide-react';
+import OperationsAiPerformanceTab from '../ai-performance/operations-ai-performance-tab';
 import OperationsMetrics from '../location/metrics/operations-metrics';
 import OperationsHeader from '../site-list/operations-header';
 import OperationsSiteList from '../site-list/operations-site-list';
@@ -121,13 +122,7 @@ export default function OperationsPageClient() {
                         </TabsContent>
 
                         <TabsContent value="ai-performance" className="mt-0">
-                            <DistrictTabEmptyState
-                                message={
-                                    selectedDistrict
-                                        ? 'AI Performance is coming soon.'
-                                        : 'Select a district to view AI performance.'
-                                }
-                            />
+                            <OperationsAiPerformanceTab />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
