@@ -45,7 +45,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
-# local development notes (not for sharing)
-IMPLEMENTATION_GUIDELINES.md
-API_GUIDELINES.md
