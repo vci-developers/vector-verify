@@ -29,15 +29,29 @@ export default function OperationsSiteList({
             ...(endDate && { endDate }),
         });
 
-    const siteIdToSessionCounts = useMemo(() => {
+    const { siteIdToSessionCounts, siteIdToNeedsReviewCount } = useMemo(() => {
         const counts = new Map<number, number>();
-        if (!getAllSessionsResult?.ok) return counts;
+        const reviewCounts = new Map<number, number>();
+        if (!getAllSessionsResult?.ok)
+            return {
+                siteIdToSessionCounts: counts,
+                siteIdToNeedsReviewCount: reviewCounts,
+            };
 
         for (const session of getAllSessionsResult.data.sessions) {
             counts.set(session.siteId, (counts.get(session.siteId) ?? 0) + 1);
+            if (session.state === 'NEEDS_REVIEW') {
+                reviewCounts.set(
+                    session.siteId,
+                    (reviewCounts.get(session.siteId) ?? 0) + 1,
+                );
+            }
         }
 
-        return counts;
+        return {
+            siteIdToSessionCounts: counts,
+            siteIdToNeedsReviewCount: reviewCounts,
+        };
     }, [getAllSessionsResult]);
 
     function toggleSiteRow(path: string) {
@@ -74,6 +88,7 @@ export default function OperationsSiteList({
             depth={0}
             parentPath=""
             siteIdToSessionCounts={siteIdToSessionCounts}
+            siteIdToNeedsReviewCount={siteIdToNeedsReviewCount}
             expandedSitePaths={expandedSitePaths}
             onToggle={toggleSiteRow}
         />

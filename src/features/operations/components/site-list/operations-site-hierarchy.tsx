@@ -35,6 +35,7 @@ interface SiteHierarchyProps {
     depth: number;
     parentPath: string;
     siteIdToSessionCounts: Map<number, number>;
+    siteIdToNeedsReviewCount: Map<number, number>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
 }
@@ -44,6 +45,7 @@ export default function OperationsSiteHierarchy({
     depth,
     parentPath,
     siteIdToSessionCounts,
+    siteIdToNeedsReviewCount,
     expandedSitePaths,
     onToggle,
 }: SiteHierarchyProps) {
@@ -71,6 +73,10 @@ export default function OperationsSiteHierarchy({
                         siteIdToSessionCounts.get(site.siteId) ?? 0;
                     const hasSessions = sessionCount > 0;
 
+                    const needsReviewCount =
+                        siteIdToNeedsReviewCount.get(site.siteId) ?? 0;
+                    const hasNeedsReview = needsReviewCount > 0;
+
                     return (
                         <div
                             key={site.siteId}
@@ -96,13 +102,20 @@ export default function OperationsSiteHierarchy({
                                     {site[currentLevel.key] ?? 'Unknown'}
                                 </span>
                             </div>
-                            <Badge
-                                variant={hasSessions ? 'default' : 'outline'}
-                            >
-                                {hasSessions
-                                    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                    : 'No sessions'}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                {hasNeedsReview && (
+                                    <Badge variant="destructive">
+                                        {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
+                                    </Badge>
+                                )}
+                                <Badge
+                                    variant={hasSessions ? 'default' : 'outline'}
+                                >
+                                    {hasSessions
+                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
+                                        : 'No sessions'}
+                                </Badge>
+                            </div>
                         </div>
                     );
                 })}
@@ -125,6 +138,11 @@ export default function OperationsSiteHierarchy({
                                   100,
                           )
                         : 0;
+                const needsReviewTotal = sitesInLocation.reduce(
+                    (sum, site) =>
+                        sum + (siteIdToNeedsReviewCount.get(site.siteId) ?? 0),
+                    0,
+                );
 
                 return (
                     <Collapsible
@@ -152,6 +170,11 @@ export default function OperationsSiteHierarchy({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {needsReviewTotal > 0 && (
+                                        <span className="text-destructive text-xs tabular-nums">
+                                            {`${needsReviewTotal} ${needsReviewTotal === 1 ? 'needs' : 'need'} review`}
+                                        </span>
+                                    )}
                                     <span className="text-muted-foreground text-xs tabular-nums">
                                         {coveredSites.length} of{' '}
                                         {sitesInLocation.length} visited
@@ -171,6 +194,9 @@ export default function OperationsSiteHierarchy({
                                         parentPath={currentPath}
                                         siteIdToSessionCounts={
                                             siteIdToSessionCounts
+                                        }
+                                        siteIdToNeedsReviewCount={
+                                            siteIdToNeedsReviewCount
                                         }
                                         expandedSitePaths={expandedSitePaths}
                                         onToggle={onToggle}
