@@ -3,11 +3,8 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
-import { Microscope } from 'lucide-react';
 import SiteHierarchy from './operations-site-hierarchy';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const DEFAULT_SKELETON_COUNT = 5;
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -27,14 +24,11 @@ export default function OperationsSiteList({
     );
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions(
-            {
-                district,
-                ...(startDate && { startDate }),
-                ...(endDate && { endDate }),
-            },
-            { enabled: !!district },
-        );
+        useGetAllSessions({
+            district,
+            ...(startDate && { startDate }),
+            ...(endDate && { endDate }),
+        });
 
     const siteIdToSessionCounts = useMemo(() => {
         const counts = new Map<number, number>();
@@ -57,32 +51,19 @@ export default function OperationsSiteList({
         });
     }
 
-    const skeletonCount =
-        sites.length > 0
-            ? new Set(sites.map(s => s.subCounty)).size
-            : DEFAULT_SKELETON_COUNT;
+    const skeletonCount = new Set(sites.map(s => s.subCounty)).size || 5;
 
-    if (!district || isGetAllSessionsPending || !getAllSessionsResult) {
+    if (isGetAllSessionsPending || !getAllSessionsResult) {
         return (
-            <div className="relative">
-                <div className="space-y-1">
-                    {Array.from({ length: skeletonCount }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="flex items-center justify-between rounded-lg"
-                        >
-                            <Skeleton height="xl" width="full" />
-                        </div>
-                    ))}
-                </div>
-                {!district && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                        <p className="text-muted-foreground text-sm">
-                            Select a district to view sites.
-                        </p>
+            <div className="space-y-1">
+                {Array.from({ length: skeletonCount }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="flex items-center justify-between rounded-lg"
+                    >
+                        <Skeleton height="xl" width="full" />
                     </div>
-                )}
+                ))}
             </div>
         );
     }

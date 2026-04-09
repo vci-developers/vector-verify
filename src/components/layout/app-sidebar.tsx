@@ -6,10 +6,13 @@ import {
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
+    Moon,
     PencilRuler,
     Microscope,
+    Sun,
     type LucideIcon,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
 import {
     Sidebar,
@@ -75,10 +78,18 @@ interface AppSidebarProps {
 
 export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const pathname = usePathname();
+    const { resolvedTheme, setTheme } = useTheme();
     const {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const isDark = resolvedTheme === 'dark';
+    const ThemeIcon = isDark ? Sun : Moon;
+
+    function handleThemeToggle() {
+        setTheme(isDark ? 'light' : 'dark');
+    }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return <h1>LOADING...</h1>;
@@ -166,6 +177,11 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                     {userProfile.email}
                                 </div>
                             </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleThemeToggle}>
+                                <ThemeIcon className="h-4 w-4" />
+                                {isDark ? 'Light mode' : 'Dark mode'}
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
                                 <LogoutButton />

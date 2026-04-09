@@ -1,5 +1,6 @@
 import '@/app/globals.css';
 import { TanstackProvider } from '@/components/providers/tanstack-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -26,13 +27,20 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="h-full">
+        <html lang="en" className="h-full" suppressHydrationWarning>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
             >
-                <TooltipProvider delayDuration={200}>
-                    <TanstackProvider>{children}</TanstackProvider>
-                </TooltipProvider>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <TooltipProvider delayDuration={200}>
+                        <TanstackProvider>{children}</TanstackProvider>
+                    </TooltipProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
