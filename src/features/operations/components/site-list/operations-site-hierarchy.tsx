@@ -109,7 +109,9 @@ export default function OperationsSiteHierarchy({
                                     </Badge>
                                 )}
                                 <Badge
-                                    variant={hasSessions ? 'default' : 'outline'}
+                                    variant={
+                                        hasSessions ? 'default' : 'outline'
+                                    }
                                 >
                                     {hasSessions
                                         ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
