@@ -22,6 +22,7 @@ interface OperationsHeaderProps {
     onDistrictChange: (district: string) => void;
     selectedMonth: Date;
     onMonthChange: (month: Date) => void;
+    locationLabel: string;
 }
 
 export default function OperationsHeader({
@@ -33,6 +34,7 @@ export default function OperationsHeader({
     onDistrictChange,
     selectedMonth,
     onMonthChange,
+    locationLabel,
 }: OperationsHeaderProps) {
     return (
         <div className="space-y-4">
@@ -42,11 +44,13 @@ export default function OperationsHeader({
                     onValueChange={onDistrictChange}
                 >
                     <SelectTrigger className="w-52">
-                        <SelectValue placeholder="Select a district" />
+                        <SelectValue
+                            placeholder={`Select a ${locationLabel.toLowerCase()}`}
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>District</SelectLabel>
+                            <SelectLabel>{locationLabel}</SelectLabel>
                             {districts.map(district => (
                                 <SelectItem key={district} value={district}>
                                     {district}

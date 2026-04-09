@@ -60,11 +60,20 @@ export default function SpecimenImageViewer({
                         {site ? (
                             <Fragment>
                                 <p className="text-sm font-medium">
-                                    House #{site.houseNumber},{' '}
-                                    {site.villageName}
+                                    {Object.values(site.locationHierarchy)
+                                        .length > 0
+                                        ? Object.values(site.locationHierarchy)
+                                              .slice(-2)
+                                              .join(', ')
+                                        : `House #${site.houseNumber}, ${site.villageName}`}
                                 </p>
                                 <p className="text-muted-foreground text-sm">
-                                    {site.subCounty}, {site.district}
+                                    {Object.values(site.locationHierarchy)
+                                        .length > 0
+                                        ? Object.values(site.locationHierarchy)
+                                              .slice(0, -2)
+                                              .join(', ')
+                                        : `${site.subCounty}, ${site.district}`}{' '}
                                 </p>
                             </Fragment>
                         ) : (

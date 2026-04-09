@@ -11,6 +11,10 @@ import OperationsSiteList from '@/features/operations/components/site-list/opera
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import {
+    getSitesLocationLabel,
+    getSiteTopLevelLocation,
+} from '@/api/site/utils';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -63,17 +67,18 @@ export default function OperationsPageClient() {
 
     const filteredAccessibleSites = selectedDistrict
         ? accessibleSites.filter(
-              site => site.district?.trim() === selectedDistrict,
+              site => getSiteTopLevelLocation(site) === selectedDistrict,
           )
         : accessibleSites;
 
     const accessibleDistricts = [
         ...new Set(
             accessibleSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
+                .map(site => getSiteTopLevelLocation(site))
+                .filter((location): location is string => Boolean(location)),
         ),
     ].sort();
+    const locationLabel = getSitesLocationLabel(accessibleSites);
 
     const startDate = format(selectedMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
@@ -95,6 +100,7 @@ export default function OperationsPageClient() {
                         onDistrictChange={setSelectedDistrict}
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
+                        locationLabel={locationLabel}
                     />
 
                     <Separator />

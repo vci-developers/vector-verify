@@ -9,6 +9,10 @@ import ReviewSitesList from '@/features/review/components/sites-list/review-site
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
+import {
+    getSitesLocationLabel,
+    getSiteTopLevelLocation,
+} from '@/api/site/utils';
 
 export default function ReviewSitesListPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
@@ -35,17 +39,19 @@ export default function ReviewSitesListPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
+    const locationLabel = getSitesLocationLabel(accessibleSites);
+
     const accessibleDistricts = [
         ...new Set(
             accessibleSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
+                .map(site => getSiteTopLevelLocation(site))
+                .filter((location): location is string => Boolean(location)),
         ),
     ].sort();
 
     const sitesInAccessibleDistrict = selectedDistrict
         ? accessibleSites.filter(
-              site => site.district?.trim() === selectedDistrict,
+              site => getSiteTopLevelLocation(site) === selectedDistrict,
           )
         : [];
 
@@ -63,6 +69,7 @@ export default function ReviewSitesListPageClient() {
                         onDistrictChange={setSelectedDistrict}
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
+                        locationLabel={locationLabel}
                     />
 
                     <Separator />

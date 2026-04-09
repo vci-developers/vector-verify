@@ -17,6 +17,7 @@ interface ReviewSiteListHeaderProps {
     onDistrictChange: (district: string) => void;
     selectedMonth: Date;
     onMonthChange: (month: Date) => void;
+    locationLabel: string;
 }
 
 export default function ReviewSitesListHeader({
@@ -25,16 +26,19 @@ export default function ReviewSitesListHeader({
     onDistrictChange,
     selectedMonth,
     onMonthChange,
+    locationLabel,
 }: ReviewSiteListHeaderProps) {
     return (
         <div className="flex items-center justify-between">
             <Select value={selectedDistrict} onValueChange={onDistrictChange}>
                 <SelectTrigger className="w-52">
-                    <SelectValue placeholder="Select a district" />
+                    <SelectValue
+                        placeholder={`Select a ${locationLabel.toLocaleLowerCase()}`}
+                    />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
-                        <SelectLabel>District</SelectLabel>
+                        <SelectLabel>{locationLabel}</SelectLabel>
                         {districts.map(district => (
                             <SelectItem key={district} value={district}>
                                 {district}

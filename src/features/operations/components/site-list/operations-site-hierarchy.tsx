@@ -1,5 +1,6 @@
 'use client';
 
+import { getSiteTopLevelLocation } from '@/api/site/utils';
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/components/ui/collapsible';
 import { CompletenessBox } from '@/features/operations/components/site-list/completeness-box';
 import { ChevronRight, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { useMemo } from 'react';
 
 function getCompletenessBackgroundColor(
@@ -22,13 +24,14 @@ function getCompletenessBackgroundColor(
     return 'bg-destructive/10 hover:bg-destructive/20';
 }
 
-const HIERARCHY_LEVELS = [
-    { key: 'subCounty', label: 'Subcounty' },
-    { key: 'healthCenter', label: 'Health Center' },
-    { key: 'parish', label: 'Parish' },
-    { key: 'villageName', label: 'Village' },
-    { key: 'houseNumber', label: 'House' },
-] as const;
+function getSiteValueAtLevel(site: Site, levelKey: string): string | undefined {
+    const hierarchyKeys = Object.keys(site.locationHierarchy);
+    if (hierarchyKeys.length > 0) {
+        return site.locationHierarchy[levelKey];
+    }
+    // Legacy handling when locationHierarchy is empty - fall back to known fields
+    return (site as Record<string, unknown>)[levelKey] as string | undefined;
+}
 
 interface SiteHierarchyProps {
     sites: Site[];
@@ -37,6 +40,7 @@ interface SiteHierarchyProps {
     siteIdToSessionCounts: Map<number, number>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
+    hierarchyLevels: { key: string; label: string }[];
 }
 
 export default function OperationsSiteHierarchy({
@@ -46,14 +50,16 @@ export default function OperationsSiteHierarchy({
     siteIdToSessionCounts,
     expandedSitePaths,
     onToggle,
+    hierarchyLevels,
 }: SiteHierarchyProps) {
-    const currentLevel = HIERARCHY_LEVELS[depth];
-    const isLeafLevel = depth === HIERARCHY_LEVELS.length - 1;
+    const currentLevel = hierarchyLevels[depth];
+    const isLeafLevel = depth === hierarchyLevels.length - 1;
 
     const sortedLocationEntries = useMemo(() => {
         if (!currentLevel) return [];
         const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
-            const locationName = site[currentLevel.key] ?? 'Unknown';
+            const locationName =
+                getSiteValueAtLevel(site, currentLevel.key) ?? 'Unknown';
             groups[locationName] ??= [];
             groups[locationName].push(site);
             return groups;
@@ -72,8 +78,9 @@ export default function OperationsSiteHierarchy({
                     const hasSessions = sessionCount > 0;
 
                     return (
-                        <div
+                        <Link
                             key={site.siteId}
+                            href={`/operations/${getSiteTopLevelLocation(site)}/${site.siteId}`}
                             className="flex items-center justify-between rounded-md px-3 py-2"
                         >
                             <div className="flex items-center gap-3">
@@ -93,7 +100,10 @@ export default function OperationsSiteHierarchy({
                                     />
                                 </div>
                                 <span className="text-sm">
-                                    {site[currentLevel.key] ?? 'Unknown'}
+                                    {getSiteValueAtLevel(
+                                        site,
+                                        currentLevel.key,
+                                    ) ?? 'Unknown'}
                                 </span>
                             </div>
                             <Badge
@@ -103,7 +113,7 @@ export default function OperationsSiteHierarchy({
                                     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
                                     : 'No sessions'}
                             </Badge>
-                        </div>
+                        </Link>
                     );
                 })}
             </div>
@@ -174,6 +184,7 @@ export default function OperationsSiteHierarchy({
                                         }
                                         expandedSitePaths={expandedSitePaths}
                                         onToggle={onToggle}
+                                        hierarchyLevels={hierarchyLevels}
                                     />
                                 </div>
                             </CollapsibleContent>

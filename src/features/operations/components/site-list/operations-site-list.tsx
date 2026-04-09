@@ -4,6 +4,7 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
 import SiteHierarchy from '@/features/operations/components/site-list/operations-site-hierarchy';
+import { getHierarchyLevels } from '@/api/site/utils';
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -28,6 +29,8 @@ export default function OperationsSiteList({
             ...(startDate && { startDate }),
             ...(endDate && { endDate }),
         });
+
+    const hierarchyLevels = useMemo(() => getHierarchyLevels(sites), [sites]);
 
     const siteIdToSessionCounts = useMemo(() => {
         const counts = new Map<number, number>();
@@ -76,6 +79,7 @@ export default function OperationsSiteList({
             siteIdToSessionCounts={siteIdToSessionCounts}
             expandedSitePaths={expandedSitePaths}
             onToggle={toggleSiteRow}
+            hierarchyLevels={hierarchyLevels}
         />
     );
 }
