@@ -115,7 +115,7 @@ export default function OperationsPageClient() {
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a district to view sites.
+                                    Select a district to view data.
                                 </p>
                             </div>
                         </div>
