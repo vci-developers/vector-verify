@@ -3,8 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
-import { Microscope } from 'lucide-react';
-import SiteHierarchy from './operations-site-hierarchy';
+import SiteHierarchy from '@/features/operations/components/site-list/operations-site-hierarchy';
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -24,14 +23,11 @@ export default function OperationsSiteList({
     );
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions(
-            {
-                district,
-                ...(startDate && { startDate }),
-                ...(endDate && { endDate }),
-            },
-            { enabled: !!district },
-        );
+        useGetAllSessions({
+            district,
+            ...(startDate && { startDate }),
+            ...(endDate && { endDate }),
+        });
 
     const siteIdToSessionCounts = useMemo(() => {
         const counts = new Map<number, number>();
@@ -60,17 +56,6 @@ export default function OperationsSiteList({
 
     if (!getAllSessionsResult.ok) {
         return <h1>ERROR: {getAllSessionsResult.error.message}</h1>;
-    }
-
-    if (!district) {
-        return (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground text-sm">
-                    Please select a district to view sites.
-                </p>
-                <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
-            </div>
-        );
     }
 
     if (sites.length === 0) {
