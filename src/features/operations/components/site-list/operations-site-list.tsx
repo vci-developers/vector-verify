@@ -27,6 +27,7 @@ export default function OperationsSiteList({
             district,
             ...(startDate && { startDate }),
             ...(endDate && { endDate }),
+            type: 'SURVEILLANCE',
         });
 
     const siteIdToSessionCounts = useMemo(() => {
