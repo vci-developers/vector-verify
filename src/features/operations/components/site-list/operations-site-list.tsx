@@ -4,7 +4,7 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useMemo, useState } from 'react';
 import SiteHierarchy from './operations-site-hierarchy';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonList } from '@/components/ui/skeleton-list';
 
 interface OperationsSiteListProps {
     sites: Site[];
@@ -54,36 +54,17 @@ export default function OperationsSiteList({
     const skeletonCount = new Set(sites.map(s => s.subCounty)).size || 5;
 
     if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return (
-            <div className="space-y-1">
-                {Array.from({ length: skeletonCount }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="flex items-center justify-between rounded-lg"
-                    >
-                        <Skeleton height="xl" width="full" />
-                    </div>
-                ))}
-            </div>
-        );
+        return <SkeletonList count={skeletonCount} height="xl" width="full" />;
     }
 
     if (!getAllSessionsResult.ok) {
         return (
-            <div className="space-y-1">
-                {Array.from({ length: skeletonCount }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="flex items-center justify-between rounded-lg"
-                    >
-                        <Skeleton
-                            height="xl"
-                            width="full"
-                            variant="destructive"
-                        />
-                    </div>
-                ))}
-            </div>
+            <SkeletonList
+                count={skeletonCount}
+                height="xl"
+                width="full"
+                variant="destructive"
+            />
         );
     }
 

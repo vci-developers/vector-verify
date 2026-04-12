@@ -32,7 +32,7 @@ const ROUNDED = {
     lg: 'rounded-lg',
 } as const;
 
-interface SkeletonProps extends React.ComponentProps<'div'> {
+export interface SkeletonProps extends React.ComponentProps<'div'> {
     height?: keyof typeof HEIGHTS;
     width?: keyof typeof WIDTHS;
     variant?: keyof typeof VARIANTS;

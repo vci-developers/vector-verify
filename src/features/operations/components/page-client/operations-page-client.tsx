@@ -4,7 +4,6 @@ import { Fragment, useState } from 'react';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { Microscope } from 'lucide-react';
 import OperationsMetrics from '@/features/operations/components/metrics/operations-metrics';
@@ -12,6 +11,7 @@ import OperationsSiteList from '@/features/operations/components/site-list/opera
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import { SkeletonList } from '@/components/ui/skeleton-list';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -102,16 +102,7 @@ export default function OperationsPageClient() {
 
                     {!selectedDistrict ? (
                         <div className="relative">
-                            <div className="space-y-1">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center justify-between rounded-lg"
-                                    >
-                                        <Skeleton height="xl" width="full" />
-                                    </div>
-                                ))}
-                            </div>
+                            <SkeletonList count={5} height="xl" width="full" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
                                 <p className="text-muted-foreground text-sm">
