@@ -11,6 +11,7 @@ import OperationsSiteList from '@/features/operations/components/site-list/opera
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import ExportDialog from '@/features/operations/components/export/export-dialog';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -26,6 +27,7 @@ export default function OperationsPageClient() {
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
     );
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
         data: getUserPermissionsResult,
@@ -95,6 +97,7 @@ export default function OperationsPageClient() {
                         onDistrictChange={setSelectedDistrict}
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
+                        onExportClick={() => setIsExportDialogOpen(true)}
                     />
 
                     <Separator />
@@ -126,6 +129,15 @@ export default function OperationsPageClient() {
                     )}
                 </CardContent>
             </Card>
+
+            <ExportDialog
+                open={isExportDialogOpen}
+                onOpenChange={setIsExportDialogOpen}
+                programId={getUserPermissionsResult.data.programId}
+                district={selectedDistrict}
+                startDate={startDate}
+                endDate={endDate}
+            />
         </PageShell>
     );
 }
