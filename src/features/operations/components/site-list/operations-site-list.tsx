@@ -29,29 +29,26 @@ export default function OperationsSiteList({
             ...(endDate && { endDate }),
         });
 
-    const { siteIdToSessionCounts, siteIdToNeedsReviewCount } = useMemo(() => {
-        const counts = new Map<number, number>();
-        const reviewCounts = new Map<number, number>();
-        if (!getAllSessionsResult?.ok)
-            return {
-                siteIdToSessionCounts: counts,
-                siteIdToNeedsReviewCount: reviewCounts,
-            };
+    const siteIdToCounts = useMemo(() => {
+        const counts = new Map<
+            number,
+            { sessionCount: number; needsReviewCount: number }
+        >();
+        if (!getAllSessionsResult?.ok) return counts;
 
         for (const session of getAllSessionsResult.data.sessions) {
-            counts.set(session.siteId, (counts.get(session.siteId) ?? 0) + 1);
-            if (session.state === 'NEEDS_REVIEW') {
-                reviewCounts.set(
-                    session.siteId,
-                    (reviewCounts.get(session.siteId) ?? 0) + 1,
-                );
-            }
+            const currentCounts = counts.get(session.siteId) ?? {
+                sessionCount: 0,
+                needsReviewCount: 0,
+            };
+            counts.set(session.siteId, {
+                sessionCount: currentCounts.sessionCount + 1,
+                needsReviewCount:
+                    currentCounts.needsReviewCount +
+                    (session.state === 'NEEDS_REVIEW' ? 1 : 0),
+            });
         }
-
-        return {
-            siteIdToSessionCounts: counts,
-            siteIdToNeedsReviewCount: reviewCounts,
-        };
+        return counts;
     }, [getAllSessionsResult]);
 
     function toggleSiteRow(path: string) {
@@ -87,8 +84,7 @@ export default function OperationsSiteList({
             sites={sites}
             depth={0}
             parentPath=""
-            siteIdToSessionCounts={siteIdToSessionCounts}
-            siteIdToNeedsReviewCount={siteIdToNeedsReviewCount}
+            siteIdToCounts={siteIdToCounts}
             expandedSitePaths={expandedSitePaths}
             onToggle={toggleSiteRow}
         />

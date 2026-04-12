@@ -34,8 +34,10 @@ interface SiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    siteIdToSessionCounts: Map<number, number>;
-    siteIdToNeedsReviewCount: Map<number, number>;
+    siteIdToCounts: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
 }
@@ -44,8 +46,7 @@ export default function OperationsSiteHierarchy({
     sites,
     depth,
     parentPath,
-    siteIdToSessionCounts,
-    siteIdToNeedsReviewCount,
+    siteIdToCounts,
     expandedSitePaths,
     onToggle,
 }: SiteHierarchyProps) {
@@ -69,12 +70,12 @@ export default function OperationsSiteHierarchy({
         return (
             <div className="space-y-1">
                 {sites.map(site => {
-                    const sessionCount =
-                        siteIdToSessionCounts.get(site.siteId) ?? 0;
+                    const { sessionCount, needsReviewCount } =
+                        siteIdToCounts.get(site.siteId) ?? {
+                            sessionCount: 0,
+                            needsReviewCount: 0,
+                        };
                     const hasSessions = sessionCount > 0;
-
-                    const needsReviewCount =
-                        siteIdToNeedsReviewCount.get(site.siteId) ?? 0;
                     const hasNeedsReview = needsReviewCount > 0;
 
                     return (
@@ -131,7 +132,9 @@ export default function OperationsSiteHierarchy({
                 const currentPath = `${parentPath}/${locationName}`;
                 const isExpanded = expandedSitePaths.has(currentPath);
                 const coveredSites = sitesInLocation.filter(
-                    site => (siteIdToSessionCounts.get(site.siteId) ?? 0) > 0,
+                    site =>
+                        (siteIdToCounts.get(site.siteId)?.sessionCount ?? 0) >
+                        0,
                 );
                 const completenessPercentage =
                     sitesInLocation.length > 0
@@ -142,7 +145,9 @@ export default function OperationsSiteHierarchy({
                         : 0;
                 const needsReviewTotal = sitesInLocation.reduce(
                     (sum, site) =>
-                        sum + (siteIdToNeedsReviewCount.get(site.siteId) ?? 0),
+                        sum +
+                        (siteIdToCounts.get(site.siteId)?.needsReviewCount ??
+                            0),
                     0,
                 );
 
@@ -194,12 +199,7 @@ export default function OperationsSiteHierarchy({
                                         sites={sitesInLocation}
                                         depth={depth + 1}
                                         parentPath={currentPath}
-                                        siteIdToSessionCounts={
-                                            siteIdToSessionCounts
-                                        }
-                                        siteIdToNeedsReviewCount={
-                                            siteIdToNeedsReviewCount
-                                        }
+                                        siteIdToCounts={siteIdToCounts}
                                         expandedSitePaths={expandedSitePaths}
                                         onToggle={onToggle}
                                     />
