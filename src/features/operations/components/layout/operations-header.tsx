@@ -1,7 +1,5 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
-import MonthPicker from '@/components/ui/month-picker';
+import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,
     SelectContent,
@@ -22,8 +20,10 @@ interface OperationsHeaderProps {
     districts: string[];
     selectedDistrict: string;
     onDistrictChange: (district: string) => void;
-    selectedMonth: Date;
-    onMonthChange: (month: Date) => void;
+    startMonth: Date;
+    endMonth: Date;
+    onStartMonthChange: (month: Date) => void;
+    onEndMonthChange: (month: Date) => void;
     onExportClick: () => void;
 }
 
@@ -34,8 +34,10 @@ export default function OperationsHeader({
     districts,
     selectedDistrict,
     onDistrictChange,
-    selectedMonth,
-    onMonthChange,
+    startMonth,
+    endMonth,
+    onStartMonthChange,
+    onEndMonthChange,
     onExportClick,
 }: OperationsHeaderProps) {
     return (
@@ -61,9 +63,11 @@ export default function OperationsHeader({
                 </Select>
 
                 <div className="flex items-center gap-2">
-                    <MonthPicker
-                        selectedMonth={selectedMonth}
-                        onMonthChange={onMonthChange}
+                    <MonthRangePicker
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={onStartMonthChange}
+                        onEndMonthChange={onEndMonthChange}
                         maxDate={new Date()}
                     />
 
