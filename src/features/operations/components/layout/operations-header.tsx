@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import MonthPicker from '@/components/ui/month-picker';
 import {
     Select,
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { OperationsTab } from '@/features/operations/components/page-client/operations-page-client';
+import { Download } from 'lucide-react';
 
 interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
@@ -22,6 +24,7 @@ interface OperationsHeaderProps {
     onDistrictChange: (district: string) => void;
     selectedMonth: Date;
     onMonthChange: (month: Date) => void;
+    onExportClick: () => void;
 }
 
 export default function OperationsHeader({
@@ -33,6 +36,7 @@ export default function OperationsHeader({
     onDistrictChange,
     selectedMonth,
     onMonthChange,
+    onExportClick,
 }: OperationsHeaderProps) {
     return (
         <div className="space-y-4">
@@ -56,11 +60,22 @@ export default function OperationsHeader({
                     </SelectContent>
                 </Select>
 
-                <MonthPicker
-                    selectedMonth={selectedMonth}
-                    onMonthChange={onMonthChange}
-                    maxDate={new Date()}
-                />
+                <div className="flex items-center gap-2">
+                    <MonthPicker
+                        selectedMonth={selectedMonth}
+                        onMonthChange={onMonthChange}
+                        maxDate={new Date()}
+                    />
+
+                    <Button
+                        variant="default"
+                        disabled={!selectedDistrict}
+                        onClick={onExportClick}
+                    >
+                        <Download className="h-4 w-4" />
+                        Export Data
+                    </Button>
+                </div>
             </div>
 
             <Tabs
