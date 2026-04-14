@@ -6,7 +6,6 @@ import {
     eachMonthOfInterval,
     endOfMonth,
     format,
-    startOfMonth,
 } from 'date-fns';
 import { useMemo, useState } from 'react';
 import SiteHierarchy from './operations-site-hierarchy';
