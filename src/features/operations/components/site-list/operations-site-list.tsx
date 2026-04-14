@@ -95,13 +95,7 @@ export default function OperationsSiteList({
 
     const skeletonCount = new Set(sites.map(site => site.subCounty)).size || 5;
 
-    if (
-        isGetAllSessionsPending ||
-        !getAllSessionsResult ||
-        !getAllSessionsResult.ok
-    ) {
-        const variant =
-            getAllSessionsResult?.ok === false ? 'destructive' : 'default';
+    if (isGetAllSessionsPending || !getAllSessionsResult) {
         return (
             <div className="space-y-2">
                 {months.map(month => (
@@ -113,11 +107,18 @@ export default function OperationsSiteList({
                             count={skeletonCount}
                             height="xl"
                             width="full"
-                            variant={variant}
                         />
                     </div>
                 ))}
             </div>
+        );
+    }
+
+    if (!getAllSessionsResult.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getAllSessionsResult.error.message}
+            </p>
         );
     }
 
