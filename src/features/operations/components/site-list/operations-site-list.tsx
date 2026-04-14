@@ -2,11 +2,7 @@
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
-import {
-    eachMonthOfInterval,
-    endOfMonth,
-    format,
-} from 'date-fns';
+import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import SiteHierarchy from './operations-site-hierarchy';
 import { SkeletonList } from '@/components/ui/skeleton-list';
