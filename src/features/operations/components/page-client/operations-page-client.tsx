@@ -11,11 +11,13 @@ import OperationsSiteList from '@/features/operations/components/site-list/opera
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import OperationsGeographicalSummary from '@/features/operations/components/geographical-summary/operations-geographical-summary';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
+    { value: 'geographical-summary', label: 'GEOGRAPHICAL SUMMARY' },
     { value: 'metrics', label: 'METRICS' },
     { value: 'ai-performance', label: 'AI PERFORMANCE' },
 ] as const;
@@ -128,6 +130,14 @@ export default function OperationsPageClient() {
                             )}
 
                             {activeTab === 'metrics' && <OperationsMetrics />}
+
+                            {activeTab === 'geographical-summary' && (
+                                <OperationsGeographicalSummary
+                                    district={selectedDistrict}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
+                            )}
 
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformanceTab />
