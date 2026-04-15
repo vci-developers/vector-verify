@@ -192,20 +192,18 @@ export default function OperationsSiteHierarchy({
                                 </div>
                             </div>
                         </CollapsibleTrigger>
-                        {isExpanded && (
-                            <CollapsibleContent>
-                                <div className="border-border/60 ml-4.5 border-l pl-4">
-                                    <OperationsSiteHierarchy
-                                        sites={sitesInLocation}
-                                        depth={depth + 1}
-                                        parentPath={currentPath}
-                                        siteIdToCounts={siteIdToCounts}
-                                        expandedSitePaths={expandedSitePaths}
-                                        onToggle={onToggle}
-                                    />
-                                </div>
-                            </CollapsibleContent>
-                        )}
+                        <CollapsibleContent>
+                            <div className="border-border/60 ml-4.5 border-l pl-4">
+                                <OperationsSiteHierarchy
+                                    sites={sitesInLocation}
+                                    depth={depth + 1}
+                                    parentPath={currentPath}
+                                    siteIdToCounts={siteIdToCounts}
+                                    expandedSitePaths={expandedSitePaths}
+                                    onToggle={onToggle}
+                                />
+                            </div>
+                        </CollapsibleContent>
                     </Collapsible>
                 );
             })}
