@@ -27,7 +27,7 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+    const [selectedLocation, setSelectedLocation] = useState<string>('');
     const [activeTab, setActiveTab] = useState<OperationsTab>('sites');
     const [startMonth, setStartMonth] = useState(() =>
         startOfMonth(subMonths(new Date(), 2)),
@@ -69,13 +69,13 @@ export default function OperationsPageClient() {
     const accessibleSites =
         getUserPermissionsResult.data.permissions.sites.canAccessSites;
 
-    const filteredAccessibleSites = selectedDistrict
+    const filteredAccessibleSites = selectedLocation
         ? accessibleSites.filter(
-              site => getSiteTopLevelLocation(site) === selectedDistrict,
+              site => getSiteTopLevelLocation(site) === selectedLocation,
           )
         : accessibleSites;
 
-    const accessibleDistricts = [
+    const accessibleLocations = [
         ...new Set(
             accessibleSites
                 .map(site => getSiteTopLevelLocation(site))
@@ -99,9 +99,9 @@ export default function OperationsPageClient() {
                         tabs={OPERATIONS_TABS}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
-                        districts={accessibleDistricts}
-                        selectedDistrict={selectedDistrict}
-                        onDistrictChange={setSelectedDistrict}
+                        locations={accessibleLocations}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={setSelectedLocation}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={setStartMonth}
@@ -112,13 +112,13 @@ export default function OperationsPageClient() {
 
                     <Separator />
 
-                    {!selectedDistrict ? (
+                    {!selectedLocation ? (
                         <div className="relative">
                             <SkeletonList count={5} height="xl" width="full" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a district to view data.
+                                    {`Select a ${locationLabel.toLowerCase()} to view data.`}
                                 </p>
                             </div>
                         </div>
@@ -127,7 +127,7 @@ export default function OperationsPageClient() {
                             {activeTab === 'sites' && (
                                 <OperationsSiteList
                                     sites={filteredAccessibleSites}
-                                    district={selectedDistrict}
+                                    topLevelLocation={selectedLocation}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
                                 />
@@ -147,7 +147,7 @@ export default function OperationsPageClient() {
                 open={isExportDialogOpen}
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
-                district={selectedDistrict}
+                topLevelLocation={selectedLocation}
                 startDate={startDate}
                 endDate={endDate}
             />

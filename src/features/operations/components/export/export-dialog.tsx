@@ -26,7 +26,7 @@ interface ExportDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     programId: number;
-    district: string;
+    topLevelLocation: string;
     startDate?: string;
     endDate?: string;
 }
@@ -35,7 +35,7 @@ export default function ExportDialog({
     open,
     onOpenChange,
     programId,
-    district,
+    topLevelLocation,
     startDate,
     endDate,
 }: ExportDialogProps) {
@@ -59,7 +59,7 @@ export default function ExportDialog({
                         endDate,
                         sessionType: 'SURVEILLANCE',
                         programId: programId,
-                        districts: district,
+                        districts: topLevelLocation,
                     },
                     getSessionsReportQueryParamsSchema,
                 );
@@ -89,7 +89,7 @@ export default function ExportDialog({
 
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = `${district}-report-${startDate}-to-${endDate}.xlsx`;
+            anchor.download = `${topLevelLocation}-report-${startDate}-to-${endDate}.xlsx`;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
@@ -111,7 +111,7 @@ export default function ExportDialog({
                     <DialogDescription>
                         This will download session data for{' '}
                         <span className="text-foreground font-medium">
-                            {district}
+                            {topLevelLocation}
                         </span>{' '}
                         from{' '}
                         <span className="text-foreground font-medium">

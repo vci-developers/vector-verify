@@ -2,7 +2,7 @@
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
-import { getHierarchyLevels } from '@/api/site/utils';
+import { getHierarchyLevels, getSitesLocationLabel } from '@/api/site/utils';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import SiteHierarchy from './operations-site-hierarchy';
@@ -17,14 +17,14 @@ import { ChevronRight } from 'lucide-react';
 
 interface OperationsSiteListProps {
     sites: Site[];
-    district: string;
+    topLevelLocation: string;
     startMonth: Date;
     endMonth: Date;
 }
 
 export default function OperationsSiteList({
     sites,
-    district,
+    topLevelLocation,
     startMonth,
     endMonth,
 }: OperationsSiteListProps) {
@@ -40,7 +40,7 @@ export default function OperationsSiteList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            district,
+            district: topLevelLocation,
             startDate,
             endDate,
             type: 'SURVEILLANCE',
@@ -96,7 +96,17 @@ export default function OperationsSiteList({
         });
     }
 
-    const skeletonCount = new Set(sites.map(site => site.subCounty)).size || 5;
+    const locationLabel = getSitesLocationLabel(sites);
+    const firstGroupKey = hierarchyLevels[0]?.key;
+    const skeletonCount = firstGroupKey
+        ? new Set(
+              sites.map(
+                  site =>
+                      site.locationHierarchy[firstGroupKey] ??
+                      (site as Record<string, unknown>)[firstGroupKey],
+              ),
+          ).size || 5
+        : 5;
 
     if (isGetAllSessionsPending || !getAllSessionsResult) {
         return (
@@ -129,7 +139,7 @@ export default function OperationsSiteList({
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
                 <p className="text-muted-foreground text-sm">
-                    No sites found for this district.
+                    {`No sites found for this ${locationLabel.toLowerCase()}.`}
                 </p>
             </div>
         );
