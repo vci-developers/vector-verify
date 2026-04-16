@@ -37,7 +37,10 @@ interface SiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    siteIdToSessionCounts: Map<number, number>;
+    siteIdToCounts: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
     hierarchyLevels: { key: string; label: string }[];
@@ -47,7 +50,7 @@ export default function OperationsSiteHierarchy({
     sites,
     depth,
     parentPath,
-    siteIdToSessionCounts,
+    siteIdToCounts,
     expandedSitePaths,
     onToggle,
     hierarchyLevels,
@@ -73,9 +76,13 @@ export default function OperationsSiteHierarchy({
         return (
             <div className="space-y-1">
                 {sites.map(site => {
-                    const sessionCount =
-                        siteIdToSessionCounts.get(site.siteId) ?? 0;
+                    const { sessionCount, needsReviewCount } =
+                        siteIdToCounts.get(site.siteId) ?? {
+                            sessionCount: 0,
+                            needsReviewCount: 0,
+                        };
                     const hasSessions = sessionCount > 0;
+                    const hasNeedsReview = needsReviewCount > 0;
 
                     return (
                         <Link
@@ -106,13 +113,22 @@ export default function OperationsSiteHierarchy({
                                     ) ?? 'Unknown'}
                                 </span>
                             </div>
-                            <Badge
-                                variant={hasSessions ? 'default' : 'outline'}
-                            >
-                                {hasSessions
-                                    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                    : 'No sessions'}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                {hasNeedsReview && (
+                                    <Badge variant="destructive">
+                                        {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
+                                    </Badge>
+                                )}
+                                <Badge
+                                    variant={
+                                        hasSessions ? 'default' : 'outline'
+                                    }
+                                >
+                                    {hasSessions
+                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
+                                        : 'No sessions'}
+                                </Badge>
+                            </div>
                         </Link>
                     );
                 })}
@@ -126,7 +142,9 @@ export default function OperationsSiteHierarchy({
                 const currentPath = `${parentPath}/${locationName}`;
                 const isExpanded = expandedSitePaths.has(currentPath);
                 const coveredSites = sitesInLocation.filter(
-                    site => (siteIdToSessionCounts.get(site.siteId) ?? 0) > 0,
+                    site =>
+                        (siteIdToCounts.get(site.siteId)?.sessionCount ?? 0) >
+                        0,
                 );
                 const completenessPercentage =
                     sitesInLocation.length > 0
@@ -135,6 +153,13 @@ export default function OperationsSiteHierarchy({
                                   100,
                           )
                         : 0;
+                const needsReviewTotal = sitesInLocation.reduce(
+                    (sum, site) =>
+                        sum +
+                        (siteIdToCounts.get(site.siteId)?.needsReviewCount ??
+                            0),
+                    0,
+                );
 
                 return (
                     <Collapsible
@@ -162,6 +187,11 @@ export default function OperationsSiteHierarchy({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {needsReviewTotal > 0 && (
+                                        <span className="text-destructive text-xs tabular-nums">
+                                            {`${needsReviewTotal} ${needsReviewTotal === 1 ? 'needs' : 'need'} review`}
+                                        </span>
+                                    )}
                                     <span className="text-muted-foreground text-xs tabular-nums">
                                         {coveredSites.length} of{' '}
                                         {sitesInLocation.length} visited
@@ -172,23 +202,19 @@ export default function OperationsSiteHierarchy({
                                 </div>
                             </div>
                         </CollapsibleTrigger>
-                        {isExpanded && (
-                            <CollapsibleContent>
-                                <div className="border-border/60 ml-4.5 border-l pl-4">
-                                    <OperationsSiteHierarchy
-                                        sites={sitesInLocation}
-                                        depth={depth + 1}
-                                        parentPath={currentPath}
-                                        siteIdToSessionCounts={
-                                            siteIdToSessionCounts
-                                        }
-                                        expandedSitePaths={expandedSitePaths}
-                                        onToggle={onToggle}
-                                        hierarchyLevels={hierarchyLevels}
-                                    />
-                                </div>
-                            </CollapsibleContent>
-                        )}
+                        <CollapsibleContent>
+                            <div className="border-border/60 ml-4.5 border-l pl-4">
+                                <OperationsSiteHierarchy
+                                    sites={sitesInLocation}
+                                    depth={depth + 1}
+                                    parentPath={currentPath}
+                                    siteIdToCounts={siteIdToCounts}
+                                    expandedSitePaths={expandedSitePaths}
+                                    onToggle={onToggle}
+                                    hierarchyLevels={hierarchyLevels}
+                                />
+                            </div>
+                        </CollapsibleContent>
                     </Collapsible>
                 );
             })}

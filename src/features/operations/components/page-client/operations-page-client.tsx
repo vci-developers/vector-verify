@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { endOfMonth, format, startOfMonth } from 'date-fns';
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
 import OperationsMetrics from '@/features/operations/components/metrics/operations-metrics';
 import OperationsSiteList from '@/features/operations/components/site-list/operations-site-list';
@@ -15,6 +15,8 @@ import {
     getSitesLocationLabel,
     getSiteTopLevelLocation,
 } from '@/api/site/utils';
+import { SkeletonList } from '@/components/ui/skeleton-list';
+import ExportDialog from '@/features/operations/components/export/export-dialog';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -27,9 +29,11 @@ export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 export default function OperationsPageClient() {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [activeTab, setActiveTab] = useState<OperationsTab>('sites');
-    const [selectedMonth, setSelectedMonth] = useState(() =>
-        startOfMonth(new Date()),
+    const [startMonth, setStartMonth] = useState(() =>
+        startOfMonth(subMonths(new Date(), 2)),
     );
+    const [endMonth, setEndMonth] = useState(() => startOfMonth(new Date()));
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
         data: getUserPermissionsResult,
@@ -80,8 +84,8 @@ export default function OperationsPageClient() {
     ].sort();
     const locationLabel = getSitesLocationLabel(accessibleSites);
 
-    const startDate = format(selectedMonth, 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const startDate = format(startMonth, 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
     return (
         <PageShell
@@ -98,19 +102,25 @@ export default function OperationsPageClient() {
                         districts={accessibleDistricts}
                         selectedDistrict={selectedDistrict}
                         onDistrictChange={setSelectedDistrict}
-                        selectedMonth={selectedMonth}
-                        onMonthChange={setSelectedMonth}
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={setStartMonth}
+                        onEndMonthChange={setEndMonth}
+                        onExportClick={() => setIsExportDialogOpen(true)}
                         locationLabel={locationLabel}
                     />
 
                     <Separator />
 
                     {!selectedDistrict ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <p className="text-muted-foreground text-sm">
-                                Select a district to view data.
-                            </p>
-                            <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
+                        <div className="relative">
+                            <SkeletonList count={5} height="xl" width="full" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                                <p className="text-muted-foreground text-sm">
+                                    Select a district to view data.
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <Fragment>
@@ -118,8 +128,8 @@ export default function OperationsPageClient() {
                                 <OperationsSiteList
                                     sites={filteredAccessibleSites}
                                     district={selectedDistrict}
-                                    startDate={startDate}
-                                    endDate={endDate}
+                                    startMonth={startMonth}
+                                    endMonth={endMonth}
                                 />
                             )}
 
@@ -132,6 +142,15 @@ export default function OperationsPageClient() {
                     )}
                 </CardContent>
             </Card>
+
+            <ExportDialog
+                open={isExportDialogOpen}
+                onOpenChange={setIsExportDialogOpen}
+                programId={getUserPermissionsResult.data.programId}
+                district={selectedDistrict}
+                startDate={startDate}
+                endDate={endDate}
+            />
         </PageShell>
     );
 }
