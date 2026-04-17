@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const geocodeQueryParamsSchema = z.object({
-    village: z.string().optional(),
-    parish: z.string().optional(),
-    subCounty: z.string().optional(),
-    district: z.string().optional(),
-    query: z.string().optional(),
-});
+import { geocodeQueryParamsSchema } from '@/api/geocode/validation/geocode-query-params-schema';
 
 type CacheEntry = {
     lat: number | null;
