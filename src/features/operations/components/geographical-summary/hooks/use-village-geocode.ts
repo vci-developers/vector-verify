@@ -1,51 +1,31 @@
 'use client';
 
+import { geocodeKeys } from '@/api/geocode/geocode-keys';
+import { fetchGeocode } from '@/api/geocode/hooks/use-get-geocode';
+import type { GeocodeQueryParams } from '@/api/geocode/validation/get-geocode-schema';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { VillageMarker } from '@/features/operations/lib/use-site-markers';
+import { useQueryClient } from '@tanstack/react-query';
+import type { VillageMarker } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
 
 export interface GeocodedPosition {
     latitude: number;
     longitude: number;
 }
 
-const geocodeCache = new Map<string, GeocodedPosition>();
-
-async function geocodeVillage(
-    marker: VillageMarker,
-    signal: AbortSignal,
-): Promise<GeocodedPosition | null> {
-    const cacheKey = marker.id;
-    if (geocodeCache.has(cacheKey)) return geocodeCache.get(cacheKey)!;
-
-    const params = new URLSearchParams();
-    if (marker.villageName) params.set('village', marker.villageName);
-    if (marker.parish) params.set('parish', marker.parish);
-    if (marker.subCounty) params.set('subCounty', marker.subCounty);
-    if (marker.district) params.set('district', marker.district);
-
-    try {
-        const r = await fetch(`/api/geocode?${params.toString()}`, { signal });
-        if (!r.ok) return null;
-        const data = (await r.json()) as {
-            ok: boolean;
-            data?: { latitude: number; longitude: number };
-        };
-        if (data.ok && data.data != null) {
-            const pos = {
-                latitude: data.data.latitude,
-                longitude: data.data.longitude,
-            };
-            geocodeCache.set(cacheKey, pos);
-            return pos;
-        }
-    } catch {}
-    return null;
+function markerToGeocodeParams(marker: VillageMarker): GeocodeQueryParams {
+    return {
+        village: marker.villageName ?? undefined,
+        parish: marker.parish ?? undefined,
+        subCounty: marker.subCounty ?? undefined,
+        district: marker.district ?? undefined,
+    };
 }
 
 export function useVillageGeocode(markers: VillageMarker[]): {
     positions: Map<string, GeocodedPosition>;
     isGeocoding: boolean;
 } {
+    const queryClient = useQueryClient();
     const [positions, setPositions] = useState<Map<string, GeocodedPosition>>(
         new Map(),
     );
@@ -57,7 +37,7 @@ export function useVillageGeocode(markers: VillageMarker[]): {
     const villagesKey = useMemo(
         () =>
             markers
-                .map(m => m.id)
+                .map(marker => marker.id)
                 .sort()
                 .join('\x00'),
         [markers],
@@ -71,31 +51,35 @@ export function useVillageGeocode(markers: VillageMarker[]): {
             return;
         }
 
-        const controller = new AbortController();
+        let cancelled = false;
         setIsGeocoding(true);
 
-        async function geocodeAll() {
+        async function collectAllGeocodedPositions() {
             const result = new Map<string, GeocodedPosition>();
 
             for (const marker of currentMarkers) {
-                if (controller.signal.aborted) break;
-                const pos = await geocodeVillage(marker, controller.signal);
-                if (pos) result.set(marker.id, pos);
+                if (cancelled) break;
+                const params = markerToGeocodeParams(marker);
+                const geocodeResult = await queryClient.fetchQuery({
+                    queryKey: geocodeKeys.geocode(params),
+                    queryFn: () => fetchGeocode(params),
+                });
+                if (geocodeResult.ok) result.set(marker.id, geocodeResult.data);
             }
 
-            if (!controller.signal.aborted) {
+            if (!cancelled) {
                 setPositions(result);
                 setIsGeocoding(false);
             }
         }
 
-        geocodeAll();
+        collectAllGeocodedPositions();
 
         return () => {
-            controller.abort();
+            cancelled = true;
             setIsGeocoding(false);
         };
-    }, [villagesKey]);
+    }, [villagesKey, queryClient]);
 
     return { positions, isGeocoding };
 }

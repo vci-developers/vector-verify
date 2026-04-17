@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
-import { useSiteMarkers } from '@/features/operations/lib/use-site-markers';
+import { useSiteMarkers } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
 
 export const ANOPHELES_THRESHOLD = {
     low: 10,

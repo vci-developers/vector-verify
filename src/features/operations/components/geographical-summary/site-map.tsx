@@ -10,7 +10,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import { useVillageGeocode } from './hooks/use-village-geocode';
 import MarkerLayer from './components/map/marker-layer';
 import MapNavigator from './components/map/map-navigator';
-import type { VillageMarker } from '@/features/operations/lib/use-site-markers';
+import type { VillageMarker } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
 
 export type { VillageMarker };
 

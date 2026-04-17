@@ -1,5 +1,6 @@
 'use client';
 
+import { useGetGeocode } from '@/api/geocode/hooks/use-get-geocode';
 import { useEffect } from 'react';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useMap } from 'react-leaflet';
@@ -16,6 +17,11 @@ interface MapNavigatorProps {
 export default function MapNavigator({ bounds, district }: MapNavigatorProps) {
     const map = useMap();
 
+    const { data: geocodeResult } = useGetGeocode(
+        { district },
+        { enabled: !bounds },
+    );
+
     useEffect(() => {
         if (bounds) {
             map.flyToBounds(bounds, {
@@ -26,40 +32,18 @@ export default function MapNavigator({ bounds, district }: MapNavigatorProps) {
                 try {
                     map.stop();
                 } catch {
-                    /* Leaflet throws if map is already stopped */
+                    // Leaflet throws if map is already stopped
                 }
             };
         }
 
-        const controller = new AbortController();
-        fetch(`/api/geocode?district=${encodeURIComponent(district)}`, {
-            signal: controller.signal,
-        })
-            .then(r => r.json())
-            .then(
-                (result: {
-                    ok: boolean;
-                    data?: { latitude: number; longitude: number };
-                }) => {
-                    if (result.ok && result.data != null) {
-                        map.flyTo(
-                            [result.data.latitude, result.data.longitude],
-                            GEOCODE_ZOOM,
-                        );
-                    }
-                },
-            )
-            .catch(() => {});
-
-        return () => {
-            controller.abort();
-            try {
-                map.stop();
-            } catch {
-                /* Leaflet throws if map is already stopped */
-            }
-        };
-    }, [map, bounds, district]);
+        if (geocodeResult?.ok && geocodeResult.data != null) {
+            map.flyTo(
+                [geocodeResult.data.latitude, geocodeResult.data.longitude],
+                GEOCODE_ZOOM,
+            );
+        }
+    }, [map, bounds, geocodeResult]);
 
     return null;
 }

@@ -16,7 +16,7 @@ type GetGeocodeQueryOptions = Omit<
     'queryKey' | 'queryFn'
 >;
 
-async function fetchGeocode(
+export async function fetchGeocode(
     queryParams: GeocodeQueryParams,
 ): Promise<GetGeocodeQueryResult> {
     const queryString = constructQueryString(

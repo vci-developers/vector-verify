@@ -3,7 +3,7 @@
 import L from 'leaflet';
 import { Marker, Tooltip, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import type { VillageMarker } from '@/features/operations/lib/use-site-markers';
+import type { VillageMarker } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
 import type { GeocodedPosition } from '../../hooks/use-village-geocode';
 import {
     ANOPHELES_COLOR,
