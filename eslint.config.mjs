@@ -36,7 +36,7 @@ const eslintConfig = [
                         'src/lib/**/*',
                         'src/utils/**/*',
                         'src/server/**/*',
-                        'src/types/**/*',
+                        'src/app/global.d.ts',
                     ],
                 },
                 {
