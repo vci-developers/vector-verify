@@ -19,7 +19,6 @@ export interface VillageMarker {
     lastCollectionDate?: number;
 }
 
-const MAX_SPECIES_IN_TOOLTIP = 5;
 const ANOPHELES_PREFIXES = ['an.', 'anopheles'] as const;
 
 interface VillageData {
@@ -31,19 +30,16 @@ interface VillageData {
     speciesCounts: Record<string, number>;
 }
 
-interface SessionStats {
-    sessionCount: number;
-    lastCollectionDate: number;
-}
-
-function aggregateByVillage(data: GetSpecimensCountSuccessPayload['data']): {
+function aggregateSpecimensByVillage(
+    specimensData: GetSpecimensCountSuccessPayload['data'],
+): {
     villageData: Map<string, VillageData>;
     siteIdToVillage: Map<number, string>;
 } {
     const villageData = new Map<string, VillageData>();
     const siteIdToVillage = new Map<number, string>();
 
-    for (const entry of data) {
+    for (const entry of specimensData) {
         if (!entry.siteInfo) continue;
         const villageName = entry.siteInfo.villageName;
         if (!villageName) continue;
@@ -51,29 +47,31 @@ function aggregateByVillage(data: GetSpecimensCountSuccessPayload['data']): {
         siteIdToVillage.set(entry.siteInfo.siteId, villageName);
 
         const anophelesCount = entry.counts
-            .filter(c =>
+            .filter(specimenCount =>
                 ANOPHELES_PREFIXES.some(prefix =>
-                    c.species?.toLowerCase().startsWith(prefix),
+                    specimenCount.species?.toLowerCase().startsWith(prefix),
                 ),
             )
-            .reduce((sum, c) => sum + c.count, 0);
+            .reduce((sum, specimenCount) => sum + specimenCount.count, 0);
 
-        const prev = villageData.get(villageName);
+        const previous = villageData.get(villageName);
         const mergedSpecies: Record<string, number> = {
-            ...(prev?.speciesCounts ?? {}),
+            ...(previous?.speciesCounts ?? {}),
         };
-        for (const c of entry.counts) {
-            if (!c.species) continue;
-            mergedSpecies[c.species] =
-                (mergedSpecies[c.species] ?? 0) + c.count;
+        for (const specimenCount of entry.counts) {
+            if (!specimenCount.species) continue;
+            mergedSpecies[specimenCount.species] =
+                (mergedSpecies[specimenCount.species] ?? 0) +
+                specimenCount.count;
         }
 
         villageData.set(villageName, {
             district: entry.siteInfo.district,
             subCounty: entry.siteInfo.subCounty,
             parish: entry.siteInfo.parish,
-            totalSpecimens: (prev?.totalSpecimens ?? 0) + entry.totalSpecimens,
-            anophelesCount: (prev?.anophelesCount ?? 0) + anophelesCount,
+            totalSpecimens:
+                (previous?.totalSpecimens ?? 0) + entry.totalSpecimens,
+            anophelesCount: (previous?.anophelesCount ?? 0) + anophelesCount,
             speciesCounts: mergedSpecies,
         });
     }
@@ -84,19 +82,22 @@ function aggregateByVillage(data: GetSpecimensCountSuccessPayload['data']): {
 function sessionStatsByVillage(
     sessions: GetAllSessionsSuccessPayload['sessions'],
     siteIdToVillage: Map<number, string>,
-): Map<string, SessionStats> {
-    const stats = new Map<string, SessionStats>();
+): Map<string, { sessionCount: number; lastCollectionDate: number }> {
+    const stats = new Map<
+        string,
+        { sessionCount: number; lastCollectionDate: number }
+    >();
     for (const session of sessions) {
         const village = siteIdToVillage.get(session.siteId);
         if (!village) continue;
-        const prev = stats.get(village) ?? {
+        const previous = stats.get(village) ?? {
             sessionCount: 0,
             lastCollectionDate: 0,
         };
         stats.set(village, {
-            sessionCount: prev.sessionCount + 1,
+            sessionCount: previous.sessionCount + 1,
             lastCollectionDate: Math.max(
-                prev.lastCollectionDate,
+                previous.lastCollectionDate,
                 session.collectionDate,
             ),
         });
@@ -104,51 +105,45 @@ function sessionStatsByVillage(
     return stats;
 }
 
-function buildMarkers(
+function buildVillageMarkers(
     villageData: Map<string, VillageData>,
-    sessionStats: Map<string, SessionStats>,
+    sessionStats: Map<
+        string,
+        { sessionCount: number; lastCollectionDate: number }
+    >,
 ): VillageMarker[] {
-    return Array.from(villageData.entries()).map(([villageName, data]) => {
-        const stats = sessionStats.get(villageName);
-        const speciesBreakdown = Object.entries(data.speciesCounts)
-            .map(([species, count]) => ({ species, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, MAX_SPECIES_IN_TOOLTIP);
+    return Array.from(villageData.entries()).map(
+        ([villageName, villageInfo]) => {
+            const stats = sessionStats.get(villageName);
+            const speciesBreakdown = Object.entries(villageInfo.speciesCounts)
+                .map(([species, count]) => ({ species, count }))
+                .sort((a, b) => b.count - a.count);
 
-        return {
-            id: villageName,
-            villageName,
-            district: data.district,
-            subCounty: data.subCounty,
-            parish: data.parish,
-            sessionCount: stats?.sessionCount ?? 0,
-            totalSpecimens: data.totalSpecimens,
-            anophelesCount: data.anophelesCount,
-            speciesBreakdown,
-            lastCollectionDate: stats?.lastCollectionDate || undefined,
-        };
-    });
-}
-
-interface SiteMarkersParams {
-    district: string;
-    startDate: string;
-    endDate: string;
-}
-
-export interface SiteMarkersResult {
-    markers: VillageMarker[];
-    totalVillages: number;
-    isPending: boolean;
-    isSpecimensPending: boolean;
-    sessionsFailed: boolean;
+            return {
+                id: villageName,
+                villageName,
+                district: villageInfo.district,
+                subCounty: villageInfo.subCounty,
+                parish: villageInfo.parish,
+                sessionCount: stats?.sessionCount ?? 0,
+                totalSpecimens: villageInfo.totalSpecimens,
+                anophelesCount: villageInfo.anophelesCount,
+                speciesBreakdown,
+                lastCollectionDate: stats?.lastCollectionDate || undefined,
+            };
+        },
+    );
 }
 
 export function useSiteMarkers({
     district,
     startDate,
     endDate,
-}: SiteMarkersParams): SiteMarkersResult {
+}: {
+    district: string;
+    startDate: string;
+    endDate: string;
+}) {
     const { data: sessionsResult, isPending: isSessionsPending } =
         useGetAllSessions({
             district,
@@ -170,7 +165,7 @@ export function useSiteMarkers({
     const markers = useMemo(() => {
         if (!specimensResult?.ok) return [] as VillageMarker[];
 
-        const { villageData, siteIdToVillage } = aggregateByVillage(
+        const { villageData, siteIdToVillage } = aggregateSpecimensByVillage(
             specimensResult.data.data,
         );
 
@@ -179,14 +174,17 @@ export function useSiteMarkers({
                   sessionsResult.data.sessions,
                   siteIdToVillage,
               )
-            : new Map<string, SessionStats>();
+            : new Map<
+                  string,
+                  { sessionCount: number; lastCollectionDate: number }
+              >();
 
-        return buildMarkers(villageData, stats);
+        return buildVillageMarkers(villageData, stats);
     }, [sessionsResult, specimensResult]);
 
     return {
         markers,
-        totalVillages: markers.filter(m => m.sessionCount > 0).length,
+        totalVillages: markers.filter(marker => marker.sessionCount > 0).length,
         isPending,
         isSpecimensPending,
         sessionsFailed: !isPending && !sessionsResult?.ok,

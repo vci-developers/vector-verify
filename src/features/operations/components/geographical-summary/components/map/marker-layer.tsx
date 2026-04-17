@@ -10,12 +10,13 @@ import {
     ANOPHELES_THRESHOLD,
 } from '../../operations-geographical-summary';
 
+const MAX_SPECIES_IN_TOOLTIP = 5;
 const CLICK_ZOOM = 13;
 const MARKER_RADIUS_MIN = 8;
 const MARKER_RADIUS_MAX = 26;
 const MARKER_RADIUS_SCALE = 20;
 
-function createSiteIcon(
+function createSpecimenMarkerIcon(
     totalSpecimens: number,
     anophelesCount: number,
 ): L.DivIcon {
@@ -63,7 +64,7 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                     <Marker
                         key={marker.id}
                         position={[pos.latitude, pos.longitude]}
-                        icon={createSiteIcon(
+                        icon={createSpecimenMarkerIcon(
                             marker.totalSpecimens,
                             marker.anophelesCount,
                         )}
@@ -103,7 +104,7 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                                 </p>
                                 {marker.speciesBreakdown.length > 0 && (
                                     <div className="mt-1 space-y-0.5 border-t border-gray-200 pt-1">
-                                        {marker.speciesBreakdown.map(s => (
+                                        {marker.speciesBreakdown.slice(0, MAX_SPECIES_IN_TOOLTIP).map(s => (
                                             <p
                                                 key={s.species}
                                                 className="text-gray-600"

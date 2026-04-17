@@ -44,6 +44,12 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    --color-count-none: var(--count-none);
+    --color-count-low: var(--count-low);
+    --color-count-moderate: var(--count-moderate);
+    --color-count-high: var(--count-high);
+    --color-count-critical: var(--count-critical);
+
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -113,6 +119,12 @@
     --chart-3: #0277bd;
     --chart-4: #ffca1b;
     --chart-5: #e54848;
+
+    --count-none: #6b7280;
+    --count-low: #3b82f6;
+    --count-moderate: #f97316;
+    --count-high: #ef4444;
+    --count-critical: #991b1b;
 }
 
 .dark {
@@ -164,6 +176,12 @@
     --chart-3: #5dbbff;
     --chart-4: #ffd666;
     --chart-5: #ff6b6b;
+
+    --count-none: #9ca3af;
+    --count-low: #60a5fa;
+    --count-moderate: #fb923c;
+    --count-high: #f87171;
+    --count-critical: #dc2626;
 }
 
 @layer base {

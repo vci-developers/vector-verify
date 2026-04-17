@@ -14,6 +14,8 @@ interface MapNavigatorProps {
     district: string;
 }
 
+// Returns null intentionally — rendered inside MapContainer to access useMap() context,
+// requires a descendant component rather than a hook called from the parent.
 export default function MapNavigator({ bounds, district }: MapNavigatorProps) {
     const map = useMap();
 

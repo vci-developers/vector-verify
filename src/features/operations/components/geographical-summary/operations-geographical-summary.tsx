@@ -12,13 +12,15 @@ export const ANOPHELES_THRESHOLD = {
 } as const;
 
 export const ANOPHELES_COLOR = {
-    none: '#6b7280',
-    low: '#3b82f6',
-    moderate: '#f97316',
-    high: '#ef4444',
-    critical: '#991b1b',
+    none: 'var(--color-count-none)',
+    low: 'var(--color-count-low)',
+    moderate: 'var(--color-count-moderate)',
+    high: 'var(--color-count-high)',
+    critical: 'var(--color-count-critical)',
 } as const;
 
+// 'use client' still renders on the server during SSR
+// dynamic with ssr:false is required because leaflet will fail to load on the server due to its reliance on browser APIs like window and document
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
 interface OperationsGeographicalSummaryProps {
