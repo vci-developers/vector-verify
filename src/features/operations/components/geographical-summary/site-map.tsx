@@ -28,10 +28,12 @@ export default function SiteMap({ markers, district }: SiteMapProps) {
     const bounds = useMemo((): LatLngBoundsExpression | null => {
         const coords = markers
             .map(m => positions.get(m.id))
-            .filter((p): p is { lat: number; lng: number } => p != null);
+            .filter(
+                (p): p is { latitude: number; longitude: number } => p != null,
+            );
         if (coords.length === 0) return null;
-        const lats = coords.map(p => p.lat);
-        const lngs = coords.map(p => p.lng);
+        const lats = coords.map(p => p.latitude);
+        const lngs = coords.map(p => p.longitude);
         return [
             [Math.min(...lats), Math.min(...lngs)],
             [Math.max(...lats), Math.max(...lngs)],

@@ -36,11 +36,19 @@ export default function MapNavigator({ bounds, district }: MapNavigatorProps) {
             signal: controller.signal,
         })
             .then(r => r.json())
-            .then((result: { ok: boolean; lat?: number; lng?: number }) => {
-                if (result.ok && result.lat != null && result.lng != null) {
-                    map.flyTo([result.lat, result.lng], GEOCODE_ZOOM);
-                }
-            })
+            .then(
+                (result: {
+                    ok: boolean;
+                    data?: { latitude: number; longitude: number };
+                }) => {
+                    if (result.ok && result.data != null) {
+                        map.flyTo(
+                            [result.data.latitude, result.data.longitude],
+                            GEOCODE_ZOOM,
+                        );
+                    }
+                },
+            )
             .catch(() => {});
 
         return () => {

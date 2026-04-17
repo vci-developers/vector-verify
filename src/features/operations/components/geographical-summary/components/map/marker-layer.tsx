@@ -5,25 +5,15 @@ import { Marker, Tooltip, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import type { VillageMarker } from '@/features/operations/lib/use-site-markers';
 import type { GeocodedPosition } from '../../hooks/use-village-geocode';
+import {
+    ANOPHELES_COLOR,
+    ANOPHELES_THRESHOLD,
+} from '../../operations-geographical-summary';
 
 const CLICK_ZOOM = 13;
 const MARKER_RADIUS_MIN = 8;
 const MARKER_RADIUS_MAX = 26;
 const MARKER_RADIUS_SCALE = 20;
-
-export const ANOPHELES_THRESHOLD = {
-    low: 10,
-    moderate: 50,
-    high: 100,
-} as const;
-
-export const ANOPHELES_COLOR = {
-    none: '#6b7280',
-    low: '#3b82f6',
-    moderate: '#f97316',
-    high: '#ef4444',
-    critical: '#991b1b',
-} as const;
 
 function createSiteIcon(
     totalSpecimens: number,
@@ -72,7 +62,7 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                 return (
                     <Marker
                         key={marker.id}
-                        position={[pos.lat, pos.lng]}
+                        position={[pos.latitude, pos.longitude]}
                         icon={createSiteIcon(
                             marker.totalSpecimens,
                             marker.anophelesCount,
@@ -80,7 +70,7 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                         eventHandlers={{
                             click: () => {
                                 map.flyTo(
-                                    [pos.lat, pos.lng],
+                                    [pos.latitude, pos.longitude],
                                     Math.max(map.getZoom(), CLICK_ZOOM),
                                 );
                             },

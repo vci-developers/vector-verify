@@ -9,3 +9,10 @@ export const geocodeQueryParamsSchema = z.object({
 });
 
 export type GeocodeQueryParams = z.infer<typeof geocodeQueryParamsSchema>;
+
+export type GeocodeCoordinates = {
+    latitude: number;
+    longitude: number;
+};
+
+export type GetGeocodeSuccessPayload = GeocodeCoordinates;

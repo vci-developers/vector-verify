@@ -4,10 +4,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 import { useSiteMarkers } from '@/features/operations/lib/use-site-markers';
-import {
-    ANOPHELES_COLOR,
-    ANOPHELES_THRESHOLD,
-} from './components/map/marker-layer';
+
+export const ANOPHELES_THRESHOLD = {
+    low: 10,
+    moderate: 50,
+    high: 100,
+} as const;
+
+export const ANOPHELES_COLOR = {
+    none: '#6b7280',
+    low: '#3b82f6',
+    moderate: '#f97316',
+    high: '#ef4444',
+    critical: '#991b1b',
+} as const;
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 

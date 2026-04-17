@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { VillageMarker } from '@/features/operations/lib/use-site-markers';
 
 export interface GeocodedPosition {
-    lat: number;
-    lng: number;
+    latitude: number;
+    longitude: number;
 }
 
 const geocodeCache = new Map<string, GeocodedPosition>();
@@ -28,11 +28,13 @@ async function geocodeVillage(
         if (!r.ok) return null;
         const data = (await r.json()) as {
             ok: boolean;
-            lat?: number;
-            lng?: number;
+            data?: { latitude: number; longitude: number };
         };
-        if (data.ok && data.lat != null && data.lng != null) {
-            const pos = { lat: data.lat, lng: data.lng };
+        if (data.ok && data.data != null) {
+            const pos = {
+                latitude: data.data.latitude,
+                longitude: data.data.longitude,
+            };
             geocodeCache.set(cacheKey, pos);
             return pos;
         }
