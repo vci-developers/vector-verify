@@ -104,18 +104,20 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                                 </p>
                                 {marker.speciesBreakdown.length > 0 && (
                                     <div className="mt-1 space-y-0.5 border-t border-gray-200 pt-1">
-                                        {marker.speciesBreakdown.slice(0, MAX_SPECIES_IN_TOOLTIP).map(s => (
-                                            <p
-                                                key={s.species}
-                                                className="text-gray-600"
-                                            >
-                                                <span className="mr-1 text-gray-400">
-                                                    ↳
-                                                </span>
-                                                {s.species}:{' '}
-                                                {s.count.toLocaleString()}
-                                            </p>
-                                        ))}
+                                        {marker.speciesBreakdown
+                                            .slice(0, MAX_SPECIES_IN_TOOLTIP)
+                                            .map(s => (
+                                                <p
+                                                    key={s.species}
+                                                    className="text-gray-600"
+                                                >
+                                                    <span className="mr-1 text-gray-400">
+                                                        ↳
+                                                    </span>
+                                                    {s.species}:{' '}
+                                                    {s.count.toLocaleString()}
+                                                </p>
+                                            ))}
                                     </div>
                                 )}
                                 {marker.lastCollectionDate && (
