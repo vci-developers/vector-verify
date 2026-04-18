@@ -79,14 +79,9 @@ export default function OperationsAiPerformance({
         validatedSpecimens > 0 && getAnnotationTasksResult?.ok
             ? getAnnotationTasksResult.data.tasks
                   .filter(task => (task.annotationCounts?.annotated ?? 0) > 0)
-                  .reduce<number | null>(
-                      (maxTimestamp, task) =>
-                          maxTimestamp === null ||
-                          task.updatedAt > maxTimestamp
-                              ? task.updatedAt
-                              : maxTimestamp,
-                      null,
-                  )
+                  .reduce<
+                      number | null
+                  >((maxTimestamp, task) => (maxTimestamp === null || task.updatedAt > maxTimestamp ? task.updatedAt : maxTimestamp), null)
             : null;
 
     const lastUpdateFormatted = lastUpdateTimestamp
