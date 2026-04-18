@@ -57,19 +57,19 @@ export default function OperationsSpeciesComposition({
         <div className="space-y-6">
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
-                    const specimenCountsByClass =
-                        sumSpecimenCountsByClass(
-                            specimenClassificationAxis,
-                            monthlySpecimenCounts,
-                        );
-                    const specimenCountsByMonth =
-                        groupSpecimenCountsByMonth(
-                            specimenClassificationAxis,
-                            monthlySpecimenCounts,
-                        );
+                    const specimenCountsByClass = sumSpecimenCountsByClass(
+                        specimenClassificationAxis,
+                        monthlySpecimenCounts,
+                    );
+                    const specimenCountsByMonth = groupSpecimenCountsByMonth(
+                        specimenClassificationAxis,
+                        monthlySpecimenCounts,
+                    );
                     const specimenChartConfig = buildSpecimenChartConfig(
                         specimenClassificationAxis,
-                        specimenCountsByClass.map(({ specimenClass }) => specimenClass),
+                        specimenCountsByClass.map(
+                            ({ specimenClass }) => specimenClass,
+                        ),
                     );
 
                     return (
