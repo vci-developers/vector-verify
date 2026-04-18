@@ -16,3 +16,4 @@ export const specimenSchema = z.object({
 });
 
 export type Specimen = z.infer<typeof specimenSchema>;
+export type SpecimenClassificationAxis = 'species' | 'sex' | 'abdomenStatus';
