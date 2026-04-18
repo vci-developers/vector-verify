@@ -1,5 +1,4 @@
 import { sessionTypeSchema } from '@/api/session/validation/session-schema';
-import { siteSchema } from '@/api/site/validation/site-schema';
 import { z } from 'zod';
 
 export const getSpecimensCountQueryParamsSchema = z.object({
@@ -18,18 +17,10 @@ export const getSpecimensCountQueryParamsSchema = z.object({
     endDate: z.string().optional(),
 });
 
-const specimensCountSchema = z.object({
-    species: z.string(),
-    sex: z.string(),
-    abdomenStatus: z.string(),
-    count: z.number(),
-    columnName: z.string(),
-});
-
 const specimensCountDataSchema = z.object({
     siteId: z.number().optional(),
-    siteInfo: siteSchema.optional(),
-    counts: z.array(specimensCountSchema),
+    siteInfo: z.unknown().optional(),
+    counts: z.array(z.unknown()),
     totalSpecimens: z.number(),
 });
 

@@ -1,3 +1,8 @@
+'use client';
+
+import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
+import { useGetAnnotationTasks } from '@/api/annotation-task/hooks/use-get-annotation-tasks';
+import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,
@@ -7,126 +12,50 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { format } from 'date-fns';
 import { Bot, Info } from 'lucide-react';
 
-const SUMMARY_CARDS = [
-    {
-        label: 'Coverage',
-        value: '87.5%',
-        description: 'of specimens labeled',
-        className:
-            'border-emerald-400/80 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.12)]',
-    },
-    {
-        label: 'Validated Specimens',
-        value: '896',
-        description: 'total validated',
-        className:
-            'border-emerald-400/80 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.12)]',
-    },
-    {
-        label: 'Last Update',
-        value: '2h ago',
-        description: '2026-02-24 14:30',
-        className: 'border-border',
-    },
-] as const;
+interface OperationsAiPerformanceProps {
+    district: string;
+    startDate: string;
+    endDate: string;
+}
 
 const CONFUSION_MATRIX = [
     {
         label: 'An. gambiae s.s.',
         cells: [
-            {
-                value: '458',
-                percent: '95%',
-                className: 'bg-emerald-500 text-white',
-            },
-            {
-                value: '12',
-                percent: '2%',
-                className: 'bg-rose-100 text-rose-700',
-            },
-            {
-                value: '8',
-                percent: '2%',
-                className: 'bg-rose-50 text-rose-700',
-            },
-            {
-                value: '5',
-                percent: '1%',
-                className: 'bg-rose-50 text-rose-700',
-            },
+            { value: '458', percent: '95%', className: 'bg-emerald-500 text-white' },
+            { value: '12', percent: '2%', className: 'bg-rose-100 text-rose-700' },
+            { value: '8', percent: '2%', className: 'bg-rose-50 text-rose-700' },
+            { value: '5', percent: '1%', className: 'bg-rose-50 text-rose-700' },
         ],
     },
     {
         label: 'An. arabiensis',
         cells: [
-            {
-                value: '15',
-                percent: '5%',
-                className: 'bg-rose-300 text-rose-800',
-            },
-            {
-                value: '256',
-                percent: '89%',
-                className: 'bg-emerald-500 text-white',
-            },
-            {
-                value: '6',
-                percent: '2%',
-                className: 'bg-rose-200 text-rose-700',
-            },
-            {
-                value: '10',
-                percent: '3%',
-                className: 'bg-rose-300 text-rose-800',
-            },
+            { value: '15', percent: '5%', className: 'bg-rose-300 text-rose-800' },
+            { value: '256', percent: '89%', className: 'bg-emerald-500 text-white' },
+            { value: '6', percent: '2%', className: 'bg-rose-200 text-rose-700' },
+            { value: '10', percent: '3%', className: 'bg-rose-300 text-rose-800' },
         ],
     },
     {
         label: 'An. funestus',
         cells: [
-            {
-                value: '5',
-                percent: '3%',
-                className: 'bg-rose-200 text-rose-700',
-            },
-            {
-                value: '8',
-                percent: '6%',
-                className: 'bg-rose-300 text-rose-800',
-            },
-            {
-                value: '125',
-                percent: '87%',
-                className: 'bg-emerald-500 text-white',
-            },
-            {
-                value: '5',
-                percent: '3%',
-                className: 'bg-rose-200 text-rose-700',
-            },
+            { value: '5', percent: '3%', className: 'bg-rose-200 text-rose-700' },
+            { value: '8', percent: '6%', className: 'bg-rose-300 text-rose-800' },
+            { value: '125', percent: '87%', className: 'bg-emerald-500 text-white' },
+            { value: '5', percent: '3%', className: 'bg-rose-200 text-rose-700' },
         ],
     },
     {
         label: 'Culex sp.',
         cells: [
             { value: '8', percent: '9%', className: 'bg-rose-400 text-white' },
-            {
-                value: '11',
-                percent: '13%',
-                className: 'bg-rose-500 text-white',
-            },
-            {
-                value: '4',
-                percent: '5%',
-                className: 'bg-rose-300 text-rose-800',
-            },
-            {
-                value: '62',
-                percent: '73%',
-                className: 'bg-emerald-500 text-white',
-            },
+            { value: '11', percent: '13%', className: 'bg-rose-500 text-white' },
+            { value: '4', percent: '5%', className: 'bg-rose-300 text-rose-800' },
+            { value: '62', percent: '73%', className: 'bg-emerald-500 text-white' },
         ],
     },
 ] as const;
@@ -138,7 +67,77 @@ const CLASS_PERFORMANCE = [
     { label: 'Culex sp.', precision: '72.9%', recall: '78.1%' },
 ] as const;
 
-export default function OperationsAiPerformanceTab() {
+export default function OperationsAiPerformance({
+    district,
+    startDate,
+    endDate,
+}: OperationsAiPerformanceProps) {
+    const {
+        data: getAnnotationsSummaryResult,
+        isPending: isGetAnnotationsSummaryPending,
+    } = useGetAnnotationsSummary({ district, startDate, endDate });
+
+    const {
+        data: getSpecimensCountResult,
+        isPending: isGetSpecimensCountPending,
+    } = useGetSpecimensCount({ district, startDate, endDate });
+
+    const { data: getAnnotationTasksResult } = useGetAnnotationTasks({
+        startDate,
+        endDate,
+        limit: 100,
+    });
+
+    if (isGetAnnotationsSummaryPending || isGetSpecimensCountPending) {
+        return <p className="text-muted-foreground text-sm">Loading...</p>;
+    }
+
+    if (!getAnnotationsSummaryResult?.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getAnnotationsSummaryResult?.error.message ??
+                    'Failed to load annotations summary.'}
+            </p>
+        );
+    }
+
+    if (!getSpecimensCountResult?.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getSpecimensCountResult?.error.message ??
+                    'Failed to load specimens count.'}
+            </p>
+        );
+    }
+
+    const validatedSpecimens =
+        getAnnotationsSummaryResult.data.statusCounts.ANNOTATED;
+
+    const totalSpecimens = getSpecimensCountResult.data.data.reduce(
+        (sum, d) => sum + d.totalSpecimens,
+        0,
+    );
+
+    const coveragePercent =
+        totalSpecimens > 0
+            ? ((validatedSpecimens / totalSpecimens) * 100).toFixed(1)
+            : null;
+
+    const lastUpdateTimestamp =
+        validatedSpecimens > 0 && getAnnotationTasksResult?.ok
+            ? getAnnotationTasksResult.data.tasks
+                  .filter(t => (t.annotationCounts?.annotated ?? 0) > 0)
+                  .reduce<number | null>(
+                      (max, t) =>
+                          max === null || t.updatedAt > max ? t.updatedAt : max,
+                      null,
+                  )
+            : null;
+
+    const lastUpdateFormatted = lastUpdateTimestamp
+        ? format(new Date(lastUpdateTimestamp), 'yyyy-MM-dd HH:mm')
+        : null;
+
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2 rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-700">
@@ -146,25 +145,37 @@ export default function OperationsAiPerformanceTab() {
                 <span>Metrics reflect only expert-validated specimens</span>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-3">
-                {SUMMARY_CARDS.map(card => (
-                    <Card
-                        key={card.label}
-                        className={`gap-0 py-0 ${card.className}`}
-                    >
-                        <CardContent className="p-4">
-                            <p className="text-muted-foreground text-sm">
-                                {card.label}
-                            </p>
-                            <p className="mt-1 text-4xl font-semibold tracking-tight">
-                                {card.value}
-                            </p>
-                            <p className="text-muted-foreground mt-2 text-xs">
-                                {card.description}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
+            <div className="grid gap-3 lg:grid-cols-2">
+                <Card className="gap-0 border-emerald-400/80 py-0 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.12)]">
+                    <CardContent className="p-4">
+                        <p className="text-muted-foreground text-sm">
+                            Coverage & Validated Specimens
+                        </p>
+                        <p className="mt-1 text-4xl font-semibold tracking-tight">
+                            {coveragePercent !== null
+                                ? `${coveragePercent}%`
+                                : '—'}
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            {validatedSpecimens.toLocaleString()} annotated /{' '}
+                            {totalSpecimens.toLocaleString()} total specimens
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border gap-0 py-0">
+                    <CardContent className="p-4">
+                        <p className="text-muted-foreground text-sm">
+                            Last Update
+                        </p>
+                        <p className="mt-1 text-4xl font-semibold tracking-tight">
+                            {lastUpdateFormatted ?? '—'}
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            latest master VCO annotation
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
 
             <Card className="gap-0">

@@ -10,7 +10,7 @@ import OperationsMetrics from '@/features/operations/components/metrics/operatio
 import OperationsSiteList from '@/features/operations/components/site-list/operations-site-list';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
-import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import OperationsAiPerformance from '@/features/operations/components/ai-performance/operations-ai-performance';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -120,7 +120,11 @@ export default function OperationsPageClient() {
                             {activeTab === 'metrics' && <OperationsMetrics />}
 
                             {activeTab === 'ai-performance' && (
-                                <OperationsAiPerformanceTab />
+                                <OperationsAiPerformance
+                                    district={selectedDistrict}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             )}
                         </Fragment>
                     )}
