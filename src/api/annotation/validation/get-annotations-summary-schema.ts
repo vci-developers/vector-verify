@@ -7,6 +7,16 @@ export const getAnnotationsSummaryQueryParamsSchema = z.object({
     endDate: z.string().optional(),
 });
 
+export const annotationConfusionMatrixSchema = z.object({
+    columns: z.array(z.string()),
+    data: z.array(
+        z.object({
+            rowLabel: z.string(),
+            values: z.record(z.string(), z.number()),
+        }),
+    ),
+});
+
 export const getAnnotationsSummaryResponseSchema = z.object({
     total: z.number(),
     statusCounts: z
@@ -16,7 +26,13 @@ export const getAnnotationsSummaryResponseSchema = z.object({
             FLAGGED: z.number().default(0),
         })
         .default({ PENDING: 0, ANNOTATED: 0, FLAGGED: 0 }),
-    confusionMatrices: z.unknown().optional(),
+    confusionMatrices: z
+        .object({
+            species: annotationConfusionMatrixSchema.optional(),
+            sex: annotationConfusionMatrixSchema.optional(),
+            abdomenStatus: annotationConfusionMatrixSchema.optional(),
+        })
+        .optional(),
 });
 
 export type GetAnnotationsSummaryQueryParams = z.infer<
@@ -27,3 +43,6 @@ export type GetAnnotationsSummaryResponseBody = z.infer<
 >;
 export type GetAnnotationsSummarySuccessPayload =
     GetAnnotationsSummaryResponseBody;
+export type AnnotationConfusionMatrix = z.infer<
+    typeof annotationConfusionMatrixSchema
+>;
