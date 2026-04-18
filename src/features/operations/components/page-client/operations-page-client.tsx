@@ -6,17 +6,17 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
-import OperationsMetrics from '@/features/operations/components/metrics/operations-metrics';
 import OperationsSiteList from '@/features/operations/components/site-list/operations-site-list';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
+import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
-    { value: 'metrics', label: 'METRICS' },
+    { value: 'species-composition', label: 'SPECIES COMPOSITION' },
     { value: 'ai-performance', label: 'AI PERFORMANCE' },
 ] as const;
 
@@ -127,7 +127,13 @@ export default function OperationsPageClient() {
                                 />
                             )}
 
-                            {activeTab === 'metrics' && <OperationsMetrics />}
+                            {activeTab === 'species-composition' && (
+                                <OperationsSpeciesComposition
+                                    district={selectedDistrict}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
+                            )}
 
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformanceTab />
