@@ -187,8 +187,8 @@ function MatrixCard({
                             The confusion matrix compares expert-validated
                             mosquito species against the AI prediction for the
                             selected district. Each cell shows the specimen
-                            count and that cell&apos;s share of the
-                            true-species row.
+                            count and that cell&apos;s share of the true-species
+                            row.
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
                             Precision indicates how reliable each predicted

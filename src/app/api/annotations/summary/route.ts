@@ -25,8 +25,7 @@ export async function GET(request: Request) {
     }
 
     const authorizedGetAnnotationsSummaryResult =
-        await withAuthSession<GetAnnotationsSummaryResponseBody>(
-        accessToken =>
+        await withAuthSession<GetAnnotationsSummaryResponseBody>(accessToken =>
             getAnnotationsSummary(accessToken, parsedQueryParams.data),
         );
 
