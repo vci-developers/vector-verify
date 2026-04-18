@@ -35,8 +35,9 @@ async function fetchAnnotationsSummary(
         },
     });
 
-    const result: GetAnnotationsSummaryQueryResult = await response.json();
-    return result;
+    const getAnnotationsSummaryResult: GetAnnotationsSummaryQueryResult =
+        await response.json();
+    return getAnnotationsSummaryResult;
 }
 
 export function useGetAnnotationsSummary(

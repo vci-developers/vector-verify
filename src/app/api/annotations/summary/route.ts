@@ -24,12 +24,15 @@ export async function GET(request: Request) {
         );
     }
 
-    const result = await withAuthSession<GetAnnotationsSummaryResponseBody>(
+    const authorizedGetAnnotationsSummaryResult =
+        await withAuthSession<GetAnnotationsSummaryResponseBody>(
         accessToken =>
             getAnnotationsSummary(accessToken, parsedQueryParams.data),
-    );
+        );
 
-    return NextResponse.json(result, {
-        status: result.ok ? 200 : (result.error.status ?? 400),
+    return NextResponse.json(authorizedGetAnnotationsSummaryResult, {
+        status: authorizedGetAnnotationsSummaryResult.ok
+            ? 200
+            : (authorizedGetAnnotationsSummaryResult.error.status ?? 400),
     });
 }

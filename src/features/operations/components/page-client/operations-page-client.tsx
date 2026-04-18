@@ -9,7 +9,7 @@ import { Microscope } from 'lucide-react';
 import OperationsSiteList from '@/features/operations/components/site-list/operations-site-list';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
-import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import OperationsAiPerformance from '@/features/operations/components/ai-performance/operations-ai-performance';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
@@ -136,7 +136,7 @@ export default function OperationsPageClient() {
                             )}
 
                             {activeTab === 'ai-performance' && (
-                                <OperationsAiPerformanceTab
+                                <OperationsAiPerformance
                                     district={selectedDistrict}
                                     startDate={startDate}
                                     endDate={endDate}
