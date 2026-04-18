@@ -39,7 +39,7 @@ export default function ReviewSitesList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions(
-            { district, startDate, endDate },
+            { district, startDate, endDate, type: 'SURVEILLANCE' },
             { enabled: !!district },
         );
 

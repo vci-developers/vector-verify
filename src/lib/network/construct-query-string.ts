@@ -24,11 +24,12 @@ export function constructQueryString<T extends Record<string, QueryValue>>(
     Object.entries(params.data).forEach(([key, value]) => {
         if (value === undefined || value === null || value === '') return;
         if (Array.isArray(value)) {
-            value.forEach(entry => {
-                if (entry === undefined || entry === null || entry === '')
-                    return;
-                searchParams.append(key, String(entry));
-            });
+            const filteredArray = value.filter(
+                item => item !== undefined && item !== null && item !== '',
+            );
+            if (filteredArray.length > 0) {
+                searchParams.set(key, filteredArray.map(String).join(','));
+            }
             return;
         }
 

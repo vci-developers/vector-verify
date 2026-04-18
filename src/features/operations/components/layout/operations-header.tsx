@@ -1,6 +1,5 @@
-'use client';
-
-import MonthPicker from '@/components/ui/month-picker';
+import { Button } from '@/components/ui/button';
+import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,
     SelectContent,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { OperationsTab } from '@/features/operations/components/page-client/operations-page-client';
+import { Download } from 'lucide-react';
 
 interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
@@ -20,8 +20,11 @@ interface OperationsHeaderProps {
     districts: string[];
     selectedDistrict: string;
     onDistrictChange: (district: string) => void;
-    selectedMonth: Date;
-    onMonthChange: (month: Date) => void;
+    startMonth: Date;
+    endMonth: Date;
+    onStartMonthChange: (month: Date) => void;
+    onEndMonthChange: (month: Date) => void;
+    onExportClick: () => void;
 }
 
 export default function OperationsHeader({
@@ -31,8 +34,11 @@ export default function OperationsHeader({
     districts,
     selectedDistrict,
     onDistrictChange,
-    selectedMonth,
-    onMonthChange,
+    startMonth,
+    endMonth,
+    onStartMonthChange,
+    onEndMonthChange,
+    onExportClick,
 }: OperationsHeaderProps) {
     return (
         <div className="space-y-4">
@@ -56,11 +62,24 @@ export default function OperationsHeader({
                     </SelectContent>
                 </Select>
 
-                <MonthPicker
-                    selectedMonth={selectedMonth}
-                    onMonthChange={onMonthChange}
-                    maxDate={new Date()}
-                />
+                <div className="flex items-center gap-2">
+                    <MonthRangePicker
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={onStartMonthChange}
+                        onEndMonthChange={onEndMonthChange}
+                        maxDate={new Date()}
+                    />
+
+                    <Button
+                        variant="default"
+                        disabled={!selectedDistrict}
+                        onClick={onExportClick}
+                    >
+                        <Download className="h-4 w-4" />
+                        Export Data
+                    </Button>
+                </div>
             </div>
 
             <Tabs
