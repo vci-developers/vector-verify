@@ -25,37 +25,97 @@ const CONFUSION_MATRIX = [
     {
         label: 'An. gambiae s.s.',
         cells: [
-            { value: '458', percent: '95%', className: 'bg-emerald-500 text-white' },
-            { value: '12', percent: '2%', className: 'bg-rose-100 text-rose-700' },
-            { value: '8', percent: '2%', className: 'bg-rose-50 text-rose-700' },
-            { value: '5', percent: '1%', className: 'bg-rose-50 text-rose-700' },
+            {
+                value: '458',
+                percent: '95%',
+                className: 'bg-emerald-500 text-white',
+            },
+            {
+                value: '12',
+                percent: '2%',
+                className: 'bg-rose-100 text-rose-700',
+            },
+            {
+                value: '8',
+                percent: '2%',
+                className: 'bg-rose-50 text-rose-700',
+            },
+            {
+                value: '5',
+                percent: '1%',
+                className: 'bg-rose-50 text-rose-700',
+            },
         ],
     },
     {
         label: 'An. arabiensis',
         cells: [
-            { value: '15', percent: '5%', className: 'bg-rose-300 text-rose-800' },
-            { value: '256', percent: '89%', className: 'bg-emerald-500 text-white' },
-            { value: '6', percent: '2%', className: 'bg-rose-200 text-rose-700' },
-            { value: '10', percent: '3%', className: 'bg-rose-300 text-rose-800' },
+            {
+                value: '15',
+                percent: '5%',
+                className: 'bg-rose-300 text-rose-800',
+            },
+            {
+                value: '256',
+                percent: '89%',
+                className: 'bg-emerald-500 text-white',
+            },
+            {
+                value: '6',
+                percent: '2%',
+                className: 'bg-rose-200 text-rose-700',
+            },
+            {
+                value: '10',
+                percent: '3%',
+                className: 'bg-rose-300 text-rose-800',
+            },
         ],
     },
     {
         label: 'An. funestus',
         cells: [
-            { value: '5', percent: '3%', className: 'bg-rose-200 text-rose-700' },
-            { value: '8', percent: '6%', className: 'bg-rose-300 text-rose-800' },
-            { value: '125', percent: '87%', className: 'bg-emerald-500 text-white' },
-            { value: '5', percent: '3%', className: 'bg-rose-200 text-rose-700' },
+            {
+                value: '5',
+                percent: '3%',
+                className: 'bg-rose-200 text-rose-700',
+            },
+            {
+                value: '8',
+                percent: '6%',
+                className: 'bg-rose-300 text-rose-800',
+            },
+            {
+                value: '125',
+                percent: '87%',
+                className: 'bg-emerald-500 text-white',
+            },
+            {
+                value: '5',
+                percent: '3%',
+                className: 'bg-rose-200 text-rose-700',
+            },
         ],
     },
     {
         label: 'Culex sp.',
         cells: [
             { value: '8', percent: '9%', className: 'bg-rose-400 text-white' },
-            { value: '11', percent: '13%', className: 'bg-rose-500 text-white' },
-            { value: '4', percent: '5%', className: 'bg-rose-300 text-rose-800' },
-            { value: '62', percent: '73%', className: 'bg-emerald-500 text-white' },
+            {
+                value: '11',
+                percent: '13%',
+                className: 'bg-rose-500 text-white',
+            },
+            {
+                value: '4',
+                percent: '5%',
+                className: 'bg-rose-300 text-rose-800',
+            },
+            {
+                value: '62',
+                percent: '73%',
+                className: 'bg-emerald-500 text-white',
+            },
         ],
     },
 ] as const;
@@ -127,11 +187,9 @@ export default function OperationsAiPerformance({
         validatedSpecimens > 0 && getAnnotationTasksResult?.ok
             ? getAnnotationTasksResult.data.tasks
                   .filter(t => (t.annotationCounts?.annotated ?? 0) > 0)
-                  .reduce<number | null>(
-                      (max, t) =>
-                          max === null || t.updatedAt > max ? t.updatedAt : max,
-                      null,
-                  )
+                  .reduce<
+                      number | null
+                  >((max, t) => (max === null || t.updatedAt > max ? t.updatedAt : max), null)
             : null;
 
     const lastUpdateFormatted = lastUpdateTimestamp
