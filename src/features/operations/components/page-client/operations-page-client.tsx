@@ -136,7 +136,11 @@ export default function OperationsPageClient() {
                             )}
 
                             {activeTab === 'ai-performance' && (
-                                <OperationsAiPerformanceTab />
+                                <OperationsAiPerformanceTab
+                                    district={selectedDistrict}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             )}
                         </Fragment>
                     )}
