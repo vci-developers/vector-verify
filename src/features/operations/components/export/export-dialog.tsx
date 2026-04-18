@@ -59,7 +59,7 @@ export default function ExportDialog({
                         endDate,
                         sessionType: 'SURVEILLANCE',
                         programId: programId,
-                        districts: district,
+                        districts: [district],
                     },
                     getSessionsReportQueryParamsSchema,
                 );
