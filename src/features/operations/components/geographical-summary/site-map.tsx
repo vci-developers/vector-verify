@@ -10,9 +10,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import { useVillageGeocode } from './hooks/use-village-geocode';
 import MarkerLayer from './components/map/marker-layer';
 import MapNavigator from './components/map/map-navigator';
-import type { VillageMarker } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
-
-export type { VillageMarker };
+import type { VillageMarker } from '@/features/operations/utils/site-marker-data';
 
 const DEFAULT_CENTER: LatLngExpression = { lat: 1.5, lng: 32.5 };
 const DEFAULT_ZOOM = 7;
