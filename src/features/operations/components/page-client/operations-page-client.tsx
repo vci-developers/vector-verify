@@ -13,9 +13,11 @@ import OperationsAiPerformanceTab from '@/features/operations/components/ai-perf
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
+import OperationsInterventionCoverageTab from '../intervention-coverage/operations-intervention-coverage-tab';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
+    { value: 'intervention-coverage', label: 'INTERVENTION COVERAGE' },
     { value: 'species-composition', label: 'SPECIES COMPOSITION' },
     { value: 'ai-performance', label: 'AI PERFORMANCE' },
 ] as const;
@@ -133,6 +135,10 @@ export default function OperationsPageClient() {
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
+                            )}
+
+                            {activeTab === 'intervention-coverage' && (
+                                <OperationsInterventionCoverageTab />
                             )}
 
                             {activeTab === 'ai-performance' && (
