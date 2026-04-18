@@ -11,8 +11,10 @@ import { BedDouble, House, Shield, Users } from 'lucide-react';
 const IRS_COVERAGE = {
     percent: 35,
     title: 'Indoor Residual Spraying (IRS) Coverage',
-    description: 'Percentage of surveyed households with IRS in the past 12 months',
-    guidance: 'Values below 80% indicate a need for IRS campaign intensification.',
+    description:
+        'Percentage of surveyed households with IRS in the past 12 months',
+    guidance:
+        'Values below 80% indicate a need for IRS campaign intensification.',
 };
 
 const LLIN_HOUSEHOLD_STATS = [
