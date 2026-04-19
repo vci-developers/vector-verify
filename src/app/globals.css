@@ -119,7 +119,6 @@
     --chart-3: #0277bd;
     --chart-4: #ffca1b;
     --chart-5: #e54848;
-
 }
 
 .dark {
@@ -171,7 +170,6 @@
     --chart-3: #5dbbff;
     --chart-4: #ffd666;
     --chart-5: #ff6b6b;
-
 }
 
 @layer base {
