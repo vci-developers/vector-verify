@@ -7,8 +7,7 @@ export function getTopLevelSites(accessibleSites: Site[]): Site[] {
 
     const topLevelSites = accessibleSites.filter(
         site =>
-            site.parentId == null ||
-            !allAccessibleSiteIds.has(site.parentId),
+            site.parentId == null || !allAccessibleSiteIds.has(site.parentId),
     );
 
     return topLevelSites.sort((a, b) =>

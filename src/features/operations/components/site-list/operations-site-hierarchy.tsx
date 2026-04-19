@@ -147,7 +147,10 @@ function HierarchicalSiteHierarchy({
                 ).filter(
                     descendant =>
                         descendant.siteId !== site.siteId &&
-                        !sites.some(otherSite => otherSite.parentId === descendant.siteId),
+                        !sites.some(
+                            otherSite =>
+                                otherSite.parentId === descendant.siteId,
+                        ),
                 );
 
                 return (
