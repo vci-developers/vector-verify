@@ -7,7 +7,7 @@ export function getTopLevelSites(accessibleSites: Site[]): Site[] {
 
     const topLevelSites = accessibleSites.filter(
         site =>
-            site.parentId === undefined ||
+            site.parentId == null ||
             !allAccessibleSiteIds.has(site.parentId),
     );
 
@@ -31,7 +31,7 @@ export function getSiteAndDescendants(
         const sizeBefore = ancestorAndDescendantSiteIds.size;
         for (const site of accessibleSites) {
             if (
-                site.parentId !== undefined &&
+                site.parentId != null &&
                 ancestorAndDescendantSiteIds.has(site.parentId)
             ) {
                 ancestorAndDescendantSiteIds.add(site.siteId);

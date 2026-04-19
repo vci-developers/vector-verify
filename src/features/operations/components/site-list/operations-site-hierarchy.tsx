@@ -2,7 +2,10 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { isLegacySite } from '@/lib/location/location-query';
-import { getLocationTypeName } from '@/lib/location/site-tree';
+import {
+    getLocationTypeName,
+    getSiteAndDescendants,
+} from '@/lib/location/site-tree';
 import { useMemo } from 'react';
 import SiteLeafRows from './operations-site-leaf-rows';
 import CollapsibleLocationGroup from './collapsible-location-group';
@@ -15,7 +18,7 @@ const LEGACY_HIERARCHY_LEVELS = [
     { key: 'houseNumber', label: 'House' },
 ] as const;
 
-interface SiteHierarchyProps {
+interface LegacySiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
@@ -34,7 +37,7 @@ function LegacySiteHierarchy({
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
-}: SiteHierarchyProps) {
+}: LegacySiteHierarchyProps) {
     const currentLevel = LEGACY_HIERARCHY_LEVELS[depth];
     const isLeafLevel = depth === LEGACY_HIERARCHY_LEVELS.length - 1;
 
@@ -89,86 +92,78 @@ function LegacySiteHierarchy({
     );
 }
 
+interface HierarchicalSiteHierarchyProps {
+    sites: Site[];
+    parentSiteId: number | undefined;
+    parentPath: string;
+    sessionCountsBySiteId: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
+    expandedSitePaths: Set<string>;
+    onToggle: (path: string) => void;
+}
+
 function HierarchicalSiteHierarchy({
     sites,
-    depth,
+    parentSiteId,
     parentPath,
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
-}: SiteHierarchyProps) {
-    const allSiteIds = useMemo(
-        () => new Set(sites.map(site => site.siteId)),
-        [sites],
-    );
-
-    const sitesAtCurrentLevel = useMemo(
+}: HierarchicalSiteHierarchyProps) {
+    const childSites = useMemo(
         () =>
-            depth === 0
-                ? sites
-                      .filter(
-                          site =>
-                              site.parentId === undefined ||
-                              !allSiteIds.has(site.parentId),
-                      )
-                      .sort((a, b) =>
-                          (a.name ?? '').localeCompare(b.name ?? ''),
-                      )
-                : [...sites].sort((a, b) =>
-                      (a.name ?? '').localeCompare(b.name ?? ''),
-                  ),
-        [sites, depth, allSiteIds],
+            sites
+                .filter(site => site.parentId === parentSiteId)
+                .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
+        [sites, parentSiteId],
     );
 
-    const childSitesByParentId = useMemo(() => {
-        const map = new Map<number, Site[]>();
-        for (const site of sites) {
-            if (site.parentId !== undefined && allSiteIds.has(site.parentId)) {
-                const siblings = map.get(site.parentId) ?? [];
-                siblings.push(site);
-                map.set(site.parentId, siblings);
-            }
-        }
-        return map;
-    }, [sites, allSiteIds]);
-
-    const isLeafLevel = sitesAtCurrentLevel.every(
-        site => !childSitesByParentId.has(site.siteId),
+    const isLeafLevel = childSites.every(
+        site => !sites.some(otherSite => otherSite.parentId === site.siteId),
     );
+
+    if (childSites.length === 0) return null;
 
     if (isLeafLevel) {
         return (
             <SiteLeafRows
-                sites={sitesAtCurrentLevel}
+                sites={childSites}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 sessionCountsBySiteId={sessionCountsBySiteId}
             />
         );
     }
 
-    const locationTypeName =
-        sitesAtCurrentLevel.length > 0
-            ? getLocationTypeName(sitesAtCurrentLevel[0]!)
-            : 'Location';
+    const locationTypeName = getLocationTypeName(childSites[0]!);
 
     return (
         <div className="space-y-1">
-            {sitesAtCurrentLevel.map(site => {
-                const childSites = childSitesByParentId.get(site.siteId) ?? [];
+            {childSites.map(site => {
+                const descendantSites = getSiteAndDescendants(
+                    sites,
+                    site.siteId,
+                ).filter(
+                    descendant =>
+                        descendant.siteId !== site.siteId &&
+                        !sites.some(otherSite => otherSite.parentId === descendant.siteId),
+                );
+
                 return (
                     <CollapsibleLocationGroup
                         key={`${parentPath}/${site.name}`}
                         locationName={site.name ?? 'Unknown'}
                         locationTypeName={locationTypeName}
-                        sitesInGroup={childSites}
+                        sitesInGroup={descendantSites}
                         parentPath={parentPath}
                         sessionCountsBySiteId={sessionCountsBySiteId}
                         expandedSitePaths={expandedSitePaths}
                         onToggle={onToggle}
                     >
                         <HierarchicalSiteHierarchy
-                            sites={childSites}
-                            depth={depth + 1}
+                            sites={sites}
+                            parentSiteId={site.siteId}
                             parentPath={`${parentPath}/${site.name}`}
                             sessionCountsBySiteId={sessionCountsBySiteId}
                             expandedSitePaths={expandedSitePaths}
@@ -181,12 +176,45 @@ function HierarchicalSiteHierarchy({
     );
 }
 
-export default function OperationsSiteHierarchy(props: SiteHierarchyProps) {
-    if (props.sites.length === 0) return null;
+interface SiteHierarchyProps {
+    sites: Site[];
+    depth: number;
+    parentPath: string;
+    sessionCountsBySiteId: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
+    expandedSitePaths: Set<string>;
+    onToggle: (path: string) => void;
+}
 
-    return isLegacySite(props.sites[0]!) ? (
-        <LegacySiteHierarchy {...props} />
+export default function OperationsSiteHierarchy({
+    sites,
+    depth,
+    parentPath,
+    sessionCountsBySiteId,
+    expandedSitePaths,
+    onToggle,
+}: SiteHierarchyProps) {
+    if (sites.length === 0) return null;
+
+    return isLegacySite(sites[0]!) ? (
+        <LegacySiteHierarchy
+            sites={sites}
+            depth={depth}
+            parentPath={parentPath}
+            sessionCountsBySiteId={sessionCountsBySiteId}
+            expandedSitePaths={expandedSitePaths}
+            onToggle={onToggle}
+        />
     ) : (
-        <HierarchicalSiteHierarchy {...props} />
+        <HierarchicalSiteHierarchy
+            sites={sites}
+            parentSiteId={undefined}
+            parentPath={parentPath}
+            sessionCountsBySiteId={sessionCountsBySiteId}
+            expandedSitePaths={expandedSitePaths}
+            onToggle={onToggle}
+        />
     );
 }
