@@ -11,6 +11,7 @@ export const siteSchema = z.object({
     healthCenter: z.string().optional(),
     locationTypeId: z.number().optional(),
     name: z.string().optional(),
+    parentId: z.number().optional(),
     locationHierarchy: z.record(z.string(), z.string()),
     isActive: z.boolean(),
     hasData: z.boolean().optional(),

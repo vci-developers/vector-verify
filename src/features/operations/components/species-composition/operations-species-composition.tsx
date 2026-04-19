@@ -9,6 +9,7 @@ import {
     groupSpecimenCountsByMonth,
     sumSpecimenCountsByClass,
 } from '../../utils/chart-data';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -20,22 +21,27 @@ const COMPOSITION_SECTIONS: {
 ];
 
 interface OperationsSpeciesCompositionProps {
-    district: string;
+    locationQueryParam: LocationQueryParam;
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsSpeciesComposition({
-    district,
+    locationQueryParam,
     startDate,
     endDate,
 }: OperationsSpeciesCompositionProps) {
+    const locationFilter =
+        'district' in locationQueryParam
+            ? { districts: [locationQueryParam.district] }
+            : { siteIds: [locationQueryParam.siteId] };
+
     const getMonthlySpecimensCountQueryParams: GetMonthlySpecimensCountQueryParams =
         {
             startDate,
             endDate,
-            districts: [district],
             sessionType: 'SURVEILLANCE',
+            ...locationFilter,
         };
 
     const {

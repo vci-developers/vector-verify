@@ -13,6 +13,7 @@ import OperationsAiPerformanceTab from '@/features/operations/components/ai-perf
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
+import { useLocationSelection } from '../../hooks/use-location-selection';
 
 const OPERATIONS_TABS = [
     { value: 'sites', label: 'SITES' },
@@ -23,7 +24,6 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [activeTab, setActiveTab] = useState<OperationsTab>('sites');
     const [startMonth, setStartMonth] = useState(() =>
         startOfMonth(subMonths(new Date(), 2)),
@@ -35,6 +35,19 @@ export default function OperationsPageClient() {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+        : [];
+
+    const {
+        selectedLocation,
+        setSelectedLocation,
+        locationTypeName,
+        locationDropdownOptions,
+        locationQueryParam,
+        descendantsOfSelectedLocation,
+    } = useLocationSelection(accessibleSites);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -62,23 +75,6 @@ export default function OperationsPageClient() {
         );
     }
 
-    const accessibleSites =
-        getUserPermissionsResult.data.permissions.sites.canAccessSites;
-
-    const filteredAccessibleSites = selectedDistrict
-        ? accessibleSites.filter(
-              site => site.district?.trim() === selectedDistrict,
-          )
-        : accessibleSites;
-
-    const accessibleDistricts = [
-        ...new Set(
-            accessibleSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
-        ),
-    ].sort();
-
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -94,9 +90,10 @@ export default function OperationsPageClient() {
                         tabs={OPERATIONS_TABS}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
-                        districts={accessibleDistricts}
-                        selectedDistrict={selectedDistrict}
-                        onDistrictChange={setSelectedDistrict}
+                        locationTypeName={locationTypeName}
+                        locationDropdownOptions={locationDropdownOptions}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={setSelectedLocation}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={setStartMonth}
@@ -106,13 +103,13 @@ export default function OperationsPageClient() {
 
                     <Separator />
 
-                    {!selectedDistrict ? (
+                    {!locationQueryParam ? (
                         <div className="relative">
                             <SkeletonList count={5} height="xl" width="full" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a district to view data.
+                                    Select a location to view data.
                                 </p>
                             </div>
                         </div>
@@ -120,8 +117,8 @@ export default function OperationsPageClient() {
                         <Fragment>
                             {activeTab === 'sites' && (
                                 <OperationsSiteList
-                                    sites={filteredAccessibleSites}
-                                    district={selectedDistrict}
+                                    sites={descendantsOfSelectedLocation}
+                                    locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
                                 />
@@ -129,7 +126,7 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'species-composition' && (
                                 <OperationsSpeciesComposition
-                                    district={selectedDistrict}
+                                    locationQueryParam={locationQueryParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -147,7 +144,8 @@ export default function OperationsPageClient() {
                 open={isExportDialogOpen}
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
-                district={selectedDistrict}
+                locationQueryParam={locationQueryParam!}
+                locationName={selectedLocation}
                 startDate={startDate}
                 endDate={endDate}
             />
