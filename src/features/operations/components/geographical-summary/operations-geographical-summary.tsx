@@ -12,11 +12,11 @@ export const ANOPHELES_THRESHOLD = {
 } as const;
 
 export const ANOPHELES_COLOR = {
-    none: 'var(--color-count-none)',
-    low: 'var(--color-count-low)',
-    moderate: 'var(--color-count-moderate)',
-    high: 'var(--color-count-high)',
-    critical: 'var(--color-count-critical)',
+    none: 'var(--count-none)',
+    low: 'var(--count-low)',
+    moderate: 'var(--count-moderate)',
+    high: 'var(--count-high)',
+    critical: 'var(--count-critical)',
 } as const;
 
 // 'use client' still renders on the server during SSR

@@ -120,11 +120,6 @@
     --chart-4: #ffca1b;
     --chart-5: #e54848;
 
-    --count-none: #6b7280;
-    --count-low: #3b82f6;
-    --count-moderate: #f97316;
-    --count-high: #ef4444;
-    --count-critical: #991b1b;
 }
 
 .dark {
@@ -177,14 +172,23 @@
     --chart-4: #ffd666;
     --chart-5: #ff6b6b;
 
-    --count-none: #9ca3af;
-    --count-low: #60a5fa;
-    --count-moderate: #fb923c;
-    --count-high: #f87171;
-    --count-critical: #dc2626;
 }
 
 @layer base {
+    :root {
+        --count-none: #6b7280;
+        --count-low: #3b82f6;
+        --count-moderate: #f97316;
+        --count-high: #ef4444;
+        --count-critical: #991b1b;
+    }
+    .dark {
+        --count-none: #9ca3af;
+        --count-low: #60a5fa;
+        --count-moderate: #fb923c;
+        --count-high: #f87171;
+        --count-critical: #dc2626;
+    }
     * {
         @apply border-border outline-ring/50;
     }
