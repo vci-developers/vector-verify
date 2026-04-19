@@ -7,6 +7,7 @@ import type {
     GeocodeCoordinates,
     GeocodeQueryParams,
 } from './validation/get-geocode-schema';
+import { safeApiCall } from '@/lib/network/safe-api-call';
 
 export type { GeocodeCoordinates };
 
@@ -27,31 +28,26 @@ async function nominatimSearch(
 
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
 
-    let response: Response;
-    try {
-        response = await fetch(url, {
+    const result = await safeApiCall(
+        url,
+        {
             headers: {
                 'User-Agent':
                     'VectorVerify/1.0 (CBID surveillance application)',
                 'Accept-Language': 'en',
             },
-        });
-    } catch (error) {
-        const message = error instanceof Error ? error.message : undefined;
-        return err({ kind: 'network', message });
-    }
+        },
+        nominatimResponseSchema,
+    );
 
-    if (!response.ok) return ok(null);
+    if (!result.ok) return ok(null);
 
-    const parsed = nominatimResponseSchema.safeParse(await response.json());
-    if (!parsed.success) return err({ kind: 'client' });
-
-    const first = parsed.data[0];
-    if (!first) return ok(null);
+    const geocodeMatch = result.data[0];
+    if (!geocodeMatch) return ok(null);
 
     return ok({
-        latitude: parseFloat(first.lat),
-        longitude: parseFloat(first.lon),
+        latitude: parseFloat(geocodeMatch.lat),
+        longitude: parseFloat(geocodeMatch.lon),
     });
 }
 

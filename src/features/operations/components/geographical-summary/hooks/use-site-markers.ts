@@ -55,12 +55,14 @@ export function useSiteMarkers({
                   { sessionCount: number; lastCollectionDate: number }
               >();
 
-        return buildVillageMarkers(villageData, stats);
+        return buildVillageMarkers(villageData, stats).filter(
+            marker => marker.sessionCount > 0,
+        );
     }, [sessionsResult, specimensResult]);
 
     return {
         markers,
-        totalVillages: markers.filter(marker => marker.sessionCount > 0).length,
+        totalVillages: markers.length,
         isPending,
         isSpecimensPending,
         sessionsFailed: !isPending && !sessionsResult?.ok,
