@@ -16,13 +16,31 @@ import ExportDialog from '@/features/operations/components/export/export-dialog'
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
 import OperationsInterventionCoverageTab from '../intervention-coverage/operations-intervention-coverage-tab';
 import { useLocationSelection } from '../../hooks/use-location-selection';
+import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 
 const OPERATIONS_TABS = [
-    { value: 'sites', label: 'SITES' },
-    { value: 'intervention-coverage', label: 'INTERVENTION COVERAGE' },
-    { value: 'geographical-summary', label: 'GEOGRAPHICAL SUMMARY' },
-    { value: 'species-composition', label: 'SPECIES COMPOSITION' },
-    { value: 'ai-performance', label: 'AI PERFORMANCE' },
+    { value: 'sites', label: 'SITES', shouldRender: () => true },
+    {
+        value: 'intervention-coverage',
+        label: 'INTERVENTION COVERAGE',
+        shouldRender: () => true,
+    },
+    {
+        value: 'geographical-summary',
+        label: 'GEOGRAPHICAL SUMMARY',
+        shouldRender: () => true,
+    },
+    {
+        value: 'species-composition',
+        label: 'SPECIES COMPOSITION',
+        shouldRender: () => true,
+    },
+    {
+        value: 'ai-performance',
+        label: 'AI PERFORMANCE',
+        shouldRender: (permissions: UserPermissions) =>
+            permissions.annotations.viewAndWriteAnnotationTasks,
+    },
 ] as const;
 
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
@@ -82,6 +100,10 @@ export default function OperationsPageClient() {
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
+    const visibleTabs = OPERATIONS_TABS.filter(tab =>
+        tab.shouldRender(getUserPermissionsResult.data.permissions),
+    );
+
     return (
         <PageShell
             title="Operations"
@@ -91,7 +113,7 @@ export default function OperationsPageClient() {
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
                     <OperationsHeader
-                        tabs={OPERATIONS_TABS}
+                        tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                         locationTypeName={locationTypeName}
