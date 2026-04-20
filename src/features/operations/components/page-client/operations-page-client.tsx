@@ -87,7 +87,7 @@ export default function OperationsPageClient() {
 
     const visibleTabs = canReadAndWriteAnnotationTasks
         ? OPERATIONS_TABS
-        : OPERATIONS_TABS.filter((tab) => tab.value !== 'ai-performance');
+        : OPERATIONS_TABS.filter(tab => tab.value !== 'ai-performance');
 
     return (
         <PageShell
