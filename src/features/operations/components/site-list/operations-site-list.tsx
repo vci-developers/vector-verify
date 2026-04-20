@@ -13,17 +13,18 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 
 interface OperationsSiteListProps {
     sites: Site[];
-    district: string;
+    locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
 }
 
 export default function OperationsSiteList({
     sites,
-    district,
+    locationQueryParam,
     startMonth,
     endMonth,
 }: OperationsSiteListProps) {
@@ -39,7 +40,7 @@ export default function OperationsSiteList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            district,
+            ...locationQueryParam,
             startDate,
             endDate,
             type: 'SURVEILLANCE',
@@ -126,7 +127,7 @@ export default function OperationsSiteList({
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
                 <p className="text-muted-foreground text-sm">
-                    No sites found for this district.
+                    No sites found for this location.
                 </p>
             </div>
         );
@@ -136,7 +137,7 @@ export default function OperationsSiteList({
         <div className="space-y-2">
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
-                const siteIdToCounts =
+                const sessionCountsBySiteId =
                     monthToSiteIdCounts.get(monthKey) ?? new Map();
                 const isCollapsed = collapsedMonths.has(monthKey);
 
@@ -157,7 +158,7 @@ export default function OperationsSiteList({
                                 sites={sites}
                                 depth={0}
                                 parentPath={monthKey}
-                                siteIdToCounts={siteIdToCounts}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
                                 expandedSitePaths={expandedSitePaths}
                                 onToggle={toggleSiteRow}
                             />
