@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { useCheckProgram } from '@/lib/hooks/use-check-program';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import {
     ChevronUp,
@@ -84,6 +85,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
 
+    const { isUganda } = useCheckProgram();
+
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
 
@@ -120,11 +123,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                 <SidebarGroup>
                     <SidebarMenu>
                         {navigation
-                            .filter(item =>
-                                item.canAccess
-                                    ? item.canAccess(userPermissions)
-                                    : true,
-                            )
+                            .filter(item => item.canAccess(userPermissions))
+                            .filter(item => isUganda || item.href === '/operations')
                             .map(item => (
                                 <SidebarMenuItem key={item.href}>
                                     <SidebarMenuButton
