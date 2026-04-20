@@ -30,11 +30,11 @@ export function useCheckProgram() {
             : null;
 
     const isUganda = country?.toLowerCase() === 'uganda';
-    const isResolved = getProgramsResult?.ok === true;
+    const isProgramOk = getProgramsResult?.ok === true;
 
     useEffect(() => {
         if (
-            isResolved &&
+            isProgramOk &&
             !isUganda &&
             UGANDA_ONLY_PATHS.some(
                 path => path === pathname || pathname.startsWith(path + '/'),
@@ -42,7 +42,7 @@ export function useCheckProgram() {
         ) {
             router.replace('/operations');
         }
-    }, [isResolved, isUganda, pathname, router]);
+    }, [isProgramOk, isUganda, pathname, router]);
 
-    return { country, isUganda, isResolved };
+    return { country, isUganda, isProgramOk };
 }
