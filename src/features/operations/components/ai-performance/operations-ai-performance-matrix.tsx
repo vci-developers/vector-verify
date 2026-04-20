@@ -17,6 +17,7 @@ import {
     type SpeciesMatrixViewModel,
 } from '@/features/operations/utils/build-species-matrix-view-model';
 import type { LocationQueryParam } from '@/lib/location/location-query';
+import { cn } from '@/utils/cn';
 
 interface OperationsAiPerformanceMatrixProps {
     locationQueryParam: LocationQueryParam;
@@ -26,32 +27,75 @@ interface OperationsAiPerformanceMatrixProps {
 
 const numberFormatter = new Intl.NumberFormat('en-US');
 
+const MATRIX_CELL_STYLE = {
+    diagonal: {
+        baseAlpha: 0.14,
+        alphaRange: 0.78,
+        highContrastTextThreshold: 0.52,
+    },
+    offDiagonal: {
+        baseAlpha: 0.06,
+        alphaRange: 0.5,
+        emphasizedTextThreshold: 0.2,
+    },
+} as const;
+
 function formatPercent(value: number | null) {
     if (value === null) return '—';
     return `${(value * 100).toFixed(1)}%`;
 }
 
-function getMatrixCellStyle(
+function getHeatmapBackgroundColor(
+    colorVariable: '--success' | '--destructive',
+    opacity: number,
+) {
+    return `color-mix(in srgb, var(${colorVariable}) ${opacity * 100}%, transparent)`;
+}
+
+function getMatrixCellPresentation(
     ratio: number | null,
     isDiagonal: boolean,
-): CSSProperties {
+): { className: string; style?: CSSProperties } {
     if (ratio === null) {
         return {
-            backgroundColor: 'rgba(248, 250, 252, 1)',
-            color: 'rgb(100, 116, 139)',
+            className: 'bg-muted text-muted-foreground',
         };
     }
 
     if (isDiagonal) {
+        const opacity =
+            MATRIX_CELL_STYLE.diagonal.baseAlpha +
+            ratio * MATRIX_CELL_STYLE.diagonal.alphaRange;
+
         return {
-            backgroundColor: `rgba(16, 185, 129, ${0.14 + ratio * 0.78})`,
-            color: ratio >= 0.52 ? 'white' : 'rgb(6, 95, 70)',
+            className:
+                ratio >= MATRIX_CELL_STYLE.diagonal.highContrastTextThreshold
+                    ? 'text-success-foreground'
+                    : 'text-success',
+            style: {
+                backgroundColor: getHeatmapBackgroundColor(
+                    '--success',
+                    opacity,
+                ),
+            },
         };
     }
 
+    const opacity =
+        MATRIX_CELL_STYLE.offDiagonal.baseAlpha +
+        ratio * MATRIX_CELL_STYLE.offDiagonal.alphaRange;
+
     return {
-        backgroundColor: `rgba(244, 63, 94, ${0.06 + ratio * 0.5})`,
-        color: ratio >= 0.2 ? 'rgb(159, 18, 57)' : 'rgb(190, 24, 93)',
+        className:
+            ratio >= MATRIX_CELL_STYLE.offDiagonal.emphasizedTextThreshold
+                ? 'text-destructive'
+                : 'text-destructive/80',
+        style: {
+            backgroundColor: getHeatmapBackgroundColor(
+                '--destructive',
+                opacity,
+            ),
+        },
     };
 }
 
@@ -125,27 +169,37 @@ function MatrixCard({
                                     <TableCell className="bg-background border text-center text-xs font-medium whitespace-normal">
                                         {row.label}
                                     </TableCell>
-                                    {row.cells.map((cell, cellIndex) => (
-                                        <TableCell
-                                            key={`${row.label}-${speciesMatrix.columns[cellIndex] ?? cellIndex}`}
-                                            className="border p-0"
-                                            style={getMatrixCellStyle(
+                                    {row.cells.map((cell, cellIndex) => {
+                                        const cellPresentation =
+                                            getMatrixCellPresentation(
                                                 cell.ratio,
                                                 cell.isDiagonal,
-                                            )}
-                                        >
-                                            <div className="flex min-h-20 flex-col items-center justify-center px-2 py-3 text-center">
-                                                <span className="text-base font-semibold">
-                                                    {numberFormatter.format(
-                                                        cell.count,
-                                                    )}
-                                                </span>
-                                                <span className="text-xs opacity-90">
-                                                    {formatPercent(cell.ratio)}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                    ))}
+                                            );
+
+                                        return (
+                                            <TableCell
+                                                key={`${row.label}-${speciesMatrix.columns[cellIndex] ?? cellIndex}`}
+                                                className={cn(
+                                                    'border p-0',
+                                                    cellPresentation.className,
+                                                )}
+                                                style={cellPresentation.style}
+                                            >
+                                                <div className="flex min-h-20 flex-col items-center justify-center px-2 py-3 text-center">
+                                                    <span className="text-base font-semibold">
+                                                        {numberFormatter.format(
+                                                            cell.count,
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs opacity-90">
+                                                        {formatPercent(
+                                                            cell.ratio,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                        );
+                                    })}
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -210,7 +264,7 @@ function MatrixLoadingState() {
                 <CardTitle className="text-xl">Confusion Matrix</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
+                <div className="text-muted-foreground rounded-lg border border-dashed px-4 py-8 text-center text-sm">
                     Loading species confusion matrix...
                 </div>
             </CardContent>
@@ -225,7 +279,7 @@ function MatrixErrorState({ message }: { message: string }) {
                 <CardTitle className="text-xl">Confusion Matrix</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="border-destructive/20 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
                     {message}
                 </div>
             </CardContent>
@@ -240,7 +294,7 @@ function MatrixEmptyState() {
                 <CardTitle className="text-xl">Confusion Matrix</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
+                <div className="text-muted-foreground rounded-lg border border-dashed px-4 py-8 text-center text-sm">
                     No species confusion matrix is available for this location
                     and date range.
                 </div>
