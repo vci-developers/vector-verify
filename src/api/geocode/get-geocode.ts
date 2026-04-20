@@ -68,18 +68,10 @@ function buildFallbackQueries(location: string): string[] {
         .filter(Boolean);
     if (parts.length <= 1) return [location];
 
-    const target = parts[0];
-    const ancestors = parts.slice(1);
-    const broadestAncestor = parts[parts.length - 1];
-
-    const queries: string[] = [parts.join(', ')];
-
-    if (ancestors.length > 1) {
-        queries.push(`${target}, ${broadestAncestor}`);
+    const queries: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+        queries.push(parts.slice(i).join(', '));
     }
-
-    queries.push(ancestors.join(', '));
-
     return queries;
 }
 

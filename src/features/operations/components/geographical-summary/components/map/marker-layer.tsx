@@ -39,7 +39,7 @@ function createSpecimenMarkerIcon(
                   ? ANOPHELES_COLOR.high
                   : ANOPHELES_COLOR.critical;
     return L.divIcon({
-        html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;opacity:0.7;border:2px solid ${color};box-sizing:border-box;"></div>`,
+        html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);box-sizing:border-box;"></div>`,
         className: '',
         iconSize: [size, size],
         iconAnchor: [radius, radius],
