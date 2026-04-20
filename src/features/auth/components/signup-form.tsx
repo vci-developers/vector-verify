@@ -189,7 +189,8 @@ export default function SignupForm() {
                                                     program.programId,
                                                 )}
                                             >
-                                                {program.name}
+                                                {program.name}:{' '}
+                                                {program.country}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
