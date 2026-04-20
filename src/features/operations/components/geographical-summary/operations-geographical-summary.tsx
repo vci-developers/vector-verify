@@ -16,7 +16,7 @@ const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 interface OperationsGeographicalSummaryProps {
     locationQueryParam: LocationQueryParam;
     selectedLocation: string;
-    sites: Site[];
+    descendantsOfSelectedLocation: Site[];
     startDate: string;
     endDate: string;
 }
@@ -24,13 +24,13 @@ interface OperationsGeographicalSummaryProps {
 export default function OperationsGeographicalSummary({
     locationQueryParam,
     selectedLocation,
-    sites,
+    descendantsOfSelectedLocation,
     startDate,
     endDate,
 }: OperationsGeographicalSummaryProps) {
     const { markers, totalSites, isPending, isError } = useSiteMarkers({
         locationQueryParam,
-        sites,
+        descendantsOfSelectedLocation,
         startDate,
         endDate,
     });

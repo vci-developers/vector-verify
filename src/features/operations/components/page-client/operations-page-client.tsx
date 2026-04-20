@@ -138,7 +138,9 @@ export default function OperationsPageClient() {
                                 <OperationsGeographicalSummary
                                     locationQueryParam={locationQueryParam}
                                     selectedLocation={selectedLocation}
-                                    sites={descendantsOfSelectedLocation}
+                                    descendantsOfSelectedLocation={
+                                        descendantsOfSelectedLocation
+                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

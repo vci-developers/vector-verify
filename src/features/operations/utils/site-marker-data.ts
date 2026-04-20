@@ -98,12 +98,14 @@ function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
 export function buildSiteMarkers(
     siteSpecimenCounts: GetSpecimensCountSuccessPayload['data'],
     allSessions: GetAllSessionsSuccessPayload['sessions'],
-    accessibleSites: Site[],
+    descendantsOfSelectedLocation: Site[],
 ): SiteMarker[] {
-    const sitesById = new Map(accessibleSites.map(site => [site.siteId, site]));
+    const sitesById = new Map(
+        descendantsOfSelectedLocation.map(site => [site.siteId, site]),
+    );
 
     const siteIdsWithChildren = new Set(
-        accessibleSites
+        descendantsOfSelectedLocation
             .filter(site => site.parentId != null)
             .map(site => site.parentId!),
     );

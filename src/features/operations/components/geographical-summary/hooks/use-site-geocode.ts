@@ -7,15 +7,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 
-
 export function useSiteGeocode(markers: SiteMarker[]): {
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     isGeocoding: boolean;
 } {
     const queryClient = useQueryClient();
-    const [markerIdsToGeocodedPosition, setMarkerIdsToGeocodedPosition] = useState<
-        Map<string, Geocode>
-    >(new Map());
+    const [markerIdsToGeocodedPosition, setMarkerIdsToGeocodedPosition] =
+        useState<Map<string, Geocode>>(new Map());
     const [isGeocoding, setIsGeocoding] = useState(false);
 
     const markersRef = useRef(markers);

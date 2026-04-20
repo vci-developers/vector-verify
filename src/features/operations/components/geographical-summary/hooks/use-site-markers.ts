@@ -9,14 +9,14 @@ import type { Site } from '@/api/site/validation/site-schema';
 
 interface UseSiteMarkersParams {
     locationQueryParam: LocationQueryParam;
-    sites: Site[];
+    descendantsOfSelectedLocation: Site[];
     startDate: string;
     endDate: string;
 }
 
 export function useSiteMarkers({
     locationQueryParam,
-    sites,
+    descendantsOfSelectedLocation,
     startDate,
     endDate,
 }: UseSiteMarkersParams) {
@@ -52,9 +52,13 @@ export function useSiteMarkers({
         return buildSiteMarkers(
             getSpecimensCountResult.data.data,
             getAllSessionsResult.data.sessions,
-            sites,
+            descendantsOfSelectedLocation,
         );
-    }, [getAllSessionsResult, getSpecimensCountResult, sites]);
+    }, [
+        getAllSessionsResult,
+        getSpecimensCountResult,
+        descendantsOfSelectedLocation,
+    ]);
 
     return {
         markers,

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const geocodeSchema = z.object({
     latitude: z.number(),
