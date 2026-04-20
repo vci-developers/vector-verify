@@ -11,16 +11,17 @@ const GEOCODE_ZOOM = 10;
 
 interface MapNavigatorProps {
     bounds: LatLngBoundsExpression | null;
-    district: string;
+    selectedLocation: string;
 }
 
-// Returns null intentionally — rendered inside MapContainer to access useMap() context,
-// requires a descendant component rather than a hook called from the parent.
-export default function MapNavigator({ bounds, district }: MapNavigatorProps) {
+export default function MapNavigator({
+    bounds,
+    selectedLocation,
+}: MapNavigatorProps) {
     const map = useMap();
 
     const { data: geocodeResult } = useGetGeocode(
-        { district },
+        { location: selectedLocation },
         { enabled: !bounds },
     );
 

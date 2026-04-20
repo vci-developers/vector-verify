@@ -136,7 +136,9 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
-                                    district={selectedDistrict}
+                                    locationQueryParam={locationQueryParam}
+                                    selectedLocation={selectedLocation}
+                                    sites={descendantsOfSelectedLocation}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

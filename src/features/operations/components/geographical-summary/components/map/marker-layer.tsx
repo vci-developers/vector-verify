@@ -3,12 +3,12 @@
 import L from 'leaflet';
 import { Marker, Tooltip, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import type { VillageMarker } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
-import type { GeocodedPosition } from '../../hooks/use-village-geocode';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
-} from '../../operations-geographical-summary';
+    type SiteMarker,
+} from '@/features/operations/utils/site-marker-data';
+import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 
 const MAX_SPECIES_IN_TOOLTIP = 5;
 const CLICK_ZOOM = 13;
@@ -47,23 +47,29 @@ function createSpecimenMarkerIcon(
 }
 
 interface MarkerLayerProps {
-    markers: VillageMarker[];
-    positions: Map<string, GeocodedPosition>;
+    markers: SiteMarker[];
+    markerIdsToGeocodedPosition: Map<string, Geocode>;
 }
 
-export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
+export default function MarkerLayer({
+    markers,
+    markerIdsToGeocodedPosition,
+}: MarkerLayerProps) {
     const map = useMap();
 
     return (
-        <MarkerClusterGroup key={positions.size} chunkedLoading>
+        <MarkerClusterGroup
+            key={markerIdsToGeocodedPosition.size}
+            chunkedLoading
+        >
             {markers.map(marker => {
-                const pos = positions.get(marker.id);
-                if (!pos) return null;
+                const position = markerIdsToGeocodedPosition.get(marker.id);
+                if (!position) return null;
 
                 return (
                     <Marker
                         key={marker.id}
-                        position={[pos.latitude, pos.longitude]}
+                        position={[position.latitude, position.longitude]}
                         icon={createSpecimenMarkerIcon(
                             marker.totalSpecimens,
                             marker.anophelesCount,
@@ -71,7 +77,7 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                         eventHandlers={{
                             click: () => {
                                 map.flyTo(
-                                    [pos.latitude, pos.longitude],
+                                    [position.latitude, position.longitude],
                                     Math.max(map.getZoom(), CLICK_ZOOM),
                                 );
                             },
@@ -80,16 +86,14 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                         <Tooltip>
                             <div className="min-w-40 text-xs">
                                 <p className="font-semibold">
-                                    {marker.villageName}
+                                    {marker.siteName}
                                 </p>
-                                {(marker.district ?? marker.parish) && (
-                                    <p className="text-gray-500">
-                                        {[marker.district, marker.parish]
-                                            .filter(Boolean)
-                                            .join(' · ')}
+                                {marker.parentLocationName && (
+                                    <p className="text-muted-foreground">
+                                        {marker.parentLocationName}
                                     </p>
                                 )}
-                                <hr className="my-1 border-gray-200" />
+                                <hr className="border-border my-1" />
                                 <p>
                                     {marker.sessionCount} session
                                     {marker.sessionCount !== 1 ? 's' : ''}
@@ -103,25 +107,25 @@ export default function MarkerLayer({ markers, positions }: MarkerLayerProps) {
                                     Anopheles
                                 </p>
                                 {marker.speciesBreakdown.length > 0 && (
-                                    <div className="mt-1 space-y-0.5 border-t border-gray-200 pt-1">
+                                    <div className="border-border mt-1 space-y-0.5 border-t pt-1">
                                         {marker.speciesBreakdown
                                             .slice(0, MAX_SPECIES_IN_TOOLTIP)
-                                            .map(s => (
+                                            .map(({ species, count }) => (
                                                 <p
-                                                    key={s.species}
-                                                    className="text-gray-600"
+                                                    key={species}
+                                                    className="text-muted-foreground"
                                                 >
-                                                    <span className="mr-1 text-gray-400">
+                                                    <span className="mr-1">
                                                         ↳
                                                     </span>
-                                                    {s.species}:{' '}
-                                                    {s.count.toLocaleString()}
+                                                    {species}:{' '}
+                                                    {count.toLocaleString()}
                                                 </p>
                                             ))}
                                     </div>
                                 )}
                                 {marker.lastCollectionDate && (
-                                    <p className="text-gray-500">
+                                    <p className="text-muted-foreground">
                                         Last collection:{' '}
                                         {new Date(
                                             marker.lastCollectionDate,

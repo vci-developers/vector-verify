@@ -1,12 +1,27 @@
 import type { GetAllSessionsSuccessPayload } from '@/api/session/validation/get-all-sessions-schema';
+import type { Site } from '@/api/site/validation/site-schema';
 import type { GetSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-specimens-count-schema';
+import { isLegacySite } from '@/lib/location/location-query';
 
-export interface VillageMarker {
+export const ANOPHELES_THRESHOLD = {
+    low: 10,
+    moderate: 50,
+    high: 100,
+} as const;
+
+export const ANOPHELES_COLOR = {
+    none: 'var(--count-none)',
+    low: 'var(--count-low)',
+    moderate: 'var(--count-moderate)',
+    high: 'var(--count-high)',
+    critical: 'var(--count-critical)',
+} as const;
+
+export interface SiteMarker {
     id: string;
-    villageName: string;
-    district?: string | null;
-    subCounty?: string | null;
-    parish?: string | null;
+    siteName: string;
+    parentLocationName: string;
+    locationQuery: string;
     sessionCount: number;
     totalSpecimens: number;
     anophelesCount: number;
@@ -14,117 +29,186 @@ export interface VillageMarker {
     lastCollectionDate?: number;
 }
 
-const ANOPHELES_PREFIXES = ['an.', 'anopheles'] as const;
+function buildLegacyLocationQuery(
+    villageName: string | null | undefined,
+    parish: string | null | undefined,
+    subCounty: string | null | undefined,
+    district: string | null | undefined,
+): string {
+    const cleanDistrict = district?.replace(/ District$/i, '').trim();
+    const countryPart = cleanDistrict ? `${cleanDistrict}, Uganda` : 'Uganda';
 
-interface VillageData {
-    district?: string | null;
-    subCounty?: string | null;
-    parish?: string | null;
-    totalSpecimens: number;
-    anophelesCount: number;
-    speciesCounts: Record<string, number>;
+    let cleanVillage = villageName?.split('+')[0]?.trim() ?? null;
+
+    if (
+        cleanVillage &&
+        (cleanVillage.toLowerCase() === subCounty?.toLowerCase() ||
+            cleanVillage.toLowerCase() === parish?.toLowerCase())
+    ) {
+        cleanVillage = cleanVillage
+            .replace(/ Subcounty$/i, '')
+            .replace(/ Parish$/i, '')
+            .trim();
+    }
+
+    if (cleanVillage) return `${cleanVillage}, ${countryPart}`;
+    if (cleanDistrict) return countryPart;
+    return 'Uganda';
 }
 
-export function aggregateSpecimensByVillage(
-    specimensData: GetSpecimensCountSuccessPayload['data'],
-): {
-    villageData: Map<string, VillageData>;
-    siteIdToVillage: Map<number, string>;
-} {
-    const villageData = new Map<string, VillageData>();
-    const siteIdToVillage = new Map<number, string>();
+function buildHierarchicalLocationQuery(site: Site): string {
+    const ancestorNames = Object.values(site.locationHierarchy).filter(
+        value => value !== site.name,
+    );
+    const topLevelRegion = ancestorNames[0];
+    return [site.name, topLevelRegion].filter(Boolean).join(', ');
+}
 
-    for (const entry of specimensData) {
-        if (!entry.siteInfo) continue;
-        const villageName = entry.siteInfo.villageName;
-        if (!villageName) continue;
+function buildParentLocationName(site: Site): string {
+    if (isLegacySite(site)) {
+        return [site.district, site.subCounty, site.parish]
+            .filter(Boolean)
+            .join(' · ');
+    }
+    return Object.values(site.locationHierarchy)
+        .filter(value => value !== site.name)
+        .join(' · ');
+}
 
-        siteIdToVillage.set(entry.siteInfo.siteId, villageName);
+function getMarkerName(
+    site: Site,
+    sitesById: Map<number, Site>,
+): string | null {
+    if (isLegacySite(site)) {
+        return site.villageName ?? null;
+    }
+    const parentSite =
+        site.parentId != null ? sitesById.get(site.parentId) : null;
+    return parentSite?.name ?? site.name ?? null;
+}
 
-        const anophelesCount = entry.counts
-            .filter(specimenCount =>
-                ANOPHELES_PREFIXES.some(prefix =>
-                    specimenCount.species?.toLowerCase().startsWith(prefix),
-                ),
+function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
+    if (isLegacySite(site)) return site;
+    if (site.parentId != null) {
+        return sitesById.get(site.parentId) ?? site;
+    }
+    return site;
+}
+
+export function buildSiteMarkers(
+    siteSpecimenCounts: GetSpecimensCountSuccessPayload['data'],
+    allSessions: GetAllSessionsSuccessPayload['sessions'],
+    accessibleSites: Site[],
+): SiteMarker[] {
+    const sitesById = new Map(accessibleSites.map(site => [site.siteId, site]));
+
+    const siteIdsWithChildren = new Set(
+        accessibleSites
+            .filter(site => site.parentId != null)
+            .map(site => site.parentId!),
+    );
+
+    const markerNameToSpecimenData = new Map<
+        string,
+        {
+            markerSite: Site;
+            totalSpecimens: number;
+            anophelesCount: number;
+            speciesCounts: Record<string, number>;
+        }
+    >();
+    const siteIdToMarkerName = new Map<number, string>();
+
+    for (const siteSpecimenCount of siteSpecimenCounts) {
+        if (
+            !siteSpecimenCount.siteInfo ||
+            !sitesById.has(siteSpecimenCount.siteInfo.siteId) ||
+            siteIdsWithChildren.has(siteSpecimenCount.siteInfo.siteId)
+        )
+            continue;
+
+        const markerName = getMarkerName(siteSpecimenCount.siteInfo, sitesById);
+        if (!markerName) continue;
+
+        siteIdToMarkerName.set(siteSpecimenCount.siteInfo.siteId, markerName);
+
+        const anophelesCount = siteSpecimenCount.counts
+            .filter(speciesCount =>
+                speciesCount.species?.toLowerCase().startsWith('anopheles'),
             )
-            .reduce((sum, specimenCount) => sum + specimenCount.count, 0);
+            .reduce((sum, speciesCount) => sum + speciesCount.count, 0);
 
-        const previous = villageData.get(villageName);
-        const mergedSpecies: Record<string, number> = {
-            ...(previous?.speciesCounts ?? {}),
-        };
-        for (const specimenCount of entry.counts) {
-            if (!specimenCount.species) continue;
-            mergedSpecies[specimenCount.species] =
-                (mergedSpecies[specimenCount.species] ?? 0) +
-                specimenCount.count;
+        const markerData = markerNameToSpecimenData.get(markerName);
+        const speciesCounts = { ...(markerData?.speciesCounts ?? {}) };
+        for (const speciesCount of siteSpecimenCount.counts) {
+            if (!speciesCount.species) continue;
+            speciesCounts[speciesCount.species] =
+                (speciesCounts[speciesCount.species] ?? 0) + speciesCount.count;
         }
 
-        villageData.set(villageName, {
-            district: entry.siteInfo.district,
-            subCounty: entry.siteInfo.subCounty,
-            parish: entry.siteInfo.parish,
+        markerNameToSpecimenData.set(markerName, {
+            markerSite:
+                markerData?.markerSite ??
+                getMarkerSite(siteSpecimenCount.siteInfo, sitesById),
             totalSpecimens:
-                (previous?.totalSpecimens ?? 0) + entry.totalSpecimens,
-            anophelesCount: (previous?.anophelesCount ?? 0) + anophelesCount,
-            speciesCounts: mergedSpecies,
+                (markerData?.totalSpecimens ?? 0) +
+                siteSpecimenCount.totalSpecimens,
+            anophelesCount: (markerData?.anophelesCount ?? 0) + anophelesCount,
+            speciesCounts,
         });
     }
 
-    return { villageData, siteIdToVillage };
-}
-
-export function sessionStatsByVillage(
-    sessions: GetAllSessionsSuccessPayload['sessions'],
-    siteIdToVillage: Map<number, string>,
-): Map<string, { sessionCount: number; lastCollectionDate: number }> {
-    const stats = new Map<
+    const markerNameToSessionData = new Map<
         string,
         { sessionCount: number; lastCollectionDate: number }
     >();
-    for (const session of sessions) {
-        const village = siteIdToVillage.get(session.siteId);
-        if (!village) continue;
-        const previous = stats.get(village) ?? {
+
+    for (const session of allSessions) {
+        const markerName = siteIdToMarkerName.get(session.siteId);
+        if (!markerName) continue;
+
+        const sessionData = markerNameToSessionData.get(markerName) ?? {
             sessionCount: 0,
             lastCollectionDate: 0,
         };
-        stats.set(village, {
-            sessionCount: previous.sessionCount + 1,
+        markerNameToSessionData.set(markerName, {
+            sessionCount: sessionData.sessionCount + 1,
             lastCollectionDate: Math.max(
-                previous.lastCollectionDate,
+                sessionData.lastCollectionDate,
                 session.collectionDate,
             ),
         });
     }
-    return stats;
-}
 
-export function buildVillageMarkers(
-    villageData: Map<string, VillageData>,
-    sessionStats: Map<
-        string,
-        { sessionCount: number; lastCollectionDate: number }
-    >,
-): VillageMarker[] {
-    return Array.from(villageData.entries()).map(
-        ([villageName, villageInfo]) => {
-            const stats = sessionStats.get(villageName);
-            const speciesBreakdown = Object.entries(villageInfo.speciesCounts)
+    return Array.from(markerNameToSpecimenData.entries()).map(
+        ([markerName, specimenData]) => {
+            const sessionData = markerNameToSessionData.get(markerName);
+            const { markerSite } = specimenData;
+
+            const speciesBreakdown = Object.entries(specimenData.speciesCounts)
                 .map(([species, count]) => ({ species, count }))
                 .sort((a, b) => b.count - a.count);
 
+            const locationQuery = isLegacySite(markerSite)
+                ? buildLegacyLocationQuery(
+                      markerSite.villageName,
+                      markerSite.parish,
+                      markerSite.subCounty,
+                      markerSite.district,
+                  )
+                : buildHierarchicalLocationQuery(markerSite);
+
             return {
-                id: villageName,
-                villageName,
-                district: villageInfo.district,
-                subCounty: villageInfo.subCounty,
-                parish: villageInfo.parish,
-                sessionCount: stats?.sessionCount ?? 0,
-                totalSpecimens: villageInfo.totalSpecimens,
-                anophelesCount: villageInfo.anophelesCount,
+                id: markerName,
+                siteName: markerName,
+                parentLocationName: buildParentLocationName(markerSite),
+                locationQuery,
+                sessionCount: sessionData?.sessionCount ?? 0,
+                totalSpecimens: specimenData.totalSpecimens,
+                anophelesCount: specimenData.anophelesCount,
                 speciesBreakdown,
-                lastCollectionDate: stats?.lastCollectionDate || undefined,
+                lastCollectionDate:
+                    sessionData?.lastCollectionDate || undefined,
             };
         },
     );
