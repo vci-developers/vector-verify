@@ -42,6 +42,11 @@ export default function OperationsPageClient() {
         ? getUserPermissionsResult.data.permissions.sites.canAccessSites
         : [];
 
+    const canReadAndWriteAnnotationTasks = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.annotations
+              .viewAndWriteAnnotationTasks
+        : false;
+
     const {
         selectedLocation,
         setSelectedLocation,
@@ -80,6 +85,10 @@ export default function OperationsPageClient() {
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
+    const visibleTabs = canReadAndWriteAnnotationTasks
+        ? OPERATIONS_TABS
+        : OPERATIONS_TABS.filter((tab) => tab.value !== 'ai-performance');
+
     return (
         <PageShell
             title="Operations"
@@ -89,7 +98,7 @@ export default function OperationsPageClient() {
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
                     <OperationsHeader
-                        tabs={OPERATIONS_TABS}
+                        tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                         locationTypeName={locationTypeName}
