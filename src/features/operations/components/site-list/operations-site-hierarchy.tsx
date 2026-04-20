@@ -1,28 +1,16 @@
 'use client';
 
 import type { Site } from '@/api/site/validation/site-schema';
-import { Badge } from '@/components/ui/badge';
+import { isLegacySite } from '@/lib/location/location-query';
 import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { CompletenessBox } from '@/features/operations/components/site-list/completeness-box';
-import { ChevronRight, MapPin } from 'lucide-react';
+    getLocationTypeName,
+    getSiteAndDescendants,
+} from '@/lib/location/site-tree';
 import { useMemo } from 'react';
+import SiteLeafRows from './operations-site-leaf-rows';
+import CollapsibleLocationGroup from './collapsible-location-group';
 
-function getCompletenessBackgroundColor(
-    percentage: number,
-    highThreshold = 80,
-    mediumThreshold = 50,
-): string {
-    if (percentage >= highThreshold) return 'bg-success/10 hover:bg-success/20';
-    if (percentage >= mediumThreshold)
-        return 'bg-warning/10 hover:bg-warning/20';
-    return 'bg-destructive/10 hover:bg-destructive/20';
-}
-
-const HIERARCHY_LEVELS = [
+const LEGACY_HIERARCHY_LEVELS = [
     { key: 'subCounty', label: 'Subcounty' },
     { key: 'healthCenter', label: 'Health Center' },
     { key: 'parish', label: 'Parish' },
@@ -30,11 +18,172 @@ const HIERARCHY_LEVELS = [
     { key: 'houseNumber', label: 'House' },
 ] as const;
 
+interface LegacySiteHierarchyProps {
+    sites: Site[];
+    depth: number;
+    parentPath: string;
+    sessionCountsBySiteId: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
+    expandedSitePaths: Set<string>;
+    onToggle: (path: string) => void;
+}
+
+function LegacySiteHierarchy({
+    sites,
+    depth,
+    parentPath,
+    sessionCountsBySiteId,
+    expandedSitePaths,
+    onToggle,
+}: LegacySiteHierarchyProps) {
+    const currentLevel = LEGACY_HIERARCHY_LEVELS[depth];
+    const isLeafLevel = depth === LEGACY_HIERARCHY_LEVELS.length - 1;
+
+    const sortedLocationGroups = useMemo(() => {
+        if (!currentLevel) return [];
+        const sitesByLocationName: Record<string, Site[]> = {};
+        for (const site of sites) {
+            const locationName = site[currentLevel.key] ?? 'Unknown';
+            (sitesByLocationName[locationName] ??= []).push(site);
+        }
+        return Object.entries(sitesByLocationName).sort(([a], [b]) =>
+            a.localeCompare(b),
+        );
+    }, [sites, currentLevel]);
+
+    if (!currentLevel) return null;
+
+    if (isLeafLevel) {
+        return (
+            <SiteLeafRows
+                sites={sites}
+                getDisplayName={site => site[currentLevel.key] ?? 'Unknown'}
+                sessionCountsBySiteId={sessionCountsBySiteId}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-1">
+            {sortedLocationGroups.map(([locationName, sitesInGroup]) => (
+                <CollapsibleLocationGroup
+                    key={`${parentPath}/${locationName}`}
+                    locationName={locationName}
+                    locationTypeName={currentLevel.label}
+                    sitesInGroup={sitesInGroup}
+                    parentPath={parentPath}
+                    sessionCountsBySiteId={sessionCountsBySiteId}
+                    expandedSitePaths={expandedSitePaths}
+                    onToggle={onToggle}
+                >
+                    <LegacySiteHierarchy
+                        sites={sitesInGroup}
+                        depth={depth + 1}
+                        parentPath={`${parentPath}/${locationName}`}
+                        sessionCountsBySiteId={sessionCountsBySiteId}
+                        expandedSitePaths={expandedSitePaths}
+                        onToggle={onToggle}
+                    />
+                </CollapsibleLocationGroup>
+            ))}
+        </div>
+    );
+}
+
+interface HierarchicalSiteHierarchyProps {
+    sites: Site[];
+    parentSiteId: number | undefined;
+    parentPath: string;
+    sessionCountsBySiteId: Map<
+        number,
+        { sessionCount: number; needsReviewCount: number }
+    >;
+    expandedSitePaths: Set<string>;
+    onToggle: (path: string) => void;
+}
+
+function HierarchicalSiteHierarchy({
+    sites,
+    parentSiteId,
+    parentPath,
+    sessionCountsBySiteId,
+    expandedSitePaths,
+    onToggle,
+}: HierarchicalSiteHierarchyProps) {
+    const childSites = useMemo(
+        () =>
+            sites
+                .filter(site => site.parentId === parentSiteId)
+                .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
+        [sites, parentSiteId],
+    );
+
+    const isLeafLevel = childSites.every(
+        site => !sites.some(otherSite => otherSite.parentId === site.siteId),
+    );
+
+    if (childSites.length === 0) return null;
+
+    if (isLeafLevel) {
+        return (
+            <SiteLeafRows
+                sites={childSites}
+                getDisplayName={site => site.name ?? 'Unknown'}
+                sessionCountsBySiteId={sessionCountsBySiteId}
+            />
+        );
+    }
+
+    const locationTypeName = getLocationTypeName(childSites[0]!);
+
+    return (
+        <div className="space-y-1">
+            {childSites.map(site => {
+                const descendantSites = getSiteAndDescendants(
+                    sites,
+                    site.siteId,
+                ).filter(
+                    descendant =>
+                        descendant.siteId !== site.siteId &&
+                        !sites.some(
+                            otherSite =>
+                                otherSite.parentId === descendant.siteId,
+                        ),
+                );
+
+                return (
+                    <CollapsibleLocationGroup
+                        key={`${parentPath}/${site.name}`}
+                        locationName={site.name ?? 'Unknown'}
+                        locationTypeName={locationTypeName}
+                        sitesInGroup={descendantSites}
+                        parentPath={parentPath}
+                        sessionCountsBySiteId={sessionCountsBySiteId}
+                        expandedSitePaths={expandedSitePaths}
+                        onToggle={onToggle}
+                    >
+                        <HierarchicalSiteHierarchy
+                            sites={sites}
+                            parentSiteId={site.siteId}
+                            parentPath={`${parentPath}/${site.name}`}
+                            sessionCountsBySiteId={sessionCountsBySiteId}
+                            expandedSitePaths={expandedSitePaths}
+                            onToggle={onToggle}
+                        />
+                    </CollapsibleLocationGroup>
+                );
+            })}
+        </div>
+    );
+}
+
 interface SiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    siteIdToCounts: Map<
+    sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
     >;
@@ -46,167 +195,29 @@ export default function OperationsSiteHierarchy({
     sites,
     depth,
     parentPath,
-    siteIdToCounts,
+    sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
 }: SiteHierarchyProps) {
-    const currentLevel = HIERARCHY_LEVELS[depth];
-    const isLeafLevel = depth === HIERARCHY_LEVELS.length - 1;
+    if (sites.length === 0) return null;
 
-    const sortedLocationEntries = useMemo(() => {
-        if (!currentLevel) return [];
-        const grouped = sites.reduce<Record<string, Site[]>>((groups, site) => {
-            const locationName = site[currentLevel.key] ?? 'Unknown';
-            groups[locationName] ??= [];
-            groups[locationName].push(site);
-            return groups;
-        }, {});
-        return Object.entries(grouped).sort();
-    }, [sites, currentLevel]);
-
-    if (!currentLevel) return null;
-
-    if (isLeafLevel) {
-        return (
-            <div className="space-y-1">
-                {sites.map(site => {
-                    const { sessionCount, needsReviewCount } =
-                        siteIdToCounts.get(site.siteId) ?? {
-                            sessionCount: 0,
-                            needsReviewCount: 0,
-                        };
-                    const hasSessions = sessionCount > 0;
-                    const hasNeedsReview = needsReviewCount > 0;
-
-                    return (
-                        <div
-                            key={site.siteId}
-                            className="flex items-center justify-between rounded-md px-3 py-2"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                        hasSessions
-                                            ? 'bg-primary/10'
-                                            : 'bg-muted'
-                                    }`}
-                                >
-                                    <MapPin
-                                        className={`h-4 w-4 ${
-                                            hasSessions
-                                                ? 'text-primary'
-                                                : 'text-muted-foreground'
-                                        }`}
-                                    />
-                                </div>
-                                <span className="text-sm">
-                                    {site[currentLevel.key] ?? 'Unknown'}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {hasNeedsReview && (
-                                    <Badge variant="destructive">
-                                        {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
-                                    </Badge>
-                                )}
-                                <Badge
-                                    variant={
-                                        hasSessions ? 'default' : 'outline'
-                                    }
-                                >
-                                    {hasSessions
-                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                        : 'No sessions'}
-                                </Badge>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-1">
-            {sortedLocationEntries.map(([locationName, sitesInLocation]) => {
-                const currentPath = `${parentPath}/${locationName}`;
-                const isExpanded = expandedSitePaths.has(currentPath);
-                const coveredSites = sitesInLocation.filter(
-                    site =>
-                        (siteIdToCounts.get(site.siteId)?.sessionCount ?? 0) >
-                        0,
-                );
-                const completenessPercentage =
-                    sitesInLocation.length > 0
-                        ? Math.round(
-                              (coveredSites.length / sitesInLocation.length) *
-                                  100,
-                          )
-                        : 0;
-                const needsReviewTotal = sitesInLocation.reduce(
-                    (sum, site) =>
-                        sum +
-                        (siteIdToCounts.get(site.siteId)?.needsReviewCount ??
-                            0),
-                    0,
-                );
-
-                return (
-                    <Collapsible
-                        key={currentPath}
-                        open={isExpanded}
-                        onOpenChange={() => onToggle(currentPath)}
-                    >
-                        <CollapsibleTrigger className="w-full">
-                            <div
-                                className={`group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 transition-all ${getCompletenessBackgroundColor(completenessPercentage)}`}
-                            >
-                                <div className="flex items-center gap-2.5">
-                                    <ChevronRight
-                                        className={`text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200 ${
-                                            isExpanded ? 'rotate-90' : ''
-                                        }`}
-                                    />
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-sm font-medium">
-                                            {locationName}
-                                        </span>
-                                        <span className="text-muted-foreground text-[11px]">
-                                            {currentLevel.label}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    {needsReviewTotal > 0 && (
-                                        <span className="text-destructive text-xs tabular-nums">
-                                            {`${needsReviewTotal} ${needsReviewTotal === 1 ? 'needs' : 'need'} review`}
-                                        </span>
-                                    )}
-                                    <span className="text-muted-foreground text-xs tabular-nums">
-                                        {coveredSites.length} of{' '}
-                                        {sitesInLocation.length} visited
-                                    </span>
-                                    <CompletenessBox
-                                        percentage={completenessPercentage}
-                                    />
-                                </div>
-                            </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <div className="border-border/60 ml-4.5 border-l pl-4">
-                                <OperationsSiteHierarchy
-                                    sites={sitesInLocation}
-                                    depth={depth + 1}
-                                    parentPath={currentPath}
-                                    siteIdToCounts={siteIdToCounts}
-                                    expandedSitePaths={expandedSitePaths}
-                                    onToggle={onToggle}
-                                />
-                            </div>
-                        </CollapsibleContent>
-                    </Collapsible>
-                );
-            })}
-        </div>
+    return isLegacySite(sites[0]!) ? (
+        <LegacySiteHierarchy
+            sites={sites}
+            depth={depth}
+            parentPath={parentPath}
+            sessionCountsBySiteId={sessionCountsBySiteId}
+            expandedSitePaths={expandedSitePaths}
+            onToggle={onToggle}
+        />
+    ) : (
+        <HierarchicalSiteHierarchy
+            sites={sites}
+            parentSiteId={undefined}
+            parentPath={parentPath}
+            sessionCountsBySiteId={sessionCountsBySiteId}
+            expandedSitePaths={expandedSitePaths}
+            onToggle={onToggle}
+        />
     );
 }

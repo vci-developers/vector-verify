@@ -34,6 +34,3 @@ export type GetMonthlySpecimensCountResponseBody = z.infer<
 >;
 export type GetMonthlySpecimensCountSuccessPayload =
     GetMonthlySpecimensCountResponseBody;
-
-export type MonthlySpecimenCounts =
-    GetMonthlySpecimensCountSuccessPayload['data'];

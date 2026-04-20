@@ -5,7 +5,6 @@ import { z } from 'zod';
 export const getSpecimensCountQueryParamsSchema = z.object({
     sessionId: z.coerce.number().optional(),
     siteId: z.coerce.number().optional(),
-    programId: z.coerce.number().optional(),
     district: z.string().optional(),
     specimenId: z.string().optional(),
     shouldProcessFurther: z.coerce.boolean().optional(),
@@ -19,9 +18,9 @@ export const getSpecimensCountQueryParamsSchema = z.object({
 });
 
 const specimensCountSchema = z.object({
-    species: z.string(),
-    sex: z.string(),
-    abdomenStatus: z.string(),
+    species: z.string().nullable(),
+    sex: z.string().nullable(),
+    abdomenStatus: z.string().nullable(),
     count: z.number(),
     columnName: z.string(),
 });

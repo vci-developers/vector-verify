@@ -37,7 +37,7 @@ export default function SpecimenImageViewer({
                 <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-md">
                     {thumbnailUrl ? (
                         <Image
-                            src={`/api/${thumbnailUrl}`}
+                            src={`/api${thumbnailUrl}`}
                             alt={`Specimen ${specimen?.specimenId}`}
                             fill
                             unoptimized

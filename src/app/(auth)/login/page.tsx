@@ -8,7 +8,7 @@ export default function LoginPage() {
         <AuthShell
             title="Welcome back"
             description="Sign in to continue to your dashboard."
-            imageSrc="/assets/auth/images/login.png"
+            imageSrc="/assets/auth/images/Login.png"
         >
             <LoginForm />
             <Separator className="my-6" />
