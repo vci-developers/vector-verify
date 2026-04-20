@@ -22,12 +22,11 @@ export function useCheckProgram() {
         { enabled: programId !== undefined },
     );
 
-    const country =
-        getProgramsResult?.ok
-            ? getProgramsResult.data.programs.find(
-                  program => program.programId === programId,
-              )?.country ?? null
-            : null;
+    const country = getProgramsResult?.ok
+        ? (getProgramsResult.data.programs.find(
+              program => program.programId === programId,
+          )?.country ?? null)
+        : null;
 
     const isUganda = country?.toLowerCase() === 'uganda';
     const isProgramOk = getProgramsResult?.ok === true;

@@ -124,7 +124,9 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                     <SidebarMenu>
                         {navigation
                             .filter(item => item.canAccess(userPermissions))
-                            .filter(item => isUganda || item.href === '/operations')
+                            .filter(
+                                item => isUganda || item.href === '/operations',
+                            )
                             .map(item => (
                                 <SidebarMenuItem key={item.href}>
                                     <SidebarMenuButton
