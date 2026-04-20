@@ -6,28 +6,37 @@ import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-cou
 import { Card, CardContent } from '@/components/ui/card';
 import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
 import { format } from 'date-fns';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
 
 interface OperationsAiPerformanceProps {
-    district: string;
+    locationQueryParam: LocationQueryParam;
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsAiPerformance({
-    district,
+    locationQueryParam,
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
     const {
         data: getAnnotationsSummaryResult,
         isPending: isGetAnnotationsSummaryPending,
-    } = useGetAnnotationsSummary({ district, startDate, endDate });
+    } = useGetAnnotationsSummary({
+        ...locationQueryParam,
+        startDate,
+        endDate,
+    });
 
     const {
         data: getSpecimensCountResult,
         isPending: isGetSpecimensCountPending,
-    } = useGetSpecimensCount({ district, startDate, endDate });
+    } = useGetSpecimensCount({
+        ...locationQueryParam,
+        startDate,
+        endDate,
+    });
 
     const { data: getAnnotationTasksResult } = useGetAnnotationTasks({
         startDate,
@@ -139,7 +148,7 @@ export default function OperationsAiPerformance({
                 ))}
 
                 <OperationsAiPerformanceMatrix
-                    district={district}
+                    locationQueryParam={locationQueryParam}
                     startDate={startDate}
                     endDate={endDate}
                 />
