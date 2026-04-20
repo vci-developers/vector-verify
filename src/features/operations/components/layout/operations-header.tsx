@@ -17,9 +17,10 @@ interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
     activeTab: OperationsTab;
     onTabChange: (tab: OperationsTab) => void;
-    districts: string[];
-    selectedDistrict: string;
-    onDistrictChange: (district: string) => void;
+    locationTypeName: string;
+    locationDropdownOptions: string[];
+    selectedLocation: string;
+    onLocationChange: (location: string) => void;
     startMonth: Date;
     endMonth: Date;
     onStartMonthChange: (month: Date) => void;
@@ -31,9 +32,10 @@ export default function OperationsHeader({
     tabs,
     activeTab,
     onTabChange,
-    districts,
-    selectedDistrict,
-    onDistrictChange,
+    locationTypeName,
+    locationDropdownOptions,
+    selectedLocation,
+    onLocationChange,
     startMonth,
     endMonth,
     onStartMonthChange,
@@ -44,18 +46,20 @@ export default function OperationsHeader({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <Select
-                    value={selectedDistrict}
-                    onValueChange={onDistrictChange}
+                    value={selectedLocation}
+                    onValueChange={onLocationChange}
                 >
                     <SelectTrigger className="w-52">
-                        <SelectValue placeholder="Select a district" />
+                        <SelectValue
+                            placeholder={`Select a ${locationTypeName.toLowerCase()}`}
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>District</SelectLabel>
-                            {districts.map(district => (
-                                <SelectItem key={district} value={district}>
-                                    {district}
+                            <SelectLabel>{locationTypeName}</SelectLabel>
+                            {locationDropdownOptions.map(option => (
+                                <SelectItem key={option} value={option}>
+                                    {option}
                                 </SelectItem>
                             ))}
                         </SelectGroup>
@@ -73,7 +77,7 @@ export default function OperationsHeader({
 
                     <Button
                         variant="default"
-                        disabled={!selectedDistrict}
+                        disabled={!selectedLocation}
                         onClick={onExportClick}
                     >
                         <Download className="h-4 w-4" />

@@ -1,12 +1,12 @@
 import { getGeocode } from '@/api/geocode/get-geocode';
-import { geocodeQueryParamsSchema } from '@/api/geocode/validation/get-geocode-schema';
+import { getGeocodeQueryParamsSchema } from '@/api/geocode/validation/get-geocode-schema';
 import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
     const url = new URL(request.url);
 
-    const parsed = geocodeQueryParamsSchema.safeParse(
+    const parsed = getGeocodeQueryParamsSchema.safeParse(
         Object.fromEntries(url.searchParams.entries()),
     );
     if (!parsed.success) {

@@ -4,47 +4,55 @@ import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import type { LatLngBoundsExpression, LatLngExpression } from 'leaflet';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
-import { useVillageGeocode } from './hooks/use-village-geocode';
+import { useSiteGeocode } from './hooks/use-site-geocode';
 import MarkerLayer from './components/map/marker-layer';
 import MapNavigator from './components/map/map-navigator';
-import type { VillageMarker } from '@/features/operations/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
 
 const DEFAULT_CENTER: LatLngExpression = { lat: 1.5, lng: 32.5 };
 const DEFAULT_ZOOM = 7;
 
 interface SiteMapProps {
-    markers: VillageMarker[];
-    district: string;
+    markers: SiteMarker[];
+    selectedLocation: string;
 }
 
-export default function SiteMap({ markers, district }: SiteMapProps) {
-    const { positions, isGeocoding } = useVillageGeocode(markers);
+export default function SiteMap({ markers, selectedLocation }: SiteMapProps) {
+    const { markerIdsToGeocodedPosition, isGeocoding } =
+        useSiteGeocode(markers);
 
     const bounds = useMemo((): LatLngBoundsExpression | null => {
-        const coords = markers
-            .map(m => positions.get(m.id))
+        const geocodedCoordinates = markers
+            .map(marker => markerIdsToGeocodedPosition.get(marker.id))
             .filter(
-                (p): p is { latitude: number; longitude: number } => p != null,
+                (
+                    position,
+                ): position is { latitude: number; longitude: number } =>
+                    position != null,
             );
-        if (coords.length === 0) return null;
-        const lats = coords.map(p => p.latitude);
-        const lngs = coords.map(p => p.longitude);
+        if (geocodedCoordinates.length === 0) return null;
+        const latitudes = geocodedCoordinates.map(
+            position => position.latitude,
+        );
+        const longitudes = geocodedCoordinates.map(
+            position => position.longitude,
+        );
         return [
-            [Math.min(...lats), Math.min(...lngs)],
-            [Math.max(...lats), Math.max(...lngs)],
+            [Math.min(...latitudes), Math.min(...longitudes)],
+            [Math.max(...latitudes), Math.max(...longitudes)],
         ];
-    }, [markers, positions]);
+    }, [markers, markerIdsToGeocodedPosition]);
 
     return (
-        <>
+        <Fragment>
             {isGeocoding && (
                 <div className="absolute bottom-4 left-1/2 z-1000 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs shadow">
                     <Loader2 className="text-muted-foreground h-3 w-3 animate-spin" />
                     <span className="text-muted-foreground">
-                        Locating villages…
+                        Locating sites…
                     </span>
                 </div>
             )}
@@ -55,13 +63,19 @@ export default function SiteMap({ markers, district }: SiteMapProps) {
                 className="rounded-md"
                 scrollWheelZoom
             >
-                <MapNavigator bounds={bounds} district={district} />
+                <MapNavigator
+                    bounds={bounds}
+                    selectedLocation={selectedLocation}
+                />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <MarkerLayer markers={markers} positions={positions} />
+                <MarkerLayer
+                    markers={markers}
+                    markerIdsToGeocodedPosition={markerIdsToGeocodedPosition}
+                />
             </MapContainer>
-        </>
+        </Fragment>
     );
 }

@@ -1,7 +1,7 @@
-import type { GeocodeQueryParams } from './validation/get-geocode-schema';
+import type { GetGeocodeQueryParams } from './validation/get-geocode-schema';
 
 export const geocodeKeys = {
     root: ['geocode'] as const,
-    geocode: (queryParams: GeocodeQueryParams) =>
+    geocode: (queryParams: GetGeocodeQueryParams) =>
         ['geocode', queryParams] as const,
 };

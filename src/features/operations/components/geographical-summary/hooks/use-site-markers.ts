@@ -3,68 +3,69 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { useMemo } from 'react';
-import {
-    aggregateSpecimensByVillage,
-    buildVillageMarkers,
-    sessionStatsByVillage,
-} from '@/features/operations/utils/site-marker-data';
+import { buildSiteMarkers } from '@/features/operations/utils/site-marker-data';
+import type { LocationQueryParam } from '@/lib/location/location-query';
+import type { Site } from '@/api/site/validation/site-schema';
 
-export type { VillageMarker } from '@/features/operations/utils/site-marker-data';
-
-export function useSiteMarkers({
-    district,
-    startDate,
-    endDate,
-}: {
-    district: string;
+interface UseSiteMarkersParams {
+    locationQueryParam: LocationQueryParam;
+    descendantsOfSelectedLocation: Site[];
     startDate: string;
     endDate: string;
-}) {
-    const { data: sessionsResult, isPending: isSessionsPending } =
+}
+
+export function useSiteMarkers({
+    locationQueryParam,
+    descendantsOfSelectedLocation,
+    startDate,
+    endDate,
+}: UseSiteMarkersParams) {
+    const locationFilter =
+        'district' in locationQueryParam
+            ? { district: locationQueryParam.district }
+            : { siteId: locationQueryParam.siteId };
+
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            district,
             startDate,
             endDate,
             type: 'SURVEILLANCE',
+            ...locationFilter,
         });
 
-    const { data: specimensResult, isPending: isSpecimensPending } =
-        useGetSpecimensCount({
-            district,
-            startDate,
-            endDate,
-            sessionType: 'SURVEILLANCE',
-        });
+    const {
+        data: getSpecimensCountResult,
+        isPending: isGetSpecimensCountPending,
+    } = useGetSpecimensCount({
+        startDate,
+        endDate,
+        sessionType: 'SURVEILLANCE',
+        ...locationFilter,
+    });
 
-    const isPending = isSessionsPending || isSpecimensPending;
+    const isPending = isGetAllSessionsPending || isGetSpecimensCountPending;
 
     const markers = useMemo(() => {
-        if (!specimensResult?.ok) return [];
+        if (!getSpecimensCountResult?.ok || !getAllSessionsResult?.ok)
+            return [];
 
-        const { villageData, siteIdToVillage } = aggregateSpecimensByVillage(
-            specimensResult.data.data,
+        return buildSiteMarkers(
+            getSpecimensCountResult.data.data,
+            getAllSessionsResult.data.sessions,
+            descendantsOfSelectedLocation,
         );
-
-        const stats = sessionsResult?.ok
-            ? sessionStatsByVillage(
-                  sessionsResult.data.sessions,
-                  siteIdToVillage,
-              )
-            : new Map<
-                  string,
-                  { sessionCount: number; lastCollectionDate: number }
-              >();
-
-        return buildVillageMarkers(villageData, stats).filter(
-            marker => marker.sessionCount > 0,
-        );
-    }, [sessionsResult, specimensResult]);
+    }, [
+        getAllSessionsResult,
+        getSpecimensCountResult,
+        descendantsOfSelectedLocation,
+    ]);
 
     return {
         markers,
-        totalVillages: markers.length,
+        totalSites: markers.length,
         isPending,
-        isSpecimensPending,
-        sessionsFailed: !isPending && !sessionsResult?.ok,
+        isError:
+            !isPending &&
+            (!getAllSessionsResult?.ok || !getSpecimensCountResult?.ok),
     };
 }
