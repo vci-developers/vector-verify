@@ -15,12 +15,26 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
 import { useLocationSelection } from '../../hooks/use-location-selection';
+import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 
 const OPERATIONS_TABS = [
-    { value: 'sites', label: 'SITES' },
-    { value: 'geographical-summary', label: 'GEOGRAPHICAL SUMMARY' },
-    { value: 'species-composition', label: 'SPECIES COMPOSITION' },
-    { value: 'ai-performance', label: 'AI PERFORMANCE' },
+    { value: 'sites', label: 'SITES', shouldRender: () => true },
+    {
+        value: 'geographical-summary',
+        label: 'GEOGRAPHICAL SUMMARY',
+        shouldRender: () => true,
+    },
+    {
+        value: 'species-composition',
+        label: 'SPECIES COMPOSITION',
+        shouldRender: () => true,
+    },
+    {
+        value: 'ai-performance',
+        label: 'AI PERFORMANCE',
+        shouldRender: (permissions: UserPermissions) =>
+            permissions.annotations.viewAndWriteAnnotationTasks,
+    },
 ] as const;
 
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
@@ -41,11 +55,6 @@ export default function OperationsPageClient() {
     const accessibleSites = getUserPermissionsResult?.ok
         ? getUserPermissionsResult.data.permissions.sites.canAccessSites
         : [];
-
-    const canReadAndWriteAnnotationTasks = getUserPermissionsResult?.ok
-        ? getUserPermissionsResult.data.permissions.annotations
-              .viewAndWriteAnnotationTasks
-        : false;
 
     const {
         selectedLocation,
@@ -85,9 +94,9 @@ export default function OperationsPageClient() {
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const visibleTabs = canReadAndWriteAnnotationTasks
-        ? OPERATIONS_TABS
-        : OPERATIONS_TABS.filter(tab => tab.value !== 'ai-performance');
+    const visibleTabs = OPERATIONS_TABS.filter(tab =>
+        tab.shouldRender(getUserPermissionsResult.data.permissions),
+    );
 
     return (
         <PageShell
