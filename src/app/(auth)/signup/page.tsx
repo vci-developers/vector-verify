@@ -8,7 +8,7 @@ export default function SignupPage() {
         <AuthShell
             title="Create your account"
             description="Set up access to your VectorVerify workspace."
-            imageSrc="/assets/auth/images/signup.png"
+            imageSrc="/assets/auth/images/Signup.png"
         >
             <SignupForm />
             <Separator className="my-6" />
