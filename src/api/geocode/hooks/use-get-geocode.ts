@@ -1,7 +1,7 @@
 import { geocodeKeys } from '@/api/geocode/geocode-keys';
 import {
-    geocodeQueryParamsSchema,
-    type GeocodeQueryParams,
+    getGeocodeQueryParamsSchema,
+    type GetGeocodeQueryParams,
     type GetGeocodeSuccessPayload,
 } from '@/api/geocode/validation/get-geocode-schema';
 import { constructQueryString } from '@/lib/network/construct-query-string';
@@ -17,11 +17,11 @@ type GetGeocodeQueryOptions = Omit<
 >;
 
 export async function fetchGeocode(
-    queryParams: GeocodeQueryParams,
+    queryParams: GetGeocodeQueryParams,
 ): Promise<GetGeocodeQueryResult> {
     const queryString = constructQueryString(
         queryParams,
-        geocodeQueryParamsSchema,
+        getGeocodeQueryParamsSchema,
     );
 
     const response = await fetch(`/api/geocode${queryString}`, {
@@ -37,7 +37,7 @@ export async function fetchGeocode(
 }
 
 export function useGetGeocode(
-    queryParams: GeocodeQueryParams,
+    queryParams: GetGeocodeQueryParams,
     options?: GetGeocodeQueryOptions,
 ) {
     return useQuery({
