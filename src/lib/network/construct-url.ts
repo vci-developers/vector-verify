@@ -1,4 +1,4 @@
-const BASE_URL = 'https://test.api.vectorcam.org';
+const BASE_URL = process.env.API_BASE_URL ?? '';
 
 export function constructUrl(path: string): string {
     if (/^https?:\/\//i.test(path)) return path;

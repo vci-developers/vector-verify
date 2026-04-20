@@ -1,4 +1,4 @@
-import type { MonthlySpecimenCounts } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
+import type { GetMonthlySpecimensCountSuccessPayload } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import type { ChartConfig } from '@/components/ui/chart';
 import { format, parseISO } from 'date-fns';
@@ -43,7 +43,7 @@ const CHART_COLOR_FAMILY_BY_CLASSIFICATION_AXIS: Record<
 
 export function sumSpecimenCountsByClass(
     specimenClassificationAxis: SpecimenClassificationAxis,
-    monthlySpecimenCounts: MonthlySpecimenCounts,
+    monthlySpecimenCounts: GetMonthlySpecimensCountSuccessPayload['data'],
 ): { specimenClass: string; specimenCount: number }[] {
     const specimenCountsByClass: Record<string, number> = {};
     for (const monthlySpecimenCount of monthlySpecimenCounts) {
@@ -64,7 +64,7 @@ export function sumSpecimenCountsByClass(
 
 export function groupSpecimenCountsByMonth(
     specimenClassificationAxis: SpecimenClassificationAxis,
-    monthlySpecimenCounts: MonthlySpecimenCounts,
+    monthlySpecimenCounts: GetMonthlySpecimensCountSuccessPayload['data'],
 ): Record<string, string | number>[] {
     const allSpecimenClasses = [
         ...new Set(

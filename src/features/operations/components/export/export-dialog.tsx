@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import {
     networkErrorMessage,
@@ -26,7 +27,8 @@ interface ExportDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     programId: number;
-    district: string;
+    locationQueryParam: LocationQueryParam;
+    locationName: string;
     startDate?: string;
     endDate?: string;
 }
@@ -35,7 +37,8 @@ export default function ExportDialog({
     open,
     onOpenChange,
     programId,
-    district,
+    locationQueryParam,
+    locationName,
     startDate,
     endDate,
 }: ExportDialogProps) {
@@ -52,6 +55,11 @@ export default function ExportDialog({
         setError(null);
 
         try {
+            const locationFilter =
+                'district' in locationQueryParam
+                    ? { districts: [locationQueryParam.district] }
+                    : { siteIds: [locationQueryParam.siteId] };
+
             const queryString =
                 constructQueryString<GetSessionsReportQueryParams>(
                     {
@@ -59,7 +67,7 @@ export default function ExportDialog({
                         endDate,
                         sessionType: 'SURVEILLANCE',
                         programId: programId,
-                        districts: [district],
+                        ...locationFilter,
                     },
                     getSessionsReportQueryParamsSchema,
                 );
@@ -89,7 +97,7 @@ export default function ExportDialog({
 
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = `${district}-report-${startDate}-to-${endDate}.xlsx`;
+            anchor.download = `${locationName}-report-${startDate}-to-${endDate}.xlsx`;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
@@ -111,7 +119,7 @@ export default function ExportDialog({
                     <DialogDescription>
                         This will download session data for{' '}
                         <span className="text-foreground font-medium">
-                            {district}
+                            {locationName}
                         </span>{' '}
                         from{' '}
                         <span className="text-foreground font-medium">

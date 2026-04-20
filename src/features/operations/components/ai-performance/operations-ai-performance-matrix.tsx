@@ -16,9 +16,10 @@ import {
     buildSpeciesMatrixViewModel,
     type SpeciesMatrixViewModel,
 } from '@/features/operations/utils/build-species-matrix-view-model';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 
 interface OperationsAiPerformanceMatrixProps {
-    district: string;
+    locationQueryParam: LocationQueryParam;
     startDate: string;
     endDate: string;
 }
@@ -186,7 +187,7 @@ function MatrixCard({
                         <p className="text-muted-foreground text-sm leading-6">
                             The confusion matrix compares expert-validated
                             mosquito species against the AI prediction for the
-                            selected district. Each cell shows the specimen
+                            selected location. Each cell shows the specimen
                             count and that cell&apos;s share of the true-species
                             row.
                         </p>
@@ -240,7 +241,7 @@ function MatrixEmptyState() {
             </CardHeader>
             <CardContent>
                 <div className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
-                    No species confusion matrix is available for this district
+                    No species confusion matrix is available for this location
                     and date range.
                 </div>
             </CardContent>
@@ -249,7 +250,7 @@ function MatrixEmptyState() {
 }
 
 export default function OperationsAiPerformanceMatrix({
-    district,
+    locationQueryParam,
     startDate,
     endDate,
 }: OperationsAiPerformanceMatrixProps) {
@@ -258,7 +259,7 @@ export default function OperationsAiPerformanceMatrix({
         isPending: isGetAnnotationsSummaryPending,
         isError: isGetAnnotationsSummaryError,
     } = useGetAnnotationsSummary({
-        district,
+        ...locationQueryParam,
         startDate,
         endDate,
     });

@@ -5,13 +5,21 @@ import {
     sessionTypeSchema,
 } from '@/api/session/validation/session-schema';
 
-export const getAllSessionsQueryParamsSchema = z.object({
-    district: z.string(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    state: sessionStateSchema.optional(),
-    type: sessionTypeSchema.optional(),
-});
+export const getAllSessionsQueryParamsSchema = z
+    .object({
+        district: z.string().optional(),
+        siteId: z.coerce.number().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        state: sessionStateSchema.optional(),
+        type: sessionTypeSchema.optional(),
+    })
+    .refine(
+        queryParams =>
+            queryParams.district !== undefined ||
+            queryParams.siteId !== undefined,
+        { message: 'Either district or siteId must be provided' },
+    );
 
 export const getAllSessionsResponseSchema = z.object({
     message: z.string(),

@@ -1,9 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
+import type { LocationQueryParam } from '@/lib/location/location-query';
 
 interface OperationsAiPerformanceProps {
-    district: string;
+    locationQueryParam: LocationQueryParam;
     startDate: string;
     endDate: string;
 }
@@ -32,7 +33,7 @@ const SUMMARY_CARDS = [
 ] as const;
 
 export default function OperationsAiPerformance({
-    district,
+    locationQueryParam,
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
@@ -64,7 +65,7 @@ export default function OperationsAiPerformance({
                 ))}
 
                 <OperationsAiPerformanceMatrix
-                    district={district}
+                    locationQueryParam={locationQueryParam}
                     startDate={startDate}
                     endDate={endDate}
                 />
