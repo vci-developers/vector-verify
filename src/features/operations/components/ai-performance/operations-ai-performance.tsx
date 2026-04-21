@@ -136,12 +136,6 @@ export default function OperationsAiPerformance({
             description: `${annotatedSpecimenCount.toLocaleString()} annotated and ${flaggedSpecimenCount.toLocaleString()} flagged`,
             accentClassName: 'border-border bg-card',
         },
-        {
-            label: 'Flagged Specimens',
-            value: flaggedSpecimenCount.toLocaleString(),
-            description: 'Reviewed specimens that still need follow-up',
-            accentClassName: 'border-warning/40 bg-warning/10',
-        },
     ] as const;
 
     return (
@@ -155,7 +149,7 @@ export default function OperationsAiPerformance({
                 </span>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-4">
+            <div className="grid gap-3 lg:grid-cols-3">
                 {summaryCards.map(summaryCard => (
                     <AiPerformanceSummaryCard
                         key={summaryCard.label}

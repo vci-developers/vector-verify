@@ -8,7 +8,7 @@ export default function SpeciesConfusionMatrixStateCard({
     message,
 }: SpeciesConfusionMatrixStateCardProps) {
     return (
-        <Card className="gap-0 lg:col-span-4">
+        <Card className="gap-0 lg:col-span-3">
             <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Confusion Matrix</CardTitle>
             </CardHeader>

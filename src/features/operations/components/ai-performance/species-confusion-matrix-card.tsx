@@ -13,7 +13,7 @@ export default function SpeciesConfusionMatrixCard({
     selectedLocationName,
 }: SpeciesConfusionMatrixCardProps) {
     return (
-        <Card className="gap-0 lg:col-span-4">
+        <Card className="gap-0 lg:col-span-3">
             <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Confusion Matrix</CardTitle>
             </CardHeader>
@@ -22,12 +22,12 @@ export default function SpeciesConfusionMatrixCard({
                     speciesConfusionMatrix={speciesConfusionMatrix}
                 />
 
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="grid items-stretch gap-4 lg:grid-cols-[500px_minmax(0,1fr)]">
                     <SpeciesConfusionMatrixMetrics
                         speciesConfusionMatrix={speciesConfusionMatrix}
                     />
 
-                    <div className="space-y-3 rounded-xl border p-4">
+                    <div className="h-full space-y-3 rounded-xl border p-4">
                         <h3 className="text-sm font-semibold">
                             Interpretation
                         </h3>
@@ -42,11 +42,19 @@ export default function SpeciesConfusionMatrixCard({
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
                             Each cell shows the specimen count and that
-                            cell&apos;s share of the ground-truth row.
-                            Sensitivity shows how often the AI correctly
-                            recovers a class. Specificity shows how often the AI
-                            correctly rejects other classes when that class is
-                            not present.
+                            cell&apos;s share of the ground-truth row. Each
+                            per-class metric is computed as a one-vs-rest
+                            comparison for that species label.
+                        </p>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            Sensitivity = TP / (TP + FN). It measures how often
+                            the AI correctly identifies specimens that truly
+                            belong to that class.
+                        </p>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            Specificity = TN / (TN + FP). It measures how often
+                            the AI correctly avoids assigning that class when
+                            the specimen truly belongs to some other class.
                         </p>
                     </div>
                 </div>
