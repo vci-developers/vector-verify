@@ -27,7 +27,7 @@ const specimensCountSchema = z.object({
 
 const specimensCountDataSchema = z.object({
     siteId: z.number().optional(),
-    siteInfo: siteSchema.nullable().optional(),
+    siteInfo: siteSchema.optional(),
     counts: z.array(specimensCountSchema),
     totalSpecimens: z.number(),
 });

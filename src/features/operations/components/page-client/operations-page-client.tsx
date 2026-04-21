@@ -149,6 +149,7 @@ export default function OperationsPageClient() {
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
                                     locationQueryParam={locationQueryParam}
+                                    selectedLocationName={selectedLocation}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

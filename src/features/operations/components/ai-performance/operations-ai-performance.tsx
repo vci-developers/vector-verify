@@ -1,48 +1,81 @@
 'use client';
 
 import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
-import { useGetAnnotationTasks } from '@/api/annotation-task/hooks/use-get-annotation-tasks';
+import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
+import type { GetSpecimensCountQueryParams } from '@/api/specimen/validation/get-specimens-count-schema';
 import { Card, CardContent } from '@/components/ui/card';
 import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
-import { format } from 'date-fns';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
 
 interface OperationsAiPerformanceProps {
     locationQueryParam: LocationQueryParam;
+    selectedLocationName: string;
     startDate: string;
     endDate: string;
 }
 
+interface AiPerformanceSummaryCardProps {
+    accentClassName?: string;
+    label: string;
+    value: string;
+    description: string;
+}
+
+function AiPerformanceSummaryCard({
+    accentClassName,
+    label,
+    value,
+    description,
+}: AiPerformanceSummaryCardProps) {
+    return (
+        <Card className={`gap-0 py-0 ${accentClassName ?? ''}`}>
+            <CardContent className="p-4">
+                <p className="text-muted-foreground text-sm">{label}</p>
+                <p className="mt-1 text-4xl font-semibold tracking-tight">
+                    {value}
+                </p>
+                <p className="text-muted-foreground mt-2 text-xs">
+                    {description}
+                </p>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function OperationsAiPerformance({
     locationQueryParam,
+    selectedLocationName,
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
+    const locationFilterQueryParams =
+        'district' in locationQueryParam
+            ? { district: locationQueryParam.district }
+            : { siteId: locationQueryParam.siteId };
+
+    const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
+        ...locationFilterQueryParams,
+        startDate,
+        endDate,
+    };
+
+    const specimensCountQueryParams: GetSpecimensCountQueryParams = {
+        ...locationFilterQueryParams,
+        startDate,
+        endDate,
+    };
+
     const {
         data: getAnnotationsSummaryResult,
         isPending: isGetAnnotationsSummaryPending,
-    } = useGetAnnotationsSummary({
-        ...locationQueryParam,
-        startDate,
-        endDate,
-    });
+    } = useGetAnnotationsSummary(annotationsSummaryQueryParams);
 
     const {
         data: getSpecimensCountResult,
         isPending: isGetSpecimensCountPending,
-    } = useGetSpecimensCount({
-        ...locationQueryParam,
-        startDate,
-        endDate,
-    });
-
-    const { data: getAnnotationTasksResult } = useGetAnnotationTasks({
-        startDate,
-        endDate,
-        limit: 100,
-    });
+    } = useGetSpecimensCount(specimensCountQueryParams);
 
     if (
         isGetAnnotationsSummaryPending ||
@@ -71,86 +104,71 @@ export default function OperationsAiPerformance({
         );
     }
 
-    const validatedSpecimens =
+    const annotatedSpecimenCount =
         getAnnotationsSummaryResult.data.statusCounts.ANNOTATED;
+    const flaggedSpecimenCount =
+        getAnnotationsSummaryResult.data.statusCounts.FLAGGED;
+    const reviewedSpecimenCount = annotatedSpecimenCount + flaggedSpecimenCount;
 
-    const totalSpecimens = getSpecimensCountResult.data.data.reduce(
-        (sum, datum) => sum + datum.totalSpecimens,
+    const totalSpecimenCount = getSpecimensCountResult.data.data.reduce(
+        (sum, siteSpecimenCounts) => sum + siteSpecimenCounts.totalSpecimens,
         0,
     );
 
-    const coveragePercent =
-        totalSpecimens > 0
-            ? ((validatedSpecimens / totalSpecimens) * 100).toFixed(1)
+    const specimenCoveragePercentage =
+        totalSpecimenCount > 0
+            ? (reviewedSpecimenCount / totalSpecimenCount) * 100
             : null;
-
-    const lastUpdateTimestamp =
-        validatedSpecimens > 0 && getAnnotationTasksResult?.ok
-            ? getAnnotationTasksResult.data.tasks
-                  .filter(task => (task.annotationCounts?.annotated ?? 0) > 0)
-                  .reduce<
-                      number | null
-                  >((maxTimestamp, task) => (maxTimestamp === null || task.updatedAt > maxTimestamp ? task.updatedAt : maxTimestamp), null)
-            : null;
-
-    const lastUpdateFormatted = lastUpdateTimestamp
-        ? format(new Date(lastUpdateTimestamp), 'yyyy-MM-dd HH:mm')
-        : null;
 
     const summaryCards = [
         {
             label: 'Coverage',
-            value: coveragePercent !== null ? `${coveragePercent}%` : '—',
-            description: `${validatedSpecimens.toLocaleString()} annotated / ${totalSpecimens.toLocaleString()} total specimens`,
-            className:
-                'border-emerald-400/80 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.12)]',
+            value:
+                specimenCoveragePercentage !== null
+                    ? `${specimenCoveragePercentage.toFixed(1)}%`
+                    : '—',
+            description: `${reviewedSpecimenCount.toLocaleString()} reviewed / ${totalSpecimenCount.toLocaleString()} total specimens`,
+            accentClassName: 'border-success/40 bg-success/5',
         },
         {
-            label: 'Validated Specimens',
-            value: validatedSpecimens.toLocaleString(),
-            description: 'expert-validated specimens',
-            className:
-                'border-emerald-400/80 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.12)]',
+            label: 'Reviewed Specimens',
+            value: reviewedSpecimenCount.toLocaleString(),
+            description: `${annotatedSpecimenCount.toLocaleString()} annotated and ${flaggedSpecimenCount.toLocaleString()} flagged`,
+            accentClassName: 'border-border bg-card',
         },
         {
-            label: 'Last Update',
-            value: lastUpdateFormatted ?? '—',
-            description: 'latest master VCO annotation',
-            className: 'border-border',
+            label: 'Flagged Specimens',
+            value: flaggedSpecimenCount.toLocaleString(),
+            description: 'Reviewed specimens that still need follow-up',
+            accentClassName: 'border-warning/40 bg-warning/10',
         },
     ] as const;
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center gap-2 rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-700">
+            <div className="border-accent bg-accent/40 text-accent-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-sm">
                 <Info className="h-4 w-4" />
-                <span>Metrics reflect only expert-validated specimens</span>
+                <span>
+                    Coverage reflects reviewed specimens for
+                    {` ${selectedLocationName} `}
+                    where review means annotated or flagged.
+                </span>
             </div>
 
             <div className="grid gap-3 lg:grid-cols-4">
-                {summaryCards.map(card => (
-                    <Card
-                        key={card.label}
-                        className={`gap-0 py-0 ${card.className}`}
-                    >
-                        <CardContent className="p-4">
-                            <p className="text-muted-foreground text-sm">
-                                {card.label}
-                            </p>
-                            <p className="mt-1 text-4xl font-semibold tracking-tight">
-                                {card.value}
-                            </p>
-                            <p className="text-muted-foreground mt-2 text-xs">
-                                {card.description}
-                            </p>
-                        </CardContent>
-                    </Card>
+                {summaryCards.map(summaryCard => (
+                    <AiPerformanceSummaryCard
+                        key={summaryCard.label}
+                        accentClassName={summaryCard.accentClassName}
+                        label={summaryCard.label}
+                        value={summaryCard.value}
+                        description={summaryCard.description}
+                    />
                 ))}
 
                 <OperationsAiPerformanceMatrix
-                    locationQueryParam={locationQueryParam}
-                    startDate={startDate}
-                    endDate={endDate}
+                    annotationsSummary={getAnnotationsSummaryResult.data}
+                    selectedLocationName={selectedLocationName}
                 />
             </div>
         </div>

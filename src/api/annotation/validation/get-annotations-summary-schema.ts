@@ -7,7 +7,7 @@ export const getAnnotationsSummaryQueryParamsSchema = z.object({
     endDate: z.string().optional(),
 });
 
-export const annotationConfusionMatrixSchema = z.object({
+const annotationConfusionMatrixSchema = z.object({
     columns: z.array(z.string()),
     data: z.array(
         z.object({
@@ -19,13 +19,11 @@ export const annotationConfusionMatrixSchema = z.object({
 
 export const getAnnotationsSummaryResponseSchema = z.object({
     total: z.number(),
-    statusCounts: z
-        .object({
-            PENDING: z.number().default(0),
-            ANNOTATED: z.number().default(0),
-            FLAGGED: z.number().default(0),
-        })
-        .default({ PENDING: 0, ANNOTATED: 0, FLAGGED: 0 }),
+    statusCounts: z.object({
+        PENDING: z.number(),
+        ANNOTATED: z.number(),
+        FLAGGED: z.number(),
+    }),
     confusionMatrices: z
         .object({
             species: annotationConfusionMatrixSchema.optional(),

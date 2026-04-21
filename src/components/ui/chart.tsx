@@ -2,15 +2,15 @@
 
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
+import type {
+    NameType,
+    ValueType,
+} from 'recharts/types/component/DefaultTooltipContent';
 
 import { cn } from '@/utils/cn';
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: '', dark: '.dark' } as const;
-
-const INITIAL_DIMENSION = { width: 320, height: 200 } as const;
-type TooltipValueType = number | string | Array<number | string>;
-type TooltipNameType = number | string;
 
 export type ChartConfig = Record<
     string,
@@ -44,17 +44,12 @@ function ChartContainer({
     className,
     children,
     config,
-    initialDimension = INITIAL_DIMENSION,
     ...props
 }: React.ComponentProps<'div'> & {
     config: ChartConfig;
     children: React.ComponentProps<
         typeof RechartsPrimitive.ResponsiveContainer
     >['children'];
-    initialDimension?: {
-        width: number;
-        height: number;
-    };
 }) {
     const uniqueId = React.useId();
     const chartId = `chart-${id ?? uniqueId.replace(/:/g, '')}`;
@@ -71,9 +66,7 @@ function ChartContainer({
                 {...props}
             >
                 <ChartStyle id={chartId} config={config} />
-                <RechartsPrimitive.ResponsiveContainer
-                    initialDimension={initialDimension}
-                >
+                <RechartsPrimitive.ResponsiveContainer>
                     {children}
                 </RechartsPrimitive.ResponsiveContainer>
             </div>
@@ -138,10 +131,7 @@ function ChartTooltipContent({
         nameKey?: string;
         labelKey?: string;
     } & Omit<
-        RechartsPrimitive.DefaultTooltipContentProps<
-            TooltipValueType,
-            TooltipNameType
-        >,
+        RechartsPrimitive.DefaultTooltipContentProps<ValueType, NameType>,
         'accessibilityLayer'
     >) {
     const { config } = useChart();
