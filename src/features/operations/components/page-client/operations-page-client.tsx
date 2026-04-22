@@ -6,7 +6,6 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
-import OperationsSiteList from '@/features/operations/components/site-list/operations-site-list';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
@@ -14,11 +13,10 @@ import OperationsGeographicalSummary from '@/features/operations/components/geog
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
-import { useLocationSelection } from '../../hooks/use-location-selection';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
+import { useLocationSelection } from '@/lib/location/use-location-selection';
 
 const OPERATIONS_TABS = [
-    { value: 'sites', label: 'SITES', shouldRender: () => true },
     {
         value: 'geographical-summary',
         label: 'GEOGRAPHICAL SUMMARY',
@@ -40,7 +38,9 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [activeTab, setActiveTab] = useState<OperationsTab>('sites');
+    const [activeTab, setActiveTab] = useState<OperationsTab>(
+        'geographical-summary',
+    );
     const [startMonth, setStartMonth] = useState(() =>
         startOfMonth(subMonths(new Date(), 2)),
     );
@@ -135,15 +135,6 @@ export default function OperationsPageClient() {
                         </div>
                     ) : (
                         <Fragment>
-                            {activeTab === 'sites' && (
-                                <OperationsSiteList
-                                    sites={descendantsOfSelectedLocation}
-                                    locationQueryParam={locationQueryParam}
-                                    startMonth={startMonth}
-                                    endMonth={endMonth}
-                                />
-                            )}
-
                             {activeTab === 'species-composition' && (
                                 <OperationsSpeciesComposition
                                     locationQueryParam={locationQueryParam}

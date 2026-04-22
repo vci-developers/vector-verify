@@ -5,9 +5,9 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
-import { CompletenessBox } from './completeness-box';
+import ReviewVisitCoverageBadge from './review-visit-coverage-badge';
 
-function getCompletenessBackgroundColor(
+function getVisitCoverageBackgroundColor(
     percentage: number,
     highThreshold = 80,
     mediumThreshold = 50,
@@ -18,7 +18,7 @@ function getCompletenessBackgroundColor(
     return 'bg-destructive/10 hover:bg-destructive/20';
 }
 
-interface CollapsibleLocationGroupProps {
+interface ReviewCollapsibleLocationGroupProps {
     locationName: string;
     locationTypeName: string;
     sitesInGroup: Site[];
@@ -32,7 +32,7 @@ interface CollapsibleLocationGroupProps {
     children: React.ReactNode;
 }
 
-export default function CollapsibleLocationGroup({
+export default function ReviewCollapsibleLocationGroup({
     locationName,
     locationTypeName,
     sitesInGroup,
@@ -41,17 +41,19 @@ export default function CollapsibleLocationGroup({
     expandedSitePaths,
     onToggle,
     children,
-}: CollapsibleLocationGroupProps) {
+}: ReviewCollapsibleLocationGroupProps) {
     const path = `${parentPath}/${locationName}`;
     const isExpanded = expandedSitePaths.has(path);
 
     const visitedCount = sitesInGroup.filter(
         site => (sessionCountsBySiteId.get(site.siteId)?.sessionCount ?? 0) > 0,
     ).length;
+
     const visitedPercentage =
         sitesInGroup.length > 0
             ? Math.round((visitedCount / sitesInGroup.length) * 100)
             : 0;
+
     const needsReviewTotal = sitesInGroup.reduce(
         (sum, site) =>
             sum +
@@ -63,7 +65,7 @@ export default function CollapsibleLocationGroup({
         <Collapsible open={isExpanded} onOpenChange={() => onToggle(path)}>
             <CollapsibleTrigger className="w-full">
                 <div
-                    className={`group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 transition-all ${getCompletenessBackgroundColor(visitedPercentage)}`}
+                    className={`group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 transition-all ${getVisitCoverageBackgroundColor(visitedPercentage)}`}
                 >
                     <div className="flex items-center gap-2.5">
                         <ChevronRight
@@ -80,19 +82,25 @@ export default function CollapsibleLocationGroup({
                             </span>
                         </div>
                     </div>
+
                     <div className="flex items-center gap-3">
                         {needsReviewTotal > 0 && (
                             <span className="text-destructive text-xs tabular-nums">
                                 {`${needsReviewTotal} ${needsReviewTotal === 1 ? 'needs' : 'need'} review`}
                             </span>
                         )}
+
                         <span className="text-muted-foreground text-xs tabular-nums">
                             {visitedCount} of {sitesInGroup.length} visited
                         </span>
-                        <CompletenessBox percentage={visitedPercentage} />
+
+                        <ReviewVisitCoverageBadge
+                            visitedPercentage={visitedPercentage}
+                        />
                     </div>
                 </div>
             </CollapsibleTrigger>
+
             <CollapsibleContent>
                 <div className="border-border/60 ml-4.5 border-l pl-4">
                     {children}

@@ -2,7 +2,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { MapPin } from 'lucide-react';
 
-interface SiteLeafRowsProps {
+interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     sessionCountsBySiteId: Map<
@@ -11,11 +11,11 @@ interface SiteLeafRowsProps {
     >;
 }
 
-export default function SiteLeafRows({
+export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     sessionCountsBySiteId,
-}: SiteLeafRowsProps) {
+}: ReviewSiteLeafRowsProps) {
     return (
         <div className="space-y-1">
             {sites.map(site => {
