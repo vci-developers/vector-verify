@@ -7,8 +7,8 @@ import {
     getSiteAndDescendants,
 } from '@/lib/location/site-tree';
 import { useMemo } from 'react';
-import SiteLeafRows from './operations-site-leaf-rows';
-import CollapsibleLocationGroup from './collapsible-location-group';
+import ReviewSiteLeafRows from './review-site-leaf-rows';
+import ReviewCollapsibleLocationGroup from './review-collapsible-location-group';
 
 const LEGACY_HIERARCHY_LEVELS = [
     { key: 'subCounty', label: 'Subcounty' },
@@ -57,7 +57,7 @@ function LegacySiteHierarchy({
 
     if (isLeafLevel) {
         return (
-            <SiteLeafRows
+            <ReviewSiteLeafRows
                 sites={sites}
                 getDisplayName={site => site[currentLevel.key] ?? 'Unknown'}
                 sessionCountsBySiteId={sessionCountsBySiteId}
@@ -68,7 +68,7 @@ function LegacySiteHierarchy({
     return (
         <div className="space-y-1">
             {sortedLocationGroups.map(([locationName, sitesInGroup]) => (
-                <CollapsibleLocationGroup
+                <ReviewCollapsibleLocationGroup
                     key={`${parentPath}/${locationName}`}
                     locationName={locationName}
                     locationTypeName={currentLevel.label}
@@ -86,7 +86,7 @@ function LegacySiteHierarchy({
                         expandedSitePaths={expandedSitePaths}
                         onToggle={onToggle}
                     />
-                </CollapsibleLocationGroup>
+                </ReviewCollapsibleLocationGroup>
             ))}
         </div>
     );
@@ -128,7 +128,7 @@ function HierarchicalSiteHierarchy({
 
     if (isLeafLevel) {
         return (
-            <SiteLeafRows
+            <ReviewSiteLeafRows
                 sites={childSites}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 sessionCountsBySiteId={sessionCountsBySiteId}
@@ -154,7 +154,7 @@ function HierarchicalSiteHierarchy({
                 );
 
                 return (
-                    <CollapsibleLocationGroup
+                    <ReviewCollapsibleLocationGroup
                         key={`${parentPath}/${site.name}`}
                         locationName={site.name ?? 'Unknown'}
                         locationTypeName={locationTypeName}
@@ -172,14 +172,14 @@ function HierarchicalSiteHierarchy({
                             expandedSitePaths={expandedSitePaths}
                             onToggle={onToggle}
                         />
-                    </CollapsibleLocationGroup>
+                    </ReviewCollapsibleLocationGroup>
                 );
             })}
         </div>
     );
 }
 
-interface SiteHierarchyProps {
+interface ReviewSiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
@@ -191,14 +191,14 @@ interface SiteHierarchyProps {
     onToggle: (path: string) => void;
 }
 
-export default function OperationsSiteHierarchy({
+export default function ReviewSiteHierarchy({
     sites,
     depth,
     parentPath,
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
-}: SiteHierarchyProps) {
+}: ReviewSiteHierarchyProps) {
     if (sites.length === 0) return null;
 
     return isLegacySite(sites[0]!) ? (
