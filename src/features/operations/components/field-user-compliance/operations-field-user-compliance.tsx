@@ -25,19 +25,16 @@ export default function OperationsFieldUserCompliance({
         endDate,
     });
 
-    const months = useMemo(
-        () =>
-            eachMonthOfInterval({
-                start: parseISO(startDate),
-                end: parseISO(endDate),
-            }),
-        [startDate, endDate],
-    );
-
-    const monthKeys = useMemo(
-        () => months.map(m => format(m, 'yyyy-MM')),
-        [months],
-    );
+    const { months, monthKeys } = useMemo(() => {
+        const months = eachMonthOfInterval({
+            start: parseISO(startDate),
+            end: parseISO(endDate),
+        });
+        return {
+            months,
+            monthKeys: months.map(month => format(month, 'yyyy-MM')),
+        };
+    }, [startDate, endDate]);
 
     if (isPending || !getAllSessionsResult) {
         return (
