@@ -6,6 +6,9 @@ import {
     buildCollectorKey,
     type CollectorRow,
 } from '@/features/operations/utils/field-user-compliance-data';
+import { format } from 'date-fns';
+import StatBadge from '@/components/ui/stat-badge';
+import ComplianceCollectorTableRow from '@/features/operations/components/field-user-compliance/compliance-collector-table-row';
 
 function buildChartPillColor(index: number, total: number): string {
     const startHue = 133;
@@ -16,9 +19,6 @@ function buildChartPillColor(index: number, total: number): string {
             : startHue + ((endHue - startHue) * index) / (total - 1);
     return `hsl(${hue}, 55%, 45%)`;
 }
-import { format } from 'date-fns';
-import StatBadge from '@/components/ui/stat-badge';
-import ComplianceCollectorTableRow from '@/features/operations/components/field-user-compliance/compliance-collector-table-row';
 
 interface FieldUserComplianceChartProps {
     months: Date[];
@@ -59,18 +59,18 @@ export default function FieldUserComplianceChart({
                         No submissions found for this location and date range.
                     </p>
                 ) : (
-                    <ScrollArea className="w-full">
+                    <ScrollArea className="h-[45vh] w-full">
                         <div className="min-w-max">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="text-muted-foreground bg-card sticky left-0 z-10 w-px px-4 py-3 text-left text-xs font-medium whitespace-nowrap">
+                                        <th className="text-muted-foreground bg-card sticky top-0 left-0 z-20 w-px px-4 py-3 text-left text-xs font-medium whitespace-nowrap">
                                             Collector
                                         </th>
                                         {months.map(month => (
                                             <th
                                                 key={format(month, 'yyyy-MM')}
-                                                className="text-muted-foreground min-w-20 px-1 py-2 text-center text-xs font-medium whitespace-nowrap"
+                                                className="text-muted-foreground bg-card sticky top-0 z-10 min-w-20 px-1 py-2 text-center text-xs font-medium whitespace-nowrap"
                                             >
                                                 {format(month, 'MMM yy')}
                                             </th>
@@ -96,6 +96,7 @@ export default function FieldUserComplianceChart({
                             </table>
                         </div>
                         <ScrollBar orientation="horizontal" />
+                        <ScrollBar orientation="vertical" />
                     </ScrollArea>
                 )}
             </CardContent>
