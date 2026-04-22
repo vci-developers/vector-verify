@@ -1,7 +1,6 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
 import { userKeys } from '@/api/user/user-keys';
-import ReviewSitesListPageClient from '@/features/review/components/sites-list/page-client/review-sites-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -9,6 +8,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
+import ReviewPageClient from '@/features/review/components/page-client/review-page-client';
 
 export default async function ReviewSiteListPage() {
     const queryClient = new QueryClient();
@@ -37,7 +37,7 @@ export default async function ReviewSiteListPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewSitesListPageClient />
+            <ReviewPageClient />
         </HydrationBoundary>
     );
 }
