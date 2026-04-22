@@ -38,7 +38,9 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [activeTab, setActiveTab] = useState<OperationsTab>('geographical-summary');
+    const [activeTab, setActiveTab] = useState<OperationsTab>(
+        'geographical-summary',
+    );
     const [startMonth, setStartMonth] = useState(() =>
         startOfMonth(subMonths(new Date(), 2)),
     );
