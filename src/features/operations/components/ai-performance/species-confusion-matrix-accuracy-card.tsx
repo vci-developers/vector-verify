@@ -3,7 +3,7 @@ import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/bui
 import {
     formatMatrixPercentage,
     integerCountFormatter,
-} from './species-confusion-matrix-helpers';
+} from '@/features/operations/utils/species-confusion-matrix-helpers';
 
 interface SpeciesConfusionMatrixAccuracyCardProps {
     speciesConfusionMatrix: SpeciesConfusionMatrixData | null;

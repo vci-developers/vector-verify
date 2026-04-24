@@ -7,12 +7,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/build-species-confusion-matrix';
-import { cn } from '@/utils/cn';
 import {
     formatMatrixPercentage,
     getMatrixCellPresentation,
     integerCountFormatter,
-} from './species-confusion-matrix-helpers';
+} from '@/features/operations/utils/species-confusion-matrix-helpers';
+import { cn } from '@/utils/cn';
 
 interface SpeciesConfusionMatrixTableProps {
     speciesConfusionMatrix: SpeciesConfusionMatrixData;
@@ -34,12 +34,12 @@ export default function SpeciesConfusionMatrixTable({
                                     .length
                             }
                         >
-                            AI Prediction
+                            VectorCam Species Label
                         </TableHead>
                     </TableRow>
                     <TableRow className="hover:bg-transparent">
                         <TableHead className="bg-muted/20 border text-center text-sm font-semibold">
-                            Ground Truth
+                            Visual Verification Species Label
                         </TableHead>
                         {speciesConfusionMatrix.predictedSpeciesLabels.map(
                             predictedSpeciesLabel => (

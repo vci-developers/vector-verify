@@ -4,7 +4,7 @@ import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotat
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import type { GetSpecimensCountQueryParams } from '@/api/specimen/validation/get-specimens-count-schema';
-import { Card, CardContent } from '@/components/ui/card';
+import AiPerformanceSummaryCard from '@/features/operations/components/ai-performance/ai-performance-summary-card';
 import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
@@ -14,34 +14,6 @@ interface OperationsAiPerformanceProps {
     selectedLocationName: string;
     startDate: string;
     endDate: string;
-}
-
-interface AiPerformanceSummaryCardProps {
-    accentClassName?: string;
-    label: string;
-    value: string;
-    description: string;
-}
-
-function AiPerformanceSummaryCard({
-    accentClassName,
-    label,
-    value,
-    description,
-}: AiPerformanceSummaryCardProps) {
-    return (
-        <Card className={`gap-0 py-0 ${accentClassName ?? ''}`}>
-            <CardContent className="p-4">
-                <p className="text-muted-foreground text-sm">{label}</p>
-                <p className="mt-1 text-4xl font-semibold tracking-tight">
-                    {value}
-                </p>
-                <p className="text-muted-foreground mt-2 text-xs">
-                    {description}
-                </p>
-            </CardContent>
-        </Card>
-    );
 }
 
 export default function OperationsAiPerformance({
