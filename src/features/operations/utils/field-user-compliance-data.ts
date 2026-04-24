@@ -13,16 +13,9 @@ export interface FieldUserComplianceData {
     collectorRows: CollectorRow[];
 }
 
-export function buildCollectorKey(
-    collectorTitle: string,
-    collectorName: string,
-): string {
-    return `${collectorTitle}/${collectorName}`;
-}
-
 export function buildFieldUserComplianceData(
     sessions: Session[],
-    monthKeys: string[],
+    monthYearKeys: string[],
 ): FieldUserComplianceData {
     const now = new Date();
     const previousMonth = subMonths(now, 1);
@@ -38,22 +31,19 @@ export function buildFieldUserComplianceData(
     >();
 
     for (const session of sessions) {
-        const key = buildCollectorKey(
-            session.collectorTitle,
-            session.collectorName,
-        );
-        if (!collectorMap.has(key)) {
-            collectorMap.set(key, {
+        const collectorKey = `${session.collectorName}/${session.collectorTitle}`;
+        if (!collectorMap.has(collectorKey)) {
+            collectorMap.set(collectorKey, {
                 collectorTitle: session.collectorTitle,
                 collectorName: session.collectorName,
                 sessionCountsByMonth: Object.fromEntries(
-                    monthKeys.map(month => [month, 0]),
+                    monthYearKeys.map(month => [month, 0]),
                 ),
                 hasRecentSubmission: false,
             });
         }
 
-        const entry = collectorMap.get(key)!;
+        const entry = collectorMap.get(collectorKey)!;
         const submittedDate = new Date(session.submittedAt);
         const monthKey = format(submittedDate, 'yyyy-MM');
 

@@ -2,12 +2,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import {
-    buildCollectorKey,
-    type CollectorRow,
-} from '@/features/operations/utils/field-user-compliance-data';
+import type { CollectorRow } from '@/features/operations/utils/field-user-compliance-data';
 import { format } from 'date-fns';
 import StatBadge from '@/components/ui/stat-badge';
+import {
+    TableBody,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import ComplianceCollectorTableRow from '@/features/operations/components/field-user-compliance/compliance-collector-table-row';
 
 function buildChartPillColor(index: number, total: number): string {
@@ -22,7 +25,6 @@ function buildChartPillColor(index: number, total: number): string {
 
 interface FieldUserComplianceChartProps {
     months: Date[];
-    monthKeys: string[];
     collectorRows: CollectorRow[];
     totalCollectors: number;
     activeCollectors: number;
@@ -30,11 +32,11 @@ interface FieldUserComplianceChartProps {
 
 export default function FieldUserComplianceChart({
     months,
-    monthKeys,
     collectorRows,
     totalCollectors,
     activeCollectors,
 }: FieldUserComplianceChartProps) {
+    const monthYearKeys = months.map(month => format(month, 'yyyy-MM'));
     return (
         <Card>
             <CardHeader>
@@ -62,37 +64,34 @@ export default function FieldUserComplianceChart({
                     <ScrollArea className="h-[45vh] w-full">
                         <div className="min-w-max">
                             <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="text-muted-foreground bg-card sticky top-0 left-0 z-20 w-px px-4 py-3 text-left text-xs font-medium whitespace-nowrap">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="text-muted-foreground bg-card sticky top-0 left-0 z-20 w-px px-4 py-3 text-xs">
                                             Collector
-                                        </th>
+                                        </TableHead>
                                         {months.map(month => (
-                                            <th
+                                            <TableHead
                                                 key={format(month, 'yyyy-MM')}
-                                                className="text-muted-foreground bg-card sticky top-0 z-10 min-w-20 px-1 py-2 text-center text-xs font-medium whitespace-nowrap"
+                                                className="text-muted-foreground bg-card sticky top-0 z-10 min-w-20 px-1 py-2 text-center text-xs"
                                             >
                                                 {format(month, 'MMM yy')}
-                                            </th>
+                                            </TableHead>
                                         ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                     {collectorRows.map((row, rowIndex) => (
                                         <ComplianceCollectorTableRow
-                                            key={buildCollectorKey(
-                                                row.collectorTitle,
-                                                row.collectorName,
-                                            )}
+                                            key={`${row.collectorName}/${row.collectorTitle}`}
                                             row={row}
-                                            monthKeys={monthKeys}
+                                            monthYearKeys={monthYearKeys}
                                             color={buildChartPillColor(
                                                 rowIndex,
                                                 collectorRows.length,
                                             )}
                                         />
                                     ))}
-                                </tbody>
+                                </TableBody>
                             </table>
                         </div>
                         <ScrollBar orientation="horizontal" />

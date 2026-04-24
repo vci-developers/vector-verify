@@ -25,14 +25,14 @@ export default function OperationsFieldUserCompliance({
         endDate,
     });
 
-    const { months, monthKeys } = useMemo(() => {
+    const { months, monthYearKeys } = useMemo(() => {
         const months = eachMonthOfInterval({
             start: parseISO(startDate),
             end: parseISO(endDate),
         });
         return {
             months,
-            monthKeys: months.map(month => format(month, 'yyyy-MM')),
+            monthYearKeys: months.map(month => format(month, 'yyyy-MM')),
         };
     }, [startDate, endDate]);
 
@@ -56,13 +56,12 @@ export default function OperationsFieldUserCompliance({
     const { collectorRows, totalCollectors, activeCollectors } =
         buildFieldUserComplianceData(
             getAllSessionsResult.data.sessions,
-            monthKeys,
+            monthYearKeys,
         );
 
     return (
         <FieldUserComplianceChart
             months={months}
-            monthKeys={monthKeys}
             collectorRows={collectorRows}
             totalCollectors={totalCollectors}
             activeCollectors={activeCollectors}
