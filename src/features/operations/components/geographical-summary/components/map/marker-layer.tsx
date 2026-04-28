@@ -81,8 +81,12 @@ export default function MarkerLayer({
                 return (
                     <Marker
                         key={marker.id}
-                        ref={ref => {
-                            if (ref) markerRefs.current.set(marker.id, ref);
+                        ref={leafletMarker => {
+                            if (leafletMarker)
+                                markerRefs.current.set(
+                                    marker.id,
+                                    leafletMarker,
+                                );
                             else markerRefs.current.delete(marker.id);
                         }}
                         position={position}
@@ -92,8 +96,8 @@ export default function MarkerLayer({
                             selectedMarkerId === marker.id,
                         )}
                         eventHandlers={{
-                            click: e => {
-                                L.DomEvent.stopPropagation(e);
+                            click: event => {
+                                L.DomEvent.stopPropagation(event);
                                 onMarkerSelect(
                                     selectedMarkerId === marker.id
                                         ? null

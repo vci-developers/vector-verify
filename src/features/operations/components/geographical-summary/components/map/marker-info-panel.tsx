@@ -5,8 +5,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/utils/cn';
 import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
 
-const MAX_SPECIES = 5;
-
 interface MarkerInfoPanelProps {
     markers: SiteMarker[];
     selectedMarkerId: string | null;
@@ -43,9 +41,12 @@ export default function MarkerInfoPanel({
                     return (
                         <button
                             key={marker.id}
-                            ref={el => {
-                                if (el)
-                                    panelItemRefs.current.set(marker.id, el);
+                            ref={panelItem => {
+                                if (panelItem)
+                                    panelItemRefs.current.set(
+                                        marker.id,
+                                        panelItem,
+                                    );
                                 else panelItemRefs.current.delete(marker.id);
                             }}
                             disabled={isLoading}
@@ -80,9 +81,8 @@ export default function MarkerInfoPanel({
                                 </p>
                                 {marker.speciesBreakdown.length > 0 && (
                                     <div className="border-border mt-1 space-y-0.5 border-t pt-1">
-                                        {marker.speciesBreakdown
-                                            .slice(0, MAX_SPECIES)
-                                            .map(({ species, count }) => (
+                                        {marker.speciesBreakdown.map(
+                                            ({ species, count }) => (
                                                 <p key={species}>
                                                     <span className="mr-1">
                                                         ↳
@@ -90,7 +90,8 @@ export default function MarkerInfoPanel({
                                                     {species}:{' '}
                                                     {count.toLocaleString()}
                                                 </p>
-                                            ))}
+                                            ),
+                                        )}
                                     </div>
                                 )}
                                 {marker.lastCollectionDate && (

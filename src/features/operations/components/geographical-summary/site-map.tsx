@@ -13,8 +13,8 @@ import MarkerInfoPanel from './components/map/marker-info-panel';
 import MapNavigator from './components/map/map-navigator';
 import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
 
-const DEFAULT_CENTER: LatLngExpression = { lat: 1.5, lng: 32.5 };
-const DEFAULT_ZOOM = 7;
+const DEFAULT_CENTER: LatLngExpression = { lat: 0, lng: 0 };
+const DEFAULT_ZOOM = 2;
 
 interface SiteMapProps {
     markers: SiteMarker[];
