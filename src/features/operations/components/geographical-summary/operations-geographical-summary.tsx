@@ -10,6 +10,7 @@ import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
 } from '../../utils/site-marker-data';
+import { useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
@@ -35,6 +36,9 @@ export default function OperationsGeographicalSummary({
         endDate,
     });
 
+    const siteMapMounted = useRef(false);
+    if (!isPending && markers.length > 0) siteMapMounted.current = true;
+
     return (
         <div className="mt-4 space-y-3">
             <Card className="border-border/50 w-fit">
@@ -54,7 +58,12 @@ export default function OperationsGeographicalSummary({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    {isPending ? (
+                    {siteMapMounted.current ? (
+                        <SiteMap
+                            markers={markers}
+                            selectedLocation={selectedLocation}
+                        />
+                    ) : isPending ? (
                         <Skeleton className="h-full w-full rounded-md" />
                     ) : isError ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">

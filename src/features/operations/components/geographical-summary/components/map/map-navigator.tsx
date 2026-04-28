@@ -27,9 +27,10 @@ export default function MapNavigator({
 
     useEffect(() => {
         if (bounds) {
-            map.flyToBounds(bounds, {
+            map.fitBounds(bounds, {
                 padding: FLY_TO_BOUNDS_PADDING,
                 maxZoom: FLY_TO_BOUNDS_MAX_ZOOM,
+                animate: true,
             });
             return () => {
                 try {
