@@ -31,11 +31,13 @@ export function buildFieldUserComplianceData(
     >();
 
     for (const session of sessions) {
-        const collectorKey = `${session.collectorName}/${session.collectorTitle}`;
+        const collectorName = session.collectorName.trim();
+        const collectorTitle = session.collectorTitle.trim();
+        const collectorKey = `${collectorName}/${collectorTitle}`;
         if (!collectorMap.has(collectorKey)) {
             collectorMap.set(collectorKey, {
-                collectorTitle: session.collectorTitle,
-                collectorName: session.collectorName,
+                collectorTitle,
+                collectorName,
                 sessionCountsByMonth: Object.fromEntries(
                     monthYearKeys.map(month => [month, 0]),
                 ),

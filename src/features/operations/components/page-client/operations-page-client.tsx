@@ -36,7 +36,7 @@ const OPERATIONS_TABS = [
     },
     {
         value: 'field-user-compliance',
-        label: 'FIELD USER COMPLIANCE',
+        label: 'FIELD TEAM PERFORMANCE',
         shouldRender: () => true,
     },
 ] as const;

@@ -6,6 +6,7 @@ import type { CollectorRow } from '@/features/operations/utils/field-user-compli
 import { format } from 'date-fns';
 import StatBadge from '@/components/ui/stat-badge';
 import {
+    Table,
     TableBody,
     TableHead,
     TableHeader,
@@ -50,7 +51,7 @@ export default function FieldUserComplianceChart({
                         <StatBadge
                             label="Active Collectors"
                             value={activeCollectors}
-                            tooltip="Submitted this or last month"
+                            description="Submitted this or last month"
                         />
                     </div>
                 </div>
@@ -63,7 +64,7 @@ export default function FieldUserComplianceChart({
                 ) : (
                     <ScrollArea className="h-[45vh] w-full">
                         <div className="min-w-max">
-                            <table className="w-full text-sm">
+                            <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="text-muted-foreground bg-card sticky top-0 left-0 z-20 w-px px-4 py-3 text-xs">
@@ -92,7 +93,7 @@ export default function FieldUserComplianceChart({
                                         />
                                     ))}
                                 </TableBody>
-                            </table>
+                            </Table>
                         </div>
                         <ScrollBar orientation="horizontal" />
                         <ScrollBar orientation="vertical" />

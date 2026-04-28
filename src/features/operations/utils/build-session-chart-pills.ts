@@ -1,12 +1,12 @@
-export type SessionSegment =
+export type SessionChartPill =
     | { type: 'empty'; span: number }
     | { type: 'active'; span: number; totalCount: number };
 
-export function buildSessionSegments(
+export function buildSessionChartPills(
     monthYearKeys: string[],
     sessionCountsByMonth: Record<string, number>,
-): SessionSegment[] {
-    const sessionSegments: SessionSegment[] = [];
+): SessionChartPill[] {
+    const sessionChartPills: SessionChartPill[] = [];
     let i = 0;
     while (i < monthYearKeys.length) {
         const count = sessionCountsByMonth[monthYearKeys[i]!] ?? 0;
@@ -19,7 +19,7 @@ export function buildSessionSegments(
                 span++;
                 i++;
             }
-            sessionSegments.push({ type: 'empty', span });
+            sessionChartPills.push({ type: 'empty', span });
         } else {
             let span = 0;
             let totalCount = 0;
@@ -31,8 +31,8 @@ export function buildSessionSegments(
                 span++;
                 i++;
             }
-            sessionSegments.push({ type: 'active', span, totalCount });
+            sessionChartPills.push({ type: 'active', span, totalCount });
         }
     }
-    return sessionSegments;
+    return sessionChartPills;
 }

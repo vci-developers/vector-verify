@@ -1,4 +1,4 @@
-import { buildSessionSegments } from '@/features/operations/utils/build-session-segments';
+import { buildSessionChartPills } from '@/features/operations/utils/build-session-chart-pills';
 import type { CollectorRow } from '@/features/operations/utils/field-user-compliance-data';
 import { TableCell, TableRow } from '@/components/ui/table';
 
@@ -13,7 +13,7 @@ export default function ComplianceCollectorTableRow({
     monthYearKeys,
     color,
 }: ComplianceCollectorTableRowProps) {
-    const sessionSegments = buildSessionSegments(
+    const sessionChartPills = buildSessionChartPills(
         monthYearKeys,
         row.sessionCountsByMonth,
     );
@@ -28,7 +28,7 @@ export default function ComplianceCollectorTableRow({
                     {row.collectorTitle}
                 </p>
             </TableCell>
-            {sessionSegments.map((segment, index) => {
+            {sessionChartPills.map((segment, index) => {
                 if (segment.type === 'empty') {
                     return <TableCell key={index} colSpan={segment.span} />;
                 }
