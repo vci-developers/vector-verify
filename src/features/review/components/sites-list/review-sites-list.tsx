@@ -3,7 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -14,18 +14,6 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
-
-const ReviewSiteListMonthKeyContext = createContext<string | null>(null);
-
-export function useReviewSiteListMonthKey() {
-    const monthKey = useContext(ReviewSiteListMonthKeyContext);
-    if (monthKey === null) {
-        throw new Error(
-            'useReviewSiteListMonthKey must be used within a ReviewSitesList month.',
-        );
-    }
-    return monthKey;
-}
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -167,20 +155,15 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteListMonthKeyContext.Provider
-                                value={monthKey}
-                            >
-                                <ReviewSiteHierarchy
-                                    sites={sites}
-                                    depth={0}
-                                    parentPath={monthKey}
-                                    sessionCountsBySiteId={
-                                        sessionCountsBySiteId
-                                    }
-                                    expandedSitePaths={expandedSitePaths}
-                                    onToggle={toggleSiteRow}
-                                />
-                            </ReviewSiteListMonthKeyContext.Provider>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                depth={0}
+                                parentPath={monthKey}
+                                monthKey={monthKey}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
+                                expandedSitePaths={expandedSitePaths}
+                                onToggle={toggleSiteRow}
+                            />
                         </CollapsibleContent>
                     </Collapsible>
                 );
