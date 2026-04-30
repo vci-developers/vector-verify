@@ -73,7 +73,7 @@ export default function SpecimenImageReviewCarousel({
                 </div>
 
                 {hasMultipleImages && (
-                    <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between p-4">
+                    <div className="absolute inset-y-0 right-0 left-0 flex items-center justify-between p-4">
                         <Button
                             type="button"
                             variant="secondary"

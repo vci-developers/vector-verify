@@ -50,19 +50,11 @@ export default function OperationsSpeciesComposition({
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return (
-            <p className="text-muted-foreground text-sm">
-                Loading species composition...
-            </p>
-        );
+        return <h1>LOADING...</h1>;
     }
 
     if (!getMonthlySpecimensCountResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getMonthlySpecimensCountResult.error.message}
-            </p>
-        );
+        return <h1>ERROR: {getMonthlySpecimensCountResult.error.message}</h1>;
     }
 
     const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;

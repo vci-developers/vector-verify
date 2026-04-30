@@ -47,7 +47,9 @@ function specimenImageToReviewImage(
     };
 }
 
-function thumbnailToReviewImage(specimen: Specimen): SpecimenReviewImage | null {
+function thumbnailToReviewImage(
+    specimen: Specimen,
+): SpecimenReviewImage | null {
     if (!specimen.thumbnailUrl) return null;
 
     const collectionDate = specimen.session?.collectionDate ?? null;
