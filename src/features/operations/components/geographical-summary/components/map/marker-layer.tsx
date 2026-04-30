@@ -1,140 +1,111 @@
 'use client';
 
 import L from 'leaflet';
-import { Marker, Tooltip, useMap } from 'react-leaflet';
+import 'leaflet.markercluster';
+import { useEffect, useMemo, useRef } from 'react';
+import { Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import {
-    ANOPHELES_COLOR,
-    ANOPHELES_THRESHOLD,
-    type SiteMarker,
-} from '@/features/operations/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
+import { createSpecimenMarkerIcon } from '@/features/operations/components/geographical-summary/components/map/create-specimen-marker-icon';
 
-const MAX_SPECIES_IN_TOOLTIP = 5;
-const CLICK_ZOOM = 13;
-const MARKER_RADIUS_MIN = 8;
-const MARKER_RADIUS_MAX = 26;
-const MARKER_RADIUS_SCALE = 20;
-
-function createSpecimenMarkerIcon(
-    totalSpecimens: number,
-    anophelesCount: number,
-): L.DivIcon {
-    const radius = Math.max(
-        MARKER_RADIUS_MIN,
-        Math.min(
-            MARKER_RADIUS_MAX,
-            MARKER_RADIUS_MIN + totalSpecimens / MARKER_RADIUS_SCALE,
-        ),
-    );
-    const size = radius * 2;
-    const color =
-        anophelesCount === 0
-            ? ANOPHELES_COLOR.none
-            : anophelesCount < ANOPHELES_THRESHOLD.low
-              ? ANOPHELES_COLOR.low
-              : anophelesCount < ANOPHELES_THRESHOLD.moderate
-                ? ANOPHELES_COLOR.moderate
-                : anophelesCount < ANOPHELES_THRESHOLD.high
-                  ? ANOPHELES_COLOR.high
-                  : ANOPHELES_COLOR.critical;
-    return L.divIcon({
-        html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);box-sizing:border-box;"></div>`,
-        className: '',
-        iconSize: [size, size],
-        iconAnchor: [radius, radius],
-    });
-}
+type ClusterGroup = L.MarkerClusterGroup & {
+    _spiderfied: L.MarkerCluster | null;
+};
 
 interface MarkerLayerProps {
     markers: SiteMarker[];
     markerIdsToGeocodedPosition: Map<string, Geocode>;
+    selectedMarkerId: string | null;
+    onMarkerSelect: (id: string | null) => void;
 }
 
 export default function MarkerLayer({
     markers,
     markerIdsToGeocodedPosition,
+    selectedMarkerId,
+    onMarkerSelect,
 }: MarkerLayerProps) {
     const map = useMap();
+    const clusterRef = useRef<ClusterGroup | null>(null);
+    const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+
+    const positionMap = useMemo(() => {
+        const result = new Map<string, [number, number]>();
+        markers.forEach(marker => {
+            const position = markerIdsToGeocodedPosition.get(marker.id);
+            if (position)
+                result.set(marker.id, [position.latitude, position.longitude]);
+        });
+        return result;
+    }, [markers, markerIdsToGeocodedPosition]);
+
+    useEffect(() => {
+        if (!selectedMarkerId) return;
+        const position = markerIdsToGeocodedPosition.get(selectedMarkerId);
+        const markerInstance = markerRefs.current.get(selectedMarkerId);
+        if (!position || !markerInstance) return;
+
+        const cluster = clusterRef.current;
+        const visibleParent = cluster?.getVisibleParent(markerInstance);
+        const latitudeLongitude: [number, number] = [
+            position.latitude,
+            position.longitude,
+        ];
+
+        if (
+            !visibleParent ||
+            visibleParent === markerInstance ||
+            cluster?._spiderfied === visibleParent
+        ) {
+            if (!map.getBounds().contains(latitudeLongitude)) {
+                map.panTo(latitudeLongitude);
+            }
+            return;
+        }
+
+        const doSpiderfy = () => (visibleParent as L.MarkerCluster).spiderfy();
+        map.once('moveend', doSpiderfy);
+        map.panTo(visibleParent.getLatLng());
+        return () => {
+            map.off('moveend', doSpiderfy);
+        };
+    }, [selectedMarkerId, markerIdsToGeocodedPosition, map]);
 
     return (
-        <MarkerClusterGroup
-            key={markerIdsToGeocodedPosition.size}
-            chunkedLoading
-        >
+        <MarkerClusterGroup ref={clusterRef} chunkedLoading>
             {markers.map(marker => {
-                const position = markerIdsToGeocodedPosition.get(marker.id);
+                const position = positionMap.get(marker.id);
                 if (!position) return null;
 
                 return (
                     <Marker
                         key={marker.id}
-                        position={[position.latitude, position.longitude]}
+                        ref={leafletMarker => {
+                            if (leafletMarker)
+                                markerRefs.current.set(
+                                    marker.id,
+                                    leafletMarker,
+                                );
+                            else markerRefs.current.delete(marker.id);
+                        }}
+                        position={position}
                         icon={createSpecimenMarkerIcon(
                             marker.totalSpecimens,
                             marker.anophelesCount,
+                            selectedMarkerId === marker.id,
                         )}
                         eventHandlers={{
-                            click: () => {
-                                map.flyTo(
-                                    [position.latitude, position.longitude],
-                                    Math.max(map.getZoom(), CLICK_ZOOM),
+                            click: event => {
+                                L.DomEvent.stopPropagation(event);
+                                onMarkerSelect(
+                                    selectedMarkerId === marker.id
+                                        ? null
+                                        : marker.id,
                                 );
                             },
                         }}
-                    >
-                        <Tooltip>
-                            <div className="min-w-40 text-xs">
-                                <p className="font-semibold">
-                                    {marker.siteName}
-                                </p>
-                                {marker.parentLocationName && (
-                                    <p className="text-muted-foreground">
-                                        {marker.parentLocationName}
-                                    </p>
-                                )}
-                                <hr className="border-border my-1" />
-                                <p>
-                                    {marker.sessionCount} session
-                                    {marker.sessionCount !== 1 ? 's' : ''}
-                                </p>
-                                <p>
-                                    {marker.totalSpecimens.toLocaleString()}{' '}
-                                    total specimens
-                                </p>
-                                <p>
-                                    {marker.anophelesCount.toLocaleString()}{' '}
-                                    Anopheles
-                                </p>
-                                {marker.speciesBreakdown.length > 0 && (
-                                    <div className="border-border mt-1 space-y-0.5 border-t pt-1">
-                                        {marker.speciesBreakdown
-                                            .slice(0, MAX_SPECIES_IN_TOOLTIP)
-                                            .map(({ species, count }) => (
-                                                <p
-                                                    key={species}
-                                                    className="text-muted-foreground"
-                                                >
-                                                    <span className="mr-1">
-                                                        ↳
-                                                    </span>
-                                                    {species}:{' '}
-                                                    {count.toLocaleString()}
-                                                </p>
-                                            ))}
-                                    </div>
-                                )}
-                                {marker.lastCollectionDate && (
-                                    <p className="text-muted-foreground">
-                                        Last collection:{' '}
-                                        {new Date(
-                                            marker.lastCollectionDate,
-                                        ).toLocaleDateString()}
-                                    </p>
-                                )}
-                            </div>
-                        </Tooltip>
-                    </Marker>
+                    />
                 );
             })}
         </MarkerClusterGroup>

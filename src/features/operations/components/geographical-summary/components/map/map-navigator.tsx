@@ -7,7 +7,7 @@ import { useMap } from 'react-leaflet';
 
 const FLY_TO_BOUNDS_PADDING: [number, number] = [40, 40];
 const FLY_TO_BOUNDS_MAX_ZOOM = 14;
-const GEOCODE_ZOOM = 10;
+const SELECTED_LOCATION_ZOOM = 10;
 
 interface MapNavigatorProps {
     bounds: LatLngBoundsExpression | null;
@@ -27,23 +27,22 @@ export default function MapNavigator({
 
     useEffect(() => {
         if (bounds) {
-            map.flyToBounds(bounds, {
+            map.fitBounds(bounds, {
                 padding: FLY_TO_BOUNDS_PADDING,
                 maxZoom: FLY_TO_BOUNDS_MAX_ZOOM,
+                animate: true,
             });
             return () => {
                 try {
                     map.stop();
-                } catch {
-                    // Leaflet throws if map is already stopped
-                }
+                } catch {}
             };
         }
 
         if (geocodeResult?.ok && geocodeResult.data != null) {
             map.flyTo(
                 [geocodeResult.data.latitude, geocodeResult.data.longitude],
-                GEOCODE_ZOOM,
+                SELECTED_LOCATION_ZOOM,
             );
         }
     }, [map, bounds, geocodeResult]);
