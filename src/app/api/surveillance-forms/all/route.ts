@@ -7,16 +7,22 @@ import { err } from '@/lib/result/result';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-    const body = await request.json();
+export async function GET(request: Request) {
+    const url = new URL(request.url);
+    const queryParams = Object.fromEntries(url.searchParams.entries());
 
-    const parsedBody = getAllSurveillanceFormsQueryParamsSchema.safeParse(body);
-    if (!parsedBody.success) {
+    const parsedQueryParams =
+        getAllSurveillanceFormsQueryParamsSchema.safeParse({
+            ...queryParams,
+            sessionId: queryParams.sessionId?.split(',') ?? [],
+        });
+    if (!parsedQueryParams.success) {
         return NextResponse.json(
             err({
                 kind: 'client',
                 status: 400,
-                message: 'Invalid request body: sessionIds array is required',
+                message:
+                    'Invalid query parameters: sessionId array is required',
             }),
             { status: 400 },
         );
@@ -25,7 +31,7 @@ export async function POST(request: Request) {
     const authorizedGetAllSurveillanceFormsResult =
         await withAuthSession<GetAllSurveillanceFormsResponseBody>(
             accessToken =>
-                getAllSurveillanceForms(accessToken, parsedBody.data),
+                getAllSurveillanceForms(accessToken, parsedQueryParams.data),
         );
 
     return NextResponse.json(authorizedGetAllSurveillanceFormsResult, {
