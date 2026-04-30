@@ -8,6 +8,8 @@ export const specimenKeys = {
     specimenById: (specimenId: number) => ['specimens', specimenId] as const,
     specimens: (queryParams?: GetSpecimensQueryParams) =>
         ['specimens', queryParams] as const,
+    allPaginatedSpecimens: (queryParams?: GetSpecimensQueryParams) =>
+        ['specimens', 'paginated-all', queryParams] as const,
     specimensCount: (queryParams?: GetSpecimensCountQueryParams) =>
         ['specimens', 'count', queryParams] as const,
     monthlySpecimensCount: (

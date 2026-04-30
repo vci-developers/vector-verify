@@ -1,13 +1,16 @@
 'use client';
 
 import PageShell from '@/components/layout/page-shell';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReviewSiteDetailHeader from '@/features/review/components/site-detail/review-site-detail-header';
+import SpecimenImageReviewWorkspace from '@/features/review/components/site-detail/specimen-image-review/specimen-image-review-workspace';
 import SurveillanceFormReviewWorkspace from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-workspace';
-import { ClipboardList, ChevronLeft } from 'lucide-react';
+import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const REVIEW_TABS = [{ value: 'review', label: 'REVIEW' }] as const;
 
@@ -16,6 +19,8 @@ const REVIEW_STEPS = [
     { label: 'Image Review' },
     { label: 'Certification' },
 ];
+
+const LAST_IMPLEMENTED_REVIEW_STEP = 2;
 
 interface ReviewDetailsPageClientProps {
     siteId: number;
@@ -28,6 +33,18 @@ export default function ReviewDetailsPageClient({
     startDate,
     endDate,
 }: ReviewDetailsPageClientProps) {
+    const [currentStep, setCurrentStep] = useState(1);
+
+    function showPreviousStep() {
+        setCurrentStep(step => Math.max(step - 1, 1));
+    }
+
+    function showNextStep() {
+        setCurrentStep(step =>
+            Math.min(step + 1, LAST_IMPLEMENTED_REVIEW_STEP),
+        );
+    }
+
     return (
         <PageShell
             title="Review"
@@ -64,18 +81,54 @@ export default function ReviewDetailsPageClient({
                         <div className="absolute left-1/2 w-max -translate-x-1/2">
                             <ReviewSiteDetailHeader
                                 steps={REVIEW_STEPS}
-                                currentStep={1}
+                                currentStep={currentStep}
                             />
                         </div>
                     </div>
 
                     <Separator />
 
-                    <SurveillanceFormReviewWorkspace
-                        siteId={siteId}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
+                    {currentStep === 1 && (
+                        <SurveillanceFormReviewWorkspace
+                            siteId={siteId}
+                            startDate={startDate}
+                            endDate={endDate}
+                        />
+                    )}
+
+                    {currentStep === 2 && (
+                        <SpecimenImageReviewWorkspace
+                            siteId={siteId}
+                            startDate={startDate}
+                            endDate={endDate}
+                        />
+                    )}
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="lg"
+                            onClick={showPreviousStep}
+                            disabled={currentStep === 1}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                        </Button>
+                        <Button
+                            type="button"
+                            size="lg"
+                            onClick={showNextStep}
+                            disabled={
+                                currentStep === LAST_IMPLEMENTED_REVIEW_STEP
+                            }
+                        >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </PageShell>
