@@ -13,6 +13,7 @@ import OperationsGeographicalSummary from '@/features/operations/components/geog
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
+import OperationsFieldUserCompliance from '@/features/operations/components/field-user-compliance/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 
@@ -32,6 +33,11 @@ const OPERATIONS_TABS = [
         label: 'AI PERFORMANCE',
         shouldRender: (permissions: UserPermissions) =>
             permissions.annotations.viewAndWriteAnnotationTasks,
+    },
+    {
+        value: 'field-user-compliance',
+        label: 'FIELD TEAM PERFORMANCE',
+        shouldRender: () => true,
     },
 ] as const;
 
@@ -157,6 +163,14 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformanceTab />
+                            )}
+
+                            {activeTab === 'field-user-compliance' && (
+                                <OperationsFieldUserCompliance
+                                    locationQueryParam={locationQueryParam}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             )}
                         </Fragment>
                     )}
