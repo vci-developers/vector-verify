@@ -2,8 +2,6 @@
 
 import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
-import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
-import type { GetSpecimensCountQueryParams } from '@/api/specimen/validation/get-specimens-count-schema';
 import AiPerformanceSummaryCard from '@/features/operations/components/ai-performance/ai-performance-summary-card';
 import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
 import type { LocationQueryParam } from '@/lib/location/location-query';
@@ -33,28 +31,12 @@ export default function OperationsAiPerformance({
         endDate,
     };
 
-    const specimensCountQueryParams: GetSpecimensCountQueryParams = {
-        ...locationFilterQueryParams,
-        startDate,
-        endDate,
-    };
-
     const {
         data: getAnnotationsSummaryResult,
         isPending: isGetAnnotationsSummaryPending,
     } = useGetAnnotationsSummary(annotationsSummaryQueryParams);
 
-    const {
-        data: getSpecimensCountResult,
-        isPending: isGetSpecimensCountPending,
-    } = useGetSpecimensCount(specimensCountQueryParams);
-
-    if (
-        isGetAnnotationsSummaryPending ||
-        isGetSpecimensCountPending ||
-        !getAnnotationsSummaryResult ||
-        !getSpecimensCountResult
-    ) {
+    if (isGetAnnotationsSummaryPending || !getAnnotationsSummaryResult) {
         return <p className="text-muted-foreground text-sm">Loading...</p>;
     }
 
@@ -67,25 +49,11 @@ export default function OperationsAiPerformance({
         );
     }
 
-    if (!getSpecimensCountResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getSpecimensCountResult.error.message ??
-                    'Failed to load specimens count.'}
-            </p>
-        );
-    }
-
-    const annotatedSpecimenCount =
-        getAnnotationsSummaryResult.data.statusCounts.ANNOTATED;
-    const flaggedSpecimenCount =
-        getAnnotationsSummaryResult.data.statusCounts.FLAGGED;
+    const annotationsSummary = getAnnotationsSummaryResult.data;
+    const annotatedSpecimenCount = annotationsSummary.statusCounts.ANNOTATED;
+    const flaggedSpecimenCount = annotationsSummary.statusCounts.FLAGGED;
     const reviewedSpecimenCount = annotatedSpecimenCount + flaggedSpecimenCount;
-
-    const totalSpecimenCount = getSpecimensCountResult.data.data.reduce(
-        (sum, siteSpecimenCounts) => sum + siteSpecimenCounts.totalSpecimens,
-        0,
-    );
+    const totalSpecimenCount = annotationsSummary.total;
 
     const specimenCoveragePercentage =
         totalSpecimenCount > 0
@@ -133,7 +101,7 @@ export default function OperationsAiPerformance({
                 ))}
 
                 <OperationsAiPerformanceMatrix
-                    annotationsSummary={getAnnotationsSummaryResult.data}
+                    annotationsSummary={annotationsSummary}
                     selectedLocationName={selectedLocationName}
                 />
             </div>
