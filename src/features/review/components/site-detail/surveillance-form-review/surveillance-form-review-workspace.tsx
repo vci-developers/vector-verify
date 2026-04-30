@@ -4,7 +4,6 @@ import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetAllSurveillanceForms } from '@/api/surveillance-form/hooks/use-get-all-surveillance-forms';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
-import { Separator } from '@/components/ui/separator';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
 import { useMemo } from 'react';
 
@@ -99,8 +98,6 @@ export default function SurveillanceFormReviewWorkspace({
                     sessions must match.
                 </p>
             </div>
-
-            <Separator />
 
             <SurveillanceFormReviewTable
                 surveillanceForms={surveillanceForms}

@@ -2,9 +2,14 @@
 
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReviewSiteDetailHeader from '@/features/review/components/site-detail/review-site-detail-header';
 import SurveillanceFormReviewWorkspace from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-workspace';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
+
+const REVIEW_TABS = [{ value: 'review', label: 'REVIEW' }] as const;
 
 const REVIEW_STEPS = [
     { label: 'Form Comparison' },
@@ -26,20 +31,46 @@ export default function ReviewDetailsPageClient({
     return (
         <PageShell
             title="Review"
-            description="Review submitted session data by district and month."
+            description="Review submitted session data by location."
             icon={ClipboardList}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-                <CardContent className="p-6">
-                    <ReviewSiteDetailHeader
-                        steps={REVIEW_STEPS}
-                        currentStep={1}
-                    />
-                </CardContent>
-            </Card>
+                <CardContent className="space-y-4 p-6">
+                    <div className="relative flex items-center">
+                        <div className="flex flex-col space-y-4">
+                            <Link
+                                href="/review"
+                                className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
+                            >
+                                <ChevronLeft className="h-9 w-3" />
+                                Back to Sites
+                            </Link>
 
-            <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-                <CardContent className="p-6">
+                            <Tabs value={REVIEW_TABS[0].value}>
+                                <TabsList>
+                                    {REVIEW_TABS.map(tab => (
+                                        <TabsTrigger
+                                            key={tab.value}
+                                            value={tab.value}
+                                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                                        >
+                                            {tab.label}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+                            </Tabs>
+                        </div>
+
+                        <div className="absolute left-1/2 w-max -translate-x-1/2">
+                            <ReviewSiteDetailHeader
+                                steps={REVIEW_STEPS}
+                                currentStep={1}
+                            />
+                        </div>
+                    </div>
+
+                    <Separator />
+
                     <SurveillanceFormReviewWorkspace
                         siteId={siteId}
                         startDate={startDate}
