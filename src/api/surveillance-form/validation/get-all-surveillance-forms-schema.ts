@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { surveillanceFormSchema } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
 export const getAllSurveillanceFormsQueryParamsSchema = z.object({
-    sessionIds: z.array(z.number()),
+    sessionId: z.array(z.coerce.number()),
 });
 
 export const getAllSurveillanceFormsResponseSchema = z.object({

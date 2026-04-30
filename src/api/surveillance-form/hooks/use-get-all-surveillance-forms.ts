@@ -2,9 +2,11 @@ import type {
     GetAllSurveillanceFormsQueryParams,
     GetAllSurveillanceFormsSuccessPayload,
 } from '@/api/surveillance-form/validation/get-all-surveillance-forms-schema';
+import { getAllSurveillanceFormsQueryParamsSchema } from '@/api/surveillance-form/validation/get-all-surveillance-forms-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
+import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { Result } from '@/lib/result/result';
 
 type GetAllSurveillanceFormsQueryResult = Result<
@@ -20,13 +22,17 @@ type GetAllSurveillanceFormsQueryOptions = Omit<
 async function fetchAllSurveillanceForms(
     queryParams: GetAllSurveillanceFormsQueryParams,
 ): Promise<GetAllSurveillanceFormsQueryResult> {
-    const response = await fetch('/api/surveillance-forms/all', {
-        method: 'POST',
+    const queryString = constructQueryString(
+        queryParams,
+        getAllSurveillanceFormsQueryParamsSchema,
+    );
+
+    const response = await fetch(`/api/surveillance-forms/all${queryString}`, {
+        method: 'GET',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(queryParams),
     });
 
     const getAllSurveillanceFormsResult: GetAllSurveillanceFormsQueryResult =
@@ -39,9 +45,7 @@ export function useGetAllSurveillanceForms(
     options?: GetAllSurveillanceFormsQueryOptions,
 ) {
     return useQuery({
-        queryKey: surveillanceFormKeys.allSurveillanceForms(
-            queryParams.sessionIds,
-        ),
+        queryKey: surveillanceFormKeys.allSurveillanceForms(queryParams),
         queryFn: () => fetchAllSurveillanceForms(queryParams),
         ...options,
     });
