@@ -25,5 +25,5 @@ export async function GET(_request: Request, { params }: RouteParams) {
     }
 
     const upstream = authorizedFetchImageResult.data;
-    return new NextResponse(upstream.body, { status: 200 });
+    return upstream;
 }

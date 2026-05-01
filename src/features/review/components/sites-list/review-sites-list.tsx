@@ -1,75 +1,190 @@
 'use client';
 
-import type { SessionState } from '@/api/session/validation/session-schema';
+import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
-import { Separator } from '@/components/ui/separator';
-import ReviewSiteCard from '@/features/review/components/sites-list/review-site-card';
-import { usePagination } from '@/lib/hooks/use-pagination';
-import { Fragment, useEffect } from 'react';
-import ReviewSitesListPagination from '@/features/review/components/sites-list/review-sites-list-pagination';
+import { ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import type { LocationQueryParam } from '@/lib/location/location-query';
+import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
+import { SkeletonList } from '@/components/ui/skeleton-list';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import ReviewSiteHierarchy from './review-site-hierarchy';
+import type { ReviewSiteSessionSummary } from './review-site-session-summary';
 
 interface ReviewSiteListProps {
     sites: Site[];
-    startDate: string;
-    endDate: string;
-    sessionsBySiteId: Map<number, { count: number; state?: SessionState }>;
+    locationQueryParam: LocationQueryParam;
+    startMonth: Date;
+    endMonth: Date;
+}
+
+function createEmptySessionSummary(): ReviewSiteSessionSummary {
+    return {
+        sessionCount: 0,
+        needsReviewCount: 0,
+        stateCounts: {},
+    };
 }
 
 export default function ReviewSitesList({
     sites,
-    startDate,
-    endDate,
-    sessionsBySiteId,
+    locationQueryParam,
+    startMonth,
+    endMonth,
 }: ReviewSiteListProps) {
-    const {
-        page,
-        limit,
-        nextPage,
-        previousPage,
-        goToPage,
-        resetPage,
-        createPageRange,
-    } = usePagination({ limit: 12 });
+    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
+        new Set(),
+    );
+    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
+        new Set(),
+    );
 
-    useEffect(() => {
-        resetPage();
-    }, [startDate, endDate, resetPage]);
+    const startDate = format(startMonth, 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const totalPages = Math.ceil(sites.length / limit);
-    const paginatedSites = sites.slice((page - 1) * limit, page * limit);
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
+        useGetAllSessions({
+            ...locationQueryParam,
+            startDate,
+            endDate,
+            type: 'SURVEILLANCE',
+        });
+
+    const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
+
+    const monthToSiteIdCounts = useMemo(() => {
+        const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
+        if (!getAllSessionsResult?.ok) return map;
+
+        for (const session of getAllSessionsResult.data.sessions) {
+            const monthKey = format(
+                new Date(session.collectionDate),
+                'yyyy-MM',
+            );
+            if (!map.has(monthKey)) map.set(monthKey, new Map());
+
+            const monthMap = map.get(monthKey)!;
+            const current =
+                monthMap.get(session.siteId) ?? createEmptySessionSummary();
+            const stateCounts = { ...current.stateCounts };
+
+            if (session.state) {
+                stateCounts[session.state] =
+                    (stateCounts[session.state] ?? 0) + 1;
+            }
+
+            monthMap.set(session.siteId, {
+                sessionCount: current.sessionCount + 1,
+                needsReviewCount:
+                    current.needsReviewCount +
+                    (session.state === 'NEEDS_REVIEW' ? 1 : 0),
+                stateCounts,
+            });
+        }
+
+        return map;
+    }, [getAllSessionsResult]);
+
+    function toggleSiteRow(path: string) {
+        setExpandedSitePaths(previousPaths => {
+            const nextPaths = new Set(previousPaths);
+            if (nextPaths.has(path)) nextPaths.delete(path);
+            else nextPaths.add(path);
+            return nextPaths;
+        });
+    }
+
+    function toggleMonth(monthKey: string) {
+        setCollapsedMonths(previousMonths => {
+            const nextMonths = new Set(previousMonths);
+            if (nextMonths.has(monthKey)) nextMonths.delete(monthKey);
+            else nextMonths.add(monthKey);
+            return nextMonths;
+        });
+    }
+
+    const skeletonCount = new Set(sites.map(site => site.subCounty)).size || 5;
+
+    if (isGetAllSessionsPending || !getAllSessionsResult) {
+        return (
+            <div className="space-y-2">
+                {months.map(month => (
+                    <div key={format(month, 'yyyy-MM')}>
+                        <div className="flex items-center gap-2 py-3">
+                            <Skeleton className="h-3 w-24" />
+                        </div>
+                        <SkeletonList
+                            count={skeletonCount}
+                            height="xl"
+                            width="full"
+                        />
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (!getAllSessionsResult.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getAllSessionsResult.error.message}
+            </p>
+        );
+    }
+
+    if (sites.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-muted-foreground text-sm">
+                    No sites found for this location.
+                </p>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedSites.map(site => {
-                    const { count, state } =
-                        sessionsBySiteId.get(site.siteId) ?? {};
-                    return (
-                        <ReviewSiteCard
-                            key={site.siteId}
-                            site={site}
-                            sessionCount={count ?? 0}
-                            state={state}
-                            startDate={startDate}
-                            endDate={endDate}
-                        />
-                    );
-                })}
-            </div>
+        <div className="space-y-2">
+            {months.map(month => {
+                const monthKey = format(month, 'yyyy-MM');
+                const monthStartDate = format(month, 'yyyy-MM-dd');
+                const monthEndDate = format(endOfMonth(month), 'yyyy-MM-dd');
+                const sessionCountsBySiteId =
+                    monthToSiteIdCounts.get(monthKey) ??
+                    new Map<number, ReviewSiteSessionSummary>();
+                const isCollapsed = collapsedMonths.has(monthKey);
 
-            {totalPages > 1 && (
-                <Fragment>
-                    <Separator />
-                    <ReviewSitesListPagination
-                        page={page}
-                        totalPages={totalPages}
-                        pageRange={createPageRange(totalPages)}
-                        onPageChange={newPage => goToPage(newPage, totalPages)}
-                        onPrevious={() => previousPage(totalPages)}
-                        onNext={() => nextPage(totalPages)}
-                    />
-                </Fragment>
-            )}
+                return (
+                    <Collapsible
+                        key={monthKey}
+                        open={!isCollapsed}
+                        onOpenChange={() => toggleMonth(monthKey)}
+                    >
+                        <CollapsibleTrigger className="group flex w-full items-center gap-2 py-3">
+                            <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                            <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+                                {format(month, 'MMMM yyyy')}
+                            </span>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                depth={0}
+                                parentPath={monthKey}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
+                                expandedSitePaths={expandedSitePaths}
+                                startDate={monthStartDate}
+                                endDate={monthEndDate}
+                                onToggle={toggleSiteRow}
+                            />
+                        </CollapsibleContent>
+                    </Collapsible>
+                );
+            })}
         </div>
     );
 }

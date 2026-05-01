@@ -1,36 +1,75 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { endOfMonth, format, startOfMonth } from 'date-fns';
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
-import OperationsMetrics from '../location/metrics/operations-metrics';
-import OperationsHeader from '../site-list/operations-header';
-import OperationsSiteList from '../site-list/operations-site-list';
+import { Separator } from '@/components/ui/separator';
+import OperationsHeader from '@/features/operations/components/layout/operations-header';
+import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import OperationsGeographicalSummary from '@/features/operations/components/geographical-summary/operations-geographical-summary';
+import { SkeletonList } from '@/components/ui/skeleton-list';
+import ExportDialog from '@/features/operations/components/export/export-dialog';
+import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
+import OperationsFieldUserCompliance from '@/features/operations/components/field-user-compliance/operations-field-user-compliance';
+import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
+import { useLocationSelection } from '@/lib/location/use-location-selection';
 
-function DistrictTabEmptyState({ message }: { message: string }) {
-    return (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground text-sm">{message}</p>
-            <Microscope className="text-muted-foreground/50 mt-4 h-12 w-12" />
-        </div>
-    );
-}
+const OPERATIONS_TABS = [
+    {
+        value: 'geographical-summary',
+        label: 'GEOGRAPHICAL SUMMARY',
+        shouldRender: () => true,
+    },
+    {
+        value: 'species-composition',
+        label: 'SPECIES COMPOSITION',
+        shouldRender: () => true,
+    },
+    {
+        value: 'ai-performance',
+        label: 'AI PERFORMANCE',
+        shouldRender: (permissions: UserPermissions) =>
+            permissions.annotations.viewAndWriteAnnotationTasks,
+    },
+    {
+        value: 'field-user-compliance',
+        label: 'FIELD TEAM PERFORMANCE',
+        shouldRender: () => true,
+    },
+] as const;
+
+export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-    const [activeTab, setActiveTab] = useState('sites');
-    const [selectedMonth, setSelectedMonth] = useState(() =>
-        startOfMonth(new Date()),
+    const [activeTab, setActiveTab] = useState<OperationsTab>(
+        'geographical-summary',
     );
+    const [startMonth, setStartMonth] = useState(() =>
+        startOfMonth(subMonths(new Date(), 2)),
+    );
+    const [endMonth, setEndMonth] = useState(() => startOfMonth(new Date()));
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+        : [];
+
+    const {
+        selectedLocation,
+        setSelectedLocation,
+        locationTypeName,
+        locationDropdownOptions,
+        locationQueryParam,
+        descendantsOfSelectedLocation,
+    } = useLocationSelection(accessibleSites);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -58,25 +97,12 @@ export default function OperationsPageClient() {
         );
     }
 
-    const accessibleSites =
-        getUserPermissionsResult.data.permissions.sites.canAccessSites;
+    const startDate = format(startMonth, 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const filteredAccessibleSites = selectedDistrict
-        ? accessibleSites.filter(
-              site => site.district?.trim() === selectedDistrict,
-          )
-        : accessibleSites;
-
-    const accessibleDistricts = [
-        ...new Set(
-            accessibleSites
-                .map(site => site.district?.trim())
-                .filter((district): district is string => Boolean(district)),
-        ),
-    ].sort();
-
-    const startDate = format(selectedMonth, 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
+    const visibleTabs = OPERATIONS_TABS.filter(tab =>
+        tab.shouldRender(getUserPermissionsResult.data.permissions),
+    );
 
     return (
         <PageShell
@@ -86,52 +112,80 @@ export default function OperationsPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <Tabs
-                        value={activeTab}
-                        onValueChange={setActiveTab}
-                        className="space-y-4"
-                    >
-                        <OperationsHeader
-                            districts={accessibleDistricts}
-                            selectedDistrict={selectedDistrict}
-                            onDistrictChange={setSelectedDistrict}
-                            selectedMonth={selectedMonth}
-                            onMonthChange={setSelectedMonth}
-                        />
+                    <OperationsHeader
+                        tabs={visibleTabs}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                        locationTypeName={locationTypeName}
+                        locationDropdownOptions={locationDropdownOptions}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={setSelectedLocation}
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={setStartMonth}
+                        onEndMonthChange={setEndMonth}
+                        onExportClick={() => setIsExportDialogOpen(true)}
+                    />
 
-                        <TabsContent value="sites" className="mt-0">
-                            <OperationsSiteList
-                                sites={filteredAccessibleSites}
-                                district={selectedDistrict}
-                                startDate={startDate}
-                                endDate={endDate}
-                            />
-                        </TabsContent>
+                    <Separator />
 
-                        <TabsContent value="review" className="mt-0">
-                            <DistrictTabEmptyState message="Review is not wired into the operations dashboard yet." />
-                        </TabsContent>
-
-                        <TabsContent value="metrics" className="mt-0">
-                            {selectedDistrict ? (
-                                <OperationsMetrics />
-                            ) : (
-                                <DistrictTabEmptyState message="Select a district to view district-level metrics." />
+                    {!locationQueryParam ? (
+                        <div className="relative">
+                            <SkeletonList count={5} height="xl" width="full" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                                <p className="text-muted-foreground text-sm">
+                                    Select a location to view data.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <Fragment>
+                            {activeTab === 'species-composition' && (
+                                <OperationsSpeciesComposition
+                                    locationQueryParam={locationQueryParam}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             )}
-                        </TabsContent>
 
-                        <TabsContent value="ai-performance" className="mt-0">
-                            <DistrictTabEmptyState
-                                message={
-                                    selectedDistrict
-                                        ? 'AI Performance is coming soon.'
-                                        : 'Select a district to view AI performance.'
-                                }
-                            />
-                        </TabsContent>
-                    </Tabs>
+                            {activeTab === 'geographical-summary' && (
+                                <OperationsGeographicalSummary
+                                    locationQueryParam={locationQueryParam}
+                                    selectedLocation={selectedLocation}
+                                    descendantsOfSelectedLocation={
+                                        descendantsOfSelectedLocation
+                                    }
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
+                            )}
+
+                            {activeTab === 'ai-performance' && (
+                                <OperationsAiPerformanceTab />
+                            )}
+
+                            {activeTab === 'field-user-compliance' && (
+                                <OperationsFieldUserCompliance
+                                    locationQueryParam={locationQueryParam}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
+                            )}
+                        </Fragment>
+                    )}
                 </CardContent>
             </Card>
+
+            <ExportDialog
+                open={isExportDialogOpen}
+                onOpenChange={setIsExportDialogOpen}
+                programId={getUserPermissionsResult.data.programId}
+                locationQueryParam={locationQueryParam!}
+                locationName={selectedLocation}
+                startDate={startDate}
+                endDate={endDate}
+            />
         </PageShell>
     );
 }

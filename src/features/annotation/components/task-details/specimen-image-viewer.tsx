@@ -37,7 +37,7 @@ export default function SpecimenImageViewer({
                 <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-md">
                     {thumbnailUrl ? (
                         <Image
-                            src={`/api/${thumbnailUrl}`}
+                            src={`/api${thumbnailUrl}`}
                             alt={`Specimen ${specimen?.specimenId}`}
                             fill
                             unoptimized
@@ -59,13 +59,34 @@ export default function SpecimenImageViewer({
                     <div>
                         {site ? (
                             <Fragment>
-                                <p className="text-sm font-medium">
-                                    House #{site.houseNumber},{' '}
-                                    {site.villageName}
-                                </p>
-                                <p className="text-muted-foreground text-sm">
-                                    {site.subCounty}, {site.district}
-                                </p>
+                                {Object.keys(site.locationHierarchy).length >
+                                0 ? (
+                                    <Fragment>
+                                        <p className="text-sm font-medium">
+                                            {site.name}
+                                        </p>
+                                        <p className="text-muted-foreground text-sm">
+                                            {Object.values(
+                                                site.locationHierarchy,
+                                            )
+                                                .filter(
+                                                    value =>
+                                                        value !== site.name,
+                                                )
+                                                .join(', ')}
+                                        </p>
+                                    </Fragment>
+                                ) : (
+                                    <Fragment>
+                                        <p className="text-sm font-medium">
+                                            House #{site.houseNumber},{' '}
+                                            {site.villageName}
+                                        </p>
+                                        <p className="text-muted-foreground text-sm">
+                                            {site.subCounty}, {site.district}
+                                        </p>
+                                    </Fragment>
+                                )}
                             </Fragment>
                         ) : (
                             <p className="text-muted-foreground text-sm">

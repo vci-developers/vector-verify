@@ -47,6 +47,10 @@ export default function ReviewCertificationStep({
                         I certify that this house&apos;s data for {periodLabel}{' '}
                         is accurate
                     </span>
+                    <p className="text-xs font-medium text-green-900 dark:text-green-100">
+                        Once certified, this house&apos;s data for {periodLabel}{' '}
+                        will be locked and no further changes can be made.
+                    </p>
                     <p className="text-xs text-green-800 dark:text-green-200">
                         By checking this box, I confirm that:
                     </p>
