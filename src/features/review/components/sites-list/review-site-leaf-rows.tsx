@@ -4,11 +4,12 @@ import { cn } from '@/utils/cn';
 import { endOfMonth, format, parseISO } from 'date-fns';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { Fragment } from 'react';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
-    monthKey: string;
+    parentPath: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -18,10 +19,10 @@ interface ReviewSiteLeafRowsProps {
 export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
-    monthKey,
+    parentPath,
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
-    const startDate = `${monthKey}-01`;
+    const startDate = `${parentPath.split('/')[0]}-01`;
     const endDate = format(endOfMonth(parseISO(startDate)), 'yyyy-MM-dd');
 
     return (
@@ -33,7 +34,7 @@ export default function ReviewSiteLeafRows({
                         needsReviewCount: 0,
                     };
                 const hasSessions = sessionCount > 0;
-                const href = `/review/${site.district}/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
+                const href = `/review/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
 
                 const rowClassName = cn(
                     'flex items-center justify-between rounded-md px-3 py-2',
@@ -43,7 +44,7 @@ export default function ReviewSiteLeafRows({
                 );
 
                 const rowContent = (
-                    <>
+                    <Fragment>
                         <div className="flex items-center gap-3">
                             <div
                                 className={cn(
@@ -78,7 +79,7 @@ export default function ReviewSiteLeafRows({
                                     : 'No sessions'}
                             </Badge>
                         </div>
-                    </>
+                    </Fragment>
                 );
 
                 if (hasSessions) {

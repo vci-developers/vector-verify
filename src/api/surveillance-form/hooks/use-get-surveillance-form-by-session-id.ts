@@ -1,6 +1,10 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import {
+    useQueries,
+    useQuery,
+    type UseQueryOptions,
+} from '@tanstack/react-query';
 import type { GetSurveillanceFormBySessionIdSuccessPayload } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
 import { surveillanceFormKeys } from '../surveillance-form-keys';
 
@@ -38,5 +42,15 @@ export function useGetSurveillanceFormBySessionId(
         queryKey: surveillanceFormKeys.surveillanceFormBySessionId(sessionId),
         queryFn: () => fetchSurveillanceFormBySessionId(sessionId),
         ...options,
+    });
+}
+
+export function useGetSurveillanceFormsBySessionIds(sessionIds: number[]) {
+    return useQueries({
+        queries: sessionIds.map(sessionId => ({
+            queryKey:
+                surveillanceFormKeys.surveillanceFormBySessionId(sessionId),
+            queryFn: () => fetchSurveillanceFormBySessionId(sessionId),
+        })),
     });
 }

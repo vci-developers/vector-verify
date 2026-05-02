@@ -159,7 +159,6 @@ export default function ReviewSitesList({
                                 sites={sites}
                                 depth={0}
                                 parentPath={monthKey}
-                                monthKey={monthKey}
                                 sessionCountsBySiteId={sessionCountsBySiteId}
                                 expandedSitePaths={expandedSitePaths}
                                 onToggle={toggleSiteRow}

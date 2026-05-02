@@ -22,7 +22,6 @@ interface LegacySiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    monthKey: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -35,7 +34,6 @@ function LegacySiteHierarchy({
     sites,
     depth,
     parentPath,
-    monthKey,
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
@@ -62,7 +60,7 @@ function LegacySiteHierarchy({
             <ReviewSiteLeafRows
                 sites={sites}
                 getDisplayName={site => site[currentLevel.key] ?? 'Unknown'}
-                monthKey={monthKey}
+                parentPath={parentPath}
                 sessionCountsBySiteId={sessionCountsBySiteId}
             />
         );
@@ -85,7 +83,6 @@ function LegacySiteHierarchy({
                         sites={sitesInGroup}
                         depth={depth + 1}
                         parentPath={`${parentPath}/${locationName}`}
-                        monthKey={monthKey}
                         sessionCountsBySiteId={sessionCountsBySiteId}
                         expandedSitePaths={expandedSitePaths}
                         onToggle={onToggle}
@@ -100,7 +97,6 @@ interface HierarchicalSiteHierarchyProps {
     sites: Site[];
     parentSiteId: number | undefined;
     parentPath: string;
-    monthKey: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -113,7 +109,6 @@ function HierarchicalSiteHierarchy({
     sites,
     parentSiteId,
     parentPath,
-    monthKey,
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
@@ -137,7 +132,7 @@ function HierarchicalSiteHierarchy({
             <ReviewSiteLeafRows
                 sites={childSites}
                 getDisplayName={site => site.name ?? 'Unknown'}
-                monthKey={monthKey}
+                parentPath={parentPath}
                 sessionCountsBySiteId={sessionCountsBySiteId}
             />
         );
@@ -175,7 +170,6 @@ function HierarchicalSiteHierarchy({
                             sites={sites}
                             parentSiteId={site.siteId}
                             parentPath={`${parentPath}/${site.name}`}
-                            monthKey={monthKey}
                             sessionCountsBySiteId={sessionCountsBySiteId}
                             expandedSitePaths={expandedSitePaths}
                             onToggle={onToggle}
@@ -191,7 +185,6 @@ interface ReviewSiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    monthKey: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -204,7 +197,6 @@ export default function ReviewSiteHierarchy({
     sites,
     depth,
     parentPath,
-    monthKey,
     sessionCountsBySiteId,
     expandedSitePaths,
     onToggle,
@@ -216,7 +208,6 @@ export default function ReviewSiteHierarchy({
             sites={sites}
             depth={depth}
             parentPath={parentPath}
-            monthKey={monthKey}
             sessionCountsBySiteId={sessionCountsBySiteId}
             expandedSitePaths={expandedSitePaths}
             onToggle={onToggle}
@@ -226,7 +217,6 @@ export default function ReviewSiteHierarchy({
             sites={sites}
             parentSiteId={undefined}
             parentPath={parentPath}
-            monthKey={monthKey}
             sessionCountsBySiteId={sessionCountsBySiteId}
             expandedSitePaths={expandedSitePaths}
             onToggle={onToggle}

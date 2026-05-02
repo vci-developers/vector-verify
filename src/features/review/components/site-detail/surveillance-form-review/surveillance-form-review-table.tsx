@@ -1,7 +1,10 @@
 'use client';
 
+import type {
+    FormRow,
+    SessionWithRows,
+} from '@/api/surveillance-form/validation/session-with-rows-schema';
 import type { Session } from '@/api/session/validation/session-schema';
-import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import {
     Table,
     TableBody,
@@ -12,58 +15,39 @@ import {
 } from '@/components/ui/table';
 import { format } from 'date-fns';
 
-interface SessionWithForm {
-    session: Session;
-    form: SurveillanceForm | null;
-}
-
 interface SurveillanceFormReviewTableProps {
-    surveillanceForms: SessionWithForm[];
+    surveillanceForms: SessionWithRows[];
 }
 
-function formatValue(value: unknown): string {
-    if (value === null || value === undefined) return 'N/A';
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    return String(value);
+function getAllLabels(forms: SessionWithRows[]): string[] {
+    const addedLabels = new Set<string>();
+    const labels: string[] = [];
+    for (const { rows } of forms) {
+        if (!rows) continue;
+        for (const row of rows) {
+            if (!addedLabels.has(row.label)) {
+                addedLabels.add(row.label);
+                labels.push(row.label);
+            }
+        }
+    }
+    return labels;
 }
 
-const DATA_FIELDS: {
+function getValueForLabel(rows: FormRow[] | null, label: string): string {
+    if (!rows) return 'No data';
+    return rows.find(row => row.label === label)?.value ?? 'No data';
+}
+
+const SESSION_FIELDS: {
     label: string;
-    render: (session: Session, form: SurveillanceForm | null) => string;
+    render: (session: Session) => string;
 }[] = [
-    {
-        label: 'Collector Name',
-        render: session => formatValue(session.collectorName),
-    },
-    {
-        label: 'Collector Title',
-        render: session => formatValue(session.collectorTitle),
-    },
+    { label: 'Collector Name', render: session => session.collectorName },
+    { label: 'Collector Title', render: session => session.collectorTitle },
     {
         label: 'Collection Method',
-        render: session => formatValue(session.collectionMethod),
-    },
-    {
-        label: 'People in House',
-        render: (_, form) => formatValue(form?.numPeopleSleptInHouse),
-    },
-    {
-        label: 'IRS Conducted',
-        render: (_, form) => formatValue(form?.wasIrsConducted),
-    },
-    {
-        label: 'Months Since IRS',
-        render: (_, form) => formatValue(form?.monthsSinceIrs),
-    },
-    {
-        label: 'LLINs Available',
-        render: (_, form) => formatValue(form?.numLlinsAvailable),
-    },
-    { label: 'LLIN Type', render: (_, form) => formatValue(form?.llinType) },
-    { label: 'LLIN Brand', render: (_, form) => formatValue(form?.llinBrand) },
-    {
-        label: 'People Under LLIN',
-        render: (_, form) => formatValue(form?.numPeopleSleptUnderLlin),
+        render: session => session.collectionMethod,
     },
 ];
 
@@ -79,6 +63,8 @@ export default function SurveillanceFormReviewTable({
             </div>
         );
     }
+
+    const formLabels = getAllLabels(surveillanceForms);
 
     return (
         <Table className="border-border rounded-md border">
@@ -99,17 +85,32 @@ export default function SurveillanceFormReviewTable({
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {DATA_FIELDS.map(field => (
+                {SESSION_FIELDS.map(field => (
                     <TableRow key={field.label} className="h-14">
                         <TableCell className="border-border w-48 border font-medium">
                             {field.label}
                         </TableCell>
-                        {surveillanceForms.map(({ session, form }) => (
+                        {surveillanceForms.map(({ session }) => (
                             <TableCell
                                 key={session.sessionId}
                                 className="border-border border"
                             >
-                                {field.render(session, form)}
+                                {field.render(session)}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                ))}
+                {formLabels.map(label => (
+                    <TableRow key={label} className="h-14">
+                        <TableCell className="border-border w-48 border font-medium">
+                            {label}
+                        </TableCell>
+                        {surveillanceForms.map(({ session, rows }) => (
+                            <TableCell
+                                key={session.sessionId}
+                                className="border-border border"
+                            >
+                                {getValueForLabel(rows, label)}
                             </TableCell>
                         ))}
                     </TableRow>

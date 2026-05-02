@@ -1,7 +1,7 @@
 import { sessionKeys } from '@/api/session/session-keys';
 import { getSessions } from '@/api/session/get-sessions';
 import type { GetSessionsQueryParams } from '@/api/session/validation/get-sessions-schema';
-import { getAllSurveillanceForms } from '@/api/surveillance-form/get-all-surveillance-forms';
+import { getSurveillanceFormDataBySessionId } from '@/api/surveillance-form/get-surveillance-form-data-by-session-id';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
@@ -50,21 +50,20 @@ export default async function ReviewSiteDetailPage({
             );
 
             if (getSessionsResult.ok) {
-                const sessionIds = getSessionsResult.data.sessions.map(
-                    session => session.sessionId,
+                await Promise.all(
+                    getSessionsResult.data.sessions.map(async session => {
+                        const result = await getSurveillanceFormDataBySessionId(
+                            accessToken,
+                            session.sessionId,
+                        );
+                        queryClient.setQueryData(
+                            surveillanceFormKeys.surveillanceFormBySessionId(
+                                session.sessionId,
+                            ),
+                            result,
+                        );
+                    }),
                 );
-                if (sessionIds.length > 0) {
-                    const getAllSurveillanceFormsResult =
-                        await getAllSurveillanceForms(accessToken, {
-                            sessionId: sessionIds,
-                        });
-                    queryClient.setQueryData(
-                        surveillanceFormKeys.allSurveillanceForms({
-                            sessionId: sessionIds,
-                        }),
-                        getAllSurveillanceFormsResult,
-                    );
-                }
             }
 
             return getSessionsResult;
