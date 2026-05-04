@@ -2,7 +2,7 @@
 
 import type {
     FormRow,
-    SessionWithRows,
+    SessionWithFormFieldRows,
 } from '@/api/surveillance-form/validation/session-with-rows-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import {
@@ -16,10 +16,10 @@ import {
 import { format } from 'date-fns';
 
 interface SurveillanceFormReviewTableProps {
-    surveillanceForms: SessionWithRows[];
+    surveillanceForms: SessionWithFormFieldRows[];
 }
 
-function getAllLabels(forms: SessionWithRows[]): string[] {
+function getAllLabels(forms: SessionWithFormFieldRows[]): string[] {
     const addedLabels = new Set<string>();
     const labels: string[] = [];
     for (const { rows } of forms) {

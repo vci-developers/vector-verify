@@ -60,7 +60,6 @@ function LegacySiteHierarchy({
             <ReviewSiteLeafRows
                 sites={sites}
                 getDisplayName={site => site[currentLevel.key] ?? 'Unknown'}
-                parentPath={parentPath}
                 sessionCountsBySiteId={sessionCountsBySiteId}
             />
         );
@@ -132,7 +131,6 @@ function HierarchicalSiteHierarchy({
             <ReviewSiteLeafRows
                 sites={childSites}
                 getDisplayName={site => site.name ?? 'Unknown'}
-                parentPath={parentPath}
                 sessionCountsBySiteId={sessionCountsBySiteId}
             />
         );

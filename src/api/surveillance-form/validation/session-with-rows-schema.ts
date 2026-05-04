@@ -6,10 +6,12 @@ const formRowSchema = z.object({
     value: z.string(),
 });
 
-export const sessionWithRowsSchema = z.object({
+export const sessionWithFormFieldRowsSchema = z.object({
     session: sessionSchema,
     rows: z.array(formRowSchema).nullable(),
 });
 
 export type FormRow = z.infer<typeof formRowSchema>;
-export type SessionWithRows = z.infer<typeof sessionWithRowsSchema>;
+export type SessionWithFormFieldRows = z.infer<
+    typeof sessionWithFormFieldRowsSchema
+>;

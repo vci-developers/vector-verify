@@ -4,7 +4,7 @@ import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
 import type { FormAnswer } from '@/api/surveillance-form/validation/form-answers-schema';
 import type { SurveillanceFormData } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
-import type { SessionWithRows } from '@/api/surveillance-form/validation/session-with-rows-schema';
+import type { SessionWithFormFieldRows } from '@/api/surveillance-form/validation/session-with-rows-schema';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
 
 interface SurveillanceFormReviewWorkspaceProps {
@@ -119,10 +119,12 @@ export default function SurveillanceFormReviewWorkspace({
         }
     }
 
-    const surveillanceForms: SessionWithRows[] = sessions.map(session => ({
-        session,
-        rows: formsMap.get(session.sessionId) ?? null,
-    }));
+    const surveillanceForms: SessionWithFormFieldRows[] = sessions.map(
+        session => ({
+            session,
+            rows: formsMap.get(session.sessionId) ?? null,
+        }),
+    );
 
     return (
         <div className="space-y-4">
