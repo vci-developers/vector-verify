@@ -8,10 +8,10 @@ import { usePutSurveillanceForm } from '@/api/surveillance-form/hooks/use-put-su
 import { usePutSession } from '@/api/session/hooks/use-put-session';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
 import {
-    computeConflicts,
-    DATA_FIELDS,
-    formatFieldValue,
-    type SessionWithForm,
+    findSurveillanceFormFieldConflicts,
+    SURVEILLANCE_FORM_FIELDS,
+    formatSurveillanceFormFieldValue,
+    type SessionWithSurveillanceForm,
 } from '@/features/review/utils/surveillance-form-fields';
 import { Button } from '@/components/ui/button';
 import { sessionKeys } from '@/api/session/session-keys';
@@ -89,20 +89,24 @@ export default function SurveillanceFormReviewWorkspace({
         );
     }
 
-    const formsMap = new Map(
+    const surveillanceFormsBySessionIdMap = new Map(
         getAllSurveillanceFormsResult.data.surveillanceForms.map(f => [
             f.sessionId,
             f,
         ]),
     );
 
-    const surveillanceForms: SessionWithForm[] = sessions.map(session => ({
-        session,
-        form: formsMap.get(session.sessionId) ?? null,
-    }));
+    const sessionsWithSurveillanceForms: SessionWithSurveillanceForm[] =
+        sessions.map(session => ({
+            session,
+            form:
+                surveillanceFormsBySessionIdMap.get(session.sessionId) ?? null,
+        }));
 
-    const conflictMap = computeConflicts(surveillanceForms);
-    const conflictedFieldKeys = Object.keys(conflictMap);
+    const surveillanceFormFieldConflicts = findSurveillanceFormFieldConflicts(
+        sessionsWithSurveillanceForms,
+    );
+    const conflictedFieldKeys = Object.keys(surveillanceFormFieldConflicts);
     const unresolvedCount = conflictedFieldKeys.filter(
         key => resolutions[key] === undefined,
     ).length;
@@ -115,11 +119,15 @@ export default function SurveillanceFormReviewWorkspace({
         const sessionUpdateFields: Record<string, unknown> = {};
         const formUpdateFields: Record<string, unknown> = {};
 
-        for (const [fieldKey, displayValue] of Object.entries(resolutions)) {
-            const fieldDef = DATA_FIELDS.find(f => f.fieldKey === fieldKey);
+        for (const [fieldKey, resolvedFieldValue] of Object.entries(
+            resolutions,
+        )) {
+            const fieldDef = SURVEILLANCE_FORM_FIELDS.find(
+                field => field.fieldKey === fieldKey,
+            );
             if (!fieldDef) continue;
 
-            const parsed = fieldDef.parseForPut(displayValue);
+            const parsed = fieldDef.parseForPut(resolvedFieldValue);
             if (fieldDef.source === 'session') {
                 sessionUpdateFields[fieldKey] = parsed;
             } else {
@@ -128,7 +136,7 @@ export default function SurveillanceFormReviewWorkspace({
         }
 
         const results = await Promise.all(
-            surveillanceForms.map(({ session, form }) =>
+            sessionsWithSurveillanceForms.map(({ session, form }) =>
                 Promise.all([
                     putSessionAsync({
                         sessionId: session.sessionId,
@@ -177,13 +185,17 @@ export default function SurveillanceFormReviewWorkspace({
             {hasConflicts ? (
                 <>
                     <SurveillanceFormReviewTable
-                        surveillanceForms={surveillanceForms}
-                        conflicts={conflictMap}
+                        sessionsWithSurveillanceForms={
+                            sessionsWithSurveillanceForms
+                        }
+                        surveillanceFormFieldConflicts={
+                            surveillanceFormFieldConflicts
+                        }
                         resolutions={resolutions}
-                        onResolve={(fieldKey, displayValue) =>
+                        onResolve={(fieldKey, resolvedFieldValue) =>
                             setResolutions(prev => ({
                                 ...prev,
-                                [fieldKey]: displayValue,
+                                [fieldKey]: resolvedFieldValue,
                             }))
                         }
                     />
@@ -217,7 +229,9 @@ export default function SurveillanceFormReviewWorkspace({
                 </>
             ) : (
                 <NoConflictsCard
-                    surveillanceForms={surveillanceForms}
+                    sessionsWithSurveillanceForms={
+                        sessionsWithSurveillanceForms
+                    }
                     isPending={isPending}
                     onContinue={handleSubmit}
                 />
@@ -227,15 +241,15 @@ export default function SurveillanceFormReviewWorkspace({
 }
 
 function NoConflictsCard({
-    surveillanceForms,
+    sessionsWithSurveillanceForms,
     isPending,
     onContinue,
 }: {
-    surveillanceForms: SessionWithForm[];
+    sessionsWithSurveillanceForms: SessionWithSurveillanceForm[];
     isPending: boolean;
     onContinue: () => void;
 }) {
-    const [sample] = surveillanceForms;
+    const [sample] = sessionsWithSurveillanceForms;
     if (sample === undefined) return null;
 
     return (
@@ -243,18 +257,19 @@ function NoConflictsCard({
             <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
                 <h3 className="font-semibold text-green-800 dark:text-green-300">
-                    All {surveillanceForms.length} sessions are consistent
+                    All {sessionsWithSurveillanceForms.length} sessions are
+                    consistent
                 </h3>
             </div>
 
             <div className="mb-6 grid grid-cols-2 gap-x-8 gap-y-2">
-                {DATA_FIELDS.map(field => (
+                {SURVEILLANCE_FORM_FIELDS.map(field => (
                     <div key={field.fieldKey} className="flex gap-2 text-sm">
                         <span className="text-muted-foreground min-w-32 shrink-0">
                             {field.label}
                         </span>
                         <span className="font-medium">
-                            {formatFieldValue(
+                            {formatSurveillanceFormFieldValue(
                                 field.getValue(sample.session, sample.form),
                             )}
                         </span>
