@@ -1,6 +1,11 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/utils/cn';
+import { endOfMonth, format, parseISO } from 'date-fns';
 import { MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { Fragment } from 'react';
+import { useReviewSiteListMonthKey } from './review-sites-list';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
@@ -16,6 +21,10 @@ export default function ReviewSiteLeafRows({
     getDisplayName,
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
+    const monthKey = useReviewSiteListMonthKey();
+    const startDate = `${monthKey}-01`;
+    const endDate = format(endOfMonth(parseISO(startDate)), 'yyyy-MM-dd');
+
     return (
         <div className="space-y-1">
             {sites.map(site => {
@@ -25,24 +34,31 @@ export default function ReviewSiteLeafRows({
                         needsReviewCount: 0,
                     };
                 const hasSessions = sessionCount > 0;
+                const href = `/review/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
 
-                return (
-                    <div
-                        key={site.siteId}
-                        className="flex items-center justify-between rounded-md px-3 py-2"
-                    >
+                const rowClassName = cn(
+                    'flex items-center justify-between rounded-md px-3 py-2',
+                    hasSessions
+                        ? 'cursor-pointer hover:bg-muted/50'
+                        : 'cursor-not-allowed opacity-60',
+                );
+
+                const rowContent = (
+                    <Fragment>
                         <div className="flex items-center gap-3">
                             <div
-                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                    hasSessions ? 'bg-primary/10' : 'bg-muted'
-                                }`}
+                                className={cn(
+                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                                    hasSessions ? 'bg-primary/10' : 'bg-muted',
+                                )}
                             >
                                 <MapPin
-                                    className={`h-4 w-4 ${
+                                    className={cn(
+                                        'h-4 w-4',
                                         hasSessions
                                             ? 'text-primary'
-                                            : 'text-muted-foreground'
-                                    }`}
+                                            : 'text-muted-foreground',
+                                    )}
                                 />
                             </div>
                             <span className="text-sm">
@@ -63,6 +79,24 @@ export default function ReviewSiteLeafRows({
                                     : 'No sessions'}
                             </Badge>
                         </div>
+                    </Fragment>
+                );
+
+                if (hasSessions) {
+                    return (
+                        <Link
+                            key={site.siteId}
+                            href={href}
+                            className={rowClassName}
+                        >
+                            {rowContent}
+                        </Link>
+                    );
+                }
+
+                return (
+                    <div key={site.siteId} className={rowClassName}>
+                        {rowContent}
                     </div>
                 );
             })}
