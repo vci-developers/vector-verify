@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReviewSiteDetailHeader from '@/features/review/components/site-detail/review-site-detail-header';
 import SurveillanceFormReviewWorkspace from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-workspace';
+import { Button } from '@/components/ui/button';
 import { ClipboardList, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -123,12 +124,7 @@ function ImageReviewPlaceholder({ onSuccess }: { onSuccess: () => void }) {
                 </p>
             </div>
             <div className="flex justify-end">
-                <button
-                    className="bg-primary text-primary-foreground rounded px-4 py-2 text-sm font-medium"
-                    onClick={onSuccess}
-                >
-                    Continue to Certification
-                </button>
+                <Button onClick={onSuccess}>Continue to Certification</Button>
             </div>
         </div>
     );

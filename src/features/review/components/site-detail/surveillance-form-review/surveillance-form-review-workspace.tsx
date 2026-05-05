@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetAllSurveillanceForms } from '@/api/surveillance-form/hooks/use-get-all-surveillance-forms';
@@ -57,54 +57,28 @@ export default function SurveillanceFormReviewWorkspace({
     const { mutateAsync: putSurveillanceFormAsync } = usePutSurveillanceForm();
     const { mutateAsync: putSessionAsync } = usePutSession();
 
-    if (isGetSessionsPending || !getSessionsResult) {
-        return <p className="text-muted-foreground text-sm">Loading...</p>;
-    }
-
-    if (!getSessionsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getSessionsResult.error.message}
-            </p>
+    const sessionsWithSurveillanceForms = useMemo<
+        SessionWithSurveillanceForm[]
+    >(() => {
+        if (!getSessionsResult?.ok || !getAllSurveillanceFormsResult?.ok)
+            return [];
+        const surveillanceFormsBySessionId = new Map(
+            getAllSurveillanceFormsResult.data.surveillanceForms.map(
+                surveillanceForm => [
+                    surveillanceForm.sessionId,
+                    surveillanceForm,
+                ],
+            ),
         );
-    }
-
-    if (sessions.length === 0) {
-        return (
-            <p className="text-muted-foreground text-sm">
-                No sessions found for this site.
-            </p>
-        );
-    }
-
-    if (isGetAllSurveillanceFormsPending || !getAllSurveillanceFormsResult) {
-        return <p className="text-muted-foreground text-sm">Loading...</p>;
-    }
-
-    if (!getAllSurveillanceFormsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSurveillanceFormsResult.error.message}
-            </p>
-        );
-    }
-
-    const surveillanceFormsBySessionIdMap = new Map(
-        getAllSurveillanceFormsResult.data.surveillanceForms.map(f => [
-            f.sessionId,
-            f,
-        ]),
-    );
-
-    const sessionsWithSurveillanceForms: SessionWithSurveillanceForm[] =
-        sessions.map(session => ({
+        return sessions.map(session => ({
             session,
-            form:
-                surveillanceFormsBySessionIdMap.get(session.sessionId) ?? null,
+            form: surveillanceFormsBySessionId.get(session.sessionId) ?? null,
         }));
+    }, [getSessionsResult, getAllSurveillanceFormsResult, sessions]);
 
-    const surveillanceFormFieldConflicts = findSurveillanceFormFieldConflicts(
-        sessionsWithSurveillanceForms,
+    const surveillanceFormFieldConflicts = useMemo(
+        () => findSurveillanceFormFieldConflicts(sessionsWithSurveillanceForms),
+        [sessionsWithSurveillanceForms],
     );
     const conflictedFieldKeys = Object.keys(surveillanceFormFieldConflicts);
     const unresolvedCount = conflictedFieldKeys.filter(
@@ -112,7 +86,7 @@ export default function SurveillanceFormReviewWorkspace({
     ).length;
     const hasConflicts = conflictedFieldKeys.length > 0;
 
-    async function handleSubmit() {
+    const handleSubmit = useCallback(async () => {
         setSubmitError(null);
         setIsPending(true);
 
@@ -167,7 +141,47 @@ export default function SurveillanceFormReviewWorkspace({
         await queryClient.invalidateQueries({
             queryKey: surveillanceFormKeys.root,
         });
+        setIsPending(false);
         onSuccess();
+    }, [
+        sessionsWithSurveillanceForms,
+        resolutions,
+        putSurveillanceFormAsync,
+        putSessionAsync,
+        queryClient,
+        onSuccess,
+    ]);
+
+    if (isGetSessionsPending || !getSessionsResult) {
+        return <p className="text-muted-foreground text-sm">Loading...</p>;
+    }
+
+    if (!getSessionsResult.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getSessionsResult.error.message}
+            </p>
+        );
+    }
+
+    if (sessions.length === 0) {
+        return (
+            <p className="text-muted-foreground text-sm">
+                No sessions found for this site.
+            </p>
+        );
+    }
+
+    if (isGetAllSurveillanceFormsPending || !getAllSurveillanceFormsResult) {
+        return <p className="text-muted-foreground text-sm">Loading...</p>;
+    }
+
+    if (!getAllSurveillanceFormsResult.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                {getAllSurveillanceFormsResult.error.message}
+            </p>
+        );
     }
 
     return (

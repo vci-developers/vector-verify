@@ -4,11 +4,11 @@ import { cn } from '@/utils/cn';
 import { endOfMonth, format, parseISO } from 'date-fns';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { useReviewSiteListMonthKey } from './review-sites-list';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
-    monthKey: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -18,9 +18,9 @@ interface ReviewSiteLeafRowsProps {
 export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
-    monthKey,
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
+    const monthKey = useReviewSiteListMonthKey();
     const startDate = `${monthKey}-01`;
     const endDate = format(endOfMonth(parseISO(startDate)), 'yyyy-MM-dd');
 
