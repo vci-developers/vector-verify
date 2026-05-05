@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CheckCircle2, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetAllSurveillanceForms } from '@/api/surveillance-form/hooks/use-get-all-surveillance-forms';
 import { usePutSurveillanceForm } from '@/api/surveillance-form/hooks/use-put-surveillance-form';
@@ -14,20 +14,27 @@ import {
     type SessionWithForm,
 } from '@/features/review/utils/surveillance-form-fields';
 import { Button } from '@/components/ui/button';
+import { sessionKeys } from '@/api/session/session-keys';
+import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SurveillanceFormReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    onSuccess: () => void;
 }
 
 export default function SurveillanceFormReviewWorkspace({
     siteId,
     startDate,
     endDate,
+    onSuccess,
 }: SurveillanceFormReviewWorkspaceProps) {
     const [resolutions, setResolutions] = useState<Record<string, string>>({});
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isPending, setIsPending] = useState(false);
+    const queryClient = useQueryClient();
 
     const { data: getSessionsResult, isPending: isGetSessionsPending } =
         useGetSessions({ siteId, startDate, endDate });
@@ -103,6 +110,7 @@ export default function SurveillanceFormReviewWorkspace({
 
     async function handleSubmit() {
         setSubmitError(null);
+        setIsPending(true);
 
         const sessionUpdateFields: Record<string, unknown> = {};
         const formUpdateFields: Record<string, unknown> = {};
@@ -143,7 +151,15 @@ export default function SurveillanceFormReviewWorkspace({
 
         if (firstError && !firstError.ok) {
             setSubmitError(firstError.error.message ?? 'Submission failed.');
+            setIsPending(false);
+            return;
         }
+
+        await queryClient.invalidateQueries({ queryKey: sessionKeys.root });
+        await queryClient.invalidateQueries({
+            queryKey: surveillanceFormKeys.root,
+        });
+        onSuccess();
     }
 
     return (
@@ -189,9 +205,12 @@ export default function SurveillanceFormReviewWorkspace({
 
                     <div className="flex justify-end">
                         <Button
-                            disabled={unresolvedCount > 0}
+                            disabled={unresolvedCount > 0 || isPending}
                             onClick={handleSubmit}
                         >
+                            {isPending && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
                             Confirm &amp; Continue
                         </Button>
                     </div>
@@ -199,6 +218,7 @@ export default function SurveillanceFormReviewWorkspace({
             ) : (
                 <NoConflictsCard
                     surveillanceForms={surveillanceForms}
+                    isPending={isPending}
                     onContinue={handleSubmit}
                 />
             )}
@@ -208,9 +228,11 @@ export default function SurveillanceFormReviewWorkspace({
 
 function NoConflictsCard({
     surveillanceForms,
+    isPending,
     onContinue,
 }: {
     surveillanceForms: SessionWithForm[];
+    isPending: boolean;
     onContinue: () => void;
 }) {
     const [sample] = surveillanceForms;
@@ -241,7 +263,12 @@ function NoConflictsCard({
             </div>
 
             <div className="flex justify-end">
-                <Button onClick={onContinue}>Continue to Image Review</Button>
+                <Button disabled={isPending} onClick={onContinue}>
+                    {isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Continue to Image Review
+                </Button>
             </div>
         </div>
     );
