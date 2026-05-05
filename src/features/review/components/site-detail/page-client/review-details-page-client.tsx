@@ -8,6 +8,7 @@ import ReviewSiteDetailHeader from '@/features/review/components/site-detail/rev
 import SurveillanceFormReviewWorkspace from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-workspace';
 import { ClipboardList, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const REVIEW_TABS = [{ value: 'review', label: 'REVIEW' }] as const;
 
@@ -28,6 +29,40 @@ export default function ReviewDetailsPageClient({
     startDate,
     endDate,
 }: ReviewDetailsPageClientProps) {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const rawStep = Number(searchParams.get('step') ?? '1');
+    const currentStep =
+        Number.isFinite(rawStep) &&
+        rawStep >= 1 &&
+        rawStep <= REVIEW_STEPS.length
+            ? rawStep
+            : 1;
+
+    function handleStepSuccess() {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('step', String(currentStep + 1));
+        router.replace(`?${params.toString()}`);
+    }
+
+    function renderStep() {
+        if (currentStep === 1) {
+            return (
+                <SurveillanceFormReviewWorkspace
+                    siteId={siteId}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onSuccess={handleStepSuccess}
+                />
+            );
+        }
+        if (currentStep === 2) {
+            return <ImageReviewPlaceholder onSuccess={handleStepSuccess} />;
+        }
+        return <CertificationPlaceholder />;
+    }
+
     return (
         <PageShell
             title="Review"
@@ -64,20 +99,50 @@ export default function ReviewDetailsPageClient({
                         <div className="absolute left-1/2 w-max -translate-x-1/2">
                             <ReviewSiteDetailHeader
                                 steps={REVIEW_STEPS}
-                                currentStep={1}
+                                currentStep={currentStep}
                             />
                         </div>
                     </div>
 
                     <Separator />
 
-                    <SurveillanceFormReviewWorkspace
-                        siteId={siteId}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
+                    {renderStep()}
                 </CardContent>
             </Card>
         </PageShell>
+    );
+}
+
+function ImageReviewPlaceholder({ onSuccess }: { onSuccess: () => void }) {
+    return (
+        <div className="space-y-4">
+            <div>
+                <h2 className="text-lg font-semibold">Step 2: Image Review</h2>
+                <p className="text-muted-foreground text-sm">
+                    Image review is not yet implemented.
+                </p>
+            </div>
+            <div className="flex justify-end">
+                <button
+                    className="bg-primary text-primary-foreground rounded px-4 py-2 text-sm font-medium"
+                    onClick={onSuccess}
+                >
+                    Continue to Certification
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function CertificationPlaceholder() {
+    return (
+        <div className="space-y-4">
+            <div>
+                <h2 className="text-lg font-semibold">Step 3: Certification</h2>
+                <p className="text-muted-foreground text-sm">
+                    Certification is not yet implemented.
+                </p>
+            </div>
+        </div>
     );
 }

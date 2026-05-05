@@ -10,6 +10,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import ReviewDetailsPageClient from '@/features/review/components/site-detail/page-client/review-details-page-client';
 
 interface ReviewSiteDetailPageProps {
@@ -82,11 +83,13 @@ export default async function ReviewSiteDetailPage({
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewDetailsPageClient
-                siteId={siteId}
-                startDate={startDate}
-                endDate={endDate}
-            />
+            <Suspense>
+                <ReviewDetailsPageClient
+                    siteId={siteId}
+                    startDate={startDate}
+                    endDate={endDate}
+                />
+            </Suspense>
         </HydrationBoundary>
     );
 }
