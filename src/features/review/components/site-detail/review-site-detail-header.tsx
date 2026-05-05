@@ -4,12 +4,8 @@ import { Check } from 'lucide-react';
 import { Fragment } from 'react';
 import { cn } from '@/utils/cn';
 
-interface Step {
-    label: string;
-}
-
 interface ReviewSiteDetailHeaderProps {
-    steps: Step[];
+    steps: { label: string }[];
     currentStep: number;
 }
 

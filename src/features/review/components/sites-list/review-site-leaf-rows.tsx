@@ -33,7 +33,7 @@ export default function ReviewSiteLeafRows({
                         needsReviewCount: 0,
                     };
                 const hasSessions = sessionCount > 0;
-                const href = `/review/${site.district}/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
+                const href = `/review/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
 
                 const rowClassName = cn(
                     'flex items-center justify-between rounded-md px-3 py-2',

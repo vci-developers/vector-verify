@@ -8,7 +8,7 @@ import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
-import OperationsAiPerformanceTab from '@/features/operations/components/ai-performance/operations-ai-performance-tab';
+import OperationsAiPerformance from '@/features/operations/components/ai-performance/operations-ai-performance';
 import OperationsGeographicalSummary from '@/features/operations/components/geographical-summary/operations-geographical-summary';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
@@ -162,7 +162,12 @@ export default function OperationsPageClient() {
                             )}
 
                             {activeTab === 'ai-performance' && (
-                                <OperationsAiPerformanceTab />
+                                <OperationsAiPerformance
+                                    locationQueryParam={locationQueryParam}
+                                    selectedLocationName={selectedLocation}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             )}
 
                             {activeTab === 'field-user-compliance' && (

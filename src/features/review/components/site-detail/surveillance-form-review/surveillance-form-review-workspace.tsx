@@ -1,21 +1,58 @@
 'use client';
 
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
-import { useGetAllSurveillanceForms } from '@/api/surveillance-form/hooks/use-get-all-surveillance-forms';
-import type { Session } from '@/api/session/validation/session-schema';
-import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
+import type { FormAnswer } from '@/api/surveillance-form/validation/form-answers-schema';
+import type { SurveillanceFormData } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
+import type { SessionWithFormFieldRows } from '@/api/surveillance-form/validation/session-with-rows-schema';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
-import { useMemo } from 'react';
-
-interface SessionWithForm {
-    session: Session;
-    form: SurveillanceForm | null;
-}
 
 interface SurveillanceFormReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+}
+
+function formatValue(value: unknown): string {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    return String(value);
+}
+
+function normalizeFormData(
+    data: SurveillanceFormData,
+): { label: string; value: string }[] {
+    if (data.kind === 'answers') {
+        return data.answers.flatMap((answer: FormAnswer) =>
+            answer.label !== null
+                ? [{ label: answer.label, value: formatValue(answer.value) }]
+                : [],
+        );
+    }
+    return [
+        {
+            label: 'People in House',
+            value: formatValue(data.numPeopleSleptInHouse),
+        },
+        {
+            label: 'IRS Conducted',
+            value: formatValue(data.wasIrsConducted),
+        },
+        {
+            label: 'Months Since IRS',
+            value: formatValue(data.monthsSinceIrs),
+        },
+        {
+            label: 'LLINs Available',
+            value: formatValue(data.numLlinsAvailable),
+        },
+        { label: 'LLIN Type', value: formatValue(data.llinType) },
+        { label: 'LLIN Brand', value: formatValue(data.llinBrand) },
+        {
+            label: 'People Under LLIN',
+            value: formatValue(data.numPeopleSleptUnderLlin),
+        },
+    ];
 }
 
 export default function SurveillanceFormReviewWorkspace({
@@ -26,22 +63,12 @@ export default function SurveillanceFormReviewWorkspace({
     const { data: getSessionsResult, isPending: isGetSessionsPending } =
         useGetSessions({ siteId, startDate, endDate });
 
-    const { sessions, sessionIds } = useMemo(() => {
-        const sessions = getSessionsResult?.ok
-            ? getSessionsResult.data.sessions
-            : [];
-        return {
-            sessions,
-            sessionIds: sessions.map(session => session.sessionId),
-        };
-    }, [getSessionsResult]);
+    const sessions = getSessionsResult?.ok
+        ? getSessionsResult.data.sessions
+        : [];
 
-    const {
-        data: getAllSurveillanceFormsResult,
-        isPending: isGetAllSurveillanceFormsPending,
-    } = useGetAllSurveillanceForms(
-        { sessionId: sessionIds },
-        { enabled: sessionIds.length > 0 },
+    const surveillanceFormQueries = useGetSurveillanceFormsBySessionIds(
+        sessions.map(session => session.sessionId),
     );
 
     if (isGetSessionsPending || !getSessionsResult) {
@@ -64,28 +91,40 @@ export default function SurveillanceFormReviewWorkspace({
         );
     }
 
-    if (isGetAllSurveillanceFormsPending || !getAllSurveillanceFormsResult) {
+    if (surveillanceFormQueries.some(query => query.isPending)) {
         return <p className="text-muted-foreground text-sm">Loading...</p>;
     }
 
-    if (!getAllSurveillanceFormsResult.ok) {
+    const failedQuery = surveillanceFormQueries.find(
+        query =>
+            query.data &&
+            !query.data.ok &&
+            query.data.error.kind !== 'not_found',
+    );
+    if (failedQuery?.data && !failedQuery.data.ok) {
         return (
             <p className="text-destructive text-sm">
-                {getAllSurveillanceFormsResult.error.message}
+                {failedQuery.data.error.message}
             </p>
         );
     }
 
-    const formsMap = new Map(
-        getAllSurveillanceFormsResult.data.surveillanceForms.map(
-            surveillanceForm => [surveillanceForm.sessionId, surveillanceForm],
-        ),
-    );
+    const formsMap = new Map<number, { label: string; value: string }[]>();
+    for (const query of surveillanceFormQueries) {
+        if (query.data?.ok) {
+            formsMap.set(
+                query.data.data.sessionId,
+                normalizeFormData(query.data.data),
+            );
+        }
+    }
 
-    const surveillanceForms: SessionWithForm[] = sessions.map(session => ({
-        session,
-        form: formsMap.get(session.sessionId) ?? null,
-    }));
+    const surveillanceForms: SessionWithFormFieldRows[] = sessions.map(
+        session => ({
+            session,
+            rows: formsMap.get(session.sessionId) ?? null,
+        }),
+    );
 
     return (
         <div className="space-y-4">
