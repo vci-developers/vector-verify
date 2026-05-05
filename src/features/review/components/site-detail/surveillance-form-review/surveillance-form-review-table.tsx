@@ -23,20 +23,20 @@ import { Button } from '@/components/ui/button';
 import {
     SURVEILLANCE_FORM_FIELDS,
     formatSurveillanceFormFieldValue,
-    type SurveillanceFormFieldConflictMap,
+    type FieldConflictMap,
     type SessionWithSurveillanceForm,
 } from '@/features/review/utils/surveillance-form-fields';
 
 interface SurveillanceFormReviewTableProps {
-    sessionsWithSurveillanceForms: SessionWithSurveillanceForm[];
-    surveillanceFormFieldConflicts: SurveillanceFormFieldConflictMap;
+    sessionsWithForms: SessionWithSurveillanceForm[];
+    fieldConflicts: FieldConflictMap;
     resolutions: Record<string, string>;
     onResolve: (fieldKey: string, resolvedFieldValue: string) => void;
 }
 
 interface ResolveDropdownProps {
     fieldKey: string;
-    reportedValues: Array<{ label: string; value: unknown }>;
+    reportedValues: string[];
     resolved: string | undefined;
     otherAllowed: 'string' | 'number' | false;
     onResolve: (fieldKey: string, resolvedFieldValue: string) => void;
@@ -112,9 +112,9 @@ function ResolveDropdown({
                 <SelectValue placeholder="Resolve" />
             </SelectTrigger>
             <SelectContent>
-                {reportedValues.map(opt => (
-                    <SelectItem key={opt.label} value={opt.label}>
-                        {opt.label}
+                {reportedValues.map(label => (
+                    <SelectItem key={label} value={label}>
+                        {label}
                     </SelectItem>
                 ))}
                 {otherAllowed !== false && (
@@ -126,14 +126,11 @@ function ResolveDropdown({
 }
 
 export default function SurveillanceFormReviewTable({
-    sessionsWithSurveillanceForms,
-    surveillanceFormFieldConflicts,
+    sessionsWithForms,
+    fieldConflicts,
     resolutions,
     onResolve,
 }: SurveillanceFormReviewTableProps) {
-    const hasActionColumn =
-        Object.keys(surveillanceFormFieldConflicts).length > 0;
-
     return (
         <Table className="border-border rounded-md border">
             <TableHeader>
@@ -141,7 +138,7 @@ export default function SurveillanceFormReviewTable({
                     <TableHead className="border-border w-48 border text-xs font-semibold tracking-wide uppercase">
                         Field Name
                     </TableHead>
-                    {sessionsWithSurveillanceForms.map(({ session }) => (
+                    {sessionsWithForms.map(({ session }) => (
                         <TableHead
                             key={session.sessionId}
                             className="border-border border"
@@ -157,17 +154,14 @@ export default function SurveillanceFormReviewTable({
                             </div>
                         </TableHead>
                     ))}
-                    {hasActionColumn && (
-                        <TableHead className="border-border border text-xs font-semibold tracking-wide uppercase">
-                            Action
-                        </TableHead>
-                    )}
+                    <TableHead className="border-border border text-xs font-semibold tracking-wide uppercase">
+                        Action
+                    </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {SURVEILLANCE_FORM_FIELDS.map(field => {
-                    const fieldConflict =
-                        surveillanceFormFieldConflicts[field.fieldKey];
+                    const fieldConflict = fieldConflicts[field.fieldKey];
                     const resolved = resolutions[field.fieldKey];
 
                     return (
@@ -180,56 +174,50 @@ export default function SurveillanceFormReviewTable({
                                     {field.label}
                                 </div>
                             </TableCell>
-                            {sessionsWithSurveillanceForms.map(
-                                ({ session, form }) => {
-                                    const sessionFieldValue =
-                                        formatSurveillanceFormFieldValue(
-                                            field.getValue(session, form),
-                                        );
-                                    const isOutlier =
-                                        fieldConflict !== undefined &&
-                                        (fieldConflict.majorityValue === null ||
-                                            sessionFieldValue !==
-                                                formatSurveillanceFormFieldValue(
-                                                    fieldConflict.majorityValue,
-                                                ));
-
-                                    return (
-                                        <TableCell
-                                            key={session.sessionId}
-                                            className={`border-border border ${isOutlier ? 'bg-destructive/10' : ''}`}
-                                        >
-                                            <span
-                                                className={
-                                                    isOutlier
-                                                        ? 'text-destructive font-semibold'
-                                                        : ''
-                                                }
-                                            >
-                                                {resolved !== undefined &&
-                                                fieldConflict !== undefined
-                                                    ? resolved
-                                                    : sessionFieldValue}
-                                            </span>
-                                        </TableCell>
+                            {sessionsWithForms.map(({ session, form }) => {
+                                const sessionFieldValue =
+                                    formatSurveillanceFormFieldValue(
+                                        field.getValue(session, form),
                                     );
-                                },
-                            )}
-                            {hasActionColumn && (
-                                <TableCell className="border-border border">
-                                    {fieldConflict !== undefined && (
-                                        <ResolveDropdown
-                                            fieldKey={field.fieldKey}
-                                            reportedValues={
-                                                fieldConflict.reportedValues
+                                const isOutlier =
+                                    fieldConflict !== undefined &&
+                                    (fieldConflict.majorityLabel === null ||
+                                        sessionFieldValue !==
+                                            fieldConflict.majorityLabel);
+
+                                return (
+                                    <TableCell
+                                        key={session.sessionId}
+                                        className={`border-border border ${isOutlier ? 'bg-destructive/10' : ''}`}
+                                    >
+                                        <span
+                                            className={
+                                                isOutlier
+                                                    ? 'text-destructive font-semibold'
+                                                    : ''
                                             }
-                                            resolved={resolved}
-                                            otherAllowed={field.otherAllowed}
-                                            onResolve={onResolve}
-                                        />
-                                    )}
-                                </TableCell>
-                            )}
+                                        >
+                                            {resolved !== undefined &&
+                                            fieldConflict !== undefined
+                                                ? resolved
+                                                : sessionFieldValue}
+                                        </span>
+                                    </TableCell>
+                                );
+                            })}
+                            <TableCell className="border-border border">
+                                {fieldConflict !== undefined && (
+                                    <ResolveDropdown
+                                        fieldKey={field.fieldKey}
+                                        reportedValues={
+                                            fieldConflict.reportedValues
+                                        }
+                                        resolved={resolved}
+                                        otherAllowed={field.otherAllowed}
+                                        onResolve={onResolve}
+                                    />
+                                )}
+                            </TableCell>
                         </TableRow>
                     );
                 })}

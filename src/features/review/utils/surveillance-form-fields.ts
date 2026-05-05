@@ -1,6 +1,8 @@
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
+export type FieldValue = string | number | boolean | null;
+
 export interface SessionWithSurveillanceForm {
     session: Session;
     form: SurveillanceForm | null;
@@ -10,15 +12,21 @@ export interface SurveillanceFormField {
     label: string;
     fieldKey: string;
     source: 'session' | 'form';
-    getValue: (session: Session, form: SurveillanceForm | null) => unknown;
-    parseForPut: (fieldValue: string) => unknown;
+    getValue: (session: Session, form: SurveillanceForm | null) => FieldValue;
+    deserializeApiValue: (fieldValue: string) => FieldValue | undefined;
     otherAllowed: 'string' | 'number' | false;
 }
 
-export function formatSurveillanceFormFieldValue(value: unknown): string {
+export function formatSurveillanceFormFieldValue(
+    value: FieldValue | undefined,
+): string {
     if (value === null || value === undefined) return 'N/A';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     return String(value);
+}
+
+function normalizeValue(value: FieldValue | undefined): FieldValue {
+    return value === undefined || value === null ? null : value;
 }
 
 function sessionField(
@@ -30,7 +38,7 @@ function sessionField(
         fieldKey: key,
         source: 'session',
         getValue: session => session[key],
-        parseForPut: fieldValue => fieldValue,
+        deserializeApiValue: fieldValue => fieldValue,
         otherAllowed: 'string',
     };
 }
@@ -44,7 +52,8 @@ function surveillanceFormTextField(
         fieldKey: key as string,
         source: 'form',
         getValue: (_session, form) => form?.[key] ?? null,
-        parseForPut: fieldValue => (fieldValue === 'N/A' ? null : fieldValue),
+        deserializeApiValue: fieldValue =>
+            fieldValue === 'N/A' ? null : fieldValue,
         otherAllowed: 'string',
     };
 }
@@ -58,7 +67,7 @@ function surveillanceFormYesNoField(
         fieldKey: key as string,
         source: 'form',
         getValue: (_session, form) => form?.[key] ?? null,
-        parseForPut: fieldValue =>
+        deserializeApiValue: fieldValue =>
             fieldValue === 'N/A' ? undefined : fieldValue === 'Yes',
         otherAllowed: false,
     };
@@ -74,7 +83,7 @@ function surveillanceFormNumericField(
         fieldKey: key as string,
         source: 'form',
         getValue: (_session, form) => form?.[key] ?? null,
-        parseForPut: fieldValue =>
+        deserializeApiValue: fieldValue =>
             fieldValue === 'N/A'
                 ? nullable
                     ? null
@@ -106,82 +115,53 @@ export const SURVEILLANCE_FORM_FIELDS: SurveillanceFormField[] = [
 ];
 
 export interface SurveillanceFormFieldConflict {
-    // Each unique field value reported by at least one session, paired with its raw typed form
-    reportedValues: Array<{ label: string; value: unknown }>;
-    // The field value held by the majority of sessions, or null when sessions are evenly split
-    majorityValue: unknown | null;
+    reportedValues: string[];
+    majorityLabel: string | null;
 }
 
-export type SurveillanceFormFieldConflictMap = Record<
-    string,
-    SurveillanceFormFieldConflict
->;
+export type FieldConflictMap = Record<string, SurveillanceFormFieldConflict>;
 
-function findMajorityValue(
-    distinctFieldValues: Array<{ label: string; value: unknown }>,
-    sessionFieldValues: string[],
-): unknown | null {
-    const sessionCountByFieldValue = new Map<string, number>();
-    for (const fieldValue of sessionFieldValues) {
-        sessionCountByFieldValue.set(
-            fieldValue,
-            (sessionCountByFieldValue.get(fieldValue) ?? 0) + 1,
-        );
+function findMajorityLabel(sessionValues: FieldValue[]): string | null {
+    const countByValue = new Map<FieldValue, number>();
+    for (const v of sessionValues) {
+        countByValue.set(v, (countByValue.get(v) ?? 0) + 1);
     }
 
-    let highestSessionCount = 0;
-    for (const sessionCount of sessionCountByFieldValue.values()) {
-        if (sessionCount > highestSessionCount)
-            highestSessionCount = sessionCount;
+    let highestCount = 0;
+    for (const count of countByValue.values()) {
+        if (count > highestCount) highestCount = count;
     }
 
-    const fieldValuesHeldByMostSessions = distinctFieldValues.filter(
-        distinctFieldValue =>
-            (sessionCountByFieldValue.get(distinctFieldValue.label) ?? 0) ===
-            highestSessionCount,
+    const withHighestCount = [...countByValue.keys()].filter(
+        v => (countByValue.get(v) ?? 0) === highestCount,
     );
 
-    return fieldValuesHeldByMostSessions.length === 1
-        ? (fieldValuesHeldByMostSessions.at(0)?.value ?? null)
+    return withHighestCount.length === 1
+        ? formatSurveillanceFormFieldValue(withHighestCount[0] ?? null)
         : null;
 }
 
 export function findSurveillanceFormFieldConflicts(
-    sessionsWithSurveillanceForms: SessionWithSurveillanceForm[],
-): SurveillanceFormFieldConflictMap {
-    const surveillanceFormFieldConflicts: SurveillanceFormFieldConflictMap = {};
+    sessionsWithForms: SessionWithSurveillanceForm[],
+): FieldConflictMap {
+    const fieldConflicts: FieldConflictMap = {};
 
     for (const field of SURVEILLANCE_FORM_FIELDS) {
-        const sessionFieldValues = sessionsWithSurveillanceForms.map(
-            ({ session, form }) =>
-                formatSurveillanceFormFieldValue(field.getValue(session, form)),
+        const sessionValues = sessionsWithForms.map(({ session, form }) =>
+            normalizeValue(field.getValue(session, form)),
         );
 
-        if (new Set(sessionFieldValues).size <= 1) continue;
+        if (new Set(sessionValues).size <= 1) continue;
 
-        const distinctFieldValues = [...new Set(sessionFieldValues)].map(
-            fieldValue => {
-                const sessionIndex = sessionFieldValues.indexOf(fieldValue);
-                const sessionWithSurveillanceForm =
-                    sessionsWithSurveillanceForms[sessionIndex]!;
-                return {
-                    label: fieldValue,
-                    value: field.getValue(
-                        sessionWithSurveillanceForm.session,
-                        sessionWithSurveillanceForm.form,
-                    ),
-                };
-            },
-        );
+        const distinctValues = [...new Set(sessionValues)];
 
-        surveillanceFormFieldConflicts[field.fieldKey] = {
-            reportedValues: distinctFieldValues,
-            majorityValue: findMajorityValue(
-                distinctFieldValues,
-                sessionFieldValues,
+        fieldConflicts[field.fieldKey] = {
+            reportedValues: distinctValues.map(
+                formatSurveillanceFormFieldValue,
             ),
+            majorityLabel: findMajorityLabel(sessionValues),
         };
     }
 
-    return surveillanceFormFieldConflicts;
+    return fieldConflicts;
 }

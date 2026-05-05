@@ -1,11 +1,9 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetAllSurveillanceForms } from '@/api/surveillance-form/hooks/use-get-all-surveillance-forms';
-import { usePutSurveillanceForm } from '@/api/surveillance-form/hooks/use-put-surveillance-form';
-import { usePutSession } from '@/api/session/hooks/use-put-session';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
 import {
     findSurveillanceFormFieldConflicts,
@@ -13,10 +11,8 @@ import {
     formatSurveillanceFormFieldValue,
     type SessionWithSurveillanceForm,
 } from '@/features/review/utils/surveillance-form-fields';
+import { useSurveillanceFormReviewSubmit } from '@/features/review/components/site-detail/surveillance-form-review/use-surveillance-form-review-submit';
 import { Button } from '@/components/ui/button';
-import { sessionKeys } from '@/api/session/session-keys';
-import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface SurveillanceFormReviewWorkspaceProps {
     siteId: number;
@@ -32,9 +28,6 @@ export default function SurveillanceFormReviewWorkspace({
     onSuccess,
 }: SurveillanceFormReviewWorkspaceProps) {
     const [resolutions, setResolutions] = useState<Record<string, string>>({});
-    const [submitError, setSubmitError] = useState<string | null>(null);
-    const [isPending, setIsPending] = useState(false);
-    const queryClient = useQueryClient();
 
     const { data: getSessionsResult, isPending: isGetSessionsPending } =
         useGetSessions({ siteId, startDate, endDate });
@@ -54,12 +47,7 @@ export default function SurveillanceFormReviewWorkspace({
         { enabled: sessionIds.length > 0 },
     );
 
-    const { mutateAsync: putSurveillanceFormAsync } = usePutSurveillanceForm();
-    const { mutateAsync: putSessionAsync } = usePutSession();
-
-    const sessionsWithSurveillanceForms = useMemo<
-        SessionWithSurveillanceForm[]
-    >(() => {
+    const sessionsWithForms = useMemo<SessionWithSurveillanceForm[]>(() => {
         if (!getSessionsResult?.ok || !getAllSurveillanceFormsResult?.ok)
             return [];
         const surveillanceFormsBySessionId = new Map(
@@ -76,83 +64,29 @@ export default function SurveillanceFormReviewWorkspace({
         }));
     }, [getSessionsResult, getAllSurveillanceFormsResult, sessions]);
 
-    const surveillanceFormFieldConflicts = useMemo(
-        () => findSurveillanceFormFieldConflicts(sessionsWithSurveillanceForms),
-        [sessionsWithSurveillanceForms],
+    const fieldConflicts = useMemo(
+        () => findSurveillanceFormFieldConflicts(sessionsWithForms),
+        [sessionsWithForms],
     );
-    const conflictedFieldKeys = Object.keys(surveillanceFormFieldConflicts);
+    const conflictedFieldKeys = Object.keys(fieldConflicts);
     const unresolvedCount = conflictedFieldKeys.filter(
         key => resolutions[key] === undefined,
     ).length;
     const hasConflicts = conflictedFieldKeys.length > 0;
 
-    const handleSubmit = useCallback(async () => {
-        setSubmitError(null);
-        setIsPending(true);
-
-        const sessionUpdateFields: Record<string, unknown> = {};
-        const formUpdateFields: Record<string, unknown> = {};
-
-        for (const [fieldKey, resolvedFieldValue] of Object.entries(
-            resolutions,
-        )) {
-            const fieldDef = SURVEILLANCE_FORM_FIELDS.find(
-                field => field.fieldKey === fieldKey,
-            );
-            if (!fieldDef) continue;
-
-            const parsed = fieldDef.parseForPut(resolvedFieldValue);
-            if (fieldDef.source === 'session') {
-                sessionUpdateFields[fieldKey] = parsed;
-            } else {
-                formUpdateFields[fieldKey] = parsed;
-            }
-        }
-
-        const results = await Promise.all(
-            sessionsWithSurveillanceForms.map(({ session, form }) =>
-                Promise.all([
-                    putSessionAsync({
-                        sessionId: session.sessionId,
-                        requestBody: {
-                            ...sessionUpdateFields,
-                            state: 'IN_REVIEW',
-                        },
-                    }),
-                    form
-                        ? putSurveillanceFormAsync({
-                              formId: form.formId,
-                              requestBody: formUpdateFields,
-                          })
-                        : Promise.resolve(null),
-                ]),
-            ),
-        );
-
-        const firstError = results.flat().find(r => r !== null && !r.ok);
-
-        if (firstError && !firstError.ok) {
-            setSubmitError(firstError.error.message ?? 'Submission failed.');
-            setIsPending(false);
-            return;
-        }
-
-        await queryClient.invalidateQueries({ queryKey: sessionKeys.root });
-        await queryClient.invalidateQueries({
-            queryKey: surveillanceFormKeys.root,
-        });
-        setIsPending(false);
-        onSuccess();
-    }, [
-        sessionsWithSurveillanceForms,
+    const { submit, isPending, error } = useSurveillanceFormReviewSubmit({
+        sessionsWithForms,
         resolutions,
-        putSurveillanceFormAsync,
-        putSessionAsync,
-        queryClient,
         onSuccess,
-    ]);
+    });
 
-    if (isGetSessionsPending || !getSessionsResult) {
+    if (
+        isGetSessionsPending ||
+        !getSessionsResult ||
+        (sessionIds.length > 0 &&
+            (isGetAllSurveillanceFormsPending ||
+                !getAllSurveillanceFormsResult))
+    ) {
         return <p className="text-muted-foreground text-sm">Loading...</p>;
     }
 
@@ -172,14 +106,10 @@ export default function SurveillanceFormReviewWorkspace({
         );
     }
 
-    if (isGetAllSurveillanceFormsPending || !getAllSurveillanceFormsResult) {
-        return <p className="text-muted-foreground text-sm">Loading...</p>;
-    }
-
-    if (!getAllSurveillanceFormsResult.ok) {
+    if (!getAllSurveillanceFormsResult?.ok) {
         return (
             <p className="text-destructive text-sm">
-                {getAllSurveillanceFormsResult.error.message}
+                {getAllSurveillanceFormsResult?.error.message}
             </p>
         );
     }
@@ -199,12 +129,8 @@ export default function SurveillanceFormReviewWorkspace({
             {hasConflicts ? (
                 <>
                     <SurveillanceFormReviewTable
-                        sessionsWithSurveillanceForms={
-                            sessionsWithSurveillanceForms
-                        }
-                        surveillanceFormFieldConflicts={
-                            surveillanceFormFieldConflicts
-                        }
+                        sessionsWithForms={sessionsWithForms}
+                        fieldConflicts={fieldConflicts}
                         resolutions={resolutions}
                         onResolve={(fieldKey, resolvedFieldValue) =>
                             setResolutions(prev => ({
@@ -223,16 +149,14 @@ export default function SurveillanceFormReviewWorkspace({
                         </div>
                     )}
 
-                    {submitError && (
-                        <p className="text-destructive text-sm">
-                            {submitError}
-                        </p>
+                    {error && (
+                        <p className="text-destructive text-sm">{error}</p>
                     )}
 
                     <div className="flex justify-end">
                         <Button
                             disabled={unresolvedCount > 0 || isPending}
-                            onClick={handleSubmit}
+                            onClick={submit}
                         >
                             {isPending && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -243,11 +167,9 @@ export default function SurveillanceFormReviewWorkspace({
                 </>
             ) : (
                 <NoConflictsCard
-                    sessionsWithSurveillanceForms={
-                        sessionsWithSurveillanceForms
-                    }
+                    sessionsWithForms={sessionsWithForms}
                     isPending={isPending}
-                    onContinue={handleSubmit}
+                    onContinue={submit}
                 />
             )}
         </div>
@@ -255,15 +177,15 @@ export default function SurveillanceFormReviewWorkspace({
 }
 
 function NoConflictsCard({
-    sessionsWithSurveillanceForms,
+    sessionsWithForms,
     isPending,
     onContinue,
 }: {
-    sessionsWithSurveillanceForms: SessionWithSurveillanceForm[];
+    sessionsWithForms: SessionWithSurveillanceForm[];
     isPending: boolean;
     onContinue: () => void;
 }) {
-    const [sample] = sessionsWithSurveillanceForms;
+    const [sample] = sessionsWithForms;
     if (sample === undefined) return null;
 
     return (
@@ -271,8 +193,7 @@ function NoConflictsCard({
             <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
                 <h3 className="font-semibold text-green-800 dark:text-green-300">
-                    All {sessionsWithSurveillanceForms.length} sessions are
-                    consistent
+                    All {sessionsWithForms.length} sessions are consistent
                 </h3>
             </div>
 
