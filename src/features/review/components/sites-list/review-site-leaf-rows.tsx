@@ -1,5 +1,6 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/utils/cn';
 import { ChevronRight, Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -41,9 +42,8 @@ const STATUS_LABELS = {
 } as const;
 
 function buildReviewHref(site: Site, startDate: string, endDate: string) {
-    const districtPath = encodeURIComponent(site.district ?? 'location');
     const queryParams = new URLSearchParams({ startDate, endDate });
-    return `/review/${districtPath}/${site.siteId}?${queryParams.toString()}`;
+    return `/review/${site.siteId}?${queryParams.toString()}`;
 }
 
 export default function ReviewSiteLeafRows({
@@ -71,27 +71,29 @@ export default function ReviewSiteLeafRows({
                             {STATUS_LABELS[status]}
                         </Badge>
                     ) : null;
+                const rowClassName = cn(
+                    'flex items-center justify-between rounded-md px-3 py-2 transition-colors',
+                    isLocked
+                        ? 'cursor-not-allowed opacity-60'
+                        : 'cursor-pointer hover:bg-muted/50',
+                );
 
                 const rowContent = (
-                    <div
-                        className={`flex items-center justify-between rounded-md px-3 py-2 transition-colors ${
-                            isLocked
-                                ? 'cursor-not-allowed opacity-60'
-                                : 'hover:bg-muted/50'
-                        }`}
-                    >
+                    <>
                         <div className="flex items-center gap-3">
                             <div
-                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                    hasSessions ? 'bg-primary/10' : 'bg-muted'
-                                }`}
+                                className={cn(
+                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                                    hasSessions ? 'bg-primary/10' : 'bg-muted',
+                                )}
                             >
                                 <MapPin
-                                    className={`h-4 w-4 ${
+                                    className={cn(
+                                        'h-4 w-4',
                                         hasSessions
                                             ? 'text-primary'
-                                            : 'text-muted-foreground'
-                                    }`}
+                                            : 'text-muted-foreground',
+                                    )}
                                 />
                             </div>
                             <span className="text-sm">
@@ -123,17 +125,22 @@ export default function ReviewSiteLeafRows({
                                 <ChevronRight className="text-muted-foreground h-4 w-4" />
                             )}
                         </div>
-                    </div>
+                    </>
                 );
 
                 if (isLocked) {
-                    return <div key={site.siteId}>{rowContent}</div>;
+                    return (
+                        <div key={site.siteId} className={rowClassName}>
+                            {rowContent}
+                        </div>
+                    );
                 }
 
                 return (
                     <Link
                         key={site.siteId}
                         href={buildReviewHref(site, startDate, endDate)}
+                        className={rowClassName}
                     >
                         {rowContent}
                     </Link>
