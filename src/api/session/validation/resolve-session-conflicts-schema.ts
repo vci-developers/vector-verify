@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { sessionSchema } from '@/api/session/validation/session-schema';
+import { surveillanceFormSchema } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
 export const resolveSessionConflictsRequestSchema = z.object({
     sessionIds: z.array(z.number()),
-    resolvedData: sessionSchema,
-    resolvedSurveillanceForm: z.record(z.string(), z.unknown()).nullable(),
+    resolvedData: sessionSchema.nullable(),
+    resolvedSurveillanceForm: surveillanceFormSchema.nullable(),
 });
 
 export const resolveSessionConflictsResponseSchema = z.object({

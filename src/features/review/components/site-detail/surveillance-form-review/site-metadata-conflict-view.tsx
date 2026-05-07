@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import type { Session } from '@/api/session/validation/session-schema';
-import type { SessionWithFormFieldRows } from '@/api/surveillance-form/validation/session-with-rows-schema';
+import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
 import { Button } from '@/components/ui/button';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
 import { getConflictingLabels } from '@/features/review/utils/detect-session-conflicts';
@@ -19,15 +19,15 @@ const SESSION_FIELD_LABELS: Record<string, ResolvableSessionKey> = {
     'Collection Method': 'collectionMethod',
 };
 
-interface SurveillanceFormConflictViewProps {
-    surveillanceForms: SessionWithFormFieldRows[];
+interface SiteMetadataConflictViewProps {
+    sessions: SessionWithFormData[];
     onResolved?: () => void;
 }
 
-export default function SurveillanceFormConflictView({
-    surveillanceForms,
+export default function SiteMetadataConflictView({
+    sessions,
     onResolved,
-}: SurveillanceFormConflictViewProps) {
+}: SiteMetadataConflictViewProps) {
     const [resolutions, setResolutions] = useState<Map<string, string>>(
         new Map(),
     );
@@ -35,7 +35,7 @@ export default function SurveillanceFormConflictView({
 
     const resolveSessionConflictsMutation = useResolveSessionConflicts();
 
-    const conflictingLabels = getConflictingLabels(surveillanceForms);
+    const conflictingLabels = getConflictingLabels(sessions);
     const hasConflict = conflictingLabels.size > 0;
 
     const allConflictsResolved = Array.from(conflictingLabels).every(label =>
@@ -47,35 +47,31 @@ export default function SurveillanceFormConflictView({
     }
 
     function handleResolve() {
-        const baseForm = surveillanceForms[0];
-        if (!baseForm) return;
+        const baseSession = sessions[0];
+        if (!baseSession) return;
 
-        const sessionOverrides: Partial<Pick<Session, ResolvableSessionKey>> =
-            {};
-        const formResolutions: Record<string, string> = {};
+        const resolvedSessionFields: Partial<
+            Pick<Session, ResolvableSessionKey>
+        > = {};
 
         for (const [label, value] of resolutions) {
             const sessionKey = SESSION_FIELD_LABELS[label];
             if (sessionKey !== undefined) {
-                sessionOverrides[sessionKey] = value;
-            } else {
-                formResolutions[label] = value;
+                resolvedSessionFields[sessionKey] = value;
             }
         }
 
         const resolvedData: Session = {
-            ...baseForm.session,
-            ...sessionOverrides,
+            ...baseSession.session,
+            ...resolvedSessionFields,
         };
 
         setResolveError(null);
         resolveSessionConflictsMutation.mutate(
             {
-                sessionIds: surveillanceForms.map(
-                    form => form.session.sessionId,
-                ),
+                sessionIds: sessions.map(s => s.session.sessionId),
                 resolvedData,
-                resolvedSurveillanceForm: formResolutions,
+                resolvedSurveillanceForm: null,
             },
             {
                 onSuccess: result => {
@@ -95,7 +91,7 @@ export default function SurveillanceFormConflictView({
     return (
         <div className="space-y-4">
             <SurveillanceFormReviewTable
-                surveillanceForms={surveillanceForms}
+                sessions={sessions}
                 conflictingLabels={conflictingLabels}
                 resolutions={resolutions}
                 onResolutionChange={handleResolutionChange}

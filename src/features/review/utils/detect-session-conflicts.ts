@@ -1,15 +1,19 @@
-import type { SessionWithFormFieldRows } from '@/api/surveillance-form/validation/session-with-rows-schema';
+import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
+import { normalizeSessionRows } from '@/features/review/utils/normalize-form-data';
 
 export function getConflictingLabels(
-    forms: SessionWithFormFieldRows[],
+    sessions: SessionWithFormData[],
 ): Set<string> {
+    const normalizedSessions = sessions.map(({ session, formData }) =>
+        normalizeSessionRows(session, formData),
+    );
     const conflicting = new Set<string>();
     const allLabels = new Set(
-        forms.flatMap(({ rows }) => (rows ?? []).map(row => row.label)),
+        normalizedSessions.flatMap(rows => rows.map(row => row.label)),
     );
     for (const label of allLabels) {
-        const values = forms.map(
-            ({ rows }) => rows?.find(row => row.label === label)?.value,
+        const values = normalizedSessions.map(
+            rows => rows.find(row => row.label === label)?.value,
         );
         if (new Set(values).size > 1) conflicting.add(label);
     }

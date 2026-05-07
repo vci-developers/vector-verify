@@ -2,9 +2,8 @@
 
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
-import type { SurveillanceFormData } from '@/api/surveillance-form/validation/get-surveillance-form-by-session-id-schema';
-import SurveillanceFormConflictView from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-conflict-view';
-import { normalizeSessionRows } from '@/features/review/utils/normalize-form-data';
+import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
+import SiteMetadataConflictView from '@/features/review/components/site-detail/surveillance-form-review/site-metadata-conflict-view';
 
 interface SurveillanceFormReviewWorkspaceProps {
     siteId: number;
@@ -68,20 +67,14 @@ export default function SurveillanceFormReviewWorkspace({
         );
     }
 
-    const formDataBySessionId = new Map<number, SurveillanceFormData>();
-    for (const query of surveillanceFormQueries) {
-        if (query.data?.ok) {
-            formDataBySessionId.set(query.data.data.sessionId, query.data.data);
-        }
-    }
-
-    const surveillanceForms = sessions.map(session => ({
-        session,
-        rows: normalizeSessionRows(
+    const sessionsWithFormData: SessionWithFormData[] = sessions.map(
+        (session, index) => ({
             session,
-            formDataBySessionId.get(session.sessionId) ?? null,
-        ),
-    }));
+            formData: surveillanceFormQueries[index]?.data?.ok
+                ? surveillanceFormQueries[index].data.data
+                : null,
+        }),
+    );
 
     return (
         <div className="space-y-4">
@@ -95,8 +88,8 @@ export default function SurveillanceFormReviewWorkspace({
                 </p>
             </div>
 
-            <SurveillanceFormConflictView
-                surveillanceForms={surveillanceForms}
+            <SiteMetadataConflictView
+                sessions={sessionsWithFormData}
                 onResolved={onResolved}
             />
         </div>

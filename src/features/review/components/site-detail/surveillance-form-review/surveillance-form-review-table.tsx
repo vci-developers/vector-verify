@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-    FormRow,
-    SessionWithFormFieldRows,
-} from '@/api/surveillance-form/validation/session-with-rows-schema';
+import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
 import {
     Table,
     TableBody,
@@ -22,19 +19,21 @@ import {
 import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
 import { CircleCheck, TriangleAlert } from 'lucide-react';
+import { normalizeSessionRows } from '@/features/review/utils/normalize-form-data';
 
 interface SurveillanceFormReviewTableProps {
-    surveillanceForms: SessionWithFormFieldRows[];
+    sessions: SessionWithFormData[];
     conflictingLabels?: Set<string>;
     resolutions?: Map<string, string>;
     onResolutionChange?: (label: string, value: string) => void;
 }
 
-function getAllLabels(forms: SessionWithFormFieldRows[]): string[] {
+function getAllRowLabelsAcrossSessions(
+    normalizedSessions: { label: string; value: string }[][],
+): string[] {
     const addedLabels = new Set<string>();
     const labels: string[] = [];
-    for (const { rows } of forms) {
-        if (!rows) continue;
+    for (const rows of normalizedSessions) {
         for (const row of rows) {
             if (!addedLabels.has(row.label)) {
                 addedLabels.add(row.label);
@@ -45,27 +44,29 @@ function getAllLabels(forms: SessionWithFormFieldRows[]): string[] {
     return labels;
 }
 
-function getValueForLabel(rows: FormRow[] | null, label: string): string {
-    if (!rows) return 'No data';
+function getValueForLabel(
+    rows: { label: string; value: string }[],
+    label: string,
+): string {
     return rows.find(row => row.label === label)?.value ?? 'No data';
 }
 
-function getDistinctValues(
-    forms: SessionWithFormFieldRows[],
+function getDistinctSessionValuesForLabel(
+    normalizedSessions: { label: string; value: string }[][],
     label: string,
 ): string[] {
     return Array.from(
-        new Set(forms.map(({ rows }) => getValueForLabel(rows, label))),
+        new Set(normalizedSessions.map(rows => getValueForLabel(rows, label))),
     );
 }
 
 export default function SurveillanceFormReviewTable({
-    surveillanceForms,
+    sessions,
     conflictingLabels = new Set<string>(),
     resolutions,
     onResolutionChange,
 }: SurveillanceFormReviewTableProps) {
-    if (surveillanceForms.length === 0) {
+    if (sessions.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
                 <p className="text-muted-foreground text-sm">
@@ -75,7 +76,10 @@ export default function SurveillanceFormReviewTable({
         );
     }
 
-    const allLabels = getAllLabels(surveillanceForms);
+    const normalizedSessions = sessions.map(({ session, formData }) =>
+        normalizeSessionRows(session, formData),
+    );
+    const allLabels = getAllRowLabelsAcrossSessions(normalizedSessions);
     const showResolutionColumn = conflictingLabels.size > 0;
 
     return (
@@ -84,7 +88,7 @@ export default function SurveillanceFormReviewTable({
                 <TableHeader>
                     <TableRow className="h-14">
                         <TableHead className="border-border w-48 border" />
-                        {surveillanceForms.map(({ session }) => (
+                        {sessions.map(({ session }) => (
                             <TableHead
                                 key={session.sessionId}
                                 className="border-border border"
@@ -124,9 +128,9 @@ export default function SurveillanceFormReviewTable({
                                     {label}
                                 </div>
                             </TableCell>
-                            {surveillanceForms.map(({ session, rows }) => (
+                            {normalizedSessions.map((rows, index) => (
                                 <TableCell
-                                    key={session.sessionId}
+                                    key={sessions[index]!.session.sessionId}
                                     className="border-border border"
                                 >
                                     {getValueForLabel(rows, label)}
@@ -148,8 +152,8 @@ export default function SurveillanceFormReviewTable({
                                                 <SelectValue placeholder="Select value" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {getDistinctValues(
-                                                    surveillanceForms,
+                                                {getDistinctSessionValuesForLabel(
+                                                    normalizedSessions,
                                                     label,
                                                 ).map(distinctValue => (
                                                     <SelectItem

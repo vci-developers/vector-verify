@@ -32,6 +32,7 @@ export function normalizeFormData(
                 : [],
         );
     }
+    // TODO: labels should be returned by the backend instead of being hardcoded here
     return [
         {
             label: 'People in House',
