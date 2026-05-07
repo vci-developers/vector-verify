@@ -1,14 +1,14 @@
-import { resolveConflict } from '@/api/session/resolve-conflict';
+import { resolveSessionConflicts } from '@/api/session/resolve-conflicts';
 import type {
-    ResolveConflictRequestBody,
-    ResolveConflictResponseBody,
-} from '@/api/session/validation/resolve-conflict-schema';
+    ResolveSessionConflictsRequestBody,
+    ResolveSessionConflictsResponseBody,
+} from '@/api/session/validation/resolve-session-conflicts-schema';
 import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
 export async function POST(request: Request) {
-    let requestBody: ResolveConflictRequestBody;
+    let requestBody: ResolveSessionConflictsRequestBody;
     try {
         requestBody = await request.json();
     } catch {
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
     }
 
     const authorizedResolveConflictResult =
-        await withAuthSession<ResolveConflictResponseBody>(accessToken =>
-            resolveConflict(accessToken, requestBody),
+        await withAuthSession<ResolveSessionConflictsResponseBody>(
+            accessToken => resolveSessionConflicts(accessToken, requestBody),
         );
 
     return NextResponse.json(authorizedResolveConflictResult, {

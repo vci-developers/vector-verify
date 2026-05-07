@@ -4,7 +4,6 @@ import type {
     FormRow,
     SessionWithFormFieldRows,
 } from '@/api/surveillance-form/validation/session-with-rows-schema';
-import type { Session } from '@/api/session/validation/session-schema';
 import {
     Table,
     TableBody,
@@ -13,10 +12,22 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
+import { CircleCheck, TriangleAlert } from 'lucide-react';
 
 interface SurveillanceFormReviewTableProps {
     surveillanceForms: SessionWithFormFieldRows[];
+    conflictingLabels?: Set<string>;
+    resolutions?: Map<string, string>;
+    onResolutionChange?: (label: string, value: string) => void;
 }
 
 function getAllLabels(forms: SessionWithFormFieldRows[]): string[] {
@@ -39,20 +50,20 @@ function getValueForLabel(rows: FormRow[] | null, label: string): string {
     return rows.find(row => row.label === label)?.value ?? 'No data';
 }
 
-const SESSION_FIELDS: {
-    label: string;
-    render: (session: Session) => string;
-}[] = [
-    { label: 'Collector Name', render: session => session.collectorName },
-    { label: 'Collector Title', render: session => session.collectorTitle },
-    {
-        label: 'Collection Method',
-        render: session => session.collectionMethod,
-    },
-];
+function getDistinctValues(
+    forms: SessionWithFormFieldRows[],
+    label: string,
+): string[] {
+    return Array.from(
+        new Set(forms.map(({ rows }) => getValueForLabel(rows, label))),
+    );
+}
 
 export default function SurveillanceFormReviewTable({
     surveillanceForms,
+    conflictingLabels = new Set<string>(),
+    resolutions,
+    onResolutionChange,
 }: SurveillanceFormReviewTableProps) {
     if (surveillanceForms.length === 0) {
         return (
@@ -64,58 +75,99 @@ export default function SurveillanceFormReviewTable({
         );
     }
 
-    const formLabels = getAllLabels(surveillanceForms);
+    const allLabels = getAllLabels(surveillanceForms);
+    const showResolutionColumn = conflictingLabels.size > 0;
 
     return (
-        <Table className="border-border rounded-md border">
-            <TableHeader>
-                <TableRow className="h-14">
-                    <TableHead className="border-border w-48 border" />
-                    {surveillanceForms.map(({ session }) => (
-                        <TableHead
-                            key={session.sessionId}
-                            className="border-border border"
-                        >
-                            {format(
-                                new Date(session.collectionDate),
-                                'MMM d, yyyy',
-                            )}
-                        </TableHead>
-                    ))}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {SESSION_FIELDS.map(field => (
-                    <TableRow key={field.label} className="h-14">
-                        <TableCell className="border-border w-48 border font-medium">
-                            {field.label}
-                        </TableCell>
+        <div className="overflow-x-auto">
+            <Table className="border-border rounded-md border">
+                <TableHeader>
+                    <TableRow className="h-14">
+                        <TableHead className="border-border w-48 border" />
                         {surveillanceForms.map(({ session }) => (
-                            <TableCell
+                            <TableHead
                                 key={session.sessionId}
                                 className="border-border border"
                             >
-                                {field.render(session)}
-                            </TableCell>
+                                {format(
+                                    new Date(session.collectionDate),
+                                    'MMM d, yyyy',
+                                )}
+                            </TableHead>
                         ))}
+                        {showResolutionColumn && (
+                            <TableHead className="border-border bg-background sticky right-0 z-20 border font-semibold">
+                                Resolution
+                            </TableHead>
+                        )}
                     </TableRow>
-                ))}
-                {formLabels.map(label => (
-                    <TableRow key={label} className="h-14">
-                        <TableCell className="border-border w-48 border font-medium">
-                            {label}
-                        </TableCell>
-                        {surveillanceForms.map(({ session, rows }) => (
-                            <TableCell
-                                key={session.sessionId}
-                                className="border-border border"
-                            >
-                                {getValueForLabel(rows, label)}
+                </TableHeader>
+                <TableBody>
+                    {allLabels.map(label => (
+                        <TableRow
+                            key={label}
+                            className={cn(
+                                'h-14',
+                                conflictingLabels.has(label) &&
+                                    !resolutions?.has(label) &&
+                                    'bg-destructive/10 hover:bg-destructive/15',
+                            )}
+                        >
+                            <TableCell className="border-border w-48 border font-medium">
+                                <div className="flex items-center gap-2">
+                                    {conflictingLabels.has(label) &&
+                                        (resolutions?.has(label) ? (
+                                            <CircleCheck className="h-4 w-4 shrink-0 text-green-600" />
+                                        ) : (
+                                            <TriangleAlert className="text-destructive h-4 w-4 shrink-0" />
+                                        ))}
+                                    {label}
+                                </div>
                             </TableCell>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                            {surveillanceForms.map(({ session, rows }) => (
+                                <TableCell
+                                    key={session.sessionId}
+                                    className="border-border border"
+                                >
+                                    {getValueForLabel(rows, label)}
+                                </TableCell>
+                            ))}
+                            {showResolutionColumn && (
+                                <TableCell className="border-border bg-background sticky right-0 z-20 border">
+                                    {conflictingLabels.has(label) ? (
+                                        <Select
+                                            value={resolutions?.get(label)}
+                                            onValueChange={value =>
+                                                onResolutionChange?.(
+                                                    label,
+                                                    value,
+                                                )
+                                            }
+                                        >
+                                            <SelectTrigger className="w-40">
+                                                <SelectValue placeholder="Select value" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {getDistinctValues(
+                                                    surveillanceForms,
+                                                    label,
+                                                ).map(distinctValue => (
+                                                    <SelectItem
+                                                        key={distinctValue}
+                                                        value={distinctValue}
+                                                    >
+                                                        {distinctValue}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : null}
+                                </TableCell>
+                            )}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
     );
 }

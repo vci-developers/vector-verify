@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -28,6 +29,8 @@ export default function ReviewDetailsPageClient({
     startDate,
     endDate,
 }: ReviewDetailsPageClientProps) {
+    const [currentStep, setCurrentStep] = useState(1);
+
     return (
         <PageShell
             title="Review"
@@ -64,7 +67,7 @@ export default function ReviewDetailsPageClient({
                         <div className="absolute left-1/2 w-max -translate-x-1/2">
                             <ReviewSiteDetailHeader
                                 steps={REVIEW_STEPS}
-                                currentStep={1}
+                                currentStep={currentStep}
                             />
                         </div>
                     </div>
@@ -75,6 +78,7 @@ export default function ReviewDetailsPageClient({
                         siteId={siteId}
                         startDate={startDate}
                         endDate={endDate}
+                        onResolved={() => setCurrentStep(step => step + 1)}
                     />
                 </CardContent>
             </Card>
