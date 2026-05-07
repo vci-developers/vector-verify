@@ -123,14 +123,40 @@ export default function CompositionChartPair({
                             config={specimenChartConfig}
                             className="h-full w-full"
                         >
-                            <AreaChart data={specimenCountsByMonth}>
+                            <AreaChart
+                                data={specimenCountsByMonth}
+                                margin={{
+                                    top: 8,
+                                    right: 12,
+                                    bottom: 32,
+                                    left: 12,
+                                }}
+                            >
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis
                                     dataKey="month"
                                     tickLine={false}
                                     axisLine={false}
-                                />
-                                <YAxis tickLine={false} axisLine={false} />
+                                >
+                                    <Label
+                                        value="Month"
+                                        position="bottom"
+                                        className="fill-muted-foreground text-sm font-bold"
+                                    />
+                                </XAxis>
+                                <YAxis
+                                    tickLine={false}
+                                    axisLine={false}
+                                    width={44}
+                                >
+                                    <Label
+                                        value="Specimen Count"
+                                        angle={-90}
+                                        position="left"
+                                        className="fill-muted-foreground text-sm font-bold"
+                                        style={{ textAnchor: 'middle' }}
+                                    />
+                                </YAxis>
                                 <ChartTooltip
                                     content={
                                         <ChartTooltipContent

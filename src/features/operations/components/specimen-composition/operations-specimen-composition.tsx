@@ -20,17 +20,17 @@ const COMPOSITION_SECTIONS: {
     { specimenClassificationAxis: 'abdomenStatus', title: 'Abdomen Status' },
 ];
 
-interface OperationsSpeciesCompositionProps {
+interface OperationsSpecimenCompositionProps {
     locationQueryParam: LocationQueryParam;
     startDate: string;
     endDate: string;
 }
 
-export default function OperationsSpeciesComposition({
+export default function OperationsSpecimenComposition({
     locationQueryParam,
     startDate,
     endDate,
-}: OperationsSpeciesCompositionProps) {
+}: OperationsSpecimenCompositionProps) {
     const locationFilter =
         'district' in locationQueryParam
             ? { districts: [locationQueryParam.district] }
