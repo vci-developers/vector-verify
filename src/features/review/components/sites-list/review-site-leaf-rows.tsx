@@ -4,11 +4,12 @@ import { cn } from '@/utils/cn';
 import { endOfMonth, format, parseISO } from 'date-fns';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { Fragment } from 'react';
+import { useReviewSiteListMonthKey } from './review-sites-list';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
-    monthKey: string;
     sessionCountsBySiteId: Map<
         number,
         { sessionCount: number; needsReviewCount: number }
@@ -18,9 +19,9 @@ interface ReviewSiteLeafRowsProps {
 export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
-    monthKey,
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
+    const monthKey = useReviewSiteListMonthKey();
     const startDate = `${monthKey}-01`;
     const endDate = format(endOfMonth(parseISO(startDate)), 'yyyy-MM-dd');
 
@@ -43,7 +44,7 @@ export default function ReviewSiteLeafRows({
                 );
 
                 const rowContent = (
-                    <>
+                    <Fragment>
                         <div className="flex items-center gap-3">
                             <div
                                 className={cn(
@@ -78,7 +79,7 @@ export default function ReviewSiteLeafRows({
                                     : 'No sessions'}
                             </Badge>
                         </div>
-                    </>
+                    </Fragment>
                 );
 
                 if (hasSessions) {
