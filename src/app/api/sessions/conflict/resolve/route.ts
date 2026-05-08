@@ -1,6 +1,7 @@
 import { resolveSessionConflicts } from '@/api/session/resolve-conflicts';
 import {
     resolveSessionConflictsRequestSchema,
+    type ResolveSessionConflictsRequestBody,
     type ResolveSessionConflictsResponseBody,
 } from '@/api/session/validation/resolve-session-conflicts-schema';
 import { err } from '@/lib/result/result';
@@ -8,9 +9,9 @@ import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
 export async function POST(request: Request) {
-    let rawBody: unknown;
+    let requestBody: ResolveSessionConflictsRequestBody;
     try {
-        rawBody = await request.json();
+        requestBody = await request.json();
     } catch {
         return NextResponse.json(
             err({ kind: 'client', status: 400, message: 'Invalid JSON body' }),
@@ -18,7 +19,8 @@ export async function POST(request: Request) {
         );
     }
 
-    const parsedBody = resolveSessionConflictsRequestSchema.safeParse(rawBody);
+    const parsedBody =
+        resolveSessionConflictsRequestSchema.safeParse(requestBody);
     if (!parsedBody.success) {
         return NextResponse.json(
             err({

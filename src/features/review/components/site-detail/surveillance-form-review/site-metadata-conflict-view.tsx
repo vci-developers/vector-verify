@@ -69,7 +69,9 @@ export default function SiteMetadataConflictView({
         setResolveError(null);
         resolveSessionConflictsMutation.mutate(
             {
-                sessionIds: sessions.map(s => s.session.sessionId),
+                sessionIds: sessions.map(
+                    sessionAndFormData => sessionAndFormData.session.sessionId,
+                ),
                 resolvedData,
                 resolvedSurveillanceForm: null,
             },
