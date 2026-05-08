@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import type { Session } from '@/api/session/validation/session-schema';
+import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
 import { Button } from '@/components/ui/button';
 import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
@@ -66,6 +67,11 @@ export default function SiteMetadataConflictView({
             ...resolvedSessionFields,
         };
 
+        let resolvedSurveillanceForm: SurveillanceForm | null = null;
+        if (baseSession.formData?.kind === 'legacy') {
+            resolvedSurveillanceForm = baseSession.formData;
+        }
+
         setResolveError(null);
         resolveSessionConflictsMutation.mutate(
             {
@@ -73,7 +79,7 @@ export default function SiteMetadataConflictView({
                     sessionAndFormData => sessionAndFormData.session.sessionId,
                 ),
                 resolvedData,
-                resolvedSurveillanceForm: null,
+                resolvedSurveillanceForm,
             },
             {
                 onSuccess: result => {
