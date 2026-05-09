@@ -10,7 +10,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewDetailsPageClient from '@/features/review/components/site-detail/page-client/review-details-page-client';
+import ReviewDetailsPageClient from '@/features/review/site-detail/components/review-details-page-client';
 
 interface ReviewSiteDetailPageProps {
     params: Promise<{

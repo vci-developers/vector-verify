@@ -3,7 +3,7 @@
 import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
 import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
-import SiteMetadataConflictView from '@/features/review/components/site-detail/surveillance-form-review/site-metadata-conflict-view';
+import SiteMetadataConflictView from './site-metadata-conflict-view';
 
 interface SurveillanceFormReviewWorkspaceProps {
     siteId: number;

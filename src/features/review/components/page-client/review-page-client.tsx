@@ -9,7 +9,7 @@ import { Fragment, useState } from 'react';
 import ReviewHeader from '../layout/review-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import ReviewSitesList from '../sites-list/review-sites-list';
+import ReviewSitesList from '@/features/review/sites-list/components/review-sites-list';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 
 const REVIEW_TABS = [{ value: 'sites-list', label: 'SITES LIST' }] as const;

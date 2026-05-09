@@ -6,8 +6,8 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
 import { Button } from '@/components/ui/button';
-import SurveillanceFormReviewTable from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-table';
-import { getConflictingLabels } from '@/features/review/utils/detect-session-conflicts';
+import { getConflictingLabels } from '@/features/review/site-detail/utils/detect-session-conflicts';
+import SurveillanceFormReviewTable from './surveillance-form-review-table';
 
 type ResolvableSessionKey =
     | 'collectorName'

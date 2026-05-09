@@ -1,5 +1,5 @@
 import type { SessionWithFormData } from '@/api/surveillance-form/validation/session-with-form-data-schema';
-import { normalizeSessionRows } from '@/features/review/utils/normalize-form-data';
+import { normalizeSessionRows } from '@/features/review/site-detail/utils/normalize-form-data';
 
 export function getConflictingLabels(
     sessions: SessionWithFormData[],

@@ -19,7 +19,7 @@ import {
 import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
 import { CircleCheck, TriangleAlert } from 'lucide-react';
-import { normalizeSessionRows } from '@/features/review/utils/normalize-form-data';
+import { normalizeSessionRows } from '@/features/review/site-detail/utils/normalize-form-data';
 
 interface SurveillanceFormReviewTableProps {
     sessions: SessionWithFormData[];

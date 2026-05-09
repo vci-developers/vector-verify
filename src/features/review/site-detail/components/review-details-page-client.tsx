@@ -5,10 +5,10 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ReviewSiteDetailHeader from '@/features/review/components/site-detail/review-site-detail-header';
-import SurveillanceFormReviewWorkspace from '@/features/review/components/site-detail/surveillance-form-review/surveillance-form-review-workspace';
+import ReviewSiteDetailHeader from '@/features/review/site-detail/components/review-site-detail-header';
 import { ClipboardList, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import SurveillanceFormReviewWorkspace from '@/features/review/site-detail/components/surveillance-form-review-workspace';
 
 const REVIEW_TABS = [{ value: 'review', label: 'REVIEW' }] as const;
 
