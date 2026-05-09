@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Pencil } from 'lucide-react';
 import { Fragment } from 'react';
-import { deserializeAnnotationFormArtifacts } from '@/features/annotation/lib/annotation-form-artifacts-serializer';
+import { deserializeAnnotationFormArtifacts } from '@/features/annotation/task-details/lib/annotation-form-artifacts-serializer';
 import { Badge } from '@/components/ui/badge';
 
 interface AnnotationReadonlyViewProps {

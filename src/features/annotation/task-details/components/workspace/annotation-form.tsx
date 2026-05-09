@@ -8,7 +8,7 @@ import {
     annotationFormArtifactSchema,
     type AnnotationFormInput,
     annotationFormSchema,
-} from '@/features/annotation/validation/annotation-form-schema';
+} from '@/features/annotation/task-details/validation/annotation-form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     abdomenStatusSchema,
@@ -49,7 +49,7 @@ import {
 import {
     deserializeAnnotationFormArtifacts,
     serializeAnnotationFormArtifacts,
-} from '@/features/annotation/lib/annotation-form-artifacts-serializer';
+} from '@/features/annotation/task-details/lib/annotation-form-artifacts-serializer';
 
 interface AnnotationFormProps {
     annotation: Annotation;

@@ -5,8 +5,8 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { PencilRuler } from 'lucide-react';
 import { useState } from 'react';
-import AnnotationWorkspace from '@/features/annotation/components/task-details/annotation-workspace';
-import AnnotationTaskDetailsHeader from '@/features/annotation/components/task-details/annotation-task-details-header';
+import AnnotationWorkspace from '@/features/annotation/task-details/components/workspace/annotation-workspace';
+import AnnotationTaskDetailsHeader from '@/features/annotation/task-details/components/layout/annotation-task-details-header';
 
 interface AnnotationTaskDetailsPageClientProps {
     taskId: number;

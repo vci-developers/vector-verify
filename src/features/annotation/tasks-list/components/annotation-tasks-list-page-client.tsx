@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PencilRuler } from 'lucide-react';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import AnnotationTasksListHeader from '@/features/annotation/components/tasks-list/annotation-tasks-list-header';
-import AnnotationTasksList from '@/features/annotation/components/tasks-list/annotation-tasks-list';
+import AnnotationTasksListHeader from '@/features/annotation/tasks-list/components/layout/annotation-tasks-list-header';
+import AnnotationTasksList from '@/features/annotation/tasks-list/components/tasks/annotation-tasks-list';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 

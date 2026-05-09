@@ -1,4 +1,4 @@
-import type { AnnotationFormArtifact } from '@/features/annotation/validation/annotation-form-schema';
+import type { AnnotationFormArtifact } from '@/features/annotation/task-details/validation/annotation-form-schema';
 
 export function deserializeAnnotationFormArtifacts(
     serializedArtifacts?: string | null,

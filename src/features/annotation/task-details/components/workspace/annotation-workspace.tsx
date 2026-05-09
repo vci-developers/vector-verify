@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import SpecimenImageViewer from '@/features/annotation/components/task-details/specimen-image-viewer';
-import AnnotationReadonlyView from '@/features/annotation/components/task-details/annotation-readonly-view';
-import AnnotationForm from '@/features/annotation/components/task-details/annotation-form';
+import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
+import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
+import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
