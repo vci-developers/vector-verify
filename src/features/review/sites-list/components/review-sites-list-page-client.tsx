@@ -6,17 +6,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { startOfMonth, subMonths } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { Fragment, useState } from 'react';
-import ReviewHeader from '../layout/review-header';
+import ReviewSitesListHeader from './layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import ReviewSitesList from '@/features/review/sites-list/components/review-sites-list';
+import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 
 const REVIEW_TABS = [{ value: 'sites-list', label: 'SITES LIST' }] as const;
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
 
-export default function ReviewPageClient() {
+export default function ReviewSitesListPageClient() {
     const [activeTab, setActiveTab] = useState<ReviewTab>('sites-list');
     const [startMonth, setStartMonth] = useState(() =>
         startOfMonth(subMonths(new Date(), 2)),
@@ -75,7 +75,7 @@ export default function ReviewPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <ReviewHeader
+                    <ReviewSitesListHeader
                         tabs={REVIEW_TABS}
                         activeTab={activeTab}
                         onTabChange={tab => setActiveTab(tab)}

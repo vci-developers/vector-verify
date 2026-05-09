@@ -9,9 +9,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ReviewTab } from '../page-client/review-page-client';
+import type { ReviewTab } from '../review-sites-list-page-client';
 
-interface ReviewHeaderProps {
+interface ReviewSitesListHeaderProps {
     tabs: readonly { value: ReviewTab; label: string }[];
     activeTab: ReviewTab;
     onTabChange: (tab: ReviewTab) => void;
@@ -25,7 +25,7 @@ interface ReviewHeaderProps {
     onEndMonthChange: (month: Date) => void;
 }
 
-export default function ReviewHeader({
+export default function ReviewSitesListHeader({
     tabs,
     activeTab,
     onTabChange,
@@ -37,7 +37,7 @@ export default function ReviewHeader({
     endMonth,
     onStartMonthChange,
     onEndMonthChange,
-}: ReviewHeaderProps) {
+}: ReviewSitesListHeaderProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
