@@ -12,7 +12,7 @@ import OperationsAiPerformance from '@/features/operations/components/ai-perform
 import OperationsGeographicalSummary from '@/features/operations/components/geographical-summary/operations-geographical-summary';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
-import OperationsSpeciesComposition from '../species-composition/operations-species-composition';
+import OperationsSpecimenComposition from '../specimen-composition/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/components/field-user-compliance/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
@@ -24,8 +24,8 @@ const OPERATIONS_TABS = [
         shouldRender: () => true,
     },
     {
-        value: 'species-composition',
-        label: 'SPECIES COMPOSITION',
+        value: 'specimen-composition',
+        label: 'SPECIMEN COMPOSITION',
         shouldRender: () => true,
     },
     {
@@ -141,8 +141,8 @@ export default function OperationsPageClient() {
                         </div>
                     ) : (
                         <Fragment>
-                            {activeTab === 'species-composition' && (
-                                <OperationsSpeciesComposition
+                            {activeTab === 'specimen-composition' && (
+                                <OperationsSpecimenComposition
                                     locationQueryParam={locationQueryParam}
                                     startDate={startDate}
                                     endDate={endDate}
