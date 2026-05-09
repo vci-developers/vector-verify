@@ -4,7 +4,7 @@ import {
     loginResponseSchema,
     type LoginRequestBody,
     type LoginResponseBody,
-} from '@/features/auth/validation/network/login-network-schema';
+} from '@/api/auth/validation/login-schema';
 import { err, type Result } from '@/lib/result/result';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 

@@ -3,7 +3,7 @@ import {
     refreshResponseSchema,
     type RefreshRequestBody,
     type RefreshResponseBody,
-} from '@/features/auth/validation/network/refresh-network-schema';
+} from '@/api/auth/validation/refresh-schema';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';

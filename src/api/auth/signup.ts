@@ -3,7 +3,7 @@ import {
     signupResponseSchema,
     type SignupRequestBody,
     type SignupResponseBody,
-} from '@/features/auth/validation/network/signup-network-schema';
+} from '@/api/auth/validation/signup-schema';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
