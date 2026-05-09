@@ -1,7 +1,7 @@
 import { getUserPermissions } from '@/api/user/get-user-permissions';
 import { userKeys } from '@/api/user/user-keys';
 import type { GetUserPermissionsResponseBody } from '@/api/user/validation/get-user-permissions-schema';
-import OperationsPageClient from '@/features/operations/components/page-client/operations-page-client';
+import OperationsPageClient from '@/features/operations/components/operations-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,

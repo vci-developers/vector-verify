@@ -7,11 +7,11 @@ import type { LatLngBoundsExpression, LatLngExpression } from 'leaflet';
 import { useMemo, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { MapContainer, TileLayer } from 'react-leaflet';
-import { useSiteGeocode } from './hooks/use-site-geocode';
-import MarkerLayer from './components/map/marker-layer';
-import MarkerInfoPanel from './components/map/marker-info-panel';
-import MapNavigator from './components/map/map-navigator';
-import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
+import { useSiteGeocode } from '../hooks/use-site-geocode';
+import type { SiteMarker } from '@/features/operations/geographical-summary/utils/site-marker-data';
+import MapNavigator from './map-navigator';
+import MarkerLayer from './marker-layer';
+import MarkerInfoPanel from './marker-info-panel';
 
 const DEFAULT_CENTER: LatLngExpression = { lat: 0, lng: 0 };
 const DEFAULT_ZOOM = 2;

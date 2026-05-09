@@ -3,7 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { useMemo } from 'react';
-import { buildSiteMarkers } from '@/features/operations/utils/site-marker-data';
+import { buildSiteMarkers } from '@/features/operations/geographical-summary/utils/site-marker-data';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import type { Site } from '@/api/site/validation/site-schema';
 

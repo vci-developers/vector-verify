@@ -1,9 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
-import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/build-species-confusion-matrix';
+import type { SpeciesConfusionMatrixData } from '@/features/operations/ai-performance/utils/build-species-confusion-matrix';
 import {
     formatMatrixPercentage,
     integerCountFormatter,
-} from '@/features/operations/utils/species-confusion-matrix-helpers';
+} from '@/features/operations/ai-performance/utils/species-confusion-matrix-helpers';
 
 interface SpeciesConfusionMatrixAccuracyCardProps {
     speciesConfusionMatrix: SpeciesConfusionMatrixData | null;

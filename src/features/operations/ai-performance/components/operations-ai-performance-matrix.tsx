@@ -2,10 +2,10 @@
 
 import { Fragment } from 'react';
 import type { GetAnnotationsSummarySuccessPayload } from '@/api/annotation/validation/get-annotations-summary-schema';
-import SpeciesConfusionMatrixAccuracyCard from '@/features/operations/components/ai-performance/species-confusion-matrix-accuracy-card';
-import SpeciesConfusionMatrixCard from '@/features/operations/components/ai-performance/species-confusion-matrix-card';
-import SpeciesConfusionMatrixStateCard from '@/features/operations/components/ai-performance/species-confusion-matrix-state-card';
-import { buildSpeciesConfusionMatrix } from '@/features/operations/utils/build-species-confusion-matrix';
+import SpeciesConfusionMatrixAccuracyCard from '@/features/operations/ai-performance/components/species-confusion-matrix-accuracy-card';
+import SpeciesConfusionMatrixCard from '@/features/operations/ai-performance/components/species-confusion-matrix-card';
+import SpeciesConfusionMatrixStateCard from '@/features/operations/ai-performance/components/species-confusion-matrix-state-card';
+import { buildSpeciesConfusionMatrix } from '@/features/operations/ai-performance/utils/build-species-confusion-matrix';
 
 interface OperationsAiPerformanceMatrixProps {
     annotationsSummary: GetAnnotationsSummarySuccessPayload;

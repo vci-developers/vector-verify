@@ -3,13 +3,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
-import { useSiteMarkers } from '@/features/operations/components/geographical-summary/hooks/use-site-markers';
+import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
-} from '../../utils/site-marker-data';
+} from '../utils/site-marker-data';
 import { useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });

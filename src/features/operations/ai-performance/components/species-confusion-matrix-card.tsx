@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/build-species-confusion-matrix';
+import type { SpeciesConfusionMatrixData } from '@/features/operations/ai-performance/utils/build-species-confusion-matrix';
 import SpeciesConfusionMatrixMetrics from './species-confusion-matrix-metrics';
 import SpeciesConfusionMatrixTable from './species-confusion-matrix-table';
 

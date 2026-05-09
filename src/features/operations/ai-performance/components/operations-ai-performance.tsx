@@ -2,8 +2,8 @@
 
 import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
-import AiPerformanceSummaryCard from '@/features/operations/components/ai-performance/ai-performance-summary-card';
-import OperationsAiPerformanceMatrix from '@/features/operations/components/ai-performance/operations-ai-performance-matrix';
+import AiPerformanceSummaryCard from '@/features/operations/ai-performance/components/ai-performance-summary-card';
+import OperationsAiPerformanceMatrix from '@/features/operations/ai-performance/components/operations-ai-performance-matrix';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
 

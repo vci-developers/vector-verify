@@ -2,7 +2,7 @@ import L from 'leaflet';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
-} from '@/features/operations/utils/site-marker-data';
+} from '@/features/operations/geographical-summary/utils/site-marker-data';
 
 const MARKER_RADIUS_MIN = 8;
 const MARKER_RADIUS_MAX = 26;

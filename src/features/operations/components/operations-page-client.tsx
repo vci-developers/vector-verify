@@ -8,12 +8,12 @@ import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { Microscope } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
-import OperationsAiPerformance from '@/features/operations/components/ai-performance/operations-ai-performance';
-import OperationsGeographicalSummary from '@/features/operations/components/geographical-summary/operations-geographical-summary';
+import OperationsAiPerformance from '@/features/operations/ai-performance/components/operations-ai-performance';
+import OperationsGeographicalSummary from '@/features/operations/geographical-summary/components/operations-geographical-summary';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
-import OperationsSpecimenComposition from '../specimen-composition/operations-specimen-composition';
-import OperationsFieldUserCompliance from '@/features/operations/components/field-user-compliance/operations-field-user-compliance';
+import OperationsSpecimenComposition from '../specimen-composition/components/operations-specimen-composition';
+import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 

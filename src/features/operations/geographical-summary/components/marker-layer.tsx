@@ -5,9 +5,9 @@ import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import type { SiteMarker } from '@/features/operations/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/geographical-summary/utils/site-marker-data';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
-import { createSpecimenMarkerIcon } from '@/features/operations/components/geographical-summary/components/map/create-specimen-marker-icon';
+import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
 
 type ClusterGroup = L.MarkerClusterGroup & {
     _spiderfied: L.MarkerCluster | null;

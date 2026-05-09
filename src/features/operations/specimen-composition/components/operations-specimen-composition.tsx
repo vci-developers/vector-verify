@@ -8,7 +8,7 @@ import {
     buildSpecimenChartConfig,
     groupSpecimenCountsByMonth,
     sumSpecimenCountsByClass,
-} from '../../utils/chart-data';
+} from '../utils/chart-data';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 
 const COMPOSITION_SECTIONS: {

@@ -7,8 +7,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/build-species-confusion-matrix';
-import { formatMatrixPercentage } from '@/features/operations/utils/species-confusion-matrix-helpers';
+import type { SpeciesConfusionMatrixData } from '@/features/operations/ai-performance/utils/build-species-confusion-matrix';
+import { formatMatrixPercentage } from '@/features/operations/ai-performance/utils/species-confusion-matrix-helpers';
 
 interface SpeciesConfusionMatrixMetricsProps {
     speciesConfusionMatrix: SpeciesConfusionMatrixData;

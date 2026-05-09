@@ -1,5 +1,5 @@
-import { buildSessionChartPills } from '@/features/operations/utils/build-session-chart-pills';
-import type { CollectorRow } from '@/features/operations/utils/field-user-compliance-data';
+import { buildSessionChartPills } from '@/features/operations/field-user-compliance/utils/build-session-chart-pills';
+import type { CollectorRow } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
 import { TableCell, TableRow } from '@/components/ui/table';
 
 interface ComplianceCollectorTableRowProps {

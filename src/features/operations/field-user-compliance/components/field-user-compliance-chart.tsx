@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import type { CollectorRow } from '@/features/operations/utils/field-user-compliance-data';
+import type { CollectorRow } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
 import { format } from 'date-fns';
 import StatBadge from '@/components/ui/stat-badge';
 import {
@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import ComplianceCollectorTableRow from '@/features/operations/components/field-user-compliance/compliance-collector-table-row';
+import ComplianceCollectorTableRow from '@/features/operations/field-user-compliance/components/compliance-collector-table-row';
 
 function buildChartPillColor(index: number, total: number): string {
     const startHue = 133;

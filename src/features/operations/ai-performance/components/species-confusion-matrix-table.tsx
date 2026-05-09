@@ -6,12 +6,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import type { SpeciesConfusionMatrixData } from '@/features/operations/utils/build-species-confusion-matrix';
+import type { SpeciesConfusionMatrixData } from '@/features/operations/ai-performance/utils/build-species-confusion-matrix';
 import {
     formatMatrixPercentage,
     getMatrixCellPresentation,
     integerCountFormatter,
-} from '@/features/operations/utils/species-confusion-matrix-helpers';
+} from '@/features/operations/ai-performance/utils/species-confusion-matrix-helpers';
 import { cn } from '@/utils/cn';
 
 interface SpeciesConfusionMatrixTableProps {
@@ -23,7 +23,7 @@ export default function SpeciesConfusionMatrixTable({
 }: SpeciesConfusionMatrixTableProps) {
     return (
         <div className="max-w-full">
-            <Table className="min-w-[720px] table-fixed border-collapse overflow-hidden rounded-lg">
+            <Table className="min-w-180 table-fixed border-collapse overflow-hidden rounded-lg">
                 <TableHeader>
                     <TableRow className="hover:bg-transparent">
                         <TableHead className="bg-muted/40 h-12 w-60 border" />
