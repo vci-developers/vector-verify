@@ -2,8 +2,8 @@
 
 import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
-import AiPerformanceSummaryCard from '@/features/operations/ai-performance/components/ai-performance-summary-card';
-import OperationsAiPerformanceMatrix from '@/features/operations/ai-performance/components/operations-ai-performance-matrix';
+import { Card, CardContent } from '@/components/ui/card';
+import SpecimenConfusionMatrix from './specimen-confusion-matrix';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
 
@@ -20,13 +20,13 @@ export default function OperationsAiPerformance({
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
-    const locationFilterQueryParams =
+    const annotationLocationQueryParams =
         'district' in locationQueryParam
             ? { district: locationQueryParam.district }
             : { siteId: locationQueryParam.siteId };
 
     const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
-        ...locationFilterQueryParams,
+        ...annotationLocationQueryParams,
         startDate,
         endDate,
     };
@@ -50,33 +50,13 @@ export default function OperationsAiPerformance({
     }
 
     const annotationsSummary = getAnnotationsSummaryResult.data;
-    const annotatedSpecimenCount = annotationsSummary.statusCounts.ANNOTATED;
-    const flaggedSpecimenCount = annotationsSummary.statusCounts.FLAGGED;
-    const reviewedSpecimenCount = annotatedSpecimenCount + flaggedSpecimenCount;
-    const totalSpecimenCount = annotationsSummary.total;
+    const annotatedSpecimens = annotationsSummary.statusCounts.ANNOTATED;
+    const flaggedSpecimens = annotationsSummary.statusCounts.FLAGGED;
+    const reviewedSpecimens = annotatedSpecimens + flaggedSpecimens;
+    const totalSpecimens = annotationsSummary.total;
 
-    const specimenCoveragePercentage =
-        totalSpecimenCount > 0
-            ? (reviewedSpecimenCount / totalSpecimenCount) * 100
-            : null;
-
-    const summaryCards = [
-        {
-            label: 'Coverage',
-            value:
-                specimenCoveragePercentage !== null
-                    ? `${specimenCoveragePercentage.toFixed(1)}%`
-                    : '—',
-            description: `${reviewedSpecimenCount.toLocaleString()} reviewed / ${totalSpecimenCount.toLocaleString()} total specimens`,
-            accentClassName: 'border-success/40 bg-success/5',
-        },
-        {
-            label: 'Reviewed Specimens',
-            value: reviewedSpecimenCount.toLocaleString(),
-            description: `${annotatedSpecimenCount.toLocaleString()} annotated and ${flaggedSpecimenCount.toLocaleString()} flagged`,
-            accentClassName: 'border-border bg-card',
-        },
-    ] as const;
+    const reviewedSpecimensCoverage =
+        totalSpecimens > 0 ? (reviewedSpecimens / totalSpecimens) * 100 : null;
 
     return (
         <div className="space-y-4">
@@ -89,21 +69,77 @@ export default function OperationsAiPerformance({
                 </span>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-3">
-                {summaryCards.map(summaryCard => (
-                    <AiPerformanceSummaryCard
-                        key={summaryCard.label}
-                        accentClassName={summaryCard.accentClassName}
-                        label={summaryCard.label}
-                        value={summaryCard.value}
-                        description={summaryCard.description}
-                    />
-                ))}
+            <div className="grid gap-3 lg:col-span-3 lg:grid-cols-2">
+                <Card className="border-success/40 bg-success/5 gap-0 py-0">
+                    <CardContent className="p-4">
+                        <p className="text-muted-foreground text-sm">
+                            Coverage
+                        </p>
+                        <p className="mt-1 text-4xl font-semibold tracking-tight">
+                            {reviewedSpecimensCoverage !== null
+                                ? `${reviewedSpecimensCoverage.toFixed(1)}%`
+                                : '—'}
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            {reviewedSpecimens.toLocaleString()} reviewed /{' '}
+                            {totalSpecimens.toLocaleString()} total specimens
+                        </p>
+                    </CardContent>
+                </Card>
 
-                <OperationsAiPerformanceMatrix
-                    annotationsSummary={annotationsSummary}
-                    selectedLocationName={selectedLocationName}
-                />
+                <Card className="border-border bg-card gap-0 py-0">
+                    <CardContent className="p-4">
+                        <p className="text-muted-foreground text-sm">
+                            Reviewed Specimens
+                        </p>
+                        <p className="mt-1 text-4xl font-semibold tracking-tight">
+                            {reviewedSpecimens.toLocaleString()}
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            {annotatedSpecimens.toLocaleString()} annotated and{' '}
+                            {flaggedSpecimens.toLocaleString()} flagged
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {annotationsSummary.confusionMatrices?.species && (
+                    <SpecimenConfusionMatrix
+                        title="Species Confusion Matrix"
+                        classificationCategory="species"
+                        groundTruthAxisLabel="Visual Verification Species Label"
+                        predictionAxisLabel="VectorCam Species Label"
+                        confusionMatrix={
+                            annotationsSummary.confusionMatrices.species
+                        }
+                        selectedLocationName={selectedLocationName}
+                    />
+                )}
+
+                {annotationsSummary.confusionMatrices?.sex && (
+                    <SpecimenConfusionMatrix
+                        title="Sex Confusion Matrix"
+                        classificationCategory="sex"
+                        groundTruthAxisLabel="Visual Verification Sex Label"
+                        predictionAxisLabel="VectorCam Sex Label"
+                        confusionMatrix={
+                            annotationsSummary.confusionMatrices.sex
+                        }
+                        selectedLocationName={selectedLocationName}
+                    />
+                )}
+
+                {annotationsSummary.confusionMatrices?.abdomenStatus && (
+                    <SpecimenConfusionMatrix
+                        title="Abdomen Status Confusion Matrix"
+                        classificationCategory="abdomen status"
+                        groundTruthAxisLabel="Visual Verification Abdomen Status Label"
+                        predictionAxisLabel="VectorCam Abdomen Status Label"
+                        confusionMatrix={
+                            annotationsSummary.confusionMatrices.abdomenStatus
+                        }
+                        selectedLocationName={selectedLocationName}
+                    />
+                )}
             </div>
         </div>
     );

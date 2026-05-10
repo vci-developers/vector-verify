@@ -22,7 +22,6 @@ export async function safeApiCall<T>(
     options?: RequestInit,
     validationSchema?: z.ZodType<T>,
 ): Promise<Result<T, NetworkError>> {
-    console.log('Making API call to:', path);
     let response: Response;
     try {
         response = await fetch(constructUrl(path), {
@@ -39,11 +38,9 @@ export async function safeApiCall<T>(
     }
 
     const responseBody = await readJson(response);
-    console.log('API response body:', responseBody);
 
     if (!response.ok) {
         const parsedError = backendErrorSchema.safeParse(responseBody);
-        console.log('Parsed error:', parsedError);
         return err({
             kind: statusToNetworkErrorKind(response.status),
             status: response.status,
@@ -53,7 +50,6 @@ export async function safeApiCall<T>(
 
     if (validationSchema) {
         const parsedData = validationSchema.safeParse(responseBody);
-        console.log('Parsed data:', parsedData);
         if (!parsedData.success) return err({ kind: 'client' });
         return ok(parsedData.data);
     }

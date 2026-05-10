@@ -23,13 +23,6 @@ export function formatMatrixPercentage(value: number | null) {
     return `${(value * 100).toFixed(1)}%`;
 }
 
-function getHeatmapBackgroundColor(
-    colorVariable: '--success' | '--destructive',
-    opacity: number,
-) {
-    return `color-mix(in srgb, var(${colorVariable}) ${opacity * 100}%, transparent)`;
-}
-
 export function getMatrixCellPresentation(
     rowShare: number | null,
     isCorrectPrediction: boolean,
@@ -51,10 +44,7 @@ export function getMatrixCellPresentation(
                     ? 'text-success-foreground'
                     : 'text-success',
             style: {
-                backgroundColor: getHeatmapBackgroundColor(
-                    '--success',
-                    opacity,
-                ),
+                backgroundColor: `color-mix(in srgb, var(--success) ${opacity * 100}%, transparent)`,
             },
         };
     }
@@ -69,10 +59,7 @@ export function getMatrixCellPresentation(
                 ? 'text-destructive'
                 : 'text-destructive/80',
         style: {
-            backgroundColor: getHeatmapBackgroundColor(
-                '--destructive',
-                opacity,
-            ),
+            backgroundColor: `color-mix(in srgb, var(--destructive) ${opacity * 100}%, transparent)`,
         },
     };
 }
