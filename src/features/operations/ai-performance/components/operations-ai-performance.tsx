@@ -69,7 +69,7 @@ export default function OperationsAiPerformance({
                 </span>
             </div>
 
-            <div className="grid gap-3 lg:col-span-3 lg:grid-cols-2">
+            <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
                 <Card className="border-success/40 bg-success/5 gap-0 py-0">
                     <CardContent className="p-4">
                         <p className="text-muted-foreground text-sm">
