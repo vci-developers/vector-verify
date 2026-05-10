@@ -92,7 +92,7 @@ export default function SpecimenConfusionMatrix({
             : null;
 
     return (
-        <Card className="gap-0 lg:col-span-3">
+        <Card className="gap-0 lg:col-span-2">
             <CardHeader className="pb-2">
                 <CardTitle className="text-xl">{title}</CardTitle>
             </CardHeader>
@@ -117,14 +117,14 @@ export default function SpecimenConfusionMatrix({
                             <TableRow className="hover:bg-transparent">
                                 <TableHead className="bg-muted/40 h-12 w-60 border" />
                                 <TableHead
-                                    className="bg-muted/40 h-12 border text-center font-semibold"
+                                    className="bg-muted/40 h-auto min-h-12 border px-3 py-3 text-center leading-snug font-semibold whitespace-normal wrap-break-word"
                                     colSpan={classLabels.length}
                                 >
                                     {predictionAxisLabel}
                                 </TableHead>
                             </TableRow>
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-muted/20 border text-center text-sm font-semibold">
+                                <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold whitespace-normal wrap-break-word">
                                     {groundTruthAxisLabel}
                                 </TableHead>
                                 {classLabels.map(predictedLabel => (
@@ -187,15 +187,10 @@ export default function SpecimenConfusionMatrix({
                                                         cellPresentation.style
                                                     }
                                                 >
-                                                    <div className="flex min-h-20 flex-col items-center justify-center px-2 py-3 text-center">
+                                                    <div className="flex min-h-20 items-center justify-center px-2 py-3 text-center">
                                                         <span className="text-base font-semibold">
                                                             {integerCountFormatter.format(
                                                                 specimenCountForCell,
-                                                            )}
-                                                        </span>
-                                                        <span className="text-xs opacity-90">
-                                                            {formatMatrixPercentage(
-                                                                groundTruthLabelShare,
                                                             )}
                                                         </span>
                                                     </div>
