@@ -1,10 +1,10 @@
-import { login } from '@/features/auth/api/login';
+import { login } from '@/api/auth/login';
 import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
     LoginRequestBody,
     LoginResponseBody,
     LoginSuccessPayload,
-} from '@/features/auth/validation/network/login-network-schema';
+} from '@/api/auth/validation/login-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';

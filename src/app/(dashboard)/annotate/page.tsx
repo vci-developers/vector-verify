@@ -1,7 +1,7 @@
 import { annotationTaskKeys } from '@/api/annotation-task/annotation-task-keys';
 import { getAnnotationTasks } from '@/api/annotation-task/get-annotation-tasks';
 import type { GetAnnotationTasksResponseBody } from '@/api/annotation-task/validation/get-annotation-tasks-schema';
-import AnnotationTasksListPageClient from '@/features/annotation/components/tasks-list/page-client/annotation-tasks-list-page-client';
+import AnnotationTasksListPageClient from '@/features/annotation/tasks-list/components/annotation-tasks-list-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,

@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { OperationsTab } from '@/features/operations/components/page-client/operations-page-client';
+import type { OperationsTab } from '@/features/operations/components/operations-page-client';
 import { Download } from 'lucide-react';
 
 interface OperationsHeaderProps {

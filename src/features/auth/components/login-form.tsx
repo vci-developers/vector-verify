@@ -4,11 +4,11 @@ import { Controller, useForm } from 'react-hook-form';
 import {
     loginFormSchema,
     type LoginFormInput,
-} from '@/features/auth/validation/form/login-form-schema';
+} from '@/features/auth/validation/login-form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
-import type { LoginSuccessPayload } from '@/features/auth/validation/network/login-network-schema';
+import type { LoginSuccessPayload } from '@/api/auth/validation/login-schema';
 import {
     Field,
     FieldError,
