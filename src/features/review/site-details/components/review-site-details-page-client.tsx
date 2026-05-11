@@ -1,10 +1,15 @@
 'use client';
 
+import { useGetSessions } from '@/api/session/hooks/use-get-sessions';
+import { useUpdateSession } from '@/api/session/hooks/use-update-session';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
+import ErrorBanner from '@/components/ui/error-banner';
 import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ReviewSiteDetailsHeader from './layout/review-site-details-header';
 import MetadataReviewWorkspace from '../metadata-review/components/metadata-review-workspace';
 import ImageReviewWorkspace from '../image-review/components/image-review-workspace';
@@ -27,7 +32,60 @@ export default function ReviewSiteDetailsPageClient({
     startDate,
     endDate,
 }: ReviewSiteDetailsPageClientProps) {
+    const router = useRouter();
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
+    const [certificationError, setCertificationError] = useState<string | null>(
+        null,
+    );
+
+    const { mutateAsync: updateSession, isPending: isUpdatingSession } =
+        useUpdateSession();
+    const { data: getSessionsResult } = useGetSessions({
+        siteId,
+        startDate,
+        endDate,
+    });
+
+    const periodLabel = startDate
+        ? format(new Date(startDate + 'T00:00:00'), 'MMMM yyyy')
+        : 'the selected period';
+
+    async function handleCertify() {
+        setCertificationError(null);
+
+        const sessions = getSessionsResult?.ok
+            ? getSessionsResult.data.sessions
+            : [];
+
+        const results = await Promise.allSettled(
+            sessions.map(session =>
+                updateSession({
+                    sessionId: session.sessionId,
+                    requestBody: { state: 'CERTIFIED' },
+                }),
+            ),
+        );
+
+        const failedMessages = results.flatMap(result => {
+            if (result.status === 'rejected') {
+                return ['Unable to certify one or more sessions.'];
+            }
+            if (!result.value.ok) {
+                return [result.value.error.message];
+            }
+            return [];
+        });
+
+        if (failedMessages.length > 0) {
+            setCertificationError(
+                failedMessages[0] ??
+                    'Some sessions could not be certified. Please try again.',
+            );
+            return;
+        }
+
+        router.push('/review');
+    }
 
     function goToNextStep() {
         setCurrentStepIndex(index =>
@@ -55,6 +113,10 @@ export default function ReviewSiteDetailsPageClient({
 
                         <Separator />
 
+                        {certificationError && currentStepIndex === 2 && (
+                            <ErrorBanner message={certificationError} />
+                        )}
+
                         {currentStepIndex === 0 && (
                             <MetadataReviewWorkspace
                                 siteId={siteId}
@@ -71,7 +133,10 @@ export default function ReviewSiteDetailsPageClient({
                         )}
                         {currentStepIndex === 2 && (
                             <CertificationWorkspace
+                                periodLabel={periodLabel}
                                 onGoToPreviousStep={goToPreviousStep}
+                                onCertify={handleCertify}
+                                isCertifying={isUpdatingSession}
                             />
                         )}
                     </div>
