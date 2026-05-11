@@ -1,10 +1,10 @@
-import { signup } from '@/features/auth/api/signup';
+import { signup } from '@/api/auth/signup';
 import { setAccessCookie, setRefreshCookie } from '@/lib/auth-session/cookies';
 import type {
     SignupRequestBody,
     SignupResponseBody,
     SignupSuccessPayload,
-} from '@/features/auth/validation/network/signup-network-schema';
+} from '@/api/auth/validation/signup-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';

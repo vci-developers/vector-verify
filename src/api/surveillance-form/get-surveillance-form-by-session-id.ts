@@ -11,7 +11,7 @@ export async function getSurveillanceFormBySessionId(
     sessionId: number,
 ): Promise<Result<GetSurveillanceFormBySessionIdResponseBody, NetworkError>> {
     return safeApiCall<GetSurveillanceFormBySessionIdResponseBody>(
-        `/sessions/${sessionId}/surveillance-form`,
+        `/sessions/${sessionId}/survey`,
         {
             method: 'GET',
             headers: {

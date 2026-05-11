@@ -1,4 +1,4 @@
-import { refresh } from '@/features/auth/api/refresh';
+import { refresh } from '@/api/auth/refresh';
 import {
     REFRESH_COOKIE_NAME,
     setAccessCookie,
@@ -7,7 +7,7 @@ import type {
     RefreshRequestBody,
     RefreshResponseBody,
     RefreshSuccessPayload,
-} from '@/features/auth/validation/network/refresh-network-schema';
+} from '@/api/auth/validation/refresh-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
 import { cookies } from 'next/headers';
