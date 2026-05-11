@@ -146,7 +146,7 @@ export default function MetadataReviewWorkspace({
                                 siteId,
                                 startDate,
                                 endDate,
-                                type: 'SURVEILLANCE'
+                                type: 'SURVEILLANCE',
                             }),
                         });
                         for (const session of allSessionsForSite) {

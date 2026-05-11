@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { cn } from '@/utils/cn';
 import { Check, ChevronLeft } from 'lucide-react';
