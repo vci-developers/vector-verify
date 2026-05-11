@@ -10,11 +10,11 @@ import {
     FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import type { SignupSuccessPayload } from '@/features/auth/validation/network/signup-network-schema';
+import type { SignupSuccessPayload } from '@/api/auth/validation/signup-schema';
 import {
     signupFormSchema,
     type SignupFormInput,
-} from '@/features/auth/validation/form/signup-form-schema';
+} from '@/features/auth/validation/signup-form-schema';
 import {
     networkErrorMessage,
     type NetworkError,
