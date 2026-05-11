@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/utils/cn';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 interface MarkerInfoPanelProps {
     markers: SiteMarker[];

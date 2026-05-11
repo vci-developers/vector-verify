@@ -38,7 +38,6 @@ export async function safeApiCall<T>(
     }
 
     const responseBody = await readJson(response);
-    console.log(responseBody)
 
     if (!response.ok) {
         const parsedError = backendErrorSchema.safeParse(responseBody);

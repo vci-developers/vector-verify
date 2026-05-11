@@ -4,7 +4,7 @@ import {
     formatMatrixPercentage,
     getMatrixCellPresentation,
     integerCountFormatter,
-} from '../utils/specimen-confusion-matrix-helpers';
+} from '../utils/ai-performance-helpers';
 import {
     Table,
     TableBody,

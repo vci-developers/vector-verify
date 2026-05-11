@@ -5,7 +5,7 @@ import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
 

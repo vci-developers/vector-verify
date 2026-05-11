@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { useSiteGeocode } from '../hooks/use-site-geocode';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/site-marker-data';
+import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import MapNavigator from './map-navigator';
 import MarkerLayer from './marker-layer';
 import MarkerInfoPanel from './marker-info-panel';

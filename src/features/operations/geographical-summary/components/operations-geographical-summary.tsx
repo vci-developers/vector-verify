@@ -9,7 +9,7 @@ import type { LocationQueryParam } from '@/lib/location/location-query';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
-} from '../utils/site-marker-data';
+} from '../utils/geographical-summary-helpers';
 import { useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
