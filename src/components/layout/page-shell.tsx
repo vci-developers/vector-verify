@@ -5,7 +5,6 @@ interface PageShellProps {
     icon: LucideIcon;
     description?: string;
     children: React.ReactNode;
-    headerAction?: React.ReactNode;
 }
 
 export default function PageShell({
@@ -13,7 +12,6 @@ export default function PageShell({
     icon: Icon,
     description,
     children,
-    headerAction,
 }: PageShellProps) {
     return (
         <div className="from-background via-background to-muted/30 min-h-screen bg-linear-to-br">
@@ -34,7 +32,6 @@ export default function PageShell({
                             )}
                         </div>
                     </div>
-                    {headerAction}
                 </div>
 
                 {children}
