@@ -1,7 +1,4 @@
 import { sessionKeys } from '@/api/session/session-keys';
-import { getSessions } from '@/api/session/get-sessions';
-import type { GetSessionsQueryParams } from '@/api/session/validation/get-sessions-schema';
-import { getSurveillanceFormDataBySessionId } from '@/api/surveillance-form/get-surveillance-form-data-by-session-id';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
@@ -10,7 +7,10 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewDetailsPageClient from '@/features/review/site-detail/components/review-details-page-client';
+import ReviewSiteDetailsPageClient from '@/features/review/site-details/components/review-site-details-page-client';
+import { getSurveillanceFormBySessionId } from '@/api/surveillance-form/get-surveillance-form-by-session-id';
+import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
+import { getAllSessions } from '@/api/session/get-all-sessions';
 
 interface ReviewSiteDetailPageProps {
     params: Promise<{
@@ -26,33 +26,34 @@ export default async function ReviewSiteDetailPage({
     params,
     searchParams,
 }: ReviewSiteDetailPageProps) {
-    const { siteId: siteIdParam } = await params;
+    const siteId = Number((await params).siteId);
     const { startDate, endDate } = await searchParams;
-    const siteId = Number(siteIdParam);
+
     const queryClient = new QueryClient();
 
-    const getSessionsQueryParams: GetSessionsQueryParams = {
+    const getAllSessionsQueryParams: GetAllSessionsQueryParams = {
         siteId,
         startDate,
         endDate,
+        type: 'SURVEILLANCE',
     };
 
-    const authorizedGetSessionsResult = await withAuthSession(
+    const authorizedGetAllSessionsResult = await withAuthSession(
         async accessToken => {
-            const getSessionsResult = await getSessions(
+            const getAllSessionsResult = await getAllSessions(
                 accessToken,
-                getSessionsQueryParams,
+                getAllSessionsQueryParams,
             );
 
             queryClient.setQueryData(
-                sessionKeys.sessions(getSessionsQueryParams),
-                getSessionsResult,
+                sessionKeys.allSessions(getAllSessionsQueryParams),
+                getAllSessionsResult,
             );
 
-            if (getSessionsResult.ok) {
+            if (getAllSessionsResult.ok) {
                 await Promise.all(
-                    getSessionsResult.data.sessions.map(async session => {
-                        const result = await getSurveillanceFormDataBySessionId(
+                    getAllSessionsResult.data.sessions.map(async session => {
+                        const result = await getSurveillanceFormBySessionId(
                             accessToken,
                             session.sessionId,
                         );
@@ -66,22 +67,22 @@ export default async function ReviewSiteDetailPage({
                 );
             }
 
-            return getSessionsResult;
+            return getAllSessionsResult;
         },
     );
 
-    if (!authorizedGetSessionsResult.ok) {
-        if (authorizedGetSessionsResult.error.kind === 'unauthorized') {
+    if (!authorizedGetAllSessionsResult.ok) {
+        if (authorizedGetAllSessionsResult.error.kind === 'unauthorized') {
             redirect('/login');
         }
-        if (authorizedGetSessionsResult.error.kind === 'forbidden') {
+        if (authorizedGetAllSessionsResult.error.kind === 'forbidden') {
             redirect('/forbidden');
         }
     }
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewDetailsPageClient
+            <ReviewSiteDetailsPageClient
                 siteId={siteId}
                 startDate={startDate}
                 endDate={endDate}

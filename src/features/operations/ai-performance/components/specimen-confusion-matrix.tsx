@@ -117,14 +117,14 @@ export default function SpecimenConfusionMatrix({
                             <TableRow className="hover:bg-transparent">
                                 <TableHead className="bg-muted/40 h-12 w-60 border" />
                                 <TableHead
-                                    className="bg-muted/40 h-auto min-h-12 border px-3 py-3 text-center leading-snug font-semibold whitespace-normal wrap-break-word"
+                                    className="bg-muted/40 h-auto min-h-12 border px-3 py-3 text-center leading-snug font-semibold wrap-break-word whitespace-normal"
                                     colSpan={classLabels.length}
                                 >
                                     {predictionAxisLabel}
                                 </TableHead>
                             </TableRow>
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold whitespace-normal wrap-break-word">
+                                <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold wrap-break-word whitespace-normal">
                                     {groundTruthAxisLabel}
                                 </TableHead>
                                 {classLabels.map(predictedLabel => (

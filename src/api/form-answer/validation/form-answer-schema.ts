@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const formAnswerSchema = z.object({
+export const formAnswerSchema = z.object({
     id: z.number(),
     frontendId: z.string().nullable(),
     questionId: z.number(),
@@ -17,14 +17,4 @@ const formAnswerSchema = z.object({
     updatedAt: z.number().nullable(),
 });
 
-export const formAnswersSchema = z.object({
-    formId: z.number(),
-    formName: z.string(),
-    formVersion: z.string(),
-    programId: z.number(),
-    sessionId: z.number(),
-    answers: z.array(formAnswerSchema),
-});
-
-export type FormAnswers = z.infer<typeof formAnswersSchema>;
 export type FormAnswer = z.infer<typeof formAnswerSchema>;
