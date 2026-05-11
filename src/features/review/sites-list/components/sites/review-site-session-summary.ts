@@ -6,6 +6,12 @@ export interface ReviewSiteSessionSummary {
     stateCounts: Partial<Record<SessionState, number>>;
 }
 
+export const EMPTY_SESSION_SUMMARY: ReviewSiteSessionSummary = {
+    sessionCount: 0,
+    needsReviewCount: 0,
+    stateCounts: {},
+};
+
 export const LOCKED_SESSION_STATES = [
     'CERTIFIED',
     'SUBMITTED',

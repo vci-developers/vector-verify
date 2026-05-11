@@ -14,21 +14,16 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
-import type { ReviewSiteSessionSummary } from './review-site-session-summary';
+import {
+    EMPTY_SESSION_SUMMARY,
+    type ReviewSiteSessionSummary,
+} from './review-site-session-summary';
 
 interface ReviewSiteListProps {
     sites: Site[];
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
-}
-
-function createEmptySessionSummary(): ReviewSiteSessionSummary {
-    return {
-        sessionCount: 0,
-        needsReviewCount: 0,
-        stateCounts: {},
-    };
 }
 
 export default function ReviewSitesList({
@@ -70,7 +65,7 @@ export default function ReviewSitesList({
 
             const monthMap = map.get(monthKey)!;
             const current =
-                monthMap.get(session.siteId) ?? createEmptySessionSummary();
+                monthMap.get(session.siteId) ?? EMPTY_SESSION_SUMMARY;
             const stateCounts = { ...current.stateCounts };
 
             if (session.state) {

@@ -4,6 +4,7 @@ import { cn } from '@/utils/cn';
 import { ChevronRight, Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import {
+    EMPTY_SESSION_SUMMARY,
     getReviewSiteStatus,
     isReviewSiteLocked,
     type ReviewSiteSessionSummary,
@@ -16,12 +17,6 @@ interface ReviewSiteLeafRowsProps {
     startDate: string;
     endDate: string;
 }
-
-const EMPTY_SESSION_SUMMARY: ReviewSiteSessionSummary = {
-    sessionCount: 0,
-    needsReviewCount: 0,
-    stateCounts: {},
-};
 
 const STATUS_VARIANTS = {
     NEEDS_REVIEW: 'destructive',
