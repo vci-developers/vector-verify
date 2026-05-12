@@ -42,7 +42,7 @@ export async function getAllSpecimens(
         );
 
         if (!result.ok) return result;
-        
+
         allSpecimens.push(...result.data.specimens);
         hasMore = result.data.hasMore;
         offset += LIMIT;

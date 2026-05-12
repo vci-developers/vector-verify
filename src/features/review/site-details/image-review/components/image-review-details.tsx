@@ -39,7 +39,9 @@ export default function ImageReviewDetails({
     return (
         <div className="space-y-4">
             <div>
-                <p className="text-muted-foreground text-sm uppercase">Specimen ID</p>
+                <p className="text-muted-foreground text-sm uppercase">
+                    Specimen ID
+                </p>
                 <p className="text-lg font-semibold">{specimen.specimenId}</p>
             </div>
 
