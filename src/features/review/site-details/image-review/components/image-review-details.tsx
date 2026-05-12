@@ -2,7 +2,9 @@ import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-ima
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
+import { AlertCircle } from 'lucide-react';
 
 interface ImageReviewDetailsProps {
     specimen: Specimen;
@@ -13,53 +15,68 @@ export default function ImageReviewDetails({
     specimen,
     currentImage,
 }: ImageReviewDetailsProps) {
-    const session = specimen.session;
-    const collectionDateLabel = session?.collectionDate
-        ? format(new Date(session.collectionDate), 'MMM d, yyyy')
-        : '—';
+    const totalImagesUploaded = specimen.images?.length ?? 0;
+    const expectedImagesCount = specimen.expectedImages;
+
+    const hasReliableExpectedCount =
+        expectedImagesCount != null &&
+        expectedImagesCount > 0 &&
+        totalImagesUploaded <= expectedImagesCount;
+
+    const imagesCapturedLabel = hasReliableExpectedCount
+        ? `${totalImagesUploaded} of ${expectedImagesCount}`
+        : `${totalImagesUploaded}`;
+    const isMissingExpectedImages =
+        hasReliableExpectedCount && totalImagesUploaded < expectedImagesCount;
+
     const capturedAtLabel = currentImage?.capturedAt
         ? format(new Date(currentImage.capturedAt), 'MMM d, yyyy h:mm a')
+        : '—';
+    const submittedAtLabel = currentImage?.submittedAt
+        ? format(new Date(currentImage.submittedAt), 'MMM d, yyyy h:mm a')
         : '—';
 
     return (
         <div className="space-y-4">
             <div>
-                <p className="text-muted-foreground text-xs">Specimen ID</p>
+                <p className="text-muted-foreground text-sm uppercase">Specimen ID</p>
                 <p className="text-lg font-semibold">{specimen.specimenId}</p>
             </div>
 
             <Separator />
 
-            <div className="space-y-3">
-                <p className="text-sm font-semibold">Session</p>
-                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-muted-foreground">Session ID</dt>
-                    <dd>{session?.sessionId ?? '—'}</dd>
+            <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                <dt className="text-muted-foreground">Session ID</dt>
+                <dd>{specimen.sessionId}</dd>
 
-                    <dt className="text-muted-foreground">Collection Date</dt>
-                    <dd>{collectionDateLabel}</dd>
+                <dt className="text-muted-foreground">Images Captured</dt>
+                <dd
+                    className={cn(
+                        isMissingExpectedImages &&
+                            'text-destructive font-medium',
+                    )}
+                >
+                    {isMissingExpectedImages && (
+                        <AlertCircle className="h-3.5 w-3.5" />
+                    )}
+                    {imagesCapturedLabel}
+                </dd>
 
-                    <dt className="text-muted-foreground">
-                        Specimen Condition
-                    </dt>
-                    <dd>{session?.specimenCondition ?? '—'}</dd>
-
-                    <dt className="text-muted-foreground">
-                        Needs Further Processing
-                    </dt>
-                    <dd>
-                        <Badge
-                            variant={
-                                specimen.shouldProcessFurther
-                                    ? 'default'
-                                    : 'secondary'
-                            }
-                        >
-                            {specimen.shouldProcessFurther ? 'Yes' : 'No'}
-                        </Badge>
-                    </dd>
-                </dl>
-            </div>
+                <dt className="text-muted-foreground">
+                    Needs Further Processing
+                </dt>
+                <dd>
+                    <Badge
+                        variant={
+                            specimen.shouldProcessFurther
+                                ? 'default'
+                                : 'secondary'
+                        }
+                    >
+                        {specimen.shouldProcessFurther ? 'Yes' : 'No'}
+                    </Badge>
+                </dd>
+            </dl>
 
             <Separator />
 
@@ -68,6 +85,9 @@ export default function ImageReviewDetails({
                 <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                     <dt className="text-muted-foreground">Captured At</dt>
                     <dd>{capturedAtLabel}</dd>
+
+                    <dt className="text-muted-foreground">Submitted At</dt>
+                    <dd>{submittedAtLabel}</dd>
                 </dl>
             </div>
 
