@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { useUpdateSession } from '@/api/session/hooks/use-update-session';
+import { usePutSessionById } from '@/api/session/hooks/use-put-session-by-id';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import ErrorBanner from '@/components/ui/error-banner';
@@ -38,8 +38,8 @@ export default function ReviewSiteDetailsPageClient({
         null,
     );
 
-    const { mutateAsync: updateSession, isPending: isUpdatingSession } =
-        useUpdateSession();
+    const { mutateAsync: putSessionById, isPending: isUpdatingSession } =
+        usePutSessionById();
     const { data: getAllSessionsResult } = useGetAllSessions({
         siteId,
         startDate,
@@ -59,7 +59,7 @@ export default function ReviewSiteDetailsPageClient({
 
         const results = await Promise.allSettled(
             sessions.map(session =>
-                updateSession({
+                putSessionById({
                     sessionId: session.sessionId,
                     requestBody: { state: 'CERTIFIED' },
                 }),

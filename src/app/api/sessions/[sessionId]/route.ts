@@ -1,10 +1,10 @@
 import { getSessionById } from '@/api/session/get-session-by-id';
 import type { GetSessionByIdResponseBody } from '@/api/session/validation/get-session-by-id-schema';
-import { updateSession } from '@/api/session/update-session';
+import { putSessionById } from '@/api/session/put-session-by-id';
 import type {
-    UpdateSessionRequestBody,
-    UpdateSessionResponseBody,
-} from '@/api/session/validation/update-session-schema';
+    PutSessionByIdRequestBody,
+    PutSessionByIdResponseBody,
+} from '@/api/session/validation/put-session-by-id-schema';
 import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
@@ -33,7 +33,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 export async function PUT(request: Request, { params }: RouteParams) {
     const sessionId = Number((await params).sessionId);
 
-    let requestBody: UpdateSessionRequestBody;
+    let requestBody: PutSessionByIdRequestBody;
     try {
         requestBody = await request.json();
     } catch {
@@ -43,14 +43,14 @@ export async function PUT(request: Request, { params }: RouteParams) {
         );
     }
 
-    const authorizedUpdateSessionResult =
-        await withAuthSession<UpdateSessionResponseBody>(accessToken =>
-            updateSession(accessToken, sessionId, requestBody),
+    const authorizedPutSessionByIdResult =
+        await withAuthSession<PutSessionByIdResponseBody>(accessToken =>
+            putSessionById(accessToken, sessionId, requestBody),
         );
 
-    return NextResponse.json(authorizedUpdateSessionResult, {
-        status: authorizedUpdateSessionResult.ok
+    return NextResponse.json(authorizedPutSessionByIdResult, {
+        status: authorizedPutSessionByIdResult.ok
             ? 200
-            : (authorizedUpdateSessionResult.error.status ?? 400),
+            : (authorizedPutSessionByIdResult.error.status ?? 400),
     });
 }

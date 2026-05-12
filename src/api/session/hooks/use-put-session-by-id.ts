@@ -1,21 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
-    UpdateSessionRequestBody,
-    UpdateSessionSuccessPayload,
-} from '@/api/session/validation/update-session-schema';
+    PutSessionByIdRequestBody,
+    PutSessionByIdSuccessPayload,
+} from '@/api/session/validation/put-session-by-id-schema';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 import { sessionKeys } from '@/api/session/session-keys';
 
-type UpdateSessionMutationResult = Result<
-    UpdateSessionSuccessPayload,
+type PutSessionByIdMutationResult = Result<
+    PutSessionByIdSuccessPayload,
     NetworkError
 >;
 
-async function fetchUpdateSession(
+async function updateSessionById(
     sessionId: number,
-    requestBody: UpdateSessionRequestBody,
-): Promise<UpdateSessionMutationResult> {
+    requestBody: PutSessionByIdRequestBody,
+): Promise<PutSessionByIdMutationResult> {
     const response = await fetch(`/api/sessions/${sessionId}`, {
         method: 'PUT',
         credentials: 'include',
@@ -25,12 +25,12 @@ async function fetchUpdateSession(
         body: JSON.stringify(requestBody),
     });
 
-    const updateSessionResult: UpdateSessionMutationResult =
+    const putSessionByIdResult: PutSessionByIdMutationResult =
         await response.json();
-    return updateSessionResult;
+    return putSessionByIdResult;
 }
 
-export function useUpdateSession() {
+export function usePutSessionById() {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -39,8 +39,8 @@ export function useUpdateSession() {
             requestBody,
         }: {
             sessionId: number;
-            requestBody: UpdateSessionRequestBody;
-        }) => fetchUpdateSession(sessionId, requestBody),
+            requestBody: PutSessionByIdRequestBody;
+        }) => updateSessionById(sessionId, requestBody),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: sessionKeys.root });
         },

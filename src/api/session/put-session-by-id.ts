@@ -1,24 +1,25 @@
 import { err, type Result } from '@/lib/result/result';
 import {
-    updateSessionRequestSchema,
-    updateSessionResponseSchema,
-    type UpdateSessionRequestBody,
-    type UpdateSessionResponseBody,
-} from '@/api/session/validation/update-session-schema';
+    putSessionByIdRequestSchema,
+    putSessionByIdResponseSchema,
+    type PutSessionByIdRequestBody,
+    type PutSessionByIdResponseBody,
+} from '@/api/session/validation/put-session-by-id-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 
-export async function updateSession(
+export async function putSessionById(
     accessToken: string,
     sessionId: number,
-    requestBody: UpdateSessionRequestBody,
-): Promise<Result<UpdateSessionResponseBody, NetworkError>> {
-    const parsedRequestBody = updateSessionRequestSchema.safeParse(requestBody);
+    requestBody: PutSessionByIdRequestBody,
+): Promise<Result<PutSessionByIdResponseBody, NetworkError>> {
+    const parsedRequestBody =
+        putSessionByIdRequestSchema.safeParse(requestBody);
     if (!parsedRequestBody.success) {
         return err({ kind: 'client' });
     }
 
-    return safeApiCall<UpdateSessionResponseBody>(
+    return safeApiCall<PutSessionByIdResponseBody>(
         `/sessions/${sessionId}`,
         {
             method: 'PUT',
@@ -27,6 +28,6 @@ export async function updateSession(
             },
             body: JSON.stringify(parsedRequestBody.data),
         },
-        updateSessionResponseSchema,
+        putSessionByIdResponseSchema,
     );
 }
