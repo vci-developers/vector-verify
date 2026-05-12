@@ -31,6 +31,7 @@ export default function PageShell({
                         )}
                     </div>
                 </div>
+
                 {children}
             </div>
         </div>
