@@ -65,6 +65,9 @@ export default function ReviewSiteDetailsPageClient({
                         )}
                         {currentStepIndex === 1 && (
                             <ImageReviewWorkspace
+                                siteId={siteId}
+                                startDate={startDate}
+                                endDate={endDate}
                                 onGoToPreviousStep={goToPreviousStep}
                                 onGoToNextStep={goToNextStep}
                             />

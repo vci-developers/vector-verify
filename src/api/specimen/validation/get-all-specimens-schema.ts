@@ -11,6 +11,7 @@ export const getAllSpecimensQueryParamsSchema = z
         specimenId: z.string().optional(),
         shouldProcessFurther: z.coerce.boolean().optional(),
         hasImages: z.coerce.boolean().optional(),
+        includeAllImages: z.coerce.boolean().optional(),
         species: z.string().optional(),
         sex: z.string().optional(),
         abdomenStatus: z.string().optional(),
@@ -26,6 +27,7 @@ export const getAllSpecimensQueryParamsSchema = z
     );
 
 export const getAllSpecimensResponseSchema = z.object({
+    message: z.string(),
     specimens: z.array(specimenSchema),
 });
 
