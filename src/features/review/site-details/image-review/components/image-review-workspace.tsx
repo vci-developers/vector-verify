@@ -1,21 +1,131 @@
 'use client';
 
+import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
 import { Button } from '@/components/ui/button';
+import ImageReviewCarousel from './image-review-carousel';
+import { usePagination } from '@/lib/hooks/use-pagination';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import ImageReviewDetails from './image-review-details';
 
 interface ImageReviewWorkspaceProps {
+    siteId: number;
+    startDate?: string;
+    endDate?: string;
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }
 
 export default function ImageReviewWorkspace({
+    siteId,
+    startDate,
+    endDate,
     onGoToPreviousStep,
     onGoToNextStep,
 }: ImageReviewWorkspaceProps) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const {
+        page: currentSpecimenNumber,
+        nextPage: goToNextSpecimen,
+        previousPage: goToPreviousSpecimen,
+    } = usePagination({ limit: 1 });
+
+    const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
+        useGetAllSpecimens({
+            siteId,
+            startDate,
+            endDate,
+            sessionType: 'SURVEILLANCE',
+            includeAllImages: true,
+        });
+
+    if (isGetAllSpecimensPending || !getAllSpecimensResult) {
+        return <h1>Loading...</h1>;
+    }
+
+    if (!getAllSpecimensResult.ok) {
+        return <h1>Error: {getAllSpecimensResult.error.message}</h1>;
+    }
+
+    const allSpecimensForSite = getAllSpecimensResult.data.specimens;
+
+    if (allSpecimensForSite.length === 0) {
+        return (
+            <p className="text-muted-foreground text-sm">
+                No specimens found for this site.
+            </p>
+        );
+    }
+
+    const totalSpecimensToReview = allSpecimensForSite.length;
+    const currentSpecimenBeingReviewed =
+        allSpecimensForSite[currentSpecimenNumber - 1]!;
+    const currentImageBeingViewed =
+        currentSpecimenBeingReviewed.images?.[currentImageIndex] ?? null;
+    const isOnFirstSpecimen = currentSpecimenNumber === 1;
+    const isOnLastSpecimen = currentSpecimenNumber === totalSpecimensToReview;
+
+    function handleGoToPreviousSpecimen() {
+        setCurrentImageIndex(0);
+        goToPreviousSpecimen(totalSpecimensToReview);
+    }
+
+    function handleGoToNextSpecimen() {
+        setCurrentImageIndex(0);
+        goToNextSpecimen(totalSpecimensToReview);
+    }
+
     return (
         <div className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-                Image review coming soon.
-            </p>
+            <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">
+                    Specimen {currentSpecimenNumber} of {totalSpecimensToReview}
+                </p>
+                <div className="flex gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGoToPreviousSpecimen}
+                        disabled={isOnFirstSpecimen}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous Specimen
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGoToNextSpecimen}
+                        disabled={isOnLastSpecimen}
+                    >
+                        Next Specimen
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <Card className="lg:col-span-3">
+                    <CardContent className="p-4">
+                        <ImageReviewCarousel
+                            key={currentSpecimenBeingReviewed.id}
+                            specimen={currentSpecimenBeingReviewed}
+                            currentImageIndex={currentImageIndex}
+                            onCurrentImageIndexChange={setCurrentImageIndex}
+                        />
+                    </CardContent>
+                </Card>
+                <Card className="lg:col-span-2">
+                    <CardContent className="p-4">
+                        <ImageReviewDetails
+                            specimen={currentSpecimenBeingReviewed}
+                            currentImage={currentImageBeingViewed}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
 
             <div className="flex justify-between">
                 <Button variant="outline" onClick={onGoToPreviousStep}>

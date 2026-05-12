@@ -5,6 +5,7 @@ import {
 import {
     getSessionsQueryParamsSchema,
     getSessionsResponseSchema,
+    type GetSessionsResponseBody,
 } from '@/api/session/validation/get-sessions-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import { ok, type Result } from '@/lib/result/result';
@@ -28,7 +29,7 @@ export async function getAllSessions(
             getSessionsQueryParamsSchema,
         );
 
-        const result = await safeApiCall(
+        const result = await safeApiCall<GetSessionsResponseBody>(
             `/sessions${queryString}`,
             {
                 method: 'GET',
