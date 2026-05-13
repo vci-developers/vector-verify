@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
 import ReviewVisitCoverageBadge from './review-visit-coverage-badge';
+import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
 function getVisitCoverageBackgroundColor(
     percentage: number,
@@ -23,10 +24,7 @@ interface ReviewCollapsibleLocationGroupProps {
     locationTypeName: string;
     sitesInGroup: Site[];
     parentPath: string;
-    sessionCountsBySiteId: Map<
-        number,
-        { sessionCount: number; needsReviewCount: number }
-    >;
+    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
     children: React.ReactNode;

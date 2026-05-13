@@ -1,19 +1,22 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/cn';
-import { endOfMonth, format, parseISO } from 'date-fns';
-import { MapPin } from 'lucide-react';
+import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 import { Fragment } from 'react';
-import { useReviewSiteListMonthKey } from './review-sites-list';
+import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
+import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
-    sessionCountsBySiteId: Map<
-        number,
-        { sessionCount: number; needsReviewCount: number }
-    >;
+    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
+}
+
+function buildReviewHref(site: Site, startDate: string, endDate: string) {
+    const queryParams = new URLSearchParams({ startDate, endDate });
+    return `/review/${site.siteId}?${queryParams.toString()}`;
 }
 
 export default function ReviewSiteLeafRows({
@@ -22,23 +25,27 @@ export default function ReviewSiteLeafRows({
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
     const monthKey = useReviewSiteListMonthKey();
-    const startDate = `${monthKey}-01`;
-    const endDate = format(endOfMonth(parseISO(startDate)), 'yyyy-MM-dd');
+    const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
 
     return (
         <div className="space-y-1">
             {sites.map(site => {
-                const { sessionCount, needsReviewCount } =
-                    sessionCountsBySiteId.get(site.siteId) ?? {
-                        sessionCount: 0,
-                        needsReviewCount: 0,
-                    };
+                const {
+                    sessionCount,
+                    needsReviewCount,
+                    isLocked,
+                    isCertified,
+                } = sessionCountsBySiteId.get(site.siteId) ?? {
+                    sessionCount: 0,
+                    needsReviewCount: 0,
+                    isLocked: false,
+                    isCertified: false,
+                };
                 const hasSessions = sessionCount > 0;
-                const href = `/review/${site.siteId}?startDate=${startDate}&endDate=${endDate}`;
-
                 const rowClassName = cn(
                     'flex items-center justify-between rounded-md px-3 py-2',
-                    hasSessions
+                    hasSessions && !isLocked
                         ? 'cursor-pointer hover:bg-muted/50'
                         : 'cursor-not-allowed opacity-60',
                 );
@@ -71,22 +78,31 @@ export default function ReviewSiteLeafRows({
                                     {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
                                 </Badge>
                             )}
-                            <Badge
-                                variant={hasSessions ? 'default' : 'outline'}
-                            >
-                                {hasSessions
-                                    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                    : 'No sessions'}
-                            </Badge>
+                            {isCertified ? (
+                                <Badge variant="default">Certified</Badge>
+                            ) : (
+                                <Badge
+                                    variant={
+                                        hasSessions ? 'default' : 'outline'
+                                    }
+                                >
+                                    {hasSessions
+                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
+                                        : 'No sessions'}
+                                </Badge>
+                            )}
+                            {isLocked && (
+                                <Lock className="text-muted-foreground h-4 w-4" />
+                            )}
                         </div>
                     </Fragment>
                 );
 
-                if (hasSessions) {
+                if (hasSessions && !isLocked) {
                     return (
                         <Link
                             key={site.siteId}
-                            href={href}
+                            href={buildReviewHref(site, startDate, endDate)}
                             className={rowClassName}
                         >
                             {rowContent}

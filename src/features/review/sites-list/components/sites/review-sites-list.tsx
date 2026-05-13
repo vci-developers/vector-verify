@@ -3,7 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -14,18 +14,8 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
-
-const ReviewSiteListMonthKeyContext = createContext<string | null>(null);
-
-export function useReviewSiteListMonthKey() {
-    const monthKey = useContext(ReviewSiteListMonthKeyContext);
-    if (monthKey === null) {
-        throw new Error(
-            'useReviewSiteListMonthKey must be used within a ReviewSitesList month.',
-        );
-    }
-    return monthKey;
-}
+import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { ReviewSiteListMonthKeyContext } from '../../hooks/use-review-sites-list-month-key';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -61,10 +51,7 @@ export default function ReviewSitesList({
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
     const monthToSiteIdCounts = useMemo(() => {
-        const map = new Map<
-            string,
-            Map<number, { sessionCount: number; needsReviewCount: number }>
-        >();
+        const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
         if (!getAllSessionsResult?.ok) return map;
 
         for (const session of getAllSessionsResult.data.sessions) {
@@ -73,16 +60,28 @@ export default function ReviewSitesList({
                 'yyyy-MM',
             );
             if (!map.has(monthKey)) map.set(monthKey, new Map());
+
             const monthMap = map.get(monthKey)!;
             const current = monthMap.get(session.siteId) ?? {
                 sessionCount: 0,
                 needsReviewCount: 0,
+                isLocked: true,
+                isCertified: true,
             };
+
+            const isLockedSessionState =
+                session.state === 'CERTIFIED' ||
+                session.state === 'SUBMITTED' ||
+                session.state === 'NOT_APPLICABLE';
+            const isCertifiedSessionState = session.state === 'CERTIFIED';
+
             monthMap.set(session.siteId, {
                 sessionCount: current.sessionCount + 1,
                 needsReviewCount:
                     current.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
+                isLocked: current.isLocked && isLockedSessionState,
+                isCertified: current.isCertified && isCertifiedSessionState,
             });
         }
 
@@ -151,7 +150,8 @@ export default function ReviewSitesList({
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
                 const sessionCountsBySiteId =
-                    monthToSiteIdCounts.get(monthKey) ?? new Map();
+                    monthToSiteIdCounts.get(monthKey) ??
+                    new Map<number, ReviewSiteSessionSummary>();
                 const isCollapsed = collapsedMonths.has(monthKey);
 
                 return (

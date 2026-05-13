@@ -9,6 +9,7 @@ import {
 import { useMemo } from 'react';
 import ReviewSiteLeafRows from './review-site-leaf-rows';
 import ReviewCollapsibleLocationGroup from './review-collapsible-location-group';
+import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
 const LEGACY_HIERARCHY_LEVELS = [
     { key: 'subCounty', label: 'Subcounty' },
@@ -22,10 +23,7 @@ interface LegacySiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    sessionCountsBySiteId: Map<
-        number,
-        { sessionCount: number; needsReviewCount: number }
-    >;
+    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
 }
@@ -96,10 +94,7 @@ interface HierarchicalSiteHierarchyProps {
     sites: Site[];
     parentSiteId: number | undefined;
     parentPath: string;
-    sessionCountsBySiteId: Map<
-        number,
-        { sessionCount: number; needsReviewCount: number }
-    >;
+    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
 }
@@ -183,10 +178,7 @@ interface ReviewSiteHierarchyProps {
     sites: Site[];
     depth: number;
     parentPath: string;
-    sessionCountsBySiteId: Map<
-        number,
-        { sessionCount: number; needsReviewCount: number }
-    >;
+    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onToggle: (path: string) => void;
 }
