@@ -66,12 +66,14 @@ export default function ReviewSitesList({
                 sessionCount: 0,
                 needsReviewCount: 0,
                 isLocked: true,
+                isCertified: true,
             };
 
             const isLockedSessionState =
                 session.state === 'CERTIFIED' ||
                 session.state === 'SUBMITTED' ||
                 session.state === 'NOT_APPLICABLE';
+            const isCertifiedSessionState = session.state === 'CERTIFIED';
 
             monthMap.set(session.siteId, {
                 sessionCount: current.sessionCount + 1,
@@ -79,6 +81,7 @@ export default function ReviewSitesList({
                     current.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
                 isLocked: current.isLocked && isLockedSessionState,
+                isCertified: current.isCertified && isCertifiedSessionState,
             });
         }
 

@@ -31,12 +31,17 @@ export default function ReviewSiteLeafRows({
     return (
         <div className="space-y-1">
             {sites.map(site => {
-                const { sessionCount, needsReviewCount, isLocked } =
-                    sessionCountsBySiteId.get(site.siteId) ?? {
-                        sessionCount: 0,
-                        needsReviewCount: 0,
-                        isLocked: false,
-                    };
+                const {
+                    sessionCount,
+                    needsReviewCount,
+                    isLocked,
+                    isCertified,
+                } = sessionCountsBySiteId.get(site.siteId) ?? {
+                    sessionCount: 0,
+                    needsReviewCount: 0,
+                    isLocked: false,
+                    isCertified: false,
+                };
                 const hasSessions = sessionCount > 0;
                 const rowClassName = cn(
                     'flex items-center justify-between rounded-md px-3 py-2',
@@ -73,13 +78,19 @@ export default function ReviewSiteLeafRows({
                                     {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
                                 </Badge>
                             )}
-                            <Badge
-                                variant={hasSessions ? 'default' : 'outline'}
-                            >
-                                {hasSessions
-                                    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                    : 'No sessions'}
-                            </Badge>
+                            {isCertified ? (
+                                <Badge variant="default">Certified</Badge>
+                            ) : (
+                                <Badge
+                                    variant={
+                                        hasSessions ? 'default' : 'outline'
+                                    }
+                                >
+                                    {hasSessions
+                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
+                                        : 'No sessions'}
+                                </Badge>
+                            )}
                             {isLocked && (
                                 <Lock className="text-muted-foreground h-4 w-4" />
                             )}
