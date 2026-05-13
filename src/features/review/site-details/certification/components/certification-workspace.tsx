@@ -1,92 +1,73 @@
 'use client';
 
+import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { usePutSessionById } from '@/api/session/hooks/use-put-session-by-id';
+import { sessionKeys } from '@/api/session/session-keys';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 interface CertificationWorkspaceProps {
-    periodLabel: string;
+    siteId: number;
+    startDate?: string;
+    endDate?: string;
     onGoToPreviousStep: () => void;
-    onCertify: () => void;
-    isCertifying: boolean;
 }
 
 export default function CertificationWorkspace({
-    periodLabel,
+    siteId,
+    startDate,
+    endDate,
     onGoToPreviousStep,
-    onCertify,
-    isCertifying,
 }: CertificationWorkspaceProps) {
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const router = useRouter();
+    const queryClient = useQueryClient();
+
+    const { data: getAllSessionsResult } = useGetAllSessions({
+        siteId,
+        startDate,
+        endDate,
+        type: 'SURVEILLANCE',
+    });
+    const { mutateAsync: putSessionById, isPending: isPutSessionByIdPending } =
+        usePutSessionById();
+
+    const sessionsToCertify = getAllSessionsResult?.ok
+        ? getAllSessionsResult.data.sessions
+        : [];
+    const canCertify = sessionsToCertify.length > 0 && !isPutSessionByIdPending;
+
+    async function handleCertify() {
+        await Promise.allSettled(
+            sessionsToCertify.map(session => 
+                putSessionById({
+                    sessionId: session.sessionId,
+                    requestBody: { state: 'CERTIFIED' }
+                })
+            )
+        )
+
+        queryClient.invalidateQueries({ queryKey: sessionKeys.root })
+        router.push('/review');
+    }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold">Step 3: Certification</h2>
-                <p className="text-muted-foreground mt-1 text-sm">
-                    Certify that all data for this site in {periodLabel} is
-                    accurate and complete.
-                </p>
-            </div>
+        <div className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+                Once certified, this site will be locked and no further changes
+                can be made.
+            </p>
 
-            <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/20">
-                <Checkbox
-                    id="certify-checkbox"
-                    checked={isConfirmed}
-                    onCheckedChange={checked =>
-                        setIsConfirmed(checked === true)
-                    }
-                />
-                <Label
-                    htmlFor="certify-checkbox"
-                    className="flex-1 cursor-pointer flex-col items-start gap-2"
-                >
-                    <span className="text-sm font-semibold text-green-900 dark:text-green-100">
-                        I certify that this site&apos;s data for {periodLabel}{' '}
-                        is accurate
-                    </span>
-                    <p className="text-xs font-medium text-green-900 dark:text-green-100">
-                        Once certified, this site&apos;s data for {periodLabel}{' '}
-                        will be locked and no further changes can be made.
-                    </p>
-                    <p className="text-xs text-green-800 dark:text-green-200">
-                        By checking this box, I confirm that:
-                    </p>
-                    <ul className="list-none space-y-1">
-                        {[
-                            'All surveillance form discrepancies have been resolved',
-                            'All specimen images have been reviewed',
-                            'All data is accurate and ready for submission',
-                        ].map(item => (
-                            <li
-                                key={item}
-                                className="flex items-start gap-1.5 text-xs text-green-800 dark:text-green-200"
-                            >
-                                <span className="mt-0.5 shrink-0">•</span>
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </Label>
-            </div>
-
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between">
                 <Button
                     variant="outline"
                     onClick={onGoToPreviousStep}
-                    disabled={isCertifying}
+                    disabled={isPutSessionByIdPending}
                 >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-                <Button
-                    onClick={onCertify}
-                    disabled={!isConfirmed || isCertifying}
-                >
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    {isCertifying ? 'Certifying...' : 'Certify Site'}
+                <Button onClick={handleCertify} disabled={!canCertify}>
+                    {isPutSessionByIdPending ? 'Certifying...' : 'Certify Site'}
                 </Button>
             </div>
         </div>

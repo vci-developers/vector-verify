@@ -9,7 +9,7 @@ import {
 import { useMemo } from 'react';
 import ReviewSiteLeafRows from './review-site-leaf-rows';
 import ReviewCollapsibleLocationGroup from './review-collapsible-location-group';
-import type { ReviewSiteSessionSummary } from './review-site-session-summary';
+import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
 const LEGACY_HIERARCHY_LEVELS = [
     { key: 'subCounty', label: 'Subcounty' },
@@ -25,8 +25,6 @@ interface LegacySiteHierarchyProps {
     parentPath: string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
-    startDate: string;
-    endDate: string;
     onToggle: (path: string) => void;
 }
 
@@ -36,8 +34,6 @@ function LegacySiteHierarchy({
     parentPath,
     sessionCountsBySiteId,
     expandedSitePaths,
-    startDate,
-    endDate,
     onToggle,
 }: LegacySiteHierarchyProps) {
     const currentLevel = LEGACY_HIERARCHY_LEVELS[depth];
@@ -63,8 +59,6 @@ function LegacySiteHierarchy({
                 sites={sites}
                 getDisplayName={site => site[currentLevel.key] ?? 'Unknown'}
                 sessionCountsBySiteId={sessionCountsBySiteId}
-                startDate={startDate}
-                endDate={endDate}
             />
         );
     }
@@ -88,8 +82,6 @@ function LegacySiteHierarchy({
                         parentPath={`${parentPath}/${locationName}`}
                         sessionCountsBySiteId={sessionCountsBySiteId}
                         expandedSitePaths={expandedSitePaths}
-                        startDate={startDate}
-                        endDate={endDate}
                         onToggle={onToggle}
                     />
                 </ReviewCollapsibleLocationGroup>
@@ -104,8 +96,6 @@ interface HierarchicalSiteHierarchyProps {
     parentPath: string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
-    startDate: string;
-    endDate: string;
     onToggle: (path: string) => void;
 }
 
@@ -115,8 +105,6 @@ function HierarchicalSiteHierarchy({
     parentPath,
     sessionCountsBySiteId,
     expandedSitePaths,
-    startDate,
-    endDate,
     onToggle,
 }: HierarchicalSiteHierarchyProps) {
     const childSites = useMemo(
@@ -139,8 +127,6 @@ function HierarchicalSiteHierarchy({
                 sites={childSites}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 sessionCountsBySiteId={sessionCountsBySiteId}
-                startDate={startDate}
-                endDate={endDate}
             />
         );
     }
@@ -179,8 +165,6 @@ function HierarchicalSiteHierarchy({
                             parentPath={`${parentPath}/${site.name}`}
                             sessionCountsBySiteId={sessionCountsBySiteId}
                             expandedSitePaths={expandedSitePaths}
-                            startDate={startDate}
-                            endDate={endDate}
                             onToggle={onToggle}
                         />
                     </ReviewCollapsibleLocationGroup>
@@ -196,8 +180,6 @@ interface ReviewSiteHierarchyProps {
     parentPath: string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
-    startDate: string;
-    endDate: string;
     onToggle: (path: string) => void;
 }
 
@@ -207,8 +189,6 @@ export default function ReviewSiteHierarchy({
     parentPath,
     sessionCountsBySiteId,
     expandedSitePaths,
-    startDate,
-    endDate,
     onToggle,
 }: ReviewSiteHierarchyProps) {
     if (sites.length === 0) return null;
@@ -220,8 +200,6 @@ export default function ReviewSiteHierarchy({
             parentPath={parentPath}
             sessionCountsBySiteId={sessionCountsBySiteId}
             expandedSitePaths={expandedSitePaths}
-            startDate={startDate}
-            endDate={endDate}
             onToggle={onToggle}
         />
     ) : (
@@ -231,8 +209,6 @@ export default function ReviewSiteHierarchy({
             parentPath={parentPath}
             sessionCountsBySiteId={sessionCountsBySiteId}
             expandedSitePaths={expandedSitePaths}
-            startDate={startDate}
-            endDate={endDate}
             onToggle={onToggle}
         />
     );

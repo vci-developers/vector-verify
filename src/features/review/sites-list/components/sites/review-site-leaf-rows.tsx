@@ -1,40 +1,18 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/cn';
-import { ChevronRight, Lock, MapPin } from 'lucide-react';
+import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import {
-    EMPTY_SESSION_SUMMARY,
-    getReviewSiteStatus,
-    isReviewSiteLocked,
-    type ReviewSiteSessionSummary,
-} from './review-site-session-summary';
+import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { Fragment } from 'react';
+import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
+import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
-    startDate: string;
-    endDate: string;
 }
-
-const STATUS_VARIANTS = {
-    NEEDS_REVIEW: 'destructive',
-    IN_REVIEW: 'outline',
-    CERTIFIED: 'default',
-    SUBMITTED: 'secondary',
-    NOT_APPLICABLE: 'secondary',
-    LOCKED: 'secondary',
-} as const;
-
-const STATUS_LABELS = {
-    NEEDS_REVIEW: 'Needs review',
-    IN_REVIEW: 'In review',
-    CERTIFIED: 'Certified',
-    SUBMITTED: 'Submitted',
-    NOT_APPLICABLE: 'Not applicable',
-    LOCKED: 'Locked',
-} as const;
 
 function buildReviewHref(site: Site, startDate: string, endDate: string) {
     const queryParams = new URLSearchParams({ startDate, endDate });
@@ -45,36 +23,30 @@ export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     sessionCountsBySiteId,
-    startDate,
-    endDate,
 }: ReviewSiteLeafRowsProps) {
+    const monthKey = useReviewSiteListMonthKey();
+    const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
+
     return (
         <div className="space-y-1">
             {sites.map(site => {
-                const sessionSummary =
-                    sessionCountsBySiteId.get(site.siteId) ??
-                    EMPTY_SESSION_SUMMARY;
-                const { sessionCount, needsReviewCount } = sessionSummary;
+                const { sessionCount, needsReviewCount, isLocked } =
+                    sessionCountsBySiteId.get(site.siteId) ?? {
+                        sessionCount: 0,
+                        needsReviewCount: 0,
+                        isLocked: false,
+                    };
                 const hasSessions = sessionCount > 0;
-                const isLocked = isReviewSiteLocked(sessionSummary);
-                const status = hasSessions
-                    ? getReviewSiteStatus(sessionSummary)
-                    : undefined;
-                const statusBadge =
-                    status && status !== 'NEEDS_REVIEW' ? (
-                        <Badge variant={STATUS_VARIANTS[status]}>
-                            {STATUS_LABELS[status]}
-                        </Badge>
-                    ) : null;
                 const rowClassName = cn(
-                    'flex items-center justify-between rounded-md px-3 py-2 transition-colors',
-                    isLocked
-                        ? 'cursor-not-allowed opacity-60'
-                        : 'cursor-pointer hover:bg-muted/50',
+                    'flex items-center justify-between rounded-md px-3 py-2',
+                    hasSessions && !isLocked
+                        ? 'cursor-pointer hover:bg-muted/50'
+                        : 'cursor-not-allowed opacity-60',
                 );
 
                 const rowContent = (
-                    <>
+                    <Fragment>
                         <div className="flex items-center gap-3">
                             <div
                                 className={cn(
@@ -101,7 +73,6 @@ export default function ReviewSiteLeafRows({
                                     {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
                                 </Badge>
                             )}
-                            {statusBadge}
                             <Badge
                                 variant={hasSessions ? 'default' : 'outline'}
                             >
@@ -109,36 +80,29 @@ export default function ReviewSiteLeafRows({
                                     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
                                     : 'No sessions'}
                             </Badge>
-                            {hasSessions && isLocked && (
-                                <span className="text-muted-foreground hidden text-xs sm:inline">
-                                    No further changes
-                                </span>
-                            )}
-                            {isLocked ? (
+                            {isLocked && (
                                 <Lock className="text-muted-foreground h-4 w-4" />
-                            ) : (
-                                <ChevronRight className="text-muted-foreground h-4 w-4" />
                             )}
                         </div>
-                    </>
+                    </Fragment>
                 );
 
-                if (isLocked) {
+                if (hasSessions && !isLocked) {
                     return (
-                        <div key={site.siteId} className={rowClassName}>
+                        <Link
+                            key={site.siteId}
+                            href={buildReviewHref(site, startDate, endDate)}
+                            className={rowClassName}
+                        >
                             {rowContent}
-                        </div>
+                        </Link>
                     );
                 }
 
                 return (
-                    <Link
-                        key={site.siteId}
-                        href={buildReviewHref(site, startDate, endDate)}
-                        className={rowClassName}
-                    >
+                    <div key={site.siteId} className={rowClassName}>
                         {rowContent}
-                    </Link>
+                    </div>
                 );
             })}
         </div>

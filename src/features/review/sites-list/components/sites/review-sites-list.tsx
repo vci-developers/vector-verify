@@ -14,10 +14,8 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
-import {
-    EMPTY_SESSION_SUMMARY,
-    type ReviewSiteSessionSummary,
-} from './review-site-session-summary';
+import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { ReviewSiteListMonthKeyContext } from '../../hooks/use-review-sites-list-month-key';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -64,21 +62,23 @@ export default function ReviewSitesList({
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;
-            const current =
-                monthMap.get(session.siteId) ?? EMPTY_SESSION_SUMMARY;
-            const stateCounts = { ...current.stateCounts };
+            const current = monthMap.get(session.siteId) ?? {
+                sessionCount: 0,
+                needsReviewCount: 0,
+                isLocked: true,
+            };
 
-            if (session.state) {
-                stateCounts[session.state] =
-                    (stateCounts[session.state] ?? 0) + 1;
-            }
+            const isLockedSessionState =
+                session.state === 'CERTIFIED' ||
+                session.state === 'SUBMITTED' ||
+                session.state === 'NOT_APPLICABLE';
 
             monthMap.set(session.siteId, {
                 sessionCount: current.sessionCount + 1,
                 needsReviewCount:
                     current.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-                stateCounts,
+                isLocked: current.isLocked && isLockedSessionState,
             });
         }
 
@@ -146,8 +146,6 @@ export default function ReviewSitesList({
         <div className="space-y-2">
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
-                const monthStartDate = format(month, 'yyyy-MM-dd');
-                const monthEndDate = format(endOfMonth(month), 'yyyy-MM-dd');
                 const sessionCountsBySiteId =
                     monthToSiteIdCounts.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
@@ -166,16 +164,20 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteHierarchy
-                                sites={sites}
-                                depth={0}
-                                parentPath={monthKey}
-                                sessionCountsBySiteId={sessionCountsBySiteId}
-                                expandedSitePaths={expandedSitePaths}
-                                startDate={monthStartDate}
-                                endDate={monthEndDate}
-                                onToggle={toggleSiteRow}
-                            />
+                            <ReviewSiteListMonthKeyContext.Provider
+                                value={monthKey}
+                            >
+                                <ReviewSiteHierarchy
+                                    sites={sites}
+                                    depth={0}
+                                    parentPath={monthKey}
+                                    sessionCountsBySiteId={
+                                        sessionCountsBySiteId
+                                    }
+                                    expandedSitePaths={expandedSitePaths}
+                                    onToggle={toggleSiteRow}
+                                />
+                            </ReviewSiteListMonthKeyContext.Provider>
                         </CollapsibleContent>
                     </Collapsible>
                 );

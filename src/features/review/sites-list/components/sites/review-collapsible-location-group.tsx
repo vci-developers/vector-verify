@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
 import ReviewVisitCoverageBadge from './review-visit-coverage-badge';
-import type { ReviewSiteSessionSummary } from './review-site-session-summary';
+import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
 function getVisitCoverageBackgroundColor(
     percentage: number,
