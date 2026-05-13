@@ -4,7 +4,7 @@ import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
 import { Button } from '@/components/ui/button';
 import ImageReviewCarousel from './image-review-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageReviewDetails from './image-review-details';
@@ -52,9 +52,27 @@ export default function ImageReviewWorkspace({
 
     if (allSpecimensForSite.length === 0) {
         return (
-            <p className="text-muted-foreground text-sm">
-                No specimens found for this site.
-            </p>
+            <div className="space-y-4">
+                <div className="bg-muted/30 flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                    <ImageOff className="text-muted-foreground/60 mb-4 h-12 w-12" />
+                    <h3 className="text-sm font-semibold">
+                        No specimens to review
+                    </h3>
+                    <p className="text-muted-foreground mt-1 max-w-md text-sm">
+                        There are no specimens for this site in the selected
+                        period. You can continue to certification.
+                    </p>
+                </div>
+
+                <div className="flex justify-between">
+                    <Button variant="outline" onClick={onGoToPreviousStep}>
+                        Back
+                    </Button>
+                    <Button onClick={onGoToNextStep}>
+                        Continue to Certification
+                    </Button>
+                </div>
+            </div>
         );
     }
 
