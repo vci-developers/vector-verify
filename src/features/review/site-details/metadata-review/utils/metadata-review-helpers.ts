@@ -1,23 +1,70 @@
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
+type MetaDataFieldType = 'string' | 'number' | 'boolean';
+
 const SESSION_FIELDS = [
-    { fieldName: 'collectorName', label: 'Collector Name' },
-    { fieldName: 'collectorTitle', label: 'Collector Title' },
-    { fieldName: 'collectionMethod', label: 'Collection Method' },
-] as const satisfies readonly { fieldName: keyof Session; label: string }[];
+    {
+        fieldName: 'collectorName',
+        label: 'Collector Name',
+        fieldType: 'string',
+    },
+    {
+        fieldName: 'collectorTitle',
+        label: 'Collector Title',
+        fieldType: 'string',
+    },
+    {
+        fieldName: 'collectionMethod',
+        label: 'Collection Method',
+        fieldType: 'string',
+    },
+] as const satisfies readonly {
+    fieldName: keyof Session;
+    label: string;
+    fieldType: MetaDataFieldType;
+}[];
 
 const SURVEILLANCE_FORM_FIELDS = [
-    { fieldName: 'numPeopleSleptInHouse', label: 'People in House' },
-    { fieldName: 'wasIrsConducted', label: 'IRS Conducted' },
-    { fieldName: 'monthsSinceIrs', label: 'Months Since IRS' },
-    { fieldName: 'numLlinsAvailable', label: 'LLINs Available' },
-    { fieldName: 'llinType', label: 'LLIN Type' },
-    { fieldName: 'llinBrand', label: 'LLIN Brand' },
-    { fieldName: 'numPeopleSleptUnderLlin', label: 'People Under LLIN' },
+    {
+        fieldName: 'numPeopleSleptInHouse',
+        label: 'People in House',
+        fieldType: 'number',
+    },
+    {
+        fieldName: 'wasIrsConducted',
+        label: 'IRS Conducted',
+        fieldType: 'boolean',
+    },
+    {
+        fieldName: 'monthsSinceIrs',
+        label: 'Months Since IRS',
+        fieldType: 'number',
+    },
+    {
+        fieldName: 'numLlinsAvailable',
+        label: 'LLINs Available',
+        fieldType: 'number',
+    },
+    {
+        fieldName: 'llinType',
+        label: 'LLIN Type',
+        fieldType: 'string',
+    },
+    {
+        fieldName: 'llinBrand',
+        label: 'LLIN Brand',
+        fieldType: 'string',
+    },
+    {
+        fieldName: 'numPeopleSleptUnderLlin',
+        label: 'People Under LLIN',
+        fieldType: 'number',
+    },
 ] as const satisfies readonly {
     fieldName: keyof SurveillanceForm;
     label: string;
+    fieldType: MetaDataFieldType;
 }[];
 
 export interface MetadataRow {
@@ -28,6 +75,14 @@ export interface MetadataRow {
     fieldValueBySessionId: Map<number, unknown>;
     hasConflict: boolean;
 }
+
+const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
+export const allNumberFieldNames = new Map<string, MetaDataFieldType>(
+    allFields.map(field => [field.fieldName, field.fieldType]),
+);
+export const allBooleanFieldNames = new Map<string, MetaDataFieldType>(
+    allFields.map(field => [field.fieldName, field.fieldType]),
+);
 
 export function formatDisplayValue(value: unknown): string {
     if (value == null) return 'N/A';
@@ -96,21 +151,33 @@ export function applyConflictResolutions(
     const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
 
     for (const metadataRow of metadataRows) {
-        const chosenDisplayValue = resolutionsByRowId.get(metadataRow.id);
-        if (chosenDisplayValue === undefined) continue;
+        const selectedFieldDisplay = resolutionsByRowId.get(metadataRow.id);
+        if (selectedFieldDisplay === undefined) continue;
 
-        const chosenValue = [
+        const existingSessionFieldValue = [
             ...metadataRow.fieldValueBySessionId.values(),
-        ].find(value => formatDisplayValue(value) === chosenDisplayValue);
-        if (chosenValue === undefined) continue;
+        ].find(value => formatDisplayValue(value) === selectedFieldDisplay);
+
+        let resolvedFieldValue: unknown;
+        if (existingSessionFieldValue !== undefined) {
+            resolvedFieldValue = existingSessionFieldValue;
+        } else if (selectedFieldDisplay === 'N/A') {
+            resolvedFieldValue = null;
+        } else if (
+            allNumberFieldNames.get(metadataRow.fieldName) === 'number'
+        ) {
+            resolvedFieldValue = parseInt(selectedFieldDisplay, 10);
+        } else {
+            resolvedFieldValue = selectedFieldDisplay;
+        }
 
         if (metadataRow.entity === 'session') {
             Object.assign(resolvedSession, {
-                [metadataRow.fieldName]: chosenValue,
+                [metadataRow.fieldName]: resolvedFieldValue,
             });
         } else {
             Object.assign(resolvedSurveillanceForm, {
-                [metadataRow.fieldName]: chosenValue,
+                [metadataRow.fieldName]: resolvedFieldValue,
             });
         }
     }
