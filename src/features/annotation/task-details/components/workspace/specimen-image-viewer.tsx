@@ -1,11 +1,13 @@
 'use client';
 
+import { useGetSpecimenById } from '@/api/specimen/hooks/use-get-specimen-by-id';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
+import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { getSpecimenImageCarouselItems } from '@/lib/specimen/specimen-image-carousel-items';
 import { MapPin } from 'lucide-react';
-import Image from 'next/image';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 
 interface SpecimenImageViewerProps {
     specimen: Specimen;
@@ -14,8 +16,25 @@ interface SpecimenImageViewerProps {
 export default function SpecimenImageViewer({
     specimen,
 }: SpecimenImageViewerProps) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const { data: getSpecimenByIdResult, isPending: isGetSpecimenByIdPending } =
+        useGetSpecimenById(specimen.id);
+
+    const fullSpecimen =
+        getSpecimenByIdResult?.ok === true
+            ? getSpecimenByIdResult.data
+            : specimen;
+    const didGetSpecimenByIdFail = getSpecimenByIdResult?.ok === false;
     const site = specimen.session?.site;
-    const thumbnailUrl = specimen.thumbnailUrl;
+    const specimenImages = useMemo(
+        () => getSpecimenImageCarouselItems(fullSpecimen),
+        [fullSpecimen],
+    );
+
+    useEffect(() => {
+        setCurrentImageIndex(0);
+    }, [specimen.id]);
 
     return (
         <Card>
@@ -34,23 +53,31 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-md">
-                    {thumbnailUrl ? (
-                        <Image
-                            src={`/api${thumbnailUrl}`}
-                            alt={`Specimen ${specimen?.specimenId}`}
-                            fill
-                            unoptimized
-                            className="object-contain"
-                        />
-                    ) : (
-                        <div className="flex h-full items-center justify-center">
-                            <p className="text-muted-foreground text-sm">
-                                No image available
-                            </p>
-                        </div>
-                    )}
-                </div>
+                <SpecimenImageCarousel
+                    specimenId={specimen.specimenId}
+                    images={specimenImages}
+                    currentImageIndex={currentImageIndex}
+                    onCurrentImageIndexChange={setCurrentImageIndex}
+                    emptyLabel={
+                        didGetSpecimenByIdFail
+                            ? 'Unable to load specimen images'
+                            : isGetSpecimenByIdPending
+                              ? 'Loading specimen images...'
+                              : 'No image available'
+                    }
+                    secondaryCounterText={
+                        didGetSpecimenByIdFail
+                            ? 'Unable to load all images'
+                            : isGetSpecimenByIdPending &&
+                                specimenImages.length > 0
+                              ? 'Loading all images...'
+                              : undefined
+                    }
+                    mainImageContainerClassName="bg-muted relative aspect-square w-full overflow-hidden rounded-md border"
+                    mainImageSizes="(min-width: 1024px) 50vw, 100vw"
+                    thumbnailButtonClassName="relative h-16 w-20 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent"
+                    thumbnailImageSizes="80px"
+                />
 
                 <Separator />
 
