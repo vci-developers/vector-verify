@@ -77,10 +77,7 @@ export interface MetadataRow {
 }
 
 const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
-export const allNumberFieldNames = new Map<string, MetaDataFieldType>(
-    allFields.map(field => [field.fieldName, field.fieldType]),
-);
-export const allBooleanFieldNames = new Map<string, MetaDataFieldType>(
+export const fieldTypeByFieldName = new Map<string, MetaDataFieldType>(
     allFields.map(field => [field.fieldName, field.fieldType]),
 );
 
@@ -164,7 +161,7 @@ export function applyConflictResolutions(
         } else if (selectedFieldDisplay === 'N/A') {
             resolvedFieldValue = null;
         } else if (
-            allNumberFieldNames.get(metadataRow.fieldName) === 'number'
+            fieldTypeByFieldName.get(metadataRow.fieldName) === 'number'
         ) {
             resolvedFieldValue = parseInt(selectedFieldDisplay, 10);
         } else {
