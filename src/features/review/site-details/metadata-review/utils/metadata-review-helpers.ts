@@ -77,8 +77,16 @@ export interface MetadataRow {
 }
 
 const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
-export const fieldTypeByFieldName = new Map<string, MetaDataFieldType>(
-    allFields.map(field => [field.fieldName, field.fieldType]),
+
+export const numberFieldNames = new Set<string>(
+    allFields
+        .filter(field => field.fieldType === 'number')
+        .map(field => field.fieldName),
+);
+export const booleanFieldNames = new Set<string>(
+    allFields
+        .filter(field => field.fieldType === 'boolean')
+        .map(field => field.fieldName),
 );
 
 export function formatDisplayValue(value: unknown): string {
@@ -160,9 +168,7 @@ export function applyConflictResolutions(
             resolvedFieldValue = existingSessionFieldValue;
         } else if (selectedFieldDisplay === 'N/A') {
             resolvedFieldValue = null;
-        } else if (
-            fieldTypeByFieldName.get(metadataRow.fieldName) === 'number'
-        ) {
+        } else if (numberFieldNames.has(metadataRow.fieldName)) {
             resolvedFieldValue = parseInt(selectedFieldDisplay, 10);
         } else {
             resolvedFieldValue = selectedFieldDisplay;
