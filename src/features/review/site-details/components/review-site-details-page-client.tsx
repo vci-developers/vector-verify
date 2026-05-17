@@ -74,6 +74,9 @@ export default function ReviewSiteDetailsPageClient({
                         )}
                         {currentStepIndex === 2 && (
                             <CertificationWorkspace
+                                siteId={siteId}
+                                startDate={startDate}
+                                endDate={endDate}
                                 onGoToPreviousStep={goToPreviousStep}
                             />
                         )}
