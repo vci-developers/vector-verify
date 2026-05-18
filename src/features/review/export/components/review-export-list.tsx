@@ -4,20 +4,32 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { format, eachMonthOfInterval, endOfMonth } from 'date-fns';
 import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { usePostDhis2Export } from '@/api/dhis2/hooks/use-post-dhis2-export';
+import { sessionKeys } from '@/api/session/session-keys';
+import type { ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
 import ExportMonthRow from '@/features/review/export/components/export-month-row';
 import ExportProgressPanel from '@/features/review/export/components/export-progress-panel';
 import ExportConfirmDialog from '@/features/review/export/components/export-confirm-dialog';
-import { useExportBatch } from '@/features/review/export/hooks/use-export-batch';
-import { useExportSelection } from '@/features/review/export/hooks/use-export-selection';
-import { groupExportResultsByMonth } from '@/features/review/export/utils/export-selection-helpers';
+import { deriveSiteStatuses } from '@/features/review/export/utils/derive-site-statuses';
+import {
+    groupExportResultsByMonth,
+    isAllSelected,
+    totalSelectedCount,
+    toggleSites,
+    selectAll,
+} from '@/features/review/export/utils/export-selection-helpers';
 import {
     buildExportItems,
+    type ExportBatchSite,
     type SiteIrsFormData,
 } from '@/features/review/export/utils/build-site-irs-data';
+
+type ExportStatus = 'idle' | 'exporting' | 'done';
 
 interface ReviewExportListProps {
     sites: Site[];
@@ -35,8 +47,23 @@ export default function ReviewExportList({
     const district =
         'district' in locationQueryParam ? locationQueryParam.district : null;
 
-    const { runExport, reset, exportStatus, exportProgress, exportResults } =
-        useExportBatch();
+    const { mutateAsync } = usePostDhis2Export();
+    const queryClient = useQueryClient();
+
+    const [exportStatus, setExportStatus] = useState<ExportStatus>('idle');
+    const [exportProgress, setExportProgress] = useState<{
+        completed: number;
+        total: number;
+    } | null>(null);
+    const [exportResults, setExportResults] = useState<
+        Map<string, ExportSiteStatus>
+    >(new Map());
+
+    const [selectedSites, setSelectedSites] = useState<
+        Map<string, Set<number>>
+    >(new Map());
+
+    const [showWarningModal, setShowWarningModal] = useState(false);
 
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -81,21 +108,96 @@ export default function ReviewExportList({
         return total;
     }, [certifiedSiteIdsByMonth]);
 
-    const {
-        selectedSites,
-        selectedCount,
-        allSelected,
-        handleToggleSites,
-        handleSelectAll,
-        handleDeselectAll,
-    } = useExportSelection(certifiedSiteIdsByMonth);
-
-    const [showWarningModal, setShowWarningModal] = useState(false);
+    const selectedCount = totalSelectedCount(selectedSites);
+    const allSelected = isAllSelected(certifiedSiteIdsByMonth, selectedSites);
 
     const exportStatusByMonth = useMemo(
         () => groupExportResultsByMonth(exportResults),
         [exportResults],
     );
+
+    async function runExport(exportSites: ExportBatchSite[]) {
+        setExportStatus('exporting');
+        setExportResults(new Map());
+
+        const total = exportSites.length;
+        setExportProgress({ completed: 0, total });
+
+        const newResults = new Map<string, ExportSiteStatus>();
+        let completed = 0;
+
+        try {
+            for (const {
+                monthKey,
+                year,
+                month,
+                siteId,
+                district: siteDistrict,
+                irsData,
+            } of exportSites) {
+                let result;
+                try {
+                    result = await mutateAsync({
+                        queryParams: {
+                            year,
+                            month,
+                            district: siteDistrict,
+                            siteIds: String(siteId),
+                        },
+                        body: { irsData: [irsData] },
+                    });
+                } catch {
+                    newResults.set(`${monthKey}:${siteId}`, 'failed');
+                    completed += 1;
+                    setExportProgress({ completed, total });
+                    setExportResults(new Map(newResults));
+                    continue;
+                }
+
+                if (result.ok) {
+                    const siteStatuses = deriveSiteStatuses(
+                        result.data.results,
+                        [siteId],
+                    );
+                    newResults.set(
+                        `${monthKey}:${siteId}`,
+                        siteStatuses.get(siteId) ?? 'skipped',
+                    );
+                } else {
+                    newResults.set(`${monthKey}:${siteId}`, 'failed');
+                }
+
+                completed += 1;
+                setExportProgress({ completed, total });
+                setExportResults(new Map(newResults));
+            }
+        } finally {
+            setExportStatus('done');
+            await queryClient.invalidateQueries({ queryKey: sessionKeys.root });
+        }
+    }
+
+    function reset() {
+        setExportProgress(null);
+        setExportResults(new Map());
+        setExportStatus('idle');
+    }
+
+    function handleToggleSites(
+        monthKey: string,
+        siteIds: number[],
+        select: boolean,
+    ) {
+        setSelectedSites(prev => toggleSites(monthKey, siteIds, select, prev));
+    }
+
+    function handleSelectAll() {
+        setSelectedSites(selectAll(certifiedSiteIdsByMonth));
+    }
+
+    function handleDeselectAll() {
+        setSelectedSites(new Map());
+    }
 
     async function handleConfirmExport(
         siteIrsData: Map<number, SiteIrsFormData>,
