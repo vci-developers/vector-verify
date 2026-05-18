@@ -23,6 +23,7 @@ interface ComboBoxProps {
     onValueChange: (value: string) => void;
     placeholder?: string;
     validate?: (value: string) => string | null;
+    disabled?: boolean;
 }
 
 export function ComboBox({
@@ -31,6 +32,7 @@ export function ComboBox({
     onValueChange,
     placeholder = 'Select value...',
     validate,
+    disabled,
 }: ComboBoxProps) {
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
@@ -59,6 +61,7 @@ export function ComboBox({
                     role="combobox"
                     aria-expanded={open}
                     className="w-40 justify-between font-normal"
+                    disabled={disabled}
                 >
                     <span className="truncate">{value ?? placeholder}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
