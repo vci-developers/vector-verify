@@ -1,12 +1,12 @@
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-uganda-schema';
 
-export interface ExportBatchItem {
+export interface ExportBatchSite {
     monthKey: string;
     year: number;
     month: number;
-    siteIds: number[];
+    siteId: number;
     district: string;
-    irsData: SiteIrsData[];
+    irsData: SiteIrsData;
 }
 
 export interface SiteIrsFormData {
@@ -20,23 +20,25 @@ export function buildExportItems(
     selectedSites: Map<string, Set<number>>,
     siteIrsData: Map<number, SiteIrsFormData>,
     district: string,
-): ExportBatchItem[] {
-    return [...selectedSites.entries()]
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([monthKey, siteIdSet]) => {
-            const [yearStr, monthStr] = monthKey.split('-');
-            const siteIds = [...siteIdSet];
-            return {
+): ExportBatchSite[] {
+    const sitesToExport: ExportBatchSite[] = [];
+    const sortedMonths = [...selectedSites.entries()].sort(([a], [b]) =>
+        a.localeCompare(b),
+    );
+    for (const [monthKey, selectedSiteIds] of sortedMonths) {
+        const [yearStr, monthStr] = monthKey.split('-');
+        for (const siteId of selectedSiteIds) {
+            sitesToExport.push({
                 monthKey,
                 year: Number(yearStr),
                 month: Number(monthStr),
-                siteIds,
+                siteId,
                 district,
-                irsData: siteIds.map(siteId =>
-                    toSiteIrsData(siteId, siteIrsData.get(siteId)),
-                ),
-            };
-        });
+                irsData: toSiteIrsData(siteId, siteIrsData.get(siteId)),
+            });
+        }
+    }
+    return sitesToExport;
 }
 
 function toSiteIrsData(

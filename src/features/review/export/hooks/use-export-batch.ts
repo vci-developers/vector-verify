@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
 import { deriveSiteStatuses } from '../utils/derive-site-statuses';
-import type { ExportBatchItem } from '../utils/build-site-irs-data';
+import type { ExportBatchSite } from '../utils/build-site-irs-data';
 
 export type ExportStatus = 'idle' | 'exporting' | 'done';
 
@@ -21,14 +21,11 @@ export function useExportBatch() {
         Map<string, ExportSiteStatus>
     >(new Map());
 
-    async function runExport(exportSites: ExportBatchItem[]) {
+    async function runExport(exportSites: ExportBatchSite[]) {
         setExportStatus('exporting');
         setExportResults(new Map());
 
-        const total = exportSites.reduce(
-            (sum, exportSite) => sum + exportSite.siteIds.length,
-            0,
-        );
+        const total = exportSites.length;
         setExportProgress({ completed: 0, total });
 
         const newResults = new Map<string, ExportSiteStatus>();
@@ -39,7 +36,7 @@ export function useExportBatch() {
                 monthKey,
                 year,
                 month,
-                siteIds,
+                siteId,
                 district,
                 irsData,
             } of exportSites) {
@@ -50,15 +47,13 @@ export function useExportBatch() {
                             year,
                             month,
                             district,
-                            siteIds: siteIds.join(','),
+                            siteIds: String(siteId),
                         },
-                        body: { irsData },
+                        body: { irsData: [irsData] },
                     });
                 } catch {
-                    for (const siteId of siteIds) {
-                        newResults.set(`${monthKey}:${siteId}`, 'failed');
-                    }
-                    completed += siteIds.length;
+                    newResults.set(`${monthKey}:${siteId}`, 'failed');
+                    completed += 1;
                     setExportProgress({ completed, total });
                     setExportResults(new Map(newResults));
                     continue;
@@ -67,18 +62,17 @@ export function useExportBatch() {
                 if (result.ok) {
                     const siteStatuses = deriveSiteStatuses(
                         result.data.results,
-                        siteIds,
+                        [siteId],
                     );
-                    for (const [siteId, status] of siteStatuses) {
-                        newResults.set(`${monthKey}:${siteId}`, status);
-                    }
+                    newResults.set(
+                        `${monthKey}:${siteId}`,
+                        siteStatuses.get(siteId) ?? 'skipped',
+                    );
                 } else {
-                    for (const siteId of siteIds) {
-                        newResults.set(`${monthKey}:${siteId}`, 'failed');
-                    }
+                    newResults.set(`${monthKey}:${siteId}`, 'failed');
                 }
 
-                completed += siteIds.length;
+                completed += 1;
                 setExportProgress({ completed, total });
                 setExportResults(new Map(newResults));
             }
