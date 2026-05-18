@@ -1,17 +1,32 @@
 import { postDhis2Export } from '@/api/dhis2/post-dhis2-export';
 import {
-    postDhis2ExportRequestSchema,
-    type PostDhis2ExportRequestBody,
+    postDhis2ExportQueryParamsSchema,
     type PostDhis2ExportResponseBody,
 } from '@/api/dhis2/validation/post-dhis2-export-schema';
+import { postDhis2UgandaExportBodySchema } from '@/api/dhis2/validation/post-dhis2-uganda-schema';
 import { err } from '@/lib/result/result';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    let requestBody: PostDhis2ExportRequestBody;
+    const { searchParams } = new URL(request.url);
+    const parsedQueryParams = postDhis2ExportQueryParamsSchema.safeParse(
+        Object.fromEntries(searchParams),
+    );
+    if (!parsedQueryParams.success) {
+        return NextResponse.json(
+            err({
+                kind: 'client',
+                status: 400,
+                message: 'Invalid query params',
+            }),
+            { status: 400 },
+        );
+    }
+
+    let rawBody: unknown;
     try {
-        requestBody = await request.json();
+        rawBody = await request.json();
     } catch {
         return NextResponse.json(
             err({ kind: 'client', status: 400, message: 'Invalid JSON body' }),
@@ -19,7 +34,7 @@ export async function POST(request: Request) {
         );
     }
 
-    const parsedBody = postDhis2ExportRequestSchema.safeParse(requestBody);
+    const parsedBody = postDhis2UgandaExportBodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
         return NextResponse.json(
             err({
@@ -31,11 +46,13 @@ export async function POST(request: Request) {
         );
     }
 
-    const { irsData, ...queryParams } = parsedBody.data;
-
     const authorizedPostDhis2ExportResult =
         await withAuthSession<PostDhis2ExportResponseBody>(accessToken =>
-            postDhis2Export(accessToken, queryParams, irsData),
+            postDhis2Export(
+                accessToken,
+                parsedQueryParams.data,
+                parsedBody.data,
+            ),
         );
 
     return NextResponse.json(authorizedPostDhis2ExportResult, {
