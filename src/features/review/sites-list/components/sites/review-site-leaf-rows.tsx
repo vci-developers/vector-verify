@@ -7,6 +7,7 @@ import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-s
 import { Fragment } from 'react';
 import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
+import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
@@ -29,18 +30,21 @@ export default function ReviewSiteLeafRows({
     const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
 
     return (
-        <div className="space-y-1">
-            {sites.map(site => {
+        <SiteLeafRows
+            sites={sites}
+            renderSiteRow={site => {
                 const {
                     sessionCount,
                     needsReviewCount,
                     isLocked,
                     isCertified,
+                    isSubmitted,
                 } = sessionCountsBySiteId.get(site.siteId) ?? {
                     sessionCount: 0,
                     needsReviewCount: 0,
                     isLocked: false,
                     isCertified: false,
+                    isSubmitted: false,
                 };
                 const hasSessions = sessionCount > 0;
                 const rowClassName = cn(
@@ -78,7 +82,11 @@ export default function ReviewSiteLeafRows({
                                     {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
                                 </Badge>
                             )}
-                            {isCertified ? (
+                            {isSubmitted ? (
+                                <Badge variant="secondary">
+                                    Submitted to DHIS2
+                                </Badge>
+                            ) : isCertified ? (
                                 <Badge variant="default">Certified</Badge>
                             ) : (
                                 <Badge
@@ -101,7 +109,6 @@ export default function ReviewSiteLeafRows({
                 if (hasSessions && !isLocked) {
                     return (
                         <Link
-                            key={site.siteId}
                             href={buildReviewHref(site, startDate, endDate)}
                             className={rowClassName}
                         >
@@ -110,12 +117,8 @@ export default function ReviewSiteLeafRows({
                     );
                 }
 
-                return (
-                    <div key={site.siteId} className={rowClassName}>
-                        {rowContent}
-                    </div>
-                );
-            })}
-        </div>
+                return <div className={rowClassName}>{rowContent}</div>;
+            }}
+        />
     );
 }

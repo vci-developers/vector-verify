@@ -4,6 +4,8 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/cn';
 import { MapPin } from 'lucide-react';
+import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
+import { hasCertifiedSessions } from '@/features/review/export/utils/export-selection-helpers';
 import { useExportMonthContext } from './export-month-row';
 
 interface ExportSiteLeafRowsProps {
@@ -23,24 +25,19 @@ export default function ExportSiteLeafRows({
         exportStatusBySiteId,
     } = useExportMonthContext();
 
-    const eligibleSites = sites.filter(
-        site => (certifiedCountsBySiteId.get(site.siteId) ?? 0) > 0,
-    );
-
-    if (eligibleSites.length === 0) return null;
-
     return (
-        <div className="space-y-1">
-            {eligibleSites.map(site => {
+        <SiteLeafRows
+            sites={sites}
+            filterSite={site =>
+                hasCertifiedSessions(site, certifiedCountsBySiteId)
+            }
+            renderSiteRow={site => {
                 const exportStatus = exportStatusBySiteId.get(site.siteId);
                 const isChecked = selectedSiteIds.has(site.siteId);
                 const isDisabled = isExporting || exportStatus !== undefined;
 
                 return (
-                    <div
-                        key={site.siteId}
-                        className="flex items-center justify-between rounded-md px-3 py-2"
-                    >
+                    <div className="flex items-center justify-between rounded-md px-3 py-2">
                         <div className="flex items-center gap-3">
                             <input
                                 type="checkbox"
@@ -82,7 +79,7 @@ export default function ExportSiteLeafRows({
                         </div>
                     </div>
                 );
-            })}
-        </div>
+            }}
+        />
     );
 }

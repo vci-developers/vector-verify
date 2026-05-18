@@ -59,11 +59,15 @@ export default function ExportMonthRow({
         new Set(),
     );
 
-    function togglePath(path: string) {
+    function togglePath(path: string, descendantPaths: string[]) {
         setExpandedSitePaths(prev => {
             const next = new Set(prev);
-            if (next.has(path)) next.delete(path);
-            else next.add(path);
+            if (next.has(path)) {
+                next.delete(path);
+            } else {
+                next.add(path);
+                descendantPaths.forEach(p => next.add(p));
+            }
             return next;
         });
     }
@@ -120,7 +124,6 @@ export default function ExportMonthRow({
                 <CollapsibleContent>
                     <ExportSiteHierarchy
                         sites={sites}
-                        depth={0}
                         parentPath={monthKey}
                         expandedSitePaths={expandedSitePaths}
                         onTogglePath={togglePath}

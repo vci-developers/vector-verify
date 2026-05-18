@@ -3,4 +3,5 @@ export interface ReviewSiteSessionSummary {
     needsReviewCount: number;
     isLocked: boolean;
     isCertified: boolean;
+    isSubmitted: boolean;
 }
