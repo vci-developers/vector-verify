@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const DEPENDENCY_RULES: Record<
+const FIELD_DEPENDENCIES: Record<
     string,
-    { dependentIds: string[]; disablingValue: string }
+    { dependentIds: string[]; disablingValues: string[] }
 > = {
     'surveillanceForm.wasIrsConducted': {
         dependentIds: ['surveillanceForm.monthsSinceIrs'],
-        disablingValue: 'No',
+        disablingValues: ['No', 'N/A'],
     },
     'surveillanceForm.numLlinsAvailable': {
         dependentIds: [
@@ -14,7 +14,7 @@ const DEPENDENCY_RULES: Record<
             'surveillanceForm.llinBrand',
             'surveillanceForm.numPeopleSleptUnderLlin',
         ],
-        disablingValue: '0',
+        disablingValues: ['0', 'N/A'],
     },
 };
 
@@ -26,36 +26,43 @@ export default function useMetadataReviewState() {
         setSavedResolutionsByMetadataRowId,
     ] = useState<Map<string, string>>(new Map());
 
-    const disabledRowIds = new Set<string>();
-
-    for (const [parentId, { dependentIds, disablingValue }] of Object.entries(
-        DEPENDENCY_RULES,
-    )) {
-        if (resolutionsByMetadataRowId.get(parentId) === disablingValue) {
-            for (const id of dependentIds) disabledRowIds.add(id);
+    const disabledRowIds = useMemo(() => {
+        const nextDisabledRowIds = new Set<string>();
+        for (const [
+            parentId,
+            { dependentIds, disablingValues },
+        ] of Object.entries(FIELD_DEPENDENCIES)) {
+            if (
+                disablingValues.includes(
+                    resolutionsByMetadataRowId.get(parentId) ?? '',
+                )
+            ) {
+                for (const id of dependentIds) nextDisabledRowIds.add(id);
+            }
         }
-    }
+        return nextDisabledRowIds;
+    }, [resolutionsByMetadataRowId]);
 
     function handleConflictResolutionChange(
         metadataRowId: string,
         displayValue: string,
     ) {
-        const rule = DEPENDENCY_RULES[metadataRowId];
+        const fieldDependency = FIELD_DEPENDENCIES[metadataRowId];
 
         const nextResolutions = new Map(resolutionsByMetadataRowId);
         nextResolutions.set(metadataRowId, displayValue);
         const nextSaved = new Map(savedResolutionsByMetadataRowId);
 
-        if (rule) {
-            if (displayValue === rule.disablingValue) {
-                for (const id of rule.dependentIds) {
-                    if (nextResolutions.has(id)) {
+        if (fieldDependency) {
+            if (fieldDependency.disablingValues.includes(displayValue)) {
+                for (const id of fieldDependency.dependentIds) {
+                    if (nextResolutions.has(id) && !nextSaved.has(id)) {
                         nextSaved.set(id, nextResolutions.get(id)!);
                     }
                     nextResolutions.set(id, 'N/A');
                 }
             } else {
-                for (const id of rule.dependentIds) {
+                for (const id of fieldDependency.dependentIds) {
                     if (nextSaved.has(id)) {
                         nextResolutions.set(id, nextSaved.get(id)!);
                         nextSaved.delete(id);
@@ -70,9 +77,15 @@ export default function useMetadataReviewState() {
         setSavedResolutionsByMetadataRowId(nextSaved);
     }
 
+    function resetResolutions() {
+        setResolutionsByMetadataRowId(new Map());
+        setSavedResolutionsByMetadataRowId(new Map());
+    }
+
     return {
         resolutionsByMetadataRowId,
         disabledRowIds,
         handleConflictResolutionChange,
+        resetResolutions,
     };
 }

@@ -37,6 +37,7 @@ interface MetadataReviewTableProps {
         metadataRowId: string,
         chosenDisplayValue: string,
     ) => void;
+    disabledRowIds: Set<string>;
 }
 
 function validateNumberInput(value: string): string | null {
@@ -47,12 +48,21 @@ function validateNumberInput(value: string): string | null {
     return null;
 }
 
+function validateNonNegativeInput(value: string): string | null {
+    if (value === 'N/A') return null;
+    if (!/^\d+$/.test(value)) {
+        return 'Must be a whole non-negative integer';
+    }
+    return null;
+}
+
 export default function MetadataReviewTable({
     sessions,
     metadataRows,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
     onConflictResolutionChange,
+    disabledRowIds,
 }: MetadataReviewTableProps) {
     const hasAnyConflict = metadataRows.some(
         metadataRow => metadataRow.hasConflict,
@@ -95,6 +105,7 @@ export default function MetadataReviewTable({
                         const isResolved = resolutionsByMetadataRowId.has(
                             metadataRow.id,
                         );
+                        const isDisabled = disabledRowIds.has(metadataRow.id);
                         const resolutionOptions = [
                             ...new Set(
                                 [
@@ -143,15 +154,20 @@ export default function MetadataReviewTable({
                                                 metadataRow.fieldName,
                                             ) ? (
                                                 <Select
-                                                    value={resolutionsByMetadataRowId.get(
-                                                        metadataRow.id,
-                                                    )}
+                                                    value={
+                                                        isDisabled
+                                                            ? 'N/A'
+                                                            : resolutionsByMetadataRowId.get(
+                                                                  metadataRow.id,
+                                                              )
+                                                    }
                                                     onValueChange={value =>
                                                         onConflictResolutionChange(
                                                             metadataRow.id,
                                                             value,
                                                         )
                                                     }
+                                                    disabled={isDisabled}
                                                 >
                                                     <SelectTrigger className="w-40">
                                                         <SelectValue placeholder="Select value" />
@@ -174,9 +190,13 @@ export default function MetadataReviewTable({
                                             ) : (
                                                 <ComboBox
                                                     options={resolutionOptions}
-                                                    value={resolutionsByMetadataRowId.get(
-                                                        metadataRow.id,
-                                                    )}
+                                                    value={
+                                                        isDisabled
+                                                            ? 'N/A'
+                                                            : resolutionsByMetadataRowId.get(
+                                                                  metadataRow.id,
+                                                              )
+                                                    }
                                                     onValueChange={value =>
                                                         onConflictResolutionChange(
                                                             metadataRow.id,
@@ -185,12 +205,16 @@ export default function MetadataReviewTable({
                                                     }
                                                     placeholder="Select value"
                                                     validate={
-                                                        numberFieldNames.has(
-                                                            metadataRow.fieldName,
-                                                        )
-                                                            ? validateNumberInput
-                                                            : undefined
+                                                        metadataRow.fieldName ===
+                                                        'numLlinsAvailable'
+                                                            ? validateNonNegativeInput
+                                                            : numberFieldNames.has(
+                                                                    metadataRow.fieldName,
+                                                                )
+                                                              ? validateNumberInput
+                                                              : undefined
                                                     }
+                                                    disabled={isDisabled}
                                                 />
                                             ))}
                                     </TableCell>
