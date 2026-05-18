@@ -1,5 +1,4 @@
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-uganda-schema';
-import type { Site } from '@/api/site/validation/site-schema';
 
 export interface ExportBatchItem {
     monthKey: string;
@@ -10,9 +9,8 @@ export interface ExportBatchItem {
     irsData: SiteIrsData[];
 }
 
-export interface VillageIrsFormData {
-    monthKey: string;
-    villageName: string;
+export interface SiteIrsFormData {
+    siteId: number;
     wasIrsSprayed: boolean;
     insecticideSprayed: string;
     dateLastSprayed: string;
@@ -20,8 +18,7 @@ export interface VillageIrsFormData {
 
 export function buildExportItems(
     selectedSites: Map<string, Set<number>>,
-    sites: Site[],
-    irsFormData: VillageIrsFormData[],
+    siteIrsData: Map<number, SiteIrsFormData>,
     district: string,
 ): ExportBatchItem[] {
     return [...selectedSites.entries()]
@@ -35,36 +32,24 @@ export function buildExportItems(
                 month: Number(monthStr),
                 siteIds,
                 district,
-                irsData: buildSiteIrsData(
-                    siteIds,
-                    sites,
-                    irsFormData.filter(e => e.monthKey === monthKey),
+                irsData: siteIds.map(siteId =>
+                    toSiteIrsData(siteId, siteIrsData.get(siteId)),
                 ),
             };
         });
 }
 
-function buildSiteIrsData(
-    siteIds: number[],
-    sites: Site[],
-    villageData: VillageIrsFormData[],
-): SiteIrsData[] {
-    const siteById = new Map(sites.map(site => [site.siteId, site]));
-    const byVillage = new Map(
-        villageData.map(entry => [entry.villageName, entry]),
-    );
-
-    return siteIds.map(siteId => {
-        const villageName = siteById.get(siteId)?.villageName ?? '';
-        const entry = byVillage.get(villageName);
-        if (!entry?.wasIrsSprayed) {
-            return { siteId, wasIrsSprayed: false };
-        }
-        return {
-            siteId,
-            wasIrsSprayed: true,
-            insecticideSprayed: entry.insecticideSprayed || undefined,
-            dateLastSprayed: entry.dateLastSprayed || undefined,
-        };
-    });
+function toSiteIrsData(
+    siteId: number,
+    formData: SiteIrsFormData | undefined,
+): SiteIrsData {
+    if (!formData?.wasIrsSprayed) {
+        return { siteId, wasIrsSprayed: false };
+    }
+    return {
+        siteId,
+        wasIrsSprayed: true,
+        insecticideSprayed: formData.insecticideSprayed || undefined,
+        dateLastSprayed: formData.dateLastSprayed || undefined,
+    };
 }

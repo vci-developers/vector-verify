@@ -16,7 +16,7 @@ import { useExportSelection } from '@/features/review/export/hooks/use-export-se
 import { groupExportResultsByMonth } from '@/features/review/export/utils/export-selection-helpers';
 import {
     buildExportItems,
-    type VillageIrsFormData,
+    type SiteIrsFormData,
 } from '@/features/review/export/utils/build-site-irs-data';
 
 interface ReviewExportListProps {
@@ -97,12 +97,12 @@ export default function ReviewExportList({
         [exportResults],
     );
 
-    async function handleConfirmExport(irsFormData: VillageIrsFormData[]) {
+    async function handleConfirmExport(
+        siteIrsData: Map<number, SiteIrsFormData>,
+    ) {
         if (!district) return;
         setShowWarningModal(false);
-        await runExport(
-            buildExportItems(selectedSites, sites, irsFormData, district),
-        );
+        await runExport(buildExportItems(selectedSites, siteIrsData, district));
     }
 
     function handleDone() {

@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Site } from '@/api/site/validation/site-schema';
-import type { VillageIrsFormData } from '../utils/build-site-irs-data';
-import SiteIrsRow from './site-irs-row';
+import type { SiteIrsFormData } from '@/features/review/export/utils/build-site-irs-data';
+import SiteIrsRow from '@/features/review/export/components/site-irs-row';
 
 interface ExportConfirmDialogProps {
     isOpen: boolean;
@@ -22,34 +22,24 @@ interface ExportConfirmDialogProps {
     selectedSites: Map<string, Set<number>>;
     sites: Site[];
     selectedCount: number;
-    onConfirm: (irsData: VillageIrsFormData[]) => void;
+    onConfirm: (siteIrsData: Map<number, SiteIrsFormData>) => void;
 }
 
-function initFormData(
+function initSiteIrsData(
     selectedSites: Map<string, Set<number>>,
-    sites: Site[],
-): Map<string, VillageIrsFormData> {
-    const siteById = new Map(sites.map(site => [site.siteId, site]));
-    const formData = new Map<string, VillageIrsFormData>();
-
-    for (const [monthKey, siteIdSet] of selectedSites) {
-        const villages = new Set<string>();
+): Map<number, SiteIrsFormData> {
+    const data = new Map<number, SiteIrsFormData>();
+    for (const siteIdSet of selectedSites.values()) {
         for (const siteId of siteIdSet) {
-            const villageName = siteById.get(siteId)?.villageName;
-            if (villageName) villages.add(villageName);
-        }
-        for (const villageName of villages) {
-            formData.set(`${monthKey}:${villageName}`, {
-                monthKey,
-                villageName,
+            data.set(siteId, {
+                siteId,
                 wasIrsSprayed: false,
                 insecticideSprayed: '',
                 dateLastSprayed: '',
             });
         }
     }
-
-    return formData;
+    return data;
 }
 
 export default function ExportConfirmDialog({
@@ -61,32 +51,37 @@ export default function ExportConfirmDialog({
     onConfirm,
 }: ExportConfirmDialogProps) {
     const [step, setStep] = useState<1 | 2>(1);
-    const [formData, setFormData] = useState<Map<string, VillageIrsFormData>>(
-        () => initFormData(selectedSites, sites),
-    );
+    const [siteIrsData, setSiteIrsData] = useState<
+        Map<number, SiteIrsFormData>
+    >(() => initSiteIrsData(selectedSites));
 
     useEffect(() => {
         if (!isOpen) return;
         setStep(1);
-        setFormData(initFormData(selectedSites, sites));
-    }, [isOpen, selectedSites, sites]);
+        setSiteIrsData(initSiteIrsData(selectedSites));
+    }, [isOpen, selectedSites]);
+
+    const siteById = useMemo(
+        () => new Map(sites.map(site => [site.siteId, site])),
+        [sites],
+    );
 
     const monthKeys = useMemo(
         () => [...selectedSites.keys()].sort(),
         [selectedSites],
     );
 
-    function updateEntry(key: string, patch: Partial<VillageIrsFormData>) {
-        setFormData(prev => {
+    function updateSiteIrs(siteId: number, patch: Partial<SiteIrsFormData>) {
+        setSiteIrsData(prev => {
             const next = new Map(prev);
-            const current = next.get(key);
-            if (current) next.set(key, { ...current, ...patch });
+            const current = next.get(siteId);
+            if (current) next.set(siteId, { ...current, ...patch });
             return next;
         });
     }
 
     function isFormValid(): boolean {
-        for (const entry of formData.values()) {
+        for (const entry of siteIrsData.values()) {
             if (entry.wasIrsSprayed) {
                 if (!entry.insecticideSprayed.trim()) return false;
                 const parsed = parseISO(entry.dateLastSprayed);
@@ -104,9 +99,9 @@ export default function ExportConfirmDialog({
     return (
         <Dialog
             open={isOpen}
-            onOpenChange={isOpen => {
-                onOpenChange(isOpen);
-                if (!isOpen) setStep(1);
+            onOpenChange={open => {
+                onOpenChange(open);
+                if (!open) setStep(1);
             }}
         >
             <DialogContent showCloseButton={false} className="max-w-2xl">
@@ -115,25 +110,26 @@ export default function ExportConfirmDialog({
                         <DialogHeader>
                             <DialogTitle>IRS Information</DialogTitle>
                             <DialogDescription>
-                                For each village, indicate whether Indoor
-                                Residual Spraying (IRS) was conducted. If yes,
-                                provide the insecticide and date. This applies
-                                to all sites in that village.
+                                For each site, indicate whether Indoor Residual
+                                Spraying (IRS) was conducted. If yes, provide
+                                the insecticide and date.
                             </DialogDescription>
                         </DialogHeader>
 
                         <ScrollArea className="max-h-[60vh]">
                             <div className="space-y-6">
                                 {monthKeys.map(monthKey => {
-                                    const entries = [
-                                        ...formData.values(),
-                                    ].filter(
-                                        entry => entry.monthKey === monthKey,
-                                    );
-                                    if (entries.length === 0) return null;
-                                    const [y, m] = monthKey.split('-');
+                                    const siteIds = [
+                                        ...(selectedSites.get(monthKey) ?? []),
+                                    ];
+                                    if (siteIds.length === 0) return null;
+                                    const [year, month] = monthKey.split('-');
                                     const monthLabel = format(
-                                        new Date(Number(y), Number(m) - 1, 1),
+                                        new Date(
+                                            Number(year),
+                                            Number(month) - 1,
+                                            1,
+                                        ),
                                         'MMMM yyyy',
                                     );
                                     return (
@@ -144,15 +140,34 @@ export default function ExportConfirmDialog({
                                             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                                                 {monthLabel}
                                             </p>
-                                            {entries.map(entry => {
-                                                const key = `${monthKey}:${entry.villageName}`;
+                                            {siteIds.map(siteId => {
+                                                const entry =
+                                                    siteIrsData.get(siteId);
+                                                const site =
+                                                    siteById.get(siteId);
+                                                const siteName =
+                                                    site?.name ??
+                                                    site?.villageName ??
+                                                    String(siteId);
+                                                if (!entry) return null;
                                                 return (
-                                                    <SiteIrsRow
-                                                        key={key}
-                                                        entry={entry}
-                                                        formKey={key}
-                                                        onUpdate={updateEntry}
-                                                    />
+                                                    <div
+                                                        key={siteId}
+                                                        className="space-y-2"
+                                                    >
+                                                        <p className="text-sm font-medium">
+                                                            {siteName}
+                                                        </p>
+                                                        <SiteIrsRow
+                                                            entry={entry}
+                                                            onUpdate={patch =>
+                                                                updateSiteIrs(
+                                                                    siteId,
+                                                                    patch,
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
                                                 );
                                             })}
                                         </div>
@@ -188,7 +203,7 @@ export default function ExportConfirmDialog({
                         <div className="space-y-2 text-sm">
                             <p className="text-destructive font-medium">
                                 This may take a while. Do not close this tab or
-                                your laptop during the export.
+                                your computer during the export.
                             </p>
                         </div>
                         <DialogFooter>
@@ -198,11 +213,7 @@ export default function ExportConfirmDialog({
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                onClick={() =>
-                                    onConfirm([...formData.values()])
-                                }
-                            >
+                            <Button onClick={() => onConfirm(siteIrsData)}>
                                 Start export
                             </Button>
                         </DialogFooter>
