@@ -21,11 +21,14 @@ export function useExportBatch() {
         Map<string, ExportSiteStatus>
     >(new Map());
 
-    async function runExport(items: ExportBatchItem[]) {
+    async function runExport(exportSites: ExportBatchItem[]) {
         setExportStatus('exporting');
         setExportResults(new Map());
 
-        const total = items.reduce((sum, item) => sum + item.siteIds.length, 0);
+        const total = exportSites.reduce(
+            (sum, exportSite) => sum + exportSite.siteIds.length,
+            0,
+        );
         setExportProgress({ completed: 0, total });
 
         const newResults = new Map<string, ExportSiteStatus>();
@@ -39,7 +42,7 @@ export function useExportBatch() {
                 siteIds,
                 district,
                 irsData,
-            } of items) {
+            } of exportSites) {
                 let result;
                 try {
                     result = await mutateAsync({

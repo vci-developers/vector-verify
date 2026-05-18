@@ -66,7 +66,9 @@ export default function ExportSiteLeafRows({
 
                         <div className="flex items-center gap-2">
                             {exportStatus === 'success' && (
-                                <Badge variant="secondary">Submitted</Badge>
+                                <Badge variant="secondary">
+                                    Submitted to DHIS2
+                                </Badge>
                             )}
                             {exportStatus === 'failed' && (
                                 <Badge variant="destructive">Failed</Badge>

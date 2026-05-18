@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import ExportMonthRow from '@/features/review/export/components/export-month-row';
 import ExportProgressPanel from '@/features/review/export/components/export-progress-panel';
-import ExportWarningDialog from '@/features/review/export/components/export-warning-dialog';
+import ExportConfirmDialog from '@/features/review/export/components/export-confirm-dialog';
 import { useExportBatch } from '@/features/review/export/hooks/use-export-batch';
 import { useExportSelection } from '@/features/review/export/hooks/use-export-selection';
 import { groupExportResultsByMonth } from '@/features/review/export/utils/export-selection-helpers';
@@ -200,7 +200,7 @@ export default function ReviewExportList({
                 />
             )}
 
-            <ExportWarningDialog
+            <ExportConfirmDialog
                 isOpen={showWarningModal}
                 onOpenChange={setShowWarningModal}
                 selectedSites={selectedSites}

@@ -23,17 +23,17 @@ export const INSECTICIDE_OPTIONS = [
     'Clothiacid',
 ] as const;
 
-interface VillageIrsRowProps {
+interface SiteIrsRowProps {
     entry: VillageIrsFormData;
     formKey: string;
     onUpdate: (key: string, patch: Partial<VillageIrsFormData>) => void;
 }
 
-export default function VillageIrsRow({
+export default function SiteIrsRow({
     entry,
     formKey,
     onUpdate,
-}: VillageIrsRowProps) {
+}: SiteIrsRowProps) {
     return (
         <div className="border-border space-y-3 rounded-lg border p-4">
             <div className="flex items-center gap-2">

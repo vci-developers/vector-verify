@@ -10,9 +10,10 @@ export function isMonthFullySelected(
 export function totalSelectedCount(
     selectedSites: Map<string, Set<number>>,
 ): number {
-    let total = 0;
-    for (const siteIds of selectedSites.values()) total += siteIds.size;
-    return total;
+    return [...selectedSites.values()].reduce(
+        (sum, siteIds) => sum + siteIds.size,
+        0,
+    );
 }
 
 export function isAllSelected(

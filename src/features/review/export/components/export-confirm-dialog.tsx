@@ -14,9 +14,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { VillageIrsFormData } from '../utils/build-site-irs-data';
-import VillageIrsRow from './village-irs-row';
+import SiteIrsRow from './site-irs-row';
 
-interface ExportWarningDialogProps {
+interface ExportConfirmDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     selectedSites: Map<string, Set<number>>;
@@ -52,14 +52,14 @@ function initFormData(
     return formData;
 }
 
-export default function ExportWarningDialog({
+export default function ExportConfirmDialog({
     isOpen,
     onOpenChange,
     selectedSites,
     sites,
     selectedCount,
     onConfirm,
-}: ExportWarningDialogProps) {
+}: ExportConfirmDialogProps) {
     const [step, setStep] = useState<1 | 2>(1);
     const [formData, setFormData] = useState<Map<string, VillageIrsFormData>>(
         () => initFormData(selectedSites, sites),
@@ -147,7 +147,7 @@ export default function ExportWarningDialog({
                                             {entries.map(entry => {
                                                 const key = `${monthKey}:${entry.villageName}`;
                                                 return (
-                                                    <VillageIrsRow
+                                                    <SiteIrsRow
                                                         key={key}
                                                         entry={entry}
                                                         formKey={key}
