@@ -43,11 +43,13 @@ export function useExportBatch() {
                 let result;
                 try {
                     result = await mutateAsync({
-                        year,
-                        month,
-                        district,
-                        siteIds: siteIds.join(','),
-                        irsData,
+                        queryParams: {
+                            year,
+                            month,
+                            district,
+                            siteIds: siteIds.join(','),
+                        },
+                        body: { irsData },
                     });
                 } catch {
                     for (const siteId of siteIds) {

@@ -1,4 +1,4 @@
-import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-export-schema';
+import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-uganda-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 
 export interface ExportBatchItem {
