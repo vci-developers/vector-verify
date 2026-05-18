@@ -12,9 +12,7 @@ const LLIN_DEPENDENT_IDS = [
     'surveillanceForm.numPeopleSleptUnderLlin',
 ];
 
-function deriveDisabledRowIds(
-    resolutions: Map<string, string>,
-): Set<string> {
+function deriveDisabledRowIds(resolutions: Map<string, string>): Set<string> {
     const disabled = new Set<string>();
 
     if (resolutions.get(IRS_PARENT_ID) === 'No') {
@@ -31,8 +29,10 @@ function deriveDisabledRowIds(
 export function useMetadataReviewState() {
     const [resolutionsByMetadataRowId, setResolutionsByMetadataRowId] =
         useState<Map<string, string>>(new Map());
-    const [savedResolutionsByMetadataRowId, setSavedResolutionsByMetadataRowId] =
-        useState<Map<string, string>>(new Map());
+    const [
+        savedResolutionsByMetadataRowId,
+        setSavedResolutionsByMetadataRowId,
+    ] = useState<Map<string, string>>(new Map());
 
     const disabledRowIds = deriveDisabledRowIds(resolutionsByMetadataRowId);
 
