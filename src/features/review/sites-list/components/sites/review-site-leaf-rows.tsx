@@ -15,8 +15,17 @@ interface ReviewSiteLeafRowsProps {
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
 }
 
-function buildReviewHref(site: Site, startDate: string, endDate: string) {
-    const queryParams = new URLSearchParams({ startDate, endDate });
+function buildReviewHref(
+    site: Site,
+    startDate: string,
+    endDate: string,
+    displayName: string,
+) {
+    const queryParams = new URLSearchParams({
+        startDate,
+        endDate,
+        displayName,
+    });
     return `/review/${site.siteId}?${queryParams.toString()}`;
 }
 
@@ -109,7 +118,12 @@ export default function ReviewSiteLeafRows({
                 if (hasSessions && !isLocked) {
                     return (
                         <Link
-                            href={buildReviewHref(site, startDate, endDate)}
+                            href={buildReviewHref(
+                                site,
+                                startDate,
+                                endDate,
+                                getDisplayName(site),
+                            )}
                             className={rowClassName}
                         >
                             {rowContent}
