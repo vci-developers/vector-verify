@@ -29,6 +29,5 @@ pnpm-lock.yaml
 prettier.config.cjs
 eslint.config.mjs
 tsconfig.json
-next.config.js
-postcss.config.js
-tailwind.config.js
+next.config.ts
+postcss.config.mjs
