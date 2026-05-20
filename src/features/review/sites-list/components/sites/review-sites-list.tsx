@@ -67,6 +67,7 @@ export default function ReviewSitesList({
                 needsReviewCount: 0,
                 isLocked: true,
                 isCertified: true,
+                isSubmitted: true,
             };
 
             const isLockedSessionState =
@@ -74,6 +75,7 @@ export default function ReviewSitesList({
                 session.state === 'SUBMITTED' ||
                 session.state === 'NOT_APPLICABLE';
             const isCertifiedSessionState = session.state === 'CERTIFIED';
+            const isSubmittedSessionState = session.state === 'SUBMITTED';
 
             monthMap.set(session.siteId, {
                 sessionCount: current.sessionCount + 1,
@@ -82,17 +84,22 @@ export default function ReviewSitesList({
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
                 isLocked: current.isLocked && isLockedSessionState,
                 isCertified: current.isCertified && isCertifiedSessionState,
+                isSubmitted: current.isSubmitted && isSubmittedSessionState,
             });
         }
 
         return map;
     }, [getAllSessionsResult]);
 
-    function toggleSiteRow(path: string) {
+    function toggleSiteRow(path: string, descendantPaths: string[]) {
         setExpandedSitePaths(previousPaths => {
             const nextPaths = new Set(previousPaths);
-            if (nextPaths.has(path)) nextPaths.delete(path);
-            else nextPaths.add(path);
+            if (nextPaths.has(path)) {
+                nextPaths.delete(path);
+            } else {
+                nextPaths.add(path);
+                descendantPaths.forEach(p => nextPaths.add(p));
+            }
             return nextPaths;
         });
     }
@@ -172,13 +179,12 @@ export default function ReviewSitesList({
                             >
                                 <ReviewSiteHierarchy
                                     sites={sites}
-                                    depth={0}
                                     parentPath={monthKey}
                                     sessionCountsBySiteId={
                                         sessionCountsBySiteId
                                     }
                                     expandedSitePaths={expandedSitePaths}
-                                    onToggle={toggleSiteRow}
+                                    onTogglePath={toggleSiteRow}
                                 />
                             </ReviewSiteListMonthKeyContext.Provider>
                         </CollapsibleContent>

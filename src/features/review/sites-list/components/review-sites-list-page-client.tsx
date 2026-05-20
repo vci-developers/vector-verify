@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { startOfMonth, subMonths } from 'date-fns';
@@ -10,9 +11,13 @@ import ReviewSitesListHeader from './layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
+import ReviewExportList from '@/features/review/export/components/review-export-list';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 
-const REVIEW_TABS = [{ value: 'sites-list', label: 'SITES LIST' }] as const;
+const REVIEW_TABS = [
+    { value: 'sites-list', label: 'SITES LIST' },
+    { value: 'export', label: 'EXPORT' },
+] as const;
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
 
@@ -27,6 +32,23 @@ export default function ReviewSitesListPageClient() {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const programId = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.programId
+        : undefined;
+
+    const { data: getProgramsResult } = useGetPrograms(
+        { programId },
+        { enabled: programId !== undefined },
+    );
+
+    const isUgandaProgram =
+        getProgramsResult?.ok === true &&
+        getProgramsResult.data.programs[0]?.country === 'Uganda';
+
+    const visibleTabs = REVIEW_TABS.filter(
+        tab => tab.value !== 'export' || isUgandaProgram,
+    );
 
     const accessibleSites = getUserPermissionsResult?.ok
         ? getUserPermissionsResult.data.permissions.sites.canAccessSites
@@ -76,7 +98,7 @@ export default function ReviewSitesListPageClient() {
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
                     <ReviewSitesListHeader
-                        tabs={REVIEW_TABS}
+                        tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={tab => setActiveTab(tab)}
                         locationTypeName={locationTypeName}
@@ -105,6 +127,14 @@ export default function ReviewSitesListPageClient() {
                         <Fragment>
                             {activeTab === 'sites-list' && (
                                 <ReviewSitesList
+                                    sites={descendantsOfSelectedLocation}
+                                    locationQueryParam={locationQueryParam}
+                                    startMonth={startMonth}
+                                    endMonth={endMonth}
+                                />
+                            )}
+                            {activeTab === 'export' && (
+                                <ReviewExportList
                                     sites={descendantsOfSelectedLocation}
                                     locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
