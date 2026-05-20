@@ -1,30 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const IRS_PARENT_ID = 'surveillanceForm.wasIrsConducted';
-const IRS_DEPENDENT_IDS = ['surveillanceForm.monthsSinceIrs'];
-
-const LLIN_PARENT_ID = 'surveillanceForm.numLlinsAvailable';
-const LLIN_DEPENDENT_IDS = [
-    'surveillanceForm.llinType',
-    'surveillanceForm.llinBrand',
-    'surveillanceForm.numPeopleSleptUnderLlin',
-];
-
-function deriveDisabledRowIds(resolutions: Map<string, string>): Set<string> {
-    const disabled = new Set<string>();
-
-    if (resolutions.get(IRS_PARENT_ID) === 'No') {
-        for (const id of IRS_DEPENDENT_IDS) disabled.add(id);
-    }
-
-    if (resolutions.get(LLIN_PARENT_ID) === '0') {
-        for (const id of LLIN_DEPENDENT_IDS) disabled.add(id);
-    }
-
-    return disabled;
-}
+const FIELD_DEPENDENCIES: Record<
+    string,
+    { dependentIds: string[]; disablingValues: string[] }
+> = {
+    'surveillanceForm.wasIrsConducted': {
+        dependentIds: ['surveillanceForm.monthsSinceIrs'],
+        disablingValues: ['No', 'N/A'],
+    },
+    'surveillanceForm.numLlinsAvailable': {
+        dependentIds: [
+            'surveillanceForm.llinType',
+            'surveillanceForm.llinBrand',
+            'surveillanceForm.numPeopleSleptUnderLlin',
+        ],
+        disablingValues: ['0', 'N/A'],
+    },
+};
 
 export function useMetadataReviewState() {
     const [resolutionsByMetadataRowId, setResolutionsByMetadataRowId] =
@@ -34,61 +28,66 @@ export function useMetadataReviewState() {
         setSavedResolutionsByMetadataRowId,
     ] = useState<Map<string, string>>(new Map());
 
-    const disabledRowIds = deriveDisabledRowIds(resolutionsByMetadataRowId);
+    const disabledRowIds = useMemo(() => {
+        const nextDisabledRowIds = new Set<string>();
+        for (const [
+            parentId,
+            { dependentIds, disablingValues },
+        ] of Object.entries(FIELD_DEPENDENCIES)) {
+            if (
+                disablingValues.includes(
+                    resolutionsByMetadataRowId.get(parentId) ?? '',
+                )
+            ) {
+                for (const id of dependentIds) nextDisabledRowIds.add(id);
+            }
+        }
+        return nextDisabledRowIds;
+    }, [resolutionsByMetadataRowId]);
 
     function handleConflictResolutionChange(
         metadataRowId: string,
-        chosenDisplayValue: string,
+        displayValue: string,
     ) {
-        setResolutionsByMetadataRowId(prev => {
-            const next = new Map(prev);
-            next.set(metadataRowId, chosenDisplayValue);
+        const fieldDependency = FIELD_DEPENDENCIES[metadataRowId];
 
-            const dependentIds =
-                metadataRowId === IRS_PARENT_ID
-                    ? IRS_DEPENDENT_IDS
-                    : metadataRowId === LLIN_PARENT_ID
-                      ? LLIN_DEPENDENT_IDS
-                      : null;
+        const nextResolutions = new Map(resolutionsByMetadataRowId);
+        nextResolutions.set(metadataRowId, displayValue);
+        const nextSaved = new Map(savedResolutionsByMetadataRowId);
 
-            if (!dependentIds) return next;
-
-            const isDisablingValue =
-                metadataRowId === IRS_PARENT_ID
-                    ? chosenDisplayValue === 'No'
-                    : chosenDisplayValue === '0';
-
-            if (isDisablingValue) {
-                setSavedResolutionsByMetadataRowId(prevSaved => {
-                    const nextSaved = new Map(prevSaved);
-                    for (const id of dependentIds) {
-                        if (next.has(id)) nextSaved.set(id, next.get(id)!);
-                        next.set(id, 'N/A');
+        if (fieldDependency) {
+            if (fieldDependency.disablingValues.includes(displayValue)) {
+                for (const id of fieldDependency.dependentIds) {
+                    if (nextResolutions.has(id) && !nextSaved.has(id)) {
+                        nextSaved.set(id, nextResolutions.get(id)!);
                     }
-                    return nextSaved;
-                });
+                    nextResolutions.set(id, 'N/A');
+                }
             } else {
-                setSavedResolutionsByMetadataRowId(prevSaved => {
-                    const nextSaved = new Map(prevSaved);
-                    for (const id of dependentIds) {
-                        if (nextSaved.has(id)) {
-                            next.set(id, nextSaved.get(id)!);
-                            nextSaved.delete(id);
-                        } else {
-                            next.delete(id);
-                        }
+                for (const id of fieldDependency.dependentIds) {
+                    if (nextSaved.has(id)) {
+                        nextResolutions.set(id, nextSaved.get(id)!);
+                        nextSaved.delete(id);
+                    } else {
+                        nextResolutions.delete(id);
                     }
-                    return nextSaved;
-                });
+                }
             }
+        }
 
-            return next;
-        });
+        setResolutionsByMetadataRowId(nextResolutions);
+        setSavedResolutionsByMetadataRowId(nextSaved);
+    }
+
+    function resetResolutions() {
+        setResolutionsByMetadataRowId(new Map());
+        setSavedResolutionsByMetadataRowId(new Map());
     }
 
     return {
         resolutionsByMetadataRowId,
         disabledRowIds,
         handleConflictResolutionChange,
+        resetResolutions,
     };
 }

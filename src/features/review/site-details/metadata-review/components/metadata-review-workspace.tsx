@@ -12,7 +12,7 @@ import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
-import useMetadataReviewState from '@/features/review/site-details/metadata-review/utils/useMetadataReviewState';
+import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;
