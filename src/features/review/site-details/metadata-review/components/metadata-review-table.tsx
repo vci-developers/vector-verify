@@ -1,10 +1,7 @@
 'use client';
 
 import type { Session } from '@/api/session/validation/session-schema';
-import {
-    formatDisplayValue,
-    type MetadataRow,
-} from '../utils/metadata-review-helpers';
+
 import {
     Table,
     TableBody,
@@ -23,6 +20,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui/combobox';
+import {
+    booleanFieldNames,
+    formatDisplayValue,
+    numberFieldNames,
+    type MetadataRow,
+} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
@@ -33,6 +37,23 @@ interface MetadataReviewTableProps {
         metadataRowId: string,
         chosenDisplayValue: string,
     ) => void;
+    disabledRowIds: Set<string>;
+}
+
+function validateNumberInput(value: string): string | null {
+    if (value === 'N/A') return null;
+    if (!/^\d+$/.test(value) || parseInt(value, 10) < 1) {
+        return 'Must be a whole positive integer';
+    }
+    return null;
+}
+
+function validateNonNegativeInput(value: string): string | null {
+    if (value === 'N/A') return null;
+    if (!/^\d+$/.test(value)) {
+        return 'Must be a whole non-negative integer';
+    }
+    return null;
 }
 
 export default function MetadataReviewTable({
@@ -41,6 +62,7 @@ export default function MetadataReviewTable({
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
     onConflictResolutionChange,
+    disabledRowIds,
 }: MetadataReviewTableProps) {
     const hasAnyConflict = metadataRows.some(
         metadataRow => metadataRow.hasConflict,
@@ -83,6 +105,7 @@ export default function MetadataReviewTable({
                         const isResolved = resolutionsByMetadataRowId.has(
                             metadataRow.id,
                         );
+                        const isDisabled = disabledRowIds.has(metadataRow.id);
                         const resolutionOptions = [
                             ...new Set(
                                 [
@@ -112,49 +135,101 @@ export default function MetadataReviewTable({
                                         {metadataRow.label}
                                     </div>
                                 </TableCell>
-                                {sessions.map(session => (
-                                    <TableCell
-                                        key={session.sessionId}
-                                        className="border-border border"
-                                    >
-                                        {formatDisplayValue(
-                                            metadataRow.fieldValueBySessionId.get(
-                                                session.sessionId,
-                                            ),
-                                        )}
-                                    </TableCell>
-                                ))}
+                                {sessions.map(session => {
+                                    const originalValue = formatDisplayValue(
+                                        metadataRow.fieldValueBySessionId.get(
+                                            session.sessionId,
+                                        ),
+                                    );
+                                    const effectiveValue = isDisabled
+                                        ? 'N/A'
+                                        : (resolutionsByMetadataRowId.get(
+                                              metadataRow.id,
+                                          ) ?? originalValue);
+                                    return (
+                                        <TableCell
+                                            key={session.sessionId}
+                                            className={cn(
+                                                'border-border border',
+                                                effectiveValue !==
+                                                    originalValue &&
+                                                    'bg-primary/10',
+                                            )}
+                                        >
+                                            {effectiveValue}
+                                        </TableCell>
+                                    );
+                                })}
                                 {hasAnyConflict && (
                                     <TableCell className="border-border bg-background sticky right-0 z-20 border">
-                                        {metadataRow.hasConflict && (
-                                            <Select
-                                                value={resolutionsByMetadataRowId.get(
-                                                    metadataRow.id,
-                                                )}
-                                                onValueChange={value =>
-                                                    onConflictResolutionChange(
-                                                        metadataRow.id,
-                                                        value,
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger className="w-40">
-                                                    <SelectValue placeholder="Select value" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {resolutionOptions.map(
-                                                        option => (
-                                                            <SelectItem
-                                                                key={option}
-                                                                value={option}
-                                                            >
-                                                                {option}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
+                                        {metadataRow.hasConflict &&
+                                            (booleanFieldNames.has(
+                                                metadataRow.fieldName,
+                                            ) ? (
+                                                <Select
+                                                    value={
+                                                        isDisabled
+                                                            ? 'N/A'
+                                                            : resolutionsByMetadataRowId.get(
+                                                                  metadataRow.id,
+                                                              )
+                                                    }
+                                                    onValueChange={value =>
+                                                        onConflictResolutionChange(
+                                                            metadataRow.id,
+                                                            value,
+                                                        )
+                                                    }
+                                                    disabled={isDisabled}
+                                                >
+                                                    <SelectTrigger className="w-40">
+                                                        <SelectValue placeholder="Select value" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {resolutionOptions.map(
+                                                            option => (
+                                                                <SelectItem
+                                                                    key={option}
+                                                                    value={
+                                                                        option
+                                                                    }
+                                                                >
+                                                                    {option}
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <ComboBox
+                                                    options={resolutionOptions}
+                                                    value={
+                                                        isDisabled
+                                                            ? 'N/A'
+                                                            : resolutionsByMetadataRowId.get(
+                                                                  metadataRow.id,
+                                                              )
+                                                    }
+                                                    onValueChange={value =>
+                                                        onConflictResolutionChange(
+                                                            metadataRow.id,
+                                                            value,
+                                                        )
+                                                    }
+                                                    placeholder="Select value"
+                                                    validate={
+                                                        metadataRow.fieldName ===
+                                                        'numLlinsAvailable'
+                                                            ? validateNonNegativeInput
+                                                            : numberFieldNames.has(
+                                                                    metadataRow.fieldName,
+                                                                )
+                                                              ? validateNumberInput
+                                                              : undefined
+                                                    }
+                                                    disabled={isDisabled}
+                                                />
+                                            ))}
                                     </TableCell>
                                 )}
                             </TableRow>
