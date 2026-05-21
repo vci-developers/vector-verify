@@ -135,18 +135,31 @@ export default function MetadataReviewTable({
                                         {metadataRow.label}
                                     </div>
                                 </TableCell>
-                                {sessions.map(session => (
-                                    <TableCell
-                                        key={session.sessionId}
-                                        className="border-border border"
-                                    >
-                                        {formatDisplayValue(
-                                            metadataRow.fieldValueBySessionId.get(
-                                                session.sessionId,
-                                            ),
-                                        )}
-                                    </TableCell>
-                                ))}
+                                {sessions.map(session => {
+                                    const originalValue = formatDisplayValue(
+                                        metadataRow.fieldValueBySessionId.get(
+                                            session.sessionId,
+                                        ),
+                                    );
+                                    const effectiveValue = isDisabled
+                                        ? 'N/A'
+                                        : (resolutionsByMetadataRowId.get(
+                                              metadataRow.id,
+                                          ) ?? originalValue);
+                                    return (
+                                        <TableCell
+                                            key={session.sessionId}
+                                            className={cn(
+                                                'border-border border',
+                                                effectiveValue !==
+                                                    originalValue &&
+                                                    'bg-primary/10',
+                                            )}
+                                        >
+                                            {effectiveValue}
+                                        </TableCell>
+                                    );
+                                })}
                                 {hasAnyConflict && (
                                     <TableCell className="border-border bg-background sticky right-0 z-20 border">
                                         {metadataRow.hasConflict &&
