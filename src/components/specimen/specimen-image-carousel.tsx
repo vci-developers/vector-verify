@@ -1,6 +1,7 @@
 'use client';
 
-import type { SpecimenImageCarouselItem } from '@/lib/specimen/specimen-image-carousel-items';
+import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
+import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,29 +18,58 @@ import Image from 'next/image';
 import { Fragment, useEffect, useState } from 'react';
 
 interface SpecimenImageCarouselProps {
-    specimenId: string;
-    images: SpecimenImageCarouselItem[];
+    specimen: Specimen;
     currentImageIndex: number;
     onCurrentImageIndexChange: (index: number) => void;
-    emptyLabel: string;
-    secondaryCounterText?: string;
-    mainImageContainerClassName?: string;
-    mainImageSizes?: string;
-    thumbnailButtonClassName?: string;
-    thumbnailImageSizes?: string;
+}
+
+export function getSpecimenImagesForCarousel(specimen: Specimen) {
+    const allImagesForSpecimen = specimen.images ?? [];
+    const thumbnailImageId =
+        specimen.thumbnailImageId ?? specimen.thumbnailImage?.id ?? null;
+    const thumbnailImageFromList =
+        thumbnailImageId != null
+            ? allImagesForSpecimen.find(image => image.id === thumbnailImageId)
+            : undefined;
+    const thumbnailImage =
+        thumbnailImageFromList ??
+        specimen.thumbnailImage ??
+        (specimen.thumbnailUrl
+            ? {
+                  id: thumbnailImageId ?? -1,
+                  url: specimen.thumbnailUrl,
+                  species: null,
+                  sex: null,
+                  abdomenStatus: null,
+              }
+            : null);
+
+    if (!thumbnailImage) {
+        return allImagesForSpecimen;
+    }
+
+    return [
+        thumbnailImage,
+        ...allImagesForSpecimen.filter(
+            image =>
+                image.id !== thumbnailImage.id &&
+                image.url !== thumbnailImage.url,
+        ),
+    ];
+}
+
+function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
+    return (
+        image.id === specimen.thumbnailImageId ||
+        image.id === specimen.thumbnailImage?.id ||
+        image.url === specimen.thumbnailUrl
+    );
 }
 
 export default function SpecimenImageCarousel({
-    specimenId,
-    images,
+    specimen,
     currentImageIndex,
     onCurrentImageIndexChange,
-    emptyLabel,
-    secondaryCounterText,
-    mainImageContainerClassName = 'bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border',
-    mainImageSizes = '(min-width: 1024px) 60vw, 100vw',
-    thumbnailButtonClassName = 'relative h-20 w-28 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent',
-    thumbnailImageSizes = '112px',
 }: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
@@ -48,26 +78,15 @@ export default function SpecimenImageCarousel({
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
         useState(false);
 
-    const hasAnyImages = images.length > 0;
-    const hasMultipleImages = images.length > 1;
-    const activeImageIndex = hasAnyImages
-        ? Math.min(Math.max(currentImageIndex, 0), images.length - 1)
-        : 0;
-    const currentImage = images[activeImageIndex];
+    const allImagesForSpecimen = getSpecimenImagesForCarousel(specimen);
+    const hasAnyImages = allImagesForSpecimen.length > 0;
+    const hasMultipleImages = allImagesForSpecimen.length > 1;
+    const currentImage = allImagesForSpecimen[currentImageIndex];
+    const isCurrentImageThumbnail = currentImage
+        ? isThumbnailImage(specimen, currentImage)
+        : false;
     const showThumbnailScrollControls =
         canScrollThumbnailsLeft || canScrollThumbnailsRight;
-
-    useEffect(() => {
-        if (!hasAnyImages) return;
-        if (currentImageIndex >= 0 && currentImageIndex < images.length) return;
-
-        onCurrentImageIndexChange(0);
-    }, [
-        currentImageIndex,
-        hasAnyImages,
-        images.length,
-        onCurrentImageIndexChange,
-    ]);
 
     useEffect(() => {
         if (!imageViewerApi) return;
@@ -86,14 +105,10 @@ export default function SpecimenImageCarousel({
 
     useEffect(() => {
         if (!imageViewerApi) return;
-        if (imageViewerApi.selectedScrollSnap() === activeImageIndex) return;
+        if (imageViewerApi.selectedScrollSnap() === currentImageIndex) return;
 
-        imageViewerApi.scrollTo(activeImageIndex);
-    }, [activeImageIndex, imageViewerApi]);
-
-    useEffect(() => {
-        thumbnailStripApi?.scrollTo(activeImageIndex);
-    }, [activeImageIndex, thumbnailStripApi]);
+        imageViewerApi.scrollTo(currentImageIndex);
+    }, [currentImageIndex, imageViewerApi]);
 
     useEffect(() => {
         if (!thumbnailStripApi) return;
@@ -117,13 +132,10 @@ export default function SpecimenImageCarousel({
 
     if (!hasAnyImages) {
         return (
-            <div
-                className={cn(
-                    mainImageContainerClassName,
-                    'flex items-center justify-center',
-                )}
-            >
-                <p className="text-muted-foreground text-sm">{emptyLabel}</p>
+            <div className="bg-muted flex aspect-4/3 items-center justify-center rounded-lg border">
+                <p className="text-muted-foreground text-sm">
+                    No image has been uploaded for this specimen.
+                </p>
             </div>
         );
     }
@@ -137,15 +149,15 @@ export default function SpecimenImageCarousel({
                     aria-label="Specimen image carousel"
                 >
                     <CarouselContent>
-                        {images.map(image => (
+                        {allImagesForSpecimen.map(image => (
                             <CarouselItem key={image.id}>
-                                <div className={mainImageContainerClassName}>
+                                <div className="bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border">
                                     <Image
                                         src={`/api${image.url}`}
-                                        alt={`Specimen ${specimenId}`}
+                                        alt={`Specimen ${specimen.specimenId}`}
                                         fill
                                         unoptimized
-                                        sizes={mainImageSizes}
+                                        sizes="(min-width: 1024px) 60vw, 100vw"
                                         className="object-contain"
                                     />
                                 </div>
@@ -161,7 +173,7 @@ export default function SpecimenImageCarousel({
                     )}
                 </Carousel>
 
-                {currentImage?.isThumbnail && (
+                {isCurrentImageThumbnail && (
                     <Badge
                         variant="secondary"
                         className="absolute top-3 left-3 shadow-md"
@@ -174,13 +186,9 @@ export default function SpecimenImageCarousel({
 
             <div className="flex items-center justify-between gap-3">
                 <p className="text-muted-foreground text-sm">
-                    Image {activeImageIndex + 1} of {images.length}
+                    Image {currentImageIndex + 1} of{' '}
+                    {allImagesForSpecimen.length}
                 </p>
-                {secondaryCounterText && (
-                    <p className="text-muted-foreground text-sm">
-                        {secondaryCounterText}
-                    </p>
-                )}
             </div>
 
             {hasMultipleImages && (
@@ -208,53 +216,58 @@ export default function SpecimenImageCarousel({
                         aria-label="Image thumbnails"
                     >
                         <CarouselContent className="-ml-2">
-                            {images.map((image, imageIndex) => (
-                                <CarouselItem
-                                    key={image.id}
-                                    className="basis-auto pl-2"
-                                >
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => {
-                                            onCurrentImageIndexChange(
-                                                imageIndex,
-                                            );
-                                            imageViewerApi?.scrollTo(
-                                                imageIndex,
-                                            );
-                                        }}
-                                        className={cn(
-                                            thumbnailButtonClassName,
-                                            imageIndex === activeImageIndex
-                                                ? 'border-primary ring-primary/30 ring-2'
-                                                : 'border-border hover:border-foreground/40',
-                                        )}
-                                        aria-label={
-                                            image.isThumbnail
-                                                ? `Show image ${imageIndex + 1} (thumbnail)`
-                                                : `Show image ${imageIndex + 1}`
-                                        }
-                                        aria-current={
-                                            imageIndex === activeImageIndex
-                                                ? 'true'
-                                                : undefined
-                                        }
+                            {allImagesForSpecimen.map((image, imageIndex) => {
+                                const isCurrentThumbnailImage =
+                                    isThumbnailImage(specimen, image);
+
+                                return (
+                                    <CarouselItem
+                                        key={image.id}
+                                        className="basis-auto pl-2"
                                     >
-                                        <Image
-                                            src={`/api${image.url}`}
-                                            alt=""
-                                            fill
-                                            unoptimized
-                                            sizes={thumbnailImageSizes}
-                                            className="object-cover"
-                                        />
-                                        {image.isThumbnail && (
-                                            <Star className="bg-background/90 absolute top-1 left-1 size-5 rounded-full fill-current p-1 shadow-md" />
-                                        )}
-                                    </Button>
-                                </CarouselItem>
-                            ))}
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                onCurrentImageIndexChange(
+                                                    imageIndex,
+                                                );
+                                                imageViewerApi?.scrollTo(
+                                                    imageIndex,
+                                                );
+                                            }}
+                                            className={cn(
+                                                'relative h-20 w-28 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent',
+                                                imageIndex === currentImageIndex
+                                                    ? 'border-primary ring-primary/30 ring-2'
+                                                    : 'border-border hover:border-foreground/40',
+                                            )}
+                                            aria-label={
+                                                isCurrentThumbnailImage
+                                                    ? `Show image ${imageIndex + 1} (thumbnail)`
+                                                    : `Show image ${imageIndex + 1}`
+                                            }
+                                            aria-current={
+                                                imageIndex === currentImageIndex
+                                                    ? 'true'
+                                                    : undefined
+                                            }
+                                        >
+                                            <Image
+                                                src={`/api${image.url}`}
+                                                alt=""
+                                                fill
+                                                unoptimized
+                                                sizes="112px"
+                                                className="object-cover"
+                                            />
+                                            {isCurrentThumbnailImage && (
+                                                <Star className="bg-background/90 absolute top-1 left-1 size-5 rounded-full fill-current p-1 shadow-md" />
+                                            )}
+                                        </Button>
+                                    </CarouselItem>
+                                );
+                            })}
                         </CarouselContent>
                     </Carousel>
 

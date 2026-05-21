@@ -3,8 +3,9 @@
 import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { Button } from '@/components/ui/button';
-import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
-import { getSpecimenImageCarouselItems } from '@/lib/specimen/specimen-image-carousel-items';
+import SpecimenImageCarousel, {
+    getSpecimenImagesForCarousel,
+} from '@/components/specimen/specimen-image-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useState } from 'react';
@@ -90,18 +91,10 @@ export default function ImageReviewWorkspace({
     const totalSpecimensToReview = allSpecimensForSite.length;
     const currentSpecimenBeingReviewed =
         allSpecimensForSite[currentSpecimenNumber - 1]!;
-    const orderedImagesForCurrentSpecimen = getSpecimenImageCarouselItems(
-        currentSpecimenBeingReviewed,
-    );
-    const activeImageIndex =
-        orderedImagesForCurrentSpecimen.length > 0
-            ? Math.min(
-                  currentImageIndex,
-                  orderedImagesForCurrentSpecimen.length - 1,
-              )
-            : 0;
     const currentImageBeingViewed =
-        orderedImagesForCurrentSpecimen[activeImageIndex] ?? null;
+        getSpecimenImagesForCarousel(currentSpecimenBeingReviewed)[
+            currentImageIndex
+        ] ?? null;
     const isOnFirstSpecimen = currentSpecimenNumber === 1;
     const isOnLastSpecimen = currentSpecimenNumber === totalSpecimensToReview;
 
@@ -150,11 +143,9 @@ export default function ImageReviewWorkspace({
                     <CardContent className="p-4">
                         <SpecimenImageCarousel
                             key={currentSpecimenBeingReviewed.id}
-                            specimenId={currentSpecimenBeingReviewed.specimenId}
-                            images={orderedImagesForCurrentSpecimen}
-                            currentImageIndex={activeImageIndex}
+                            specimen={currentSpecimenBeingReviewed}
+                            currentImageIndex={currentImageIndex}
                             onCurrentImageIndexChange={setCurrentImageIndex}
-                            emptyLabel="No image has been uploaded for this specimen."
                         />
                     </CardContent>
                 </Card>

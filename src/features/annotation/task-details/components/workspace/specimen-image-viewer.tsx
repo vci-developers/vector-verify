@@ -5,9 +5,8 @@ import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { getSpecimenImageCarouselItems } from '@/lib/specimen/specimen-image-carousel-items';
 import { MapPin } from 'lucide-react';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 
 interface SpecimenImageViewerProps {
     specimen: Specimen;
@@ -18,23 +17,13 @@ export default function SpecimenImageViewer({
 }: SpecimenImageViewerProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const { data: getSpecimenByIdResult, isPending: isGetSpecimenByIdPending } =
-        useGetSpecimenById(specimen.id);
+    const { data: getSpecimenByIdResult } = useGetSpecimenById(specimen.id);
 
-    const fullSpecimen =
+    const specimenForImageCarousel =
         getSpecimenByIdResult?.ok === true
             ? getSpecimenByIdResult.data
             : specimen;
-    const didGetSpecimenByIdFail = getSpecimenByIdResult?.ok === false;
     const site = specimen.session?.site;
-    const specimenImages = useMemo(
-        () => getSpecimenImageCarouselItems(fullSpecimen),
-        [fullSpecimen],
-    );
-
-    useEffect(() => {
-        setCurrentImageIndex(0);
-    }, [specimen.id]);
 
     return (
         <Card>
@@ -54,29 +43,9 @@ export default function SpecimenImageViewer({
 
             <CardContent className="space-y-4">
                 <SpecimenImageCarousel
-                    specimenId={specimen.specimenId}
-                    images={specimenImages}
+                    specimen={specimenForImageCarousel}
                     currentImageIndex={currentImageIndex}
                     onCurrentImageIndexChange={setCurrentImageIndex}
-                    emptyLabel={
-                        didGetSpecimenByIdFail
-                            ? 'Unable to load specimen images'
-                            : isGetSpecimenByIdPending
-                              ? 'Loading specimen images...'
-                              : 'No image available'
-                    }
-                    secondaryCounterText={
-                        didGetSpecimenByIdFail
-                            ? 'Unable to load all images'
-                            : isGetSpecimenByIdPending &&
-                                specimenImages.length > 0
-                              ? 'Loading all images...'
-                              : undefined
-                    }
-                    mainImageContainerClassName="bg-muted relative aspect-square w-full overflow-hidden rounded-md border"
-                    mainImageSizes="(min-width: 1024px) 50vw, 100vw"
-                    thumbnailButtonClassName="relative h-16 w-20 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent"
-                    thumbnailImageSizes="80px"
                 />
 
                 <Separator />
