@@ -6,7 +6,7 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { startOfMonth, subMonths } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage/storage-keys';
 import ReviewSitesListHeader from './layout/review-sites-list-header';
@@ -74,6 +74,18 @@ export default function ReviewSitesListPageClient() {
         accessibleSites,
         StorageKeys.review.selectedLocation,
     );
+
+    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
+        new Set(),
+    );
+    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
+        new Set(),
+    );
+
+    useEffect(() => {
+        setExpandedSitePaths(new Set());
+        setCollapsedMonths(new Set());
+    }, [selectedLocation, startMonth, endMonth]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -143,6 +155,10 @@ export default function ReviewSitesListPageClient() {
                                     locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
+                                    expandedSitePaths={expandedSitePaths}
+                                    setExpandedSitePaths={setExpandedSitePaths}
+                                    collapsedMonths={collapsedMonths}
+                                    setCollapsedMonths={setCollapsedMonths}
                                 />
                             )}
                             {activeTab === 'export' && (
