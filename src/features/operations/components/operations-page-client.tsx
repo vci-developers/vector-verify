@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage/storage-keys';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
@@ -59,6 +59,9 @@ export default function OperationsPageClient() {
         startOfMonth(new Date()),
     );
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+    const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
+        null,
+    );
 
     const {
         data: getUserPermissionsResult,
@@ -80,6 +83,10 @@ export default function OperationsPageClient() {
         accessibleSites,
         StorageKeys.operations.selectedLocation,
     );
+
+    useEffect(() => {
+        setSelectedMarkerId(null);
+    }, [selectedLocation, startMonth, endMonth]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -168,6 +175,8 @@ export default function OperationsPageClient() {
                                     }
                                     startDate={startDate}
                                     endDate={endDate}
+                                    selectedMarkerId={selectedMarkerId}
+                                    onMarkerSelect={setSelectedMarkerId}
                                 />
                             )}
 
