@@ -8,7 +8,8 @@ import {
     getSiteAndDescendants,
     getTopLevelSites,
 } from '@/lib/location/site-tree';
-import { useMemo, useState } from 'react';
+import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
+import { useMemo } from 'react';
 
 function getUniqueDistricts(sites: Site[]): string[] {
     const districts = [
@@ -17,8 +18,14 @@ function getUniqueDistricts(sites: Site[]): string[] {
     return districts.sort();
 }
 
-export function useLocationSelection(accessibleSites: Site[]) {
-    const [selectedLocation, setSelectedLocation] = useState('');
+export function useLocationSelection(
+    accessibleSites: Site[],
+    storageKey: string,
+) {
+    const [selectedLocation, setSelectedLocation] = useLocalStorage(
+        storageKey,
+        '',
+    );
 
     const usesLegacyStructure =
         accessibleSites.length > 0 && isLegacySite(accessibleSites[0]!);
