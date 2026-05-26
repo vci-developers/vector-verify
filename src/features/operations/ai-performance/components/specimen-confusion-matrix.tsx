@@ -55,8 +55,11 @@ export default function SpecimenConfusionMatrix({
             : 0;
     }
 
-    function getSpecimenCountForGroundTruthLabel(groundTruthLabel: string) {
-        return classLabels.reduce(
+    function getSpecimenCountForGroundTruthLabel(
+        groundTruthLabel: string,
+        labels = classLabels,
+    ) {
+        return labels.reduce(
             (totalSpecimens, predictedLabel) =>
                 totalSpecimens +
                 getSpecimenCountForCell(groundTruthLabel, predictedLabel),
@@ -64,8 +67,11 @@ export default function SpecimenConfusionMatrix({
         );
     }
 
-    function getSpecimenCountForPredictedLabel(predictedLabel: string) {
-        return classLabels.reduce(
+    function getSpecimenCountForPredictedLabel(
+        predictedLabel: string,
+        labels = classLabels,
+    ) {
+        return labels.reduce(
             (totalSpecimens, groundTruthLabel) =>
                 totalSpecimens +
                 getSpecimenCountForCell(groundTruthLabel, predictedLabel),
@@ -91,12 +97,27 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
-    const unknownSpecimens = classLabels.filter(
-        label => label === 'UNKNOWN',
-    ).length;
-    const cannotBeDeterminedSpecimens = classLabels.filter(
-        label => label === 'Cannot be Determined',
-    ).length;
+    const unknownSpecimens = getSpecimenCountForGroundTruthLabel('UNKNOWN');
+    const cannotBeDeterminedSpecimens = getSpecimenCountForGroundTruthLabel(
+        'Cannot be Determined',
+    );
+
+    const filteredClassLabels = classLabels.filter(
+        label => label !== 'UNKNOWN' && label !== 'Cannot be Determined',
+    );
+
+    const filteredTotalSpecimens = filteredClassLabels.reduce(
+        (totalSpecimens, classLabel) => {
+            return (
+                totalSpecimens +
+                getSpecimenCountForGroundTruthLabel(
+                    classLabel,
+                    filteredClassLabels,
+                )
+            );
+        },
+        0,
+    );
 
     return (
         <Card className="gap-0 lg:col-span-2">
@@ -236,67 +257,60 @@ export default function SpecimenConfusionMatrix({
                             </TableHeader>
 
                             <TableBody>
-                                {classLabels
-                                    .filter(
-                                        classLabel =>
-                                            classLabel !== 'UNKNOWN' &&
-                                            classLabel !==
-                                                'Cannot be Determined',
-                                    )
-                                    .map(classLabel => {
-                                        const truePositives =
-                                            getSpecimenCountForCell(
-                                                classLabel,
-                                                classLabel,
-                                            );
-                                        const falseNegatives =
-                                            getSpecimenCountForGroundTruthLabel(
-                                                classLabel,
-                                            ) - truePositives;
-                                        const falsePositives =
-                                            getSpecimenCountForPredictedLabel(
-                                                classLabel,
-                                            ) - truePositives;
-                                        const trueNegatives =
-                                            totalSpecimensInMatrix -
-                                            truePositives -
-                                            falseNegatives -
-                                            falsePositives;
-
-                                        const sensitivity =
-                                            truePositives + falseNegatives > 0
-                                                ? truePositives /
-                                                  (truePositives +
-                                                      falseNegatives)
-                                                : null;
-                                        const specificity =
-                                            trueNegatives + falsePositives > 0
-                                                ? trueNegatives /
-                                                  (trueNegatives +
-                                                      falsePositives)
-                                                : null;
-
-                                        return (
-                                            <TableRow
-                                                key={classLabel}
-                                                className="hover:bg-transparent"
-                                            >
-                                                <TableCell className="font-medium whitespace-nowrap">
-                                                    {classLabel}
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground text-right">
-                                                    {formatMatrixPercentage(
-                                                        sensitivity,
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground text-right">
-                                                    {formatMatrixPercentage(
-                                                        specificity,
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
+                                {filteredClassLabels.map(classLabel => {
+                                    const truePositives =
+                                        getSpecimenCountForCell(
+                                            classLabel,
+                                            classLabel,
                                         );
-                                    })}
+                                    const falseNegatives =
+                                        getSpecimenCountForGroundTruthLabel(
+                                            classLabel,
+                                            filteredClassLabels,
+                                        ) - truePositives;
+                                    const falsePositives =
+                                        getSpecimenCountForPredictedLabel(
+                                            classLabel,
+                                            filteredClassLabels,
+                                        ) - truePositives;
+                                    const trueNegatives =
+                                        filteredTotalSpecimens -
+                                        truePositives -
+                                        falseNegatives -
+                                        falsePositives;
+
+                                    const sensitivity =
+                                        truePositives + falseNegatives > 0
+                                            ? truePositives /
+                                              (truePositives + falseNegatives)
+                                            : null;
+                                    const specificity =
+                                        trueNegatives + falsePositives > 0
+                                            ? trueNegatives /
+                                              (trueNegatives + falsePositives)
+                                            : null;
+
+                                    return (
+                                        <TableRow
+                                            key={classLabel}
+                                            className="hover:bg-transparent"
+                                        >
+                                            <TableCell className="font-medium whitespace-nowrap">
+                                                {classLabel}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-right">
+                                                {formatMatrixPercentage(
+                                                    sensitivity,
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-right">
+                                                {formatMatrixPercentage(
+                                                    specificity,
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                         <p className="text-muted-foreground text-sm leading-6">
