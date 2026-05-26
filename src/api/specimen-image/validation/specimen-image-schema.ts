@@ -6,7 +6,7 @@ export const genusSchema = z.enum([
     'Aedes',
     'Culex',
     'Mansonia',
-    'Non mosquito',
+    'Non-Mosquito',
     'Unknown',
 ]);
 
