@@ -1,5 +1,5 @@
 import { isValid } from 'date-fns';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 type SetValue<T> = (value: T | ((previousValue: T) => T)) => void;
 
@@ -8,7 +8,7 @@ export interface LocalStorageOptions<T> {
     deserialize: (serializedValue: string) => T;
 }
 
-export const DATE_SERIALIZER: LocalStorageOptions<Date> = {
+const DATE_SERIALIZER: LocalStorageOptions<Date> = {
     serialize: (value: Date) => value.toISOString(),
     deserialize: (serializedValue: string) => {
         const date = new Date(serializedValue);
@@ -17,21 +17,30 @@ export const DATE_SERIALIZER: LocalStorageOptions<Date> = {
     },
 };
 
-export const SET_SERIALIZER: LocalStorageOptions<Set<string>> = {
+const SET_SERIALIZER: LocalStorageOptions<Set<string>> = {
     serialize: (value: Set<string>) => JSON.stringify(Array.from(value)),
     deserialize: (serializedValue: string) =>
         new Set<string>(JSON.parse(serializedValue)),
 };
+
+function resolveSerializer<T>(
+    defaultValue: T,
+    options?: LocalStorageOptions<T>,
+): LocalStorageOptions<T> {
+    if (options) return options;
+    if (defaultValue instanceof Date)
+        return DATE_SERIALIZER as unknown as LocalStorageOptions<T>;
+    if (defaultValue instanceof Set)
+        return SET_SERIALIZER as unknown as LocalStorageOptions<T>;
+    return { serialize: JSON.stringify, deserialize: JSON.parse };
+}
 
 export function useLocalStorage<T>(
     key: string,
     defaultValue: T,
     options?: LocalStorageOptions<T>,
 ): [T, SetValue<T>] {
-    const serializeRef = useRef(options?.serialize ?? JSON.stringify);
-    serializeRef.current = options?.serialize ?? JSON.stringify;
-    const deserializeRef = useRef(options?.deserialize ?? JSON.parse);
-    deserializeRef.current = options?.deserialize ?? JSON.parse;
+    const { serialize, deserialize } = resolveSerializer(defaultValue, options);
 
     const [storedValue, setStoredValue] = useState<T>(() => {
         if (typeof window === 'undefined') return defaultValue;
@@ -39,7 +48,7 @@ export function useLocalStorage<T>(
         try {
             const serializedValue = window.localStorage.getItem(key);
             if (serializedValue === null) return defaultValue;
-            return deserializeRef.current(serializedValue) as T;
+            return deserialize(serializedValue) as T;
         } catch {
             window.localStorage.removeItem(key);
             return defaultValue;
@@ -55,15 +64,12 @@ export function useLocalStorage<T>(
                         : newValue;
 
                 try {
-                    window.localStorage.setItem(
-                        key,
-                        serializeRef.current(nextValue),
-                    );
+                    window.localStorage.setItem(key, serialize(nextValue));
                 } catch {}
                 return nextValue;
             });
         },
-        [key],
+        [key, serialize],
     );
 
     return [storedValue, setValue];

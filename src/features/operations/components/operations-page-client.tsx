@@ -1,10 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import {
-    DATE_SERIALIZER,
-    useLocalStorage,
-} from '@/lib/hooks/use-local-storage';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
@@ -56,12 +53,10 @@ export default function OperationsPageClient() {
     const [startMonth, setStartMonth] = useLocalStorage(
         StorageKeys.operations.startMonth,
         startOfMonth(subMonths(new Date(), 2)),
-        DATE_SERIALIZER,
     );
     const [endMonth, setEndMonth] = useLocalStorage(
         StorageKeys.operations.endMonth,
         startOfMonth(new Date()),
-        DATE_SERIALIZER,
     );
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 

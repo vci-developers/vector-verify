@@ -7,11 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { startOfMonth, subMonths } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { Fragment, useEffect } from 'react';
-import {
-    DATE_SERIALIZER,
-    SET_SERIALIZER,
-    useLocalStorage,
-} from '@/lib/hooks/use-local-storage';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from './layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
@@ -35,12 +31,10 @@ export default function ReviewSitesListPageClient() {
     const [startMonth, setStartMonth] = useLocalStorage(
         StorageKeys.review.startMonth,
         startOfMonth(subMonths(new Date(), 2)),
-        DATE_SERIALIZER,
     );
     const [endMonth, setEndMonth] = useLocalStorage(
         StorageKeys.review.endMonth,
         startOfMonth(new Date()),
-        DATE_SERIALIZER,
     );
 
     const {
@@ -83,11 +77,10 @@ export default function ReviewSitesListPageClient() {
 
     const [expandedSitePaths, setExpandedSitePaths] = useLocalStorage<
         Set<string>
-    >(StorageKeys.review.expandedSitePaths, new Set(), SET_SERIALIZER);
+    >(StorageKeys.review.expandedSitePaths, new Set());
     const [collapsedMonths, setCollapsedMonths] = useLocalStorage<Set<string>>(
         StorageKeys.review.collapsedMonths,
         new Set(),
-        SET_SERIALIZER,
     );
 
     useEffect(() => {
