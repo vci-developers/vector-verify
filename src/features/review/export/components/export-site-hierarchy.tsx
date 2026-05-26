@@ -50,8 +50,7 @@ export default function ExportSiteHierarchy({
             )}
             renderGroupContent={sitesInGroup => {
                 const certifiedSitesInGroup = sitesInGroup.filter(
-                    site =>
-                        (certifiedCountsBySiteId.get(site.siteId) ?? 0) > 0,
+                    site => (certifiedCountsBySiteId.get(site.siteId) ?? 0) > 0,
                 );
                 if (certifiedSitesInGroup.length === 0) return null;
 
