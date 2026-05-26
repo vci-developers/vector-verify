@@ -3,16 +3,15 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/cn';
 import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 import { Fragment } from 'react';
-import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
-import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
+import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
+    monthKey: string;
 }
 
 function buildReviewHref(
@@ -33,15 +32,16 @@ export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     sessionCountsBySiteId,
+    monthKey,
 }: ReviewSiteLeafRowsProps) {
-    const monthKey = useReviewSiteListMonthKey();
     const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
 
+    if (sites.length === 0) return null;
+
     return (
-        <SiteLeafRows
-            sites={sites}
-            renderSiteRow={site => {
+        <div className="space-y-1">
+            {sites.map(site => {
                 const {
                     sessionCount,
                     needsReviewCount,
@@ -118,6 +118,7 @@ export default function ReviewSiteLeafRows({
                 if (hasSessions && !isLocked) {
                     return (
                         <Link
+                            key={site.siteId}
                             href={buildReviewHref(
                                 site,
                                 startDate,
@@ -131,8 +132,12 @@ export default function ReviewSiteLeafRows({
                     );
                 }
 
-                return <div className={rowClassName}>{rowContent}</div>;
-            }}
-        />
+                return (
+                    <div key={site.siteId} className={rowClassName}>
+                        {rowContent}
+                    </div>
+                );
+            })}
+        </div>
     );
 }
