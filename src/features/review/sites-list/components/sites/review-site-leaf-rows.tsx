@@ -7,7 +7,7 @@ import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-s
 import { Fragment } from 'react';
 import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
-import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
+import SiteLeafRows from '@/features/review/components/site-leaf-rows';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];

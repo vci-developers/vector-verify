@@ -3,12 +3,13 @@ import {
     dhis2SyncResultSchema,
     dhis2SyncSummarySchema,
 } from './dhis2-sync-schema';
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 
 export const postDhis2ExportQueryParamsSchema = z.object({
     year: z.coerce.number(),
     month: z.coerce.number(),
     district: z.string(),
-    siteIds: z.string().optional(),
+    siteIds: arrayQueryParamSchema.optional(),
     dryRun: z.coerce.boolean().optional(),
 });
 

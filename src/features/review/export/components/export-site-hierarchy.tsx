@@ -3,7 +3,7 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import SiteHierarchy from '@/features/review/shared/site-hierarchy';
+import SiteHierarchy from '@/features/review/components/site-hierarchy';
 import ExportSiteLeafRows from './export-site-leaf-rows';
 import { useExportMonthContext } from './export-month-row';
 import {

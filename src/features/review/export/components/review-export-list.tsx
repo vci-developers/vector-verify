@@ -136,7 +136,7 @@ export default function ReviewExportList({
                                 year,
                                 month,
                                 district,
-                                siteIds: String(siteId),
+                                siteIds: [siteId],
                             },
                             body: { irsData: [irsData] },
                         });

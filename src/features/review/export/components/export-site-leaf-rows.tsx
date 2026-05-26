@@ -4,7 +4,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapPin } from 'lucide-react';
-import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
+import SiteLeafRows from '@/features/review/components/site-leaf-rows';
 import { hasCertifiedSessions } from '@/features/review/export/utils/export-selection-helpers';
 import { useExportMonthContext } from './export-month-row';
 
