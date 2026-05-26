@@ -91,6 +91,13 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
+    const unknownSpecimens = classLabels.filter(
+        label => label === 'UNKNOWN',
+    ).length;
+    const cannotBeDeterminedSpecimens = classLabels.filter(
+        label => label === 'Cannot be Determined',
+    ).length;
+
     return (
         <Card className="gap-0 lg:col-span-2">
             <CardHeader className="pb-2">
@@ -229,60 +236,74 @@ export default function SpecimenConfusionMatrix({
                             </TableHeader>
 
                             <TableBody>
-                                {classLabels.map(classLabel => {
-                                    const truePositives =
-                                        getSpecimenCountForCell(
-                                            classLabel,
-                                            classLabel,
+                                {classLabels
+                                    .filter(
+                                        classLabel =>
+                                            classLabel !== 'UNKNOWN' &&
+                                            classLabel !==
+                                                'Cannot be Determined',
+                                    )
+                                    .map(classLabel => {
+                                        const truePositives =
+                                            getSpecimenCountForCell(
+                                                classLabel,
+                                                classLabel,
+                                            );
+                                        const falseNegatives =
+                                            getSpecimenCountForGroundTruthLabel(
+                                                classLabel,
+                                            ) - truePositives;
+                                        const falsePositives =
+                                            getSpecimenCountForPredictedLabel(
+                                                classLabel,
+                                            ) - truePositives;
+                                        const trueNegatives =
+                                            totalSpecimensInMatrix -
+                                            truePositives -
+                                            falseNegatives -
+                                            falsePositives;
+
+                                        const sensitivity =
+                                            truePositives + falseNegatives > 0
+                                                ? truePositives /
+                                                  (truePositives +
+                                                      falseNegatives)
+                                                : null;
+                                        const specificity =
+                                            trueNegatives + falsePositives > 0
+                                                ? trueNegatives /
+                                                  (trueNegatives +
+                                                      falsePositives)
+                                                : null;
+
+                                        return (
+                                            <TableRow
+                                                key={classLabel}
+                                                className="hover:bg-transparent"
+                                            >
+                                                <TableCell className="font-medium whitespace-nowrap">
+                                                    {classLabel}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-right">
+                                                    {formatMatrixPercentage(
+                                                        sensitivity,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-right">
+                                                    {formatMatrixPercentage(
+                                                        specificity,
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
                                         );
-                                    const falseNegatives =
-                                        getSpecimenCountForGroundTruthLabel(
-                                            classLabel,
-                                        ) - truePositives;
-                                    const falsePositives =
-                                        getSpecimenCountForPredictedLabel(
-                                            classLabel,
-                                        ) - truePositives;
-                                    const trueNegatives =
-                                        totalSpecimensInMatrix -
-                                        truePositives -
-                                        falseNegatives -
-                                        falsePositives;
-
-                                    const sensitivity =
-                                        truePositives + falseNegatives > 0
-                                            ? truePositives /
-                                              (truePositives + falseNegatives)
-                                            : null;
-                                    const specificity =
-                                        trueNegatives + falsePositives > 0
-                                            ? trueNegatives /
-                                              (trueNegatives + falsePositives)
-                                            : null;
-
-                                    return (
-                                        <TableRow
-                                            key={classLabel}
-                                            className="hover:bg-transparent"
-                                        >
-                                            <TableCell className="font-medium whitespace-nowrap">
-                                                {classLabel}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-right">
-                                                {formatMatrixPercentage(
-                                                    sensitivity,
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-right">
-                                                {formatMatrixPercentage(
-                                                    specificity,
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                    })}
                             </TableBody>
                         </Table>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            {cannotBeDeterminedSpecimens} specimens were labeled
+                            as Cannot be Determined. {unknownSpecimens}{' '}
+                            specimens were labeled as UNKNOWN.
+                        </p>
                     </div>
 
                     <div className="h-full space-y-3 rounded-xl border p-4">
@@ -311,6 +332,12 @@ export default function SpecimenConfusionMatrix({
                             Specificity = TN / (TN + FP). It measures how often
                             VectorCam correctly avoids assigning that label when
                             the specimen truly belongs to another label.
+                        </p>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            Cannot be Determined and UNKNOWN specimens were
+                            excluded from the sensitivity and specificity
+                            calculations. An UNKNOWN VectorCam Prediction means
+                            that a specimen image was not uploaded.
                         </p>
                     </div>
                 </div>
