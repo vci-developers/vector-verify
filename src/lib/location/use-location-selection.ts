@@ -8,7 +8,7 @@ import {
     getSiteAndDescendants,
     getTopLevelSites,
 } from '@/lib/location/site-tree';
-import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useMemo } from 'react';
 
 function getUniqueDistricts(sites: Site[]): string[] {

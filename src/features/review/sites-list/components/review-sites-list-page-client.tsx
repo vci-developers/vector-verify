@@ -6,9 +6,13 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { startOfMonth, subMonths } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
-import { Fragment, useEffect, useState } from 'react';
-import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage/storage-keys';
+import { Fragment, useEffect } from 'react';
+import {
+    DATE_SERIALIZER,
+    SET_SERIALIZER,
+    useLocalStorage,
+} from '@/lib/hooks/use-local-storage';
+import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from './layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -31,10 +35,12 @@ export default function ReviewSitesListPageClient() {
     const [startMonth, setStartMonth] = useLocalStorage(
         StorageKeys.review.startMonth,
         startOfMonth(subMonths(new Date(), 2)),
+        DATE_SERIALIZER,
     );
     const [endMonth, setEndMonth] = useLocalStorage(
         StorageKeys.review.endMonth,
         startOfMonth(new Date()),
+        DATE_SERIALIZER,
     );
 
     const {
@@ -75,17 +81,25 @@ export default function ReviewSitesListPageClient() {
         StorageKeys.review.selectedLocation,
     );
 
-    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
+    const [expandedSitePaths, setExpandedSitePaths] = useLocalStorage<
+        Set<string>
+    >(StorageKeys.review.expandedSitePaths, new Set(), SET_SERIALIZER);
+    const [collapsedMonths, setCollapsedMonths] = useLocalStorage<Set<string>>(
+        StorageKeys.review.collapsedMonths,
         new Set(),
-    );
-    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
-        new Set(),
+        SET_SERIALIZER,
     );
 
     useEffect(() => {
         setExpandedSitePaths(new Set());
         setCollapsedMonths(new Set());
-    }, [selectedLocation, startMonth, endMonth]);
+    }, [
+        locationQueryParam,
+        startMonth,
+        endMonth,
+        setExpandedSitePaths,
+        setCollapsedMonths,
+    ]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (

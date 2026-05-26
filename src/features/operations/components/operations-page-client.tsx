@@ -1,8 +1,11 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { useLocalStorage } from '@/lib/storage/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage/storage-keys';
+import {
+    DATE_SERIALIZER,
+    useLocalStorage,
+} from '@/lib/hooks/use-local-storage';
+import { StorageKeys } from '@/lib/storage-keys';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,15 +56,14 @@ export default function OperationsPageClient() {
     const [startMonth, setStartMonth] = useLocalStorage(
         StorageKeys.operations.startMonth,
         startOfMonth(subMonths(new Date(), 2)),
+        DATE_SERIALIZER,
     );
     const [endMonth, setEndMonth] = useLocalStorage(
         StorageKeys.operations.endMonth,
         startOfMonth(new Date()),
+        DATE_SERIALIZER,
     );
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-    const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
-        null,
-    );
 
     const {
         data: getUserPermissionsResult,
@@ -84,9 +86,13 @@ export default function OperationsPageClient() {
         StorageKeys.operations.selectedLocation,
     );
 
+    const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
+        string | null
+    >(StorageKeys.operations.selectedMarkerId, null);
+
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [selectedLocation, startMonth, endMonth]);
+    }, [locationQueryParam, startMonth, endMonth, setSelectedMarkerId]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -176,7 +182,7 @@ export default function OperationsPageClient() {
                                     startDate={startDate}
                                     endDate={endDate}
                                     selectedMarkerId={selectedMarkerId}
-                                    onMarkerSelect={setSelectedMarkerId}
+                                    setSelectedMarkerId={setSelectedMarkerId}
                                 />
                             )}
 
