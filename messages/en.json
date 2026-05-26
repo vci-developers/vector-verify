@@ -1,0 +1,26 @@
+{
+    "Common": {
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "close": "Close",
+        "exit": "Exit",
+        "next": "Next",
+        "previous": "Previous",
+        "search": "Search...",
+        "noResults": "No results.",
+        "language": "Language"
+    },
+    "Navigation": {
+        "dashboard": "Dashboard",
+        "review": "Review",
+        "operations": "Operations",
+        "annotate": "Annotate",
+        "returnToDashboard": "Return to Dashboard",
+        "toggleSidebar": "Toggle Sidebar"
+    },
+    "Auth": {
+        "welcomeBack": "Welcome back",
+        "createAccount": "Create your account",
+        "accessDenied": "Access Denied"
+    }
+}
