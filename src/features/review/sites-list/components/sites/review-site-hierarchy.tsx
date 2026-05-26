@@ -20,6 +20,7 @@ function getVisitCoverageBackgroundColor(
 interface ReviewSiteHierarchyProps {
     sites: Site[];
     parentPath: string;
+    monthKey: string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onTogglePath: (path: string, descendantPaths: string[]) => void;
@@ -28,6 +29,7 @@ interface ReviewSiteHierarchyProps {
 export default function ReviewSiteHierarchy({
     sites,
     parentPath,
+    monthKey,
     sessionCountsBySiteId,
     expandedSitePaths,
     onTogglePath,
@@ -43,6 +45,7 @@ export default function ReviewSiteHierarchy({
                     sites={leafSites}
                     getDisplayName={getDisplayName}
                     sessionCountsBySiteId={sessionCountsBySiteId}
+                    monthKey={monthKey}
                 />
             )}
             renderGroupContent={sitesInGroup => {

@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
-import { ReviewSiteListMonthKeyContext } from '../../hooks/use-review-sites-list-month-key';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -50,7 +49,7 @@ export default function ReviewSitesList({
 
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
-    const monthToSiteIdCounts = useMemo(() => {
+    const sessionSummariesByMonth = useMemo(() => {
         const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
         if (!getAllSessionsResult?.ok) return map;
 
@@ -62,7 +61,7 @@ export default function ReviewSitesList({
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;
-            const current = monthMap.get(session.siteId) ?? {
+            const existingSiteSummary = monthMap.get(session.siteId) ?? {
                 sessionCount: 0,
                 needsReviewCount: 0,
                 isLocked: true,
@@ -78,13 +77,15 @@ export default function ReviewSitesList({
             const isSubmittedSessionState = session.state === 'SUBMITTED';
 
             monthMap.set(session.siteId, {
-                sessionCount: current.sessionCount + 1,
+                sessionCount: existingSiteSummary.sessionCount + 1,
                 needsReviewCount:
-                    current.needsReviewCount +
+                    existingSiteSummary.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-                isLocked: current.isLocked && isLockedSessionState,
-                isCertified: current.isCertified && isCertifiedSessionState,
-                isSubmitted: current.isSubmitted && isSubmittedSessionState,
+                isLocked: existingSiteSummary.isLocked && isLockedSessionState,
+                isCertified:
+                    existingSiteSummary.isCertified && isCertifiedSessionState,
+                isSubmitted:
+                    existingSiteSummary.isSubmitted && isSubmittedSessionState,
             });
         }
 
@@ -157,7 +158,7 @@ export default function ReviewSitesList({
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
                 const sessionCountsBySiteId =
-                    monthToSiteIdCounts.get(monthKey) ??
+                    sessionSummariesByMonth.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
                 const isCollapsed = collapsedMonths.has(monthKey);
 
@@ -174,19 +175,14 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteListMonthKeyContext.Provider
-                                value={monthKey}
-                            >
-                                <ReviewSiteHierarchy
-                                    sites={sites}
-                                    parentPath={monthKey}
-                                    sessionCountsBySiteId={
-                                        sessionCountsBySiteId
-                                    }
-                                    expandedSitePaths={expandedSitePaths}
-                                    onTogglePath={toggleSiteRow}
-                                />
-                            </ReviewSiteListMonthKeyContext.Provider>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                parentPath={monthKey}
+                                monthKey={monthKey}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
+                                expandedSitePaths={expandedSitePaths}
+                                onTogglePath={toggleSiteRow}
+                            />
                         </CollapsibleContent>
                     </Collapsible>
                 );

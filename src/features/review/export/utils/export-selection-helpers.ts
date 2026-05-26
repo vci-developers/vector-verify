@@ -1,5 +1,3 @@
-import type { Site } from '@/api/site/validation/site-schema';
-
 export function isMonthFullySelected(
     certifiedSiteIds: Iterable<number>,
     selectedSiteIds: Set<number> | undefined,
@@ -11,11 +9,4 @@ export function isMonthFullySelected(
         hasCertified = true;
     }
     return hasCertified;
-}
-
-export function hasCertifiedSessions(
-    site: Site,
-    certifiedCountsBySiteId: Map<number, number>,
-): boolean {
-    return (certifiedCountsBySiteId.get(site.siteId) ?? 0) > 0;
 }

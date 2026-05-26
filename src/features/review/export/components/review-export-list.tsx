@@ -75,9 +75,13 @@ export default function ReviewExportList({
                 new Date(session.collectionDate),
                 'yyyy-MM',
             );
-            const counts = map.get(monthKey) ?? new Map<number, number>();
-            counts.set(session.siteId, (counts.get(session.siteId) ?? 0) + 1);
-            map.set(monthKey, counts);
+            const certifiedCountsForMonth =
+                map.get(monthKey) ?? new Map<number, number>();
+            certifiedCountsForMonth.set(
+                session.siteId,
+                (certifiedCountsForMonth.get(session.siteId) ?? 0) + 1,
+            );
+            map.set(monthKey, certifiedCountsForMonth);
         }
         return map;
     }, [getAllSessionsResult]);
