@@ -27,4 +27,4 @@ export const dhis2SyncSummarySchema = z.object({
 
 export type Dhis2SyncResult = z.infer<typeof dhis2SyncResultSchema>;
 export type Dhis2SyncSummary = z.infer<typeof dhis2SyncSummarySchema>;
-export type ExportSiteStatus = Dhis2SyncResult['status'];
+export type Dhis2ExportSiteStatus = Dhis2SyncResult['status'];

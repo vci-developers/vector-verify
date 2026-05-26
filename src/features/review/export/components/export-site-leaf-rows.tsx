@@ -2,7 +2,7 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/utils/cn';
+import { Checkbox } from '@/components/ui/checkbox';
 import { MapPin } from 'lucide-react';
 import SiteLeafRows from '@/features/review/shared/site-leaf-rows';
 import { hasCertifiedSessions } from '@/features/review/export/utils/export-selection-helpers';
@@ -39,20 +39,14 @@ export default function ExportSiteLeafRows({
                 return (
                     <div className="flex items-center justify-between rounded-md px-3 py-2">
                         <div className="flex items-center gap-3">
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={isChecked}
                                 disabled={isDisabled}
-                                onChange={() =>
+                                onCheckedChange={() =>
                                     onToggleSites([site.siteId], !isChecked)
                                 }
-                                className={cn(
-                                    'h-4 w-4',
-                                    isDisabled
-                                        ? 'cursor-not-allowed opacity-50'
-                                        : 'cursor-pointer',
-                                )}
                             />
+
                             <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                                 <MapPin className="text-primary h-4 w-4" />
                             </div>

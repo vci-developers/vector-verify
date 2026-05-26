@@ -2,7 +2,7 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/utils/cn';
+import { Checkbox } from '@/components/ui/checkbox';
 import SiteHierarchy from '@/features/review/shared/site-hierarchy';
 import ExportSiteLeafRows from './export-site-leaf-rows';
 import { useExportMonthContext } from './export-month-row';
@@ -59,20 +59,12 @@ export default function ExportSiteHierarchy({
 
                 return {
                     prefixContent: (
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={isChecked}
                             disabled={isExporting}
-                            onChange={() =>
+                            onCheckedChange={() =>
                                 onToggleSites([...certifiedSiteIds], !isChecked)
                             }
-                            onClick={event => event.stopPropagation()}
-                            className={cn(
-                                'h-4 w-4',
-                                isExporting
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'cursor-pointer',
-                            )}
                         />
                     ),
                     summaryContent: (

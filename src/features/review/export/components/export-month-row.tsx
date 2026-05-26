@@ -11,15 +11,16 @@ import { ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { createContext, useContext, useState } from 'react';
 import { isMonthFullySelected } from '@/features/review/export/utils/export-selection-helpers';
-import type { ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
+import type { Dhis2ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
 import ExportSiteHierarchy from './export-site-hierarchy';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ExportMonthState {
     certifiedCountsBySiteId: Map<number, number>;
     selectedSiteIds: Set<number>;
     onToggleSites: (siteIds: number[], select: boolean) => void;
     isExporting: boolean;
-    exportStatusBySiteId: Map<number, ExportSiteStatus>;
+    exportStatusBySiteId: Map<number, Dhis2ExportSiteStatus>;
 }
 
 const ExportMonthContext = createContext<ExportMonthState | null>(null);
@@ -36,10 +37,9 @@ export function useExportMonthContext() {
 interface ExportMonthRowProps {
     month: Date;
     certifiedCountsBySiteId: Map<number, number>;
-    certifiedSiteIds: Set<number>;
     monthSelectedSiteIds: Set<number>;
     onToggleSites: (siteIds: number[], select: boolean) => void;
-    exportStatusBySiteId: Map<number, ExportSiteStatus>;
+    exportStatusBySiteId: Map<number, Dhis2ExportSiteStatus>;
     sites: Site[];
     isExporting: boolean;
 }
@@ -47,7 +47,6 @@ interface ExportMonthRowProps {
 export default function ExportMonthRow({
     month,
     certifiedCountsBySiteId,
-    certifiedSiteIds,
     monthSelectedSiteIds,
     onToggleSites,
     exportStatusBySiteId,
@@ -73,12 +72,12 @@ export default function ExportMonthRow({
     }
 
     const monthKey = format(month, 'yyyy-MM');
-    const monthCertifiedCount = certifiedSiteIds.size;
-    const monthSelectedCount = [...certifiedSiteIds].filter(id =>
-        monthSelectedSiteIds.has(id),
+    const monthCertifiedCount = certifiedCountsBySiteId.size;
+    const monthSelectedCount = [...certifiedCountsBySiteId.keys()].filter(
+        certifiedSiteId => monthSelectedSiteIds.has(certifiedSiteId),
     ).length;
     const isMonthChecked = isMonthFullySelected(
-        certifiedSiteIds,
+        certifiedCountsBySiteId.keys(),
         monthSelectedSiteIds,
     );
 
@@ -96,31 +95,30 @@ export default function ExportMonthRow({
                 open={!isCollapsed}
                 onOpenChange={() => setIsCollapsed(prev => !prev)}
             >
-                <CollapsibleTrigger className="group flex w-full items-center gap-2 py-3">
-                    <input
-                        type="checkbox"
+                <div className="flex w-full items-center gap-2 py-3">
+                    <Checkbox
                         checked={isMonthChecked}
                         disabled={monthCertifiedCount === 0 || isExporting}
-                        onChange={() =>
+                        onCheckedChange={() =>
                             onToggleSites(
-                                [...certifiedSiteIds],
+                                [...certifiedCountsBySiteId.keys()],
                                 !isMonthChecked,
                             )
                         }
-                        onClick={event => event.stopPropagation()}
-                        className="h-4 w-4 cursor-pointer"
                     />
-                    <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-                    <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                        {format(month, 'MMMM yyyy')}
-                    </span>
-                    {monthCertifiedCount > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                            {monthSelectedCount} / {monthCertifiedCount}{' '}
-                            certified
-                        </Badge>
-                    )}
-                </CollapsibleTrigger>
+                    <CollapsibleTrigger className="group flex flex-1 cursor-pointer items-center gap-2">
+                        <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                        <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+                            {format(month, 'MMMM yyyy')}
+                        </span>
+                        {monthCertifiedCount > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                                {monthSelectedCount} / {monthCertifiedCount}{' '}
+                                certified
+                            </Badge>
+                        )}
+                    </CollapsibleTrigger>
+                </div>
                 <CollapsibleContent>
                     <ExportSiteHierarchy
                         sites={sites}
