@@ -51,8 +51,8 @@ Create files lazily — only when you have something to write. If no
 ### Challenge against the glossary
 
 When the user uses a term that conflicts with the existing language in
-`.claude/CONTEXT.md`, call it out immediately. "Your glossary defines 'cancellation' as
-X, but you seem to mean Y — which is it?"
+`.claude/CONTEXT.md`, call it out immediately. "Your glossary defines
+'cancellation' as X, but you seem to mean Y — which is it?"
 
 ### Sharpen fuzzy language
 
@@ -78,8 +78,8 @@ When a term is resolved, update `.claude/CONTEXT.md` right there. Don't batch
 these up — capture them as they happen. Use the format in
 [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
 
-Don't couple `.claude/CONTEXT.md` to implementation details. Only include terms that are
-meaningful to domain experts.
+Don't couple `.claude/CONTEXT.md` to implementation details. Only include terms
+that are meaningful to domain experts.
 
 ### Offer ADRs sparingly
 

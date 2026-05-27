@@ -42,8 +42,8 @@ UI; the API calls these "leaf sites". _Avoid_: Leaf site (in UI-facing language)
 
 **Collection Schedule**: The program-level pattern that governs how Collection
 Cycles are generated. One active schedule per program at any time. Two modes:
-`RECURRING` (auto-generates cycles at a fixed interval, e.g. every 2 months)
-and `MANUAL` (cycles are created explicitly by an authorized user). Changing a
+`RECURRING` (auto-generates cycles at a fixed interval, e.g. every 2 months) and
+`MANUAL` (cycles are created explicitly by an authorized user). Changing a
 schedule ends the current one and starts a new one. _Avoid_: Cadence, frequency
 setting
 
