@@ -2,6 +2,7 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Collapsible,
     CollapsibleContent,
@@ -9,37 +10,17 @@ import {
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import { isMonthFullySelected } from '@/features/review/export/utils/export-selection-helpers';
-import type { ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
+import type { Dhis2ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
 import ExportSiteHierarchy from './export-site-hierarchy';
-
-interface ExportMonthState {
-    certifiedCountsBySiteId: Map<number, number>;
-    selectedSiteIds: Set<number>;
-    onToggleSites: (siteIds: number[], select: boolean) => void;
-    isExporting: boolean;
-    exportStatusBySiteId: Map<number, ExportSiteStatus>;
-}
-
-const ExportMonthContext = createContext<ExportMonthState | null>(null);
-
-export function useExportMonthContext() {
-    const exportMonthState = useContext(ExportMonthContext);
-    if (!exportMonthState)
-        throw new Error(
-            'useExportMonthContext must be used within ExportMonthRow',
-        );
-    return exportMonthState;
-}
 
 interface ExportMonthRowProps {
     month: Date;
     certifiedCountsBySiteId: Map<number, number>;
-    certifiedSiteIds: Set<number>;
     monthSelectedSiteIds: Set<number>;
     onToggleSites: (siteIds: number[], select: boolean) => void;
-    exportStatusBySiteId: Map<number, ExportSiteStatus>;
+    exportStatusBySiteId: Map<number, Dhis2ExportSiteStatus>;
     sites: Site[];
     isExporting: boolean;
 }
@@ -47,7 +28,6 @@ interface ExportMonthRowProps {
 export default function ExportMonthRow({
     month,
     certifiedCountsBySiteId,
-    certifiedSiteIds,
     monthSelectedSiteIds,
     onToggleSites,
     exportStatusBySiteId,
@@ -73,43 +53,32 @@ export default function ExportMonthRow({
     }
 
     const monthKey = format(month, 'yyyy-MM');
-    const monthCertifiedCount = certifiedSiteIds.size;
-    const monthSelectedCount = [...certifiedSiteIds].filter(id =>
-        monthSelectedSiteIds.has(id),
+    const monthCertifiedCount = certifiedCountsBySiteId.size;
+    const monthSelectedCount = [...certifiedCountsBySiteId.keys()].filter(
+        certifiedSiteId => monthSelectedSiteIds.has(certifiedSiteId),
     ).length;
     const isMonthChecked = isMonthFullySelected(
-        certifiedSiteIds,
+        certifiedCountsBySiteId.keys(),
         monthSelectedSiteIds,
     );
 
     return (
-        <ExportMonthContext.Provider
-            value={{
-                certifiedCountsBySiteId,
-                selectedSiteIds: monthSelectedSiteIds,
-                onToggleSites,
-                isExporting,
-                exportStatusBySiteId,
-            }}
+        <Collapsible
+            open={!isCollapsed}
+            onOpenChange={() => setIsCollapsed(prev => !prev)}
         >
-            <Collapsible
-                open={!isCollapsed}
-                onOpenChange={() => setIsCollapsed(prev => !prev)}
-            >
-                <CollapsibleTrigger className="group flex w-full items-center gap-2 py-3">
-                    <input
-                        type="checkbox"
-                        checked={isMonthChecked}
-                        disabled={monthCertifiedCount === 0 || isExporting}
-                        onChange={() =>
-                            onToggleSites(
-                                [...certifiedSiteIds],
-                                !isMonthChecked,
-                            )
-                        }
-                        onClick={event => event.stopPropagation()}
-                        className="h-4 w-4 cursor-pointer"
-                    />
+            <div className="flex w-full items-center gap-2 py-3">
+                <Checkbox
+                    checked={isMonthChecked}
+                    disabled={monthCertifiedCount === 0 || isExporting}
+                    onCheckedChange={() =>
+                        onToggleSites(
+                            [...certifiedCountsBySiteId.keys()],
+                            !isMonthChecked,
+                        )
+                    }
+                />
+                <CollapsibleTrigger className="group flex flex-1 cursor-pointer items-center gap-2">
                     <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                     <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
                         {format(month, 'MMMM yyyy')}
@@ -121,15 +90,20 @@ export default function ExportMonthRow({
                         </Badge>
                     )}
                 </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <ExportSiteHierarchy
-                        sites={sites}
-                        parentPath={monthKey}
-                        expandedSitePaths={expandedSitePaths}
-                        onTogglePath={togglePath}
-                    />
-                </CollapsibleContent>
-            </Collapsible>
-        </ExportMonthContext.Provider>
+            </div>
+            <CollapsibleContent>
+                <ExportSiteHierarchy
+                    sites={sites}
+                    parentPath={monthKey}
+                    expandedSitePaths={expandedSitePaths}
+                    onTogglePath={togglePath}
+                    certifiedCountsBySiteId={certifiedCountsBySiteId}
+                    selectedSiteIds={monthSelectedSiteIds}
+                    onToggleSites={onToggleSites}
+                    isExporting={isExporting}
+                    exportStatusBySiteId={exportStatusBySiteId}
+                />
+            </CollapsibleContent>
+        </Collapsible>
     );
 }

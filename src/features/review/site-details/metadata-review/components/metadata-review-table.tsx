@@ -40,22 +40,6 @@ interface MetadataReviewTableProps {
     disabledRowIds: Set<string>;
 }
 
-function validateNumberInput(value: string): string | null {
-    if (value === 'N/A') return null;
-    if (!/^\d+$/.test(value) || parseInt(value, 10) < 1) {
-        return 'Must be a whole positive integer';
-    }
-    return null;
-}
-
-function validateNonNegativeInput(value: string): string | null {
-    if (value === 'N/A') return null;
-    if (!/^\d+$/.test(value)) {
-        return 'Must be a whole non-negative integer';
-    }
-    return null;
-}
-
 export default function MetadataReviewTable({
     sessions,
     metadataRows,
@@ -64,6 +48,22 @@ export default function MetadataReviewTable({
     onConflictResolutionChange,
     disabledRowIds,
 }: MetadataReviewTableProps) {
+    function validateWholePositiveInteger(value: string): string | null {
+        if (value === 'N/A') return null;
+        if (!/^\d+$/.test(value) || parseInt(value, 10) < 1) {
+            return 'Must be a whole positive integer';
+        }
+        return null;
+    }
+
+    function validateWholeNonNegativeInteger(value: string): string | null {
+        if (value === 'N/A') return null;
+        if (!/^\d+$/.test(value)) {
+            return 'Must be a whole non-negative integer';
+        }
+        return null;
+    }
+
     const hasAnyConflict = metadataRows.some(
         metadataRow => metadataRow.hasConflict,
     );
@@ -220,11 +220,11 @@ export default function MetadataReviewTable({
                                                     validate={
                                                         metadataRow.fieldName ===
                                                         'numLlinsAvailable'
-                                                            ? validateNonNegativeInput
+                                                            ? validateWholeNonNegativeInteger
                                                             : numberFieldNames.has(
                                                                     metadataRow.fieldName,
                                                                 )
-                                                              ? validateNumberInput
+                                                              ? validateWholePositiveInteger
                                                               : undefined
                                                     }
                                                     disabled={isDisabled}

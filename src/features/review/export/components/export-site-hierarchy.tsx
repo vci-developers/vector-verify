@@ -2,20 +2,22 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/utils/cn';
-import SiteHierarchy from '@/features/review/shared/site-hierarchy';
+import { Checkbox } from '@/components/ui/checkbox';
+import SiteHierarchy from '@/features/review/components/site-hierarchy';
 import ExportSiteLeafRows from './export-site-leaf-rows';
-import { useExportMonthContext } from './export-month-row';
-import {
-    hasCertifiedSessions,
-    isMonthFullySelected,
-} from '@/features/review/export/utils/export-selection-helpers';
+import { isMonthFullySelected } from '@/features/review/export/utils/export-selection-helpers';
+import type { Dhis2ExportSiteStatus } from '@/api/dhis2/validation/dhis2-sync-schema';
 
 interface ExportSiteHierarchyProps {
     sites: Site[];
     parentPath: string;
     expandedSitePaths: Set<string>;
     onTogglePath: (path: string, descendantPaths: string[]) => void;
+    certifiedCountsBySiteId: Map<number, number>;
+    selectedSiteIds: Set<number>;
+    onToggleSites: (siteIds: number[], select: boolean) => void;
+    isExporting: boolean;
+    exportStatusBySiteId: Map<number, Dhis2ExportSiteStatus>;
 }
 
 export default function ExportSiteHierarchy({
@@ -23,14 +25,12 @@ export default function ExportSiteHierarchy({
     parentPath,
     expandedSitePaths,
     onTogglePath,
+    certifiedCountsBySiteId,
+    selectedSiteIds,
+    onToggleSites,
+    isExporting,
+    exportStatusBySiteId,
 }: ExportSiteHierarchyProps) {
-    const {
-        certifiedCountsBySiteId,
-        selectedSiteIds,
-        onToggleSites,
-        isExporting,
-    } = useExportMonthContext();
-
     return (
         <SiteHierarchy
             sites={sites}
@@ -41,11 +41,16 @@ export default function ExportSiteHierarchy({
                 <ExportSiteLeafRows
                     sites={leafSites}
                     getDisplayName={getDisplayName}
+                    certifiedCountsBySiteId={certifiedCountsBySiteId}
+                    selectedSiteIds={selectedSiteIds}
+                    onToggleSites={onToggleSites}
+                    isExporting={isExporting}
+                    exportStatusBySiteId={exportStatusBySiteId}
                 />
             )}
             renderGroupContent={sitesInGroup => {
-                const certifiedSitesInGroup = sitesInGroup.filter(site =>
-                    hasCertifiedSessions(site, certifiedCountsBySiteId),
+                const certifiedSitesInGroup = sitesInGroup.filter(
+                    site => (certifiedCountsBySiteId.get(site.siteId) ?? 0) > 0,
                 );
                 if (certifiedSitesInGroup.length === 0) return null;
 
@@ -59,20 +64,12 @@ export default function ExportSiteHierarchy({
 
                 return {
                     prefixContent: (
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={isChecked}
                             disabled={isExporting}
-                            onChange={() =>
+                            onCheckedChange={() =>
                                 onToggleSites([...certifiedSiteIds], !isChecked)
                             }
-                            onClick={event => event.stopPropagation()}
-                            className={cn(
-                                'h-4 w-4',
-                                isExporting
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'cursor-pointer',
-                            )}
                         />
                     ),
                     summaryContent: (

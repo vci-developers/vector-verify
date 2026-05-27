@@ -1,6 +1,8 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { StorageKeys } from '@/lib/storage-keys';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +14,7 @@ import OperationsAiPerformance from '@/features/operations/ai-performance/compon
 import OperationsGeographicalSummary from '@/features/operations/geographical-summary/components/operations-geographical-summary';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
-import OperationsSpecimenComposition from '../specimen-composition/components/operations-specimen-composition';
+import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
@@ -44,13 +46,18 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
-    const [activeTab, setActiveTab] = useState<OperationsTab>(
+    const [activeTab, setActiveTab] = useLocalStorage<OperationsTab>(
+        StorageKeys.operations.activeTab,
         'geographical-summary',
     );
-    const [startMonth, setStartMonth] = useState(() =>
+    const [startMonth, setStartMonth] = useLocalStorage(
+        StorageKeys.operations.startMonth,
         startOfMonth(subMonths(new Date(), 2)),
     );
-    const [endMonth, setEndMonth] = useState(() => startOfMonth(new Date()));
+    const [endMonth, setEndMonth] = useLocalStorage(
+        StorageKeys.operations.endMonth,
+        startOfMonth(new Date()),
+    );
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
@@ -69,7 +76,18 @@ export default function OperationsPageClient() {
         locationDropdownOptions,
         locationQueryParam,
         descendantsOfSelectedLocation,
-    } = useLocationSelection(accessibleSites);
+    } = useLocationSelection(
+        accessibleSites,
+        StorageKeys.operations.selectedLocation,
+    );
+
+    const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
+        string | null
+    >(StorageKeys.operations.selectedMarkerId, null);
+
+    useEffect(() => {
+        setSelectedMarkerId(null);
+    }, [locationQueryParam, startMonth, endMonth, setSelectedMarkerId]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -158,6 +176,8 @@ export default function OperationsPageClient() {
                                     }
                                     startDate={startDate}
                                     endDate={endDate}
+                                    selectedMarkerId={selectedMarkerId}
+                                    setSelectedMarkerId={setSelectedMarkerId}
                                 />
                             )}
 

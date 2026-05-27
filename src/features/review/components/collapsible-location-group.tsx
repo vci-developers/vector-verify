@@ -31,15 +31,19 @@ export default function CollapsibleLocationGroup({
 }: CollapsibleLocationGroupProps) {
     return (
         <Collapsible open={isExpanded} onOpenChange={onToggle}>
-            <CollapsibleTrigger className="w-full">
-                <div
-                    className={cn(
-                        'group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 transition-all',
-                        headerClassName ?? 'hover:bg-muted/50',
-                    )}
-                >
-                    <div className="flex items-center gap-2.5">
+            <div
+                className={cn(
+                    'group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 transition-all',
+                    headerClassName ?? 'hover:bg-muted/50',
+                )}
+            >
+                {prefixContent && (
+                    <div className="flex shrink-0 items-center">
                         {prefixContent}
+                    </div>
+                )}
+                <CollapsibleTrigger className="flex flex-1 cursor-pointer items-center justify-between gap-2.5 text-left">
+                    <div className="flex items-center gap-2.5">
                         <ChevronRight
                             className={cn(
                                 'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
@@ -59,8 +63,8 @@ export default function CollapsibleLocationGroup({
                     <div className="flex items-center gap-3">
                         {summaryContent}
                     </div>
-                </div>
-            </CollapsibleTrigger>
+                </CollapsibleTrigger>
+            </div>
 
             <CollapsibleContent>
                 <div className="border-border/60 ml-4.5 border-l pl-4">

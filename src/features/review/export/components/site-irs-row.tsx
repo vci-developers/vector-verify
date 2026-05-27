@@ -9,9 +9,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { SiteIrsFormData } from '@/features/review/export/utils/build-site-irs-data';
+import { Checkbox } from '@/components/ui/checkbox';
 
-export const INSECTICIDE_OPTIONS = [
+const INSECTICIDE_OPTIONS = [
     'Actellic 300C',
     'Sumishield',
     'Flodora Fusion',
@@ -24,66 +24,86 @@ export const INSECTICIDE_OPTIONS = [
 ] as const;
 
 interface SiteIrsRowProps {
-    entry: SiteIrsFormData;
-    onUpdate: (patch: Partial<SiteIrsFormData>) => void;
+    siteId: number;
+    wasIrsSprayed: boolean;
+    insecticideSprayed: string;
+    dateLastSprayed: string;
+    onChange: (nextForm: {
+        wasIrsSprayed: boolean;
+        insecticideSprayed: string;
+        dateLastSprayed: string;
+    }) => void;
 }
 
-export default function SiteIrsRow({ entry, onUpdate }: SiteIrsRowProps) {
+export default function SiteIrsRow({
+    siteId,
+    wasIrsSprayed,
+    insecticideSprayed,
+    dateLastSprayed,
+    onChange,
+}: SiteIrsRowProps) {
     return (
         <div className="border-border space-y-3 rounded-lg border p-4">
             <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    id={`irs-${entry.siteId}`}
-                    checked={entry.wasIrsSprayed}
-                    onChange={event =>
-                        onUpdate({
-                            wasIrsSprayed: event.target.checked,
+                <Checkbox
+                    id={`irs-${siteId}`}
+                    checked={wasIrsSprayed}
+                    onCheckedChange={checked =>
+                        onChange({
+                            wasIrsSprayed: checked === true,
                             insecticideSprayed: '',
                             dateLastSprayed: '',
                         })
                     }
-                    className="h-4 w-4 cursor-pointer"
                 />
-                <Label htmlFor={`irs-${entry.siteId}`} className="font-medium">
+                <Label htmlFor={`irs-${siteId}`} className="font-medium">
                     Was IRS sprayed?
                 </Label>
             </div>
 
-            {entry.wasIrsSprayed && (
+            {wasIrsSprayed && (
                 <div className="ml-6 space-y-3">
                     <div className="space-y-1">
-                        <Label htmlFor={`insecticide-${entry.siteId}`}>
+                        <Label htmlFor={`insecticide-${siteId}`}>
                             Insecticide sprayed
                         </Label>
                         <Select
-                            value={entry.insecticideSprayed}
+                            value={insecticideSprayed}
                             onValueChange={value =>
-                                onUpdate({ insecticideSprayed: value })
+                                onChange({
+                                    wasIrsSprayed,
+                                    insecticideSprayed: value,
+                                    dateLastSprayed,
+                                })
                             }
                         >
-                            <SelectTrigger id={`insecticide-${entry.siteId}`}>
+                            <SelectTrigger id={`insecticide-${siteId}`}>
                                 <SelectValue placeholder="Select an insecticide" />
                             </SelectTrigger>
                             <SelectContent>
-                                {INSECTICIDE_OPTIONS.map(opt => (
-                                    <SelectItem key={opt} value={opt}>
-                                        {opt}
+                                {INSECTICIDE_OPTIONS.map(insecticide => (
+                                    <SelectItem
+                                        key={insecticide}
+                                        value={insecticide}
+                                    >
+                                        {insecticide}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor={`date-${entry.siteId}`}>
+                        <Label htmlFor={`date-${siteId}`}>
                             Date last sprayed
                         </Label>
                         <Input
-                            id={`date-${entry.siteId}`}
+                            id={`date-${siteId}`}
                             type="date"
-                            value={entry.dateLastSprayed}
+                            value={dateLastSprayed}
                             onChange={event =>
-                                onUpdate({
+                                onChange({
+                                    wasIrsSprayed,
+                                    insecticideSprayed,
                                     dateLastSprayed: event.target.value,
                                 })
                             }
