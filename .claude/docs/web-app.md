@@ -1,0 +1,1275 @@
+Created: Feb 25, 2024
+
+Last Updated: Mar 28, 2026
+
+1. Introduction
+
+The VectorVerify Web Application is a centralized platform designed to support
+data review, validation, and operational monitoring within the VectorCam
+mosquito surveillance ecosystem.
+
+The VectorCam mobile application enables field teams to collect mosquito
+specimens and associated household survey data during vector surveillance
+activities. While this system allows rapid data collection at scale, large
+surveillance programs require additional infrastructure to ensure that the
+collected data is accurate, complete, and operationally useful.
+
+VectorVerify addresses this need by providing a web-based platform for expert
+reviewers, program managers, and researchers to evaluate surveillance data and
+monitor program performance.
+
+The platform serves three primary roles:
+
+    Annotation of mosquito specimens to evaluate machine learning model performance
+
+    Data review and quality control to ensure the integrity of surveillance datasets
+
+    Operational monitoring and analytics to support program management and decision-making
+
+Through these capabilities, VectorVerify transforms raw mosquito observations
+into high-quality surveillance intelligence that can support malaria control
+programs and public health interventions.
+
+These responsibilities match the description in your onboarding guide, where the
+platform performs annotation, structured data review, and operational
+monitoring. 2. System Overview
+
+VectorVerify operates as the central analysis and validation layer of the
+VectorCam ecosystem.
+
+The system integrates with three major components:
+
+VectorCam Mobile Application
+
+Field teams capture mosquito images and associated household survey metadata
+using the mobile application.
+
+VectorCam Backend API
+
+All data collected by the mobile application is transmitted to the backend
+infrastructure where it is stored and processed.
+
+National Health Information Systems
+
+After review and certification, validated surveillance data can be exported to
+national reporting platforms such as DHIS2.
+
+The web application enables authorized users to review surveillance records,
+validate data quality, and monitor surveillance program activity across multiple
+sites and reporting periods. 3. User Roles and Access Control
+
+The VectorVerify platform uses a role-based access control (RBAC) system to
+regulate access to surveillance data and platform functionality. Access
+permissions are determined by two primary factors:
+
+    Permission Level — whether a user can view or modify data
+
+    Scope of Access — whether a user can access data from a single sentinel site or from all sites within a program
+
+This structure ensures that sensitive surveillance data is accessible only to
+authorized users while still allowing appropriate levels of oversight across the
+surveillance program.
+
+The platform defines four access levels. Access Level 0 — Site Viewer
+
+Users assigned to Access Level 0 have read-only access to surveillance data from
+a single sentinel site within a program.
+
+Permissions include:
+
+    Viewing household surveillance records
+
+    Viewing mosquito specimen images
+
+    Viewing dashboard metrics for the assigned site
+
+These users cannot modify data or submit annotations. Access Level 1 — Program
+Viewer
+
+Users assigned to Access Level 1 have read-only access to surveillance data
+across all sentinel sites within a program.
+
+Permissions include:
+
+    Viewing household surveillance records across all sites
+
+    Viewing specimen data and images across the program
+
+    Accessing program-level dashboards and analytics
+
+These users cannot modify data or submit annotations. Access Level 2 — Site
+Editor
+
+Users assigned to Access Level 2 have read and write access to surveillance data
+from a single sentinel site within a program.
+
+Permissions include:
+
+    Viewing household survey submissions
+
+    Editing or correcting site-level surveillance records
+
+    Managing data associated with the assigned site
+
+These users cannot perform specimen annotation. Access Level 3 — Program Editor
+and Annotator
+
+Users assigned to Access Level 3 have read and write access across all sites
+within a program and are authorized to perform specimen annotation.
+
+Permissions include:
+
+    Viewing and modifying surveillance data across all sites
+
+    Performing expert annotation of mosquito specimens
+
+    Reviewing machine learning classification outputs
+
+    Participating in model evaluation workflows
+
+This access level is typically assigned to expert reviewers, program
+supervisors, or researchers responsible for validating surveillance data and
+evaluating model performance. 2. User Stories Authentication and Access Control
+
+As a program official, I want secure authentication so that only authorized
+individuals can access sensitive surveillance data. Specimen Annotation
+
+As an expert reviewer, I want to inspect mosquito images collected in the field
+so that I can verify the predictions generated by the machine learning models.
+
+As an expert reviewer, I want to record the correct species, sex, and abdomen
+status of a specimen so that model performance can be evaluated. Data Review and
+Quality Control
+
+As a district supervisor, I want to review household-level surveillance data so
+that I can confirm that submissions are complete and consistent.
+
+As a reviewer, I want to inspect mosquito specimen records associated with each
+survey so that classification errors can be corrected before the data becomes
+part of the official surveillance record.
+
+As an expert reviewer, I want to certify datasets after review so that they are
+ready for submission to national surveillance systems. Operational Monitoring
+
+As a program manager, I want dashboards that display surveillance activity
+across districts so that I can monitor whether field teams are collecting data
+consistently.
+
+As a decision-maker, I want to identify areas with unusually high mosquito
+populations so that interventions can be prioritized. Data Analysis
+
+As a biostatistician, I want to visualize mosquito population trends over time
+so that I can assess seasonal patterns.
+
+As a researcher, I want to compare entomological data with epidemiological data
+so that correlations between mosquito populations and malaria transmission can
+be analyzed. 5. Functional Requirements Authentication
+
+The system must require authentication using a valid username and password
+before a user can access any platform functionality.
+
+The system must enforce role-based access control based on the defined access
+levels (0–3).
+
+The system must restrict users to viewing and modifying data only within the
+scope permitted by their assigned access level.
+
+The system must automatically terminate inactive user sessions after a
+configurable timeout period.
+
+The system must allow users to reset their password in case it is lost for any
+reason. Surveillance Data Retrieval
+
+The system must retrieve surveillance records from the VectorCam API.
+
+The system must display surveillance records grouped by program, site, session,
+and specimen.
+
+The system must allow users to filter surveillance data using the following
+parameters:
+
+    program
+
+    site
+
+    household
+
+    collection method
+
+    date range
+
+The system must allow users to search for specific surveillance records using
+unique identifiers including:
+
+    household ID
+
+    session ID
+
+    specimen ID
+
+The system must paginate large result sets to maintain responsive performance.
+Specimen Image Review
+
+The system must display mosquito specimen images captured by the VectorCam
+mobile application.
+
+For each specimen, the system must display the machine learning model
+predictions including:
+
+    predicted species
+
+    predicted sex
+
+    predicted abdomen status
+
+    associated confidence scores
+
+The system must display metadata associated with each specimen including:
+
+    session ID
+
+    collection date
+
+    collection site
+
+    household identifier
+
+    collector identity
+
+The system must allow users to zoom and inspect specimen images for detailed
+visual review. Specimen Annotation
+
+The system must allow authorized users (Access Level 3) to submit expert
+annotations for mosquito specimens.
+
+The system must allow annotators to assign the following attributes to a
+specimen:
+
+    species
+
+    sex
+
+    abdomen status
+
+The system must allow annotators to flag specimens with issues including:
+
+    poor image quality
+
+    ambiguous specimen
+
+    incorrect capture
+
+The system must record all annotation submissions along with:
+
+    annotator identity
+
+    timestamp
+
+    original model prediction
+
+    corrected annotation
+
+The system must prevent unauthorized users from modifying annotation records.
+Surveillance Data Review
+
+The system must allow authorized reviewers to inspect household-level
+surveillance metadata.
+
+The system must display the complete set of specimens associated with a
+household surveillance session.
+
+The system must allow reviewers to identify incomplete or inconsistent
+submissions.
+
+The system must allow reviewers to mark surveillance records as:
+
+    verified
+
+    flagged for correction
+
+    pending review
+
+Dataset Certification
+
+The system must allow authorized users to certify reviewed surveillance
+datasets.
+
+Certification must only be permitted once all required review steps have been
+completed.
+
+The system must record the following information for each certification event:
+
+    certifying user
+
+    certification timestamp
+
+    associated reporting period
+
+    number of records certified
+
+Operational Monitoring Dashboards
+
+The system must display aggregate surveillance statistics across all sites
+within a program.
+
+The system must display the number of household surveys conducted per reporting
+period.
+
+The system must display the number of mosquito specimens collected per site.
+
+The system must visualize surveillance activity trends over time using
+time-series graphs.
+
+The system must display geographic distributions of mosquito counts using
+map-based visualizations. Analytical Visualizations
+
+The system must generate charts representing mosquito population composition
+including:
+
+    genus composition
+
+    species composition
+
+    sex composition
+
+    abdominal status composition
+
+The system must generate time-series graphs showing mosquito counts by species.
+
+Users must be able to filter analytical visualizations by:
+
+    district
+
+    sentinel site
+
+    time range
+
+    mosquito species
+
+Epidemiological Data Integration
+
+The system must display malaria epidemiological indicators alongside mosquito
+surveillance data.
+
+The system must allow users to overlay epidemiological data and entomological
+data within the same visualizations.
+
+Users must be able to filter epidemiological datasets by:
+
+    age
+
+    gender
+
+    geographic region
+
+    reporting period
+
+Data Export
+
+The system must allow authorized users to export validated surveillance
+datasets.
+
+The system must support export formats compatible with national surveillance
+systems such as DHIS2.
+
+Exported datasets must only include records that have completed the review and
+certification process. 6. Non-Functional Requirements
+
+The platform must support secure transmission and storage of surveillance data.
+
+The system must comply with relevant data protection regulations.
+
+The platform must provide responsive performance for large datasets.
+
+The interface must minimize the number of actions required to perform common
+tasks. 7. System Architecture and Design Technologies
+
+    Frontend: React, Next.js, TypeScript
+
+    Infrastructure: AWS Cloud (RDS + S3 + EC2)
+
+    Development Tooling: ESLint and Prettier
+
+8. Page Overview Dashboard Purpose
+
+Provide a high-level overview of surveillance activity, data quality, and
+operational status across the program. High-Level Functionality
+
+The dashboard should serve as the landing page for most users. It should
+summarize overall surveillance activity, highlight what needs attention, and
+provide quick entry points into deeper workflows.
+
+It should include:
+
+    summary metrics for surveillance activity
+
+    visibility into pending review work
+
+    visibility into flagged or incomplete records
+
+    trends over time
+
+    filtering by program, site, and date
+
+    quick links into review workflows
+
+Notes
+
+This page aligns most directly with the operational monitoring requirements,
+including aggregate surveillance statistics, surveillance activity trends, and
+site-level visibility. Status
+
+Implementation Partially Complete
+
+Review
+
+The Review feature supports site-level monthly data validation prior to
+submission to national surveillance systems.
+
+The workflow is structured into four sequential pages:
+
+    Site & Month Selection
+
+    Site Surveillance Questions Review
+
+    Specimen Review
+
+    Site Monthly Certification
+
+Review is performed for one site at a time, and certification applies only to
+that site and month.
+
+Site & Month Selection Page
+
+Purpose
+
+The Site & Month Selection Page allows users to select a sentinel site and
+reporting month for review.
+
+This page defines the scope of the review. All subsequent pages operate within
+the selected site and month.
+
+This page helps users answer:
+
+    Which site am I reviewing?
+
+    Which month am I reviewing?
+
+    What is the review status for each site/month?
+
+Page Structure
+
+    Month Selector
+
+        Users select:
+
+            Month
+
+            Year
+
+        This defines the reporting period.
+
+    Site List
+
+        Display sentinel sites for the selected program.
+
+        Each site should display:
+
+            Site name
+
+            District
+
+            Number of sessions submitted
+
+            Review status
+
+            Certification status
+
+    Review Status Indicators
+
+        Each site/month should indicate:
+
+            Not reviewed
+
+            In progress
+
+            Ready for certification
+
+            Certified
+
+        This helps users quickly identify work remaining.
+
+    Actions
+
+        Users can:
+
+            Select site for review
+
+            Resume review in progress
+
+            View certification status
+
+Status
+
+Implementation Complete
+
+Site Surveillance Questions Review Page
+
+Purpose
+
+The Site Surveillance Questions Review Page allows users to review surveillance
+form responses across all sessions submitted for a site during a selected month.
+
+This page helps identify inconsistent or conflicting responses across sessions.
+
+This page helps users answer:
+
+    Are surveillance questions consistent across sessions?
+
+    Are there conflicting responses?
+
+    Are corrections required?
+
+This page is the first validation step in the review workflow.
+
+Page Structure
+
+    Site Context Header
+
+        Display:
+
+            Site name
+
+            District
+
+            Selected month
+
+            Number of sessions
+
+        This provides review context.
+
+    Surveillance Questions Table
+
+        Display surveillance questions as rows, with responses across sessions.
+
+        Example layout:
+
+            Question
+            → Session 1 Response
+            → Session 2 Response
+            → Session 3 Response
+
+        This allows users to quickly identify inconsistencies.
+
+    Conflict Detection
+
+        Highlight:
+
+            Conflicting responses
+
+            Missing responses
+
+            Incomplete entries
+
+        This helps users focus on issues.
+
+    Resolution Actions
+
+        Users can:
+
+            Resolve conflicting entries
+
+            Mark correct response
+
+            Flag sessions for follow-up
+
+            Add notes
+
+    Outcome
+
+        User confirms:
+
+            Surveillance questions are consistent
+
+            Conflicts resolved
+
+            Data ready for specimen review
+
+Status
+
+Implementation Partially Complete
+
+Specimen Review Page
+
+Purpose
+
+The Specimen Review Page allows users to quickly review specimens collected for
+a site during a selected month and correct obvious machine learning errors.
+
+This page focuses on rapid validation, not deep annotation.
+
+This page helps users answer:
+
+    Are predictions reasonable?
+
+    Are there obvious errors?
+
+    Are images acceptable?
+
+This is the second validation step.
+
+Page Structure
+
+    Site Context Header
+
+        Display:
+
+            Household ID
+
+            Sentinel site
+
+            Collection date
+
+            Collector
+
+            Total specimens expected
+
+            Total specimens uploaded
+
+        This provides context for review.
+
+    Specimen Review Workspace
+
+        Display:
+
+            Specimen image
+
+            Model prediction
+
+            Basic metadata
+
+        Users should be able to:
+
+            Flip quickly between specimens
+
+            Approve specimen
+
+            Correct obvious ML errors
+
+            Flag problematic images
+
+    Navigation
+
+        Allow:
+
+            Next specimen
+
+            Previous specimen
+
+            Skip specimen
+
+        This supports rapid review.
+
+    Bulk Approval
+
+        Users should be able to:
+
+            Approve remaining specimens
+
+            Approve all unflagged specimens
+
+        This speeds up workflow.
+
+    Outcome
+
+        User:
+
+            Corrects obvious ML errors
+
+            Approves acceptable specimens
+
+            Flags problematic images
+
+Status
+
+Not Implemented
+
+Site Monthly Certification Page
+
+Purpose
+
+The Site Monthly Certification Page allows users to certify that surveillance
+data for a specific site and month is complete and ready for submission to
+national surveillance systems.
+
+This is the final step in the review workflow.
+
+This page helps users answer:
+
+    Have surveillance questions been reviewed?
+
+    Have specimens been reviewed?
+
+    Is data ready for certification?
+
+Page Structure
+
+    Certification Summary
+
+        Display:
+
+            Site
+
+            Month
+
+            Sessions reviewed
+
+            Specimens reviewed
+
+            Outstanding issues
+
+    Review Status Summary
+
+        Display:
+
+            Surveillance questions review status
+
+            Specimen review status
+
+            Flags remaining
+
+    Certification Actions
+
+        Users can:
+
+            Certify site/month
+
+            Add certification notes
+
+    Certification Metadata
+
+        Record:
+
+            Certifying user
+
+            Timestamp
+
+            Site
+
+            Month
+
+    Outcome
+
+        User certifies:
+
+            Site-level dataset
+
+            Month-level dataset
+
+            Data ready for national surveillance system
+
+Status
+
+Not Implemented Annotation
+
+The Annotation feature supports expert review of mosquito specimens to evaluate
+and improve machine learning performance.
+
+Unlike the Review workflow (which is site + month based), the Annotation
+workflow is task-based, allowing experts to work through assigned or generated
+annotation tasks.
+
+The workflow consists of two primary pages:
+
+    Annotation Tasks List
+
+    Annotation Workspace
+
+Annotation Tasks List Page
+
+Purpose
+
+The Annotation Tasks List Page allows users to view and select annotation tasks.
+
+Annotation tasks represent sets of specimens that require expert labeling for
+purposes such as:
+
+    Model performance evaluation
+
+    Dataset generation
+
+    Quality assurance
+
+    Targeted validation
+
+This page helps users answer:
+
+    What annotation tasks are available?
+
+    Which tasks are assigned to me?
+
+    Which tasks are in progress or complete?
+
+This page serves as the entry point into the annotation workflow.
+
+Page Structure
+
+    Annotation Tasks List
+
+        Display annotation tasks as a list and grouped by status.
+
+        Each task should include:
+
+            Task name
+
+            Task description
+
+            Program or site (if applicable)
+
+            Number of specimens
+
+            Progress (e.g., 25 / 100 annotated)
+
+            Task status
+
+    Task Status
+
+        Each task should indicate:
+
+            Not started
+
+            In progress
+
+            Completed
+
+        This helps users prioritize work.
+
+    Task Filters
+
+        Users should be able to filter tasks by:
+
+            Task status
+
+            Date created
+
+    Task Actions
+
+        Users should be able to:
+
+            Open annotation task
+
+            Resume annotation
+
+            View task details
+
+    Outcome
+
+        User selects:
+
+            Annotation task
+
+            Begins annotation workflow
+
+Annotation Workspace
+
+Purpose
+
+The Annotation Workspace allows users to annotate specimens within a selected
+annotation task.
+
+This page is designed for efficient, focused annotation, allowing users to move
+quickly through specimens.
+
+This page helps users:
+
+    Review specimen images
+
+    Evaluate model predictions
+
+    Assign correct labels
+
+    Flag ambiguous specimens
+
+Page Structure
+
+    Task Context Header
+
+        Display:
+
+            Task name
+
+            Progress
+
+            Remaining specimens
+
+            Annotator identity (optional)
+
+        This helps users understand context and progress.
+
+    Specimen Display
+
+        Display:
+
+            Specimen image
+
+            Basic metadata (optional)
+
+        This is the primary working area.
+
+    Annotation Controls
+
+        Users should be able to assign:
+
+            Genus
+
+            Species
+
+            Sex
+
+            Abdomen status
+
+            Any artifacts in the image (Eg. Blurry, missing parts, etc.)
+
+        These fields represent the core annotation labels.
+
+    Annotation Actions
+
+        Users should be able to:
+
+            Submit annotation
+
+            Skip specimen
+
+            Flag specimen
+
+            Mark as ambiguous
+
+    Navigation
+
+        Allow users to:
+
+            Move to next specimen
+
+            Move to previous specimen
+
+            Return to task list
+
+        This supports efficient annotation.
+
+    Progress Indicator
+
+        Display:
+
+            Number annotated
+
+            Total specimens
+
+            Remaining specimens
+
+        This helps users track progress.
+
+    Outcome
+
+        User:
+
+            Annotates specimens
+
+            Submits labels
+
+            Moves through task
+
+Operations
+
+The Operations feature provides a centralized operational monitoring interface
+for surveillance programs.
+
+This feature allows users to:
+
+    Monitor surveillance activity
+
+    Review catch trends
+
+    Evaluate data quality
+
+    Assess model performance
+
+    Track VHT compliance
+
+The Operations feature is structured as a single screen with multiple tabs, with
+shared filters across all tabs.
+
+Operations Page Structure:
+
+    Global Filters
+
+        These filters apply to all tabs:
+
+            District selector
+
+            Sentinel site selector (optional)
+
+            Time frame selector (month, custom range, etc.)
+
+        These filters define the scope of operational analysis.
+
+Sites Overview Tab
+
+Purpose
+
+Provide a site-level operational overview of surveillance activity.
+
+This tab helps users answer:
+
+    Which sites are active?
+
+    How much data is being collected?
+
+    Where are potential issues?
+
+Page Structure
+
+    Sites List
+
+        Display sentinel sites with:
+
+            Site name
+
+            District
+
+            Number of sessions
+
+            Number of specimens
+
+            Last submission date
+
+            Collector count (optional)
+
+    Expandable Site View
+
+        Users can expand a site to view:
+
+            Surveillance Form Summary
+
+                Key surveillance form responses
+
+                Summary across sessions
+
+            Specimen Summary
+
+                Number of specimens
+
+                Species breakdown (optional)
+
+                Image availability
+
+    Use Cases
+
+        Users can:
+
+            Identify inactive sites
+
+            Compare site activity
+
+            Inspect site-level data
+
+Status
+
+Implementation Complete
+
+Metrics Dashboard Tab
+
+Purpose
+
+Provide high-level operational insights into mosquito surveillance activity.
+
+This tab helps users answer:
+
+    What is the catch trend?
+
+    Where are mosquitoes increasing?
+
+    Is surveillance consistent?
+
+Suggested Metrics and Figures
+
+    Surveillance Activity
+
+        Sessions collected over time (line graph)
+
+        Specimens collected over time (line graph)
+
+        Active sites over time (line graph)
+
+        Sessions per site (bar chart)
+
+    Catch Metrics
+
+        Total specimens by species (bar chart)
+
+        Species composition (pie chart)
+
+        Sex composition (pie chart)
+
+        Abdomen status composition (pie chart)
+
+    Site Comparisons
+
+        Specimens per site (bar chart)
+
+        Sessions per site (bar chart)
+
+        Average specimens per session (bar chart)
+
+    Temporal Trends
+
+        Species trends over time (stacked line graph)
+
+        Mosquito abundance trends (line graph)
+
+        Monthly comparisons (bar chart)
+
+    Data Quality Metrics
+
+        Sessions missing specimens
+
+        Incomplete sessions
+
+        Flagged sessions
+
+        Review completion rate
+
+    Optional
+
+        Indoor vs outdoor collection trends
+
+        Trap method comparisons
+
+        Collector-level comparisons
+
+Status
+
+Implementation In Progress
+
+Model Accuracy Tab
+
+Purpose
+
+Provide model performance monitoring based on annotation data.
+
+This tab helps users answer:
+
+    How accurate is the model?
+
+    Where is the model struggling?
+
+    Is performance improving over time?
+
+Page Structure
+
+    Confusion Matrix
+
+        Display confusion matrix comparing:
+
+            Model prediction
+
+            Annotation labels
+
+        Example:
+
+            Species Confusion Matrix
+
+            Rows: True labels (annotation)
+
+            Columns: Model predictions
+
+    Accuracy Metrics
+
+        Display:
+
+            Overall accuracy
+
+            Per-species accuracy
+
+            Precision / recall (optional)
+
+            Confusion rate between species
+
+    Trends over Time
+
+        Accuracy over time
+
+        Accuracy by site
+
+        Accuracy by device (optional)
+
+    Use Cases
+
+        Users can:
+
+            Monitor model performance
+
+            Identify problematic species
+
+            Track improvements after retraining
+
+Status
+
+Not Implemented
+
+VHT Compliance Tab
+
+Purpose
+
+Monitor field team compliance and operational consistency.
+
+This tab helps users answer:
+
+    Are VHTs collecting data consistently?
+
+    Are some sites underperforming?
+
+    Is surveillance coverage adequate?
+
+Suggested Metrics
+
+    Activity Metrics
+
+        Sessions per VHT
+
+        Specimens per VHT
+
+        Active VHTs over time
+
+    Coverage Metrics
+
+        Households visited
+
+        Sessions per site
+
+        Sessions per district
+
+    Compliance Metrics
+
+        Days with submissions
+
+        Missed collection days
+
+        Average sessions per week
+
+    Performance Metrics
+
+        Specimens per session
+
+        Incomplete session rate
+
+        Review issues per VHT
+
+    Optional
+
+        VHT leaderboard
+
+        VHT activity heatmap
+
+Status
+
+Not Implemented
