@@ -3,7 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -21,6 +21,14 @@ interface ReviewSiteListProps {
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
+    expandedSitePaths: Set<string>;
+    setExpandedSitePaths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
+    collapsedMonths: Set<string>;
+    setCollapsedMonths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
 }
 
 export default function ReviewSitesList({
@@ -28,14 +36,11 @@ export default function ReviewSitesList({
     locationQueryParam,
     startMonth,
     endMonth,
+    expandedSitePaths,
+    setExpandedSitePaths,
+    collapsedMonths,
+    setCollapsedMonths,
 }: ReviewSiteListProps) {
-    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
-        new Set(),
-    );
-    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
-        new Set(),
-    );
-
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -99,7 +104,9 @@ export default function ReviewSitesList({
                 nextPaths.delete(path);
             } else {
                 nextPaths.add(path);
-                descendantPaths.forEach(p => nextPaths.add(p));
+                descendantPaths.forEach(descendantPath =>
+                    nextPaths.add(descendantPath),
+                );
             }
             return nextPaths;
         });
