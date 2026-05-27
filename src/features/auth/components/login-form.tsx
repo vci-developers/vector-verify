@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function LoginForm() {
     const router = useRouter();
@@ -123,6 +124,14 @@ export default function LoginForm() {
                         </Field>
                     )}
                 />
+                <p className="text-muted-foreground text-right text-sm">
+                    <Link
+                        href="/forgot-password"
+                        className="text-primary font-medium hover:underline"
+                    >
+                        Forgot password?
+                    </Link>
+                </p>
             </FieldGroup>
             <Field orientation="horizontal">
                 <Button

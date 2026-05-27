@@ -1,11 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { ACCESS_COOKIE_NAME } from './lib/auth-session/cookies';
 
-const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
+const PUBLIC_ROUTES = new Set([
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/forbidden',
+]);
 
 export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
+
+    // TODO: handle preventing users from accessing
+    // /forgot-password and /reset-password through typing the URL
 
     if (
         !pathname.includes('/forbidden') &&
