@@ -10,6 +10,8 @@ import { Fragment, useState, useEffect } from 'react';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
+import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
+import MonthRangePicker from '@/components/ui/month-range-picker';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
@@ -80,26 +82,17 @@ export default function ReviewSitesListPageClient() {
     const [expandedSitePaths, setExpandedSitePaths] = useLocalStorage<
         Set<string>
     >(StorageKeys.review.expandedSitePaths, new Set());
-    const [collapsedMonths, setCollapsedMonths] = useLocalStorage<Set<string>>(
-        StorageKeys.review.collapsedMonths,
-        new Set(),
-    );
-
-    useEffect(() => {
-        setExpandedSitePaths(new Set());
-        setCollapsedMonths(new Set());
-    }, [
-        locationQueryParam,
-        startMonth,
-        endMonth,
-        setExpandedSitePaths,
-        setCollapsedMonths,
-    ]);
+    const [collapsedSegments, setCollapsedSegments] = useLocalStorage<
+        Set<string>
+    >(StorageKeys.review.collapsedSegments, new Set());
 
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const { data: getCollectionCyclesResult } = useGetCollectionCycles(
+    const {
+        data: getCollectionCyclesResult,
+        isPending: isGetCollectionCyclesPending,
+    } = useGetCollectionCycles(
         { programId: programId ?? 0, startDate, endDate },
         { enabled: programId !== undefined },
     );
@@ -107,6 +100,20 @@ export default function ReviewSitesListPageClient() {
     const collectionCycles = getCollectionCyclesResult?.ok
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
+
+    const isCycleMode = collectionCycles.length > 0;
+
+    useEffect(() => {
+        setExpandedSitePaths(new Set());
+        setCollapsedSegments(new Set());
+    }, [
+        locationQueryParam,
+        startMonth,
+        endMonth,
+        isCycleMode,
+        setExpandedSitePaths,
+        setCollapsedSegments,
+    ]);
 
     function handleLocationChange(location: string) {
         setSelectedLocation(location);
@@ -157,22 +164,33 @@ export default function ReviewSitesListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <ReviewSitesListHeader
-                        tabs={visibleTabs}
-                        activeTab={activeTab}
-                        onTabChange={tab => setActiveTab(tab)}
-                        locationTypeName={locationTypeName}
-                        locationDropdownOptions={locationDropdownOptions}
-                        selectedLocation={selectedLocation}
-                        onLocationChange={handleLocationChange}
-                        startMonth={startMonth}
-                        endMonth={endMonth}
-                        onStartMonthChange={handleStartMonthChange}
-                        onEndMonthChange={handleEndMonthChange}
-                        collectionCycles={collectionCycles}
-                        selectedCycleIds={selectedCycleIds}
-                        onCycleIdsChange={setSelectedCycleIds}
-                    />
+                    <div className="flex items-start justify-between">
+                        <ReviewSitesListHeader
+                            tabs={visibleTabs}
+                            activeTab={activeTab}
+                            onTabChange={tab => setActiveTab(tab)}
+                            locationTypeName={locationTypeName}
+                            locationDropdownOptions={locationDropdownOptions}
+                            selectedLocation={selectedLocation}
+                            onLocationChange={handleLocationChange}
+                        />
+                        <div className="flex items-center gap-3">
+                            {isCycleMode && (
+                                <CollectionCyclePicker
+                                    collectionCycles={collectionCycles}
+                                    selectedCycleIds={selectedCycleIds}
+                                    onChange={setSelectedCycleIds}
+                                />
+                            )}
+                            <MonthRangePicker
+                                startMonth={startMonth}
+                                endMonth={endMonth}
+                                onStartMonthChange={handleStartMonthChange}
+                                onEndMonthChange={handleEndMonthChange}
+                                maxDate={new Date()}
+                            />
+                        </div>
+                    </div>
 
                     <Separator />
 
@@ -194,12 +212,15 @@ export default function ReviewSitesListPageClient() {
                                     locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
+                                    isCollectionCyclesPending={
+                                        isGetCollectionCyclesPending
+                                    }
                                     collectionCycles={collectionCycles}
                                     selectedCycleIds={selectedCycleIds}
                                     expandedSitePaths={expandedSitePaths}
                                     setExpandedSitePaths={setExpandedSitePaths}
-                                    collapsedMonths={collapsedMonths}
-                                    setCollapsedMonths={setCollapsedMonths}
+                                    collapsedSegments={collapsedSegments}
+                                    setCollapsedSegments={setCollapsedSegments}
                                 />
                             )}
                             {activeTab === 'export' && (

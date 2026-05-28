@@ -1,4 +1,3 @@
-import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,
     SelectContent,
@@ -10,8 +9,6 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ReviewTab } from '@/features/review/sites-list/components/review-sites-list-page-client';
-import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
-import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 
 interface ReviewSitesListHeaderProps {
     tabs: readonly { value: ReviewTab; label: string }[];
@@ -21,13 +18,6 @@ interface ReviewSitesListHeaderProps {
     locationDropdownOptions: string[];
     selectedLocation: string;
     onLocationChange: (location: string) => void;
-    startMonth: Date;
-    endMonth: Date;
-    onStartMonthChange: (month: Date) => void;
-    onEndMonthChange: (month: Date) => void;
-    collectionCycles: CollectionCycle[];
-    selectedCycleIds: number[];
-    onCycleIdsChange: (ids: number[]) => void;
 }
 
 export default function ReviewSitesListHeader({
@@ -38,55 +28,26 @@ export default function ReviewSitesListHeader({
     locationDropdownOptions,
     selectedLocation,
     onLocationChange,
-    startMonth,
-    endMonth,
-    onStartMonthChange,
-    onEndMonthChange,
-    collectionCycles,
-    selectedCycleIds,
-    onCycleIdsChange,
 }: ReviewSitesListHeaderProps) {
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <Select
-                    value={selectedLocation}
-                    onValueChange={onLocationChange}
-                >
-                    <SelectTrigger className="w-52">
-                        <SelectValue
-                            placeholder={`Select a ${locationTypeName.toLowerCase()}`}
-                        />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>{locationTypeName}</SelectLabel>
-                            {locationDropdownOptions.map(option => (
-                                <SelectItem key={option} value={option}>
-                                    {option}
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-
-                <div className="flex items-center gap-3">
-                    {collectionCycles.length > 0 && (
-                        <CollectionCyclePicker
-                            collectionCycles={collectionCycles}
-                            selectedCycleIds={selectedCycleIds}
-                            onChange={onCycleIdsChange}
-                        />
-                    )}
-                    <MonthRangePicker
-                        startMonth={startMonth}
-                        endMonth={endMonth}
-                        onStartMonthChange={onStartMonthChange}
-                        onEndMonthChange={onEndMonthChange}
-                        maxDate={new Date()}
+            <Select value={selectedLocation} onValueChange={onLocationChange}>
+                <SelectTrigger className="w-52">
+                    <SelectValue
+                        placeholder={`Select a ${locationTypeName.toLowerCase()}`}
                     />
-                </div>
-            </div>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>{locationTypeName}</SelectLabel>
+                        {locationDropdownOptions.map(option => (
+                            <SelectItem key={option} value={option}>
+                                {option}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
 
             <Tabs
                 value={activeTab}

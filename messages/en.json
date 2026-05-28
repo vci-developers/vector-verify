@@ -22,5 +22,8 @@
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
         "accessDenied": "Access Denied"
+    },
+    "CollectionCycle": {
+        "allCycles": "All Collection Cycles"
     }
 }

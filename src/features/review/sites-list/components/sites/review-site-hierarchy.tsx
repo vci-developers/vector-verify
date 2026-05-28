@@ -2,9 +2,9 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import SiteHierarchy from '@/features/review/components/site-hierarchy';
-import ReviewVisitCoverageBadge from './review-visit-coverage-badge';
-import ReviewSiteLeafRows from './review-site-leaf-rows';
-import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import ReviewVisitCoverageBadge from '@/features/review/sites-list/components/sites/review-visit-coverage-badge';
+import ReviewSiteLeafRows from '@/features/review/sites-list/components/sites/review-site-leaf-rows';
+import type { ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
 
 function getVisitCoverageBackgroundColor(
     percentage: number,

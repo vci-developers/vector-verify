@@ -18,22 +18,25 @@ import {
     buildCollectionCycleSegments,
     type CollectionCycleSegment,
 } from '@/features/review/sites-list/utils/build-collection-cycle-segments';
-import ReviewSiteHierarchy from './review-site-hierarchy';
-import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
+import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
+import ReviewSiteHierarchy from '@/features/review/sites-list/components/sites/review-site-hierarchy';
+import { type ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
 
 interface ReviewSiteListProps {
     sites: Site[];
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
+    isCollectionCyclesPending: boolean;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
     expandedSitePaths: Set<string>;
     setExpandedSitePaths: (
         value: Set<string> | ((prev: Set<string>) => Set<string>),
     ) => void;
-    collapsedMonths: Set<string>;
-    setCollapsedMonths: (
+    collapsedSegments: Set<string>;
+    setCollapsedSegments: (
         value: Set<string> | ((prev: Set<string>) => Set<string>),
     ) => void;
 }
@@ -43,12 +46,13 @@ export default function ReviewSitesList({
     locationQueryParam,
     startMonth,
     endMonth,
+    isCollectionCyclesPending,
     collectionCycles,
     selectedCycleIds,
     expandedSitePaths,
     setExpandedSitePaths,
-    collapsedMonths,
-    setCollapsedMonths,
+    collapsedSegments,
+    setCollapsedSegments,
 }: ReviewSiteListProps) {
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -74,34 +78,11 @@ export default function ReviewSitesList({
                 'yyyy-MM',
             );
             if (!map.has(monthKey)) map.set(monthKey, new Map());
-
             const monthMap = map.get(monthKey)!;
-            const existingSiteSummary = monthMap.get(session.siteId) ?? {
-                sessionCount: 0,
-                needsReviewCount: 0,
-                isLocked: true,
-                isCertified: true,
-                isSubmitted: true,
-            };
-
-            const isLockedSessionState =
-                session.state === 'CERTIFIED' ||
-                session.state === 'SUBMITTED' ||
-                session.state === 'NOT_APPLICABLE';
-            const isCertifiedSessionState = session.state === 'CERTIFIED';
-            const isSubmittedSessionState = session.state === 'SUBMITTED';
-
-            monthMap.set(session.siteId, {
-                sessionCount: existingSiteSummary.sessionCount + 1,
-                needsReviewCount:
-                    existingSiteSummary.needsReviewCount +
-                    (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-                isLocked: existingSiteSummary.isLocked && isLockedSessionState,
-                isCertified:
-                    existingSiteSummary.isCertified && isCertifiedSessionState,
-                isSubmitted:
-                    existingSiteSummary.isSubmitted && isSubmittedSessionState,
-            });
+            monthMap.set(
+                session.siteId,
+                accumulateSessionSummary(monthMap.get(session.siteId), session),
+            );
         }
 
         return map;
@@ -137,7 +118,7 @@ export default function ReviewSitesList({
     }
 
     function toggleSegment(key: string) {
-        setCollapsedMonths(previous => {
+        setCollapsedSegments(previous => {
             const next = new Set(previous);
             if (next.has(key)) next.delete(key);
             else next.add(key);
@@ -147,7 +128,11 @@ export default function ReviewSitesList({
 
     const skeletonCount = new Set(sites.map(site => site.subCounty)).size || 5;
 
-    if (isGetAllSessionsPending || !getAllSessionsResult) {
+    if (
+        isGetAllSessionsPending ||
+        isCollectionCyclesPending ||
+        !getAllSessionsResult
+    ) {
         return (
             <div className="space-y-2">
                 {months.map(month => (
@@ -192,7 +177,7 @@ export default function ReviewSitesList({
                         cycleSegment.cycle !== null
                             ? String(cycleSegment.cycle.id)
                             : 'unassigned';
-                    const isCollapsed = collapsedMonths.has(key);
+                    const isCollapsed = collapsedSegments.has(key);
 
                     const segmentStartDate =
                         cycleSegment.cycle !== null
@@ -211,7 +196,7 @@ export default function ReviewSitesList({
 
                     const label =
                         cycleSegment.cycle !== null
-                            ? `Cycle ${cycleSegment.cycle.cycleNumber} · ${format(new Date(cycleSegment.cycle.startDate), 'MMM d')} – ${format(new Date(cycleSegment.cycle.endDate), 'MMM d, yyyy')}`
+                            ? formatCollectionCycleLabel(cycleSegment.cycle)
                             : 'Unassigned Sessions';
 
                     return (
@@ -253,7 +238,7 @@ export default function ReviewSitesList({
                 const sessionCountsBySiteId =
                     sessionSummariesByMonth.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
-                const isCollapsed = collapsedMonths.has(monthKey);
+                const isCollapsed = collapsedSegments.has(monthKey);
 
                 return (
                     <Collapsible
