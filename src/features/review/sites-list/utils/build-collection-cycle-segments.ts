@@ -2,12 +2,15 @@ import type { CollectionCycle } from '@/api/collection-cycle/validation/collecti
 import type { Session } from '@/api/session/validation/session-schema';
 import type { ReviewSiteSessionSummary } from './review-site-session-summary';
 
-export interface CycleSegment {
+export interface CollectionCycleSegment {
     cycle: CollectionCycle | null;
     sessionSummaryBySiteId: Map<number, ReviewSiteSessionSummary>;
 }
 
-function addSessionToSegment(segment: CycleSegment, session: Session) {
+function addSessionToSegment(
+    segment: CollectionCycleSegment,
+    session: Session,
+) {
     const existing = segment.sessionSummaryBySiteId.get(session.siteId) ?? {
         sessionCount: 0,
         needsReviewCount: 0,
@@ -29,11 +32,11 @@ function addSessionToSegment(segment: CycleSegment, session: Session) {
     });
 }
 
-export function buildCycleSegments(
+export function buildCollectionCycleSegments(
     sessions: Session[],
     cycles: CollectionCycle[],
-): CycleSegment[] {
-    const segmentByCycleId = new Map<number | null, CycleSegment>([
+): CollectionCycleSegment[] {
+    const segmentByCycleId = new Map<number | null, CollectionCycleSegment>([
         ...cycles.map(
             cycle =>
                 [

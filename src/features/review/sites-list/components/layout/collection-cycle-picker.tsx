@@ -11,23 +11,23 @@ import {
 } from '@/components/ui/multi-select';
 import { format } from 'date-fns';
 
-interface CyclePickerProps {
+interface CollectionCyclePickerProps {
     cycles: CollectionCycle[];
     selectedCycleIds: number[];
     onChange: (ids: number[]) => void;
 }
 
-function formatCycleLabel(cycle: CollectionCycle): string {
+function formatCollectionCycleLabel(cycle: CollectionCycle): string {
     const start = format(new Date(cycle.startDate), 'MMM d');
     const end = format(new Date(cycle.endDate), 'MMM d, yyyy');
     return `Cycle ${cycle.cycleNumber} · ${start} – ${end}`;
 }
 
-export default function CyclePicker({
+export default function CollectionCyclePicker({
     cycles,
     selectedCycleIds,
     onChange,
-}: CyclePickerProps) {
+}: CollectionCyclePickerProps) {
     return (
         <MultiSelect
             values={selectedCycleIds.map(String)}
@@ -43,7 +43,7 @@ export default function CyclePicker({
                             key={cycle.id}
                             value={String(cycle.id)}
                         >
-                            {formatCycleLabel(cycle)}
+                            {formatCollectionCycleLabel(cycle)}
                         </MultiSelectItem>
                     ))}
                 </MultiSelectGroup>
