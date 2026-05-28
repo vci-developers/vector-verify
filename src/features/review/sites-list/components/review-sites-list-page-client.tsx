@@ -115,19 +115,23 @@ export default function ReviewSitesListPageClient() {
         setCollapsedSegments,
     ]);
 
+    function resetCycleFilter() {
+        setSelectedCycleIds([]);
+    }
+
     function handleLocationChange(location: string) {
         setSelectedLocation(location);
-        setSelectedCycleIds([]);
+        resetCycleFilter();
     }
 
     function handleStartMonthChange(month: Date) {
         setStartMonth(month);
-        setSelectedCycleIds([]);
+        resetCycleFilter();
     }
 
     function handleEndMonthChange(month: Date) {
         setEndMonth(month);
-        setSelectedCycleIds([]);
+        resetCycleFilter();
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -175,13 +179,15 @@ export default function ReviewSitesListPageClient() {
                             onLocationChange={handleLocationChange}
                         />
                         <div className="flex items-center gap-3">
-                            {isCycleMode && (
-                                <CollectionCyclePicker
-                                    collectionCycles={collectionCycles}
-                                    selectedCycleIds={selectedCycleIds}
-                                    onChange={setSelectedCycleIds}
-                                />
-                            )}
+                            <CollectionCyclePicker
+                                collectionCycles={collectionCycles}
+                                selectedCycleIds={selectedCycleIds}
+                                onChange={setSelectedCycleIds}
+                                disabled={
+                                    isGetCollectionCyclesPending ||
+                                    collectionCycles.length === 0
+                                }
+                            />
                             <MonthRangePicker
                                 startMonth={startMonth}
                                 endMonth={endMonth}

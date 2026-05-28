@@ -24,6 +24,9 @@
         "accessDenied": "Access Denied"
     },
     "CollectionCycle": {
-        "allCycles": "All Collection Cycles"
+        "allCycles": "All Collection Cycles",
+        "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
+        "badgeLabel": "Cycle {cycleNumber}",
+        "unassignedSessions": "Unassigned Sessions"
     }
 }

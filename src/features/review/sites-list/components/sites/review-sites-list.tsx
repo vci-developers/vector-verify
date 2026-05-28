@@ -14,14 +14,12 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
-import {
-    buildCollectionCycleSegments,
-    type CollectionCycleSegment,
-} from '@/features/review/sites-list/utils/build-collection-cycle-segments';
+import { buildCollectionCycleSegments } from '@/features/review/sites-list/utils/build-collection-cycle-segments';
 import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
 import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
 import ReviewSiteHierarchy from '@/features/review/sites-list/components/sites/review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
+import { useTranslations } from 'next-intl';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -54,6 +52,7 @@ export default function ReviewSitesList({
     collapsedSegments,
     setCollapsedSegments,
 }: ReviewSiteListProps) {
+    const t = useTranslations('CollectionCycle');
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -88,19 +87,22 @@ export default function ReviewSitesList({
         return map;
     }, [getAllSessionsResult, isCycleMode]);
 
-    const cycleSegments = useMemo(() => {
+    const allCycleSegments = useMemo(() => {
         if (!isCycleMode || !getAllSessionsResult?.ok) return [];
-        const allCycleSegments = buildCollectionCycleSegments(
+        return buildCollectionCycleSegments(
             getAllSessionsResult.data.sessions,
             collectionCycles,
         );
+    }, [getAllSessionsResult, collectionCycles, isCycleMode]);
+
+    const cycleSegments = useMemo(() => {
         if (selectedCycleIds.length === 0) return allCycleSegments;
         return allCycleSegments.filter(
-            (cycleSegment: CollectionCycleSegment) =>
-                cycleSegment.cycle === null ||
+            cycleSegment =>
+                cycleSegment.cycle !== null &&
                 selectedCycleIds.includes(cycleSegment.cycle.id),
         );
-    }, [getAllSessionsResult, collectionCycles, isCycleMode, selectedCycleIds]);
+    }, [allCycleSegments, selectedCycleIds]);
 
     function toggleSiteRow(path: string, descendantPaths: string[]) {
         setExpandedSitePaths(previousPaths => {
@@ -196,8 +198,8 @@ export default function ReviewSitesList({
 
                     const label =
                         cycleSegment.cycle !== null
-                            ? formatCollectionCycleLabel(cycleSegment.cycle)
-                            : 'Unassigned Sessions';
+                            ? formatCollectionCycleLabel(cycleSegment.cycle, t)
+                            : t('unassignedSessions');
 
                     return (
                         <Collapsible

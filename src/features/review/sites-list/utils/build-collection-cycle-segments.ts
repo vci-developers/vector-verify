@@ -24,16 +24,20 @@ export function buildCollectionCycleSegments(
     ]);
 
     for (const session of sessions) {
-        const cycleSegment = segmentByCycleId.get(session.collectionCycleId);
-        if (cycleSegment) {
-            cycleSegment.sessionSummaryBySiteId.set(
-                session.siteId,
-                accumulateSessionSummary(
-                    cycleSegment.sessionSummaryBySiteId.get(session.siteId),
-                    session,
-                ),
-            );
-        }
+        const { collectionCycleId } = session;
+        const resolvedCycleId =
+            collectionCycleId !== null &&
+            segmentByCycleId.has(collectionCycleId)
+                ? collectionCycleId
+                : null;
+        const cycleSegment = segmentByCycleId.get(resolvedCycleId)!;
+        cycleSegment.sessionSummaryBySiteId.set(
+            session.siteId,
+            accumulateSessionSummary(
+                cycleSegment.sessionSummaryBySiteId.get(session.siteId),
+                session,
+            ),
+        );
     }
 
     const assignedSegments = cycles.map(

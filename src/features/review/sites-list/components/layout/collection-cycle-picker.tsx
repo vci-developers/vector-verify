@@ -16,21 +16,29 @@ interface CollectionCyclePickerProps {
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
     onChange: (ids: number[]) => void;
+    disabled?: boolean;
 }
 
 export default function CollectionCyclePicker({
     collectionCycles,
     selectedCycleIds,
     onChange,
+    disabled,
 }: CollectionCyclePickerProps) {
     const t = useTranslations('CollectionCycle');
 
+    const selectedCycleIdStrings = selectedCycleIds.map(String);
+
+    function handleStringIdsChange(stringIds: string[]) {
+        onChange(stringIds.map(Number));
+    }
+
     return (
         <MultiSelect
-            values={selectedCycleIds.map(String)}
-            onValuesChange={values => onChange(values.map(Number))}
+            values={selectedCycleIdStrings}
+            onValuesChange={handleStringIdsChange}
         >
-            <MultiSelectTrigger className="w-52">
+            <MultiSelectTrigger className="w-52" disabled={disabled}>
                 <MultiSelectValue
                     placeholder={t('allCycles')}
                     overflowBehavior="cutoff"
@@ -42,10 +50,12 @@ export default function CollectionCyclePicker({
                         <MultiSelectItem
                             key={cycle.id}
                             value={String(cycle.id)}
-                            badgeLabel={`Cycle ${cycle.cycleNumber}`}
+                            badgeLabel={t('badgeLabel', {
+                                cycleNumber: cycle.cycleNumber,
+                            })}
                             className="pr-6"
                         >
-                            {formatCollectionCycleLabel(cycle)}
+                            {formatCollectionCycleLabel(cycle, t)}
                         </MultiSelectItem>
                     ))}
                 </MultiSelectGroup>
