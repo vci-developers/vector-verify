@@ -52,10 +52,10 @@ from a Collection Schedule, used to group Sessions for Review and reporting.
 Replaces the default calendar-month grouping. Cycles are program-scoped — all
 sites in a program share the same schedule. A session whose collection date
 falls outside any cycle window can be manually re-assigned to an adjacent cycle
-by a VCO during Review (the exception case). Note: adoption is not yet
-universal — programs without a Collection Schedule, or sessions created before
-one was established, produce sessions with no cycle assignment. _Avoid_:
-Reporting period, month (when a custom cycle is in use)
+by a VCO during Review (the exception case). Note: adoption is not yet universal
+— programs without a Collection Schedule, or sessions created before one was
+established, produce sessions with no cycle assignment. _Avoid_: Reporting
+period, month (when a custom cycle is in use)
 
 **Session**: A single field data collection event at a site, conducted by a VHT
 using the VectorCam mobile app. Only sessions of type `SURVEILLANCE` enter the
@@ -96,7 +96,9 @@ annotation. _Avoid_: Image-based
 - A **Program** contains many **Sites**
 - A **Site** hosts many **Sessions**
 - A **Session** contains many **Specimens**
-- A **Session** optionally belongs to one **Collection Cycle**; sessions from programs without a Collection Schedule, or created before a schedule was established, have no cycle
+- A **Session** optionally belongs to one **Collection Cycle**; sessions from
+  programs without a Collection Schedule, or created before a schedule was
+  established, have no cycle
 - A **Specimen** belongs to exactly one **Session**
 - An **Annotation Task** contains many **Specimens** drawn from across sessions
 - A **VCO** performs **Annotation** (via Annotation Tasks) and **Review** (via
