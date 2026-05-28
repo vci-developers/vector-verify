@@ -96,7 +96,6 @@ export default function ReviewSitesListPageClient() {
         setCollapsedMonths,
     ]);
 
-    const programId = descendantsOfSelectedLocation[0]?.programId;
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 

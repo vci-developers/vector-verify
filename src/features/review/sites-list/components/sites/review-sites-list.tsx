@@ -13,6 +13,11 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
+import {
+    buildCollectionCycleSegments,
+    type CollectionCycleSegment,
+} from '@/features/review/sites-list/utils/build-collection-cycle-segments';
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 
@@ -187,7 +192,7 @@ export default function ReviewSitesList({
                         cycleSegment.cycle !== null
                             ? String(cycleSegment.cycle.id)
                             : 'unassigned';
-                    const isCollapsed = collapsedSegmentKeys.has(key);
+                    const isCollapsed = collapsedMonths.has(key);
 
                     const segmentStartDate =
                         cycleSegment.cycle !== null
@@ -222,23 +227,17 @@ export default function ReviewSitesList({
                                 </span>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
-                                <ReviewSiteListDateRangeContext.Provider
-                                    value={{
-                                        startDate: segmentStartDate,
-                                        endDate: segmentEndDate,
-                                    }}
-                                >
-                                    <ReviewSiteHierarchy
-                                        sites={sites}
-                                        depth={0}
-                                        parentPath={key}
-                                        sessionCountsBySiteId={
-                                            cycleSegment.sessionSummaryBySiteId
-                                        }
-                                        expandedSitePaths={expandedSitePaths}
-                                        onToggle={toggleSiteRow}
-                                    />
-                                </ReviewSiteListDateRangeContext.Provider>
+                                <ReviewSiteHierarchy
+                                    sites={sites}
+                                    parentPath={key}
+                                    startDate={segmentStartDate}
+                                    endDate={segmentEndDate}
+                                    sessionCountsBySiteId={
+                                        cycleSegment.sessionSummaryBySiteId
+                                    }
+                                    expandedSitePaths={expandedSitePaths}
+                                    onTogglePath={toggleSiteRow}
+                                />
                             </CollapsibleContent>
                         </Collapsible>
                     );
@@ -272,7 +271,11 @@ export default function ReviewSitesList({
                             <ReviewSiteHierarchy
                                 sites={sites}
                                 parentPath={monthKey}
-                                monthKey={monthKey}
+                                startDate={format(month, 'yyyy-MM-dd')}
+                                endDate={format(
+                                    endOfMonth(month),
+                                    'yyyy-MM-dd',
+                                )}
                                 sessionCountsBySiteId={sessionCountsBySiteId}
                                 expandedSitePaths={expandedSitePaths}
                                 onTogglePath={toggleSiteRow}
