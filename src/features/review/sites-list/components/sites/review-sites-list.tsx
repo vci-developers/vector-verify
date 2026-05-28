@@ -5,7 +5,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
-import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
+import { eachMonthOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
-import { ReviewSiteListMonthKeyContext } from '../../hooks/use-review-sites-list-month-key';
+import { ReviewSiteListDateRangeContext } from '@/features/review/sites-list/hooks/use-review-sites-list-date-range';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -154,6 +154,12 @@ export default function ReviewSitesList({
                     new Map<number, ReviewSiteSessionSummary>();
                 const isCollapsed = collapsedMonths.has(monthKey);
 
+                const segmentStartDate = format(
+                    startOfMonth(month),
+                    'yyyy-MM-dd',
+                );
+                const segmentEndDate = format(endOfMonth(month), 'yyyy-MM-dd');
+
                 return (
                     <Collapsible
                         key={monthKey}
@@ -167,8 +173,11 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteListMonthKeyContext.Provider
-                                value={monthKey}
+                            <ReviewSiteListDateRangeContext.Provider
+                                value={{
+                                    startDate: segmentStartDate,
+                                    endDate: segmentEndDate,
+                                }}
                             >
                                 <ReviewSiteHierarchy
                                     sites={sites}
@@ -180,7 +189,7 @@ export default function ReviewSitesList({
                                     expandedSitePaths={expandedSitePaths}
                                     onToggle={toggleSiteRow}
                                 />
-                            </ReviewSiteListMonthKeyContext.Provider>
+                            </ReviewSiteListDateRangeContext.Provider>
                         </CollapsibleContent>
                     </Collapsible>
                 );

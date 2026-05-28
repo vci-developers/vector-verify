@@ -5,8 +5,7 @@ import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 import { Fragment } from 'react';
-import { useReviewSiteListMonthKey } from '../../hooks/use-review-sites-list-month-key';
-import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
+import { useReviewSiteListDateRange } from '@/features/review/sites-list/hooks/use-review-sites-list-date-range';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
@@ -24,9 +23,7 @@ export default function ReviewSiteLeafRows({
     getDisplayName,
     sessionCountsBySiteId,
 }: ReviewSiteLeafRowsProps) {
-    const monthKey = useReviewSiteListMonthKey();
-    const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
+    const { startDate, endDate } = useReviewSiteListDateRange();
 
     return (
         <div className="space-y-1">
