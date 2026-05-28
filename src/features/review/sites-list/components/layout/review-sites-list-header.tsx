@@ -9,7 +9,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ReviewTab } from '../review-sites-list-page-client';
+import type { ReviewTab } from '@/features/review/sites-list/components/review-sites-list-page-client';
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
+import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 
 interface ReviewSitesListHeaderProps {
     tabs: readonly { value: ReviewTab; label: string }[];
@@ -23,6 +25,9 @@ interface ReviewSitesListHeaderProps {
     endMonth: Date;
     onStartMonthChange: (month: Date) => void;
     onEndMonthChange: (month: Date) => void;
+    collectionCycles: CollectionCycle[];
+    selectedCycleIds: number[];
+    onCycleIdsChange: (ids: number[]) => void;
 }
 
 export default function ReviewSitesListHeader({
@@ -37,6 +42,9 @@ export default function ReviewSitesListHeader({
     endMonth,
     onStartMonthChange,
     onEndMonthChange,
+    collectionCycles,
+    selectedCycleIds,
+    onCycleIdsChange,
 }: ReviewSitesListHeaderProps) {
     return (
         <div className="space-y-4">
@@ -62,13 +70,22 @@ export default function ReviewSitesListHeader({
                     </SelectContent>
                 </Select>
 
-                <MonthRangePicker
-                    startMonth={startMonth}
-                    endMonth={endMonth}
-                    onStartMonthChange={onStartMonthChange}
-                    onEndMonthChange={onEndMonthChange}
-                    maxDate={new Date()}
-                />
+                <div className="flex items-center gap-3">
+                    {collectionCycles.length > 0 && (
+                        <CollectionCyclePicker
+                            collectionCycles={collectionCycles}
+                            selectedCycleIds={selectedCycleIds}
+                            onChange={onCycleIdsChange}
+                        />
+                    )}
+                    <MonthRangePicker
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={onStartMonthChange}
+                        onEndMonthChange={onEndMonthChange}
+                        maxDate={new Date()}
+                    />
+                </div>
             </div>
 
             <Tabs

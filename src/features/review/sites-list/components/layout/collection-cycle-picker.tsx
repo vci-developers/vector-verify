@@ -12,7 +12,7 @@ import {
 import { format } from 'date-fns';
 
 interface CollectionCyclePickerProps {
-    cycles: CollectionCycle[];
+    collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
     onChange: (ids: number[]) => void;
 }
@@ -24,7 +24,7 @@ function formatCollectionCycleLabel(cycle: CollectionCycle): string {
 }
 
 export default function CollectionCyclePicker({
-    cycles,
+    collectionCycles,
     selectedCycleIds,
     onChange,
 }: CollectionCyclePickerProps) {
@@ -34,11 +34,11 @@ export default function CollectionCyclePicker({
             onValuesChange={values => onChange(values.map(Number))}
         >
             <MultiSelectTrigger className="w-52">
-                <MultiSelectValue placeholder="All cycles" />
+                <MultiSelectValue placeholder="All collectionCycles" />
             </MultiSelectTrigger>
             <MultiSelectContent search={false}>
                 <MultiSelectGroup>
-                    {cycles.map(cycle => (
+                    {collectionCycles.map(cycle => (
                         <MultiSelectItem
                             key={cycle.id}
                             value={String(cycle.id)}

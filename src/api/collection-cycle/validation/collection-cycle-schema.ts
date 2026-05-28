@@ -21,7 +21,7 @@ export const collectionCycleSchema = z.object({
     endDate: z.number(),
     createdAt: z.number(),
     updatedAt: z.number(),
-    collectionSchedule: collectionScheduleSchema,
+    collectionSchedule: collectionScheduleSchema.optional(),
 });
 
 export const getCollectionCyclesQueryParamsSchema = z.object({

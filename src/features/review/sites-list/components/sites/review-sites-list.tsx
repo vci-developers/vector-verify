@@ -5,7 +5,12 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
-import { eachMonthOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
+import {
+    eachMonthOfInterval,
+    endOfMonth,
+    format,
+    startOfMonth,
+} from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -16,12 +21,20 @@ import {
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
 import { ReviewSiteListDateRangeContext } from '@/features/review/sites-list/hooks/use-review-sites-list-date-range';
+import {
+    buildCollectionCycleSegments,
+    type CollectionCycleSegment,
+} from '@/features/review/sites-list/utils/build-collection-cycle-segments';
+
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 
 interface ReviewSiteListProps {
     sites: Site[];
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
+    collectionCycles: CollectionCycle[];
+    selectedCycleIds: number[];
 }
 
 export default function ReviewSitesList({
@@ -29,13 +42,15 @@ export default function ReviewSitesList({
     locationQueryParam,
     startMonth,
     endMonth,
+    collectionCycles,
+    selectedCycleIds,
 }: ReviewSiteListProps) {
     const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
         new Set(),
     );
-    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
-        new Set(),
-    );
+    const [collapsedSegmentKeys, setCollapsedSegmentKeys] = useState<
+        Set<string>
+    >(new Set());
 
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -48,11 +63,12 @@ export default function ReviewSitesList({
             type: 'SURVEILLANCE',
         });
 
+    const isCycleMode = collectionCycles.length > 0;
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
     const monthToSiteIdCounts = useMemo(() => {
         const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
-        if (!getAllSessionsResult?.ok) return map;
+        if (isCycleMode || !getAllSessionsResult?.ok) return map;
 
         for (const session of getAllSessionsResult.data.sessions) {
             const monthKey = format(
@@ -86,7 +102,21 @@ export default function ReviewSitesList({
         }
 
         return map;
-    }, [getAllSessionsResult]);
+    }, [getAllSessionsResult, isCycleMode]);
+
+    const cycleSegments = useMemo(() => {
+        if (!isCycleMode || !getAllSessionsResult?.ok) return [];
+        const allCycleSegments = buildCollectionCycleSegments(
+            getAllSessionsResult.data.sessions,
+            collectionCycles,
+        );
+        if (selectedCycleIds.length === 0) return allCycleSegments;
+        return allCycleSegments.filter(
+            (cycleSegment: CollectionCycleSegment) =>
+                cycleSegment.cycle === null ||
+                selectedCycleIds.includes(cycleSegment.cycle.id),
+        );
+    }, [getAllSessionsResult, collectionCycles, isCycleMode, selectedCycleIds]);
 
     function toggleSiteRow(path: string) {
         setExpandedSitePaths(previousPaths => {
@@ -97,12 +127,12 @@ export default function ReviewSitesList({
         });
     }
 
-    function toggleMonth(monthKey: string) {
-        setCollapsedMonths(previousMonths => {
-            const nextMonths = new Set(previousMonths);
-            if (nextMonths.has(monthKey)) nextMonths.delete(monthKey);
-            else nextMonths.add(monthKey);
-            return nextMonths;
+    function toggleSegment(key: string) {
+        setCollapsedSegmentKeys(previous => {
+            const next = new Set(previous);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
+            return next;
         });
     }
 
@@ -145,6 +175,74 @@ export default function ReviewSitesList({
         );
     }
 
+    if (isCycleMode) {
+        return (
+            <div className="space-y-2">
+                {cycleSegments.map(cycleSegment => {
+                    const key =
+                        cycleSegment.cycle !== null
+                            ? String(cycleSegment.cycle.id)
+                            : 'unassigned';
+                    const isCollapsed = collapsedSegmentKeys.has(key);
+
+                    const segmentStartDate =
+                        cycleSegment.cycle !== null
+                            ? format(
+                                  new Date(cycleSegment.cycle.startDate),
+                                  'yyyy-MM-dd',
+                              )
+                            : startDate;
+                    const segmentEndDate =
+                        cycleSegment.cycle !== null
+                            ? format(
+                                  new Date(cycleSegment.cycle.endDate),
+                                  'yyyy-MM-dd',
+                              )
+                            : endDate;
+
+                    const label =
+                        cycleSegment.cycle !== null
+                            ? `Cycle ${cycleSegment.cycle.cycleNumber} · ${format(new Date(cycleSegment.cycle.startDate), 'MMM d')} – ${format(new Date(cycleSegment.cycle.endDate), 'MMM d, yyyy')}`
+                            : 'Unassigned Sessions';
+
+                    return (
+                        <Collapsible
+                            key={key}
+                            open={!isCollapsed}
+                            onOpenChange={() => toggleSegment(key)}
+                        >
+                            <CollapsibleTrigger className="group flex w-full items-center gap-2 py-3">
+                                <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                                <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+                                    {label}
+                                </span>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <ReviewSiteListDateRangeContext.Provider
+                                    value={{
+                                        startDate: segmentStartDate,
+                                        endDate: segmentEndDate,
+                                    }}
+                                >
+                                    <ReviewSiteHierarchy
+                                        sites={sites}
+                                        depth={0}
+                                        parentPath={key}
+                                        sessionCountsBySiteId={
+                                            cycleSegment.sessionSummaryBySiteId
+                                        }
+                                        expandedSitePaths={expandedSitePaths}
+                                        onToggle={toggleSiteRow}
+                                    />
+                                </ReviewSiteListDateRangeContext.Provider>
+                            </CollapsibleContent>
+                        </Collapsible>
+                    );
+                })}
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-2">
             {months.map(month => {
@@ -152,7 +250,7 @@ export default function ReviewSitesList({
                 const sessionCountsBySiteId =
                     monthToSiteIdCounts.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
-                const isCollapsed = collapsedMonths.has(monthKey);
+                const isCollapsed = collapsedSegmentKeys.has(monthKey);
 
                 const segmentStartDate = format(
                     startOfMonth(month),
@@ -164,7 +262,7 @@ export default function ReviewSitesList({
                     <Collapsible
                         key={monthKey}
                         open={!isCollapsed}
-                        onOpenChange={() => toggleMonth(monthKey)}
+                        onOpenChange={() => toggleSegment(monthKey)}
                     >
                         <CollapsibleTrigger className="group flex w-full items-center gap-2 py-3">
                             <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />

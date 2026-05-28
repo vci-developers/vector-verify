@@ -3,14 +3,15 @@
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { startOfMonth, subMonths } from 'date-fns';
+import { format, startOfMonth, subMonths, endOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { Fragment, useState } from 'react';
-import ReviewSitesListHeader from './layout/review-sites-list-header';
+import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
+import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 
 const REVIEW_TABS = [{ value: 'sites-list', label: 'SITES LIST' }] as const;
 
@@ -22,6 +23,7 @@ export default function ReviewSitesListPageClient() {
         startOfMonth(subMonths(new Date(), 2)),
     );
     const [endMonth, setEndMonth] = useState(() => startOfMonth(new Date()));
+    const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
 
     const {
         data: getUserPermissionsResult,
@@ -40,6 +42,34 @@ export default function ReviewSitesListPageClient() {
         locationQueryParam,
         descendantsOfSelectedLocation,
     } = useLocationSelection(accessibleSites);
+
+    const programId = descendantsOfSelectedLocation[0]?.programId;
+    const startDate = format(startMonth, 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
+
+    const { data: getCollectionCyclesResult } = useGetCollectionCycles(
+        { programId: programId ?? 0, startDate, endDate },
+        { enabled: programId !== undefined },
+    );
+
+    const collectionCycles = getCollectionCyclesResult?.ok
+        ? getCollectionCyclesResult.data.collectionCycles
+        : [];
+
+    function handleLocationChange(location: string) {
+        setSelectedLocation(location);
+        setSelectedCycleIds([]);
+    }
+
+    function handleStartMonthChange(month: Date) {
+        setStartMonth(month);
+        setSelectedCycleIds([]);
+    }
+
+    function handleEndMonthChange(month: Date) {
+        setEndMonth(month);
+        setSelectedCycleIds([]);
+    }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -82,11 +112,14 @@ export default function ReviewSitesListPageClient() {
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocation={selectedLocation}
-                        onLocationChange={setSelectedLocation}
+                        onLocationChange={handleLocationChange}
                         startMonth={startMonth}
                         endMonth={endMonth}
-                        onStartMonthChange={setStartMonth}
-                        onEndMonthChange={setEndMonth}
+                        onStartMonthChange={handleStartMonthChange}
+                        onEndMonthChange={handleEndMonthChange}
+                        collectionCycles={collectionCycles}
+                        selectedCycleIds={selectedCycleIds}
+                        onCycleIdsChange={setSelectedCycleIds}
                     />
 
                     <Separator />
@@ -109,6 +142,8 @@ export default function ReviewSitesListPageClient() {
                                     locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
+                                    collectionCycles={collectionCycles}
+                                    selectedCycleIds={selectedCycleIds}
                                 />
                             )}
                         </Fragment>
