@@ -85,7 +85,7 @@ export default function AnnotationForm({
     const watchSex = annotationForm.watch('visualSex');
     const watchIsFlagged = annotationForm.watch('isFlagged');
 
-    const isNonMosquito = watchGenus === 'Non mosquito';
+    const isNonMosquito = watchGenus === 'Non-Mosquito';
     const isAnopheles = watchGenus === 'Anopheles';
     const isMale = watchSex === 'Male';
 

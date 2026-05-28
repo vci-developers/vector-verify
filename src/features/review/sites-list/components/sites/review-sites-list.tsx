@@ -3,14 +3,9 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
-import {
-    eachMonthOfInterval,
-    endOfMonth,
-    format,
-    startOfMonth,
-} from 'date-fns';
+import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -20,13 +15,6 @@ import {
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
-import { ReviewSiteListDateRangeContext } from '@/features/review/sites-list/hooks/use-review-sites-list-date-range';
-import {
-    buildCollectionCycleSegments,
-    type CollectionCycleSegment,
-} from '@/features/review/sites-list/utils/build-collection-cycle-segments';
-
-import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 
 interface ReviewSiteListProps {
     sites: Site[];
@@ -35,6 +23,14 @@ interface ReviewSiteListProps {
     endMonth: Date;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
+    expandedSitePaths: Set<string>;
+    setExpandedSitePaths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
+    collapsedMonths: Set<string>;
+    setCollapsedMonths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
 }
 
 export default function ReviewSitesList({
@@ -44,14 +40,11 @@ export default function ReviewSitesList({
     endMonth,
     collectionCycles,
     selectedCycleIds,
+    expandedSitePaths,
+    setExpandedSitePaths,
+    collapsedMonths,
+    setCollapsedMonths,
 }: ReviewSiteListProps) {
-    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
-        new Set(),
-    );
-    const [collapsedSegmentKeys, setCollapsedSegmentKeys] = useState<
-        Set<string>
-    >(new Set());
-
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -66,7 +59,7 @@ export default function ReviewSitesList({
     const isCycleMode = collectionCycles.length > 0;
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
-    const monthToSiteIdCounts = useMemo(() => {
+    const sessionSummariesByMonth = useMemo(() => {
         const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
         if (isCycleMode || !getAllSessionsResult?.ok) return map;
 
@@ -78,11 +71,12 @@ export default function ReviewSitesList({
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;
-            const current = monthMap.get(session.siteId) ?? {
+            const existingSiteSummary = monthMap.get(session.siteId) ?? {
                 sessionCount: 0,
                 needsReviewCount: 0,
                 isLocked: true,
                 isCertified: true,
+                isSubmitted: true,
             };
 
             const isLockedSessionState =
@@ -90,14 +84,18 @@ export default function ReviewSitesList({
                 session.state === 'SUBMITTED' ||
                 session.state === 'NOT_APPLICABLE';
             const isCertifiedSessionState = session.state === 'CERTIFIED';
+            const isSubmittedSessionState = session.state === 'SUBMITTED';
 
             monthMap.set(session.siteId, {
-                sessionCount: current.sessionCount + 1,
+                sessionCount: existingSiteSummary.sessionCount + 1,
                 needsReviewCount:
-                    current.needsReviewCount +
+                    existingSiteSummary.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-                isLocked: current.isLocked && isLockedSessionState,
-                isCertified: current.isCertified && isCertifiedSessionState,
+                isLocked: existingSiteSummary.isLocked && isLockedSessionState,
+                isCertified:
+                    existingSiteSummary.isCertified && isCertifiedSessionState,
+                isSubmitted:
+                    existingSiteSummary.isSubmitted && isSubmittedSessionState,
             });
         }
 
@@ -118,17 +116,23 @@ export default function ReviewSitesList({
         );
     }, [getAllSessionsResult, collectionCycles, isCycleMode, selectedCycleIds]);
 
-    function toggleSiteRow(path: string) {
+    function toggleSiteRow(path: string, descendantPaths: string[]) {
         setExpandedSitePaths(previousPaths => {
             const nextPaths = new Set(previousPaths);
-            if (nextPaths.has(path)) nextPaths.delete(path);
-            else nextPaths.add(path);
+            if (nextPaths.has(path)) {
+                nextPaths.delete(path);
+            } else {
+                nextPaths.add(path);
+                descendantPaths.forEach(descendantPath =>
+                    nextPaths.add(descendantPath),
+                );
+            }
             return nextPaths;
         });
     }
 
     function toggleSegment(key: string) {
-        setCollapsedSegmentKeys(previous => {
+        setCollapsedMonths(previous => {
             const next = new Set(previous);
             if (next.has(key)) next.delete(key);
             else next.add(key);
@@ -248,15 +252,9 @@ export default function ReviewSitesList({
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
                 const sessionCountsBySiteId =
-                    monthToSiteIdCounts.get(monthKey) ??
+                    sessionSummariesByMonth.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
-                const isCollapsed = collapsedSegmentKeys.has(monthKey);
-
-                const segmentStartDate = format(
-                    startOfMonth(month),
-                    'yyyy-MM-dd',
-                );
-                const segmentEndDate = format(endOfMonth(month), 'yyyy-MM-dd');
+                const isCollapsed = collapsedMonths.has(monthKey);
 
                 return (
                     <Collapsible
@@ -271,23 +269,14 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteListDateRangeContext.Provider
-                                value={{
-                                    startDate: segmentStartDate,
-                                    endDate: segmentEndDate,
-                                }}
-                            >
-                                <ReviewSiteHierarchy
-                                    sites={sites}
-                                    depth={0}
-                                    parentPath={monthKey}
-                                    sessionCountsBySiteId={
-                                        sessionCountsBySiteId
-                                    }
-                                    expandedSitePaths={expandedSitePaths}
-                                    onToggle={toggleSiteRow}
-                                />
-                            </ReviewSiteListDateRangeContext.Provider>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                parentPath={monthKey}
+                                monthKey={monthKey}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
+                                expandedSitePaths={expandedSitePaths}
+                                onTogglePath={toggleSiteRow}
+                            />
                         </CollapsibleContent>
                     </Collapsible>
                 );

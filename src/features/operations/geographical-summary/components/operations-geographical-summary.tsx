@@ -20,6 +20,8 @@ interface OperationsGeographicalSummaryProps {
     descendantsOfSelectedLocation: Site[];
     startDate: string;
     endDate: string;
+    selectedMarkerId: string | null;
+    setSelectedMarkerId: (value: string | null) => void;
 }
 
 export default function OperationsGeographicalSummary({
@@ -28,6 +30,8 @@ export default function OperationsGeographicalSummary({
     descendantsOfSelectedLocation,
     startDate,
     endDate,
+    selectedMarkerId,
+    setSelectedMarkerId,
 }: OperationsGeographicalSummaryProps) {
     const { markers, totalSites, isPending, isError } = useSiteMarkers({
         locationQueryParam,
@@ -62,6 +66,8 @@ export default function OperationsGeographicalSummary({
                         <SiteMap
                             markers={markers}
                             selectedLocation={selectedLocation}
+                            selectedMarkerId={selectedMarkerId}
+                            onMarkerSelect={setSelectedMarkerId}
                         />
                     ) : isPending ? (
                         <Skeleton className="h-full w-full rounded-md" />
@@ -78,6 +84,8 @@ export default function OperationsGeographicalSummary({
                         <SiteMap
                             markers={markers}
                             selectedLocation={selectedLocation}
+                            selectedMarkerId={selectedMarkerId}
+                            onMarkerSelect={setSelectedMarkerId}
                         />
                     )}
                 </CardContent>

@@ -8,21 +8,33 @@ import { Fragment } from 'react';
 interface ReviewSiteDetailsHeaderProps {
     steps: readonly { label: string }[];
     currentStepIndex: number;
+    siteName?: string;
 }
 
 export default function ReviewSiteDetailsHeader({
     steps,
     currentStepIndex,
+    siteName,
 }: ReviewSiteDetailsHeaderProps) {
     return (
         <div className="space-y-4">
-            <Link
-                href="/review"
-                className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
-            >
-                <ChevronLeft className="h-4 w-3" />
-                Back to Sites
-            </Link>
+            <div className="flex items-center gap-3">
+                <Link
+                    href="/review"
+                    className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
+                >
+                    <ChevronLeft className="h-4 w-3" />
+                    Back to Sites
+                </Link>
+                {siteName && (
+                    <Fragment>
+                        <span className="text-muted-foreground text-sm">|</span>
+                        <span className="text-foreground text-sm font-medium">
+                            {siteName}
+                        </span>
+                    </Fragment>
+                )}
+            </div>
 
             <div className="flex items-center justify-center">
                 {steps.map((step, index) => {

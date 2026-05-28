@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
+import { networkErrorMessage } from '@/lib/network/network-error';
 import { Button } from '@/components/ui/button';
 import ImageReviewCarousel from './image-review-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
@@ -45,7 +46,9 @@ export default function ImageReviewWorkspace({
     }
 
     if (!getAllSpecimensResult.ok) {
-        return <h1>Error: {getAllSpecimensResult.error.message}</h1>;
+        return (
+            <h1>Error: {networkErrorMessage(getAllSpecimensResult.error)}</h1>
+        );
     }
 
     const allSpecimensForSite = getAllSpecimensResult.data.specimens;
