@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import type { LatLngBoundsExpression, LatLngExpression } from 'leaflet';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { useSiteGeocode } from '../hooks/use-site-geocode';
@@ -19,15 +19,18 @@ const DEFAULT_ZOOM = 2;
 interface SiteMapProps {
     markers: SiteMarker[];
     selectedLocation: string;
+    selectedMarkerId: string | null;
+    onMarkerSelect: (id: string | null) => void;
 }
 
-export default function SiteMap({ markers, selectedLocation }: SiteMapProps) {
+export default function SiteMap({
+    markers,
+    selectedLocation,
+    selectedMarkerId,
+    onMarkerSelect,
+}: SiteMapProps) {
     const { markerIdsToGeocodedPosition, isGeocoding } =
         useSiteGeocode(markers);
-
-    const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
-        null,
-    );
 
     const markerBounds = useMemo((): LatLngBoundsExpression | null => {
         const geocodedPositions = markers.flatMap(marker => {
@@ -69,7 +72,7 @@ export default function SiteMap({ markers, selectedLocation }: SiteMapProps) {
                             markerIdsToGeocodedPosition
                         }
                         selectedMarkerId={selectedMarkerId}
-                        onMarkerSelect={setSelectedMarkerId}
+                        onMarkerSelect={onMarkerSelect}
                     />
                 </MapContainer>
                 {isGeocoding && (
@@ -84,7 +87,7 @@ export default function SiteMap({ markers, selectedLocation }: SiteMapProps) {
             <MarkerInfoPanel
                 markers={markers}
                 selectedMarkerId={selectedMarkerId}
-                onMarkerSelect={setSelectedMarkerId}
+                onMarkerSelect={onMarkerSelect}
                 isLoading={isGeocoding}
             />
         </div>

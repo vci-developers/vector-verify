@@ -36,6 +36,7 @@ import {
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
 import LogoutButton from '../auth-session/logout-button';
+import LocaleSwitcher from './locale-switcher';
 
 type NavigationItem = {
     name: string;
@@ -182,6 +183,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 <ThemeIcon className="h-4 w-4" />
                                 {isDark ? 'Light mode' : 'Dark mode'}
                             </DropdownMenuItem>
+                            <LocaleSwitcher />
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
                                 <LogoutButton />

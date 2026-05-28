@@ -52,7 +52,7 @@ export const annotationFormSchema = z
                         'Species is required for Anopheles genus unless the specimen is flagged.',
                 });
             }
-            if (visualGenus !== 'Non mosquito' && !visualSex) {
+            if (visualGenus !== 'Non-Mosquito' && !visualSex) {
                 context.addIssue({
                     path: ['visualSex'],
                     code: 'custom',
@@ -60,7 +60,7 @@ export const annotationFormSchema = z
                 });
             }
             if (
-                visualGenus !== 'Non mosquito' &&
+                visualGenus !== 'Non-Mosquito' &&
                 visualSex !== 'Male' &&
                 !visualAbdomenStatus
             ) {
