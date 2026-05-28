@@ -16,6 +16,7 @@ function addSessionToSegment(
         needsReviewCount: 0,
         isLocked: true,
         isCertified: true,
+        isSubmitted: true,
     };
 
     segment.sessionSummaryBySiteId.set(session.siteId, {
@@ -29,6 +30,7 @@ function addSessionToSegment(
                 session.state === 'SUBMITTED' ||
                 session.state === 'NOT_APPLICABLE'),
         isCertified: existing.isCertified && session.state === 'CERTIFIED',
+        isSubmitted: existing.isSubmitted && session.state === 'SUBMITTED',
     });
 }
 
