@@ -99,6 +99,47 @@ annotation. _Avoid_: Image-based
   the Review workflow)
 - A **VHT** creates **Sessions** and **Specimens** via the VectorCam mobile app
 
+## UI Patterns
+
+### Loading and Error State Ownership
+
+**Component-level ownership**: Each data-bound component owns its own
+`isPending`/error handling and renders its own skeleton and error UI inline.
+Page-level components do not gate rendering on behalf of children.
+
+**Exception — permissions gate**: `operations-page-client.tsx` checks
+permissions at the page level before rendering any tabs. This is deliberate:
+permissions are a hard prerequisite for all content on that page, not a content
+load.
+
+**Skeleton fidelity**: Large-region components (maps, tables, chart panels) use
+content-shaped skeletons whose dimensions match the real content's bounds to
+avoid layout shift. Small inline components (stat cards, badge counts) use the
+generic `<Skeleton>` with appropriate height/width props. A skeleton whose
+dimensions do not roughly match its real content is wrong.
+
+**`<ErrorState>` component** (`src/components/ui/`): A thin wrapper over
+`<Skeleton variant="destructive">`. Accepts the same sizing props and adds a
+generic "Something went wrong" message and an `onRetry` callback (wired to
+`refetch()`). Never duplicates skeleton visual logic. Error messages from
+`NetworkError` are not surfaced in the UI.
+
+**Mutation errors**: Surface via Sonner toast (already installed, `<Toaster>`
+must be added to root layout). Mutations call
+`toast.error("Something went wrong")` in their `onError` callback. No inline
+error state on the triggering button or form.
+
+**Empty states**: Handled ad-hoc per component with inline text. Do not create a
+shared `<EmptyState>` component until the same pattern appears in at least two
+real callsites.
+
+**Error component selection**:
+
+- `<ErrorState onRetry={refetch}>` — `onRetry` is optional; use for retryable
+  data load failures.
+- `<ErrorBanner message={...}>` — no retry; use for permission/access failures
+  where refetching cannot resolve the problem.
+
 ## Flagged ambiguities
 
 - "Sentinel site" (web app doc language) and "leaf site" (API code language)
