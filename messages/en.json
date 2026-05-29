@@ -2,6 +2,7 @@
     "Common": {
         "loading": "Loading...",
         "error": "Something went wrong",
+        "tryAgain": "Try again",
         "close": "Close",
         "exit": "Exit",
         "next": "Next",
@@ -22,5 +23,9 @@
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
         "accessDenied": "Access Denied"
+    },
+    "Annotation": {
+        "noTasksAssigned": "No tasks assigned",
+        "noAnnotations": "No annotations found"
     }
 }
