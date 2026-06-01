@@ -100,13 +100,13 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
-    const unknownSpecimens = getSpecimenCountForGroundTruthLabel('UNKNOWN');
-    const cannotBeDeterminedSpecimens = getSpecimenCountForGroundTruthLabel(
-        'Cannot be Determined',
+    const EXCLUDED_LABELS = ['UNKNOWN', 'Cannot be Determined'] as const;
+    const excludedSpecimenCounts = EXCLUDED_LABELS.map(label =>
+        getSpecimenCountForGroundTruthLabel(label),
     );
 
     const filteredClassLabels = classLabels.filter(
-        label => label !== 'UNKNOWN' && label !== 'Cannot be Determined',
+        label => !(EXCLUDED_LABELS as readonly string[]).includes(label),
     );
 
     const filteredTotalSpecimens = filteredClassLabels.reduce(
@@ -137,10 +137,15 @@ export default function SpecimenConfusionMatrix({
                         {formatMatrixPercentage(accuracy)}
                     </p>
                     <p className="text-muted-foreground mt-2 text-xs">
-                        {integerCountFormatter.format(totalCorrectPredictions)}{' '}
-                        {t('correctOf')}{' '}
-                        {integerCountFormatter.format(totalSpecimensInMatrix)}{' '}
-                        {classificationCategory} {t('comparisons')}
+                        {t('correctOf', {
+                            numCorrect: integerCountFormatter.format(
+                                totalCorrectPredictions,
+                            ),
+                            total: integerCountFormatter.format(
+                                totalSpecimensInMatrix,
+                            ),
+                            category: classificationCategory,
+                        })}
                     </p>
                 </div>
 
@@ -319,10 +324,12 @@ export default function SpecimenConfusionMatrix({
                             </TableBody>
                         </Table>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {cannotBeDeterminedSpecimens}{' '}
-                            {t('specimensLabeledAs')} {t('cannotBeDetermined')}.{' '}
-                            {unknownSpecimens} {t('specimensLabeledAs')}{' '}
-                            {t('unknown')}.
+                            {EXCLUDED_LABELS.map((label, index) => {
+                                return t('specimensLabeledAs', {
+                                    num: excludedSpecimenCounts[index] ?? 0,
+                                    category: label,
+                                });
+                            })}
                         </p>
                     </div>
 
@@ -331,10 +338,10 @@ export default function SpecimenConfusionMatrix({
                             {t('interpretation')}
                         </h3>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {t('theMatrixCompares')} {classificationCategory}{' '}
-                            {t('labelsFrom')} {selectedLocationName}{' '}
-                            {t('againstVectorCam')} {classificationCategory}{' '}
-                            {t('predictionForDateRange')}
+                            {t('matrixCompares', {
+                                category: classificationCategory,
+                                location: selectedLocationName,
+                            })}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
                             {t('eachCellShows')}
@@ -346,7 +353,7 @@ export default function SpecimenConfusionMatrix({
                             {t('specificityExplanation')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {t('cannotBeDeterminedUnknownExclusion')}
+                            {t('labelExclusionExplanation')}
                         </p>
                     </div>
                 </div>
