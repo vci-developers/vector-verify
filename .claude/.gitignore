@@ -1,0 +1,5 @@
+settings.local.json
+prds/
+plans/
+projects/
+.DS_Store

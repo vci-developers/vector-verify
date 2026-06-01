@@ -3,7 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -15,13 +15,20 @@ import {
 } from '@/components/ui/collapsible';
 import ReviewSiteHierarchy from './review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
-import { ReviewSiteListMonthKeyContext } from '../../hooks/use-review-sites-list-month-key';
 
 interface ReviewSiteListProps {
     sites: Site[];
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
+    expandedSitePaths: Set<string>;
+    setExpandedSitePaths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
+    collapsedMonths: Set<string>;
+    setCollapsedMonths: (
+        value: Set<string> | ((prev: Set<string>) => Set<string>),
+    ) => void;
 }
 
 export default function ReviewSitesList({
@@ -29,14 +36,11 @@ export default function ReviewSitesList({
     locationQueryParam,
     startMonth,
     endMonth,
+    expandedSitePaths,
+    setExpandedSitePaths,
+    collapsedMonths,
+    setCollapsedMonths,
 }: ReviewSiteListProps) {
-    const [expandedSitePaths, setExpandedSitePaths] = useState<Set<string>>(
-        new Set(),
-    );
-    const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
-        new Set(),
-    );
-
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -50,7 +54,7 @@ export default function ReviewSitesList({
 
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
-    const monthToSiteIdCounts = useMemo(() => {
+    const sessionSummariesByMonth = useMemo(() => {
         const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
         if (!getAllSessionsResult?.ok) return map;
 
@@ -62,11 +66,12 @@ export default function ReviewSitesList({
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;
-            const current = monthMap.get(session.siteId) ?? {
+            const existingSiteSummary = monthMap.get(session.siteId) ?? {
                 sessionCount: 0,
                 needsReviewCount: 0,
                 isLocked: true,
                 isCertified: true,
+                isSubmitted: true,
             };
 
             const isLockedSessionState =
@@ -74,25 +79,35 @@ export default function ReviewSitesList({
                 session.state === 'SUBMITTED' ||
                 session.state === 'NOT_APPLICABLE';
             const isCertifiedSessionState = session.state === 'CERTIFIED';
+            const isSubmittedSessionState = session.state === 'SUBMITTED';
 
             monthMap.set(session.siteId, {
-                sessionCount: current.sessionCount + 1,
+                sessionCount: existingSiteSummary.sessionCount + 1,
                 needsReviewCount:
-                    current.needsReviewCount +
+                    existingSiteSummary.needsReviewCount +
                     (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-                isLocked: current.isLocked && isLockedSessionState,
-                isCertified: current.isCertified && isCertifiedSessionState,
+                isLocked: existingSiteSummary.isLocked && isLockedSessionState,
+                isCertified:
+                    existingSiteSummary.isCertified && isCertifiedSessionState,
+                isSubmitted:
+                    existingSiteSummary.isSubmitted && isSubmittedSessionState,
             });
         }
 
         return map;
     }, [getAllSessionsResult]);
 
-    function toggleSiteRow(path: string) {
+    function toggleSiteRow(path: string, descendantPaths: string[]) {
         setExpandedSitePaths(previousPaths => {
             const nextPaths = new Set(previousPaths);
-            if (nextPaths.has(path)) nextPaths.delete(path);
-            else nextPaths.add(path);
+            if (nextPaths.has(path)) {
+                nextPaths.delete(path);
+            } else {
+                nextPaths.add(path);
+                descendantPaths.forEach(descendantPath =>
+                    nextPaths.add(descendantPath),
+                );
+            }
             return nextPaths;
         });
     }
@@ -150,7 +165,7 @@ export default function ReviewSitesList({
             {months.map(month => {
                 const monthKey = format(month, 'yyyy-MM');
                 const sessionCountsBySiteId =
-                    monthToSiteIdCounts.get(monthKey) ??
+                    sessionSummariesByMonth.get(monthKey) ??
                     new Map<number, ReviewSiteSessionSummary>();
                 const isCollapsed = collapsedMonths.has(monthKey);
 
@@ -167,20 +182,14 @@ export default function ReviewSitesList({
                             </span>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteListMonthKeyContext.Provider
-                                value={monthKey}
-                            >
-                                <ReviewSiteHierarchy
-                                    sites={sites}
-                                    depth={0}
-                                    parentPath={monthKey}
-                                    sessionCountsBySiteId={
-                                        sessionCountsBySiteId
-                                    }
-                                    expandedSitePaths={expandedSitePaths}
-                                    onToggle={toggleSiteRow}
-                                />
-                            </ReviewSiteListMonthKeyContext.Provider>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                parentPath={monthKey}
+                                monthKey={monthKey}
+                                sessionCountsBySiteId={sessionCountsBySiteId}
+                                expandedSitePaths={expandedSitePaths}
+                                onTogglePath={toggleSiteRow}
+                            />
                         </CollapsibleContent>
                     </Collapsible>
                 );

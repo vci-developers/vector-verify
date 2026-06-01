@@ -19,6 +19,7 @@ interface ReviewSiteDetailPageProps {
     searchParams: Promise<{
         startDate?: string;
         endDate?: string;
+        displayName?: string;
     }>;
 }
 
@@ -27,7 +28,7 @@ export default async function ReviewSiteDetailPage({
     searchParams,
 }: ReviewSiteDetailPageProps) {
     const siteId = Number((await params).siteId);
-    const { startDate, endDate } = await searchParams;
+    const { startDate, endDate, displayName } = await searchParams;
 
     const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ export default async function ReviewSiteDetailPage({
                 siteId={siteId}
                 startDate={startDate}
                 endDate={endDate}
+                siteName={displayName}
             />
         </HydrationBoundary>
     );

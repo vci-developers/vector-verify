@@ -33,6 +33,7 @@ const eslintConfig = [
                         'src/components/**/*',
                         'src/api/**/*',
                         'src/hooks/**/*',
+                        'src/i18n/**/*',
                         'src/lib/**/*',
                         'src/utils/**/*',
                         'src/server/**/*',
