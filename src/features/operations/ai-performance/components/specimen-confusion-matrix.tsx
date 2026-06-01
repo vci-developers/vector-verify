@@ -26,6 +26,8 @@ interface SpecimenConfusionMatrixProps {
     selectedLocationName: string;
 }
 
+const EXCLUDED_LABELS = ['UNKNOWN', 'Cannot be Determined'] as const;
+
 export default function SpecimenConfusionMatrix({
     title,
     classificationCategory,
@@ -100,7 +102,6 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
-    const EXCLUDED_LABELS = ['UNKNOWN', 'Cannot be Determined'] as const;
     const excludedSpecimenCounts = EXCLUDED_LABELS.map(label =>
         getSpecimenCountForGroundTruthLabel(label),
     );
