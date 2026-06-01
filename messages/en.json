@@ -22,5 +22,9 @@
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
         "accessDenied": "Access Denied"
+    },
+    "ReviewSitesList": {
+        "needsReview": "Needs Review",
+        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
     }
 }
