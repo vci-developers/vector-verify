@@ -3,9 +3,8 @@
 import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { Button } from '@/components/ui/button';
-import SpecimenImageCarousel, {
-    getSpecimenImagesForCarousel,
-} from '@/components/specimen/specimen-image-carousel';
+import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
+import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useState } from 'react';
@@ -27,7 +26,8 @@ export default function ImageReviewWorkspace({
     onGoToPreviousStep,
     onGoToNextStep,
 }: ImageReviewWorkspaceProps) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [currentImageBeingViewed, setCurrentImageBeingViewed] =
+        useState<SpecimenImage | null>(null);
     const {
         page: currentSpecimenNumber,
         nextPage: goToNextSpecimen,
@@ -91,20 +91,14 @@ export default function ImageReviewWorkspace({
     const totalSpecimensToReview = allSpecimensForSite.length;
     const currentSpecimenBeingReviewed =
         allSpecimensForSite[currentSpecimenNumber - 1]!;
-    const currentImageBeingViewed =
-        getSpecimenImagesForCarousel(currentSpecimenBeingReviewed)[
-            currentImageIndex
-        ] ?? null;
     const isOnFirstSpecimen = currentSpecimenNumber === 1;
     const isOnLastSpecimen = currentSpecimenNumber === totalSpecimensToReview;
 
     function handleGoToPreviousSpecimen() {
-        setCurrentImageIndex(0);
         goToPreviousSpecimen(totalSpecimensToReview);
     }
 
     function handleGoToNextSpecimen() {
-        setCurrentImageIndex(0);
         goToNextSpecimen(totalSpecimensToReview);
     }
 
@@ -144,8 +138,7 @@ export default function ImageReviewWorkspace({
                         <SpecimenImageCarousel
                             key={currentSpecimenBeingReviewed.id}
                             specimen={currentSpecimenBeingReviewed}
-                            currentImageIndex={currentImageIndex}
-                            onCurrentImageIndexChange={setCurrentImageIndex}
+                            onCurrentImageChange={setCurrentImageBeingViewed}
                         />
                     </CardContent>
                 </Card>

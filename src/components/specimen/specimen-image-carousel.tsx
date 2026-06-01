@@ -15,15 +15,14 @@ import {
 import { cn } from '@/utils/cn';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Image from 'next/image';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 
 interface SpecimenImageCarouselProps {
     specimen: Specimen;
-    currentImageIndex: number;
-    onCurrentImageIndexChange: (index: number) => void;
+    onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
-export function getSpecimenImagesForCarousel(specimen: Specimen) {
+function getSpecimenImagesForCarousel(specimen: Specimen) {
     const allImagesForSpecimen = specimen.images ?? [];
     const thumbnailImageId =
         specimen.thumbnailImageId ?? specimen.thumbnailImage?.id ?? null;
@@ -68,17 +67,20 @@ function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
 
 export default function SpecimenImageCarousel({
     specimen,
-    currentImageIndex,
-    onCurrentImageIndexChange,
+    onCurrentImageChange,
 }: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [canScrollThumbnailsLeft, setCanScrollThumbnailsLeft] =
         useState(false);
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
         useState(false);
 
-    const allImagesForSpecimen = getSpecimenImagesForCarousel(specimen);
+    const allImagesForSpecimen = useMemo(
+        () => getSpecimenImagesForCarousel(specimen),
+        [specimen],
+    );
     const hasAnyImages = allImagesForSpecimen.length > 0;
     const hasMultipleImages = allImagesForSpecimen.length > 1;
     const currentImage = allImagesForSpecimen[currentImageIndex];
@@ -91,9 +93,12 @@ export default function SpecimenImageCarousel({
     useEffect(() => {
         if (!imageViewerApi) return;
 
+        onCurrentImageChange?.(allImagesForSpecimen[0] ?? null);
+
         const handleImageViewerSelect = () => {
             const newImageIndex = imageViewerApi.selectedScrollSnap();
-            onCurrentImageIndexChange(newImageIndex);
+            setCurrentImageIndex(newImageIndex);
+            onCurrentImageChange?.(allImagesForSpecimen[newImageIndex] ?? null);
             thumbnailStripApi?.scrollTo(newImageIndex);
         };
 
@@ -101,14 +106,12 @@ export default function SpecimenImageCarousel({
         return () => {
             imageViewerApi.off('select', handleImageViewerSelect);
         };
-    }, [imageViewerApi, onCurrentImageIndexChange, thumbnailStripApi]);
-
-    useEffect(() => {
-        if (!imageViewerApi) return;
-        if (imageViewerApi.selectedScrollSnap() === currentImageIndex) return;
-
-        imageViewerApi.scrollTo(currentImageIndex);
-    }, [currentImageIndex, imageViewerApi]);
+    }, [
+        allImagesForSpecimen,
+        imageViewerApi,
+        onCurrentImageChange,
+        thumbnailStripApi,
+    ]);
 
     useEffect(() => {
         if (!thumbnailStripApi) return;
@@ -229,9 +232,6 @@ export default function SpecimenImageCarousel({
                                             type="button"
                                             variant="ghost"
                                             onClick={() => {
-                                                onCurrentImageIndexChange(
-                                                    imageIndex,
-                                                );
                                                 imageViewerApi?.scrollTo(
                                                     imageIndex,
                                                 );

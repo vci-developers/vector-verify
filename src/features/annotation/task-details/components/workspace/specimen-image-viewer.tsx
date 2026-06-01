@@ -6,7 +6,7 @@ import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { MapPin } from 'lucide-react';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 
 interface SpecimenImageViewerProps {
     specimen: Specimen;
@@ -15,8 +15,6 @@ interface SpecimenImageViewerProps {
 export default function SpecimenImageViewer({
     specimen,
 }: SpecimenImageViewerProps) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
     const { data: getSpecimenByIdResult } = useGetSpecimenById(specimen.id);
 
     const specimenForImageCarousel =
@@ -42,11 +40,7 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <SpecimenImageCarousel
-                    specimen={specimenForImageCarousel}
-                    currentImageIndex={currentImageIndex}
-                    onCurrentImageIndexChange={setCurrentImageIndex}
-                />
+                <SpecimenImageCarousel specimen={specimenForImageCarousel} />
 
                 <Separator />
 
