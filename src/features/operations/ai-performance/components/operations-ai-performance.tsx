@@ -3,6 +3,8 @@
 import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotations-summary';
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
 import { Card, CardContent } from '@/components/ui/card';
+import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import SpecimenConfusionMatrix from './specimen-confusion-matrix';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
@@ -34,18 +36,26 @@ export default function OperationsAiPerformance({
     const {
         data: getAnnotationsSummaryResult,
         isPending: isGetAnnotationsSummaryPending,
+        refetch,
     } = useGetAnnotationsSummary(annotationsSummaryQueryParams);
 
     if (isGetAnnotationsSummaryPending || !getAnnotationsSummaryResult) {
-        return <p className="text-muted-foreground text-sm">Loading...</p>;
+        return (
+            <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+            </div>
+        );
     }
 
     if (!getAnnotationsSummaryResult.ok) {
         return (
-            <p className="text-destructive text-sm">
-                {getAnnotationsSummaryResult.error.message ??
-                    'Failed to load annotations summary.'}
-            </p>
+            <ErrorState onRetry={refetch}>
+                <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
+                    <Card variant="destructive" className="h-28 gap-0 py-0" />
+                    <Card variant="destructive" className="h-28 gap-0 py-0" />
+                </div>
+            </ErrorState>
         );
     }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildFieldUserComplianceData } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
@@ -19,7 +20,11 @@ export default function OperationsFieldUserCompliance({
     startDate,
     endDate,
 }: OperationsFieldUserComplianceProps) {
-    const { data: getAllSessionsResult, isPending } = useGetAllSessions({
+    const {
+        data: getAllSessionsResult,
+        isPending,
+        refetch,
+    } = useGetAllSessions({
         ...locationQueryParam,
         startDate,
         endDate,
@@ -46,11 +51,7 @@ export default function OperationsFieldUserCompliance({
     }
 
     if (!getAllSessionsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
-        );
+        return <ErrorState onRetry={refetch} cardClassName="h-64 w-full" />;
     }
 
     const { collectorRows, totalCollectors, activeCollectors } =

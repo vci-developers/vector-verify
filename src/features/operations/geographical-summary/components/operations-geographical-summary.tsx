@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
+import ErrorBanner from '@/components/ui/error-banner';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
@@ -33,25 +34,42 @@ export default function OperationsGeographicalSummary({
     selectedMarkerId,
     setSelectedMarkerId,
 }: OperationsGeographicalSummaryProps) {
-    const { markers, totalSites, isPending, isError } = useSiteMarkers({
-        locationQueryParam,
-        descendantsOfSelectedLocation,
-        startDate,
-        endDate,
-    });
+    const { markers, totalSites, isPending, isError, refetch } = useSiteMarkers(
+        {
+            locationQueryParam,
+            descendantsOfSelectedLocation,
+            startDate,
+            endDate,
+        },
+    );
 
     const siteMapMounted = useRef(false);
     if (!isPending && markers.length > 0) siteMapMounted.current = true;
 
     return (
         <div className="mt-4 space-y-3">
-            <Card className="border-border/50 w-fit">
+            {isError && <ErrorBanner onRetry={refetch} />}
+
+            <Card
+                variant={isError ? 'destructive' : 'default'}
+                className="border-border/50 w-fit"
+            >
                 <CardContent className="flex items-center gap-3 px-4">
-                    <p className="text-muted-foreground text-xs">
+                    <p
+                        className={
+                            isError
+                                ? 'text-destructive text-xs'
+                                : 'text-muted-foreground text-xs'
+                        }
+                    >
                         Unique Sites
                     </p>
                     {isPending ? (
                         <Skeleton className="h-5 w-8" />
+                    ) : isError ? (
+                        <p className="text-destructive text-lg leading-none font-bold">
+                            —
+                        </p>
                     ) : (
                         <p className="text-lg leading-none font-bold">
                             {totalSites}
@@ -60,7 +78,10 @@ export default function OperationsGeographicalSummary({
                 </CardContent>
             </Card>
 
-            <Card className="border-border/50 p-0">
+            <Card
+                variant={isError ? 'destructive' : 'default'}
+                className="border-border/50 p-0"
+            >
                 <CardContent className="relative h-125 p-0">
                     {siteMapMounted.current ? (
                         <SiteMap
@@ -71,12 +92,7 @@ export default function OperationsGeographicalSummary({
                         />
                     ) : isPending ? (
                         <Skeleton className="h-full w-full rounded-md" />
-                    ) : isError ? (
-                        <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                            Failed to load session data. Check the console for
-                            details.
-                        </div>
-                    ) : markers.length === 0 ? (
+                    ) : isError ? null : markers.length === 0 ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                             No site data found for the selected filters.
                         </div>

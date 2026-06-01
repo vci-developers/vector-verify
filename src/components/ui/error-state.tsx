@@ -1,33 +1,27 @@
-'use client';
+import ErrorBanner from '@/components/ui/error-banner';
+import { Card } from '@/components/ui/card';
+import type { ReactNode } from 'react';
 
-import { Skeleton, type SkeletonProps } from '@/components/ui/skeleton';
-import { useTranslations } from 'next-intl';
-
-interface ErrorStateProps extends Omit<SkeletonProps, 'variant'> {
+interface ErrorStateProps {
+    message?: string;
     onRetry?: () => void;
-    errorMessage?: string;
+    cardClassName?: string;
+    children?: ReactNode;
 }
 
-function ErrorState({ onRetry, errorMessage, ...skeletonProps }: ErrorStateProps) {
-    const t = useTranslations('Common');
-
+function ErrorState({
+    message,
+    onRetry,
+    cardClassName,
+    children,
+}: ErrorStateProps) {
     return (
-        <Skeleton variant="destructive" {...skeletonProps}>
-            <div className="flex h-full flex-col items-center justify-center gap-2">
-                <p className="text-destructive text-sm font-medium">
-                    {errorMessage ?? t('error')}
-                </p>
-                {onRetry && (
-                    <button
-                        type="button"
-                        onClick={onRetry}
-                        className="text-destructive text-xs underline underline-offset-4 hover:opacity-70"
-                    >
-                        {t('tryAgain')}
-                    </button>
-                )}
-            </div>
-        </Skeleton>
+        <div className="space-y-4">
+            <ErrorBanner message={message} onRetry={onRetry} />
+            {children ?? (
+                <Card variant="destructive" className={cardClassName} />
+            )}
+        </div>
     );
 }
 

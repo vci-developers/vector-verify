@@ -25,17 +25,21 @@ export function useSiteMarkers({
             ? { district: locationQueryParam.district }
             : { siteId: locationQueryParam.siteId };
 
-    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({
-            startDate,
-            endDate,
-            type: 'SURVEILLANCE',
-            ...locationFilter,
-        });
+    const {
+        data: getAllSessionsResult,
+        isPending: isGetAllSessionsPending,
+        refetch: refetchSessions,
+    } = useGetAllSessions({
+        startDate,
+        endDate,
+        type: 'SURVEILLANCE',
+        ...locationFilter,
+    });
 
     const {
         data: getSpecimensCountResult,
         isPending: isGetSpecimensCountPending,
+        refetch: refetchSpecimensCount,
     } = useGetSpecimensCount({
         startDate,
         endDate,
@@ -67,5 +71,9 @@ export function useSiteMarkers({
         isError:
             !isPending &&
             (!getAllSessionsResult?.ok || !getSpecimensCountResult?.ok),
+        refetch: () => {
+            refetchSessions();
+            refetchSpecimensCount();
+        },
     };
 }

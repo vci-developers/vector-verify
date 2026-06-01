@@ -1,8 +1,9 @@
 'use client';
 
 import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
-import { networkErrorMessage } from '@/lib/network/network-error';
 import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import ImageReviewCarousel from './image-review-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
@@ -32,22 +33,41 @@ export default function ImageReviewWorkspace({
         previousPage: goToPreviousSpecimen,
     } = usePagination({ limit: 1 });
 
-    const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
-        useGetAllSpecimens({
-            siteId,
-            startDate,
-            endDate,
-            sessionType: 'SURVEILLANCE',
-            includeAllImages: true,
-        });
+    const {
+        data: getAllSpecimensResult,
+        isPending: isGetAllSpecimensPending,
+        refetch,
+    } = useGetAllSpecimens({
+        siteId,
+        startDate,
+        endDate,
+        sessionType: 'SURVEILLANCE',
+        includeAllImages: true,
+    });
 
     if (isGetAllSpecimensPending || !getAllSpecimensResult) {
-        return <h1>Loading...</h1>;
+        return (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <Skeleton className="h-96 lg:col-span-3" />
+                <Skeleton className="h-96 lg:col-span-2" />
+            </div>
+        );
     }
 
     if (!getAllSpecimensResult.ok) {
         return (
-            <h1>Error: {networkErrorMessage(getAllSpecimensResult.error)}</h1>
+            <ErrorState onRetry={refetch}>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                    <Card
+                        variant="destructive"
+                        className="h-96 lg:col-span-3"
+                    />
+                    <Card
+                        variant="destructive"
+                        className="h-96 lg:col-span-2"
+                    />
+                </div>
+            </ErrorState>
         );
     }
 

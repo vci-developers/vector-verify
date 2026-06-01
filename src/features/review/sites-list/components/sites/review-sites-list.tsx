@@ -6,6 +6,7 @@ import { ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
+import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -44,13 +45,16 @@ export default function ReviewSitesList({
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({
-            ...locationQueryParam,
-            startDate,
-            endDate,
-            type: 'SURVEILLANCE',
-        });
+    const {
+        data: getAllSessionsResult,
+        isPending: isGetAllSessionsPending,
+        refetch,
+    } = useGetAllSessions({
+        ...locationQueryParam,
+        startDate,
+        endDate,
+        type: 'SURVEILLANCE',
+    });
 
     const months = eachMonthOfInterval({ start: startMonth, end: endMonth });
 
@@ -143,11 +147,7 @@ export default function ReviewSitesList({
     }
 
     if (!getAllSessionsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
-        );
+        return <ErrorState onRetry={refetch} cardClassName="h-64 w-full" />;
     }
 
     if (sites.length === 0) {

@@ -2,13 +2,25 @@ import * as React from 'react';
 
 import { cn } from '@/utils/cn';
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+type CardVariant = 'default' | 'destructive';
+
+const CARD_VARIANTS: Record<CardVariant, string> = {
+    default: '',
+    destructive: 'border-destructive/50 bg-destructive/10 animate-pulse',
+};
+
+interface CardProps extends React.ComponentProps<'div'> {
+    variant?: CardVariant;
+}
+
+function Card({ className, variant = 'default', ...props }: CardProps) {
     return (
         <div
             data-slot="card"
             className={cn(
                 'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
                 className,
+                CARD_VARIANTS[variant],
             )}
             {...props}
         />

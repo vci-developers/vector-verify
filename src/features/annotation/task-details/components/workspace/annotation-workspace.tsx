@@ -7,8 +7,12 @@ import type { AnnotationStatus } from '@/api/annotation/validation/annotation-sc
 import type { GetAnnotationsQueryParams } from '@/api/annotation/validation/get-annotations-schema';
 import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
 import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
@@ -27,6 +31,8 @@ export default function AnnotationWorkspace({
     page,
     onPageChange,
 }: AnnotationWorkspaceProps) {
+    const t = useTranslations('Annotation');
+    const tCommon = useTranslations('Common');
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
 
@@ -37,8 +43,11 @@ export default function AnnotationWorkspace({
         limit: 1,
     };
 
-    const { data: getAnnotationsResult, isPending: isGetAnnotationsPending } =
-        useGetAnnotations(getAnnotationsQueryParams);
+    const {
+        data: getAnnotationsResult,
+        isPending: isGetAnnotationsPending,
+        refetch,
+    } = useGetAnnotations(getAnnotationsQueryParams);
     const { mutate: updateAnnotation, isPending: isUpdateAnnotationPending } =
         usePutAnnotationById();
 
@@ -55,6 +64,7 @@ export default function AnnotationWorkspace({
                     });
                     setIsEditing(false);
                 },
+                onError: () => toast.error(tCommon('error')),
             },
         );
     }
@@ -65,18 +75,27 @@ export default function AnnotationWorkspace({
     }
 
     if (!getAnnotationsResult || isGetAnnotationsPending) {
-        return <h1>Loading annotations...</h1>;
+        return (
+            <div className="grid grid-cols-2 gap-6">
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
+            </div>
+        );
     }
 
     if (!getAnnotationsResult.ok) {
-        return <h1>Error loading annotations</h1>;
+        return <ErrorState onRetry={refetch} cardClassName="h-96 w-full" />;
     }
 
     const annotation = getAnnotationsResult.data.annotations[0];
     const total = getAnnotationsResult.data.total;
 
     if (!annotation || total === 0) {
-        return <h1>No annotations found</h1>;
+        return (
+            <p className="text-muted-foreground text-sm">
+                {t('noAnnotations')}
+            </p>
+        );
     }
 
     const showForm = status === 'PENDING' || isEditing;

@@ -112,17 +112,31 @@ permissions at the page level before rendering any tabs. This is deliberate:
 permissions are a hard prerequisite for all content on that page, not a content
 load.
 
+**Within-card rendering**: The `<Card>` shell always renders regardless of query
+state. Loading and error UI live inside the card structure — never returned as
+bare early-return blocks that bypass the card chrome. This keeps borders,
+rounded corners, and shadow stable across all states.
+
+**Multi-card loading (Option A)**: When one query feeds multiple cards, use a
+single early-return loading block that renders all skeleton cards together.
+Skeleton cards are always anonymous (no titles or labels during loading). For
+variable-count cards (e.g. confusion matrices), show one speculative skeleton
+card; if no data returns, the skeleton disappears without replacement.
+
+**Multi-card error**: When one query feeds multiple cards and errors, render all
+card shells as `<Card variant="destructive">`. Stat cards show `—` as a value
+placeholder. One `<ErrorBanner onRetry={refetch}>` sits above the card grid —
+a single retry for a single failure.
+
 **Skeleton fidelity**: Large-region components (maps, tables, chart panels) use
 content-shaped skeletons whose dimensions match the real content's bounds to
 avoid layout shift. Small inline components (stat cards, badge counts) use the
 generic `<Skeleton>` with appropriate height/width props. A skeleton whose
 dimensions do not roughly match its real content is wrong.
 
-**`<ErrorState>` component** (`src/components/ui/`): A thin wrapper over
-`<Skeleton variant="destructive">`. Accepts the same sizing props and adds a
-generic "Something went wrong" message and an `onRetry` callback (wired to
-`refetch()`). Never duplicates skeleton visual logic. Error messages from
-`NetworkError` are not surfaced in the UI.
+**`<Card variant="destructive">`**: Red border, red background, animated pulse.
+Used for any card-shaped region that fails to load. Content area is empty or
+shows `—` for stat values. Replaces the former `<ErrorState>` component.
 
 **Mutation errors**: Surface via Sonner toast (already installed, `<Toaster>`
 must be added to root layout). Mutations call
@@ -135,7 +149,8 @@ real callsites.
 
 **Error component selection**:
 
-- `<ErrorState onRetry={refetch}>` — `onRetry` is optional; use for retryable
+- `<Card variant="destructive">` — any card-shaped region that fails to load.
+- `<ErrorBanner onRetry={refetch}>` — above-grid message + retry for multi-card
   data load failures.
 - `<ErrorBanner message={...}>` — no retry; use for permission/access failures
   where refetching cannot resolve the problem.

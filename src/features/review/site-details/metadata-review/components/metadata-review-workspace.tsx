@@ -8,11 +8,15 @@ import {
     buildMetadataRows,
 } from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
 import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;
@@ -27,6 +31,8 @@ export default function MetadataReviewWorkspace({
     endDate,
     onGoToNextStep,
 }: MetadataReviewWorkspaceProps) {
+    const t = useTranslations('Common');
+
     const {
         resolutionsByMetadataRowId,
         handleConflictResolutionChange,
@@ -36,8 +42,11 @@ export default function MetadataReviewWorkspace({
 
     const queryClient = useQueryClient();
 
-    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({ siteId, startDate, endDate, type: 'SURVEILLANCE' });
+    const {
+        data: getAllSessionsResult,
+        isPending: isGetAllSessionsPending,
+        refetch: refetchSessions,
+    } = useGetAllSessions({ siteId, startDate, endDate, type: 'SURVEILLANCE' });
     const allSessionsForSite = getAllSessionsResult?.ok
         ? getAllSessionsResult.data.sessions
         : [];
@@ -53,11 +62,19 @@ export default function MetadataReviewWorkspace({
     } = useResolveSessionConflicts();
 
     if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return <h1>Loading...</h1>;
+        return (
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+        );
     }
 
     if (!getAllSessionsResult.ok) {
-        return <h1>Error: {getAllSessionsResult.error.message}</h1>;
+        return (
+            <ErrorState onRetry={refetchSessions} cardClassName="h-40 w-full" />
+        );
     }
 
     if (allSessionsForSite.length === 0) {
@@ -69,7 +86,13 @@ export default function MetadataReviewWorkspace({
     }
 
     if (allSurveillanceFormQueriesForSite.some(query => query.isPending)) {
-        return <h1>Loading...</h1>;
+        return (
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+        );
     }
 
     const failedQuery = allSurveillanceFormQueriesForSite.find(
@@ -78,8 +101,13 @@ export default function MetadataReviewWorkspace({
             !query.data.ok &&
             query.data.error.kind !== 'not_found',
     );
-    if (failedQuery?.data && !failedQuery.data.ok) {
-        return <h1>Error: {failedQuery.data.error.message}</h1>;
+    if (failedQuery) {
+        return (
+            <ErrorState
+                onRetry={failedQuery.refetch}
+                cardClassName="h-40 w-full"
+            />
+        );
     }
 
     const surveillanceFormsBySessionId = new Map(
@@ -151,8 +179,11 @@ export default function MetadataReviewWorkspace({
                             });
                         }
                         onGoToNextStep();
+                    } else {
+                        toast.error(t('error'));
                     }
                 },
+                onError: () => toast.error(t('error')),
             },
         );
     }

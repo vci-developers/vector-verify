@@ -7,7 +7,10 @@ import { Fragment, useEffect } from 'react';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import AnnotationTaskCard from '@/features/annotation/tasks-list/components/tasks/annotation-task-card';
 import AnnotationTasksPagination from '@/features/annotation/tasks-list/components/layout/annotation-tasks-pagination';
+import { ErrorState } from '@/components/ui/error-state';
+import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Separator } from '@/components/ui/separator';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -42,17 +45,20 @@ export default function AnnotationTasksList({
         limit,
     };
 
+    const t = useTranslations('Annotation');
+
     const {
         data: getAnnotationTasksResult,
         isPending: isGetAnnotationTasksPending,
+        refetch,
     } = useGetAnnotationTasks(getAnnotationTasksQueryParams);
 
     if (isGetAnnotationTasksPending || !getAnnotationTasksResult) {
-        return <h1>LOADING...</h1>;
+        return <SkeletonList count={limit} height="xl" width="full" />;
     }
 
     if (!getAnnotationTasksResult.ok) {
-        return <h1>ERROR: {getAnnotationTasksResult.error.message}</h1>;
+        return <ErrorState onRetry={refetch} cardClassName="h-96 w-full" />;
     }
 
     const annotationTasks = getAnnotationTasksResult.data.tasks;
@@ -62,7 +68,9 @@ export default function AnnotationTasksList({
     return (
         <div className="space-y-4">
             {annotationTasks.length === 0 ? (
-                <h1>No annotation tasks found</h1>
+                <p className="text-muted-foreground text-sm">
+                    {t('noTasksAssigned')}
+                </p>
             ) : (
                 <div className="space-y-3">
                     {annotationTasks.map(task => (

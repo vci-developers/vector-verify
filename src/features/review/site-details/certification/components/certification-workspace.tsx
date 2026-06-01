@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Lock, ShieldAlert } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CertificationWorkspaceProps {
     siteId: number;
@@ -25,6 +27,7 @@ export default function CertificationWorkspace({
     endDate,
     onGoToPreviousStep,
 }: CertificationWorkspaceProps) {
+    const t = useTranslations('Common');
     const router = useRouter();
     const queryClient = useQueryClient();
     const [hasAcknowledged, setHasAcknowledged] = useState(false);
@@ -51,7 +54,7 @@ export default function CertificationWorkspace({
         sessionCount > 0 && hasAcknowledged && !isPutSessionByIdPending;
 
     async function handleCertify() {
-        await Promise.allSettled(
+        const results = await Promise.allSettled(
             sessionsToCertify.map(session =>
                 putSessionById({
                     sessionId: session.sessionId,
@@ -59,6 +62,17 @@ export default function CertificationWorkspace({
                 }),
             ),
         );
+
+        const hasFailure = results.some(
+            result =>
+                result.status === 'rejected' ||
+                (result.status === 'fulfilled' && !result.value.ok),
+        );
+
+        if (hasFailure) {
+            toast.error(t('error'));
+            return;
+        }
 
         queryClient.invalidateQueries({ queryKey: sessionKeys.root });
         router.push('/review');

@@ -3,6 +3,9 @@
 import { useGetMonthlySpecimensCount } from '@/api/specimen/hooks/use-get-monthly-specimens-count';
 import type { GetMonthlySpecimensCountQueryParams } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
 import CompositionChartPair from './composition-chart-pair';
+import { ErrorState } from '@/components/ui/error-state';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
@@ -47,14 +50,36 @@ export default function OperationsSpecimenComposition({
     const {
         data: getMonthlySpecimensCountResult,
         isPending: isGetMonthlySpecimensCountPending,
+        refetch,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>LOADING...</h1>;
+        return (
+            <div className="space-y-6">
+                {COMPOSITION_SECTIONS.map(({ specimenClassificationAxis }) => (
+                    <Skeleton
+                        key={specimenClassificationAxis}
+                        className="h-64 w-full"
+                    />
+                ))}
+            </div>
+        );
     }
 
     if (!getMonthlySpecimensCountResult.ok) {
-        return <h1>ERROR: {getMonthlySpecimensCountResult.error.message}</h1>;
+        return (
+            <ErrorState onRetry={refetch}>
+                <div className="space-y-6">
+                    {COMPOSITION_SECTIONS.map(({ specimenClassificationAxis }) => (
+                        <Card
+                            key={specimenClassificationAxis}
+                            variant="destructive"
+                            className="h-64"
+                        />
+                    ))}
+                </div>
+            </ErrorState>
+        );
     }
 
     const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;

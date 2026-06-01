@@ -5,6 +5,7 @@ import type { LocationQueryParam } from '@/lib/location/location-query';
 import { format, eachMonthOfInterval, endOfMonth } from 'date-fns';
 import { useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,8 @@ import ExportMonthRow from '@/features/review/export/components/export-month-row
 import ExportProgressPanel from '@/features/review/export/components/export-progress-panel';
 import ExportConfirmDialog from '@/features/review/export/components/export-confirm-dialog';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-uganda-schema';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 type ExportStatus = 'idle' | 'exporting' | 'done';
 
@@ -32,6 +35,7 @@ export default function ReviewExportList({
     startMonth,
     endMonth,
 }: ReviewExportListProps) {
+    const t = useTranslations('Common');
     const district =
         'district' in locationQueryParam ? locationQueryParam.district : null;
 
@@ -56,7 +60,11 @@ export default function ReviewExportList({
     const startDate = format(startMonth, 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
-    const { data: getAllSessionsResult, isPending } = useGetAllSessions({
+    const {
+        data: getAllSessionsResult,
+        isPending,
+        refetch,
+    } = useGetAllSessions({
         ...locationQueryParam,
         startDate,
         endDate,
@@ -176,6 +184,11 @@ export default function ReviewExportList({
                 }
             }
         } finally {
+            const hasFailure = [...newResults.values()].some(monthResults =>
+                [...monthResults.values()].some(status => status === 'failed'),
+            );
+            if (hasFailure) toast.error(t('error'));
+
             setExportStatus('done');
             await queryClient.invalidateQueries({ queryKey: sessionKeys.root });
         }
@@ -250,11 +263,7 @@ export default function ReviewExportList({
     }
 
     if (!getAllSessionsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
-        );
+        return <ErrorState onRetry={refetch} cardClassName="h-64 w-full" />;
     }
 
     if (totalCertifiedCount === 0) {
