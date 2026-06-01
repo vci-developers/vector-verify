@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SpecimenConfusionMatrixProps {
     title: string;
@@ -33,6 +34,8 @@ export default function SpecimenConfusionMatrix({
     confusionMatrix,
     selectedLocationName,
 }: SpecimenConfusionMatrixProps) {
+    const t = useTranslations('OperationsAIPerformance');
+
     const classLabels = Array.from(
         new Set([
             ...confusionMatrix.columns,
@@ -127,15 +130,17 @@ export default function SpecimenConfusionMatrix({
 
             <CardContent className="space-y-6">
                 <div className="border-secondary/30 bg-secondary/5 rounded-lg border p-4">
-                    <p className="text-muted-foreground text-sm">Accuracy</p>
+                    <p className="text-muted-foreground text-sm">
+                        {t('accuracy')}
+                    </p>
                     <p className="mt-1 text-4xl font-semibold tracking-tight">
                         {formatMatrixPercentage(accuracy)}
                     </p>
                     <p className="text-muted-foreground mt-2 text-xs">
                         {integerCountFormatter.format(totalCorrectPredictions)}{' '}
-                        correct of{' '}
+                        {t('correctOf')}{' '}
                         {integerCountFormatter.format(totalSpecimensInMatrix)}{' '}
-                        {classificationCategory} comparisons
+                        {classificationCategory} {t('comparisons')}
                     </p>
                 </div>
 
@@ -237,7 +242,7 @@ export default function SpecimenConfusionMatrix({
                         <div className="flex items-center gap-2">
                             <Bot className="h-4 w-4" />
                             <h3 className="text-sm font-semibold">
-                                Per-Label Metrics
+                                {t('perLabelMetrics')}
                             </h3>
                         </div>
 
@@ -245,13 +250,13 @@ export default function SpecimenConfusionMatrix({
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent">
                                     <TableHead className="w-full">
-                                        Label
+                                        {t('label')}
                                     </TableHead>
                                     <TableHead className="text-right">
-                                        Sensitivity
+                                        {t('sensitivity')}
                                     </TableHead>
                                     <TableHead className="text-right">
-                                        Specificity
+                                        {t('specificity')}
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -314,44 +319,34 @@ export default function SpecimenConfusionMatrix({
                             </TableBody>
                         </Table>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {cannotBeDeterminedSpecimens} specimens were labeled
-                            as Cannot be Determined. {unknownSpecimens}{' '}
-                            specimens were labeled as UNKNOWN.
+                            {cannotBeDeterminedSpecimens}{' '}
+                            {t('specimensLabeledAs')} {t('cannotBeDetermined')}.{' '}
+                            {unknownSpecimens} {t('specimensLabeledAs')}{' '}
+                            {t('unknown')}.
                         </p>
                     </div>
 
                     <div className="h-full space-y-3 rounded-xl border p-4">
                         <h3 className="text-sm font-semibold">
-                            Interpretation
+                            {t('interpretation')}
                         </h3>
                         <p className="text-muted-foreground text-sm leading-6">
-                            The matrix compares visual verification{' '}
-                            {classificationCategory} labels from{' '}
-                            {selectedLocationName} against the VectorCam{' '}
-                            {classificationCategory} prediction for the selected
-                            date range.
+                            {t('theMatrixCompares')} {classificationCategory}{' '}
+                            {t('labelsFrom')} {selectedLocationName}{' '}
+                            {t('againstVectorCam')} {classificationCategory}{' '}
+                            {t('predictionForDateRange')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Each cell shows the specimen count and that
-                            cell&apos;s share of the visual verification row.
-                            Each per-label metric is computed as a one-vs-rest
-                            comparison for that label.
+                            {t('eachCellShows')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Sensitivity = TP / (TP + FN). It measures how often
-                            VectorCam correctly identifies specimens that truly
-                            belong to that label.
+                            {t('sensitivityExplanation')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Specificity = TN / (TN + FP). It measures how often
-                            VectorCam correctly avoids assigning that label when
-                            the specimen truly belongs to another label.
+                            {t('specificityExplanation')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Cannot be Determined and UNKNOWN specimens were
-                            excluded from the sensitivity and specificity
-                            calculations. An UNKNOWN VectorCam Prediction means
-                            that a specimen image was not uploaded.
+                            {t('cannotBeDeterminedUnknownExclusion')}
                         </p>
                     </div>
                 </div>

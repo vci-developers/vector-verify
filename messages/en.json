@@ -22,5 +22,26 @@
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
         "accessDenied": "Access Denied"
+    },
+    "OperationsAIPerformance": {
+        "accuracy": "Accuracy",
+        "correctOf": "correct of",
+        "comparisons": "comparisons",
+        "perLabelMetrics": "Per-Label Metrics",
+        "label": "Label",
+        "sensitivity": "Sensitivity",
+        "specificity": "Specificity",
+        "specimensLabeledAs": "specimens were labeled as",
+        "cannotBeDetermined": "Cannot be Determined",
+        "unknown": "UNKNOWN",
+        "interpretation": "Interpretation",
+        "theMatrixCompares": "The matrix compares visual verification",
+        "labelsFrom": "labels from",
+        "againstVectorCam": "against the VectorCam",
+        "predictionForDateRange": "prediction for the selected date range.",
+        "eachCellShows": "Each cell shows the specimen count and that cell's share of the visual verification row. Each per-label metric is computed as a one-vs-rest comparison for that label.",
+        "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
+        "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
+        "cannotBeDeterminedUnknownExclusion": "Cannot be Determined and UNKNOWN specimens were excluded from the sensitivity and specificity calculations. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded."
     }
 }
