@@ -12,20 +12,29 @@ import {
     type CarouselApi,
 } from '@/components/ui/carousel';
 import { cn } from '@/utils/cn';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    CircleCheck,
+    Star,
+    TriangleAlert,
+} from 'lucide-react';
 import Image from 'next/image';
 import { Fragment, useEffect, useState } from 'react';
+import type { ConflictIconLabel } from './image-review-workspace';
 
 interface ImageReviewCarouselProps {
     specimen: Specimen;
     currentImageIndex: number;
     onCurrentImageIndexChange: (index: number) => void;
+    conflictIconLabel: ConflictIconLabel;
 }
 
 export default function ImageReviewCarousel({
     specimen,
     currentImageIndex,
     onCurrentImageIndexChange,
+    conflictIconLabel,
 }: ImageReviewCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
@@ -207,6 +216,16 @@ export default function ImageReviewCarousel({
                                             {isThumbnailImage && (
                                                 <Star className="bg-background/90 absolute top-1 left-1 size-5 rounded-full fill-current p-1 shadow-md" />
                                             )}
+                                            {!isThumbnailImage &&
+                                                conflictIconLabel ===
+                                                    'alert' && (
+                                                    <TriangleAlert className="text-destructive bg-background/90 absolute top-1 left-1 size-5 rounded-full p-1 shadow-md" />
+                                                )}
+                                            {!isThumbnailImage &&
+                                                conflictIconLabel ===
+                                                    'check' && (
+                                                    <CircleCheck className="text-success bg-background/90 absolute top-1 left-1 size-5 rounded-full p-1 shadow-md" />
+                                                )}
                                         </Button>
                                     </CarouselItem>
                                 );

@@ -1,20 +1,28 @@
+'use client';
+
 import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, TriangleAlert } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { detectPredictionConflict } from '@/features/review/site-details/image-review/utils/detect-prediction-conflict';
 
 interface ImageReviewDetailsProps {
     specimen: Specimen;
     currentImage: SpecimenImage | null;
+    specimenImages: SpecimenImage[];
 }
 
 export default function ImageReviewDetails({
     specimen,
     currentImage,
+    specimenImages,
 }: ImageReviewDetailsProps) {
+    const t = useTranslations('Review.ImageReview');
+    const hasConflict = detectPredictionConflict(specimenImages);
     const totalImagesUploaded = specimen.images?.length ?? 0;
     const expectedImagesCount = specimen.expectedImages;
 
@@ -106,6 +114,22 @@ export default function ImageReviewDetails({
 
                     <dt className="text-muted-foreground">Abdomen Status</dt>
                     <dd>{currentImage?.abdomenStatus ?? '—'}</dd>
+
+                    <dt className="text-muted-foreground">
+                        {t('predictionConflict')}
+                    </dt>
+                    <dd>
+                        <Badge
+                            variant={hasConflict ? 'destructive' : 'secondary'}
+                        >
+                            {hasConflict && (
+                                <TriangleAlert className="h-3 w-3" />
+                            )}
+                            {hasConflict
+                                ? t('conflictDetected')
+                                : t('noConflict')}
+                        </Badge>
+                    </dd>
                 </dl>
             </div>
         </div>
