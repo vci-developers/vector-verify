@@ -6,7 +6,7 @@ export const genusSchema = z.enum([
     'Aedes',
     'Culex',
     'Mansonia',
-    'Non mosquito',
+    'Non-Mosquito',
     'Unknown',
 ]);
 
@@ -33,8 +33,8 @@ export const specimenImageSchema = z.object({
     sex: z.string().nullable(),
     abdomenStatus: z.string().nullable(),
     filemd5: z.string().optional(),
-    capturedAt: z.number().optional(),
-    submittedAt: z.number().optional(),
+    capturedAt: z.number().nullish(),
+    submittedAt: z.number().nullish(),
     inferenceResult: inferenceResultSchema.nullable().optional(),
 });
 

@@ -20,12 +20,14 @@ interface ReviewSiteDetailsPageClientProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    siteName?: string;
 }
 
 export default function ReviewSiteDetailsPageClient({
     siteId,
     startDate,
     endDate,
+    siteName,
 }: ReviewSiteDetailsPageClientProps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
@@ -51,6 +53,7 @@ export default function ReviewSiteDetailsPageClient({
                         <ReviewSiteDetailsHeader
                             steps={REVIEW_STEPS}
                             currentStepIndex={currentStepIndex}
+                            siteName={siteName}
                         />
 
                         <Separator />

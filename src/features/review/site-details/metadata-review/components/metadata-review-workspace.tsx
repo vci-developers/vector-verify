@@ -3,16 +3,16 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
-import { useState } from 'react';
 import {
     applyConflictResolutions,
     buildMetadataRows,
-} from '../utils/metadata-review-helpers';
+} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
 import { Button } from '@/components/ui/button';
 import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
+import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;
@@ -27,8 +27,12 @@ export default function MetadataReviewWorkspace({
     endDate,
     onGoToNextStep,
 }: MetadataReviewWorkspaceProps) {
-    const [resolutionsByMetadataRowId, setResolutionsByMetadataRowId] =
-        useState<Map<string, string>>(new Map());
+    const {
+        resolutionsByMetadataRowId,
+        handleConflictResolutionChange,
+        disabledRowIds,
+        resetResolutions,
+    } = useMetadataReviewState();
 
     const queryClient = useQueryClient();
 
@@ -114,17 +118,6 @@ export default function MetadataReviewWorkspace({
         row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
     );
 
-    function handleConflictResolutionChange(
-        metadataRowId: string,
-        chosenDisplayValue: string,
-    ) {
-        setResolutionsByMetadataRowId(previousResolutions => {
-            const nextResolutions = new Map(previousResolutions);
-            nextResolutions.set(metadataRowId, chosenDisplayValue);
-            return nextResolutions;
-        });
-    }
-
     function handleResolveConflicts() {
         const { resolvedSession, resolvedSurveillanceForm } =
             applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
@@ -140,7 +133,7 @@ export default function MetadataReviewWorkspace({
             {
                 onSuccess: result => {
                     if (result.ok) {
-                        setResolutionsByMetadataRowId(new Map());
+                        resetResolutions();
                         queryClient.invalidateQueries({
                             queryKey: sessionKeys.allSessions({
                                 siteId,
@@ -179,6 +172,7 @@ export default function MetadataReviewWorkspace({
                 }
                 resolutionsByMetadataRowId={resolutionsByMetadataRowId}
                 onConflictResolutionChange={handleConflictResolutionChange}
+                disabledRowIds={disabledRowIds}
             />
 
             <div className="flex justify-end">
