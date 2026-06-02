@@ -17,6 +17,8 @@ import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+const EXCLUDED_LABELS = ['unknown', 'cannot be determined'] as const;
+
 interface SpecimenConfusionMatrixProps {
     title: string;
     classificationCategory: string;
@@ -25,8 +27,6 @@ interface SpecimenConfusionMatrixProps {
     confusionMatrix: AnnotationConfusionMatrix;
     selectedLocationName: string;
 }
-
-const EXCLUDED_LABELS = ['UNKNOWN', 'Cannot be Determined'] as const;
 
 export default function SpecimenConfusionMatrix({
     title,
@@ -62,9 +62,9 @@ export default function SpecimenConfusionMatrix({
 
     function getSpecimenCountForGroundTruthLabel(
         groundTruthLabel: string,
-        labels = classLabels,
+        allLabels = classLabels,
     ) {
-        return labels.reduce(
+        return allLabels.reduce(
             (totalSpecimens, predictedLabel) =>
                 totalSpecimens +
                 getSpecimenCountForCell(groundTruthLabel, predictedLabel),
@@ -102,12 +102,23 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
-    const excludedSpecimenCounts = EXCLUDED_LABELS.map(label =>
-        getSpecimenCountForGroundTruthLabel(label),
-    );
+    const excludedSpecimenCounts = EXCLUDED_LABELS.map(excludedLabel => {
+        const matchingLabels = classLabels.filter(
+            label => label.toLowerCase() === excludedLabel,
+        );
+        const count = matchingLabels.reduce(
+            (total, label) =>
+                total + getSpecimenCountForGroundTruthLabel(label),
+            0,
+        );
+        return { label: excludedLabel, count };
+    });
 
     const filteredClassLabels = classLabels.filter(
-        label => !(EXCLUDED_LABELS as readonly string[]).includes(label),
+        label =>
+            !EXCLUDED_LABELS.includes(
+                label.toLowerCase() as (typeof EXCLUDED_LABELS)[number],
+            ),
     );
 
     const filteredTotalSpecimens = filteredClassLabels.reduce(
@@ -325,9 +336,9 @@ export default function SpecimenConfusionMatrix({
                             </TableBody>
                         </Table>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {EXCLUDED_LABELS.map((label, index) => {
+                            {excludedSpecimenCounts.map(({ label, count }) => {
                                 return t('specimensLabeledAs', {
-                                    num: excludedSpecimenCounts[index] ?? 0,
+                                    num: count,
                                     category: label,
                                 });
                             })}
