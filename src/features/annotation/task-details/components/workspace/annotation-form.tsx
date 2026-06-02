@@ -434,6 +434,7 @@ export default function AnnotationForm({
                                     </FieldLabel>
                                     <Textarea
                                         {...field}
+                                        value={field.value ?? ''}
                                         id="annotation-rhf-notes"
                                         placeholder={
                                             watchIsFlagged
