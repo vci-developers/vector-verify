@@ -87,6 +87,12 @@ classification types recorded per annotation. _Avoid_: Morphological
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
 
+**Prediction Conflict**: A condition on a Specimen where two or more of its
+images carry differing ML model predictions on at least one classification axis
+(species, sex, or abdomen status). Detected purely on the frontend by comparing
+`SpecimenImage.species/sex/abdomenStatus` across `images[]`. Surfaced to VCOs
+during the Image Review step. _Avoid_: Prediction discrepancy, model mismatch
+
 ## Relationships
 
 - A **Program** contains many **Sites**

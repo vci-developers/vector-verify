@@ -22,5 +22,12 @@
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
         "accessDenied": "Access Denied"
+    },
+    "Review": {
+        "ImageReview": {
+            "predictionConflict": "Prediction Conflict",
+            "conflictDetected": "Conflict Detected",
+            "noConflict": "None"
+        }
     }
 }

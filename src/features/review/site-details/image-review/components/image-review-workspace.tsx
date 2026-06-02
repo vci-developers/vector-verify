@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import ImageReviewCarousel from './image-review-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageReviewDetails from './image-review-details';
+import { detectPredictionConflict } from '@/features/review/site-details/image-review/utils/detect-prediction-conflict';
+
+export type ConflictIconLabel = 'alert' | 'check' | 'none';
 
 interface ImageReviewWorkspaceProps {
     siteId: number;
@@ -31,6 +34,7 @@ export default function ImageReviewWorkspace({
         nextPage: goToNextSpecimen,
         previousPage: goToPreviousSpecimen,
     } = usePagination({ limit: 1 });
+    const specimenIdsWithConflicts = useRef<Set<number> | null>(null);
 
     const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
         useGetAllSpecimens({
@@ -52,6 +56,16 @@ export default function ImageReviewWorkspace({
     }
 
     const allSpecimensForSite = getAllSpecimensResult.data.specimens;
+
+    if (specimenIdsWithConflicts.current === null) {
+        specimenIdsWithConflicts.current = new Set(
+            allSpecimensForSite
+                .filter(specimenEntry =>
+                    detectPredictionConflict(specimenEntry.images ?? []),
+                )
+                .map(specimenEntry => specimenEntry.id),
+        );
+    }
 
     if (allSpecimensForSite.length === 0) {
         return (
@@ -86,6 +100,16 @@ export default function ImageReviewWorkspace({
         currentSpecimenBeingReviewed.images?.[currentImageIndex] ?? null;
     const isOnFirstSpecimen = currentSpecimenNumber === 1;
     const isOnLastSpecimen = currentSpecimenNumber === totalSpecimensToReview;
+
+    const currentSpecimenHasConflict = detectPredictionConflict(
+        currentSpecimenBeingReviewed.images ?? [],
+    );
+    const specimenConflictIcon: ConflictIconLabel =
+        specimenIdsWithConflicts.current.has(currentSpecimenBeingReviewed.id)
+            ? currentSpecimenHasConflict
+                ? 'alert'
+                : 'check'
+            : 'none';
 
     function handleGoToPreviousSpecimen() {
         setCurrentImageIndex(0);
@@ -135,6 +159,7 @@ export default function ImageReviewWorkspace({
                             specimen={currentSpecimenBeingReviewed}
                             currentImageIndex={currentImageIndex}
                             onCurrentImageIndexChange={setCurrentImageIndex}
+                            conflictIconLabel={specimenConflictIcon}
                         />
                     </CardContent>
                 </Card>
@@ -143,6 +168,9 @@ export default function ImageReviewWorkspace({
                         <ImageReviewDetails
                             specimen={currentSpecimenBeingReviewed}
                             currentImage={currentImageBeingViewed}
+                            specimenImages={
+                                currentSpecimenBeingReviewed.images ?? []
+                            }
                         />
                     </CardContent>
                 </Card>
