@@ -17,7 +17,7 @@ export default function SpecimenImageViewer({
 }: SpecimenImageViewerProps) {
     const { data: getSpecimenByIdResult } = useGetSpecimenById(specimen.id);
 
-    const specimenForImageCarousel =
+    const currentSpecimen =
         getSpecimenByIdResult?.ok === true
             ? getSpecimenByIdResult.data
             : specimen;
@@ -40,7 +40,7 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <SpecimenImageCarousel specimen={specimenForImageCarousel} />
+                <SpecimenImageCarousel specimen={currentSpecimen} />
 
                 <Separator />
 

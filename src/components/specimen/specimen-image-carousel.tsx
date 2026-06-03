@@ -22,41 +22,6 @@ interface SpecimenImageCarouselProps {
     onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
-function getSpecimenImagesForCarousel(specimen: Specimen) {
-    const allImagesForSpecimen = specimen.images ?? [];
-    const thumbnailImageId =
-        specimen.thumbnailImageId ?? specimen.thumbnailImage?.id ?? null;
-    const thumbnailImageFromList =
-        thumbnailImageId != null
-            ? allImagesForSpecimen.find(image => image.id === thumbnailImageId)
-            : undefined;
-    const thumbnailImage =
-        thumbnailImageFromList ??
-        specimen.thumbnailImage ??
-        (specimen.thumbnailUrl
-            ? {
-                  id: thumbnailImageId ?? -1,
-                  url: specimen.thumbnailUrl,
-                  species: null,
-                  sex: null,
-                  abdomenStatus: null,
-              }
-            : null);
-
-    if (!thumbnailImage) {
-        return allImagesForSpecimen;
-    }
-
-    return [
-        thumbnailImage,
-        ...allImagesForSpecimen.filter(
-            image =>
-                image.id !== thumbnailImage.id &&
-                image.url !== thumbnailImage.url,
-        ),
-    ];
-}
-
 function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
     return (
         image.id === specimen.thumbnailImageId ||
@@ -77,10 +42,41 @@ export default function SpecimenImageCarousel({
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
         useState(false);
 
-    const allImagesForSpecimen = useMemo(
-        () => getSpecimenImagesForCarousel(specimen),
-        [specimen],
-    );
+    const allImagesForSpecimen = useMemo(() => {
+        const allImages = specimen.images ?? [];
+        const thumbnailImageId =
+            specimen.thumbnailImageId ?? specimen.thumbnailImage?.id ?? null;
+        const thumbnailImageFromList =
+            thumbnailImageId != null
+                ? allImages.find(image => image.id === thumbnailImageId)
+                : undefined;
+        const thumbnailImage =
+            thumbnailImageFromList ??
+            specimen.thumbnailImage ??
+            (specimen.thumbnailUrl
+                ? {
+                      id: thumbnailImageId ?? -1,
+                      url: specimen.thumbnailUrl,
+                      species: null,
+                      sex: null,
+                      abdomenStatus: null,
+                  }
+                : null);
+
+        if (!thumbnailImage) {
+            return allImages;
+        }
+
+        return [
+            thumbnailImage,
+            ...allImages.filter(
+                image =>
+                    image.id !== thumbnailImage.id &&
+                    image.url !== thumbnailImage.url,
+            ),
+        ];
+    }, [specimen]);
+
     const hasAnyImages = allImagesForSpecimen.length > 0;
     const hasMultipleImages = allImagesForSpecimen.length > 1;
     const currentImage = allImagesForSpecimen[currentImageIndex];
