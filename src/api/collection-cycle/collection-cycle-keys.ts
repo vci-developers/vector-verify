@@ -1,4 +1,4 @@
-import type { GetCollectionCyclesQueryParams } from '@/api/collection-cycle/validation/collection-cycle-schema';
+import type { GetCollectionCyclesQueryParams } from '@/api/collection-cycle/validation/get-collection-cycles-schema';
 
 export const collectionCycleKeys = {
     root: ['collectionCycles'] as const,
