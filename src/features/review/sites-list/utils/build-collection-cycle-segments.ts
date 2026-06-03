@@ -3,16 +3,17 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
 import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
 
-export interface CollectionCycleSegment {
-    cycle: CollectionCycle | null;
-    sessionSummaryBySiteId: Map<number, ReviewSiteSessionSummary>;
-}
-
 export function buildCollectionCycleSegments(
     sessions: Session[],
     cycles: CollectionCycle[],
-): CollectionCycleSegment[] {
-    const segmentByCycleId = new Map<number | null, CollectionCycleSegment>([
+) {
+    const segmentByCycleId = new Map<
+        number | null,
+        {
+            cycle: CollectionCycle | null;
+            sessionSummaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+        }
+    >([
         ...cycles.map(
             cycle =>
                 [

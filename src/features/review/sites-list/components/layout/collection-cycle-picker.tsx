@@ -29,14 +29,14 @@ export default function CollectionCyclePicker({
 
     const selectedCycleIdStrings = selectedCycleIds.map(String);
 
-    function handleStringIdsChange(stringIds: string[]) {
+    function handleCollectionCycleIdsChange(stringIds: string[]) {
         onChange(stringIds.map(Number));
     }
 
     return (
         <MultiSelect
             values={selectedCycleIdStrings}
-            onValuesChange={handleStringIdsChange}
+            onValuesChange={handleCollectionCycleIdsChange}
         >
             <MultiSelectTrigger className="w-52" disabled={disabled}>
                 <MultiSelectValue
