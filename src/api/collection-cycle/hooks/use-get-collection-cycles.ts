@@ -3,7 +3,7 @@ import {
     getCollectionCyclesQueryParamsSchema,
     type GetCollectionCyclesQueryParams,
     type GetCollectionCyclesSuccessPayload,
-} from '@/api/collection-cycle/validation/collection-cycle-schema';
+} from '@/api/collection-cycle/validation/get-collection-cycles-schema';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { NetworkError } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';

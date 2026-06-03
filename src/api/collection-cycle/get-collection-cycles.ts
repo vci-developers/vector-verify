@@ -4,7 +4,7 @@ import {
     getCollectionCyclesResponseSchema,
     type GetCollectionCyclesQueryParams,
     type GetCollectionCyclesResponseBody,
-} from '@/api/collection-cycle/validation/collection-cycle-schema';
+} from '@/api/collection-cycle/validation/get-collection-cycles-schema';
 import type { Result } from '@/lib/result/result';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { safeApiCall } from '@/lib/network/safe-api-call';
@@ -13,7 +13,7 @@ export async function getCollectionCycles(
     accessToken: string,
     queryParams: GetCollectionCyclesQueryParams,
 ): Promise<Result<GetCollectionCyclesResponseBody, NetworkError>> {
-    const queryString = constructQueryString(
+    const queryString = constructQueryString<GetCollectionCyclesQueryParams>(
         queryParams,
         getCollectionCyclesQueryParamsSchema,
     );

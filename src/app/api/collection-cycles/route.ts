@@ -2,7 +2,7 @@ import { getCollectionCycles } from '@/api/collection-cycle/get-collection-cycle
 import {
     getCollectionCyclesQueryParamsSchema,
     type GetCollectionCyclesResponseBody,
-} from '@/api/collection-cycle/validation/collection-cycle-schema';
+} from '@/api/collection-cycle/validation/get-collection-cycles-schema';
 import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
