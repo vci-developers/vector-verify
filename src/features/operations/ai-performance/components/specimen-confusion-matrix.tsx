@@ -17,7 +17,7 @@ import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-const EXCLUDED_LABELS = ['unknown', 'cannot be determined'] as const;
+const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 
 interface SpecimenConfusionMatrixProps {
     title: string;
@@ -103,21 +103,21 @@ export default function SpecimenConfusionMatrix({
             : null;
 
     const excludedSpecimenCounts = EXCLUDED_LABELS.map(excludedLabel => {
-        const matchingLabels = classLabels.filter(
-            label => label.toLowerCase() === excludedLabel,
+        const matchingLabels = classLabels.filter(label =>
+            new RegExp(excludedLabel, 'i').test(label),
         );
         const count = matchingLabels.reduce(
             (total, label) =>
                 total + getSpecimenCountForGroundTruthLabel(label),
             0,
         );
-        return { label: excludedLabel, count };
+        return { excludedLabel, count };
     });
 
     const filteredClassLabels = classLabels.filter(
         label =>
-            !EXCLUDED_LABELS.includes(
-                label.toLowerCase() as (typeof EXCLUDED_LABELS)[number],
+            !EXCLUDED_LABELS.some(excludedLabel =>
+                new RegExp(excludedLabel, 'i').test(label),
             ),
     );
 
@@ -336,12 +336,14 @@ export default function SpecimenConfusionMatrix({
                             </TableBody>
                         </Table>
                         <p className="text-muted-foreground text-sm leading-6">
-                            {excludedSpecimenCounts.map(({ label, count }) => {
-                                return t('specimensLabeledAs', {
-                                    num: count,
-                                    category: label,
-                                });
-                            })}
+                            {excludedSpecimenCounts.map(
+                                ({ excludedLabel, count }) => {
+                                    return t('specimensLabeledAs', {
+                                        count: count,
+                                        category: excludedLabel,
+                                    });
+                                },
+                            )}
                         </p>
                     </div>
 
