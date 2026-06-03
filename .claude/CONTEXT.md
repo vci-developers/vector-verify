@@ -104,8 +104,10 @@ annotation. _Avoid_: Image-based
 - "Sentinel site" (web app doc language) and "leaf site" (API code language)
   refer to the same concept — a site with `has_data = true`. Use "Sentinel Site"
   in UI-facing contexts.
-- "Household" is informal shorthand for a Session and its associated
-  Surveillance Form — there is no Household entity in the data model.
+- "Household" is informal field language for a **Sentinel Site** — the physical
+  house (leaf node in the location hierarchy) where a VHT collects specimens. A
+  Sentinel Site can have multiple Sessions in a cycle. Use "Sentinel Site" in
+  code and UI-facing language; avoid "household".
 
 - "Expert Reviewer" was used in user stories to mean **VCO** — resolved: use VCO
 - "Annotation" and "Review" are two distinct workflows, not two distinct roles —

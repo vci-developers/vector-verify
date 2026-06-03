@@ -37,5 +37,9 @@
         "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
         "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
         "labelExclusionExplanation": "Cannot be Determined and UNKNOWN specimens were excluded from the sensitivity and specificity calculations. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded."
+    },
+    "ReviewSitesList": {
+        "needsReview": "Needs Review",
+        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
     }
 }
