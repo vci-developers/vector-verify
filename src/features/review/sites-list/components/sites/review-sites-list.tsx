@@ -26,7 +26,6 @@ interface ReviewSiteListProps {
     locationQueryParam: LocationQueryParam;
     startMonth: Date;
     endMonth: Date;
-    isCollectionCyclesPending: boolean;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
     expandedSitePaths: Set<string>;
@@ -44,7 +43,6 @@ export default function ReviewSitesList({
     locationQueryParam,
     startMonth,
     endMonth,
-    isCollectionCyclesPending,
     collectionCycles,
     selectedCycleIds,
     expandedSitePaths,
@@ -69,7 +67,7 @@ export default function ReviewSitesList({
 
     const sessionSummariesByMonth = useMemo(() => {
         const map = new Map<string, Map<number, ReviewSiteSessionSummary>>();
-        if (isCycleMode || !getAllSessionsResult?.ok) return map;
+        if (!getAllSessionsResult?.ok) return map;
 
         for (const session of getAllSessionsResult.data.sessions) {
             const monthKey = format(
@@ -85,15 +83,15 @@ export default function ReviewSitesList({
         }
 
         return map;
-    }, [getAllSessionsResult, isCycleMode]);
+    }, [getAllSessionsResult]);
 
     const allCycleSegments = useMemo(() => {
-        if (!isCycleMode || !getAllSessionsResult?.ok) return [];
+        if (!getAllSessionsResult?.ok) return [];
         return buildCollectionCycleSegments(
             getAllSessionsResult.data.sessions,
             collectionCycles,
         );
-    }, [getAllSessionsResult, collectionCycles, isCycleMode]);
+    }, [getAllSessionsResult, collectionCycles]);
 
     const cycleSegments = useMemo(() => {
         if (selectedCycleIds.length === 0) return allCycleSegments;
@@ -130,11 +128,7 @@ export default function ReviewSitesList({
 
     const skeletonCount = new Set(sites.map(site => site.subCounty)).size || 5;
 
-    if (
-        isGetAllSessionsPending ||
-        isCollectionCyclesPending ||
-        !getAllSessionsResult
-    ) {
+    if (isGetAllSessionsPending || !getAllSessionsResult) {
         return (
             <div className="space-y-2">
                 {months.map(month => (

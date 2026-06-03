@@ -10,8 +10,6 @@ import { Fragment, useState, useEffect } from 'react';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
-import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
-import MonthRangePicker from '@/components/ui/month-range-picker';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
@@ -168,35 +166,27 @@ export default function ReviewSitesListPageClient() {
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                 <CardContent className="space-y-4 p-6">
-                    <div className="flex items-start justify-between">
-                        <ReviewSitesListHeader
-                            tabs={visibleTabs}
-                            activeTab={activeTab}
-                            onTabChange={tab => setActiveTab(tab)}
-                            locationTypeName={locationTypeName}
-                            locationDropdownOptions={locationDropdownOptions}
-                            selectedLocation={selectedLocation}
-                            onLocationChange={handleLocationChange}
-                        />
-                        <div className="flex items-center gap-3">
-                            <CollectionCyclePicker
-                                collectionCycles={collectionCycles}
-                                selectedCycleIds={selectedCycleIds}
-                                onChange={setSelectedCycleIds}
-                                disabled={
-                                    isGetCollectionCyclesPending ||
-                                    collectionCycles.length === 0
-                                }
-                            />
-                            <MonthRangePicker
-                                startMonth={startMonth}
-                                endMonth={endMonth}
-                                onStartMonthChange={handleStartMonthChange}
-                                onEndMonthChange={handleEndMonthChange}
-                                maxDate={new Date()}
-                            />
-                        </div>
-                    </div>
+                    <ReviewSitesListHeader
+                        tabs={visibleTabs}
+                        activeTab={activeTab}
+                        onTabChange={tab => setActiveTab(tab)}
+                        locationTypeName={locationTypeName}
+                        locationDropdownOptions={locationDropdownOptions}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={handleLocationChange}
+                        collectionCycles={collectionCycles}
+                        selectedCycleIds={selectedCycleIds}
+                        onCycleIdsChange={setSelectedCycleIds}
+                        disabled={
+                            isGetCollectionCyclesPending ||
+                            collectionCycles.length === 0
+                        }
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={handleStartMonthChange}
+                        onEndMonthChange={handleEndMonthChange}
+                        maxDate={new Date()}
+                    />
 
                     <Separator />
 
@@ -212,23 +202,31 @@ export default function ReviewSitesListPageClient() {
                         </div>
                     ) : (
                         <Fragment>
-                            {activeTab === 'sites-list' && (
-                                <ReviewSitesList
-                                    sites={descendantsOfSelectedLocation}
-                                    locationQueryParam={locationQueryParam}
-                                    startMonth={startMonth}
-                                    endMonth={endMonth}
-                                    isCollectionCyclesPending={
-                                        isGetCollectionCyclesPending
-                                    }
-                                    collectionCycles={collectionCycles}
-                                    selectedCycleIds={selectedCycleIds}
-                                    expandedSitePaths={expandedSitePaths}
-                                    setExpandedSitePaths={setExpandedSitePaths}
-                                    collapsedSegments={collapsedSegments}
-                                    setCollapsedSegments={setCollapsedSegments}
-                                />
-                            )}
+                            {activeTab === 'sites-list' &&
+                                (isGetCollectionCyclesPending ? (
+                                    <SkeletonList
+                                        count={5}
+                                        height="xl"
+                                        width="full"
+                                    />
+                                ) : (
+                                    <ReviewSitesList
+                                        sites={descendantsOfSelectedLocation}
+                                        locationQueryParam={locationQueryParam}
+                                        startMonth={startMonth}
+                                        endMonth={endMonth}
+                                        collectionCycles={collectionCycles}
+                                        selectedCycleIds={selectedCycleIds}
+                                        expandedSitePaths={expandedSitePaths}
+                                        setExpandedSitePaths={
+                                            setExpandedSitePaths
+                                        }
+                                        collapsedSegments={collapsedSegments}
+                                        setCollapsedSegments={
+                                            setCollapsedSegments
+                                        }
+                                    />
+                                ))}
                             {activeTab === 'export' && (
                                 <ReviewExportList
                                     sites={descendantsOfSelectedLocation}
