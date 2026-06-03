@@ -28,5 +28,9 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}",
         "unassignedSessions": "Unassigned Sessions"
+    },
+    "ReviewSitesList": {
+        "needsReview": "Needs Review",
+        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
     }
 }

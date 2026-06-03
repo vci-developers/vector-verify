@@ -4,6 +4,7 @@ import { cn } from '@/utils/cn';
 import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Fragment } from 'react';
+import { useTranslations } from 'next-intl';
 import { type ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
 
 interface ReviewSiteLeafRowsProps {
@@ -35,6 +36,7 @@ export default function ReviewSiteLeafRows({
     startDate,
     endDate,
 }: ReviewSiteLeafRowsProps) {
+    const t = useTranslations('ReviewSitesList');
     if (sites.length === 0) return null;
 
     return (
@@ -86,7 +88,7 @@ export default function ReviewSiteLeafRows({
                         <div className="flex items-center gap-2">
                             {needsReviewCount > 0 && (
                                 <Badge variant="destructive">
-                                    {`${needsReviewCount} ${needsReviewCount === 1 ? 'needs' : 'need'} review`}
+                                    {t('needsReview')}
                                 </Badge>
                             )}
                             {isSubmitted ? (
