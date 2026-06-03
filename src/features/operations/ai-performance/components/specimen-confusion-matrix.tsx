@@ -15,6 +15,9 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 
 interface SpecimenConfusionMatrixProps {
     title: string;
@@ -33,6 +36,8 @@ export default function SpecimenConfusionMatrix({
     confusionMatrix,
     selectedLocationName,
 }: SpecimenConfusionMatrixProps) {
+    const t = useTranslations('OperationsAIPerformance');
+
     const classLabels = Array.from(
         new Set([
             ...confusionMatrix.columns,
@@ -55,8 +60,11 @@ export default function SpecimenConfusionMatrix({
             : 0;
     }
 
-    function getSpecimenCountForGroundTruthLabel(groundTruthLabel: string) {
-        return classLabels.reduce(
+    function getSpecimenCountForGroundTruthLabel(
+        groundTruthLabel: string,
+        allLabels = classLabels,
+    ) {
+        return allLabels.reduce(
             (totalSpecimens, predictedLabel) =>
                 totalSpecimens +
                 getSpecimenCountForCell(groundTruthLabel, predictedLabel),
@@ -64,8 +72,11 @@ export default function SpecimenConfusionMatrix({
         );
     }
 
-    function getSpecimenCountForPredictedLabel(predictedLabel: string) {
-        return classLabels.reduce(
+    function getSpecimenCountForPredictedLabel(
+        predictedLabel: string,
+        labels = classLabels,
+    ) {
+        return labels.reduce(
             (totalSpecimens, groundTruthLabel) =>
                 totalSpecimens +
                 getSpecimenCountForCell(groundTruthLabel, predictedLabel),
@@ -91,6 +102,38 @@ export default function SpecimenConfusionMatrix({
             ? totalCorrectPredictions / totalSpecimensInMatrix
             : null;
 
+    const excludedSpecimenCounts = EXCLUDED_LABELS.map(excludedLabel => {
+        const matchingLabels = classLabels.filter(label =>
+            new RegExp(excludedLabel, 'i').test(label),
+        );
+        const count = matchingLabels.reduce(
+            (total, label) =>
+                total + getSpecimenCountForGroundTruthLabel(label),
+            0,
+        );
+        return { excludedLabel, count };
+    });
+
+    const filteredClassLabels = classLabels.filter(
+        label =>
+            !EXCLUDED_LABELS.some(excludedLabel =>
+                new RegExp(excludedLabel, 'i').test(label),
+            ),
+    );
+
+    const filteredTotalSpecimens = filteredClassLabels.reduce(
+        (totalSpecimens, classLabel) => {
+            return (
+                totalSpecimens +
+                getSpecimenCountForGroundTruthLabel(
+                    classLabel,
+                    filteredClassLabels,
+                )
+            );
+        },
+        0,
+    );
+
     return (
         <Card className="gap-0 lg:col-span-2">
             <CardHeader className="pb-2">
@@ -99,15 +142,22 @@ export default function SpecimenConfusionMatrix({
 
             <CardContent className="space-y-6">
                 <div className="border-secondary/30 bg-secondary/5 rounded-lg border p-4">
-                    <p className="text-muted-foreground text-sm">Accuracy</p>
+                    <p className="text-muted-foreground text-sm">
+                        {t('accuracy')}
+                    </p>
                     <p className="mt-1 text-4xl font-semibold tracking-tight">
                         {formatMatrixPercentage(accuracy)}
                     </p>
                     <p className="text-muted-foreground mt-2 text-xs">
-                        {integerCountFormatter.format(totalCorrectPredictions)}{' '}
-                        correct of{' '}
-                        {integerCountFormatter.format(totalSpecimensInMatrix)}{' '}
-                        {classificationCategory} comparisons
+                        {t('correctOf', {
+                            numCorrect: integerCountFormatter.format(
+                                totalCorrectPredictions,
+                            ),
+                            total: integerCountFormatter.format(
+                                totalSpecimensInMatrix,
+                            ),
+                            category: classificationCategory,
+                        })}
                     </p>
                 </div>
 
@@ -209,7 +259,7 @@ export default function SpecimenConfusionMatrix({
                         <div className="flex items-center gap-2">
                             <Bot className="h-4 w-4" />
                             <h3 className="text-sm font-semibold">
-                                Per-Label Metrics
+                                {t('perLabelMetrics')}
                             </h3>
                         </div>
 
@@ -217,19 +267,19 @@ export default function SpecimenConfusionMatrix({
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent">
                                     <TableHead className="w-full">
-                                        Label
+                                        {t('label')}
                                     </TableHead>
                                     <TableHead className="text-right">
-                                        Sensitivity
+                                        {t('sensitivity')}
                                     </TableHead>
                                     <TableHead className="text-right">
-                                        Specificity
+                                        {t('specificity')}
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
-                                {classLabels.map(classLabel => {
+                                {filteredClassLabels.map(classLabel => {
                                     const truePositives =
                                         getSpecimenCountForCell(
                                             classLabel,
@@ -238,13 +288,15 @@ export default function SpecimenConfusionMatrix({
                                     const falseNegatives =
                                         getSpecimenCountForGroundTruthLabel(
                                             classLabel,
+                                            filteredClassLabels,
                                         ) - truePositives;
                                     const falsePositives =
                                         getSpecimenCountForPredictedLabel(
                                             classLabel,
+                                            filteredClassLabels,
                                         ) - truePositives;
                                     const trueNegatives =
-                                        totalSpecimensInMatrix -
+                                        filteredTotalSpecimens -
                                         truePositives -
                                         falseNegatives -
                                         falsePositives;
@@ -283,34 +335,39 @@ export default function SpecimenConfusionMatrix({
                                 })}
                             </TableBody>
                         </Table>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            {excludedSpecimenCounts.map(
+                                ({ excludedLabel, count }) => {
+                                    return t('specimensLabeledAs', {
+                                        count: count,
+                                        category: excludedLabel,
+                                    });
+                                },
+                            )}
+                        </p>
                     </div>
 
                     <div className="h-full space-y-3 rounded-xl border p-4">
                         <h3 className="text-sm font-semibold">
-                            Interpretation
+                            {t('interpretation')}
                         </h3>
                         <p className="text-muted-foreground text-sm leading-6">
-                            The matrix compares visual verification{' '}
-                            {classificationCategory} labels from{' '}
-                            {selectedLocationName} against the VectorCam{' '}
-                            {classificationCategory} prediction for the selected
-                            date range.
+                            {t('matrixCompares', {
+                                category: classificationCategory,
+                                location: selectedLocationName,
+                            })}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Each cell shows the specimen count and that
-                            cell&apos;s share of the visual verification row.
-                            Each per-label metric is computed as a one-vs-rest
-                            comparison for that label.
+                            {t('eachCellShows')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Sensitivity = TP / (TP + FN). It measures how often
-                            VectorCam correctly identifies specimens that truly
-                            belong to that label.
+                            {t('sensitivityExplanation')}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Specificity = TN / (TN + FP). It measures how often
-                            VectorCam correctly avoids assigning that label when
-                            the specimen truly belongs to another label.
+                            {t('specificityExplanation')}
+                        </p>
+                        <p className="text-muted-foreground text-sm leading-6">
+                            {t('labelExclusionExplanation')}
                         </p>
                     </div>
                 </div>

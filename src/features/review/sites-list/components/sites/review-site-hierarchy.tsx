@@ -5,6 +5,8 @@ import SiteHierarchy from '@/features/review/components/site-hierarchy';
 import ReviewVisitCoverageBadge from './review-visit-coverage-badge';
 import ReviewSiteLeafRows from './review-site-leaf-rows';
 import type { ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { useTranslations } from 'next-intl';
+import { Fragment } from 'react/jsx-runtime';
 
 function getVisitCoverageBackgroundColor(
     percentage: number,
@@ -34,6 +36,7 @@ export default function ReviewSiteHierarchy({
     expandedSitePaths,
     onTogglePath,
 }: ReviewSiteHierarchyProps) {
+    const t = useTranslations('ReviewSitesList');
     return (
         <SiteHierarchy
             sites={sites}
@@ -58,21 +61,21 @@ export default function ReviewSiteHierarchy({
                     sitesInGroup.length > 0
                         ? Math.round((visitedCount / sitesInGroup.length) * 100)
                         : 0;
-                const needsReviewTotal = sitesInGroup.reduce(
-                    (sum, site) =>
-                        sum +
+                const needsReviewSiteCount = sitesInGroup.filter(
+                    site =>
                         (sessionCountsBySiteId.get(site.siteId)
-                            ?.needsReviewCount ?? 0),
-                    0,
-                );
+                            ?.needsReviewCount ?? 0) > 0,
+                ).length;
                 return {
                     headerClassName:
                         getVisitCoverageBackgroundColor(visitedPercentage),
                     summaryContent: (
-                        <>
-                            {needsReviewTotal > 0 && (
+                        <Fragment>
+                            {needsReviewSiteCount > 0 && (
                                 <span className="text-destructive text-xs tabular-nums">
-                                    {`${needsReviewTotal} ${needsReviewTotal === 1 ? 'needs' : 'need'} review`}
+                                    {t('sitesNeedReview', {
+                                        count: needsReviewSiteCount,
+                                    })}
                                 </span>
                             )}
                             <span className="text-muted-foreground text-xs tabular-nums">
@@ -81,7 +84,7 @@ export default function ReviewSiteHierarchy({
                             <ReviewVisitCoverageBadge
                                 visitedPercentage={visitedPercentage}
                             />
-                        </>
+                        </Fragment>
                     ),
                 };
             }}
