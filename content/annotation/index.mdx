@@ -1,0 +1,51 @@
+import { Callout } from 'nextra/components';
+
+# Annotation
+
+The Annotation feature lets expert reviewers label mosquito specimens with
+precise biological classifications. These labels are used to evaluate and
+improve the accuracy of the machine learning models that automatically classify
+specimens collected in the field.
+
+<Callout type="warning">
+    Annotation requires **Access Level 3** (Program Editor and Annotator). Users
+    at lower access levels cannot submit annotations.
+</Callout>
+
+## How annotation works
+
+Annotation is organized into **tasks**. Each task is a set of specimens that
+need to be labeled. Tasks are created by program administrators and assigned to
+annotators, or made available for any eligible user to pick up.
+
+The annotation workflow has two parts:
+
+1. **[Annotation Tasks](/docs/annotation/tasks)** — browse available tasks and
+   choose one to work on
+2. **[Annotation Workspace](/docs/annotation/workspace)** — view each specimen
+   and submit labels
+
+## What annotators do
+
+For each specimen, you:
+
+- Inspect the specimen image
+- Review the machine learning model's prediction
+- Assign the correct **genus**, **species**, **sex**, and **abdomen status**
+- Flag the specimen if there are image quality issues or the specimen is
+  ambiguous
+
+Your annotations are recorded alongside the original model prediction, allowing
+the system to measure prediction accuracy and generate training data for model
+improvement.
+
+## Annotation vs. Review
+
+Both workflows involve looking at specimens, but they serve different purposes:
+
+|                   | Review                             | Annotation                             |
+| ----------------- | ---------------------------------- | -------------------------------------- |
+| **Purpose**       | Validate monthly surveillance data | Evaluate and improve ML model accuracy |
+| **Scope**         | Site + month batches               | Task-based specimen sets               |
+| **Labels**        | Quick approve / correct / flag     | Precise species, sex, abdomen status   |
+| **Who can do it** | Level 2+                           | Level 3 only                           |

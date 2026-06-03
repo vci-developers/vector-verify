@@ -1,0 +1,57 @@
+import { Steps } from 'nextra/components';
+
+# Review
+
+The Review workflow is how program staff validate surveillance data collected at
+a sentinel site before it is submitted to national surveillance systems. Review
+is done one site at a time, for one reporting month at a time.
+
+import { Callout } from 'nextra/components';
+
+<Callout type="warning">
+    Review requires **Access Level 2** (Site Editor) or higher. Viewers can
+    browse completed reviews but cannot make changes.
+</Callout>
+
+## The review workflow
+
+<Steps>
+### Select a site and month
+
+Choose which sentinel site and reporting month you want to review. The site list
+shows the current review status for each site so you can quickly see where work
+is needed.
+
+### Review surveillance questions
+
+Go through the surveillance form responses submitted across all sessions for the
+selected site and month. The platform highlights inconsistencies or conflicts
+between sessions so you can identify and resolve them.
+
+### Review specimens
+
+Inspect the mosquito specimens collected during the month. Approve specimens
+where the machine learning prediction looks correct, correct obvious errors, and
+flag images with quality issues.
+
+### Certify the dataset
+
+Once surveillance questions and specimens have been reviewed, certify the site's
+dataset for the month. Certification records who approved the data and when, and
+marks it as ready for national reporting.
+
+</Steps>
+
+## Review status indicators
+
+Each site and month shows one of the following statuses:
+
+| Status                      | Meaning                                                    |
+| --------------------------- | ---------------------------------------------------------- |
+| **Not reviewed**            | No review work has started for this site/month             |
+| **In progress**             | Review has started but not all steps are complete          |
+| **Ready for certification** | All review steps are complete; awaiting certification      |
+| **Certified**               | The dataset has been certified and is ready for submission |
+
+Continue to [Site & Month Selection](/docs/review/site-selection) to get
+started.

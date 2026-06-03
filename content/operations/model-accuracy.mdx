@@ -1,0 +1,39 @@
+import { Callout } from 'nextra/components';
+
+# Model Accuracy
+
+The Model Accuracy tab shows how well the machine learning model is performing
+based on expert annotations submitted through the [Annotation](/docs/annotation)
+workflow.
+
+<Callout type="info">
+    This tab requires annotation data to be populated. If no annotations have
+    been submitted for the selected period, the tab will show no results.
+</Callout>
+
+## Confusion matrix
+
+The confusion matrix compares the model's predictions against the expert
+annotations:
+
+- **Rows** — the true label (what the annotator said)
+- **Columns** — what the model predicted
+- **Cells** — how often that prediction/label combination occurred
+
+A well-performing model will have large numbers along the diagonal (correct
+predictions) and small numbers elsewhere.
+
+## Accuracy metrics
+
+- **Overall accuracy** — the percentage of specimens the model classified
+  correctly
+- **Per-species accuracy** — accuracy broken down by species, so you can see
+  which species the model handles well and which it struggles with
+- **Confusion rate between species** — which species pairs are most commonly
+  confused
+
+## Trends over time
+
+Charts showing how model accuracy has changed over time help you track whether
+recent retraining has improved performance or whether a particular period showed
+unusual errors.

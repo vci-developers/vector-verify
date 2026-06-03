@@ -15,7 +15,11 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    if (!accessToken && !PUBLIC_ROUTES.has(pathname)) {
+    if (
+        !accessToken &&
+        !PUBLIC_ROUTES.has(pathname) &&
+        !pathname.startsWith('/docs')
+    ) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 

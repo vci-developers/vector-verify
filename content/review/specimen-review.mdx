@@ -1,0 +1,47 @@
+import { Callout } from 'nextra/components';
+
+# Specimen Review
+
+The Specimen Review step lets you quickly validate the mosquito specimens
+collected during the month. The focus is rapid review — checking that
+predictions look reasonable and flagging obvious problems, not deep annotation.
+
+<Callout type="info">
+    Deep annotation (assigning precise labels for model training) is done in the
+    [Annotation](/docs/annotation) workflow, not here.
+</Callout>
+
+## The review workspace
+
+Each specimen is displayed one at a time with:
+
+- The **specimen image** for visual inspection
+- The **machine learning prediction** — species, sex, and abdomen status
+- **Basic metadata** — household ID, collection date, collector, site
+
+## Actions per specimen
+
+For each specimen you can:
+
+- **Approve** — the prediction looks correct, no changes needed
+- **Correct** — fix an obvious ML error by selecting the right species, sex, or
+  abdomen status
+- **Flag** — mark the specimen as problematic (poor image quality, ambiguous
+  specimen, incorrect capture)
+- **Skip** — move on and come back to it later
+
+## Navigating between specimens
+
+Use the **Next** and **Previous** buttons to move through specimens one at a
+time, or use the keyboard shortcuts displayed on screen for faster navigation.
+
+## Bulk approval
+
+If a set of specimens all look correct, use **Approve remaining** or **Approve
+all unflagged** to approve them in bulk rather than reviewing each one
+individually.
+
+## Completing this step
+
+Once all specimens have been approved, corrected, or flagged, confirm the step
+to proceed to [Certification](/docs/review/certification).
