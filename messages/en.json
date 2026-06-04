@@ -28,6 +28,7 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}",
         "unassignedSessions": "Unassigned Sessions"
+    },
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
