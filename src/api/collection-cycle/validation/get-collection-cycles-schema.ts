@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { collectionCycleSchema } from '@/api/collection-cycle/validation/collection-cycle-schema';
 
 export const getCollectionCyclesQueryParamsSchema = z.object({
-    programId: z.coerce.number(),
     startDate: z.string(),
     endDate: z.string(),
 });

@@ -91,7 +91,8 @@ export default function ReviewSitesListPageClient() {
         data: getCollectionCyclesResult,
         isPending: isGetCollectionCyclesPending,
     } = useGetCollectionCycles(
-        { programId: programId ?? 0, startDate, endDate },
+        programId ?? 0,
+        { startDate, endDate },
         { enabled: programId !== undefined },
     );
 

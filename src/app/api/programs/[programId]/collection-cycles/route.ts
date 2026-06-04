@@ -7,7 +7,18 @@ import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
-export async function GET(request: Request) {
+interface GetCollectionCyclesRouteParams {
+    params: Promise<{
+        programId: string;
+    }>;
+}
+
+export async function GET(
+    request: Request,
+    { params }: GetCollectionCyclesRouteParams,
+) {
+    const programId = Number((await params).programId);
+
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
@@ -26,7 +37,7 @@ export async function GET(request: Request) {
 
     const authorizedGetCollectionCyclesResult =
         await withAuthSession<GetCollectionCyclesResponseBody>(accessToken =>
-            getCollectionCycles(accessToken, parsedQueryParams.data),
+            getCollectionCycles(accessToken, programId, parsedQueryParams.data),
         );
 
     return NextResponse.json(authorizedGetCollectionCyclesResult, {

@@ -11,6 +11,7 @@ import { safeApiCall } from '@/lib/network/safe-api-call';
 
 export async function getCollectionCycles(
     accessToken: string,
+    programId: number,
     queryParams: GetCollectionCyclesQueryParams,
 ): Promise<Result<GetCollectionCyclesResponseBody, NetworkError>> {
     const queryString = constructQueryString<GetCollectionCyclesQueryParams>(
@@ -19,7 +20,7 @@ export async function getCollectionCycles(
     );
 
     return safeApiCall<GetCollectionCyclesResponseBody>(
-        `/programs/${queryParams.programId}/collection-cycles${queryString}`,
+        `/programs/${programId}/collection-cycles${queryString}`,
         {
             method: 'GET',
             headers: {

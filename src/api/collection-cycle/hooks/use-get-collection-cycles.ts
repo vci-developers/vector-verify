@@ -20,27 +20,32 @@ type GetCollectionCyclesQueryOptions = Omit<
 >;
 
 async function fetchCollectionCycles(
+    programId: number,
     queryParams: GetCollectionCyclesQueryParams,
 ): Promise<GetCollectionCyclesQueryResult> {
     const queryString = constructQueryString(
         queryParams,
         getCollectionCyclesQueryParamsSchema,
     );
-    const response = await fetch(`/api/collection-cycles${queryString}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-    });
+    const response = await fetch(
+        `/api/programs/${programId}/collection-cycles${queryString}`,
+        {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+        },
+    );
     return response.json();
 }
 
 export function useGetCollectionCycles(
+    programId: number,
     queryParams: GetCollectionCyclesQueryParams,
     options?: GetCollectionCyclesQueryOptions,
 ) {
     return useQuery({
-        queryKey: collectionCycleKeys.collectionCycles(queryParams),
-        queryFn: () => fetchCollectionCycles(queryParams),
+        queryKey: collectionCycleKeys.collectionCycles(programId, queryParams),
+        queryFn: () => fetchCollectionCycles(programId, queryParams),
         ...options,
     });
 }
