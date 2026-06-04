@@ -28,6 +28,20 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}",
         "unassignedSessions": "Unassigned Sessions"
+    "OperationsAIPerformance": {
+        "accuracy": "Accuracy",
+        "correctOf": "{numCorrect} correct of {total} {category} comparisons",
+        "perLabelMetrics": "Per-Label Metrics",
+        "label": "Label",
+        "sensitivity": "Sensitivity",
+        "specificity": "Specificity",
+        "specimensLabeledAs": "{count, plural, one {# specimen''s label was} other {# specimens'' labels were}} {category, select, unknown {or contained ''{category}''} other {{category}}}. ",
+        "interpretation": "Interpretation",
+        "matrixCompares": "The matrix compares visual verification {category} labels from {location} against the VectorCam {category} prediction for the selected date range.",
+        "eachCellShows": "Each cell shows the specimen count and that cell's share of the visual verification row. Each per-label metric is computed as a one-vs-rest comparison for that label.",
+        "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
+        "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
+        "labelExclusionExplanation": "Cannot be Determined specimens, UNKNOWN specimens, and specimens with labels containing 'unknown' were excluded from the sensitivity and specificity calculations due to ambiguity. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded. A label containing 'unknown' indicates annotator uncertainty."
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
