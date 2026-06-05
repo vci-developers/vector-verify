@@ -12,6 +12,7 @@ export const formAnswerSchema = z.object({
     options: z.array(z.unknown()).nullable(),
     value: z.string(),
     dataType: z.string(),
+    answerScope: z.string().nullable(),
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),
     updatedAt: z.number().nullable(),
