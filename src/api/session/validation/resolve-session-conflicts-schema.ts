@@ -10,15 +10,9 @@ export const resolvedFormAnswerSchema = z.object({
 
 export const resolveSessionConflictsRequestSchema = z.object({
     sessionIds: z.array(z.number()),
-    resolvedData: sessionSchema.partial().optional(),
-    resolvedSurveillanceForm: surveillanceFormSchema
-        .partial()
-        .nullable()
-        .optional(),
-    resolvedFormAnswers: z
-        .array(resolvedFormAnswerSchema)
-        .nullable()
-        .optional(),
+    resolvedData: sessionSchema.partial(),
+    resolvedSurveillanceForm: surveillanceFormSchema.partial(),
+    resolvedFormAnswers: z.array(resolvedFormAnswerSchema).optional(),
 });
 
 export const resolveSessionConflictsResponseSchema = z.object({

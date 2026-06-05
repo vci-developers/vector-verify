@@ -1,8 +1,11 @@
 import { useQueries } from '@tanstack/react-query';
 import type { NetworkError } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
-import type { GetFormAnswersBySessionIdSuccessPayload } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
-import { getFormAnswersBySessionIdQueryParamsSchema } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
+import {
+    getFormAnswersBySessionIdQueryParamsSchema,
+    type GetFormAnswersBySessionIdQueryParams,
+    type GetFormAnswersBySessionIdSuccessPayload,
+} from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
 import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 
@@ -13,10 +16,10 @@ type GetFormAnswersBySessionIdQueryResult = Result<
 
 async function fetchFormAnswersBySessionId(
     sessionId: number,
-    version?: string,
+    queryParams: GetFormAnswersBySessionIdQueryParams,
 ): Promise<GetFormAnswersBySessionIdQueryResult> {
     const queryString = constructQueryString(
-        { version },
+        queryParams,
         getFormAnswersBySessionIdQueryParamsSchema,
     );
     const response = await fetch(
@@ -27,18 +30,22 @@ async function fetchFormAnswersBySessionId(
             headers: { 'Content-Type': 'application/json' },
         },
     );
-    const result: GetFormAnswersBySessionIdQueryResult = await response.json();
-    return result;
+    const getFormAnswersBySessionIdResult: GetFormAnswersBySessionIdQueryResult =
+        await response.json();
+    return getFormAnswersBySessionIdResult;
 }
 
 export function useGetFormAnswersBySessionIds(
     sessionIds: number[],
-    version?: string,
+    queryParams: GetFormAnswersBySessionIdQueryParams = {},
 ) {
     return useQueries({
         queries: sessionIds.map(sessionId => ({
-            queryKey: formAnswerKeys.formAnswersBySessionId(sessionId, version),
-            queryFn: () => fetchFormAnswersBySessionId(sessionId, version),
+            queryKey: formAnswerKeys.formAnswersBySessionId(
+                sessionId,
+                queryParams.version,
+            ),
+            queryFn: () => fetchFormAnswersBySessionId(sessionId, queryParams),
         })),
     });
 }

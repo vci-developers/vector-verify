@@ -16,18 +16,6 @@ export const formAnswerSchema = z.object({
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),
     updatedAt: z.number().nullable(),
-    sessionUnitId: z.number().nullable(),
-    isUnitIdentityComponent: z.boolean().nullable(),
-    sessionUnit: z
-        .object({
-            id: z.number(),
-            frontendId: z.string().nullable(),
-            sessionId: z.number(),
-            unitOrder: z.number(),
-            createdAt: z.number().nullable(),
-            updatedAt: z.number().nullable(),
-        })
-        .nullable(),
 });
 
 export type FormAnswer = z.infer<typeof formAnswerSchema>;
