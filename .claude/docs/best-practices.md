@@ -1,6 +1,6 @@
 # VectorVerify Best Practices
 
-_Created: Mar 8, 2026 | Last Updated: Mar 8, 2026_
+_Created: Mar 8, 2026 | Last Updated: Jun 4, 2026_
 
 ## Purpose
 
@@ -9,6 +9,77 @@ clear, maintainable, and consistent with the rest of the system.
 
 This document outlines the standards and conventions expected when working on
 the VectorVerify web application.
+
+---
+
+## Non-Negotiable Implementation Rules
+
+> **These rules are extremely important and MUST be followed for every single
+> implementation — no exceptions.** They take precedence over personal style.
+> When in doubt, copy the nearest existing example exactly.
+
+1. **Minimal util files.** A file in a `utils/` folder contains _only_ true,
+   pure utility functions — no React, no I/O, no state. Keep one cohesive
+   responsibility per file (e.g. `build-collection-cycle-segments.ts`,
+   `accumulate-session-summary.ts`). Do not create a util file as a dumping
+   ground for unrelated helpers, and do not put logic in `utils/` that belongs in
+   a component, hook, or server function.
+
+2. **No intermediate types or interfaces.** Domain types come from the core Zod
+   schemas via `z.infer` — never hand-write a parallel type for data that a
+   schema already describes. The only types you may declare outside schemas are
+   ones that are _absolutely necessary_ and have no schema equivalent: component
+   prop interfaces (`…Props`) and tiny local UI-state unions (e.g.
+   `'idle' | 'exporting'`). If you find yourself writing an interface that mirrors
+   a schema, delete it and infer instead.
+
+3. **Names must convey exact meaning.** Every variable, function, and component
+   name states precisely what it holds and what it does — no abbreviations, no
+   vague nouns (`data`, `item`, `temp`, `handle`). Prefer
+   `certifiedCountsByMonth` over `counts`, `submitDhis2Sync` over `submit`. The
+   name alone should make the code readable without comments.
+
+4. **Simplest possible solution.** Achieve the full functionality in the fewest
+   lines and fewest files that remain clear. Do not add abstraction, options, or
+   layers that the current requirement does not need. Fewer moving parts beats
+   cleverness. Do not promote a component/util/type to "shared" until there is a
+   real second consumer.
+
+5. **Mirror the existing patterns and file structure exactly.**
+   - **API endpoints follow the EXACT structure** of existing resources under
+     `src/api/<resource>/`:
+     - `<verb>-<resource>.ts` — `'server-only'` server function that calls
+       `safeApiCall` and returns `Result<T, NetworkError>`.
+     - `hooks/use-<verb>-<resource>.ts` — TanStack Query/Mutation hook that
+       fetches the BFF route (`/api/…`), never the backend directly.
+     - `validation/<…>-schema.ts` — Zod schemas (`…Schema`) + inferred types.
+     - `<resource>-keys.ts` — query-key factory (`{ root, … }`).
+     - `src/app/api/<resource>/route.ts` — BFF handler: `safeParse` query/body →
+       `err()` on failure → `withAuthSession` → `NextResponse.json(result, {
+       status })`.
+   - **UI hierarchy stays consistent across features.** Feature code lives in
+     `src/features/<feature>/components/` (and `utils/`), mirroring how existing
+     features (e.g. `review`) are laid out. New screens look and nest like the
+     ones already there.
+
+6. **Use shadcn/ui components wherever possible.** Reach for the primitives in
+   `src/components/ui/*` (Button, Checkbox, Input, Dialog, Badge, Table, etc.)
+   instead of raw HTML elements or bespoke CSS. Only drop to a raw element when no
+   shadcn primitive fits.
+
+7. **Other enforced conventions.**
+   - Wrap all backend results in `Result<T, E>`; **never** use `try/catch` in the
+     UI layer.
+   - Validate _all_ external data (responses, bodies, query params, forms) with
+     Zod before use.
+   - Server components by default; add `'use client'` only when interactivity is
+     genuinely required.
+   - Keep complex expressions out of JSX — lift them into named variables,
+     memoized values, or utils.
+   - No magic numbers or hardcoded UI strings — extract to constants / i18n
+     resources.
+   - Leave each file better than you found it; match the surrounding code's
+     idiom, comment density, and naming.
 
 ---
 
