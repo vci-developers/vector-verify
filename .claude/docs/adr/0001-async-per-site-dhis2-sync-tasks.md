@@ -34,8 +34,19 @@ Rewrite the Export feature to drive the async task API:
 
 1. **Keying.** One Sync Task per `(collectionCycleId, siteId)` pair — never
    batched. Data is submitted one site at a time. Sessions with a `null`
-   collectionCycleId are **not exportable**; they are shown in an "Unassigned"
-   segment and must be assigned to a cycle in Review first.
+   collectionCycleId are **not exportable** and are **not rendered on the DHIS2
+   dashboard at all** — assigning a session to a cycle is a Review concern (the
+   sites-list already has its own "Unassigned" segment for that), not a job of
+   this board. The dashboard groups only cycle-assigned sessions. A site that
+   *also* holds any unassigned session is gated from submission **entirely**:
+   every `(cycle, site)` Submit for that site is hard-blocked until the orphaned
+   sessions are assigned, so a site's DHIS2 data is never pushed while part of
+   its data sits outside any cycle. The gate is a site-level frontend guard
+   (input: "does this site have ≥ 1 unassigned session?"), independent of the
+   per-row sync status — it is **not** a value of the status roll-up union, and
+   `unassigned` is therefore **not** a member of that union. The
+   assign-orphan-to-cycle flow that clears the gate is a **separate, forthcoming
+   feature, out of scope for this rewrite**.
 2. **Reads.** Hydrate shared status with one TanStack Query per `(cycle, site)`
    pair (`GET /dhis2/sync?collectionCycleId&siteId`). Accept the per-pair
    fan-out because no batch endpoint exists.
@@ -47,7 +58,9 @@ Rewrite the Export feature to drive the async task API:
    `failed`/`timed_out` retry by starting a fresh task. This is safe (UX, not
    correctness) because the backend write is idempotent.
 5. **Status roll-up.** Per-site status combines task status + `result.summary`
-   (surface partial failures, `summary.failedSyncs > 0`) + session states
+   (a `completed` task with `summary.failedSyncs > 0` = the single household was
+   rejected → rolled up to **Failed**; per-site tasks are one household, so there
+   is no partial "completed with errors" state) + session states
    (`isCertified` vs `isSubmitted`) to distinguish "Ready", "Submitted", and
    "completed but has newly-certified data". Invalidate `sessionKeys` on the
    `running → completed` transition to refresh `SUBMITTED` state.
@@ -76,6 +89,13 @@ Rewrite the Export feature to drive the async task API:
   changes, dedup must move server-side and this decision should be revisited.
 - **No attribution** — the board cannot show who started a task until the backend
   adds a user field.
+- **The unassigned-session gate depends on an unbuilt flow.** A site with any
+  unassigned session is blocked from all submission, but the assign-to-cycle
+  capability that clears the block does not exist on the frontend yet (session
+  `collectionCycleId` is read-only today — no mutation sets it). Until that
+  separate feature ships, an orphaned site cannot be submitted at all. Accepted
+  deliberately: data completeness outranks export availability, and the
+  assignment flow is expected soon.
 - Depends on two backend behaviors confirmed by inference, worth one explicit
   confirmation each: the bare `GET ?collectionCycleId&siteId` read form, and
   `SUBMITTED` being set on task completion in async mode.

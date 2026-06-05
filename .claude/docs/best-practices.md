@@ -81,6 +81,20 @@ the VectorVerify web application.
    - Leave each file better than you found it; match the surrounding code's
      idiom, comment density, and naming.
 
+8. **Develop incrementally; let utilities precipitate, don't pre-declare them.**
+   Build the feature UI-first, one sub-functionality at a time, on top of the
+   data layer. Do **not** open by enumerating the utility functions you expect
+   to need — a pre-declared util list anchors the design and pressures you to
+   use every slot you carved out, whether or not the code wants it. Extract a
+   utility only at the moment a real need appears: the same logic shows up a
+   second time, or a render block has grown genuinely unreadable. The default is
+   to inline first and extract on friction, never to scaffold helpers ahead of
+   the code that consumes them. _Carve-out:_ a genuine **deep module** —
+   irreducible domain logic with one cohesive responsibility and high branching
+   (e.g. a status roll-up) — is not speculative and may be authored up front.
+   The rule targets derived helpers (formatters, predicates, simple builders),
+   not the core logic a feature is fundamentally about.
+
 ---
 
 ## General Clean Coding Principles
