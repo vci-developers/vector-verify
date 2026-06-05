@@ -10,12 +10,24 @@ export const formAnswerSchema = z.object({
     type: z.string().nullable(),
     required: z.boolean().nullable(),
     options: z.array(z.unknown()).nullable(),
-    value: z.string(),
+    value: z.unknown(),
     dataType: z.string(),
-    answerScope: z.string().nullable(),
+    answerScope: z.enum(['SESSION', 'SESSION_UNIT']).nullable(),
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),
     updatedAt: z.number().nullable(),
+    sessionUnitId: z.number().nullable(),
+    isUnitIdentityComponent: z.boolean().nullable(),
+    sessionUnit: z
+        .object({
+            id: z.number(),
+            frontendId: z.string().nullable(),
+            sessionId: z.number(),
+            unitOrder: z.number(),
+            createdAt: z.number().nullable(),
+            updatedAt: z.number().nullable(),
+        })
+        .nullable(),
 });
 
 export type FormAnswer = z.infer<typeof formAnswerSchema>;

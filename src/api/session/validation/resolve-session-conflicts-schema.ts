@@ -10,8 +10,11 @@ export const resolvedFormAnswerSchema = z.object({
 
 export const resolveSessionConflictsRequestSchema = z.object({
     sessionIds: z.array(z.number()),
-    resolvedData: sessionSchema.partial(),
-    resolvedSurveillanceForm: surveillanceFormSchema.partial(),
+    resolvedData: sessionSchema.partial().optional(),
+    resolvedSurveillanceForm: surveillanceFormSchema
+        .partial()
+        .nullable()
+        .optional(),
     resolvedFormAnswers: z
         .array(resolvedFormAnswerSchema)
         .nullable()
@@ -25,6 +28,7 @@ export const resolveSessionConflictsResponseSchema = z.object({
     updatedSessionUnitCount: z.number(),
 });
 
+export type ResolvedFormAnswer = z.infer<typeof resolvedFormAnswerSchema>;
 export type ResolveSessionConflictsRequestBody = z.infer<
     typeof resolveSessionConflictsRequestSchema
 >;

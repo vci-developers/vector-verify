@@ -3,6 +3,8 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
+import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-ids';
+import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import {
     applyConflictResolutions,
     buildMetadataRows,
@@ -47,6 +49,10 @@ export default function MetadataReviewWorkspace({
             allSessionsForSite.map(session => session.sessionId),
         );
 
+    const allFormAnswerQueriesForSite = useGetFormAnswersBySessionIds(
+        allSessionsForSite.map(session => session.sessionId),
+    );
+
     const {
         mutate: resolveSessionConflicts,
         isPending: isResolveSessionConflictsPending,
@@ -82,11 +88,34 @@ export default function MetadataReviewWorkspace({
         return <h1>Error: {failedQuery.data.error.message}</h1>;
     }
 
+    if (allFormAnswerQueriesForSite.some(query => query.isPending)) {
+        return <h1>Loading...</h1>;
+    }
+
+    const failedFormAnswerQuery = allFormAnswerQueriesForSite.find(
+        query =>
+            query.data &&
+            !query.data.ok &&
+            query.data.error.kind !== 'not_found',
+    );
+    if (failedFormAnswerQuery?.data && !failedFormAnswerQuery.data.ok) {
+        return <h1>Error: {failedFormAnswerQuery.data.error.message}</h1>;
+    }
+
     const surveillanceFormsBySessionId = new Map(
         allSessionsForSite.map((session, index) => [
             session.sessionId,
             allSurveillanceFormQueriesForSite[index]?.data?.ok
                 ? allSurveillanceFormQueriesForSite[index].data.data
+                : null,
+        ]),
+    );
+
+    const formAnswersBySessionId = new Map(
+        allSessionsForSite.map((session, index) => [
+            session.sessionId,
+            allFormAnswerQueriesForSite[index]?.data?.ok
+                ? allFormAnswerQueriesForSite[index].data.data
                 : null,
         ]),
     );
@@ -111,6 +140,7 @@ export default function MetadataReviewWorkspace({
     const metadataRows = buildMetadataRows(
         allSessionsForSite,
         surveillanceFormsBySessionId,
+        formAnswersBySessionId,
     );
 
     const hasConflicts = metadataRows.some(row => row.hasConflict);
@@ -119,8 +149,11 @@ export default function MetadataReviewWorkspace({
     );
 
     function handleResolveConflicts() {
-        const { resolvedSession, resolvedSurveillanceForm } =
-            applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
+        const {
+            resolvedSession,
+            resolvedSurveillanceForm,
+            resolvedFormAnswers,
+        } = applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
 
         resolveSessionConflicts(
             {
@@ -129,6 +162,7 @@ export default function MetadataReviewWorkspace({
                 ),
                 resolvedData: resolvedSession,
                 resolvedSurveillanceForm,
+                resolvedFormAnswers,
             },
             {
                 onSuccess: result => {
@@ -148,6 +182,11 @@ export default function MetadataReviewWorkspace({
                                     surveillanceFormKeys.surveillanceFormBySessionId(
                                         session.sessionId,
                                     ),
+                            });
+                            queryClient.invalidateQueries({
+                                queryKey: formAnswerKeys.formAnswersBySessionId(
+                                    session.sessionId,
+                                ),
                             });
                         }
                         onGoToNextStep();

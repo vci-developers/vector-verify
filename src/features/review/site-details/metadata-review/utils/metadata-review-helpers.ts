@@ -1,5 +1,7 @@
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import type { GetFormAnswersBySessionIdResponseBody } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
+import type { ResolvedFormAnswer } from '@/api/session/validation/resolve-session-conflicts-schema';
 
 type MetaDataFieldType = 'string' | 'number' | 'boolean';
 
@@ -67,14 +69,33 @@ const SURVEILLANCE_FORM_FIELDS = [
     fieldType: MetaDataFieldType;
 }[];
 
-export interface MetadataRow {
+interface BaseMetadataRow {
     id: string;
     label: string;
-    entity: 'session' | 'surveillanceForm';
-    fieldName: string;
     fieldValueBySessionId: Map<number, unknown>;
     hasConflict: boolean;
 }
+
+export interface SessionMetadataRow extends BaseMetadataRow {
+    entity: 'session';
+    fieldName: keyof Session;
+}
+
+export interface SurveillanceFormMetadataRow extends BaseMetadataRow {
+    entity: 'surveillanceForm';
+    fieldName: keyof SurveillanceForm;
+}
+
+export interface FormAnswerMetadataRow extends BaseMetadataRow {
+    entity: 'formAnswer';
+    questionId: number;
+    dataType: string;
+}
+
+export type MetadataRow =
+    | SessionMetadataRow
+    | SurveillanceFormMetadataRow
+    | FormAnswerMetadataRow;
 
 const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
 
@@ -95,9 +116,22 @@ export function formatDisplayValue(value: unknown): string {
     return String(value);
 }
 
+function hasValueConflict(
+    fieldValueBySessionId: Map<number, unknown>,
+): boolean {
+    return (
+        new Set([...fieldValueBySessionId.values()].map(formatDisplayValue))
+            .size > 1
+    );
+}
+
 export function buildMetadataRows(
     sessions: Session[],
     surveillanceFormsBySessionId: Map<number, SurveillanceForm | null>,
+    formAnswersBySessionId: Map<
+        number,
+        GetFormAnswersBySessionIdResponseBody | null
+    >,
 ): MetadataRow[] {
     const metadataRows: MetadataRow[] = [];
 
@@ -105,9 +139,7 @@ export function buildMetadataRows(
         const fieldValueBySessionId = new Map(
             sessions.map(session => [session.sessionId, session[fieldName]]),
         );
-        const hasConflict =
-            new Set([...fieldValueBySessionId.values()].map(formatDisplayValue))
-                .size > 1;
+        const hasConflict = hasValueConflict(fieldValueBySessionId);
         metadataRows.push({
             id: `session.${fieldName}`,
             label,
@@ -121,31 +153,87 @@ export function buildMetadataRows(
     const hasAnySurveillanceForm = [
         ...surveillanceFormsBySessionId.values(),
     ].some(form => form !== null);
-    if (!hasAnySurveillanceForm) return metadataRows;
+    if (hasAnySurveillanceForm) {
+        for (const { fieldName, label } of SURVEILLANCE_FORM_FIELDS) {
+            const fieldValueBySessionId = new Map(
+                sessions.map(session => [
+                    session.sessionId,
+                    surveillanceFormsBySessionId.get(session.sessionId)?.[
+                        fieldName
+                    ] ?? null,
+                ]),
+            );
+            const hasConflict = hasValueConflict(fieldValueBySessionId);
+            metadataRows.push({
+                id: `surveillanceForm.${fieldName}`,
+                label,
+                entity: 'surveillanceForm',
+                fieldName,
+                fieldValueBySessionId,
+                hasConflict,
+            });
+        }
+    }
 
-    for (const { fieldName, label } of SURVEILLANCE_FORM_FIELDS) {
-        const fieldValueBySessionId = new Map(
-            sessions.map(session => [
-                session.sessionId,
-                surveillanceFormsBySessionId.get(session.sessionId)?.[
-                    fieldName
-                ] ?? null,
-            ]),
-        );
-        const hasConflict =
-            new Set([...fieldValueBySessionId.values()].map(formatDisplayValue))
-                .size > 1;
-        metadataRows.push({
-            id: `surveillanceForm.${fieldName}`,
-            label,
-            entity: 'surveillanceForm',
-            fieldName,
-            fieldValueBySessionId,
-            hasConflict,
-        });
+    const hasAnyFormAnswers = [...formAnswersBySessionId.values()].some(
+        result => result !== null,
+    );
+    if (hasAnyFormAnswers) {
+        const questionMap = new Map<
+            number,
+            { label: string; dataType: string }
+        >();
+        for (const formAnswers of formAnswersBySessionId.values()) {
+            if (formAnswers === null) continue;
+            for (const answer of formAnswers.answers) {
+                if (answer.answerScope !== 'SESSION') continue;
+                if (!questionMap.has(answer.questionId)) {
+                    questionMap.set(answer.questionId, {
+                        label: answer.label ?? String(answer.questionId),
+                        dataType: answer.dataType,
+                    });
+                }
+            }
+        }
+
+        for (const [questionId, { label, dataType }] of questionMap) {
+            const fieldValueBySessionId = new Map(
+                sessions.map(session => {
+                    const formAnswers =
+                        formAnswersBySessionId.get(session.sessionId) ?? null;
+                    const formAnswer = formAnswers?.answers.find(
+                        answer => answer.questionId === questionId,
+                    );
+                    return [session.sessionId, formAnswer?.value ?? null];
+                }),
+            );
+            const hasConflict = hasValueConflict(fieldValueBySessionId);
+            metadataRows.push({
+                id: `formAnswer.${questionId}`,
+                label,
+                entity: 'formAnswer',
+                questionId,
+                dataType,
+                fieldValueBySessionId,
+                hasConflict,
+            });
+        }
     }
 
     return metadataRows;
+}
+
+export function parseFormAnswerValue(
+    displayString: string,
+    dataType: string,
+): unknown {
+    if (displayString === 'N/A') return null;
+    if (dataType === 'boolean') {
+        if (displayString === 'Yes') return true;
+        if (displayString === 'No') return false;
+    }
+    if (dataType === 'number') return Number(displayString);
+    return displayString;
 }
 
 export function applyConflictResolutions(
@@ -154,10 +242,23 @@ export function applyConflictResolutions(
 ) {
     const resolvedSession: Partial<Session> = {};
     const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
+    const resolvedFormAnswers: ResolvedFormAnswer[] = [];
 
     for (const metadataRow of metadataRows) {
         const selectedFieldDisplay = resolutionsByRowId.get(metadataRow.id);
         if (selectedFieldDisplay === undefined) continue;
+
+        if (metadataRow.entity === 'formAnswer') {
+            resolvedFormAnswers.push({
+                questionId: metadataRow.questionId,
+                value: parseFormAnswerValue(
+                    selectedFieldDisplay,
+                    metadataRow.dataType,
+                ),
+                dataType: metadataRow.dataType,
+            });
+            continue;
+        }
 
         const existingSessionFieldValue = [
             ...metadataRow.fieldValueBySessionId.values(),
@@ -185,5 +286,5 @@ export function applyConflictResolutions(
         }
     }
 
-    return { resolvedSession, resolvedSurveillanceForm };
+    return { resolvedSession, resolvedSurveillanceForm, resolvedFormAnswers };
 }
