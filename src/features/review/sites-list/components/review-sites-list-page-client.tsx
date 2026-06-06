@@ -229,7 +229,14 @@ export default function ReviewSitesListPageClient() {
                                     />
                                 ))}
                             {activeTab === 'submissions' && (
-                                <ReviewDhis2Dashboard />
+                                <ReviewDhis2Dashboard
+                                    sites={descendantsOfSelectedLocation}
+                                    locationQueryParam={locationQueryParam}
+                                    startMonth={startMonth}
+                                    endMonth={endMonth}
+                                    collectionCycles={collectionCycles}
+                                    selectedCycleIds={selectedCycleIds}
+                                />
                             )}
                         </Fragment>
                     )}

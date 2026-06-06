@@ -10,10 +10,10 @@ import {
     XCircle,
     type LucideIcon,
 } from 'lucide-react';
-import type { Dhis2SyncStatus } from '../utils/dhis2-sync-status';
+import type { Dhis2SyncSiteStatus } from '../utils/dhis2-sync-site-status';
 
 const STATUS_BADGE_CONFIG: Record<
-    Dhis2SyncStatus,
+    Dhis2SyncSiteStatus,
     {
         label: string;
         variant: React.ComponentProps<typeof Badge>['variant'];
@@ -62,13 +62,13 @@ const STATUS_BADGE_CONFIG: Record<
     },
 };
 
-interface Dhis2SyncStatusBadgeProps {
-    status: Dhis2SyncStatus;
+interface Dhis2SyncSiteStatusBadgeProps {
+    status: Dhis2SyncSiteStatus;
 }
 
-export default function Dhis2SyncStatusBadge({
+export default function Dhis2SyncSiteStatusBadge({
     status,
-}: Dhis2SyncStatusBadgeProps) {
+}: Dhis2SyncSiteStatusBadgeProps) {
     const config = STATUS_BADGE_CONFIG[status];
     const Icon = config.icon;
 

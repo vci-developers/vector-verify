@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
-export const dhis2SyncDataValueSchema = z.object({
+const dhis2SyncDataValueSchema = z.object({
     displayName: z.string(),
     dataElementId: z.string(),
     value: z.unknown(),
 });
 
-export const dhis2SyncResultSchema = z.object({
+export const dhis2SyncSiteResultSchema = z.object({
     siteId: z.number(),
     houseNumber: z.string().optional(),
     healthCenter: z.string().optional(),
@@ -25,6 +25,5 @@ export const dhis2SyncSummarySchema = z.object({
     skippedHouseholds: z.number(),
 });
 
-export type Dhis2SyncResult = z.infer<typeof dhis2SyncResultSchema>;
+export type Dhis2SyncSiteResult = z.infer<typeof dhis2SyncSiteResultSchema>;
 export type Dhis2SyncSummary = z.infer<typeof dhis2SyncSummarySchema>;
-export type Dhis2ExportSiteStatus = Dhis2SyncResult['status'];

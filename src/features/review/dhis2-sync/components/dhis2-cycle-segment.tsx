@@ -13,12 +13,14 @@ import { useState } from 'react';
 interface Dhis2CycleSegmentProps {
     label: string;
     siteCount: number;
+    submittedCount: number;
     children: React.ReactNode;
 }
 
 export default function Dhis2CycleSegment({
     label,
     siteCount,
+    submittedCount,
     children,
 }: Dhis2CycleSegmentProps) {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -31,7 +33,7 @@ export default function Dhis2CycleSegment({
                     {label}
                 </span>
                 <Badge variant="secondary" className="ml-1 tabular-nums">
-                    {siteCount}
+                    {submittedCount} / {siteCount} submitted
                 </Badge>
             </CollapsibleTrigger>
             <CollapsibleContent>

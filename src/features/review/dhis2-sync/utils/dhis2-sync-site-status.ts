@@ -1,4 +1,4 @@
-export type Dhis2SyncStatus =
+export type Dhis2SyncSiteStatus =
     | 'ready'
     | 'queued'
     | 'running'

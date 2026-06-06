@@ -64,6 +64,19 @@ Rewrite the Export feature to drive the async task API:
    (`isCertified` vs `isSubmitted`) to distinguish "Ready", "Submitted", and
    "completed but has newly-certified data". Invalidate `sessionKeys` on the
    `running → completed` transition to refresh `SUBMITTED` state.
+   **Incremental data / review-pending.** Field data arrives over time, so a site
+   can gain a new, un-reviewed, in-cycle session after it was certified or even
+   submitted. The board therefore renders a site when it **has submittable data**
+   (`certifiedCount + submittedCount > 0`), not only when fully locked — otherwise
+   a submitted site silently vanishes the moment new data lands. A rendered site
+   that is **not** fully reviewed (`!isSiteLocked`) rolls up to **`reviewPending`**
+   ("Review needed"): one un-certified-new-data status (distinct from
+   *certified*-new-data "has new data to submit"), which **hard-gates submit** —
+   the second submission gate alongside the unassigned-session gate of §1. Unlike
+   that gate, this one **is** a member of the status union (it is a visible badge,
+   not a silent block). This also motivates representing the per-site session
+   summary as **per-state counts** rather than seeded-`true` AND-fold booleans, so
+   "has *any* certified/submitted" is expressible.
 6. **UI.** A dashboard-style table grouped by collection cycle, with per-row
    Submit/Retry actions and a bulk "Submit selected" action that reuses the IRS
    dialog and fires the async POSTs fire-and-forget. The blocking progress panel
