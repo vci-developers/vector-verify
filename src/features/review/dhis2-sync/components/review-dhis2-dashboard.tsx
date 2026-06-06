@@ -14,7 +14,6 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatCollectionCycleLabel } from '../../sites-list/utils/format-collection-cycle-label';
 import Dhis2SiteRow from './dhis2-site-row';
 import {
-    isSiteFullyReviewed,
     isSiteFullySubmittedToDhis2,
     siteHasCertifiedOrSubmittedSessions,
 } from '../../utils/review-site-session-summary';
@@ -119,10 +118,12 @@ export default function ReviewDhis2Dashboard({
                             );
                         });
                         const submittedCount = boardSites.filter(site => {
-                            const summary = summaryBySiteId.get(site.siteId);
+                            const siteSessionSummary = summaryBySiteId.get(
+                                site.siteId,
+                            );
                             return (
-                                summary !== undefined &&
-                                isSiteFullySubmittedToDhis2(summary)
+                                siteSessionSummary !== undefined &&
+                                isSiteFullySubmittedToDhis2(siteSessionSummary)
                             );
                         }).length;
 
@@ -137,16 +138,12 @@ export default function ReviewDhis2Dashboard({
                                     const summary = summaryBySiteId.get(
                                         site.siteId,
                                     )!;
-                                    const status = !isSiteFullyReviewed(summary)
-                                        ? 'reviewPending'
-                                        : isSiteFullySubmittedToDhis2(summary)
-                                          ? 'submitted'
-                                          : 'ready';
                                     return (
                                         <Dhis2SiteRow
                                             key={site.siteId}
                                             site={site}
-                                            status={status}
+                                            collectionCycleId={cycle.id}
+                                            siteSessionSummary={summary}
                                             isSelected={selectedSiteIds.has(
                                                 site.siteId,
                                             )}

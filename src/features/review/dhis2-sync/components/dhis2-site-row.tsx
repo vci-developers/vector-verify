@@ -3,24 +3,42 @@
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MapPin } from 'lucide-react';
 import Dhis2SyncSiteStatusBadge from './dhis2-sync-site-status-badge';
-import type { Dhis2SyncSiteStatus } from '../utils/dhis2-sync-site-status';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Site } from '@/api/site/validation/site-schema';
 import { isLegacySite } from '@/lib/location/location-query';
+import { useGetDhis2SyncTasks } from '@/api/dhis2/hooks/use-get-dhis2-sync-tasks';
+import { rollUpDhis2SyncStatus } from '../utils/roll-up-dhis2-sync-status';
+import {
+    isSiteFullyReviewed,
+    isSiteFullySubmittedToDhis2,
+    type ReviewSiteSessionSummary,
+} from '../../utils/review-site-session-summary';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 interface Dhis2SiteRowProps {
     site: Site;
-    status: Dhis2SyncSiteStatus;
+    collectionCycleId: number;
+    siteSessionSummary: ReviewSiteSessionSummary;
     isSelected: boolean;
     onToggleSelected: () => void;
 }
 
 export default function Dhis2SiteRow({
     site,
-    status,
+    collectionCycleId,
+    siteSessionSummary,
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
+    const {
+        data: getDhis2SyncTasksResult,
+        isPending: isGetDhis2SyncTasksPending,
+    } = useGetDhis2SyncTasks({
+        collectionCycleId,
+        siteId: site.siteId,
+    });
+
     let primaryLabel: string;
     let ancestorLabels: string[];
     if (isLegacySite(site)) {
@@ -41,12 +59,24 @@ export default function Dhis2SiteRow({
         );
     }
 
-    const isInFlight = status === 'queued' || status === 'running';
+    const status = getDhis2SyncTasksResult?.ok
+        ? rollUpDhis2SyncStatus(
+              isSiteFullyReviewed(siteSessionSummary),
+              isSiteFullySubmittedToDhis2(siteSessionSummary),
+              getDhis2SyncTasksResult.data.tasks[0],
+          )
+        : undefined;
+
+    const isSelectionDisabled =
+        status === undefined ||
+        status === 'queued' ||
+        status === 'running' ||
+        status === 'reviewPending';
 
     return (
         <TableRow>
             <TableCell className="w-10">
-                {!isInFlight && (
+                {!isSelectionDisabled && (
                     <Checkbox
                         checked={isSelected}
                         onCheckedChange={onToggleSelected}
@@ -71,7 +101,18 @@ export default function Dhis2SiteRow({
             </TableCell>
             <TableCell className="text-right">
                 <div className="flex justify-end">
-                    <Dhis2SyncSiteStatusBadge status={status} />
+                    {isGetDhis2SyncTasksPending || !getDhis2SyncTasksResult ? (
+                        <Skeleton height="md" width="sm" rounded="lg" />
+                    ) : status === undefined ? (
+                        <Badge
+                            variant="outline"
+                            className="bg-destructive/20 text-destructive border-destructive/50"
+                        >
+                            Error determining status
+                        </Badge>
+                    ) : (
+                        <Dhis2SyncSiteStatusBadge status={status} />
+                    )}
                 </div>
             </TableCell>
         </TableRow>

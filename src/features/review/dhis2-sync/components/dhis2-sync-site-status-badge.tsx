@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
-import { cn } from '@/utils/cn';
 import {
     CheckCircle2,
     ClipboardList,
@@ -80,7 +79,7 @@ export default function Dhis2SyncSiteStatusBadge({
     const Icon = config.icon;
 
     return (
-        <Badge variant={config.variant} className={cn(config.className)}>
+        <Badge variant={config.variant} className={config.className}>
             {config.showSpinner && <Spinner className="size-3" />}
             {Icon && <Icon />}
             {config.label}
