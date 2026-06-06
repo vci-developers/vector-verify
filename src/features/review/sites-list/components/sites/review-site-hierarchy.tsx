@@ -4,7 +4,10 @@ import type { Site } from '@/api/site/validation/site-schema';
 import SiteHierarchy from '@/features/review/components/site-hierarchy';
 import ReviewVisitCoverageBadge from '@/features/review/sites-list/components/sites/review-visit-coverage-badge';
 import ReviewSiteLeafRows from '@/features/review/sites-list/components/sites/review-site-leaf-rows';
-import type { ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
+import {
+    getSiteSessionCount,
+    type ReviewSiteSessionSummary,
+} from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 import { Fragment } from 'react/jsx-runtime';
 
@@ -55,19 +58,21 @@ export default function ReviewSiteHierarchy({
                 />
             )}
             renderGroupContent={sitesInGroup => {
-                const visitedCount = sitesInGroup.filter(
-                    site =>
-                        (sessionCountsBySiteId.get(site.siteId)?.sessionCount ??
-                            0) > 0,
-                ).length;
+                const visitedCount = sitesInGroup.filter(site => {
+                    const summary = sessionCountsBySiteId.get(site.siteId);
+                    return (
+                        summary !== undefined &&
+                        getSiteSessionCount(summary) > 0
+                    );
+                }).length;
                 const visitedPercentage =
                     sitesInGroup.length > 0
                         ? Math.round((visitedCount / sitesInGroup.length) * 100)
                         : 0;
                 const needsReviewSiteCount = sitesInGroup.filter(
                     site =>
-                        (sessionCountsBySiteId.get(site.siteId)
-                            ?.needsReviewCount ?? 0) > 0,
+                        (sessionCountsBySiteId.get(site.siteId)?.NEEDS_REVIEW ??
+                            0) > 0,
                 ).length;
                 return {
                     headerClassName:

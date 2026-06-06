@@ -13,6 +13,11 @@ import { buildCollectionCycleSegments } from '../../sites-list/utils/build-colle
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatCollectionCycleLabel } from '../../sites-list/utils/format-collection-cycle-label';
 import Dhis2SiteRow from './dhis2-site-row';
+import {
+    isSiteFullyReviewed,
+    isSiteFullySubmittedToDhis2,
+    siteHasCertifiedOrSubmittedSessions,
+} from '../../utils/review-site-session-summary';
 
 interface ReviewDhis2DashboardProps {
     sites: Site[];
@@ -106,38 +111,51 @@ export default function ReviewDhis2Dashboard({
                         const cycle = segment.cycle;
                         if (cycle === null) return null;
                         const summaryBySiteId = segment.sessionSummaryBySiteId;
-                        const lockedSites = sites.filter(
-                            site => summaryBySiteId.get(site.siteId)?.isLocked,
-                        );
-                        const submittedCount = lockedSites.filter(
-                            site => summaryBySiteId.get(site.siteId)?.isSubmitted,
-                        ).length;
+                        const boardSites = sites.filter(site => {
+                            const summary = summaryBySiteId.get(site.siteId);
+                            return (
+                                summary !== undefined &&
+                                siteHasCertifiedOrSubmittedSessions(summary)
+                            );
+                        });
+                        const submittedCount = boardSites.filter(site => {
+                            const summary = summaryBySiteId.get(site.siteId);
+                            return (
+                                summary !== undefined &&
+                                isSiteFullySubmittedToDhis2(summary)
+                            );
+                        }).length;
 
                         return (
                             <Dhis2CycleSegment
                                 key={cycle.id}
                                 label={formatCollectionCycleLabel(cycle, t)}
                                 submittedCount={submittedCount}
-                                siteCount={lockedSites.length}
+                                siteCount={boardSites.length}
                             >
-                                {lockedSites.map(site => (
-                                    <Dhis2SiteRow
-                                        key={site.siteId}
-                                        site={site}
-                                        status={
-                                            summaryBySiteId.get(site.siteId)
-                                                ?.isSubmitted
-                                                ? 'submitted'
-                                                : 'ready'
-                                        }
-                                        isSelected={selectedSiteIds.has(
-                                            site.siteId,
-                                        )}
-                                        onToggleSelected={() =>
-                                            toggleSiteSelected(site.siteId)
-                                        }
-                                    />
-                                ))}
+                                {boardSites.map(site => {
+                                    const summary = summaryBySiteId.get(
+                                        site.siteId,
+                                    )!;
+                                    const status = !isSiteFullyReviewed(summary)
+                                        ? 'reviewPending'
+                                        : isSiteFullySubmittedToDhis2(summary)
+                                          ? 'submitted'
+                                          : 'ready';
+                                    return (
+                                        <Dhis2SiteRow
+                                            key={site.siteId}
+                                            site={site}
+                                            status={status}
+                                            isSelected={selectedSiteIds.has(
+                                                site.siteId,
+                                            )}
+                                            onToggleSelected={() =>
+                                                toggleSiteSelected(site.siteId)
+                                            }
+                                        />
+                                    );
+                                })}
                             </Dhis2CycleSegment>
                         );
                     })}

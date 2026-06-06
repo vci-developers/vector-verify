@@ -3,6 +3,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/utils/cn';
 import {
     CheckCircle2,
+    ClipboardList,
     Clock,
     Send,
     Sparkles,
@@ -22,6 +23,12 @@ const STATUS_BADGE_CONFIG: Record<
         showSpinner?: boolean;
     }
 > = {
+    reviewPending: {
+        label: 'Review needed',
+        variant: 'outline',
+        className: 'bg-warning/10 text-warning-foreground border-warning/40',
+        icon: ClipboardList,
+    },
     ready: {
         label: 'Ready',
         variant: 'outline',
