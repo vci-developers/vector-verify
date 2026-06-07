@@ -77,6 +77,13 @@ Rewrite the Export feature to drive the async task API:
    not a silent block). This also motivates representing the per-site session
    summary as **per-state counts** rather than seeded-`true` AND-fold booleans, so
    "has *any* certified/submitted" is expressible.
+   > **Superseded by [Step 11d](../../prds/VCV-225/VCV-225-11d-submission-board-only.md):**
+   > the board became **submission-only**. The appear-gate tightened from "has
+   > submittable data" to **`isSiteFullyReviewed`**, and **`reviewPending` was removed
+   > from the status union** — a not-fully-reviewed site no longer appears on the board
+   > at all (review is resolved in the Review tab first), so there is no on-board
+   > review-pending badge or second submit-gate. The per-state-counts representation
+   > this paragraph motivated **remains** the design.
 6. **UI.** A dashboard-style table grouped by collection cycle, with per-row
    Submit/Retry actions and a bulk "Submit selected" action that reuses the IRS
    dialog and fires the async POSTs fire-and-forget. The blocking progress panel

@@ -14,8 +14,8 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatCollectionCycleLabel } from '../../sites-list/utils/format-collection-cycle-label';
 import Dhis2SiteRow from './dhis2-site-row';
 import {
+    isSiteFullyReviewed,
     isSiteFullySubmittedToDhis2,
-    siteHasCertifiedOrSubmittedSessions,
 } from '../../utils/review-site-session-summary';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task';
@@ -103,18 +103,16 @@ export default function ReviewDhis2Dashboard({
                     const cycle = segment.cycle!;
                     const sessionSummaryBySiteId =
                         segment.sessionSummaryBySiteId;
-                    const certifiedSites = sites.filter(site => {
+                    const submittableSites = sites.filter(site => {
                         const siteSessionSummary = sessionSummaryBySiteId.get(
                             site.siteId,
                         );
                         return (
                             siteSessionSummary !== undefined &&
-                            siteHasCertifiedOrSubmittedSessions(
-                                siteSessionSummary,
-                            )
+                            isSiteFullyReviewed(siteSessionSummary)
                         );
                     });
-                    const submittedCount = certifiedSites.filter(site =>
+                    const submittedCount = submittableSites.filter(site =>
                         isSiteFullySubmittedToDhis2(
                             sessionSummaryBySiteId.get(site.siteId)!,
                         ),
@@ -122,7 +120,7 @@ export default function ReviewDhis2Dashboard({
                     return {
                         cycle,
                         sessionSummaryBySiteId,
-                        certifiedSites,
+                        submittableSites,
                         submittedCount,
                     };
                 }),
@@ -132,7 +130,7 @@ export default function ReviewDhis2Dashboard({
     const selectedSites = useMemo(() => {
         const sitesBySiteId = new Map<number, Site>();
         for (const group of cycleSubmissionGroups) {
-            for (const site of group.certifiedSites) {
+            for (const site of group.submittableSites) {
                 if (
                     selectedSiteRowKeys.has(
                         siteRowKey(group.cycle.id, site.siteId),
@@ -149,7 +147,7 @@ export default function ReviewDhis2Dashboard({
             irsData.map(data => [data.siteId, data]),
         );
         for (const group of cycleSubmissionGroups) {
-            for (const site of group.certifiedSites) {
+            for (const site of group.submittableSites) {
                 if (
                     !selectedSiteRowKeys.has(
                         siteRowKey(group.cycle.id, site.siteId),
@@ -224,9 +222,9 @@ export default function ReviewDhis2Dashboard({
                             key={group.cycle.id}
                             label={formatCollectionCycleLabel(group.cycle, t)}
                             submittedCount={group.submittedCount}
-                            siteCount={group.certifiedSites.length}
+                            siteCount={group.submittableSites.length}
                         >
-                            {group.certifiedSites.map(site => {
+                            {group.submittableSites.map(site => {
                                 return (
                                     <Dhis2SiteRow
                                         key={site.siteId}

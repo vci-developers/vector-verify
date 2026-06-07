@@ -1,5 +1,4 @@
 export type Dhis2SyncSiteStatus =
-    | 'reviewPending'
     | 'ready'
     | 'queued'
     | 'running'

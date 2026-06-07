@@ -8,7 +8,6 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { useGetDhis2SyncTasks } from '@/api/dhis2/hooks/use-get-dhis2-sync-tasks';
 import { rollUpDhis2SyncStatus } from '../utils/roll-up-dhis2-sync-status';
 import {
-    isSiteFullyReviewed,
     isSiteFullySubmittedToDhis2,
     type ReviewSiteSessionSummary,
 } from '../../utils/review-site-session-summary';
@@ -52,8 +51,6 @@ function getSubmitBlockReason(
 ): string | undefined {
     if (siteHasUnassignedSessions)
         return "Resolve this site's unassigned sessions in Review first.";
-    if (status === 'reviewPending')
-        return "Review and certify this site's sessions before submitting.";
     if (status === 'queued' || status === 'running')
         return 'A submission is already in progress.';
     return undefined;
@@ -93,7 +90,6 @@ export default function Dhis2SiteRow({
                 const polledGetDhis2SyncTasksResult = query.state.data;
                 if (!polledGetDhis2SyncTasksResult?.ok) return false;
                 const polledDhis2SyncTasksStatus = rollUpDhis2SyncStatus(
-                    isSiteFullyReviewed(siteSessionSummary),
                     isSiteFullySubmittedToDhis2(siteSessionSummary),
                     polledGetDhis2SyncTasksResult.data.tasks[0],
                 );
@@ -118,7 +114,6 @@ export default function Dhis2SiteRow({
 
     const status = getDhis2SyncTasksResult?.ok
         ? rollUpDhis2SyncStatus(
-              isSiteFullyReviewed(siteSessionSummary),
               isSiteFullySubmittedToDhis2(siteSessionSummary),
               latestTask,
           )
@@ -148,7 +143,6 @@ export default function Dhis2SiteRow({
         status === undefined ||
         status === 'queued' ||
         status === 'running' ||
-        status === 'reviewPending' ||
         status === 'submitted' ||
         siteHasUnassignedSessions;
 

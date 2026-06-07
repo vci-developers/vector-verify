@@ -38,9 +38,3 @@ export function isSiteFullySubmittedToDhis2(
     const total = getSiteSessionCount(summary);
     return total > 0 && summary.SUBMITTED === total;
 }
-
-export function siteHasCertifiedOrSubmittedSessions(
-    summary: ReviewSiteSessionSummary,
-): boolean {
-    return summary.CERTIFIED + summary.SUBMITTED > 0;
-}
