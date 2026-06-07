@@ -23,10 +23,14 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { getSiteLabelParts } from '../utils/get-site-label-parts';
 import Dhis2IrsDialog from './dhis2-irs-dialog';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
+import { useQueryClient } from '@tanstack/react-query';
+import { sessionKeys } from '@/api/session/session-keys';
+
+const POLL_INTERVAL_MS = 4000;
 
 function getSubmitButtonLabel(status: Dhis2SyncSiteStatus): string {
     switch (status) {
@@ -74,13 +78,31 @@ export default function Dhis2SiteRow({
     const [isSiteIrsDialogOpen, setIsSiteIrsDialogOpen] = useState(false);
     const dialogSites = useMemo(() => [site], [site]);
 
+    const queryClient = useQueryClient();
     const {
         data: getDhis2SyncTasksResult,
         isPending: isGetDhis2SyncTasksPending,
-    } = useGetDhis2SyncTasks({
-        collectionCycleId,
-        siteId: site.siteId,
-    });
+    } = useGetDhis2SyncTasks(
+        {
+            collectionCycleId,
+            siteId: site.siteId,
+        },
+        {
+            refetchInterval: query => {
+                const polledGetDhis2SyncTasksResult = query.state.data;
+                if (!polledGetDhis2SyncTasksResult?.ok) return false;
+                const polledDhis2SyncTasksStatus = rollUpDhis2SyncStatus(
+                    isSiteFullyReviewed(siteSessionSummary),
+                    isSiteFullySubmittedToDhis2(siteSessionSummary),
+                    polledGetDhis2SyncTasksResult.data.tasks[0],
+                );
+                return polledDhis2SyncTasksStatus === 'queued' ||
+                    polledDhis2SyncTasksStatus === 'running'
+                    ? POLL_INTERVAL_MS
+                    : false;
+            },
+        },
+    );
 
     const {
         mutate: createDhis2SyncTask,
@@ -89,13 +111,32 @@ export default function Dhis2SiteRow({
 
     const { primaryLabel, ancestorLabels } = getSiteLabelParts(site);
 
+    const latestTask = getDhis2SyncTasksResult?.ok
+        ? getDhis2SyncTasksResult.data.tasks[0]
+        : undefined;
+
     const status = getDhis2SyncTasksResult?.ok
         ? rollUpDhis2SyncStatus(
               isSiteFullyReviewed(siteSessionSummary),
               isSiteFullySubmittedToDhis2(siteSessionSummary),
-              getDhis2SyncTasksResult.data.tasks[0],
+              latestTask,
           )
         : undefined;
+
+    const previousTaskStatusRef = useRef(latestTask?.status);
+    useEffect(() => {
+        const previousTaskStatus = previousTaskStatusRef.current;
+        const currentTaskStatus = latestTask?.status;
+        previousTaskStatusRef.current = currentTaskStatus;
+
+        const wasInFlight =
+            previousTaskStatus === 'pending' ||
+            previousTaskStatus === 'running';
+
+        if (wasInFlight && currentTaskStatus === 'completed') {
+            queryClient.invalidateQueries({ queryKey: sessionKeys.root });
+        }
+    }, [latestTask?.status, queryClient]);
 
     const isSelectionDisabled =
         status === undefined ||
