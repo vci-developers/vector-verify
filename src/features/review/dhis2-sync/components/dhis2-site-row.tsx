@@ -39,6 +39,7 @@ function getSubmitButtonLabel(status: Dhis2SyncSiteStatus): string {
             return 'Re-submit';
         case 'failed':
         case 'timedOut':
+        case 'skipped':
             return 'Retry';
         default:
             return 'Submit';
@@ -123,6 +124,11 @@ export default function Dhis2SiteRow({
           )
         : undefined;
 
+    const statusReasonMessage =
+        status === 'skipped' || status === 'failed'
+            ? latestTask?.result?.results?.[0]?.message
+            : undefined;
+
     const previousTaskStatusRef = useRef(latestTask?.status);
     useEffect(() => {
         const previousTaskStatus = previousTaskStatusRef.current;
@@ -197,6 +203,19 @@ export default function Dhis2SiteRow({
                             >
                                 Error determining status
                             </Badge>
+                        ) : statusReasonMessage ? (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span>
+                                        <Dhis2SyncSiteStatusBadge
+                                            status={status}
+                                        />
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-h-64 max-w-md overflow-y-auto text-wrap whitespace-pre-line">
+                                    {statusReasonMessage}
+                                </TooltipContent>
+                            </Tooltip>
                         ) : (
                             <Dhis2SyncSiteStatusBadge status={status} />
                         )}

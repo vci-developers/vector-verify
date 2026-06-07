@@ -6,4 +6,5 @@ export type Dhis2SyncSiteStatus =
     | 'submitted'
     | 'failed'
     | 'timedOut'
+    | 'skipped'
     | 'hasNewCertifiedData';

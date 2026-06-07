@@ -18,9 +18,9 @@ export function rollUpDhis2SyncStatus(
             case 'timed_out':
                 return 'timedOut';
             case 'completed': {
-                const failedSyncs =
-                    latestTask.result?.summary?.failedSyncs ?? 0;
-                if (failedSyncs > 0) return 'failed';
+                const summary = latestTask.result?.summary;
+                if ((summary?.failedSyncs ?? 0) > 0) return 'failed';
+                if ((summary?.skippedHouseholds ?? 0) > 0) return 'skipped';
                 return isSiteFullySubmittedToDhis2
                     ? 'submitted'
                     : 'hasNewCertifiedData';

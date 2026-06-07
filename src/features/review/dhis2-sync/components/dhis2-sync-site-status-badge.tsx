@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import {
     CheckCircle2,
+    CircleSlash,
     ClipboardList,
     Clock,
     Send,
@@ -59,6 +60,12 @@ const STATUS_BADGE_CONFIG: Record<
         variant: 'outline',
         className: 'bg-warning/20 text-warning-foreground border-warning/50',
         icon: TimerOff,
+    },
+    skipped: {
+        label: 'Skipped',
+        variant: 'outline',
+        className: 'bg-warning/20 text-warning-foreground border-warning/50',
+        icon: CircleSlash,
     },
     hasNewCertifiedData: {
         label: 'New data to submit',

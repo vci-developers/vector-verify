@@ -9,6 +9,7 @@ import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { dhis2SyncKeys } from '../dhis2-sync-keys';
+import { toastResult } from '@/lib/network/toast-result';
 
 type PostDhis2SyncTaskMutationResult = Result<
     PostDhis2SyncTaskSuccessPayload,
@@ -51,9 +52,14 @@ export function usePostDhis2SyncTask() {
             requestBody,
         }: PostDhis2SyncTaskVariables) =>
             createDhis2SyncTask(queryParams, requestBody),
-        onSuccess: (_result, { queryParams }) => {
+        onSuccess: (result, { queryParams }) => {
             queryClient.invalidateQueries({
                 queryKey: dhis2SyncKeys.syncTasks(queryParams),
+            });
+
+            toastResult(result, {
+                success: 'Submission queued',
+                error: 'Submission failed',
             });
         },
     });
