@@ -7,7 +7,8 @@ import {
 } from '../validation/post-dhis2-sync-task-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { dhis2SyncKeys } from '../dhis2-sync-keys';
 
 type PostDhis2SyncTaskMutationResult = Result<
     PostDhis2SyncTaskSuccessPayload,
@@ -42,8 +43,18 @@ async function createDhis2SyncTask(
 }
 
 export function usePostDhis2SyncTask() {
+    const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: ({ queryParams, requestBody }: PostDhis2SyncTaskVariables) =>
+        mutationFn: ({
+            queryParams,
+            requestBody,
+        }: PostDhis2SyncTaskVariables) =>
             createDhis2SyncTask(queryParams, requestBody),
+        onSuccess: (_result, { queryParams }) => {
+            queryClient.invalidateQueries({
+                queryKey: dhis2SyncKeys.syncTasks(queryParams),
+            });
+        },
     });
 }

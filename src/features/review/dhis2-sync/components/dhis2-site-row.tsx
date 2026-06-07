@@ -16,9 +16,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { Dhis2SyncSiteStatus } from '../utils/dhis2-sync-site-status';
-import { useQueryClient } from '@tanstack/react-query';
 import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task';
-import { dhis2SyncKeys } from '@/api/dhis2/dhis2-sync-keys';
 import {
     Tooltip,
     TooltipContent,
@@ -70,7 +68,6 @@ export default function Dhis2SiteRow({
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
-    const queryClient = useQueryClient();
     const {
         data: getDhis2SyncTasksResult,
         isPending: isGetDhis2SyncTasksPending,
@@ -116,7 +113,9 @@ export default function Dhis2SiteRow({
         status === undefined ||
         status === 'queued' ||
         status === 'running' ||
-        status === 'reviewPending';
+        status === 'reviewPending' ||
+        status === 'submitted' ||
+        siteHasUnassignedSessions;
 
     const submitBlockReason =
         status !== undefined
@@ -124,24 +123,12 @@ export default function Dhis2SiteRow({
             : undefined;
 
     function handleSubmit() {
-        createDhis2SyncTask(
-            {
-                queryParams: { collectionCycleId, siteId: site.siteId },
-                requestBody: {
-                    irsData: [{ siteId: site.siteId, wasIrsSprayed: false }],
-                },
+        createDhis2SyncTask({
+            queryParams: { collectionCycleId, siteId: site.siteId },
+            requestBody: {
+                irsData: [{ siteId: site.siteId, wasIrsSprayed: false }],
             },
-            {
-                onSuccess: () => {
-                    queryClient.invalidateQueries({
-                        queryKey: dhis2SyncKeys.syncTasks({
-                            collectionCycleId,
-                            siteId: site.siteId,
-                        }),
-                    });
-                },
-            },
-        );
+        });
     }
 
     return (

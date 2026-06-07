@@ -17,6 +17,9 @@ import {
     isSiteFullySubmittedToDhis2,
     siteHasCertifiedOrSubmittedSessions,
 } from '../../utils/review-site-session-summary';
+import { useQueryClient } from '@tanstack/react-query';
+import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task';
+import { dhis2SyncKeys } from '@/api/dhis2/dhis2-sync-keys';
 
 interface ReviewDhis2DashboardProps {
     sites: Site[];
@@ -36,6 +39,10 @@ export default function ReviewDhis2Dashboard({
     selectedCycleIds,
 }: ReviewDhis2DashboardProps) {
     const t = useTranslations('CollectionCycle');
+    const queryClient = useQueryClient();
+    const { mutate: createDhis2SyncTask } = usePostDhis2SyncTask();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
@@ -47,15 +54,20 @@ export default function ReviewDhis2Dashboard({
             type: 'SURVEILLANCE',
         });
 
-    const [selectedSiteIds, setSelectedSiteIds] = useState<Set<number>>(
+    const [selectedSiteRowKeys, setSelectedSiteRowKeys] = useState<Set<string>>(
         new Set(),
     );
 
-    function toggleSiteSelected(siteId: number) {
-        setSelectedSiteIds(previous => {
+    function siteRowKey(collectionCycleId: number, siteId: number) {
+        return `${collectionCycleId}:${siteId}`;
+    }
+
+    function toggleSiteRowSelected(collectionCycleId: number, siteId: number) {
+        const key = siteRowKey(collectionCycleId, siteId);
+        setSelectedSiteRowKeys(previous => {
             const next = new Set(previous);
-            if (next.has(siteId)) next.delete(siteId);
-            else next.add(siteId);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
             return next;
         });
     }
@@ -75,16 +87,80 @@ export default function ReviewDhis2Dashboard({
         return new Set(unassignedSegment?.sessionSummaryBySiteId.keys() ?? []);
     }, [allCycleSegments]);
 
-    const visibleCycleSegments = useMemo(
+    const cycleSubmissionGroups = useMemo(
         () =>
-            allCycleSegments.filter(
-                segment =>
-                    segment.cycle !== null &&
-                    (selectedCycleIds.length === 0 ||
-                        selectedCycleIds.includes(segment.cycle.id)),
-            ),
-        [allCycleSegments, selectedCycleIds],
+            allCycleSegments
+                .filter(
+                    segment =>
+                        segment.cycle !== null &&
+                        (selectedCycleIds.length === 0 ||
+                            selectedCycleIds.includes(segment.cycle.id)),
+                )
+                .map(segment => {
+                    const cycle = segment.cycle!;
+                    const sessionSummaryBySiteId =
+                        segment.sessionSummaryBySiteId;
+                    const certifiedSites = sites.filter(site => {
+                        const siteSessionSummary = sessionSummaryBySiteId.get(
+                            site.siteId,
+                        );
+                        return (
+                            siteSessionSummary !== undefined &&
+                            siteHasCertifiedOrSubmittedSessions(
+                                siteSessionSummary,
+                            )
+                        );
+                    });
+                    const submittedCount = certifiedSites.filter(site =>
+                        isSiteFullySubmittedToDhis2(
+                            sessionSummaryBySiteId.get(site.siteId)!,
+                        ),
+                    ).length;
+                    return {
+                        cycle,
+                        sessionSummaryBySiteId,
+                        certifiedSites,
+                        submittedCount,
+                    };
+                }),
+        [allCycleSegments, selectedCycleIds, sites],
     );
+
+    function handleSubmitSelected() {
+        for (const group of cycleSubmissionGroups) {
+            for (const site of group.certifiedSites) {
+                if (
+                    !selectedSiteRowKeys.has(
+                        siteRowKey(group.cycle.id, site.siteId),
+                    )
+                )
+                    continue;
+                createDhis2SyncTask({
+                    queryParams: {
+                        collectionCycleId: group.cycle.id,
+                        siteId: site.siteId,
+                    },
+                    requestBody: {
+                        irsData: [
+                            { siteId: site.siteId, wasIrsSprayed: false },
+                        ],
+                    },
+                });
+            }
+        }
+        setSelectedSiteRowKeys(new Set());
+    }
+
+    async function handleRefresh() {
+        setIsRefreshing(true);
+        try {
+            await queryClient.invalidateQueries({
+                queryKey: dhis2SyncKeys.root,
+            });
+        } finally {
+            setIsRefreshing(false);
+        }
+    }
 
     return (
         <div className="space-y-4">
@@ -99,9 +175,10 @@ export default function ReviewDhis2Dashboard({
                     </p>
                 </div>
                 <Dhis2SyncToolbar
-                    selectedSiteCount={selectedSiteIds.size}
-                    onSubmitSelected={() => {}}
-                    onRefresh={() => {}}
+                    selectedSiteRowCount={selectedSiteRowKeys.size}
+                    isRefreshing={isRefreshing}
+                    onSubmitSelected={handleSubmitSelected}
+                    onRefresh={handleRefresh}
                 />
             </div>
 
@@ -119,65 +196,44 @@ export default function ReviewDhis2Dashboard({
                 </div>
             ) : (
                 <div className="space-y-2">
-                    {visibleCycleSegments.map(segment => {
-                        const cycle = segment.cycle;
-                        if (cycle === null) return null;
-                        const sessionSummaryBySiteId =
-                            segment.sessionSummaryBySiteId;
-                        const certifiedSites = sites.filter(site => {
-                            const siteSessionSummary =
-                                sessionSummaryBySiteId.get(site.siteId);
-                            return (
-                                siteSessionSummary !== undefined &&
-                                siteHasCertifiedOrSubmittedSessions(
-                                    siteSessionSummary,
-                                )
-                            );
-                        });
-                        const submittedCount = certifiedSites.filter(site => {
-                            const siteSessionSummary =
-                                sessionSummaryBySiteId.get(site.siteId);
-                            return (
-                                siteSessionSummary !== undefined &&
-                                isSiteFullySubmittedToDhis2(siteSessionSummary)
-                            );
-                        }).length;
-
-                        return (
-                            <Dhis2CycleSegment
-                                key={cycle.id}
-                                label={formatCollectionCycleLabel(cycle, t)}
-                                submittedCount={submittedCount}
-                                siteCount={certifiedSites.length}
-                            >
-                                {certifiedSites.map(site => {
-                                    const siteSessionSummary =
-                                        sessionSummaryBySiteId.get(
+                    {cycleSubmissionGroups.map(group => (
+                        <Dhis2CycleSegment
+                            key={group.cycle.id}
+                            label={formatCollectionCycleLabel(group.cycle, t)}
+                            submittedCount={group.submittedCount}
+                            siteCount={group.certifiedSites.length}
+                        >
+                            {group.certifiedSites.map(site => {
+                                return (
+                                    <Dhis2SiteRow
+                                        key={site.siteId}
+                                        site={site}
+                                        collectionCycleId={group.cycle.id}
+                                        siteSessionSummary={
+                                            group.sessionSummaryBySiteId.get(
+                                                site.siteId,
+                                            )!
+                                        }
+                                        siteHasUnassignedSessions={sitesWithUnassignedSessions.has(
                                             site.siteId,
-                                        )!;
-                                    return (
-                                        <Dhis2SiteRow
-                                            key={site.siteId}
-                                            site={site}
-                                            collectionCycleId={cycle.id}
-                                            siteSessionSummary={
-                                                siteSessionSummary
-                                            }
-                                            siteHasUnassignedSessions={sitesWithUnassignedSessions.has(
+                                        )}
+                                        isSelected={selectedSiteRowKeys.has(
+                                            siteRowKey(
+                                                group.cycle.id,
                                                 site.siteId,
-                                            )}
-                                            isSelected={selectedSiteIds.has(
+                                            ),
+                                        )}
+                                        onToggleSelected={() =>
+                                            toggleSiteRowSelected(
+                                                group.cycle.id,
                                                 site.siteId,
-                                            )}
-                                            onToggleSelected={() =>
-                                                toggleSiteSelected(site.siteId)
-                                            }
-                                        />
-                                    );
-                                })}
-                            </Dhis2CycleSegment>
-                        );
-                    })}
+                                            )
+                                        }
+                                    />
+                                );
+                            })}
+                        </Dhis2CycleSegment>
+                    ))}
                 </div>
             )}
         </div>
