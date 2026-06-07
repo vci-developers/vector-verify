@@ -47,6 +47,16 @@ Optional body for both modes:
 }
 ```
 
+> **VectorVerify client conventions** (Step 7+, see
+> `validation/post-dhis2-sync-task-schema.ts`): although the API marks the body
+> optional, our `postDhis2SyncTask` server fn + `usePostDhis2SyncTask` hook take a
+> **required** `requestBody` (the BFF route uses `request.json()`, which 400s on an
+> empty body); the Zod `irsData` field itself stays optional. And
+> `insecticideSprayed` — a free `string` on the wire — is **narrowed to a 9-value
+> enum** (`irsInsecticideSchema`) submitted verbatim to DHIS2; the values are
+> exact-match (`Alpha Cyhalothrin(Fendona)` has no space). Memories:
+> `project_post_dhis2_sync_body_required`, `project_irs_insecticide_enum`.
+
 ## Normal Sync Response
 
 Normal sync returns `202 Accepted`:
