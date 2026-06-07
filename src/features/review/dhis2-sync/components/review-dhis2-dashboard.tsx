@@ -60,18 +60,31 @@ export default function ReviewDhis2Dashboard({
         });
     }
 
-    const visibleCycleSegments = useMemo(() => {
+    const allCycleSegments = useMemo(() => {
         if (!getAllSessionsResult?.ok) return [];
         return buildCollectionCycleSegments(
             getAllSessionsResult.data.sessions,
             collectionCycles,
-        ).filter(
-            segment =>
-                segment.cycle !== null &&
-                (selectedCycleIds.length === 0 ||
-                    selectedCycleIds.includes(segment.cycle.id)),
         );
-    }, [getAllSessionsResult, collectionCycles, selectedCycleIds]);
+    }, [getAllSessionsResult, collectionCycles]);
+
+    const sitesWithUnassignedSessions = useMemo(() => {
+        const unassignedSegment = allCycleSegments.find(
+            segment => segment.cycle === null,
+        );
+        return new Set(unassignedSegment?.sessionSummaryBySiteId.keys() ?? []);
+    }, [allCycleSegments]);
+
+    const visibleCycleSegments = useMemo(
+        () =>
+            allCycleSegments.filter(
+                segment =>
+                    segment.cycle !== null &&
+                    (selectedCycleIds.length === 0 ||
+                        selectedCycleIds.includes(segment.cycle.id)),
+            ),
+        [allCycleSegments, selectedCycleIds],
+    );
 
     return (
         <div className="space-y-4">
@@ -109,18 +122,21 @@ export default function ReviewDhis2Dashboard({
                     {visibleCycleSegments.map(segment => {
                         const cycle = segment.cycle;
                         if (cycle === null) return null;
-                        const summaryBySiteId = segment.sessionSummaryBySiteId;
-                        const boardSites = sites.filter(site => {
-                            const summary = summaryBySiteId.get(site.siteId);
+                        const sessionSummaryBySiteId =
+                            segment.sessionSummaryBySiteId;
+                        const certifiedSites = sites.filter(site => {
+                            const siteSessionSummary =
+                                sessionSummaryBySiteId.get(site.siteId);
                             return (
-                                summary !== undefined &&
-                                siteHasCertifiedOrSubmittedSessions(summary)
+                                siteSessionSummary !== undefined &&
+                                siteHasCertifiedOrSubmittedSessions(
+                                    siteSessionSummary,
+                                )
                             );
                         });
-                        const submittedCount = boardSites.filter(site => {
-                            const siteSessionSummary = summaryBySiteId.get(
-                                site.siteId,
-                            );
+                        const submittedCount = certifiedSites.filter(site => {
+                            const siteSessionSummary =
+                                sessionSummaryBySiteId.get(site.siteId);
                             return (
                                 siteSessionSummary !== undefined &&
                                 isSiteFullySubmittedToDhis2(siteSessionSummary)
@@ -132,18 +148,24 @@ export default function ReviewDhis2Dashboard({
                                 key={cycle.id}
                                 label={formatCollectionCycleLabel(cycle, t)}
                                 submittedCount={submittedCount}
-                                siteCount={boardSites.length}
+                                siteCount={certifiedSites.length}
                             >
-                                {boardSites.map(site => {
-                                    const summary = summaryBySiteId.get(
-                                        site.siteId,
-                                    )!;
+                                {certifiedSites.map(site => {
+                                    const siteSessionSummary =
+                                        sessionSummaryBySiteId.get(
+                                            site.siteId,
+                                        )!;
                                     return (
                                         <Dhis2SiteRow
                                             key={site.siteId}
                                             site={site}
                                             collectionCycleId={cycle.id}
-                                            siteSessionSummary={summary}
+                                            siteSessionSummary={
+                                                siteSessionSummary
+                                            }
+                                            siteHasUnassignedSessions={sitesWithUnassignedSessions.has(
+                                                site.siteId,
+                                            )}
                                             isSelected={selectedSiteIds.has(
                                                 site.siteId,
                                             )}

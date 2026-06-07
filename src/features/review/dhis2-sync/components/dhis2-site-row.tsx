@@ -15,11 +15,49 @@ import {
 } from '../../utils/review-site-session-summary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import type { Dhis2SyncSiteStatus } from '../utils/dhis2-sync-site-status';
+import { useQueryClient } from '@tanstack/react-query';
+import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task';
+import { dhis2SyncKeys } from '@/api/dhis2/dhis2-sync-keys';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+
+function getSubmitButtonLabel(status: Dhis2SyncSiteStatus): string {
+    switch (status) {
+        case 'submitted':
+        case 'hasNewCertifiedData':
+            return 'Re-submit';
+        case 'failed':
+        case 'timedOut':
+            return 'Retry';
+        default:
+            return 'Submit';
+    }
+}
+
+function getSubmitBlockReason(
+    status: Dhis2SyncSiteStatus,
+    siteHasUnassignedSessions: boolean,
+): string | undefined {
+    if (siteHasUnassignedSessions)
+        return 'Resolve this site’s unassigned sessions in Review first.';
+    if (status === 'reviewPending')
+        return 'Review and certify this site’s sessions before submitting.';
+    if (status === 'queued' || status === 'running')
+        return 'A submission is already in progress.';
+    return undefined;
+}
 
 interface Dhis2SiteRowProps {
     site: Site;
     collectionCycleId: number;
     siteSessionSummary: ReviewSiteSessionSummary;
+    siteHasUnassignedSessions: boolean;
     isSelected: boolean;
     onToggleSelected: () => void;
 }
@@ -28,9 +66,11 @@ export default function Dhis2SiteRow({
     site,
     collectionCycleId,
     siteSessionSummary,
+    siteHasUnassignedSessions,
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
+    const queryClient = useQueryClient();
     const {
         data: getDhis2SyncTasksResult,
         isPending: isGetDhis2SyncTasksPending,
@@ -38,6 +78,11 @@ export default function Dhis2SiteRow({
         collectionCycleId,
         siteId: site.siteId,
     });
+
+    const {
+        mutate: createDhis2SyncTask,
+        isPending: isCreateDhis2SyncTaskPending,
+    } = usePostDhis2SyncTask();
 
     let primaryLabel: string;
     let ancestorLabels: string[];
@@ -72,6 +117,32 @@ export default function Dhis2SiteRow({
         status === 'queued' ||
         status === 'running' ||
         status === 'reviewPending';
+
+    const submitBlockReason =
+        status !== undefined
+            ? getSubmitBlockReason(status, siteHasUnassignedSessions)
+            : undefined;
+
+    function handleSubmit() {
+        createDhis2SyncTask(
+            {
+                queryParams: { collectionCycleId, siteId: site.siteId },
+                requestBody: {
+                    irsData: [{ siteId: site.siteId, wasIrsSprayed: false }],
+                },
+            },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: dhis2SyncKeys.syncTasks({
+                            collectionCycleId,
+                            siteId: site.siteId,
+                        }),
+                    });
+                },
+            },
+        );
+    }
 
     return (
         <TableRow>
@@ -114,6 +185,37 @@ export default function Dhis2SiteRow({
                         <Dhis2SyncSiteStatusBadge status={status} />
                     )}
                 </div>
+            </TableCell>
+            <TableCell className="w-28 text-right">
+                {status !== undefined &&
+                    (submitBlockReason ? (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span>
+                                    <Button
+                                        size="xs"
+                                        variant="outline"
+                                        disabled
+                                    >
+                                        {getSubmitButtonLabel(status)}
+                                    </Button>
+                                </span>
+                            </TooltipTrigger>
+                            <TooltipContent>{submitBlockReason}</TooltipContent>
+                        </Tooltip>
+                    ) : (
+                        <Button
+                            size="xs"
+                            variant="outline"
+                            disabled={isCreateDhis2SyncTaskPending}
+                            onClick={handleSubmit}
+                        >
+                            {isCreateDhis2SyncTaskPending && (
+                                <Spinner className="size-3" />
+                            )}
+                            {getSubmitButtonLabel(status)}
+                        </Button>
+                    ))}
             </TableCell>
         </TableRow>
     );
