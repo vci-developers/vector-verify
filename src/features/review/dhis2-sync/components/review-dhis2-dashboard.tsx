@@ -20,6 +20,8 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task';
 import { dhis2SyncKeys } from '@/api/dhis2/dhis2-sync-keys';
+import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
+import Dhis2IrsDialog from './dhis2-irs-dialog';
 
 interface ReviewDhis2DashboardProps {
     sites: Site[];
@@ -42,6 +44,7 @@ export default function ReviewDhis2Dashboard({
     const queryClient = useQueryClient();
     const { mutate: createDhis2SyncTask } = usePostDhis2SyncTask();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isSitesIrsDialogOpen, setIsSitesIrsDialogOpen] = useState(false);
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -126,7 +129,25 @@ export default function ReviewDhis2Dashboard({
         [allCycleSegments, selectedCycleIds, sites],
     );
 
-    function handleSubmitSelected() {
+    const selectedSites = useMemo(() => {
+        const sitesBySiteId = new Map<number, Site>();
+        for (const group of cycleSubmissionGroups) {
+            for (const site of group.certifiedSites) {
+                if (
+                    selectedSiteRowKeys.has(
+                        siteRowKey(group.cycle.id, site.siteId),
+                    )
+                )
+                    sitesBySiteId.set(site.siteId, site);
+            }
+        }
+        return [...sitesBySiteId.values()];
+    }, [cycleSubmissionGroups, selectedSiteRowKeys]);
+
+    function handleConfirmBulkSubmit(irsData: SiteIrsData[]) {
+        const irsDataBySiteId = new Map(
+            irsData.map(data => [data.siteId, data]),
+        );
         for (const group of cycleSubmissionGroups) {
             for (const site of group.certifiedSites) {
                 if (
@@ -142,7 +163,9 @@ export default function ReviewDhis2Dashboard({
                     },
                     requestBody: {
                         irsData: [
-                            { siteId: site.siteId, wasIrsSprayed: false },
+                            irsDataBySiteId.get(site.siteId) ?? {
+                                siteId: site.siteId,
+                            },
                         ],
                     },
                 });
@@ -177,7 +200,7 @@ export default function ReviewDhis2Dashboard({
                 <Dhis2SyncToolbar
                     selectedSiteRowCount={selectedSiteRowKeys.size}
                     isRefreshing={isRefreshing}
-                    onSubmitSelected={handleSubmitSelected}
+                    onSubmitSelected={() => setIsSitesIrsDialogOpen(true)}
                     onRefresh={handleRefresh}
                 />
             </div>
@@ -236,6 +259,12 @@ export default function ReviewDhis2Dashboard({
                     ))}
                 </div>
             )}
+            <Dhis2IrsDialog
+                open={isSitesIrsDialogOpen}
+                onOpenChange={setIsSitesIrsDialogOpen}
+                sites={selectedSites}
+                onConfirmSubmission={handleConfirmBulkSubmit}
+            />
         </div>
     );
 }

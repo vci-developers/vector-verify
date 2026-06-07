@@ -1,7 +1,7 @@
 import z from 'zod';
 import { dhis2SyncTaskStatusSchema } from './dhis2-sync-task-schema';
 
-const irsInsecticideSchema = z.enum([
+export const irsInsecticideSchema = z.enum([
     'Actellic 300C',
     'Sumishield',
     'Flodora Fusion',
