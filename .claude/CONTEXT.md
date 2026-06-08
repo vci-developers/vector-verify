@@ -82,15 +82,15 @@ completion on AWS, and `SUBMITTED` state is reached only when that task reports
 **Sync Task**: The asynchronous backend job that carries out one **Submission**.
 A Sync Task is keyed by exactly one `(collectionCycleId, siteId)` pair — data is
 always submitted one site at a time, never batched. It is started with
-`POST /dhis2/sync`, which returns a `taskId` immediately; the frontend then polls
-`GET /dhis2/sync?collectionCycleId&siteId` for status. The backend owns the task
-end-to-end and persists it, so any VCO can observe tasks started by others. A
-Sync Task moves through `pending` → `running` → `completed` | `failed` |
-`timed_out` (work is capped at 300s before `timed_out`). _Avoid_: Job (the
+`POST /dhis2/sync`, which returns a `taskId` immediately; the frontend then
+polls `GET /dhis2/sync?collectionCycleId&siteId` for status. The backend owns
+the task end-to-end and persists it, so any VCO can observe tasks started by
+others. A Sync Task moves through `pending` → `running` → `completed` | `failed`
+| `timed_out` (work is capped at 300s before `timed_out`). _Avoid_: Job (the
 original investigation used `sync-jobs`; the shipped API uses task/`taskId`)
 
-Re-submission of a `completed` site is intentionally allowed: the backend sync is
-**idempotent** — on re-submit it updates the previously-issued DHIS2 event id
+Re-submission of a `completed` site is intentionally allowed: the backend sync
+is **idempotent** — on re-submit it updates the previously-issued DHIS2 event id
 rather than creating a new event, so pushing sessions certified after the first
 run is safe. The only states that lock a site against a new Submission are
 `pending` and `running` (an in-flight task); `failed`/`timed_out` are retried by

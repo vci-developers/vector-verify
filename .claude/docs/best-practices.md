@@ -22,16 +22,16 @@ the VectorVerify web application.
    pure utility functions — no React, no I/O, no state. Keep one cohesive
    responsibility per file (e.g. `build-collection-cycle-segments.ts`,
    `accumulate-session-summary.ts`). Do not create a util file as a dumping
-   ground for unrelated helpers, and do not put logic in `utils/` that belongs in
-   a component, hook, or server function.
+   ground for unrelated helpers, and do not put logic in `utils/` that belongs
+   in a component, hook, or server function.
 
 2. **No intermediate types or interfaces.** Domain types come from the core Zod
    schemas via `z.infer` — never hand-write a parallel type for data that a
    schema already describes. The only types you may declare outside schemas are
    ones that are _absolutely necessary_ and have no schema equivalent: component
    prop interfaces (`…Props`) and tiny local UI-state unions (e.g.
-   `'idle' | 'exporting'`). If you find yourself writing an interface that mirrors
-   a schema, delete it and infer instead.
+   `'idle' | 'exporting'`). If you find yourself writing an interface that
+   mirrors a schema, delete it and infer instead.
 
 3. **Names must convey exact meaning.** Every variable, function, and component
    name states precisely what it holds and what it does — no abbreviations, no
@@ -46,40 +46,40 @@ the VectorVerify web application.
    real second consumer.
 
 5. **Mirror the existing patterns and file structure exactly.**
-   - **API endpoints follow the EXACT structure** of existing resources under
-     `src/api/<resource>/`:
-     - `<verb>-<resource>.ts` — `'server-only'` server function that calls
-       `safeApiCall` and returns `Result<T, NetworkError>`.
-     - `hooks/use-<verb>-<resource>.ts` — TanStack Query/Mutation hook that
-       fetches the BFF route (`/api/…`), never the backend directly.
-     - `validation/<…>-schema.ts` — Zod schemas (`…Schema`) + inferred types.
-     - `<resource>-keys.ts` — query-key factory (`{ root, … }`).
-     - `src/app/api/<resource>/route.ts` — BFF handler: `safeParse` query/body →
-       `err()` on failure → `withAuthSession` → `NextResponse.json(result, {
-       status })`.
-   - **UI hierarchy stays consistent across features.** Feature code lives in
-     `src/features/<feature>/components/` (and `utils/`), mirroring how existing
-     features (e.g. `review`) are laid out. New screens look and nest like the
-     ones already there.
+    - **API endpoints follow the EXACT structure** of existing resources under
+      `src/api/<resource>/`:
+        - `<verb>-<resource>.ts` — `'server-only'` server function that calls
+          `safeApiCall` and returns `Result<T, NetworkError>`.
+        - `hooks/use-<verb>-<resource>.ts` — TanStack Query/Mutation hook that
+          fetches the BFF route (`/api/…`), never the backend directly.
+        - `validation/<…>-schema.ts` — Zod schemas (`…Schema`) + inferred types.
+        - `<resource>-keys.ts` — query-key factory (`{ root, … }`).
+        - `src/app/api/<resource>/route.ts` — BFF handler: `safeParse`
+          query/body → `err()` on failure → `withAuthSession` →
+          `NextResponse.json(result, { status })`.
+    - **UI hierarchy stays consistent across features.** Feature code lives in
+      `src/features/<feature>/components/` (and `utils/`), mirroring how
+      existing features (e.g. `review`) are laid out. New screens look and nest
+      like the ones already there.
 
 6. **Use shadcn/ui components wherever possible.** Reach for the primitives in
    `src/components/ui/*` (Button, Checkbox, Input, Dialog, Badge, Table, etc.)
-   instead of raw HTML elements or bespoke CSS. Only drop to a raw element when no
-   shadcn primitive fits.
+   instead of raw HTML elements or bespoke CSS. Only drop to a raw element when
+   no shadcn primitive fits.
 
 7. **Other enforced conventions.**
-   - Wrap all backend results in `Result<T, E>`; **never** use `try/catch` in the
-     UI layer.
-   - Validate _all_ external data (responses, bodies, query params, forms) with
-     Zod before use.
-   - Server components by default; add `'use client'` only when interactivity is
-     genuinely required.
-   - Keep complex expressions out of JSX — lift them into named variables,
-     memoized values, or utils.
-   - No magic numbers or hardcoded UI strings — extract to constants / i18n
-     resources.
-   - Leave each file better than you found it; match the surrounding code's
-     idiom, comment density, and naming.
+    - Wrap all backend results in `Result<T, E>`; **never** use `try/catch` in
+      the UI layer.
+    - Validate _all_ external data (responses, bodies, query params, forms) with
+      Zod before use.
+    - Server components by default; add `'use client'` only when interactivity
+      is genuinely required.
+    - Keep complex expressions out of JSX — lift them into named variables,
+      memoized values, or utils.
+    - No magic numbers or hardcoded UI strings — extract to constants / i18n
+      resources.
+    - Leave each file better than you found it; match the surrounding code's
+      idiom, comment density, and naming.
 
 8. **Develop incrementally; let utilities precipitate, don't pre-declare them.**
    Build the feature UI-first, one sub-functionality at a time, on top of the
