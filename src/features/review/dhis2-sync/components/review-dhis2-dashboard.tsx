@@ -127,48 +127,39 @@ export default function ReviewDhis2Dashboard({
         [allCycleSegments, selectedCycleIds, sites],
     );
 
-    const selectedSites = useMemo(() => {
-        const sitesBySiteId = new Map<number, Site>();
+    const selectedSubmissions = useMemo<
+        { site: Site; collectionCycle: CollectionCycle }[]
+    >(() => {
+        const submissions: {
+            site: Site;
+            collectionCycle: CollectionCycle;
+        }[] = [];
         for (const group of cycleSubmissionGroups) {
             for (const site of group.submittableSites) {
                 if (
                     selectedSiteRowKeys.has(
                         siteRowKey(group.cycle.id, site.siteId),
                     )
-                )
-                    sitesBySiteId.set(site.siteId, site);
+                ) {
+                    submissions.push({ site, collectionCycle: group.cycle });
+                }
             }
         }
-        return [...sitesBySiteId.values()];
+        return submissions;
     }, [cycleSubmissionGroups, selectedSiteRowKeys]);
 
     function handleConfirmBulkSubmit(irsData: SiteIrsData[]) {
-        const irsDataBySiteId = new Map(
-            irsData.map(data => [data.siteId, data]),
-        );
-        for (const group of cycleSubmissionGroups) {
-            for (const site of group.submittableSites) {
-                if (
-                    !selectedSiteRowKeys.has(
-                        siteRowKey(group.cycle.id, site.siteId),
-                    )
-                )
-                    continue;
-                createDhis2SyncTask({
-                    queryParams: {
-                        collectionCycleId: group.cycle.id,
-                        siteId: site.siteId,
-                    },
-                    requestBody: {
-                        irsData: [
-                            irsDataBySiteId.get(site.siteId) ?? {
-                                siteId: site.siteId,
-                            },
-                        ],
-                    },
-                });
-            }
-        }
+        selectedSubmissions.forEach(({ site, collectionCycle }, index) => {
+            createDhis2SyncTask({
+                queryParams: {
+                    collectionCycleId: collectionCycle.id,
+                    siteId: site.siteId,
+                },
+                requestBody: {
+                    irsData: [irsData[index] ?? { siteId: site.siteId }],
+                },
+            });
+        });
         setSelectedSiteRowKeys(new Set());
     }
 
@@ -229,7 +220,7 @@ export default function ReviewDhis2Dashboard({
                                     <Dhis2SiteRow
                                         key={site.siteId}
                                         site={site}
-                                        collectionCycleId={group.cycle.id}
+                                        collectionCycle={group.cycle}
                                         siteSessionSummary={
                                             group.sessionSummaryBySiteId.get(
                                                 site.siteId,
@@ -260,7 +251,7 @@ export default function ReviewDhis2Dashboard({
             <Dhis2IrsDialog
                 open={isSitesIrsDialogOpen}
                 onOpenChange={setIsSitesIrsDialogOpen}
-                sites={selectedSites}
+                submissions={selectedSubmissions}
                 onConfirmSubmission={handleConfirmBulkSubmit}
             />
         </div>

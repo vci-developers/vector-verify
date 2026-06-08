@@ -32,7 +32,7 @@ export default function Dhis2CycleSegment({
                 <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
                     {label}
                 </span>
-                <Badge variant="secondary" className="ml-1 tabular-nums">
+                <Badge variant="outline" className="ml-1 tabular-nums">
                     {submittedCount} / {siteCount} submitted
                 </Badge>
             </CollapsibleTrigger>

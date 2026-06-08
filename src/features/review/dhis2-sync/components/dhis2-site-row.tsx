@@ -28,6 +28,7 @@ import Dhis2IrsDialog from './dhis2-irs-dialog';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 
 const POLL_INTERVAL_MS = 4000;
 
@@ -58,7 +59,7 @@ function getSubmitBlockReason(
 
 interface Dhis2SiteRowProps {
     site: Site;
-    collectionCycleId: number;
+    collectionCycle: CollectionCycle;
     siteSessionSummary: ReviewSiteSessionSummary;
     siteHasUnassignedSessions: boolean;
     isSelected: boolean;
@@ -67,14 +68,17 @@ interface Dhis2SiteRowProps {
 
 export default function Dhis2SiteRow({
     site,
-    collectionCycleId,
+    collectionCycle,
     siteSessionSummary,
     siteHasUnassignedSessions,
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
     const [isSiteIrsDialogOpen, setIsSiteIrsDialogOpen] = useState(false);
-    const dialogSites = useMemo(() => [site], [site]);
+    const dialogSubmissions = useMemo(
+        () => [{ site, collectionCycle }],
+        [site, collectionCycle],
+    );
 
     const queryClient = useQueryClient();
     const {
@@ -82,7 +86,7 @@ export default function Dhis2SiteRow({
         isPending: isGetDhis2SyncTasksPending,
     } = useGetDhis2SyncTasks(
         {
-            collectionCycleId,
+            collectionCycleId: collectionCycle.id,
             siteId: site.siteId,
         },
         {
@@ -153,7 +157,10 @@ export default function Dhis2SiteRow({
 
     function handleSubmit(irsData: SiteIrsData[]) {
         createDhis2SyncTask({
-            queryParams: { collectionCycleId, siteId: site.siteId },
+            queryParams: {
+                collectionCycleId: collectionCycle.id,
+                siteId: site.siteId,
+            },
             requestBody: { irsData },
         });
     }
@@ -252,7 +259,7 @@ export default function Dhis2SiteRow({
             <Dhis2IrsDialog
                 open={isSiteIrsDialogOpen}
                 onOpenChange={setIsSiteIrsDialogOpen}
-                sites={dialogSites}
+                submissions={dialogSubmissions}
                 onConfirmSubmission={handleSubmit}
             />
         </Fragment>
