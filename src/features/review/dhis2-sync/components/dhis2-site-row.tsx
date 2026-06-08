@@ -177,22 +177,31 @@ export default function Dhis2SiteRow({
                         />
                     )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-full max-w-0">
                     <div className="flex items-center gap-3">
-                        <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full">
+                        <div className="bg-muted text-muted-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                             <MapPin className="h-4 w-4" />
                         </div>
-                        <span className="text-foreground text-sm font-medium">
-                            {primaryLabel}
-                        </span>
-                        {ancestorLabels.length > 0 && (
-                            <span className="text-muted-foreground text-xs">
-                                {ancestorLabels.join(' · ')}
+                        <div className="flex min-w-0 flex-col">
+                            <span className="text-foreground truncate text-sm font-medium">
+                                {primaryLabel}
                             </span>
-                        )}
+                            {ancestorLabels.length > 0 && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <span className="text-muted-foreground truncate text-xs">
+                                            {ancestorLabels.join(' ≫ ')}
+                                        </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-md text-wrap">
+                                        {ancestorLabels.join(' ≫ ')}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
+                        </div>
                     </div>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right whitespace-nowrap">
                     <div className="flex justify-end">
                         {isGetDhis2SyncTasksPending ||
                         !getDhis2SyncTasksResult ? (
