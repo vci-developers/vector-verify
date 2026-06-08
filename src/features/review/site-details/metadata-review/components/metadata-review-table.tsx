@@ -26,11 +26,13 @@ import {
     formatDisplayValue,
     numberFieldNames,
     type MetadataRow,
+    type UnitGroupMeta,
 } from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
     metadataRows: MetadataRow[];
+    unitGroups: UnitGroupMeta[];
     sessionIdsWithoutSurveillanceForm: Set<number>;
     resolutionsByMetadataRowId: Map<string, string>;
     onConflictResolutionChange: (
@@ -43,6 +45,7 @@ interface MetadataReviewTableProps {
 export default function MetadataReviewTable({
     sessions,
     metadataRows,
+    unitGroups,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
     onConflictResolutionChange,
@@ -78,7 +81,7 @@ export default function MetadataReviewTable({
         ];
 
         const isBoolean =
-            row.entity === 'formAnswer'
+            row.entity === 'formAnswer' || row.entity === 'unitFormAnswer'
                 ? row.dataType === 'boolean'
                 : booleanFieldNames.has(row.fieldName);
 
@@ -106,7 +109,7 @@ export default function MetadataReviewTable({
         }
 
         const validate =
-            row.entity === 'formAnswer'
+            row.entity === 'formAnswer' || row.entity === 'unitFormAnswer'
                 ? row.dataType === 'number'
                     ? validateWholePositiveInteger
                     : undefined
@@ -133,6 +136,32 @@ export default function MetadataReviewTable({
     const hasAnyConflict = metadataRows.some(
         metadataRow => metadataRow.hasConflict,
     );
+
+    const totalColumns = 1 + sessions.length + (hasAnyConflict ? 1 : 0);
+
+    const unitGroupByOrder = new Map(
+        unitGroups.map(group => [group.unitOrder, group]),
+    );
+    const seenUnitOrders = new Set<number>();
+    const rowsWithGroupHeaders: Array<
+        | { kind: 'unitGroupHeader'; unitOrder: number; label: string }
+        | { kind: 'dataRow'; row: MetadataRow }
+    > = [];
+    for (const row of metadataRows) {
+        if (
+            row.entity === 'unitFormAnswer' &&
+            !seenUnitOrders.has(row.unitOrder)
+        ) {
+            seenUnitOrders.add(row.unitOrder);
+            const group = unitGroupByOrder.get(row.unitOrder)!;
+            rowsWithGroupHeaders.push({
+                kind: 'unitGroupHeader',
+                unitOrder: row.unitOrder,
+                label: group.label,
+            });
+        }
+        rowsWithGroupHeaders.push({ kind: 'dataRow', row });
+    }
 
     return (
         <div className="overflow-x-auto">
@@ -167,7 +196,23 @@ export default function MetadataReviewTable({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {metadataRows.map(metadataRow => {
+                    {rowsWithGroupHeaders.map(entry => {
+                        if (entry.kind === 'unitGroupHeader') {
+                            return (
+                                <TableRow
+                                    key={`unitGroupHeader.${entry.unitOrder}`}
+                                >
+                                    <TableCell
+                                        colSpan={totalColumns}
+                                        className="border-border bg-muted border px-4 py-2 font-semibold"
+                                    >
+                                        {entry.label}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        }
+
+                        const { row: metadataRow } = entry;
                         const isResolved = resolutionsByMetadataRowId.has(
                             metadataRow.id,
                         );

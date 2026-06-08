@@ -137,7 +137,7 @@ export default function MetadataReviewWorkspace({
             : [],
     );
 
-    const metadataRows = buildMetadataRows(
+    const { rows: metadataRows, unitGroups } = buildMetadataRows(
         allSessionsForSite,
         surveillanceFormsBySessionId,
         formAnswersBySessionId,
@@ -206,6 +206,7 @@ export default function MetadataReviewWorkspace({
             <MetadataReviewTable
                 sessions={allSessionsForSite}
                 metadataRows={metadataRows}
+                unitGroups={unitGroups}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm
                 }

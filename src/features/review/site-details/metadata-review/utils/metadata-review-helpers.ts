@@ -92,10 +92,24 @@ export interface FormAnswerMetadataRow extends BaseMetadataRow {
     dataType: string;
 }
 
+export interface UnitFormAnswerMetadataRow extends BaseMetadataRow {
+    entity: 'unitFormAnswer';
+    questionId: number;
+    dataType: string;
+    unitOrder: number;
+}
+
+export interface UnitGroupMeta {
+    unitOrder: number;
+    label: string;
+    sessionUnitIdsBySessionId: Map<number, number>;
+}
+
 export type MetadataRow =
     | SessionMetadataRow
     | SurveillanceFormMetadataRow
-    | FormAnswerMetadataRow;
+    | FormAnswerMetadataRow
+    | UnitFormAnswerMetadataRow;
 
 const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
 
@@ -125,6 +139,28 @@ function hasValueConflict(
     );
 }
 
+function buildFormAnswerValuesBySessionId(
+    sessions: Session[],
+    formAnswersBySessionId: Map<
+        number,
+        GetFormAnswersBySessionIdResponseBody | null
+    >,
+    matchAnswer: (
+        answer: GetFormAnswersBySessionIdResponseBody['answers'][number],
+    ) => boolean,
+): Map<number, unknown> {
+    return new Map(
+        sessions.map(session => {
+            const answers =
+                formAnswersBySessionId.get(session.sessionId)?.answers ?? [];
+            return [
+                session.sessionId,
+                answers.find(matchAnswer)?.value ?? null,
+            ];
+        }),
+    );
+}
+
 export function buildMetadataRows(
     sessions: Session[],
     surveillanceFormsBySessionId: Map<number, SurveillanceForm | null>,
@@ -132,7 +168,7 @@ export function buildMetadataRows(
         number,
         GetFormAnswersBySessionIdResponseBody | null
     >,
-): MetadataRow[] {
+): { rows: MetadataRow[]; unitGroups: UnitGroupMeta[] } {
     const metadataRows: MetadataRow[] = [];
 
     for (const { fieldName, label } of SESSION_FIELDS) {
@@ -178,34 +214,75 @@ export function buildMetadataRows(
     const hasAnyFormAnswers = [...formAnswersBySessionId.values()].some(
         result => result !== null,
     );
+
+    const unitGroups: UnitGroupMeta[] = [];
+
     if (hasAnyFormAnswers) {
-        const questionMap = new Map<
+        const sessionQuestionMap = new Map<
             number,
             { label: string; dataType: string }
         >();
-        for (const formAnswers of formAnswersBySessionId.values()) {
+        const unitGroupBuilders = new Map<
+            number,
+            {
+                sessionUnitIdsBySessionId: Map<number, number>;
+                questionMap: Map<number, { label: string; dataType: string }>;
+                identityLabel: string | null;
+            }
+        >();
+
+        for (const [
+            sessionId,
+            formAnswers,
+        ] of formAnswersBySessionId.entries()) {
             if (formAnswers === null) continue;
             for (const answer of formAnswers.answers) {
-                if (answer.answerScope !== 'SESSION') continue;
-                if (!questionMap.has(answer.questionId)) {
-                    questionMap.set(answer.questionId, {
-                        label: answer.label ?? String(answer.questionId),
-                        dataType: answer.dataType,
-                    });
+                if (answer.answerScope === 'SESSION') {
+                    if (!sessionQuestionMap.has(answer.questionId)) {
+                        sessionQuestionMap.set(answer.questionId, {
+                            label: answer.label ?? String(answer.questionId),
+                            dataType: answer.dataType,
+                        });
+                    }
+                } else if (
+                    answer.answerScope === 'SESSION_UNIT' &&
+                    answer.sessionUnit !== null
+                ) {
+                    const { id: sessionUnitId, unitOrder } = answer.sessionUnit;
+                    if (!unitGroupBuilders.has(unitOrder)) {
+                        unitGroupBuilders.set(unitOrder, {
+                            sessionUnitIdsBySessionId: new Map(),
+                            questionMap: new Map(),
+                            identityLabel: null,
+                        });
+                    }
+                    const builder = unitGroupBuilders.get(unitOrder)!;
+                    builder.sessionUnitIdsBySessionId.set(
+                        sessionId,
+                        sessionUnitId,
+                    );
+                    if (!builder.questionMap.has(answer.questionId)) {
+                        builder.questionMap.set(answer.questionId, {
+                            label: answer.label ?? String(answer.questionId),
+                            dataType: answer.dataType,
+                        });
+                    }
+                    if (
+                        answer.isUnitIdentityComponent &&
+                        builder.identityLabel === null &&
+                        answer.value != null
+                    ) {
+                        builder.identityLabel = String(answer.value);
+                    }
                 }
             }
         }
 
-        for (const [questionId, { label, dataType }] of questionMap) {
-            const fieldValueBySessionId = new Map(
-                sessions.map(session => {
-                    const formAnswers =
-                        formAnswersBySessionId.get(session.sessionId) ?? null;
-                    const formAnswer = formAnswers?.answers.find(
-                        answer => answer.questionId === questionId,
-                    );
-                    return [session.sessionId, formAnswer?.value ?? null];
-                }),
+        for (const [questionId, { label, dataType }] of sessionQuestionMap) {
+            const fieldValueBySessionId = buildFormAnswerValuesBySessionId(
+                sessions,
+                formAnswersBySessionId,
+                answer => answer.questionId === questionId,
             );
             const hasConflict = hasValueConflict(fieldValueBySessionId);
             metadataRows.push({
@@ -218,9 +295,41 @@ export function buildMetadataRows(
                 hasConflict,
             });
         }
+
+        for (const [
+            unitOrder,
+            { sessionUnitIdsBySessionId, questionMap, identityLabel },
+        ] of [...unitGroupBuilders.entries()].sort(([a], [b]) => a - b)) {
+            const label = identityLabel ?? `Unit ${unitOrder}`;
+            unitGroups.push({ unitOrder, label, sessionUnitIdsBySessionId });
+
+            for (const [
+                questionId,
+                { label: questionLabel, dataType },
+            ] of questionMap) {
+                const fieldValueBySessionId = buildFormAnswerValuesBySessionId(
+                    sessions,
+                    formAnswersBySessionId,
+                    answer =>
+                        answer.questionId === questionId &&
+                        answer.sessionUnit?.unitOrder === unitOrder,
+                );
+                const hasConflict = hasValueConflict(fieldValueBySessionId);
+                metadataRows.push({
+                    id: `unitFormAnswer.${unitOrder}.${questionId}`,
+                    label: questionLabel,
+                    entity: 'unitFormAnswer',
+                    questionId,
+                    dataType,
+                    unitOrder,
+                    fieldValueBySessionId,
+                    hasConflict,
+                });
+            }
+        }
     }
 
-    return metadataRows;
+    return { rows: metadataRows, unitGroups };
 }
 
 export function parseFormAnswerValue(
@@ -243,20 +352,32 @@ export function applyConflictResolutions(
     const resolvedSession: Partial<Session> = {};
     const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
     const resolvedFormAnswers: ResolvedFormAnswer[] = [];
+    const unitFormAnswersByUnitOrder = new Map<number, ResolvedFormAnswer[]>();
 
     for (const metadataRow of metadataRows) {
         const selectedFieldDisplay = resolutionsByRowId.get(metadataRow.id);
         if (selectedFieldDisplay === undefined) continue;
 
-        if (metadataRow.entity === 'formAnswer') {
-            resolvedFormAnswers.push({
+        if (
+            metadataRow.entity === 'formAnswer' ||
+            metadataRow.entity === 'unitFormAnswer'
+        ) {
+            const resolvedFormAnswer: ResolvedFormAnswer = {
                 questionId: metadataRow.questionId,
                 value: parseFormAnswerValue(
                     selectedFieldDisplay,
                     metadataRow.dataType,
                 ),
                 dataType: metadataRow.dataType,
-            });
+            };
+            if (metadataRow.entity === 'unitFormAnswer') {
+                const existing =
+                    unitFormAnswersByUnitOrder.get(metadataRow.unitOrder) ?? [];
+                existing.push(resolvedFormAnswer);
+                unitFormAnswersByUnitOrder.set(metadataRow.unitOrder, existing);
+            } else {
+                resolvedFormAnswers.push(resolvedFormAnswer);
+            }
             continue;
         }
 
@@ -286,5 +407,10 @@ export function applyConflictResolutions(
         }
     }
 
-    return { resolvedSession, resolvedSurveillanceForm, resolvedFormAnswers };
+    return {
+        resolvedSession,
+        resolvedSurveillanceForm,
+        resolvedFormAnswers,
+        unitFormAnswersByUnitOrder,
+    };
 }
