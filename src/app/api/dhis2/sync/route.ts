@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         );
     }
 
-    const authorizedPostDhis2TaskSyncResult =
+    const authorizedPostDhis2SyncTaskResult =
         await withAuthSession<PostDhis2SyncTaskResponseBody>(accessToken =>
             postDhis2SyncTask(
                 accessToken,
@@ -91,9 +91,9 @@ export async function POST(request: Request) {
             ),
         );
 
-    return NextResponse.json(authorizedPostDhis2TaskSyncResult, {
-        status: authorizedPostDhis2TaskSyncResult.ok
+    return NextResponse.json(authorizedPostDhis2SyncTaskResult, {
+        status: authorizedPostDhis2SyncTaskResult.ok
             ? 202
-            : (authorizedPostDhis2TaskSyncResult.error.status ?? 400),
+            : (authorizedPostDhis2SyncTaskResult.error.status ?? 400),
     });
 }
