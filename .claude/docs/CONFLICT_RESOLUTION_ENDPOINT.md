@@ -9,7 +9,10 @@ session units, not both.
 ## Session Conflicts
 
 Use `sessionIds` when resolving conflicts between sessions. All sessions must
-exist, belong to the same site, and be in the same month and year.
+exist, belong to the same site, and belong to the same collection cycle.
+
+> **Edit:** Previously validated same month and year; now scoped to collection
+> cycle.
 
 Session mode can update:
 
@@ -41,7 +44,10 @@ Dynamic form questions in this mode must have `answerScope: "SESSION"`.
 
 Use `sessionUnitIds` when resolving conflicts between repeated collection units
 within sessions. All units must exist, and their parent sessions must belong to
-the same site and month/year.
+the same site and collection cycle.
+
+> **Edit:** Previously validated same month and year; now scoped to collection
+> cycle.
 
 Unit mode only updates dynamic form answers. `resolvedData` and
 `resolvedSurveillanceForm` are rejected in this mode.

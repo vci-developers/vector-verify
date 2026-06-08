@@ -8,12 +8,24 @@ export const resolvedFormAnswerSchema = z.object({
     dataType: z.string().optional(),
 });
 
-export const resolveSessionConflictsRequestSchema = z.object({
-    sessionIds: z.array(z.number()),
-    resolvedData: sessionSchema.partial(),
-    resolvedSurveillanceForm: surveillanceFormSchema.partial(),
-    resolvedFormAnswers: z.array(resolvedFormAnswerSchema).optional(),
-});
+export const resolveSessionConflictsRequestSchema = z.union([
+    z.object({
+        sessionIds: z.array(z.number()).min(2),
+        resolvedData: sessionSchema.partial().optional(),
+        resolvedSurveillanceForm: surveillanceFormSchema.partial().optional(),
+        resolvedFormAnswers: z
+            .array(resolvedFormAnswerSchema)
+            .nullable()
+            .optional(),
+    }),
+    z.object({
+        sessionUnitIds: z.array(z.number()).min(2),
+        resolvedFormAnswers: z
+            .array(resolvedFormAnswerSchema)
+            .nullable()
+            .optional(),
+    }),
+]);
 
 export const resolveSessionConflictsResponseSchema = z.object({
     message: z.string(),

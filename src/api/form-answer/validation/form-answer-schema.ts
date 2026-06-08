@@ -13,6 +13,18 @@ export const formAnswerSchema = z.object({
     value: z.unknown(),
     dataType: z.string(),
     answerScope: z.enum(['SESSION', 'SESSION_UNIT']).nullable(),
+    sessionUnitId: z.number().nullable(),
+    sessionUnit: z
+        .object({
+            id: z.number(),
+            frontendId: z.string(),
+            sessionId: z.number(),
+            unitOrder: z.number(),
+            createdAt: z.number(),
+            updatedAt: z.number(),
+        })
+        .nullable(),
+    isUnitIdentityComponent: z.boolean().nullable(),
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),
     updatedAt: z.number().nullable(),
