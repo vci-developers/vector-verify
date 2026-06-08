@@ -187,7 +187,7 @@ export default function ReviewDhis2Dashboard({
                     </p>
                 </div>
                 <Dhis2SyncToolbar
-                    selectedSiteRowCount={selectedSiteRowKeys.size}
+                    selectedSiteRowCount={selectedSubmissions.length}
                     isRefreshing={isRefreshing}
                     onSubmitSelected={() => setIsSitesIrsDialogOpen(true)}
                     onRefresh={handleRefresh}
