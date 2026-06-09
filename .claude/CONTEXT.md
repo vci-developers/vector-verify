@@ -99,6 +99,20 @@ annotation. _Avoid_: Image-based
   the Review workflow)
 - A **VHT** creates **Sessions** and **Specimens** via the VectorCam mobile app
 
+## Invariants
+
+### Timezone handling for `collectionDate`
+
+`Session.collectionDate` is a Unix timestamp in milliseconds (UTC). All frontend
+month-bucketing logic (grouping sessions by `'yyyy-MM'` key) **must use UTC
+methods** (`getUTCFullYear`, `getUTCMonth`) rather than `date-fns` `format`,
+which uses the browser's local timezone. The API interprets
+`startDate`/`endDate` as UTC date boundaries, so the frontend must derive month
+keys the same way. Using local browser time causes sessions to land in the wrong
+month bucket and the wrong link `startDate`/`endDate` when the reviewer's
+browser timezone differs from UTC. Display-only formatting (e.g. showing a date
+in a table header) is exempt — timezone skew in display is acceptable.
+
 ## Flagged ambiguities
 
 - "Sentinel site" (web app doc language) and "leaf site" (API code language)

@@ -59,10 +59,8 @@ export default function ReviewSitesList({
         if (!getAllSessionsResult?.ok) return map;
 
         for (const session of getAllSessionsResult.data.sessions) {
-            const monthKey = format(
-                new Date(session.collectionDate),
-                'yyyy-MM',
-            );
+            const collectionDate = new Date(session.collectionDate);
+            const monthKey = `${collectionDate.getUTCFullYear()}-${String(collectionDate.getUTCMonth() + 1).padStart(2, '0')}`;
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;

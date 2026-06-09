@@ -71,10 +71,8 @@ export default function ReviewExportList({
 
         for (const session of getAllSessionsResult.data.sessions) {
             if (session.state !== 'CERTIFIED') continue;
-            const monthKey = format(
-                new Date(session.collectionDate),
-                'yyyy-MM',
-            );
+            const collectionDate = new Date(session.collectionDate);
+            const monthKey = `${collectionDate.getUTCFullYear()}-${String(collectionDate.getUTCMonth() + 1).padStart(2, '0')}`;
             const certifiedCountsForMonth =
                 map.get(monthKey) ?? new Map<number, number>();
             certifiedCountsForMonth.set(
