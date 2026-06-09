@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/multi-select';
 import { useMemo } from 'react';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { StorageKeys } from '@/lib/storage-keys';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 
@@ -65,7 +66,7 @@ export default function OperationsSpecimenComposition({
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
     const [storedSpecies, setStoredSpecies] = useLocalStorage<string[] | null>(
-        'specimen-composition-selected-species',
+        StorageKeys.operations.selectedSpecies,
         null,
     );
     const speciesOptions = useMemo(() => {
