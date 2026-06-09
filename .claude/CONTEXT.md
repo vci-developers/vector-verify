@@ -63,6 +63,14 @@ Review workflow. `collectionCycleId` is nullable — sessions from programs
 without a Collection Schedule, or created before a schedule was established,
 have no cycle. _Avoid_: Submission, collection event
 
+**Session Unit**: A repeated sub-collection instance within a Session (e.g.
+multiple rooms or traps visited during one field visit). A Session can contain
+zero or more Session Units. Each Session Unit carries its own
+`SESSION_UNIT`-scoped dynamic form answers and is ordered by `unitOrder`. When
+detecting conflicts during Review, Session Units from different sessions are
+matched by `unitOrder`. Session Unit identity (display label) is derived from
+the answer to the question flagged `isUnitIdentityComponent`. _Avoid_: Sub-session, unit record
+
 **Session State**: The lifecycle stage of a Session. In order: `NEEDS_REVIEW` →
 `IN_REVIEW` → `CERTIFIED` → `SUBMITTED`. `NOT_APPLICABLE` is set on
 non-surveillance sessions (type `CALIBRATION`, `PRACTICE`, `DATA_COLLECTION`)
@@ -95,7 +103,7 @@ annotation. _Avoid_: Image-based
 
 - A **Program** contains many **Sites**
 - A **Site** hosts many **Sessions**
-- A **Session** contains many **Specimens**
+- A **Session** contains zero or more **Session Units** and many **Specimens**
 - A **Session** optionally belongs to one **Collection Cycle**; sessions from
   programs without a Collection Schedule, or created before a schedule was
   established, have no cycle

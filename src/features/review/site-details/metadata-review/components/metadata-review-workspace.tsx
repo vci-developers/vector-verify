@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
@@ -53,10 +54,10 @@ export default function MetadataReviewWorkspace({
         allSessionsForSite.map(session => session.sessionId),
     );
 
-    const {
-        mutate: resolveSessionConflicts,
-        isPending: isResolveSessionConflictsPending,
-    } = useResolveSessionConflicts();
+    const { mutateAsync: resolveSessionConflictsAsync } =
+        useResolveSessionConflicts();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [resolveError, setResolveError] = useState<string | null>(null);
 
     if (isGetAllSessionsPending || !getAllSessionsResult) {
         return <h1>Loading...</h1>;
@@ -148,52 +149,94 @@ export default function MetadataReviewWorkspace({
         row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
     );
 
-    function handleResolveConflicts() {
+    async function handleResolveConflicts() {
         const {
             resolvedSession,
             resolvedSurveillanceForm,
             resolvedFormAnswers,
+            unitFormAnswersByUnitOrder,
         } = applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
 
-        resolveSessionConflicts(
-            {
+        const hasSessionLevelConflicts = metadataRows.some(
+            row =>
+                (row.entity === 'session' ||
+                    row.entity === 'surveillanceForm' ||
+                    row.entity === 'formAnswer') &&
+                row.hasConflict,
+        );
+
+        const callPayloads = [];
+
+        if (hasSessionLevelConflicts) {
+            callPayloads.push({
                 sessionIds: allSessionsForSite.map(
                     session => session.sessionId,
                 ),
                 resolvedData: resolvedSession,
                 resolvedSurveillanceForm,
-                resolvedFormAnswers,
-            },
-            {
-                onSuccess: result => {
-                    if (result.ok) {
-                        resetResolutions();
-                        queryClient.invalidateQueries({
-                            queryKey: sessionKeys.allSessions({
-                                siteId,
-                                startDate,
-                                endDate,
-                                type: 'SURVEILLANCE',
-                            }),
-                        });
-                        for (const session of allSessionsForSite) {
-                            queryClient.invalidateQueries({
-                                queryKey:
-                                    surveillanceFormKeys.surveillanceFormBySessionId(
-                                        session.sessionId,
-                                    ),
-                            });
-                            queryClient.invalidateQueries({
-                                queryKey: formAnswerKeys.formAnswersBySessionId(
-                                    session.sessionId,
-                                ),
-                            });
-                        }
-                        onGoToNextStep();
-                    }
-                },
-            },
+                resolvedFormAnswers:
+                    resolvedFormAnswers.length > 0
+                        ? resolvedFormAnswers
+                        : undefined,
+            });
+        }
+
+        for (const [
+            unitOrder,
+            resolvedUnitFormAnswers,
+        ] of unitFormAnswersByUnitOrder) {
+            const unitGroup = unitGroups.find(
+                group => group.unitOrder === unitOrder,
+            );
+            if (!unitGroup) continue;
+            callPayloads.push({
+                sessionUnitIds: [
+                    ...unitGroup.sessionUnitIdsBySessionId.values(),
+                ],
+                resolvedFormAnswers: resolvedUnitFormAnswers,
+            });
+        }
+
+        setIsSubmitting(true);
+        setResolveError(null);
+
+        const results = await Promise.all(
+            callPayloads.map(payload => resolveSessionConflictsAsync(payload)),
         );
+
+        setIsSubmitting(false);
+
+        const firstFailure = results.find(result => !result.ok);
+        if (firstFailure && !firstFailure.ok) {
+            setResolveError(
+                firstFailure.error.message ??
+                    'An error occurred. Please try again.',
+            );
+            return;
+        }
+
+        resetResolutions();
+        queryClient.invalidateQueries({
+            queryKey: sessionKeys.allSessions({
+                siteId,
+                startDate,
+                endDate,
+                type: 'SURVEILLANCE',
+            }),
+        });
+        for (const session of allSessionsForSite) {
+            queryClient.invalidateQueries({
+                queryKey: surveillanceFormKeys.surveillanceFormBySessionId(
+                    session.sessionId,
+                ),
+            });
+            queryClient.invalidateQueries({
+                queryKey: formAnswerKeys.formAnswersBySessionId(
+                    session.sessionId,
+                ),
+            });
+        }
+        onGoToNextStep();
     }
 
     return (
@@ -215,18 +258,17 @@ export default function MetadataReviewWorkspace({
                 disabledRowIds={disabledRowIds}
             />
 
+            {resolveError && (
+                <p className="text-destructive text-sm">{resolveError}</p>
+            )}
+
             <div className="flex justify-end">
                 {hasConflicts ? (
                     <Button
                         onClick={handleResolveConflicts}
-                        disabled={
-                            !allConflictsResolved ||
-                            isResolveSessionConflictsPending
-                        }
+                        disabled={!allConflictsResolved || isSubmitting}
                     >
-                        {isResolveSessionConflictsPending
-                            ? 'Resolving…'
-                            : 'Resolve & Continue'}
+                        {isSubmitting ? 'Resolving…' : 'Resolve & Continue'}
                     </Button>
                 ) : (
                     <Button onClick={onGoToNextStep}>
