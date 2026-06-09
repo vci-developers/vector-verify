@@ -6,10 +6,21 @@ import CompositionChartPair from './composition-chart-pair';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
+    isNonMosquito,
+    getSpeciesOptions,
     groupSpecimenCountsByMonth,
     sumSpecimenCountsByClass,
 } from '../utils/specimen-composition-helpers';
 import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    MultiSelect,
+    MultiSelectTrigger,
+    MultiSelectValue,
+    MultiSelectItem,
+    MultiSelectContent,
+    MultiSelectGroup,
+} from '@/components/ui/multi-select';
+import { useMemo, useState } from 'react';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -49,6 +60,26 @@ export default function OperationsSpecimenComposition({
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
+    const [selectedSpecies, setSelectedSpecies] = useState<string[]>([]);
+
+    const speciesOptions = useMemo(() => {
+        if (!getMonthlySpecimensCountResult?.ok) return [];
+        return getSpeciesOptions(getMonthlySpecimensCountResult.data.data);
+    }, [getMonthlySpecimensCountResult]);
+
+    const validSelectedSpecies = useMemo(() => {
+        const validOptions = new Set(speciesOptions);
+        return selectedSpecies.filter(value => validOptions.has(value));
+    }, [selectedSpecies, speciesOptions]);
+
+    const [filterInitialized, setFilterInitialized] = useState(false);
+    if (speciesOptions.length > 0 && !filterInitialized) {
+        setSelectedSpecies(
+            speciesOptions.filter(species => !isNonMosquito(species)),
+        );
+        setFilterInitialized(true);
+    }
+
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
         return <h1>LOADING...</h1>;
     }
@@ -61,15 +92,42 @@ export default function OperationsSpecimenComposition({
 
     return (
         <div className="space-y-6">
+            <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium">Filter by Species</label>
+                <MultiSelect
+                    values={validSelectedSpecies}
+                    onValuesChange={setSelectedSpecies}
+                >
+                    <MultiSelectTrigger>
+                        <MultiSelectValue placeholder="Select species..." />
+                    </MultiSelectTrigger>
+                    <MultiSelectContent
+                        search={{
+                            placeholder: 'Search species...',
+                            emptyMessage: 'No species found.',
+                        }}
+                    >
+                        <MultiSelectGroup>
+                            {speciesOptions.map(species => (
+                                <MultiSelectItem key={species} value={species}>
+                                    {species}
+                                </MultiSelectItem>
+                            ))}
+                        </MultiSelectGroup>
+                    </MultiSelectContent>
+                </MultiSelect>
+            </div>
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
                     const specimenCountsByClass = sumSpecimenCountsByClass(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
+                        selectedSpecies,
                     );
                     const specimenCountsByMonth = groupSpecimenCountsByMonth(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
+                        selectedSpecies,
                     );
                     const specimenChartConfig = buildSpecimenChartConfig(
                         specimenClassificationAxis,

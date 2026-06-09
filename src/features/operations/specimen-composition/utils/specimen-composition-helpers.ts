@@ -3,6 +3,8 @@ import type { SpecimenClassificationAxis } from '@/api/specimen/validation/speci
 import type { ChartConfig } from '@/components/ui/chart';
 import { format, parseISO } from 'date-fns';
 
+const NON_MOSQUITO_PATTERN = /non.mosquito/i;
+
 type ChartColorFamily = 'red' | 'yellow' | 'green';
 
 const CHART_COLOR_BY_FAMILY: Record<
@@ -25,7 +27,11 @@ const CHART_COLOR_FAMILY_BY_CLASSIFICATION_AXIS: Record<
     species: specimenClass => {
         const lowercaseSpecimenClass = specimenClass.toLowerCase();
         if (lowercaseSpecimenClass.includes('anopheles')) return 'red';
-        if (lowercaseSpecimenClass.includes('non-mosquito')) return 'green';
+        if (
+            lowercaseSpecimenClass.includes('non-mosquito') ||
+            lowercaseSpecimenClass.includes('non mosquito')
+        )
+            return 'green';
         return 'yellow';
     },
     sex: specimenClass => {
@@ -41,44 +47,109 @@ const CHART_COLOR_FAMILY_BY_CLASSIFICATION_AXIS: Record<
     },
 };
 
+export function isNonMosquito(species: string): boolean {
+    return NON_MOSQUITO_PATTERN.test(species);
+}
+
+export function getSpeciesOptions(
+    monthlySpecimenCounts: GetMonthlySpecimensCountSuccessPayload['data'],
+): string[] {
+    const speciesSet = new Set<string>();
+    for (const monthlySpecimenCount of monthlySpecimenCounts) {
+        for (const species of Object.keys(monthlySpecimenCount.species)) {
+            speciesSet.add(species);
+        }
+    }
+    return [...speciesSet].sort((a, b) => {
+        const nonMosquitoA = isNonMosquito(a);
+        const nonMosquitoB = isNonMosquito(b);
+        if (nonMosquitoA !== nonMosquitoB) {
+            return nonMosquitoA ? 1 : -1;
+        }
+        return a.localeCompare(b);
+    });
+}
+
+function aggregateCountsBySpecies(
+    specimenClassificationAxis: SpecimenClassificationAxis,
+    monthlySpecimenCount: GetMonthlySpecimensCountSuccessPayload['data'][number],
+    selectedSpecies: string[],
+): Record<string, number> {
+    const bySpecies: Record<
+        string,
+        Record<string, number>
+    > = specimenClassificationAxis === 'species'
+        ? Object.fromEntries(
+              Object.entries(monthlySpecimenCount.species).map(
+                  ([species, count]) => [species, { [species]: count }],
+              ),
+          )
+        : specimenClassificationAxis === 'sex'
+          ? monthlySpecimenCount.sexBySpecies
+          : monthlySpecimenCount.abdomenStatusBySpecies;
+
+    const totalCounts: Record<string, number> = {};
+    for (const [species, classCounts] of Object.entries(bySpecies)) {
+        if (!selectedSpecies.includes(species)) continue;
+        for (const [specimenClass, specimenCount] of Object.entries(
+            classCounts,
+        )) {
+            totalCounts[specimenClass] =
+                (totalCounts[specimenClass] ?? 0) + specimenCount;
+        }
+    }
+    return totalCounts;
+}
+
 export function sumSpecimenCountsByClass(
     specimenClassificationAxis: SpecimenClassificationAxis,
     monthlySpecimenCounts: GetMonthlySpecimensCountSuccessPayload['data'],
+    selectedSpecies: string[],
 ): { specimenClass: string; specimenCount: number }[] {
     const specimenCountsByClass: Record<string, number> = {};
     for (const monthlySpecimenCount of monthlySpecimenCounts) {
         for (const [specimenClass, specimenCount] of Object.entries(
-            monthlySpecimenCount[specimenClassificationAxis],
+            aggregateCountsBySpecies(
+                specimenClassificationAxis,
+                monthlySpecimenCount,
+                selectedSpecies,
+            ),
         )) {
             specimenCountsByClass[specimenClass] =
                 (specimenCountsByClass[specimenClass] ?? 0) + specimenCount;
         }
     }
     return Object.entries(specimenCountsByClass).map(
-        ([specimenClass, specimenCount]) => ({
-            specimenClass,
-            specimenCount,
-        }),
+        ([specimenClass, specimenCount]) => ({ specimenClass, specimenCount }),
     );
 }
 
 export function groupSpecimenCountsByMonth(
     specimenClassificationAxis: SpecimenClassificationAxis,
     monthlySpecimenCounts: GetMonthlySpecimensCountSuccessPayload['data'],
+    selectedSpecies: string[],
 ): Record<string, string | number>[] {
+    const aggregateByMonth = monthlySpecimenCounts.map(
+        monthlySpecimenCount => ({
+            month: format(parseISO(monthlySpecimenCount.from), 'MMM yyyy'),
+            counts: aggregateCountsBySpecies(
+                specimenClassificationAxis,
+                monthlySpecimenCount,
+                selectedSpecies,
+            ),
+        }),
+    );
     const allSpecimenClasses = [
         ...new Set(
-            monthlySpecimenCounts.flatMap(monthlySpecimenCount =>
-                Object.keys(monthlySpecimenCount[specimenClassificationAxis]),
-            ),
+            aggregateByMonth.flatMap(({ counts }) => Object.keys(counts)),
         ),
     ];
-    return monthlySpecimenCounts.map(monthlySpecimenCount => ({
-        month: format(parseISO(monthlySpecimenCount.from), 'MMM yyyy'),
+    return aggregateByMonth.map(({ month, counts }) => ({
+        month,
         ...Object.fromEntries(
             allSpecimenClasses.map(specimenClass => [specimenClass, 0]),
         ),
-        ...monthlySpecimenCount[specimenClassificationAxis],
+        ...counts,
     }));
 }
 
