@@ -21,6 +21,7 @@ import {
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
 import { useMemo, useState } from 'react';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -60,8 +61,10 @@ export default function OperationsSpecimenComposition({
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
-    const [selectedSpecies, setSelectedSpecies] = useState<string[]>([]);
-
+    const [storedSpecies, setStoredSpecies] = useLocalStorage<string[] | null>(
+        'specimen-composition-selected-species',
+        null,
+    );
     const speciesOptions = useMemo(() => {
         if (!getMonthlySpecimensCountResult?.ok) return [];
         return getSpeciesOptions(getMonthlySpecimensCountResult.data.data);
@@ -69,16 +72,11 @@ export default function OperationsSpecimenComposition({
 
     const validSelectedSpecies = useMemo(() => {
         const validOptions = new Set(speciesOptions);
-        return selectedSpecies.filter(value => validOptions.has(value));
-    }, [selectedSpecies, speciesOptions]);
-
-    const [filterInitialized, setFilterInitialized] = useState(false);
-    if (speciesOptions.length > 0 && !filterInitialized) {
-        setSelectedSpecies(
-            speciesOptions.filter(species => !isNonMosquito(species)),
-        );
-        setFilterInitialized(true);
-    }
+        const species =
+            storedSpecies ??
+            speciesOptions.filter(species => !isNonMosquito(species));
+        return species.filter(s => validOptions.has(s));
+    }, [storedSpecies, speciesOptions]);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
         return <h1>LOADING...</h1>;
@@ -96,7 +94,7 @@ export default function OperationsSpecimenComposition({
                 <label className="text-sm font-medium">Filter by Species</label>
                 <MultiSelect
                     values={validSelectedSpecies}
-                    onValuesChange={setSelectedSpecies}
+                    onValuesChange={setStoredSpecies}
                 >
                     <MultiSelectTrigger>
                         <MultiSelectValue placeholder="Select species..." />
@@ -122,12 +120,12 @@ export default function OperationsSpecimenComposition({
                     const specimenCountsByClass = sumSpecimenCountsByClass(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
-                        selectedSpecies,
+                        validSelectedSpecies,
                     );
                     const specimenCountsByMonth = groupSpecimenCountsByMonth(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
-                        selectedSpecies,
+                        validSelectedSpecies,
                     );
                     const specimenChartConfig = buildSpecimenChartConfig(
                         specimenClassificationAxis,
