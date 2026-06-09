@@ -4,15 +4,15 @@ import { cn } from '@/utils/cn';
 import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Fragment } from 'react';
-import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { useTranslations } from 'next-intl';
-import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import { type ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
-    monthKey: string;
+    startDate: string;
+    endDate: string;
 }
 
 function buildReviewHref(
@@ -33,12 +33,10 @@ export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     sessionCountsBySiteId,
-    monthKey,
+    startDate,
+    endDate,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
-    const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
-
     if (sites.length === 0) return null;
 
     return (
