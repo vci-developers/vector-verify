@@ -94,6 +94,23 @@ A list of testing decisions that were made. Include:
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
 
+## Commit Plan
+
+Break the implementation into a sequence of small, independently reviewable
+commits. Each commit should:
+
+- Do exactly one thing (move a file, change an interface, wire a new component)
+- Leave the app in a working state — no broken builds or half-finished features
+- Have a subject line that completes the sentence "This commit will…"
+
+Format each entry as:
+
+**Commit N — Title**: One sentence describing the change and why it is
+self-contained. List the files touched.
+
+Prefer three to five commits for a typical feature. Resist the urge to batch
+unrelated cleanups into the same commit as functional changes.
+
 ## Out of Scope
 
 A description of the things that are out of scope for this PRD.
