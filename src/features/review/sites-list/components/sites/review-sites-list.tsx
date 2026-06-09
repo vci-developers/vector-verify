@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { toUTCMonthKey } from '@/lib/date/utc-month-key';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
@@ -60,7 +61,7 @@ export default function ReviewSitesList({
 
         for (const session of getAllSessionsResult.data.sessions) {
             const collectionDate = new Date(session.collectionDate);
-            const monthKey = `${collectionDate.getUTCFullYear()}-${String(collectionDate.getUTCMonth() + 1).padStart(2, '0')}`;
+            const monthKey = toUTCMonthKey(collectionDate);
             if (!map.has(monthKey)) map.set(monthKey, new Map());
 
             const monthMap = map.get(monthKey)!;

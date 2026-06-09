@@ -1,5 +1,6 @@
 import type { Session } from '@/api/session/validation/session-schema';
-import { format, isSameMonth, subMonths } from 'date-fns';
+import { toUTCMonthKey } from '@/lib/date/utc-month-key';
+import { subMonths } from 'date-fns';
 
 export interface CollectorRow {
     collectorTitle: string;
@@ -19,6 +20,8 @@ export function buildFieldUserComplianceData(
 ): FieldUserComplianceData {
     const now = new Date();
     const previousMonth = subMonths(now, 1);
+    const currentMonthKey = toUTCMonthKey(now);
+    const previousMonthKey = toUTCMonthKey(previousMonth);
 
     const collectorMap = new Map<
         string,
@@ -47,17 +50,14 @@ export function buildFieldUserComplianceData(
 
         const entry = collectorMap.get(collectorKey)!;
         const submittedDate = new Date(session.submittedAt);
-        const monthKey = format(submittedDate, 'yyyy-MM');
+        const monthKey = toUTCMonthKey(submittedDate);
 
         if (monthKey in entry.sessionCountsByMonth) {
             entry.sessionCountsByMonth[monthKey] =
                 (entry.sessionCountsByMonth[monthKey] ?? 0) + 1;
         }
 
-        if (
-            isSameMonth(submittedDate, now) ||
-            isSameMonth(submittedDate, previousMonth)
-        ) {
+        if (monthKey === currentMonthKey || monthKey === previousMonthKey) {
             entry.hasRecentSubmission = true;
         }
     }

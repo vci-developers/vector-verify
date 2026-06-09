@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import type { CollectorRow } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
+import { toUTCMonthKey } from '@/lib/date/utc-month-key';
 import { format } from 'date-fns';
 import StatBadge from '@/components/ui/stat-badge';
 import {
@@ -37,7 +38,7 @@ export default function FieldUserComplianceChart({
     totalCollectors,
     activeCollectors,
 }: FieldUserComplianceChartProps) {
-    const monthYearKeys = months.map(month => format(month, 'yyyy-MM'));
+    const monthYearKeys = months.map(month => toUTCMonthKey(month));
     return (
         <Card>
             <CardHeader>

@@ -78,7 +78,9 @@
         "prettier-plugin-tailwindcss": "^0.6.14",
         "tailwindcss": "^4",
         "tw-animate-css": "^1.3.7",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vite-tsconfig-paths": "^6.1.1",
+        "vitest": "^4.1.8"
     },
     "resolutions": {
         "@types/react": "19.1.12",

@@ -4,7 +4,8 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildFieldUserComplianceData } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
-import { eachMonthOfInterval, format, parseISO } from 'date-fns';
+import { toUTCMonthKey } from '@/lib/date/utc-month-key';
+import { eachMonthOfInterval, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import FieldUserComplianceChart from '@/features/operations/field-user-compliance/components/field-user-compliance-chart';
 
@@ -32,7 +33,7 @@ export default function OperationsFieldUserCompliance({
         });
         return {
             months,
-            monthYearKeys: months.map(month => format(month, 'yyyy-MM')),
+            monthYearKeys: months.map(month => toUTCMonthKey(month)),
         };
     }, [startDate, endDate]);
 

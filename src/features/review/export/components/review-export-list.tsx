@@ -1,6 +1,7 @@
 'use client';
 
 import type { Site } from '@/api/site/validation/site-schema';
+import { toUTCMonthKey } from '@/lib/date/utc-month-key';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { format, eachMonthOfInterval, endOfMonth } from 'date-fns';
 import { useState, useMemo } from 'react';
@@ -72,7 +73,7 @@ export default function ReviewExportList({
         for (const session of getAllSessionsResult.data.sessions) {
             if (session.state !== 'CERTIFIED') continue;
             const collectionDate = new Date(session.collectionDate);
-            const monthKey = `${collectionDate.getUTCFullYear()}-${String(collectionDate.getUTCMonth() + 1).padStart(2, '0')}`;
+            const monthKey = toUTCMonthKey(collectionDate);
             const certifiedCountsForMonth =
                 map.get(monthKey) ?? new Map<number, number>();
             certifiedCountsForMonth.set(
