@@ -20,8 +20,10 @@ import {
     MultiSelectContent,
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { Label } from '@/components/ui/label';
+import { useTranslations } from 'next-intl';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -43,6 +45,7 @@ export default function OperationsSpecimenComposition({
     startDate,
     endDate,
 }: OperationsSpecimenCompositionProps) {
+    const t = useTranslations('OperationsSpecimenComposition');
     const locationFilter =
         'district' in locationQueryParam
             ? { districts: [locationQueryParam.district] }
@@ -79,11 +82,16 @@ export default function OperationsSpecimenComposition({
     }, [storedSpecies, speciesOptions]);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>LOADING...</h1>;
+        return <h1>{t('capsLoading')}</h1>;
     }
 
     if (!getMonthlySpecimensCountResult.ok) {
-        return <h1>ERROR: {getMonthlySpecimensCountResult.error.message}</h1>;
+        return (
+            <h1>
+                {t('capsError')}
+                {getMonthlySpecimensCountResult.error.message}
+            </h1>
+        );
     }
 
     const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;
@@ -91,18 +99,20 @@ export default function OperationsSpecimenComposition({
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium">Filter by Species</label>
+                <Label className="text-sm font-medium">
+                    {t('filterBySpecies')}
+                </Label>
                 <MultiSelect
                     values={validSelectedSpecies}
                     onValuesChange={setStoredSpecies}
                 >
                     <MultiSelectTrigger>
-                        <MultiSelectValue placeholder="Select species..." />
+                        <MultiSelectValue placeholder={t('selectSpecies')} />
                     </MultiSelectTrigger>
                     <MultiSelectContent
                         search={{
-                            placeholder: 'Search species...',
-                            emptyMessage: 'No species found.',
+                            placeholder: t('searchSpecies'),
+                            emptyMessage: t('noSpeciesFound'),
                         }}
                     >
                         <MultiSelectGroup>

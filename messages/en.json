@@ -29,6 +29,14 @@
         "badgeLabel": "Cycle {cycleNumber}",
         "unassignedSessions": "Unassigned Sessions"
     },
+    "OperationsSpecimenComposition": {
+        "capsLoading": "LOADING...",
+        "capsError": "ERROR: ",
+        "filterBySpecies": "Filter by Species",
+        "selectSpecies": "Select species...",
+        "searchSpecies": "Search species...",
+        "noSpeciesFound": "No species found."
+    },
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
