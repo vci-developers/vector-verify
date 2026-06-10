@@ -9,7 +9,7 @@ import {
     getTopLevelSites,
 } from '@/lib/location/site-tree';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 function getUniqueDistricts(sites: Site[]): string[] {
     const districts = [
@@ -48,16 +48,6 @@ export function useLocationSelection(
                 : topLevelSites.map(site => site.name ?? 'Unknown'),
         [usesLegacyStructure, accessibleSites, topLevelSites],
     );
-
-    useEffect(() => {
-        if (
-            selectedLocation &&
-            locationDropdownOptions.length > 0 &&
-            !locationDropdownOptions.includes(selectedLocation)
-        ) {
-            setSelectedLocation('');
-        }
-    }, [selectedLocation, locationDropdownOptions, setSelectedLocation]);
 
     const selectedSiteId = useMemo(() => {
         if (usesLegacyStructure || !selectedLocation) return undefined;
