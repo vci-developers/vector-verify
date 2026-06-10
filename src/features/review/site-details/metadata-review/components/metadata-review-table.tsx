@@ -11,6 +11,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/cn';
 import { CircleCheck, TriangleAlert } from 'lucide-react';
 import {
@@ -21,18 +22,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui/combobox';
+import { booleanFieldNames } from '@/features/review/site-details/metadata-review/utils/metadata-fields';
 import {
-    booleanFieldNames,
     formatDisplayValue,
-    numberFieldNames,
-    type MetadataRow,
-    type UnitGroupMeta,
-} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
+    getValidatorForRow,
+} from '@/features/review/site-details/metadata-review/utils/metadata-values';
+import type { MetadataRow } from '@/features/review/site-details/metadata-review/utils/metadata-row-types';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
     metadataRows: MetadataRow[];
-    unitGroups: UnitGroupMeta[];
     sessionIdsWithoutSurveillanceForm: Set<number>;
     resolutionsByMetadataRowId: Map<string, string>;
     onConflictResolutionChange: (
@@ -45,27 +44,12 @@ interface MetadataReviewTableProps {
 export default function MetadataReviewTable({
     sessions,
     metadataRows,
-    unitGroups,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
     onConflictResolutionChange,
     disabledRowIds,
 }: MetadataReviewTableProps) {
-    function validateWholePositiveInteger(value: string): string | null {
-        if (value === 'N/A') return null;
-        if (!/^\d+$/.test(value) || parseInt(value, 10) < 1) {
-            return 'Must be a whole positive integer';
-        }
-        return null;
-    }
-
-    function validateWholeNonNegativeInteger(value: string): string | null {
-        if (value === 'N/A') return null;
-        if (!/^\d+$/.test(value)) {
-            return 'Must be a whole non-negative integer';
-        }
-        return null;
-    }
+    const t = useTranslations('MetadataReview');
 
     function renderConflictControl(
         row: MetadataRow,
@@ -95,7 +79,7 @@ export default function MetadataReviewTable({
                     disabled={isRowDisabled}
                 >
                     <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Select value" />
+                        <SelectValue placeholder={t('selectValue')} />
                     </SelectTrigger>
                     <SelectContent>
                         {options.map(option => (
@@ -108,16 +92,7 @@ export default function MetadataReviewTable({
             );
         }
 
-        const validate =
-            row.entity === 'formAnswer' || row.entity === 'unitFormAnswer'
-                ? row.dataType === 'number'
-                    ? validateWholePositiveInteger
-                    : undefined
-                : row.fieldName === 'numLlinsAvailable'
-                  ? validateWholeNonNegativeInteger
-                  : numberFieldNames.has(row.fieldName)
-                    ? validateWholePositiveInteger
-                    : undefined;
+        const validate = getValidatorForRow(row);
 
         return (
             <ComboBox
@@ -126,7 +101,7 @@ export default function MetadataReviewTable({
                 onValueChange={value =>
                     onConflictResolutionChange(row.id, value)
                 }
-                placeholder="Select value"
+                placeholder={t('selectValue')}
                 validate={validate}
                 disabled={isRowDisabled}
             />
@@ -139,25 +114,21 @@ export default function MetadataReviewTable({
 
     const totalColumns = 1 + sessions.length + (hasAnyConflict ? 1 : 0);
 
-    const unitGroupByOrder = new Map(
-        unitGroups.map(group => [group.unitOrder, group]),
-    );
-    const seenUnitOrders = new Set<number>();
+    const seenUnitIdentities = new Set<string>();
     const rowsWithGroupHeaders: Array<
-        | { kind: 'unitGroupHeader'; unitOrder: number; label: string }
+        | { kind: 'unitGroupHeader'; unitIdentity: string; label: string }
         | { kind: 'dataRow'; row: MetadataRow }
     > = [];
     for (const row of metadataRows) {
         if (
             row.entity === 'unitFormAnswer' &&
-            !seenUnitOrders.has(row.unitOrder)
+            !seenUnitIdentities.has(row.unitIdentity)
         ) {
-            seenUnitOrders.add(row.unitOrder);
-            const group = unitGroupByOrder.get(row.unitOrder)!;
+            seenUnitIdentities.add(row.unitIdentity);
             rowsWithGroupHeaders.push({
                 kind: 'unitGroupHeader',
-                unitOrder: row.unitOrder,
-                label: group.label,
+                unitIdentity: row.unitIdentity,
+                label: row.unitLabel,
             });
         }
         rowsWithGroupHeaders.push({ kind: 'dataRow', row });
@@ -180,17 +151,12 @@ export default function MetadataReviewTable({
                                 )}
                                 {sessionIdsWithoutSurveillanceForm.has(
                                     session.sessionId,
-                                ) && (
-                                    <h1>
-                                        Warning: No Surveillance form found for
-                                        this session
-                                    </h1>
-                                )}
+                                ) && <h1>{t('noSurveillanceFormWarning')}</h1>}
                             </TableHead>
                         ))}
                         {hasAnyConflict && (
                             <TableHead className="border-border bg-background sticky right-0 z-20 border font-semibold">
-                                Resolution
+                                {t('resolution')}
                             </TableHead>
                         )}
                     </TableRow>
@@ -200,7 +166,7 @@ export default function MetadataReviewTable({
                         if (entry.kind === 'unitGroupHeader') {
                             return (
                                 <TableRow
-                                    key={`unitGroupHeader.${entry.unitOrder}`}
+                                    key={`unitGroupHeader.${entry.unitIdentity}`}
                                 >
                                     <TableCell
                                         colSpan={totalColumns}

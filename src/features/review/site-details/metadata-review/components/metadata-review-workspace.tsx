@@ -1,21 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { networkErrorMessage } from '@/lib/network/network-error';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-ids';
-import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
-import {
-    applyConflictResolutions,
-    buildMetadataRows,
-} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
+import { buildMetadataRows } from '@/features/review/site-details/metadata-review/utils/build-metadata-rows';
 import { Button } from '@/components/ui/button';
 import MetadataReviewTable from './metadata-review-table';
-import { useQueryClient } from '@tanstack/react-query';
-import { sessionKeys } from '@/api/session/session-keys';
-import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
-import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
+import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/hooks/use-metadata-review-state';
+import { useResolveMetadataConflicts } from '@/features/review/site-details/metadata-review/hooks/use-resolve-metadata-conflicts';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;
@@ -37,7 +31,11 @@ export default function MetadataReviewWorkspace({
         resetResolutions,
     } = useMetadataReviewState();
 
-    const queryClient = useQueryClient();
+    const t = useTranslations('MetadataReview');
+    const tCommon = useTranslations('Common');
+
+    const { submitResolutions, isSubmitting, resolveError } =
+        useResolveMetadataConflicts({ siteId, startDate, endDate });
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({ siteId, startDate, endDate, type: 'SURVEILLANCE' });
@@ -54,53 +52,50 @@ export default function MetadataReviewWorkspace({
         allSessionsForSite.map(session => session.sessionId),
     );
 
-    const { mutateAsync: resolveSessionConflictsAsync } =
-        useResolveSessionConflicts();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [resolveError, setResolveError] = useState<string | null>(null);
+    const isAnyQueryPending =
+        isGetAllSessionsPending ||
+        allSurveillanceFormQueriesForSite.some(query => query.isPending) ||
+        allFormAnswerQueriesForSite.some(query => query.isPending);
 
-    if (isGetAllSessionsPending || !getAllSessionsResult) {
-        return <h1>Loading...</h1>;
+    if (isAnyQueryPending || !getAllSessionsResult) {
+        return <h1>{tCommon('loading')}</h1>;
     }
 
     if (!getAllSessionsResult.ok) {
-        return <h1>Error: {getAllSessionsResult.error.message}</h1>;
+        return (
+            <h1>
+                {t('loadError', {
+                    message: networkErrorMessage(getAllSessionsResult.error),
+                })}
+            </h1>
+        );
     }
 
     if (allSessionsForSite.length === 0) {
         return (
             <p className="text-muted-foreground text-sm">
-                No sessions found for this site.
+                {t('noSessionsFound')}
             </p>
         );
     }
 
-    if (allSurveillanceFormQueriesForSite.some(query => query.isPending)) {
-        return <h1>Loading...</h1>;
-    }
-
-    const failedQuery = allSurveillanceFormQueriesForSite.find(
+    const failedQuery = [
+        ...allSurveillanceFormQueriesForSite,
+        ...allFormAnswerQueriesForSite,
+    ].find(
         query =>
             query.data &&
             !query.data.ok &&
             query.data.error.kind !== 'not_found',
     );
     if (failedQuery?.data && !failedQuery.data.ok) {
-        return <h1>Error: {failedQuery.data.error.message}</h1>;
-    }
-
-    if (allFormAnswerQueriesForSite.some(query => query.isPending)) {
-        return <h1>Loading...</h1>;
-    }
-
-    const failedFormAnswerQuery = allFormAnswerQueriesForSite.find(
-        query =>
-            query.data &&
-            !query.data.ok &&
-            query.data.error.kind !== 'not_found',
-    );
-    if (failedFormAnswerQuery?.data && !failedFormAnswerQuery.data.ok) {
-        return <h1>Error: {failedFormAnswerQuery.data.error.message}</h1>;
+        return (
+            <h1>
+                {t('loadError', {
+                    message: networkErrorMessage(failedQuery.data.error),
+                })}
+            </h1>
+        );
     }
 
     const surveillanceFormsBySessionId = new Map(
@@ -144,112 +139,39 @@ export default function MetadataReviewWorkspace({
         formAnswersBySessionId,
     );
 
-    const hasConflicts = metadataRows.some(row => row.hasConflict);
-    const allConflictsResolved = metadataRows.every(
-        row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
+    const hasMissingUnit = unitGroups.some(
+        group =>
+            group.sessionUnitIdsBySessionId.size < allSessionsForSite.length,
     );
+    const hasConflicts =
+        metadataRows.some(row => row.hasConflict) || hasMissingUnit;
+    const allConflictsResolved =
+        !hasMissingUnit &&
+        metadataRows.every(
+            row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
+        );
 
     async function handleResolveConflicts() {
-        const {
-            resolvedSession,
-            resolvedSurveillanceForm,
-            resolvedFormAnswers,
-            unitFormAnswersByUnitOrder,
-        } = applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
-
-        const hasSessionLevelConflicts = metadataRows.some(
-            row =>
-                (row.entity === 'session' ||
-                    row.entity === 'surveillanceForm' ||
-                    row.entity === 'formAnswer') &&
-                row.hasConflict,
-        );
-
-        const callPayloads = [];
-
-        if (hasSessionLevelConflicts) {
-            callPayloads.push({
-                sessionIds: allSessionsForSite.map(
-                    session => session.sessionId,
-                ),
-                resolvedData: resolvedSession,
-                resolvedSurveillanceForm,
-                resolvedFormAnswers:
-                    resolvedFormAnswers.length > 0
-                        ? resolvedFormAnswers
-                        : undefined,
-            });
-        }
-
-        for (const [
-            unitOrder,
-            resolvedUnitFormAnswers,
-        ] of unitFormAnswersByUnitOrder) {
-            const unitGroup = unitGroups.find(
-                group => group.unitOrder === unitOrder,
-            );
-            if (!unitGroup) continue;
-            callPayloads.push({
-                sessionUnitIds: [
-                    ...unitGroup.sessionUnitIdsBySessionId.values(),
-                ],
-                resolvedFormAnswers: resolvedUnitFormAnswers,
-            });
-        }
-
-        setIsSubmitting(true);
-        setResolveError(null);
-
-        const results = await Promise.all(
-            callPayloads.map(payload => resolveSessionConflictsAsync(payload)),
-        );
-
-        setIsSubmitting(false);
-
-        const firstFailure = results.find(result => !result.ok);
-        if (firstFailure && !firstFailure.ok) {
-            setResolveError(
-                firstFailure.error.message ??
-                    'An error occurred. Please try again.',
-            );
-            return;
-        }
-
-        resetResolutions();
-        queryClient.invalidateQueries({
-            queryKey: sessionKeys.allSessions({
-                siteId,
-                startDate,
-                endDate,
-                type: 'SURVEILLANCE',
-            }),
+        const succeeded = await submitResolutions({
+            metadataRows,
+            unitGroups,
+            resolutionsByMetadataRowId,
+            sessions: allSessionsForSite,
         });
-        for (const session of allSessionsForSite) {
-            queryClient.invalidateQueries({
-                queryKey: surveillanceFormKeys.surveillanceFormBySessionId(
-                    session.sessionId,
-                ),
-            });
-            queryClient.invalidateQueries({
-                queryKey: formAnswerKeys.formAnswersBySessionId(
-                    session.sessionId,
-                ),
-            });
+
+        if (succeeded) {
+            resetResolutions();
+            onGoToNextStep();
         }
-        onGoToNextStep();
     }
 
     return (
         <div className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-                Review and resolve any conflicting values across sessions.
-                Sessions must agree before continuing.
-            </p>
+            <p className="text-muted-foreground text-sm">{t('intro')}</p>
 
             <MetadataReviewTable
                 sessions={allSessionsForSite}
                 metadataRows={metadataRows}
-                unitGroups={unitGroups}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm
                 }
@@ -268,11 +190,13 @@ export default function MetadataReviewWorkspace({
                         onClick={handleResolveConflicts}
                         disabled={!allConflictsResolved || isSubmitting}
                     >
-                        {isSubmitting ? 'Resolving…' : 'Resolve & Continue'}
+                        {isSubmitting
+                            ? t('resolving')
+                            : t('resolveAndContinue')}
                     </Button>
                 ) : (
                     <Button onClick={onGoToNextStep}>
-                        Continue to Image Review
+                        {t('continueToImageReview')}
                     </Button>
                 )}
             </div>

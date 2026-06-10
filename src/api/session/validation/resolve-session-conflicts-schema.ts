@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { sessionSchema } from '@/api/session/validation/session-schema';
 import { surveillanceFormSchema } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
 export const resolvedFormAnswerSchema = z.object({
@@ -8,23 +7,35 @@ export const resolvedFormAnswerSchema = z.object({
     dataType: z.string().optional(),
 });
 
+export const resolvedSessionDataSchema = z.object({
+    collectorName: z.string().optional(),
+    collectorTitle: z.string().optional(),
+    collectionMethod: z.string().optional(),
+});
+
 export const resolveSessionConflictsRequestSchema = z.union([
-    z.object({
-        sessionIds: z.array(z.number()).min(2),
-        resolvedData: sessionSchema.partial().optional(),
-        resolvedSurveillanceForm: surveillanceFormSchema.partial().optional(),
-        resolvedFormAnswers: z
-            .array(resolvedFormAnswerSchema)
-            .nullable()
-            .optional(),
-    }),
-    z.object({
-        sessionUnitIds: z.array(z.number()).min(2),
-        resolvedFormAnswers: z
-            .array(resolvedFormAnswerSchema)
-            .nullable()
-            .optional(),
-    }),
+    z
+        .object({
+            sessionIds: z.array(z.number()).min(2),
+            resolvedData: resolvedSessionDataSchema.optional(),
+            resolvedSurveillanceForm: surveillanceFormSchema
+                .partial()
+                .optional(),
+            resolvedFormAnswers: z
+                .array(resolvedFormAnswerSchema)
+                .nullable()
+                .optional(),
+        })
+        .strict(),
+    z
+        .object({
+            sessionUnitIds: z.array(z.number()).min(2),
+            resolvedFormAnswers: z
+                .array(resolvedFormAnswerSchema)
+                .nullable()
+                .optional(),
+        })
+        .strict(),
 ]);
 
 export const resolveSessionConflictsResponseSchema = z.object({
@@ -35,6 +46,7 @@ export const resolveSessionConflictsResponseSchema = z.object({
 });
 
 export type ResolvedFormAnswer = z.infer<typeof resolvedFormAnswerSchema>;
+export type ResolvedSessionData = z.infer<typeof resolvedSessionDataSchema>;
 export type ResolveSessionConflictsRequestBody = z.infer<
     typeof resolveSessionConflictsRequestSchema
 >;

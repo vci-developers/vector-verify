@@ -68,8 +68,15 @@ multiple rooms or traps visited during one field visit). A Session can contain
 zero or more Session Units. Each Session Unit carries its own
 `SESSION_UNIT`-scoped dynamic form answers and is ordered by `unitOrder`. When
 detecting conflicts during Review, Session Units from different sessions are
-matched by `unitOrder`. Session Unit identity (display label) is derived from
-the answer to the question flagged `isUnitIdentityComponent`. _Avoid_: Sub-session, unit record
+matched by their **identity** — not by `unitOrder`. The identity is the
+combination of all answers flagged `isUnitIdentityComponent` (there may be more
+than one, e.g. building + room), normalized (trimmed, lowercased) and joined,
+mirroring the API's own unit-identity rule. The API enforces that identity
+questions are `required` (so identity is always present) and that identities are
+unique within a Session, so matching is unambiguous. Because identity is the
+match key, it agrees within a matched group by construction — the identity
+components themselves are never resolvable conflicts; only the other
+(non-identity) answers can conflict. _Avoid_: Sub-session, unit record
 
 **Session State**: The lifecycle stage of a Session. In order: `NEEDS_REVIEW` →
 `IN_REVIEW` → `CERTIFIED` → `SUBMITTED`. `NOT_APPLICABLE` is set on
@@ -84,6 +91,24 @@ sign-off
 certified sessions. Sets state to `SUBMITTED`. Distinct from Certification —
 Certification is a review decision; Submission is the export action. _Avoid_:
 Export, sync
+
+**Conflict**: A disagreement in a shared field's value across the Sessions (or
+Session Units) a VCO reviews together within one Site + Collection Cycle.
+Because multiple VHTs may independently record data for the same Sentinel Site
+in the same cycle, their metadata must agree before the data can be Certified.
+Any disagreement counts — including "one VHT recorded a value, another left it
+blank" (a present-vs-absent conflict, surfaced as a value-vs-`N/A` mismatch).
+_Avoid_: Mismatch, discrepancy
+
+**Resolution**: The VCO's act of choosing the single authoritative value for a
+conflicting field and applying it to every Session (or Session Unit) in the
+Conflict Group. The selected value may be one of the existing values or, for
+some fields, a newly entered one. _Avoid_: Merge, override
+
+**Conflict Group**: The set of Sessions (or Session Units) compared against one
+another for conflicts. Sessions are grouped by Site + Collection Cycle; Session
+Units within that group are matched across sessions by their identity (see
+Session Unit). _Avoid_: Conflict set, batch
 
 **Specimen**: A single captured mosquito associated with a session. _Avoid_:
 Sample, mosquito

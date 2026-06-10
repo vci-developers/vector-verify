@@ -47,5 +47,17 @@
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
+    },
+    "MetadataReview": {
+        "intro": "Review and resolve any conflicting values across sessions. Sessions must agree before continuing.",
+        "noSessionsFound": "No sessions found for this site.",
+        "loadError": "Error: {message}",
+        "noSurveillanceFormWarning": "Warning: No Surveillance form found for this session",
+        "resolution": "Resolution",
+        "selectValue": "Select value",
+        "genericError": "An error occurred. Please try again.",
+        "resolving": "Resolving…",
+        "resolveAndContinue": "Resolve & Continue",
+        "continueToImageReview": "Continue to Image Review"
     }
 }
