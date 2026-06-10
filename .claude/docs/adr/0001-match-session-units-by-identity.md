@@ -42,7 +42,8 @@ unambiguous without client-side fallbacks.
 - A unit whose identity exists in one session but not another surfaces as a
   conflict (the missing session's cell reads empty / `N/A`) and **blocks**
   continuing. It cannot be resolved within the current contract — the resolve
-  endpoint requires `sessionUnitIds` of at least two and cannot create units — so
-  the VCO stays blocked until a backend capability to add/remove units exists.
-  The block is enforced at the gate (any unit missing from a session disables
-  "Resolve & Continue"); such a unit is never sent in a resolve request.
+  endpoint requires `sessionUnitIds` of at least two and cannot create units —
+  so the VCO stays blocked until a backend capability to add/remove units
+  exists. The block is enforced at the gate (any unit missing from a session
+  disables "Resolve & Continue"); such a unit is never sent in a resolve
+  request.
