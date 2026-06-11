@@ -203,7 +203,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                                 className="mt-1"
                                             >
                                                 <Code2 />
-                                                Developer Mode
+                                                Developer Status
                                             </Badge>
                                         )}
                                     </div>

@@ -1,15 +1,19 @@
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface RawDataExportRowProps {
     title: string;
     description: string;
+    isDownloading: boolean;
+    error: string | null;
     onDownload: () => void;
 }
 
 export default function RawDataExportRow({
     title,
     description,
+    isDownloading,
+    error,
     onDownload,
 }: RawDataExportRowProps) {
     return (
@@ -21,11 +25,21 @@ export default function RawDataExportRow({
                         {description}
                     </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={onDownload}>
-                    <Download />
-                    Download
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onDownload}
+                    disabled={isDownloading}
+                >
+                    {isDownloading ? (
+                        <Loader2 className="animate-spin" />
+                    ) : (
+                        <Download />
+                    )}
+                    {isDownloading ? 'Downloading…' : 'Download'}
                 </Button>
             </div>
+            {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
         </div>
     );
 }

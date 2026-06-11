@@ -98,10 +98,11 @@ Operations page, scoped to the selected location and date range. Audience:
 health officers. _Avoid_: Export (alone, ambiguous — see Flagged ambiguities)
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
-from the backend (specimens, surveillance forms, annotations), un-scoped by the
-Operations filters — a whole-program raw dump for engineers, not a report.
-Lives in the global user menu, not the Operations page. Audience: developers.
-_Avoid_: Raw export (capitalise), DB dump, backup
+from the backend (specimens, surveillance forms, annotations), not affected by
+the Operations filters — the raw data for the user's own program (Specimens is
+surveillance-only, with inference results), for engineers, not a report. Lives
+in the global user menu, not the Operations page. Audience: developers. _Avoid_:
+Raw export (capitalise), DB dump, backup
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only
