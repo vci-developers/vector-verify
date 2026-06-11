@@ -91,6 +91,23 @@ classification types recorded per annotation. _Avoid_: Morphological
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
 
+### Exports & Developer Tooling
+
+**Report Export**: The polished, cleaned `.xlsx` a VCO downloads from the
+Operations page, scoped to the selected location and date range. Audience:
+health officers. _Avoid_: Export (alone, ambiguous — see Flagged ambiguities)
+
+**Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
+from the backend (specimens, surveillance forms, annotations), un-scoped by the
+Operations filters — a whole-program raw dump for engineers, not a report.
+Lives in the global user menu, not the Operations page. Audience: developers.
+_Avoid_: Raw export (capitalise), DB dump, backup
+
+**Developer Mode**: An elevated client capability carried as
+`permissions.devMode` on the user permissions payload, unlocking developer-only
+features (currently just the Raw Data Export). When on, a "Developer Mode" badge
+shows in the user menu. _Avoid_: Debug mode, admin mode, dev flag
+
 ## Relationships
 
 - A **Program** contains many **Sites**
@@ -121,3 +138,8 @@ annotation. _Avoid_: Image-based
 - The Review workflow was described as "site-and-month-scoped" — updated to
   "site-and-collection-cycle-scoped" now that Collection Cycles can replace
   calendar months
+- "Export" is overloaded three ways: the glossary already steers it away from
+  **Submission** (the DHIS2 sync). It is also the visible label on the
+  Operations download button ("Export Data") — that is a **Report Export**. The
+  new CSV dump is a **Raw Data Export**. Use the qualified two-word terms; never
+  "Export" bare.
