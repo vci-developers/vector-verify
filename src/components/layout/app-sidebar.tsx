@@ -3,6 +3,7 @@
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import {
+    BookOpen,
     ChevronUp,
     ClipboardCheck,
     LayoutDashboard,
@@ -70,6 +71,12 @@ const navigation: NavigationItem[] = [
         icon: PencilRuler,
         canAccess: permissions =>
             permissions.annotations.viewAndWriteAnnotationTasks,
+    },
+    {
+        name: 'Documentation',
+        href: '/docs',
+        icon: BookOpen,
+        canAccess: () => true,
     },
 ];
 
