@@ -1,0 +1,43 @@
+# Geographical Summary
+
+The Geographical Summary tab displays a map of mosquito activity across the
+selected district. Each marker represents a village and is sized and colored
+based on the specimen data collected there.
+
+![The Geographical Summary map and site panel](/docs/operations/01-geographical-summary.png)
+
+## Reading the map
+
+Each village marker tells you:
+
+- **Size** — proportional to total specimen count. Larger circles mean more
+  specimens collected.
+- **Color** — based on Anopheles mosquito count:
+
+| Color    | Anopheles count |
+| -------- | --------------- |
+| Gray     | 0               |
+| Blue     | 1–9             |
+| Orange   | 10–49           |
+| Red      | 50–99           |
+| Dark red | 100+            |
+
+Hover over a marker to see a tooltip with specimen count, Anopheles count,
+session count, last collection date, and a species breakdown.
+
+## Marker clustering
+
+When multiple villages are close together on the map, they are grouped into a
+cluster bubble to prevent overlap. Click a cluster to zoom in and see the
+individual villages.
+
+## Map navigation
+
+The map automatically zooms to frame all markers when data loads. Use standard
+pinch-to-zoom or scroll-to-zoom to navigate. Click and drag to pan.
+
+## Filters
+
+The map responds to the shared district and time frame filters. Changing the
+district moves the map view to that district and updates the markers
+accordingly.

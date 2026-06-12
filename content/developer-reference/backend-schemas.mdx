@@ -1,0 +1,104 @@
+import { Callout } from 'nextra/components';
+
+# Backend Schemas
+
+## Session
+
+One collection event submitted from the field.
+
+| Field                              | Description                                  |
+| ---------------------------------- | -------------------------------------------- |
+| `frontendId`                       | Client-generated identifier for the session  |
+| `siteId`                           | The site where collection took place         |
+| `collectionCycleId`                | The collection cycle the session belongs to  |
+| `collectorName` / `collectorTitle` | Who collected, and their role (e.g. VHT)     |
+| `collectionDate`                   | When the specimens were collected            |
+| `collectionMethod`                 | How they were collected (trap/method)        |
+| `latitude` / `longitude`           | GPS location of the collection               |
+| `type`                             | Session type (e.g. surveillance)             |
+| `state`                            | Review state (e.g. pending, certified)       |
+| `certifiedBy`                      | The user who certified the session, if any   |
+| `expectedSpecimens`                | Number of specimens expected for the session |
+| `submittedAt` / `completedAt`      | When the session was submitted and completed |
+
+## Specimen
+
+An individual specimen collected within a session.
+
+| Field                  | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| `specimenId`           | Specimen label/identifier (e.g. `AD39`)                |
+| `sessionId`            | The session the specimen belongs to                    |
+| `thumbnailImageId`     | The specimen's primary image                           |
+| `shouldProcessFurther` | Whether the specimen is flagged for further processing |
+| `expectedImages`       | Number of images expected for the specimen             |
+
+## Specimen Image
+
+A photo of a specimen, with the on-device classification made at capture.
+
+| Field                               | Description                                 |
+| ----------------------------------- | ------------------------------------------- |
+| `specimenId`                        | The specimen the image belongs to           |
+| `imageKey`                          | Storage key for the image file              |
+| `species` / `sex` / `abdomenStatus` | The device's classification at capture time |
+| `capturedAt`                        | When the photo was taken                    |
+
+## Inference Result
+
+The ML model's raw output for a specimen image.
+
+| Field                                                        | Description                        |
+| ------------------------------------------------------------ | ---------------------------------- |
+| `specimenImageId`                                            | The image the inference was run on |
+| `bboxTopLeftX` / `bboxTopLeftY` / `bboxWidth` / `bboxHeight` | Detection bounding box             |
+| `bboxConfidence`                                             | Confidence of the detection        |
+| `speciesLogits` / `sexLogits` / `abdomenStatusLogits`        | Raw model scores per class         |
+| `*InferenceDuration`                                         | Time taken for each inference step |
+
+## Surveillance Form
+
+The household survey submitted alongside a session.
+
+| Field                                          | Description                                 |
+| ---------------------------------------------- | ------------------------------------------- |
+| `sessionId`                                    | The session the form belongs to             |
+| `numPeopleSleptInHouse`                        | People who slept in the house               |
+| `wasIrsConducted` / `monthsSinceIrs`           | Indoor residual spraying status and recency |
+| `numLlinsAvailable` / `llinType` / `llinBrand` | Bed nets available, and their type/brand    |
+| `numPeopleSleptUnderLlin`                      | People who slept under a bed net            |
+
+## Annotation
+
+An expert reviewer's labels for a specimen.
+
+| Field                                                 | Description                          |
+| ----------------------------------------------------- | ------------------------------------ |
+| `specimenId`                                          | The specimen being annotated         |
+| `annotatorId` / `annotationTaskId`                    | Who annotated, and under which task  |
+| `morphSpecies` / `morphSex` / `morphAbdomenStatus`    | Morphological identification         |
+| `visualSpecies` / `visualSex` / `visualAbdomenStatus` | Visual identification                |
+| `artifacts` / `notes`                                 | Image artifacts and free-text notes  |
+| `status`                                              | `PENDING`, `ANNOTATED`, or `FLAGGED` |
+
+## Site
+
+A location in the sentinel-site hierarchy.
+
+| Field                                                               | Description                                            |
+| ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `programId`                                                         | The program the site belongs to                        |
+| `parentId`                                                          | The parent site, forming the location hierarchy        |
+| `name` / `locationTypeId`                                           | The site's name and its level in the hierarchy         |
+| `district` / `subCounty` / `parish` / `villageName` / `houseNumber` | Legacy hierarchy fields                                |
+| `isActive` / `hasData`                                              | Whether the site is active and whether it has any data |
+
+## Collection Cycle
+
+A defined collection window for a program.
+
+| Field                   | Description                      |
+| ----------------------- | -------------------------------- |
+| `programId`             | The program the cycle belongs to |
+| `cycleNumber`           | The cycle's sequence number      |
+| `startDate` / `endDate` | The window the cycle covers      |

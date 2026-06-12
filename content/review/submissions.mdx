@@ -1,0 +1,56 @@
+# DHIS2 Submissions
+
+The **Submissions** tab is where certified site data is submitted to DHIS2, one
+collection cycle at a time. Open it from the tab switcher at the top of the
+Review page.
+
+## The submission list
+
+Sites are grouped by collection cycle, with a count of how many have been
+submitted. Each site shows its current state:
+
+- **Ready** — the site is certified and can be submitted. Select it and use
+  **Submit selected**, or use the per-row **Submit** button.
+- **Submitted** — the site has already been sent to DHIS2. You can **Re-submit**
+  if needed.
+
+![Sites grouped by cycle, each ready or already submitted](/docs/review-submissions/submissions-sites.png)
+
+## Recording IRS data
+
+Before a submission is sent, you are prompted to record Indoor Residual Spraying
+(IRS) data for that site and cycle.
+
+![The IRS prompt before submitting](/docs/review-submissions/submissions-irs-prompt.png)
+
+If IRS was sprayed, record which insecticide was used and the date it was last
+sprayed.
+
+![Recording the insecticide and date for IRS](/docs/review-submissions/submissions-irs-form.png)
+
+The insecticide is chosen from a predefined list.
+
+![Selecting the insecticide from the dropdown](/docs/review-submissions/submissions-irs-insecticide.png)
+
+## Validating before submission
+
+Use **Validate** to run a preview check on the data before submitting. The
+preview catches problems like missing information or values in the wrong format.
+It does not run every check DHIS2 performs, so a passing preview does not
+guarantee the final submission will complete.
+
+![A submission that has passed the validation preview](/docs/review-submissions/submissions-irs-validated.png)
+
+## Submitting
+
+When you submit, the site moves to a **Running** state while the submission is
+processed, and a confirmation appears that the submission has been queued.
+
+![A submission running, with the queued confirmation](/docs/review-submissions/submissions-running.png)
+
+## Tracking submitted cycles
+
+You can filter by one or more collection cycles to review submission progress
+across them. Cycles where every site has been submitted show as fully complete.
+
+![Multiple collection cycles fully submitted](/docs/review-submissions/submissions-completed.png)
