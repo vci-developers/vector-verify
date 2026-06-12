@@ -1,5 +1,6 @@
 'use client';
 
+import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,65 +15,113 @@ import {
 import { cn } from '@/utils/cn';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Image from 'next/image';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 
-interface ImageReviewCarouselProps {
+interface SpecimenImageCarouselProps {
     specimen: Specimen;
-    currentImageIndex: number;
-    onCurrentImageIndexChange: (index: number) => void;
+    onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
-export default function ImageReviewCarousel({
+function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
+    return (
+        image.id === specimen.thumbnailImageId ||
+        image.id === specimen.thumbnailImage?.id ||
+        image.url === specimen.thumbnailUrl
+    );
+}
+
+export default function SpecimenImageCarousel({
     specimen,
-    currentImageIndex,
-    onCurrentImageIndexChange,
-}: ImageReviewCarouselProps) {
+    onCurrentImageChange,
+}: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [canScrollThumbnailsLeft, setCanScrollThumbnailsLeft] =
         useState(false);
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
         useState(false);
 
-    const allImagesForSpecimen = specimen.images ?? [];
+    const allImagesForSpecimen = useMemo(() => {
+        const allImages = specimen.images ?? [];
+        const thumbnailImageId =
+            specimen.thumbnailImageId ?? specimen.thumbnailImage?.id ?? null;
+        const thumbnailImageFromList =
+            thumbnailImageId != null
+                ? allImages.find(image => image.id === thumbnailImageId)
+                : undefined;
+        const thumbnailImage =
+            thumbnailImageFromList ??
+            specimen.thumbnailImage ??
+            (specimen.thumbnailUrl
+                ? {
+                      id: thumbnailImageId ?? -1,
+                      url: specimen.thumbnailUrl,
+                      species: null,
+                      sex: null,
+                      abdomenStatus: null,
+                  }
+                : null);
+
+        if (!thumbnailImage) {
+            return allImages;
+        }
+
+        return [
+            thumbnailImage,
+            ...allImages.filter(
+                image =>
+                    image.id !== thumbnailImage.id &&
+                    image.url !== thumbnailImage.url,
+            ),
+        ];
+    }, [specimen]);
+
     const hasAnyImages = allImagesForSpecimen.length > 0;
     const hasMultipleImages = allImagesForSpecimen.length > 1;
     const currentImage = allImagesForSpecimen[currentImageIndex];
-    const isCurrentImageThumbnail =
-        currentImage?.id === specimen.thumbnailImageId;
+    const isCurrentImageThumbnail = currentImage
+        ? isThumbnailImage(specimen, currentImage)
+        : false;
     const showThumbnailScrollControls =
         canScrollThumbnailsLeft || canScrollThumbnailsRight;
 
     useEffect(() => {
         if (!imageViewerApi) return;
+
+        onCurrentImageChange?.(allImagesForSpecimen[0] ?? null);
+
         const handleImageViewerSelect = () => {
             const newImageIndex = imageViewerApi.selectedScrollSnap();
-            onCurrentImageIndexChange(newImageIndex);
+            setCurrentImageIndex(newImageIndex);
+            onCurrentImageChange?.(allImagesForSpecimen[newImageIndex] ?? null);
             thumbnailStripApi?.scrollTo(newImageIndex);
         };
+
         imageViewerApi.on('select', handleImageViewerSelect);
         return () => {
             imageViewerApi.off('select', handleImageViewerSelect);
         };
-    }, [imageViewerApi, thumbnailStripApi, onCurrentImageIndexChange]);
-
-    useEffect(() => {
-        if (!imageViewerApi) return;
-        if (imageViewerApi.selectedScrollSnap() === currentImageIndex) return;
-        imageViewerApi.scrollTo(currentImageIndex);
-    }, [imageViewerApi, currentImageIndex]);
+    }, [
+        allImagesForSpecimen,
+        imageViewerApi,
+        onCurrentImageChange,
+        thumbnailStripApi,
+    ]);
 
     useEffect(() => {
         if (!thumbnailStripApi) return;
+
         const updateThumbnailScrollState = () => {
             setCanScrollThumbnailsLeft(thumbnailStripApi.canScrollPrev());
             setCanScrollThumbnailsRight(thumbnailStripApi.canScrollNext());
         };
-        updateThumbnailScrollState();
 
+        updateThumbnailScrollState();
         thumbnailStripApi.on('select', updateThumbnailScrollState);
         thumbnailStripApi.on('reInit', updateThumbnailScrollState);
         thumbnailStripApi.on('scroll', updateThumbnailScrollState);
+
         return () => {
             thumbnailStripApi.off('select', updateThumbnailScrollState);
             thumbnailStripApi.off('reInit', updateThumbnailScrollState);
@@ -134,9 +183,12 @@ export default function ImageReviewCarousel({
                 )}
             </div>
 
-            <p className="text-muted-foreground text-right text-sm">
-                Image {currentImageIndex + 1} of {allImagesForSpecimen.length}
-            </p>
+            <div className="flex items-center justify-between gap-3">
+                <p className="text-muted-foreground text-sm">
+                    Image {currentImageIndex + 1} of{' '}
+                    {allImagesForSpecimen.length}
+                </p>
+            </div>
 
             {hasMultipleImages && (
                 <div className="flex items-center gap-2">
@@ -152,6 +204,7 @@ export default function ImageReviewCarousel({
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                     )}
+
                     <Carousel
                         setApi={setThumbnailStripApi}
                         opts={{
@@ -163,8 +216,8 @@ export default function ImageReviewCarousel({
                     >
                         <CarouselContent className="-ml-2">
                             {allImagesForSpecimen.map((image, imageIndex) => {
-                                const isThumbnailImage =
-                                    image.id === specimen.thumbnailImageId;
+                                const isCurrentThumbnailImage =
+                                    isThumbnailImage(specimen, image);
 
                                 return (
                                     <CarouselItem
@@ -174,11 +227,11 @@ export default function ImageReviewCarousel({
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={() => {
                                                 imageViewerApi?.scrollTo(
                                                     imageIndex,
-                                                )
-                                            }
+                                                );
+                                            }}
                                             className={cn(
                                                 'relative h-20 w-28 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent',
                                                 imageIndex === currentImageIndex
@@ -186,7 +239,7 @@ export default function ImageReviewCarousel({
                                                     : 'border-border hover:border-foreground/40',
                                             )}
                                             aria-label={
-                                                isThumbnailImage
+                                                isCurrentThumbnailImage
                                                     ? `Show image ${imageIndex + 1} (thumbnail)`
                                                     : `Show image ${imageIndex + 1}`
                                             }
@@ -204,7 +257,7 @@ export default function ImageReviewCarousel({
                                                 sizes="112px"
                                                 className="object-cover"
                                             />
-                                            {isThumbnailImage && (
+                                            {isCurrentThumbnailImage && (
                                                 <Star className="bg-background/90 absolute top-1 left-1 size-5 rounded-full fill-current p-1 shadow-md" />
                                             )}
                                         </Button>
@@ -213,6 +266,7 @@ export default function ImageReviewCarousel({
                             })}
                         </CarouselContent>
                     </Carousel>
+
                     {showThumbnailScrollControls && (
                         <Button
                             type="button"

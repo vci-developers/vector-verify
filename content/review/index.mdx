@@ -1,0 +1,49 @@
+import { Steps } from 'nextra/components';
+
+# Review
+
+The Review workflow is how program staff validate surveillance data collected at
+a sentinel site before it is submitted to national surveillance systems. Review
+is done one site at a time during the selected collection cycle.
+
+## The review workflow
+
+<Steps>
+### Select a site and collection cycle
+
+Select a site and collection cycle. The site list shows the current review
+status for each site so you can quickly see where work is needed.
+
+### Review surveillance questions
+
+Go through the surveillance form responses submitted across all sessions for the
+selected site and collection cycle. The platform highlights conflicts between
+sessions so you can identify and resolve them.
+
+### Review specimens
+
+Inspect the specimens collected during the collection cycle. Approve specimens
+where the machine learning prediction looks correct, correct obvious errors, and
+flag images with quality issues.
+
+### Certify the dataset
+
+Once surveillance questions and specimens have been reviewed, certify the site's
+dataset for the collection cycle. Certification records who approved the data
+and when, and marks it as ready for national reporting.
+
+</Steps>
+
+## Review status indicators
+
+Each site shows one of the following statuses:
+
+| Status                 | Meaning                                                    |
+| ---------------------- | ---------------------------------------------------------- |
+| **No Sessions**        | The site has no available sessions                         |
+| **Needs Review**       | No review work has started for this site/collection cycle  |
+| **Certified**          | The dataset has been certified and is ready for submission |
+| **Submitted to DHIS2** | The dataset has been submitted to DHIS2                    |
+
+Continue to [Site & Collection Cycle Selection](/docs/review/site-selection) to
+get started.
