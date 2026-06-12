@@ -1,0 +1,41 @@
+import { Callout } from 'nextra/components';
+
+# AI Performance
+
+The AI Performance tab shows how well the machine learning model is performing
+based on expert annotations submitted through the [Annotation](/docs/annotation)
+workflow.
+
+![The AI Performance tab with coverage and the species confusion matrix](/docs/operations/03-ai-performance.png)
+
+<Callout type="info">
+    This tab requires annotation data to be populated. If no annotations have
+    been submitted for the selected period, the tab will show no results.
+</Callout>
+
+## Confusion matrices
+
+The tab shows a confusion matrix for each of **species**, **sex**, and **abdomen
+status**. Each matrix compares the model's predictions against the expert
+annotations:
+
+- **Rows** — the visual verification label (what the annotator said)
+- **Columns** — the VectorCam label (what the model predicted)
+- **Cells** — how often that label/prediction combination occurred
+
+A well-performing model will have large numbers along the diagonal (correct
+predictions) and small numbers elsewhere.
+
+## Accuracy metrics
+
+- **Accuracy** — the percentage of specimens classified correctly, shown for each
+  matrix
+- **Per-label metrics** — sensitivity and specificity broken down by individual
+  label, so you can see which the model handles well and which it struggles with
+
+## Coverage
+
+The tab also shows review coverage — how many specimens have been reviewed
+(annotated or flagged) out of the total for the selected period. Low coverage
+means the accuracy metrics are based on a small sample and may not be
+representative.

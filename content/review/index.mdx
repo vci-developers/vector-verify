@@ -4,54 +4,46 @@ import { Steps } from 'nextra/components';
 
 The Review workflow is how program staff validate surveillance data collected at
 a sentinel site before it is submitted to national surveillance systems. Review
-is done one site at a time, for one reporting month at a time.
-
-import { Callout } from 'nextra/components';
-
-<Callout type="warning">
-    Review requires **Access Level 2** (Site Editor) or higher. Viewers can
-    browse completed reviews but cannot make changes.
-</Callout>
+is done one site at a time during the selected collection cycle.
 
 ## The review workflow
 
 <Steps>
-### Select a site and month
+### Select a site and collection cycle
 
-Choose which sentinel site and reporting month you want to review. The site list
-shows the current review status for each site so you can quickly see where work
-is needed.
+Select a site and collection cycle. The site list shows the current review
+status for each site so you can quickly see where work is needed.
 
 ### Review surveillance questions
 
 Go through the surveillance form responses submitted across all sessions for the
-selected site and month. The platform highlights inconsistencies or conflicts
-between sessions so you can identify and resolve them.
+selected site and collection cycle. The platform highlights conflicts between
+sessions so you can identify and resolve them.
 
 ### Review specimens
 
-Inspect the mosquito specimens collected during the month. Approve specimens
+Inspect the specimens collected during the collection cycle. Approve specimens
 where the machine learning prediction looks correct, correct obvious errors, and
 flag images with quality issues.
 
 ### Certify the dataset
 
 Once surveillance questions and specimens have been reviewed, certify the site's
-dataset for the month. Certification records who approved the data and when, and
-marks it as ready for national reporting.
+dataset for the collection cycle. Certification records who approved the data
+and when, and marks it as ready for national reporting.
 
 </Steps>
 
 ## Review status indicators
 
-Each site and month shows one of the following statuses:
+Each site and collection cycle shows one of the following statuses:
 
 | Status                      | Meaning                                                    |
 | --------------------------- | ---------------------------------------------------------- |
-| **Not reviewed**            | No review work has started for this site/month             |
+| **Not reviewed**            | No review work has started for this site/collection cycle  |
 | **In progress**             | Review has started but not all steps are complete          |
 | **Ready for certification** | All review steps are complete; awaiting certification      |
 | **Certified**               | The dataset has been certified and is ready for submission |
 
-Continue to [Site & Month Selection](/docs/review/site-selection) to get
-started.
+Continue to [Site & Collection Cycle Selection](/docs/review/site-selection) to
+get started.

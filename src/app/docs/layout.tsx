@@ -8,7 +8,7 @@ export default async function DocsLayout({
 }: {
     children: ReactNode;
 }) {
-    const pageMap = await getPageMap();
+    const pageMap = await getPageMap('/docs');
 
     return (
         <Layout
@@ -19,6 +19,7 @@ export default async function DocsLayout({
                             VectorVerify Docs
                         </span>
                     }
+                    logoLink="/docs"
                 />
             }
             pageMap={pageMap}

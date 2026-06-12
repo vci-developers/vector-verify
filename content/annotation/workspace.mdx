@@ -4,45 +4,48 @@ The Annotation Workspace is where you label individual specimens within a task.
 It is designed for focused, efficient annotation — you move through specimens
 one at a time and submit labels as you go.
 
-## Layout
-
-The workspace is divided into three areas:
-
-- **Task header** — shows the task name, how many specimens you have annotated,
-  and how many remain
-- **Specimen display** — the main area showing the specimen image and its
-  metadata
-- **Annotation controls** — the fields and buttons you use to label the specimen
+![The Annotation Workspace showing a specimen image and the annotation form](/docs/annotation/form-specimen.png)
 
 ## Labeling a specimen
 
-For each specimen, assign values for the following fields:
+For each specimen, record what you see in the image:
 
-| Field               | Options                                            |
-| ------------------- | -------------------------------------------------- |
-| **Genus**           | Select from available genera                       |
-| **Species**         | Select from species within the chosen genus        |
-| **Sex**             | Male / Female / Unknown                            |
-| **Abdomen status**  | Unfed / Blood-fed / Gravid / Semi-gravid / Unknown |
-| **Image artifacts** | Blurry, missing parts, incorrect capture, etc.     |
+| Field              | Options                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| **Genus**          | Anopheles, Aedes, Culex, Mansonia, Non-Mosquito, Unknown                                   |
+| **Species**        | For _Anopheles_: gambiae, funestus, other, unknown                                         |
+| **Sex**            | Female, Male, Unknown                                                                      |
+| **Abdomen status** | Unfed, Fully fed, Gravid, Unknown                                                          |
+| **Artifacts**      | Blurry Image, Missing Specimen Parts, Bad Specimen Pose, Multiple Specimens Visible, Other |
+| **Notes**          | Free-text observations                                                                     |
 
-Once you have filled in the fields, click **Submit** to record your annotation
-and move to the next specimen.
+The form adapts to your selections: species is only requested for _Anopheles_,
+and sex and abdomen status are skipped for non-mosquito specimens (abdomen
+status is also skipped for males). Once the required fields are filled in, click
+**Submit** to record your annotation.
 
-## Other actions
+Start by choosing the **Genus**:
 
-- **Skip** — move past a specimen without annotating it; it will remain in the
-  task for later
-- **Flag** — mark the specimen as problematic without submitting a full
-  annotation
-- **Mark as ambiguous** — record that the specimen cannot be confidently
-  identified
+![The genus dropdown](/docs/annotation/form-genus.png)
 
-## Navigation
+For _Anopheles_ specimens, choose the **Species**:
 
-Use the **Next** and **Previous** buttons to move between specimens. You can
-also return to the [Task List](/docs/annotation/tasks) at any time — your
-progress is saved automatically.
+![The species dropdown](/docs/annotation/form-species.png)
+
+Then record the **Sex** and **Abdomen status**:
+
+![The sex dropdown](/docs/annotation/form-sex.png)
+
+![The abdomen status dropdown](/docs/annotation/form-abdomen.png)
+
+Finally, note any image **Artifacts**:
+
+![The artifacts dropdown](/docs/annotation/form-artifacts.png)
+
+## Flagging a specimen
+
+Use the **Flag** toggle when a specimen cannot be confidently identified. You
+can also use the **Notes** field to record any observations about the specimen.
 
 ## Progress indicator
 

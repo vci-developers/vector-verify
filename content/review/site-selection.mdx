@@ -1,38 +1,48 @@
-# Site & Month Selection
+# Site & Collection Cycle Selection
 
-The Site & Month Selection page is the entry point for the Review workflow. It
-lets you choose which sentinel site and reporting month to work on.
+The Site & Collection Cycle Selection page is the entry point for the Review
+workflow. It lets you choose which sentinel site and collection cycle to work
+on.
 
-## Selecting a month
+![The Review site selection page](/docs/review/01-overview.png)
 
-Use the **Month** and **Year** selectors at the top of the page to set the
-reporting period. All site information below will update to reflect data for
-that month.
+## Choosing a location
+
+Use the location dropdown at the top left to choose the district you want to
+review. The site list below updates to show only sites within the selected
+location.
+
+![Selecting a district from the location dropdown](/docs/review/02-location-dropdown.png)
+
+## Selecting a collection cycle
+
+Use the collection cycle dropdown at the top to choose which cycle to work on.
+Each cycle covers a defined collection window (for example, Cycle 1 · Dec 31 →
+Jan 31). You can select one or more cycles, and all site information below
+updates to reflect the selected cycles.
+
+![Choosing a collection cycle from the dropdown](/docs/review/collection-cycle-dropdown.png)
 
 ## The site list
 
-The page displays all sentinel sites available to you. For each site you can
-see:
+Once a location is selected, the page displays its sentinel sites grouped by
+collection cycle. Expand a group to drill down through the location hierarchy
+(subcounty → health center → parish → village) until you reach individual sites.
+For each group and site you can see:
 
-- **Site name** and district
-- **Number of sessions** submitted that month
-- **Review status** — whether the site is unreviewed, in progress, or certified
+- **Visit coverage** — how many sites in the group have submitted sessions, as a
+  count and a percentage
+- **Review status** — sites with submissions that still need review are flagged,
+  along with statuses such as certified or submitted to DHIS2
+- **Session count** — the number of sessions recorded for each site
 
-Sites are grouped or sorted so that sites needing attention appear first.
+![The expanded site list showing visit coverage and review status](/docs/review/04-site-expanded.png)
 
 ## Starting or resuming a review
 
-Click a site to begin or continue reviewing it. If a review is already in
-progress, you will be taken directly to the step where you left off.
+Click a site that has sessions to begin or continue reviewing it. If a review is
+already in progress, you will be taken directly to the step where you left off.
+Sites with no sessions, or that are locked, cannot be opened.
 
-## What the statuses mean
-
-| Status                  | What to do                                  |
-| ----------------------- | ------------------------------------------- |
-| Not reviewed            | Click the site to begin the review workflow |
-| In progress             | Click to resume where you left off          |
-| Ready for certification | All review steps done — proceed to certify  |
-| Certified               | Review complete; no action needed           |
-
-Once you select a site and month, you move to the
+Once you select a site and collection cycle, you move to the
 [Surveillance Questions](/docs/review/surveillance-questions) step.
