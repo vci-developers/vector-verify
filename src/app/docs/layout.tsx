@@ -25,6 +25,7 @@ export default async function DocsLayout({
             pageMap={pageMap}
             docsRepositoryBase="https://github.com/vci-developers/vector-verify/tree/main"
             footer={<></>}
+            search={false}
         >
             {children}
         </Layout>
