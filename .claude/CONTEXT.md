@@ -91,6 +91,70 @@ classification types recorded per annotation. _Avoid_: Morphological
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
 
+### Forms
+
+**Legacy Surveillance Form**: The fixed-field household survey
+(`numPeopleSleptInHouse`, LLIN/IRS fields, …) attached to a Session, used by
+programs that have not yet published a Dynamic Form. _Avoid_: Surveillance form
+(bare, ambiguous with Dynamic Form data), old form
+
+**Dynamic Form**: A program-scoped, versioned questionnaire built via the Form
+API. Each question carries an `answerScope` (`SESSION` or `SESSION_UNIT`) and an
+`isUnitIdentityComponent` flag. _Avoid_: Custom form, form builder form
+
+**Form Mode**: Which form structure a program uses — `legacy` (no published
+Dynamic Form; sessions carry a Legacy Surveillance Form) or `dynamic` (a
+published Dynamic Form exists). Detected at runtime via
+`GET /programs/{id}/forms/current` (`not_found` ⇒ legacy); never hardcoded per
+program. A program is in exactly one mode at a time: publishing its first form
+migrates all legacy answers to Form Answers, so the modes are mutually
+exclusive, not coexisting. _Avoid_: Legacy program (as a permanent label —
+Uganda will migrate)
+
+**Form Answer**: A single answer value recorded against a Dynamic Form question
+for a Session (scope `SESSION`) or a Session Unit (scope `SESSION_UNIT`). Form
+Answers are version-bound: publishing a new form version does NOT migrate
+answers forward (questions may have been deleted), so a session's answers
+permanently belong to the form version they were submitted under. _Avoid_:
+Response, submission
+
+**Prerequisite**: An expression tree on a Dynamic Form question — predicates
+(`{questionId, operator, value}` with 12 operators) combined via `all`/`any`
+groups — that determines whether the question is *answerable* given other
+answers. It gates answerability only; it is not validation of the question's
+own value. Prerequisites reference questions by id and are independent of the
+`parentId` display nesting. _Avoid_: Dependency, condition, skip logic
+
+**Question Type**: One of `text | number | boolean | select | date` — the
+value vocabulary of a Dynamic Form question, driving both input widgets and the
+operators a Prerequisite may use against it.
+
+**Current-Form Rule (Metadata Review)**: Only Form Answers belonging to the
+program's current form are conflict-checked and resolvable; answers from older
+form versions render read-only behind an explanatory banner, because the
+current form reflects the current state of surveillance. _Avoid_: Version
+drift handling (vague)
+
+**Session Unit**: A repeated collection unit within a Session (e.g. one
+hour-slot × place combination), carrying its own `SESSION_UNIT`-scoped Form
+Answers; specimens may reference the unit they were caught in. _Avoid_: Repeat
+group, sub-session
+
+**Unit Identity**: The tuple of a Session Unit's answers to the form's
+`isUnitIdentityComponent` questions (e.g. Collection Time + Collection Place).
+Units with equal identity across Sessions describe the same real-world
+collection context and must agree on non-identity answers; units with
+different identities are fundamentally different units and are never compared.
+The mobile app guarantees identities are distinct within one Session. _Avoid_:
+Unit key, dedupe key
+
+**Metadata Conflict**: A disagreement, within one site + collection cycle
+review group, on the same fact — a core Session field across sessions, a
+SESSION-scoped Form Answer across current-form sessions, or a non-identity
+SESSION_UNIT answer across same-identity Session Units. Resolved by a VCO
+choosing one value, applied to every target via the conflict resolution
+endpoint. _Avoid_: Discrepancy, mismatch
+
 ### Exports & Developer Tooling
 
 **Report Export**: The polished, cleaned `.xlsx` a VCO downloads from the
