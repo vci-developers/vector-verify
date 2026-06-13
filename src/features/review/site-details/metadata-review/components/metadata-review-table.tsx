@@ -1,7 +1,6 @@
 'use client';
 
 import type { Session } from '@/api/session/validation/session-schema';
-
 import {
     Table,
     TableBody,
@@ -10,9 +9,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { format } from 'date-fns';
-import { cn } from '@/utils/cn';
-import { CircleCheck, TriangleAlert } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -21,16 +17,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui/combobox';
-import {
-    booleanFieldNames,
-    formatDisplayValue,
-    numberFieldNames,
-    type MetadataRow,
-} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
+import { cn } from '@/utils/cn';
+import { CircleCheck, TriangleAlert } from 'lucide-react';
+import type { MetadataRow } from '../utils/metadata-review-helpers';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
     metadataRows: MetadataRow[];
+    sessionLabelBySessionId: Map<number, string>;
     sessionIdsWithoutSurveillanceForm: Set<number>;
     resolutionsByMetadataRowId: Map<string, string>;
     onConflictResolutionChange: (
@@ -40,120 +34,134 @@ interface MetadataReviewTableProps {
     disabledRowIds: Set<string>;
 }
 
+function validateWholeNonNegativeInteger(value: string): string | null {
+    if (value === 'N/A') return null;
+    if (!/^\d+$/.test(value)) {
+        return 'Must be a whole non-negative integer';
+    }
+    return null;
+}
+
 export default function MetadataReviewTable({
     sessions,
     metadataRows,
+    sessionLabelBySessionId,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
     onConflictResolutionChange,
     disabledRowIds,
 }: MetadataReviewTableProps) {
-    function validateWholePositiveInteger(value: string): string | null {
-        if (value === 'N/A') return null;
-        if (!/^\d+$/.test(value) || parseInt(value, 10) < 1) {
-            return 'Must be a whole positive integer';
-        }
-        return null;
-    }
-
-    function validateWholeNonNegativeInteger(value: string): string | null {
-        if (value === 'N/A') return null;
-        if (!/^\d+$/.test(value)) {
-            return 'Must be a whole non-negative integer';
-        }
-        return null;
-    }
-
-    const hasAnyConflict = metadataRows.some(
-        metadataRow => metadataRow.hasConflict,
-    );
+    const hasAnyConflict = metadataRows.some(row => row.variants.length > 1);
 
     return (
-        <div className="overflow-x-auto">
-            <Table className="border-border rounded-md border">
+        <div className="overflow-hidden rounded-md border">
+            <Table>
                 <TableHeader>
-                    <TableRow className="h-14">
-                        <TableHead className="border-border w-48 border" />
+                    <TableRow className="hover:bg-transparent">
+                        <TableHead className="bg-muted sticky left-0 z-10 w-52 text-center font-semibold">
+                            <span className="bg-border absolute inset-y-0 right-0 w-px" />
+                            <span>Field</span>
+                        </TableHead>
                         {sessions.map(session => (
                             <TableHead
                                 key={session.sessionId}
-                                className="border-border border"
+                                className="bg-muted min-w-40 font-semibold"
                             >
-                                {format(
-                                    new Date(session.collectionDate),
-                                    'MMM d, yyyy',
-                                )}
-                                {sessionIdsWithoutSurveillanceForm.has(
-                                    session.sessionId,
-                                ) && (
-                                    <h1>
-                                        Warning: No Surveillance form found for
-                                        this session
-                                    </h1>
-                                )}
+                                <div className="flex flex-col items-center py-1">
+                                    {sessionLabelBySessionId.get(
+                                        session.sessionId,
+                                    )}
+                                    {sessionIdsWithoutSurveillanceForm.has(
+                                        session.sessionId,
+                                    ) && (
+                                        <span className="text-warning mt-1 flex items-center gap-1 text-xs font-normal">
+                                            <TriangleAlert className="size-3 shrink-0" />
+                                            No surveillance form
+                                        </span>
+                                    )}
+                                </div>
                             </TableHead>
                         ))}
                         {hasAnyConflict && (
-                            <TableHead className="border-border bg-background sticky right-0 z-20 border font-semibold">
-                                Resolution
+                            <TableHead className="bg-muted sticky right-0 z-10 min-w-44 text-center font-semibold">
+                                <span className="bg-border absolute inset-y-0 left-0 w-px" />
+                                <span>Resolution</span>
                             </TableHead>
                         )}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {metadataRows.map(metadataRow => {
+                    {metadataRows.map(row => {
+                        const hasConflict = row.variants.length > 1;
                         const isResolved = resolutionsByMetadataRowId.has(
-                            metadataRow.id,
+                            row.id,
                         );
-                        const isDisabled = disabledRowIds.has(metadataRow.id);
-                        const resolutionOptions = [
-                            ...new Set(
-                                [
-                                    ...metadataRow.fieldValueBySessionId.values(),
-                                ].map(formatDisplayValue),
-                            ),
-                        ];
+                        const isDisabled = disabledRowIds.has(row.id);
+                        const chosenDisplayValue =
+                            resolutionsByMetadataRowId.get(row.id);
+                        const resolutionOptions = row.variants.map(
+                            variant => variant.displayValue,
+                        );
+                        const displayValueBySessionId = new Map<
+                            number,
+                            string
+                        >();
+                        for (const variant of row.variants) {
+                            for (const sessionId of variant.sessionIds) {
+                                displayValueBySessionId.set(
+                                    sessionId,
+                                    variant.displayValue,
+                                );
+                            }
+                        }
 
                         return (
                             <TableRow
-                                key={metadataRow.id}
-                                className={cn(
-                                    'h-14',
-                                    metadataRow.hasConflict &&
-                                        !isResolved &&
-                                        'bg-destructive/10 hover:bg-destructive/15',
-                                )}
+                                key={row.id}
+                                className="group hover:bg-muted"
                             >
-                                <TableCell className="border-border w-48 border font-medium">
-                                    <div className="flex items-center gap-2">
-                                        {metadataRow.hasConflict &&
+                                <TableCell className="bg-background group-hover:bg-muted sticky left-0 z-10 font-medium">
+                                    <span className="bg-border absolute inset-y-0 right-0 w-px" />
+                                    {hasConflict && (
+                                        <span
+                                            className={cn(
+                                                'absolute inset-y-0 left-0 w-0.5',
+                                                isResolved
+                                                    ? 'bg-success'
+                                                    : 'bg-destructive',
+                                            )}
+                                        />
+                                    )}
+                                    <div className="flex items-center justify-center gap-2">
+                                        {hasConflict &&
                                             (isResolved ? (
-                                                <CircleCheck className="h-4 w-4 shrink-0 text-green-600" />
+                                                <CircleCheck className="text-success size-4 shrink-0" />
                                             ) : (
-                                                <TriangleAlert className="text-destructive h-4 w-4 shrink-0" />
+                                                <TriangleAlert className="text-destructive size-4 shrink-0" />
                                             ))}
-                                        {metadataRow.label}
+                                        {row.label}
                                     </div>
                                 </TableCell>
                                 {sessions.map(session => {
-                                    const originalValue = formatDisplayValue(
-                                        metadataRow.fieldValueBySessionId.get(
+                                    const originalValue =
+                                        displayValueBySessionId.get(
                                             session.sessionId,
-                                        ),
-                                    );
+                                        ) ?? 'N/A';
                                     const effectiveValue = isDisabled
                                         ? 'N/A'
-                                        : (resolutionsByMetadataRowId.get(
-                                              metadataRow.id,
-                                          ) ?? originalValue);
+                                        : (chosenDisplayValue ?? originalValue);
+                                    const isOverridden =
+                                        !isDisabled &&
+                                        effectiveValue !== originalValue;
                                     return (
                                         <TableCell
                                             key={session.sessionId}
                                             className={cn(
-                                                'border-border border',
-                                                effectiveValue !==
-                                                    originalValue &&
-                                                    'bg-primary/10',
+                                                'text-center tabular-nums',
+                                                isOverridden &&
+                                                    'text-primary font-medium',
+                                                isDisabled &&
+                                                    'text-muted-foreground',
                                             )}
                                         >
                                             {effectiveValue}
@@ -161,75 +169,73 @@ export default function MetadataReviewTable({
                                     );
                                 })}
                                 {hasAnyConflict && (
-                                    <TableCell className="border-border bg-background sticky right-0 z-20 border">
-                                        {metadataRow.hasConflict &&
-                                            (booleanFieldNames.has(
-                                                metadataRow.fieldName,
-                                            ) ? (
-                                                <Select
-                                                    value={
-                                                        isDisabled
-                                                            ? 'N/A'
-                                                            : resolutionsByMetadataRowId.get(
-                                                                  metadataRow.id,
-                                                              )
-                                                    }
-                                                    onValueChange={value =>
-                                                        onConflictResolutionChange(
-                                                            metadataRow.id,
-                                                            value,
-                                                        )
-                                                    }
-                                                    disabled={isDisabled}
-                                                >
-                                                    <SelectTrigger className="w-40">
-                                                        <SelectValue placeholder="Select value" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {resolutionOptions.map(
-                                                            option => (
-                                                                <SelectItem
-                                                                    key={option}
-                                                                    value={
-                                                                        option
-                                                                    }
-                                                                >
-                                                                    {option}
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            ) : (
-                                                <ComboBox
-                                                    options={resolutionOptions}
-                                                    value={
-                                                        isDisabled
-                                                            ? 'N/A'
-                                                            : resolutionsByMetadataRowId.get(
-                                                                  metadataRow.id,
-                                                              )
-                                                    }
-                                                    onValueChange={value =>
-                                                        onConflictResolutionChange(
-                                                            metadataRow.id,
-                                                            value,
-                                                        )
-                                                    }
-                                                    placeholder="Select value"
-                                                    validate={
-                                                        metadataRow.fieldName ===
-                                                        'numLlinsAvailable'
-                                                            ? validateWholeNonNegativeInteger
-                                                            : numberFieldNames.has(
-                                                                    metadataRow.fieldName,
-                                                                )
-                                                              ? validateWholePositiveInteger
-                                                              : undefined
-                                                    }
-                                                    disabled={isDisabled}
-                                                />
-                                            ))}
+                                    <TableCell className="bg-background group-hover:bg-muted sticky right-0 z-10">
+                                        <span className="bg-border absolute inset-y-0 left-0 w-px" />
+                                        {hasConflict && (
+                                            <div className="flex justify-center">
+                                                {row.fieldType === 'boolean' ? (
+                                                    <Select
+                                                        value={
+                                                            isDisabled
+                                                                ? 'N/A'
+                                                                : chosenDisplayValue
+                                                        }
+                                                        onValueChange={value =>
+                                                            onConflictResolutionChange(
+                                                                row.id,
+                                                                value,
+                                                            )
+                                                        }
+                                                        disabled={isDisabled}
+                                                    >
+                                                        <SelectTrigger className="w-40">
+                                                            <SelectValue placeholder="Select value" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {resolutionOptions.map(
+                                                                option => (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            option
+                                                                        }
+                                                                        value={
+                                                                            option
+                                                                        }
+                                                                    >
+                                                                        {option}
+                                                                    </SelectItem>
+                                                                ),
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                ) : (
+                                                    <ComboBox
+                                                        options={
+                                                            resolutionOptions
+                                                        }
+                                                        value={
+                                                            isDisabled
+                                                                ? 'N/A'
+                                                                : chosenDisplayValue
+                                                        }
+                                                        onValueChange={value =>
+                                                            onConflictResolutionChange(
+                                                                row.id,
+                                                                value,
+                                                            )
+                                                        }
+                                                        placeholder="Select value"
+                                                        validate={
+                                                            row.fieldType ===
+                                                            'number'
+                                                                ? validateWholeNonNegativeInteger
+                                                                : undefined
+                                                        }
+                                                        disabled={isDisabled}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
                                     </TableCell>
                                 )}
                             </TableRow>

@@ -6,13 +6,14 @@ import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hoo
 import {
     applyConflictResolutions,
     buildMetadataRows,
+    buildSessionLabelBySessionId,
 } from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
 import { Button } from '@/components/ui/button';
-import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
+import MetadataReviewTable from './metadata-review-table';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;
@@ -95,7 +96,7 @@ export default function MetadataReviewWorkspace({
         ...surveillanceFormsBySessionId.values(),
     ].some(form => form !== null);
 
-    const sessionIdsWithoutSurveillanceForm = new Set<number>(
+    const sessionIdsWithoutSurveillanceForm = new Set(
         hasAnySurveillanceForm
             ? allSessionsForSite
                   .filter(
@@ -108,14 +109,18 @@ export default function MetadataReviewWorkspace({
             : [],
     );
 
+    const sessionLabelBySessionId =
+        buildSessionLabelBySessionId(allSessionsForSite);
+
     const metadataRows = buildMetadataRows(
         allSessionsForSite,
         surveillanceFormsBySessionId,
     );
 
-    const hasConflicts = metadataRows.some(row => row.hasConflict);
+    const hasConflicts = metadataRows.some(row => row.variants.length > 1);
     const allConflictsResolved = metadataRows.every(
-        row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
+        row =>
+            row.variants.length <= 1 || resolutionsByMetadataRowId.has(row.id),
     );
 
     function handleResolveConflicts() {
@@ -159,14 +164,21 @@ export default function MetadataReviewWorkspace({
 
     return (
         <div className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-                Review and resolve any conflicting values across sessions.
-                Sessions must agree before continuing.
-            </p>
+            <div className="space-y-1">
+                <p className="text-sm font-medium">
+                    Comparing {allSessionsForSite.length}{' '}
+                    {allSessionsForSite.length === 1 ? 'session' : 'sessions'}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                    Review and resolve any conflicting values across sessions.
+                    Sessions must agree before continuing.
+                </p>
+            </div>
 
             <MetadataReviewTable
                 sessions={allSessionsForSite}
                 metadataRows={metadataRows}
+                sessionLabelBySessionId={sessionLabelBySessionId}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm
                 }

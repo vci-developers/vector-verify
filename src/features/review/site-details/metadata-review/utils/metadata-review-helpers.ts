@@ -1,7 +1,10 @@
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import { format } from 'date-fns';
 
-type MetaDataFieldType = 'string' | 'number' | 'boolean';
+export type MetadataFieldType = 'string' | 'number' | 'boolean';
+
+const SESSION_DATE_FORMAT = 'MMM d, yyyy';
 
 const SESSION_FIELDS = [
     {
@@ -22,7 +25,7 @@ const SESSION_FIELDS = [
 ] as const satisfies readonly {
     fieldName: keyof Session;
     label: string;
-    fieldType: MetaDataFieldType;
+    fieldType: MetadataFieldType;
 }[];
 
 const SURVEILLANCE_FORM_FIELDS = [
@@ -64,7 +67,7 @@ const SURVEILLANCE_FORM_FIELDS = [
 ] as const satisfies readonly {
     fieldName: keyof SurveillanceForm;
     label: string;
-    fieldType: MetaDataFieldType;
+    fieldType: MetadataFieldType;
 }[];
 
 export interface MetadataRow {
@@ -72,22 +75,9 @@ export interface MetadataRow {
     label: string;
     entity: 'session' | 'surveillanceForm';
     fieldName: string;
-    fieldValueBySessionId: Map<number, unknown>;
-    hasConflict: boolean;
+    fieldType: MetadataFieldType;
+    variants: { value: unknown; displayValue: string; sessionIds: number[] }[];
 }
-
-const allFields = [...SESSION_FIELDS, ...SURVEILLANCE_FORM_FIELDS];
-
-export const numberFieldNames = new Set<string>(
-    allFields
-        .filter(field => field.fieldType === 'number')
-        .map(field => field.fieldName),
-);
-export const booleanFieldNames = new Set<string>(
-    allFields
-        .filter(field => field.fieldType === 'boolean')
-        .map(field => field.fieldName),
-);
 
 export function formatDisplayValue(value: unknown): string {
     if (value == null) return 'N/A';
@@ -95,92 +85,140 @@ export function formatDisplayValue(value: unknown): string {
     return String(value);
 }
 
+function buildVariants(
+    fieldValueBySessionId: Map<number, unknown>,
+): MetadataRow['variants'] {
+    const variantByDisplayValue = new Map<
+        string,
+        MetadataRow['variants'][number]
+    >();
+    for (const [sessionId, value] of fieldValueBySessionId) {
+        const displayValue = formatDisplayValue(value);
+        const variant = variantByDisplayValue.get(displayValue);
+        if (variant) {
+            variant.sessionIds.push(sessionId);
+        } else {
+            variantByDisplayValue.set(displayValue, {
+                value,
+                displayValue,
+                sessionIds: [sessionId],
+            });
+        }
+    }
+    return [...variantByDisplayValue.values()];
+}
+
+export function buildSessionLabelBySessionId(
+    sessions: Session[],
+): Map<number, string> {
+    const countByFormattedDate = new Map<string, number>();
+    for (const session of sessions) {
+        const formattedDate = format(
+            new Date(session.collectionDate),
+            SESSION_DATE_FORMAT,
+        );
+        countByFormattedDate.set(
+            formattedDate,
+            (countByFormattedDate.get(formattedDate) ?? 0) + 1,
+        );
+    }
+
+    const occurrenceByFormattedDate = new Map<string, number>();
+    const sessionLabelBySessionId = new Map<number, string>();
+    for (const session of sessions) {
+        const formattedDate = format(
+            new Date(session.collectionDate),
+            SESSION_DATE_FORMAT,
+        );
+        const occurrence =
+            (occurrenceByFormattedDate.get(formattedDate) ?? 0) + 1;
+        occurrenceByFormattedDate.set(formattedDate, occurrence);
+        const hasDuplicateDate =
+            (countByFormattedDate.get(formattedDate) ?? 0) > 1;
+        sessionLabelBySessionId.set(
+            session.sessionId,
+            hasDuplicateDate
+                ? `${formattedDate} (${occurrence})`
+                : formattedDate,
+        );
+    }
+    return sessionLabelBySessionId;
+}
+
 export function buildMetadataRows(
     sessions: Session[],
     surveillanceFormsBySessionId: Map<number, SurveillanceForm | null>,
 ): MetadataRow[] {
-    const metadataRows: MetadataRow[] = [];
-
-    for (const { fieldName, label } of SESSION_FIELDS) {
-        const fieldValueBySessionId = new Map(
-            sessions.map(session => [session.sessionId, session[fieldName]]),
-        );
-        const hasConflict =
-            new Set([...fieldValueBySessionId.values()].map(formatDisplayValue))
-                .size > 1;
-        metadataRows.push({
+    const sessionRows = SESSION_FIELDS.map(
+        ({ fieldName, label, fieldType }) => ({
             id: `session.${fieldName}`,
             label,
-            entity: 'session',
+            entity: 'session' as const,
             fieldName,
-            fieldValueBySessionId,
-            hasConflict,
-        });
-    }
+            fieldType,
+            variants: buildVariants(
+                new Map(
+                    sessions.map(session => [
+                        session.sessionId,
+                        session[fieldName],
+                    ]),
+                ),
+            ),
+        }),
+    );
 
-    const hasAnySurveillanceForm = [
-        ...surveillanceFormsBySessionId.values(),
-    ].some(form => form !== null);
-    if (!hasAnySurveillanceForm) return metadataRows;
-
-    for (const { fieldName, label } of SURVEILLANCE_FORM_FIELDS) {
-        const fieldValueBySessionId = new Map(
-            sessions.map(session => [
-                session.sessionId,
-                surveillanceFormsBySessionId.get(session.sessionId)?.[
-                    fieldName
-                ] ?? null,
-            ]),
-        );
-        const hasConflict =
-            new Set([...fieldValueBySessionId.values()].map(formatDisplayValue))
-                .size > 1;
-        metadataRows.push({
+    const surveillanceFormRows = SURVEILLANCE_FORM_FIELDS.map(
+        ({ fieldName, label, fieldType }) => ({
             id: `surveillanceForm.${fieldName}`,
             label,
-            entity: 'surveillanceForm',
+            entity: 'surveillanceForm' as const,
             fieldName,
-            fieldValueBySessionId,
-            hasConflict,
-        });
-    }
+            fieldType,
+            variants: buildVariants(
+                new Map(
+                    sessions.map(session => [
+                        session.sessionId,
+                        surveillanceFormsBySessionId.get(session.sessionId)?.[
+                            fieldName
+                        ] ?? null,
+                    ]),
+                ),
+            ),
+        }),
+    );
 
-    return metadataRows;
+    return [...sessionRows, ...surveillanceFormRows];
 }
 
 export function applyConflictResolutions(
     metadataRows: MetadataRow[],
-    resolutionsByRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string>,
 ) {
     const resolvedSession: Partial<Session> = {};
     const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
 
     for (const metadataRow of metadataRows) {
-        const selectedFieldDisplay = resolutionsByRowId.get(metadataRow.id);
-        if (selectedFieldDisplay === undefined) continue;
+        const chosenDisplayValue = resolutionsByMetadataRowId.get(
+            metadataRow.id,
+        );
+        if (chosenDisplayValue === undefined) continue;
 
-        const existingSessionFieldValue = [
-            ...metadataRow.fieldValueBySessionId.values(),
-        ].find(value => formatDisplayValue(value) === selectedFieldDisplay);
-
-        let resolvedFieldValue: unknown;
-        if (existingSessionFieldValue !== undefined) {
-            resolvedFieldValue = existingSessionFieldValue;
-        } else if (selectedFieldDisplay === 'N/A') {
-            resolvedFieldValue = null;
-        } else if (numberFieldNames.has(metadataRow.fieldName)) {
-            resolvedFieldValue = parseInt(selectedFieldDisplay, 10);
-        } else {
-            resolvedFieldValue = selectedFieldDisplay;
-        }
+        const chosenVariant = metadataRow.variants.find(
+            variant => variant.displayValue === chosenDisplayValue,
+        );
+        const resolvedValue = chosenVariant
+            ? chosenVariant.value
+            : chosenDisplayValue === 'N/A'
+              ? null
+              : chosenDisplayValue;
 
         if (metadataRow.entity === 'session') {
             Object.assign(resolvedSession, {
-                [metadataRow.fieldName]: resolvedFieldValue,
+                [metadataRow.fieldName]: resolvedValue,
             });
         } else {
             Object.assign(resolvedSurveillanceForm, {
-                [metadataRow.fieldName]: resolvedFieldValue,
+                [metadataRow.fieldName]: resolvedValue,
             });
         }
     }
