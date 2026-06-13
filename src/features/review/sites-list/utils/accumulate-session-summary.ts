@@ -1,28 +1,15 @@
 import type { Session } from '@/api/session/validation/session-schema';
-import type { ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
+import {
+    emptySessionSummary,
+    type ReviewSiteSessionSummary,
+} from '@/features/review/utils/review-site-session-summary';
 
 export function accumulateSessionSummary(
-    existing: ReviewSiteSessionSummary | undefined,
+    existingSummary: ReviewSiteSessionSummary | undefined,
     session: Session,
 ): ReviewSiteSessionSummary {
-    const base = existing ?? {
-        sessionCount: 0,
-        needsReviewCount: 0,
-        isLocked: true,
-        isCertified: true,
-        isSubmitted: true,
-    };
+    const base = existingSummary ?? emptySessionSummary();
 
-    return {
-        sessionCount: base.sessionCount + 1,
-        needsReviewCount:
-            base.needsReviewCount + (session.state === 'NEEDS_REVIEW' ? 1 : 0),
-        isLocked:
-            base.isLocked &&
-            (session.state === 'CERTIFIED' ||
-                session.state === 'SUBMITTED' ||
-                session.state === 'NOT_APPLICABLE'),
-        isCertified: base.isCertified && session.state === 'CERTIFIED',
-        isSubmitted: base.isSubmitted && session.state === 'SUBMITTED',
-    };
+    const state = session.state ?? 'NEEDS_REVIEW';
+    return { ...base, [state]: base[state] + 1 };
 }

@@ -18,7 +18,7 @@ import { buildCollectionCycleSegments } from '@/features/review/sites-list/utils
 import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
 import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
 import ReviewSiteHierarchy from '@/features/review/sites-list/components/sites/review-site-hierarchy';
-import { type ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
+import { type ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
 interface ReviewSiteListProps {

@@ -13,13 +13,13 @@ import ReviewSitesListHeader from '@/features/review/sites-list/components/layou
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
-import ReviewExportList from '@/features/review/export/components/review-export-list';
+import ReviewDhis2Dashboard from '@/features/review/dhis2-sync/components/review-dhis2-dashboard';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 
 const REVIEW_TABS = [
     { value: 'sites-list', label: 'SITES LIST' },
-    { value: 'export', label: 'EXPORT' },
+    { value: 'submissions', label: 'SUBMISSIONS' },
 ] as const;
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
@@ -58,7 +58,7 @@ export default function ReviewSitesListPageClient() {
         getProgramsResult.data.programs[0]?.country === 'Uganda';
 
     const visibleTabs = REVIEW_TABS.filter(
-        tab => tab.value !== 'export' || isUgandaProgram,
+        tab => tab.value !== 'submissions' || isUgandaProgram,
     );
 
     const accessibleSites = getUserPermissionsResult?.ok
@@ -228,12 +228,14 @@ export default function ReviewSitesListPageClient() {
                                         }
                                     />
                                 ))}
-                            {activeTab === 'export' && (
-                                <ReviewExportList
+                            {activeTab === 'submissions' && (
+                                <ReviewDhis2Dashboard
                                     sites={descendantsOfSelectedLocation}
                                     locationQueryParam={locationQueryParam}
                                     startMonth={startMonth}
                                     endMonth={endMonth}
+                                    collectionCycles={collectionCycles}
+                                    selectedCycleIds={selectedCycleIds}
                                 />
                             )}
                         </Fragment>
