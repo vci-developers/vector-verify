@@ -64,6 +64,17 @@ function buildHierarchicalLocationQuery(site: Site): string {
     return [site.name, topLevelRegion].filter(Boolean).join(', ');
 }
 
+export function buildSiteLocationQuery(site: Site): string {
+    return isLegacySite(site)
+        ? buildLegacyLocationQuery(
+              site.villageName,
+              site.parish,
+              site.subCounty,
+              site.district,
+          )
+        : buildHierarchicalLocationQuery(site);
+}
+
 function buildParentLocationName(site: Site): string {
     if (isLegacySite(site)) {
         return [site.district, site.subCounty, site.parish]
@@ -191,14 +202,7 @@ export function buildSiteMarkers(
                 .map(([species, count]) => ({ species, count }))
                 .sort((a, b) => b.count - a.count);
 
-            const locationQuery = isLegacySite(markerSite)
-                ? buildLegacyLocationQuery(
-                      markerSite.villageName,
-                      markerSite.parish,
-                      markerSite.subCounty,
-                      markerSite.district,
-                  )
-                : buildHierarchicalLocationQuery(markerSite);
+            const locationQuery = buildSiteLocationQuery(markerSite);
 
             return {
                 id: markerName,

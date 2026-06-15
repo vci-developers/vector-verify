@@ -83,6 +83,7 @@ export default function OperationsGeographicalSummary({
             {geographicalView === 'devices' && (
                 <DeviceView
                     locationQueryParam={locationQueryParam}
+                    selectedLocation={selectedLocation}
                     descendantsOfSelectedLocation={
                         descendantsOfSelectedLocation
                     }

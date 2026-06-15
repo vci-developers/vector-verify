@@ -56,12 +56,19 @@
         "active": "Active",
         "lapsing": "Lapsing",
         "inactive": "Inactive",
-        "activeCaption": "Submitted this month",
-        "lapsingCaption": "Submitted in the last 3 months",
-        "inactiveCaption": "Silent for 3+ months",
         "unknownSite": "Unknown site",
         "sitesCount": "{count, plural, one {# site} other {# sites}}",
         "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
-        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}"
+        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}",
+        "locatingSites": "Locating sites…",
+        "locatingDevices": "Locating devices…",
+        "legendMarkerTitle": "Each marker represents a collection site",
+        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity as of today over a rolling 6-month window, independent of the selected date range.",
+        "legendSizeTitle": "Marker Size",
+        "legendSizeSubtitle": "Scaled by active device count",
+        "legendColorTitle": "Marker Color — Site Health",
+        "legendActive": "Has an active device this month",
+        "legendLapsing": "Only lapsing devices",
+        "legendInactive": "All devices inactive"
     }
 }

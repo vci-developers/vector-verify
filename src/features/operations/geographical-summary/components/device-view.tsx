@@ -1,28 +1,46 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import DeviceInfoPanel, {
-    type DeviceSiteRow,
-} from '@/features/operations/geographical-summary/components/device-info-panel';
+import type { DeviceSiteRow } from '@/features/operations/geographical-summary/components/device-info-panel';
 import { useDeviceActivity } from '@/features/operations/geographical-summary/hooks/use-device-activity';
+import {
+    buildDeviceMarkers,
+    DEVICE_HEALTH_COLOR,
+} from '@/features/operations/geographical-summary/utils/device-marker-helpers';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import type { Site } from '@/api/site/validation/site-schema';
 
+const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
+
 interface DeviceViewProps {
     locationQueryParam: LocationQueryParam;
+    selectedLocation: string;
     descendantsOfSelectedLocation: Site[];
 }
 
 export default function DeviceView({
     locationQueryParam,
+    selectedLocation,
     descendantsOfSelectedLocation,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
+    const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
+        null,
+    );
     const { deviceActivity, isPending, isError } =
         useDeviceActivity(locationQueryParam);
+
+    const deviceMarkers = useMemo(() => {
+        if (!deviceActivity) return [];
+        return buildDeviceMarkers(
+            deviceActivity.sites,
+            descendantsOfSelectedLocation,
+        );
+    }, [deviceActivity, descendantsOfSelectedLocation]);
 
     const siteNameById = useMemo(
         () =>
@@ -57,9 +75,9 @@ export default function DeviceView({
         return (
             <div className="space-y-3">
                 <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-20 w-44" />
-                    <Skeleton className="h-20 w-44" />
-                    <Skeleton className="h-20 w-44" />
+                    <Skeleton className="h-13 w-28" />
+                    <Skeleton className="h-13 w-28" />
+                    <Skeleton className="h-13 w-28" />
                 </div>
                 <Skeleton className="h-125 w-full rounded-md" />
             </div>
@@ -87,37 +105,22 @@ export default function DeviceView({
     }
 
     const tiers = [
-        {
-            key: 'active',
-            count: deviceActivity.activeDevices,
-            caption: t('activeCaption'),
-        },
-        {
-            key: 'lapsing',
-            count: deviceActivity.lapsingDevices,
-            caption: t('lapsingCaption'),
-        },
-        {
-            key: 'inactive',
-            count: deviceActivity.inactiveDevices,
-            caption: t('inactiveCaption'),
-        },
+        { key: 'active', count: deviceActivity.activeDevices },
+        { key: 'lapsing', count: deviceActivity.lapsingDevices },
+        { key: 'inactive', count: deviceActivity.inactiveDevices },
     ] as const;
 
     return (
         <div className="space-y-3">
             <div className="flex flex-wrap gap-3">
                 {tiers.map(tier => (
-                    <Card key={tier.key} className="border-border/50 w-44">
-                        <CardContent className="space-y-1 px-4">
+                    <Card key={tier.key} className="border-border/50 w-fit">
+                        <CardContent className="flex items-center gap-3 px-4">
                             <p className="text-muted-foreground text-xs">
                                 {t(tier.key)}
                             </p>
-                            <p className="text-2xl leading-none font-bold">
+                            <p className="text-lg leading-none font-bold">
                                 {tier.count}
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                                {tier.caption}
                             </p>
                         </CardContent>
                     </Card>
@@ -125,10 +128,67 @@ export default function DeviceView({
             </div>
 
             <Card className="border-border/50 p-0">
-                <CardContent className="h-125 p-0">
-                    <DeviceInfoPanel sites={siteRows} />
+                <CardContent className="relative h-125 p-0">
+                    <DeviceMap
+                        markers={deviceMarkers}
+                        siteRows={siteRows}
+                        selectedLocation={selectedLocation}
+                        selectedMarkerId={selectedMarkerId}
+                        onMarkerSelect={setSelectedMarkerId}
+                    />
                 </CardContent>
             </Card>
+
+            <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
+                <div className="space-y-1.5">
+                    <p className="text-foreground font-medium">
+                        {t('legendMarkerTitle')}
+                    </p>
+                    <p>{t('legendMarkerSubtitle')}</p>
+                </div>
+                <div className="space-y-1.5">
+                    <p className="text-foreground font-medium">
+                        {t('legendSizeTitle')}
+                    </p>
+                    <p>{t('legendSizeSubtitle')}</p>
+                </div>
+                <div className="space-y-1.5">
+                    <p className="text-foreground font-medium">
+                        {t('legendColorTitle')}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                        <span className="flex items-center gap-1.5">
+                            <span
+                                className="inline-block h-3 w-3 rounded-full"
+                                style={{
+                                    backgroundColor: DEVICE_HEALTH_COLOR.active,
+                                }}
+                            />
+                            {t('legendActive')}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                            <span
+                                className="inline-block h-3 w-3 rounded-full"
+                                style={{
+                                    backgroundColor:
+                                        DEVICE_HEALTH_COLOR.lapsing,
+                                }}
+                            />
+                            {t('legendLapsing')}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                            <span
+                                className="inline-block h-3 w-3 rounded-full"
+                                style={{
+                                    backgroundColor:
+                                        DEVICE_HEALTH_COLOR.inactive,
+                                }}
+                            />
+                            {t('legendInactive')}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
