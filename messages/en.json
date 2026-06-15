@@ -47,5 +47,10 @@
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
+    },
+    "OperationsGeographicalSummary": {
+        "specimens": "Specimens",
+        "devices": "Devices",
+        "noDeviceActivity": "No device activity to display."
     }
 }
