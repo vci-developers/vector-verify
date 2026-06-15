@@ -80,7 +80,14 @@ export default function OperationsGeographicalSummary({
                 </TabsList>
             </Tabs>
 
-            {geographicalView === 'devices' && <DeviceView />}
+            {geographicalView === 'devices' && (
+                <DeviceView
+                    locationQueryParam={locationQueryParam}
+                    descendantsOfSelectedLocation={
+                        descendantsOfSelectedLocation
+                    }
+                />
+            )}
 
             {geographicalView === 'specimens' && (
                 <Fragment>

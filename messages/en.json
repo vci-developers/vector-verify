@@ -51,6 +51,17 @@
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
         "devices": "Devices",
-        "noDeviceActivity": "No device activity to display."
+        "noDeviceActivity": "No device activity to display.",
+        "deviceActivityError": "Failed to load device activity. Check the console for details.",
+        "active": "Active",
+        "lapsing": "Lapsing",
+        "inactive": "Inactive",
+        "activeCaption": "Submitted this month",
+        "lapsingCaption": "Submitted in the last 3 months",
+        "inactiveCaption": "Silent for 3+ months",
+        "unknownSite": "Unknown site",
+        "sitesCount": "{count, plural, one {# site} other {# sites}}",
+        "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
+        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}"
     }
 }
