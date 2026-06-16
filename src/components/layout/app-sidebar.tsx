@@ -52,7 +52,6 @@ type NavigationItem = {
 };
 
 const navigation: NavigationItem[] = [
-    // Temporarily hidden while the dashboard is under construction.
     // {
     //     name: 'Dashboard',
     //     href: '/',
