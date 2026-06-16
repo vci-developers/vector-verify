@@ -6,7 +6,7 @@ import {
     BookOpen,
     ChevronUp,
     ClipboardCheck,
-    // LayoutDashboard, // Temporarily unused while the dashboard nav item is hidden.
+    // LayoutDashboard,
     Moon,
     PencilRuler,
     Microscope,
