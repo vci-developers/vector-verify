@@ -18,7 +18,7 @@ export default function ForbiddenPage() {
             </div>
             <div className="flex flex-col items-center gap-4">
                 <Button asChild variant="outline" className="w-full">
-                    <Link href="/">Return to Dashboard</Link>
+                    <Link href="/operations">Return to Operations</Link>
                 </Button>
                 <LogoutButton />
             </div>
