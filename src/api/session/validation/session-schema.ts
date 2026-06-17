@@ -38,6 +38,7 @@ export const sessionSchema = z.object({
     state: sessionStateSchema.optional(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
+    collectionCycleId: z.number().nullable(),
     site: siteSchema.optional(),
     device: deviceSchema.optional(),
 });

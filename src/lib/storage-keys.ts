@@ -5,7 +5,7 @@ export const StorageKeys = {
         endMonth: 'review.endMonth',
         selectedLocation: 'review.selectedLocation',
         expandedSitePaths: 'review.expandedSitePaths',
-        collapsedMonths: 'review.collapsedMonths',
+        collapsedSegments: 'review.collapsedSegments',
     },
     operations: {
         activeTab: 'operations.activeTab',

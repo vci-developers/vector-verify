@@ -1,18 +1,27 @@
+'use client';
+
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/cn';
 import { Lock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Fragment } from 'react';
-import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { useTranslations } from 'next-intl';
-import { type ReviewSiteSessionSummary } from '../../utils/review-site-session-summary';
+import {
+    isSiteFullyCertified,
+    isSiteFullyReviewed,
+    isSiteFullySubmittedToDhis2,
+    getSiteSessionCount,
+    type ReviewSiteSessionSummary,
+    emptySessionSummary,
+} from '@/features/review/utils/review-site-session-summary';
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
-    monthKey: string;
+    startDate: string;
+    endDate: string;
 }
 
 function buildReviewHref(
@@ -33,30 +42,21 @@ export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     sessionCountsBySiteId,
-    monthKey,
+    startDate,
+    endDate,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
-    const startDate = format(startOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(parseISO(monthKey)), 'yyyy-MM-dd');
-
     if (sites.length === 0) return null;
 
     return (
         <div className="space-y-1">
             {sites.map(site => {
-                const {
-                    sessionCount,
-                    needsReviewCount,
-                    isLocked,
-                    isCertified,
-                    isSubmitted,
-                } = sessionCountsBySiteId.get(site.siteId) ?? {
-                    sessionCount: 0,
-                    needsReviewCount: 0,
-                    isLocked: false,
-                    isCertified: false,
-                    isSubmitted: false,
-                };
+                const summary =
+                    sessionCountsBySiteId.get(site.siteId) ??
+                    emptySessionSummary();
+                const sessionCount = getSiteSessionCount(summary);
+                const isLocked = isSiteFullyReviewed(summary);
+
                 const hasSessions = sessionCount > 0;
                 const rowClassName = cn(
                     'flex items-center justify-between rounded-md px-3 py-2',
@@ -88,16 +88,16 @@ export default function ReviewSiteLeafRows({
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            {needsReviewCount > 0 && (
+                            {summary.NEEDS_REVIEW > 0 && (
                                 <Badge variant="destructive">
                                     {t('needsReview')}
                                 </Badge>
                             )}
-                            {isSubmitted ? (
+                            {isSiteFullySubmittedToDhis2(summary) ? (
                                 <Badge variant="secondary">
                                     Submitted to DHIS2
                                 </Badge>
-                            ) : isCertified ? (
+                            ) : isSiteFullyCertified(summary) ? (
                                 <Badge variant="default">Certified</Badge>
                             ) : (
                                 <Badge

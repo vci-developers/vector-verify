@@ -11,7 +11,8 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "postinstall": "patch-package"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.1",
@@ -45,6 +46,8 @@
         "next-auth": "^4.24.11",
         "next-intl": "^4.12.0",
         "next-themes": "^0.4.6",
+        "nextra": "^4.6.1",
+        "nextra-theme-docs": "^4.6.1",
         "radix-ui": "^1.4.3",
         "react": "19.1.1",
         "react-day-picker": "^9.13.2",
@@ -74,6 +77,8 @@
         "eslint-plugin-boundaries": "^5.4.0",
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-project-structure": "^3.14.2",
+        "patch-package": "^8.0.1",
+        "playwright": "^1.60.0",
         "prettier": "^3.6.2",
         "prettier-plugin-tailwindcss": "^0.6.14",
         "tailwindcss": "^4",
@@ -82,6 +87,7 @@
     },
     "resolutions": {
         "@types/react": "19.1.12",
-        "@types/react-dom": "19.1.9"
+        "@types/react-dom": "19.1.9",
+        "zod": "4.4.3"
     }
 }

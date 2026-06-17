@@ -2,6 +2,7 @@ import { siteSchema } from '@/api/site/validation/site-schema';
 import { z } from 'zod';
 
 export const userPermissionsSchema = z.object({
+    devMode: z.boolean(),
     sites: z.object({
         viewSiteMetadata: z.boolean(),
         writeSiteMetadata: z.boolean(),
