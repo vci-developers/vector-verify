@@ -17,6 +17,26 @@ access VectorVerify directly. _Avoid_: Collector, field worker, field team
 performs both the Annotation and Review workflows in VectorVerify. _Avoid_:
 Expert reviewer, annotator, program editor, supervisor
 
+### Access & Authorization
+
+**Whitelisted**: An account state (`user.isWhitelisted`) meaning a program
+administrator has approved the user for VectorVerify access. A logged-in user
+who is not yet whitelisted is _awaiting approval_ and can reach no feature page.
+_Avoid_: Approved, enabled, active (distinct from `isActive`)
+
+**Access Denial**: The single `/forbidden` page covers two distinct situations,
+distinguished by a cosmetic `?reason=` param (UX only — real access control is
+enforced server-side in each route's layout, never by this param):
+
+- **Pending approval** (`reason=not-whitelisted`): logged-in but not yet
+  whitelisted; no feature is reachable, so the only action is Logout.
+- **No access** (default — no `reason` param): a whitelisted user who lacks the
+  privilege for a specific feature (Annotation / Operations / Review); offered a
+  link home (`/`) plus Logout as a fallback. Any unrecognized `reason` also
+  falls through to this state.
+
+_Avoid_: Forbidden (alone, ambiguous between the two reasons)
+
 ### Workflows
 
 **Annotation**: A task-based workflow in which a VCO labels mosquito specimens
