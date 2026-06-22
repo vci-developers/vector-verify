@@ -6,12 +6,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 
-interface GeocodeMarker {
-    id: string;
-    locationQuery: string;
-}
-
-export function useSiteGeocode(markers: GeocodeMarker[]): {
+export function useSiteGeocode(
+    markers: { id: string; locationQuery: string }[],
+): {
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     isGeocoding: boolean;
 } {
