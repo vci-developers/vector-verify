@@ -25,12 +25,13 @@ export function useDeviceActivity(locationQueryParam: LocationQueryParam) {
             ? { district: locationQueryParam.district }
             : { siteId: locationQueryParam.siteId };
 
-    const { data: getAllSessionsResult, isPending } = useGetAllSessions({
-        startDate,
-        endDate,
-        type: 'SURVEILLANCE',
-        ...locationFilter,
-    });
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
+        useGetAllSessions({
+            startDate,
+            endDate,
+            type: 'SURVEILLANCE',
+            ...locationFilter,
+        });
 
     const deviceActivity = useMemo(() => {
         if (!getAllSessionsResult?.ok) return null;
@@ -39,7 +40,7 @@ export function useDeviceActivity(locationQueryParam: LocationQueryParam) {
 
     return {
         deviceActivity,
-        isPending,
-        isError: !isPending && !getAllSessionsResult?.ok,
+        isPending: isGetAllSessionsPending,
+        isError: !isGetAllSessionsPending && !getAllSessionsResult?.ok,
     };
 }
