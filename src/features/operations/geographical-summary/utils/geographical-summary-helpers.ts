@@ -29,12 +29,8 @@ export interface SiteMarker {
     lastCollectionDate?: number;
 }
 
-function buildLegacyLocationQuery(
-    villageName: string | null | undefined,
-    parish: string | null | undefined,
-    subCounty: string | null | undefined,
-    district: string | null | undefined,
-): string {
+function buildLegacyLocationQuery(site: Site): string {
+    const { villageName, parish, subCounty, district } = site;
     const cleanDistrict = district?.replace(/ District$/i, '').trim();
     const countryPart = cleanDistrict ? `${cleanDistrict}, Uganda` : 'Uganda';
 
@@ -66,12 +62,7 @@ function buildHierarchicalLocationQuery(site: Site): string {
 
 export function buildSiteLocationQuery(site: Site): string {
     return isLegacySite(site)
-        ? buildLegacyLocationQuery(
-              site.villageName,
-              site.parish,
-              site.subCounty,
-              site.district,
-          )
+        ? buildLegacyLocationQuery(site)
         : buildHierarchicalLocationQuery(site);
 }
 
