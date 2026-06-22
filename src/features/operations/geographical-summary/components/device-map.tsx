@@ -6,13 +6,10 @@ import { useTranslations } from 'next-intl';
 import type { DeviceMarker } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
 import { createDeviceMarkerIcon } from '@/features/operations/geographical-summary/components/create-device-marker-icon';
 import GeocodedClusterMap from '@/features/operations/geographical-summary/components/geocoded-cluster-map';
-import DeviceInfoPanel, {
-    type DeviceSiteRow,
-} from '@/features/operations/geographical-summary/components/device-info-panel';
+import DeviceInfoPanel from '@/features/operations/geographical-summary/components/device-info-panel';
 
 interface DeviceMapProps {
     markers: DeviceMarker[];
-    siteRows: DeviceSiteRow[];
     selectedLocation: string;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
@@ -20,7 +17,6 @@ interface DeviceMapProps {
 
 export default function DeviceMap({
     markers,
-    siteRows,
     selectedLocation,
     selectedMarkerId,
     onMarkerSelect,
@@ -50,7 +46,7 @@ export default function DeviceMap({
             loadingLabel={t('locatingDevices')}
             renderSidePanel={isLoading => (
                 <DeviceInfoPanel
-                    sites={siteRows}
+                    markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}
                     isLoading={isLoading}

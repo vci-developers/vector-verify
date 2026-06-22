@@ -1,11 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DeviceSiteRow } from '@/features/operations/geographical-summary/components/device-info-panel';
 import { useDeviceActivity } from '@/features/operations/geographical-summary/hooks/use-device-activity';
 import {
     buildDeviceMarkers,
@@ -34,42 +33,23 @@ export default function DeviceView({
     const { deviceActivity, isPending, isError } =
         useDeviceActivity(locationQueryParam);
 
+    useEffect(() => {
+        setSelectedMarkerId(null);
+    }, [locationQueryParam]);
+
     const deviceMarkers = useMemo(() => {
         if (!deviceActivity) return [];
         return buildDeviceMarkers(
             deviceActivity.sites,
             descendantsOfSelectedLocation,
+        ).sort(
+            (firstMarker, secondMarker) =>
+                secondMarker.activeDeviceCount -
+                    firstMarker.activeDeviceCount ||
+                secondMarker.lapsingDeviceCount -
+                    firstMarker.lapsingDeviceCount,
         );
     }, [deviceActivity, descendantsOfSelectedLocation]);
-
-    const siteNameById = useMemo(
-        () =>
-            new Map(
-                descendantsOfSelectedLocation.map(site => [
-                    site.siteId,
-                    site.name ?? site.villageName ?? null,
-                ]),
-            ),
-        [descendantsOfSelectedLocation],
-    );
-
-    const siteRows = useMemo((): DeviceSiteRow[] => {
-        if (!deviceActivity) return [];
-        return deviceActivity.sites
-            .map(site => ({
-                siteId: site.siteId,
-                siteName: siteNameById.get(site.siteId) ?? t('unknownSite'),
-                activeDeviceCount: site.activeDeviceCount,
-                lapsingDeviceCount: site.lapsingDeviceCount,
-            }))
-            .sort(
-                (firstSite, secondSite) =>
-                    secondSite.activeDeviceCount -
-                        firstSite.activeDeviceCount ||
-                    secondSite.lapsingDeviceCount -
-                        firstSite.lapsingDeviceCount,
-            );
-    }, [deviceActivity, siteNameById, t]);
 
     if (isPending) {
         return (
@@ -94,7 +74,7 @@ export default function DeviceView({
         );
     }
 
-    if (!deviceActivity || deviceActivity.totalDevices === 0) {
+    if (!deviceActivity || deviceActivity.totalDeviceCount === 0) {
         return (
             <Card className="border-border/50 p-0">
                 <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
@@ -105,9 +85,9 @@ export default function DeviceView({
     }
 
     const tiers = [
-        { key: 'active', count: deviceActivity.activeDevices },
-        { key: 'lapsing', count: deviceActivity.lapsingDevices },
-        { key: 'inactive', count: deviceActivity.inactiveDevices },
+        { key: 'active', count: deviceActivity.activeDeviceCount },
+        { key: 'lapsing', count: deviceActivity.lapsingDeviceCount },
+        { key: 'inactive', count: deviceActivity.inactiveDeviceCount },
     ] as const;
 
     return (
@@ -131,7 +111,6 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
                         markers={deviceMarkers}
-                        siteRows={siteRows}
                         selectedLocation={selectedLocation}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}

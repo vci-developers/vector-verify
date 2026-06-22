@@ -1,25 +1,20 @@
 'use client';
 
-import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
-import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
-
-export interface DeviceSiteRow {
-    siteId: number;
-    siteName: string;
-    activeDeviceCount: number;
-    lapsingDeviceCount: number;
-}
+import type { DeviceMarker } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
+import SelectableInfoPanel, {
+    SelectableInfoPanelRow,
+} from '@/features/operations/geographical-summary/components/selectable-info-panel';
 
 interface DeviceInfoPanelProps {
-    sites: DeviceSiteRow[];
+    markers: DeviceMarker[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
     isLoading: boolean;
 }
 
 export default function DeviceInfoPanel({
-    sites,
+    markers,
     selectedMarkerId,
     onMarkerSelect,
     isLoading,
@@ -28,29 +23,37 @@ export default function DeviceInfoPanel({
 
     return (
         <SelectableInfoPanel
-            items={sites}
-            getItemId={site => String(site.siteId)}
-            selectedMarkerId={selectedMarkerId}
-            onMarkerSelect={onMarkerSelect}
-            isLoading={isLoading}
-            countLabel={t('sitesCount', { count: sites.length })}
-            renderRow={site => (
-                <Fragment>
-                    <p className="font-semibold">{site.siteName}</p>
-                    <div className="text-muted-foreground mt-1.5 space-y-0.5">
-                        <p>
-                            {t('siteActiveCount', {
-                                count: site.activeDeviceCount,
-                            })}
+            countLabel={t('sitesCount', { count: markers.length })}
+        >
+            {markers.map(marker => {
+                const isSelected = selectedMarkerId === marker.id;
+                return (
+                    <SelectableInfoPanelRow
+                        key={marker.id}
+                        isSelected={isSelected}
+                        isLoading={isLoading}
+                        onSelect={() =>
+                            onMarkerSelect(isSelected ? null : marker.id)
+                        }
+                    >
+                        <p className="font-semibold">
+                            {marker.siteName ?? t('unknownSite')}
                         </p>
-                        <p>
-                            {t('siteLapsingCount', {
-                                count: site.lapsingDeviceCount,
-                            })}
-                        </p>
-                    </div>
-                </Fragment>
-            )}
-        />
+                        <div className="text-muted-foreground mt-1.5 space-y-0.5">
+                            <p>
+                                {t('siteActiveCount', {
+                                    count: marker.activeDeviceCount,
+                                })}
+                            </p>
+                            <p>
+                                {t('siteLapsingCount', {
+                                    count: marker.lapsingDeviceCount,
+                                })}
+                            </p>
+                        </div>
+                    </SelectableInfoPanelRow>
+                );
+            })}
+        </SelectableInfoPanel>
     );
 }
