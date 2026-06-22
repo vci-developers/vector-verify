@@ -15,21 +15,17 @@ import { buildGeocodedBounds } from '@/features/operations/geographical-summary/
 const DEFAULT_CENTER: LatLngExpression = { lat: 0, lng: 0 };
 const DEFAULT_ZOOM = 2;
 
-interface GeocodedClusterMapProps<
-    TMarker extends { id: string; locationQuery: string },
-> {
-    markers: TMarker[];
+interface GeocodedClusterMapProps {
+    markers: { id: string; locationQuery: string }[];
     selectedLocation: string;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
-    renderIcon: (marker: TMarker, isSelected: boolean) => DivIcon;
+    renderIcon: (markerId: string, isSelected: boolean) => DivIcon;
     loadingLabel: string;
     renderSidePanel: (isLoading: boolean) => ReactNode;
 }
 
-export default function GeocodedClusterMap<
-    TMarker extends { id: string; locationQuery: string },
->({
+export default function GeocodedClusterMap({
     markers,
     selectedLocation,
     selectedMarkerId,
@@ -37,7 +33,7 @@ export default function GeocodedClusterMap<
     renderIcon,
     loadingLabel,
     renderSidePanel,
-}: GeocodedClusterMapProps<TMarker>) {
+}: GeocodedClusterMapProps) {
     const { markerIdsToGeocodedPosition, isGeocoding } =
         useSiteGeocode(markers);
 

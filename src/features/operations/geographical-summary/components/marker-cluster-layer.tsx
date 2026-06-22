@@ -11,21 +11,21 @@ type ClusterGroup = L.MarkerClusterGroup & {
     _spiderfied: L.MarkerCluster | null;
 };
 
-interface MarkerClusterLayerProps<TMarker extends { id: string }> {
-    markers: TMarker[];
+interface MarkerClusterLayerProps {
+    markers: { id: string }[];
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
-    renderIcon: (marker: TMarker, isSelected: boolean) => L.DivIcon;
+    renderIcon: (markerId: string, isSelected: boolean) => L.DivIcon;
 }
 
-export default function MarkerClusterLayer<TMarker extends { id: string }>({
+export default function MarkerClusterLayer({
     markers,
     markerIdsToGeocodedPosition,
     selectedMarkerId,
     onMarkerSelect,
     renderIcon,
-}: MarkerClusterLayerProps<TMarker>) {
+}: MarkerClusterLayerProps) {
     const map = useMap();
     const clusterRef = useRef<ClusterGroup | null>(null);
     const markerRefs = useRef<Map<string, L.Marker>>(new Map());
@@ -91,7 +91,7 @@ export default function MarkerClusterLayer<TMarker extends { id: string }>({
                         }}
                         position={position}
                         icon={renderIcon(
-                            marker,
+                            marker.id,
                             selectedMarkerId === marker.id,
                         )}
                         eventHandlers={{
