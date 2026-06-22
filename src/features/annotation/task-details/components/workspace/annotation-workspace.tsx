@@ -91,7 +91,10 @@ export default function AnnotationWorkspace({
 
             <div className="grid grid-cols-2 gap-6">
                 {annotation.specimen ? (
-                    <SpecimenImageViewer specimen={annotation.specimen} />
+                    <SpecimenImageViewer
+                        key={annotation.specimen.id}
+                        specimen={annotation.specimen}
+                    />
                 ) : (
                     <p className="text-muted-foreground text-sm">
                         No specimen data

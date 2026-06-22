@@ -1,0 +1,38 @@
+# Operations
+
+The Operations page provides a centralized view of surveillance program
+activity. It is designed for program managers, district supervisors, and
+researchers who need to monitor what is happening across all sentinel sites.
+
+## Shared filters
+
+All tabs in Operations share the same filters:
+
+- **Location** — a district, or a specific site within it
+- **Time frame** — a start and end month
+
+Changing either filter updates all tabs simultaneously. You can also export the
+current view with the **Export Data** button.
+
+## Tabs
+
+The Operations page is organized into four tabs, each focused on a different
+aspect of program monitoring:
+
+| Tab                                                                   | What it shows                                                                                  |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **[Geographical Summary](/docs/operations/geographical-summary)**     | A map showing mosquito activity by village, sized and colored by specimen and Anopheles counts |
+| **[Specimen Composition](/docs/operations/specimen-composition)**     | Specimen counts broken down by species, sex, and abdomen status, with composition and trends   |
+| **[AI Performance](/docs/operations/ai-performance)**                 | Model performance based on annotation data — confusion matrices and per-label accuracy         |
+| **[Field Team Performance](/docs/operations/field-team-performance)** | Collector activity — who is active and how consistently they collect, by month                 |
+
+## Exporting a report
+
+The **Export Data** button downloads a formatted report of the session data for
+the selected location and time frame as an Excel (`.xlsx`) file.
+
+![The Export Report dialog](/docs/operations/export-report.png)
+
+For raw, unprocessed CSVs of the entire program (not affected by the Operations
+filters), see [Raw Data Export](/docs/developer-reference/raw-data-export)
+instead.

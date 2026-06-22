@@ -1,6 +1,6 @@
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Session } from '@/api/session/validation/session-schema';
-import type { ReviewSiteSessionSummary } from '@/features/review/sites-list/utils/review-site-session-summary';
+import type { ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
 import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
 
 export function buildCollectionCycleSegments(

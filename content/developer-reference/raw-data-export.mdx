@@ -1,0 +1,37 @@
+import { Callout } from 'nextra/components';
+
+# Raw Data Export
+
+Raw Data Export lets developers download raw, unprocessed CSVs for the entire
+program straight from the backend. These exports are not formatted and are
+strictly for internal use.
+
+<Callout type="warning">
+    Raw Data Export requires **Developer Status**. It is intended for developers
+    and analysts who need direct access to the underlying data, not for routine
+    reporting.
+</Callout>
+
+## Opening Raw Data Export
+
+Open the account menu at the bottom of the sidebar and choose **Raw Data
+Export**.
+
+![The account menu with the Raw Data Export option](/docs/dev-export/raw-export-menu.png)
+
+## Available exports
+
+The dialog offers three downloads, each a raw CSV pulled directly from the
+backend:
+
+| Export                 | Contents                                                                    |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Specimens**          | Raw specimen records for surveillance sessions, including inference results |
+| **Surveillance Forms** | Raw surveillance form submissions for the program                           |
+| **Annotations**        | Raw annotation records with specimen, image, and inference data             |
+
+![The Raw Data Export dialog with the three CSV downloads](/docs/dev-export/raw-export-modal.png)
+
+Click **Download** next to any export to save its CSV. For the structure of the
+underlying data, see
+[Backend Schemas](/docs/developer-reference/backend-schemas).

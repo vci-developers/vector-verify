@@ -1,0 +1,32 @@
+# Dashboard
+
+import { Callout, Cards } from 'nextra/components';
+import { ClipboardCheck, Microscope, PencilRuler } from 'lucide-react';
+
+<Callout type="warning">
+    Currently under construction! Come back at another time.
+</Callout>
+
+The Dashboard is currently being developed. In the meantime, here are the parts
+of VectorVerify you can explore today:
+
+<Cards>
+    <Cards.Card
+        icon={<ClipboardCheck />}
+        title="Review"
+        href="/docs/review"
+        arrow
+    />
+    <Cards.Card
+        icon={<Microscope />}
+        title="Operations"
+        href="/docs/operations"
+        arrow
+    />
+    <Cards.Card
+        icon={<PencilRuler />}
+        title="Annotation"
+        href="/docs/annotation"
+        arrow
+    />
+</Cards>
