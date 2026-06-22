@@ -83,13 +83,13 @@ export default function OperationsSpecimenComposition({
     }, [storedSpecies, speciesOptions]);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>{t('capsLoading')}</h1>;
+        return <h1>{t('loadingAllCaps')}</h1>;
     }
 
     if (!getMonthlySpecimensCountResult.ok) {
         return (
             <h1>
-                {t('capsError')}
+                {t('errorAllCaps')}
                 {getMonthlySpecimensCountResult.error.message}
             </h1>
         );

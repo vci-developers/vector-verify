@@ -75,30 +75,30 @@ function aggregateCountsBySpecies(
     monthlySpecimenCount: GetMonthlySpecimensCountSuccessPayload['data'][number],
     selectedSpecies: string[],
 ): Record<string, number> {
-    const bySpecies: Record<
-        string,
-        Record<string, number>
-    > = specimenClassificationAxis === 'species'
-        ? Object.fromEntries(
-              Object.entries(monthlySpecimenCount.species).map(
-                  ([species, count]) => [species, { [species]: count }],
-              ),
-          )
-        : specimenClassificationAxis === 'sex'
-          ? monthlySpecimenCount.sexBySpecies
-          : monthlySpecimenCount.abdomenStatusBySpecies;
-
-    const totalCounts: Record<string, number> = {};
-    for (const [species, classCounts] of Object.entries(bySpecies)) {
-        if (!selectedSpecies.includes(species)) continue;
-        for (const [specimenClass, specimenCount] of Object.entries(
-            classCounts,
-        )) {
-            totalCounts[specimenClass] =
-                (totalCounts[specimenClass] ?? 0) + specimenCount;
-        }
+    const selectedSpeciesSet = new Set(selectedSpecies);
+    if (specimenClassificationAxis === 'species') {
+        return Object.fromEntries(
+            Object.entries(monthlySpecimenCount.species).filter(([species]) =>
+                selectedSpeciesSet.has(species),
+            ),
+        );
     }
-    return totalCounts;
+
+    const axisCountsBySpecies =
+        specimenClassificationAxis === 'sex'
+            ? monthlySpecimenCount.sexBySpecies
+            : monthlySpecimenCount.abdomenStatusBySpecies;
+    return Object.entries(axisCountsBySpecies)
+        .filter(([species]) => selectedSpeciesSet.has(species))
+        .flatMap(([, classCounts]) => Object.entries(classCounts))
+        .reduce<Record<string, number>>(
+            (totalCounts, [specimenClass, specimenCount]) => {
+                totalCounts[specimenClass] =
+                    (totalCounts[specimenClass] ?? 0) + specimenCount;
+                return totalCounts;
+            },
+            {},
+        );
 }
 
 export function sumSpecimenCountsByClass(

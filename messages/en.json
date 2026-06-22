@@ -30,8 +30,8 @@
         "unassignedSessions": "Unassigned Sessions"
     },
     "OperationsSpecimenComposition": {
-        "capsLoading": "LOADING...",
-        "capsError": "ERROR: ",
+        "loadingAllCaps": "LOADING...",
+        "errorAllCaps": "ERROR: ",
         "filterBySpecies": "Filter by Species",
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
