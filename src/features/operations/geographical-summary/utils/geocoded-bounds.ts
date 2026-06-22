@@ -2,7 +2,7 @@ import type { LatLngBoundsExpression } from 'leaflet';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 
 export function buildGeocodedBounds(
-    markers: { id: string }[],
+    markers: { id: string; locationQuery: string }[],
     markerIdsToGeocodedPosition: Map<string, Geocode>,
 ): LatLngBoundsExpression | null {
     const geocodedPositions = markers.flatMap(marker => {
