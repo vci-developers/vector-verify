@@ -18,6 +18,7 @@ export default function ForbiddenPage() {
             </div>
             <div className="flex flex-col items-center gap-4">
                 <Button asChild variant="outline" className="w-full">
+                    {/* TODO: Revert to "/" / Return to Dashboard once the dashboard is restored. */}
                     <Link href="/operations">Return to Operations</Link>
                 </Button>
                 <LogoutButton />

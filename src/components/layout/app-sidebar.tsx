@@ -52,6 +52,7 @@ type NavigationItem = {
 };
 
 const navigation: NavigationItem[] = [
+    // TODO: Revert — Dashboard nav item temporarily hidden while the dashboard is under construction.
     // {
     //     name: 'Dashboard',
     //     href: '/',
