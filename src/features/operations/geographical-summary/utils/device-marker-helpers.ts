@@ -11,6 +11,7 @@ export const DEVICE_HEALTH_COLOR = {
 export interface DeviceMarker {
     id: string;
     siteId: number;
+    siteName: string | null;
     locationQuery: string;
     activeDeviceCount: number;
     lapsingDeviceCount: number;
@@ -32,9 +33,10 @@ export function buildDeviceMarkers(
             {
                 id: String(siteActivity.siteId),
                 siteId: siteActivity.siteId,
+                siteName: matchingSite.name ?? matchingSite.villageName ?? null,
                 locationQuery: buildSiteLocationQuery(matchingSite),
-                activeDeviceCount: siteActivity.activeDeviceCount,
-                lapsingDeviceCount: siteActivity.lapsingDeviceCount,
+                activeDeviceCount: siteActivity.activeDeviceCountAtSite,
+                lapsingDeviceCount: siteActivity.lapsingDeviceCountAtSite,
             },
         ];
     });
