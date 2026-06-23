@@ -1,8 +1,9 @@
 import type { LatLngBoundsExpression } from 'leaflet';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 export function buildGeocodedBounds(
-    markers: { id: string; locationQuery: string }[],
+    markers: GeocodableMarker[],
     markerIdsToGeocodedPosition: Map<string, Geocode>,
 ): LatLngBoundsExpression | null {
     const geocodedPositions = markers.flatMap(marker => {

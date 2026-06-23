@@ -11,12 +11,13 @@ import { useSiteGeocode } from '@/features/operations/geographical-summary/hooks
 import MapNavigator from '@/features/operations/geographical-summary/components/map-navigator';
 import MarkerClusterLayer from '@/features/operations/geographical-summary/components/marker-cluster-layer';
 import { buildGeocodedBounds } from '@/features/operations/geographical-summary/utils/geocoded-bounds';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 const DEFAULT_CENTER: LatLngExpression = { lat: 0, lng: 0 };
 const DEFAULT_ZOOM = 2;
 
 interface GeocodedClusterMapProps {
-    markers: { id: string; locationQuery: string }[];
+    markers: GeocodableMarker[];
     selectedLocation: string;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;

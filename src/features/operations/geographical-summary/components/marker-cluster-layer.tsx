@@ -6,13 +6,14 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 type ClusterGroup = L.MarkerClusterGroup & {
     _spiderfied: L.MarkerCluster | null;
 };
 
 interface MarkerClusterLayerProps {
-    markers: { id: string }[];
+    markers: GeocodableMarker[];
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;

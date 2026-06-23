@@ -1,5 +1,6 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import type { SiteDeviceActivity } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { buildSiteLocationQuery } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 export const DEVICE_HEALTH_COLOR = {
@@ -8,11 +9,9 @@ export const DEVICE_HEALTH_COLOR = {
     inactive: 'var(--count-none)',
 } as const;
 
-export interface DeviceMarker {
-    id: string;
+export interface DeviceMarker extends GeocodableMarker {
     siteId: number;
     siteName: string | null;
-    locationQuery: string;
     activeDeviceCount: number;
     lapsingDeviceCount: number;
 }

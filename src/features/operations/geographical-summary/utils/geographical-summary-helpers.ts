@@ -17,11 +17,14 @@ export const ANOPHELES_COLOR = {
     critical: 'var(--count-critical)',
 } as const;
 
-export interface SiteMarker {
+export interface GeocodableMarker {
     id: string;
+    locationQuery: string;
+}
+
+export interface SiteMarker extends GeocodableMarker {
     siteName: string;
     parentLocationName: string;
-    locationQuery: string;
     sessionCount: number;
     totalSpecimens: number;
     anophelesCount: number;

@@ -5,10 +5,9 @@ import { fetchGeocode } from '@/api/geocode/hooks/use-get-geocode';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
-export function useSiteGeocode(
-    markers: { id: string; locationQuery: string }[],
-): {
+export function useSiteGeocode(markers: GeocodableMarker[]): {
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     isGeocoding: boolean;
 } {
