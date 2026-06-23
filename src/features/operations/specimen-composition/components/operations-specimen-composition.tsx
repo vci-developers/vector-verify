@@ -6,10 +6,25 @@ import CompositionChartPair from './composition-chart-pair';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
+    isNonMosquito,
+    getSpeciesOptions,
     groupSpecimenCountsByMonth,
     sumSpecimenCountsByClass,
 } from '../utils/specimen-composition-helpers';
 import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    MultiSelect,
+    MultiSelectTrigger,
+    MultiSelectValue,
+    MultiSelectItem,
+    MultiSelectContent,
+    MultiSelectGroup,
+} from '@/components/ui/multi-select';
+import { useMemo } from 'react';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { StorageKeys } from '@/lib/storage-keys';
+import { Label } from '@/components/ui/label';
+import { useTranslations } from 'next-intl';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -31,6 +46,7 @@ export default function OperationsSpecimenComposition({
     startDate,
     endDate,
 }: OperationsSpecimenCompositionProps) {
+    const t = useTranslations('OperationsSpecimenComposition');
     const locationFilter =
         'district' in locationQueryParam
             ? { districts: [locationQueryParam.district] }
@@ -49,27 +65,78 @@ export default function OperationsSpecimenComposition({
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
+    const [storedSpecies, setStoredSpecies] = useLocalStorage<string[] | null>(
+        StorageKeys.operations.selectedSpecies,
+        null,
+    );
+    const speciesOptions = useMemo(() => {
+        if (!getMonthlySpecimensCountResult?.ok) return [];
+        return getSpeciesOptions(getMonthlySpecimensCountResult.data.data);
+    }, [getMonthlySpecimensCountResult]);
+
+    const validSelectedSpecies = useMemo(() => {
+        const validOptions = new Set(speciesOptions);
+        const species =
+            storedSpecies ??
+            speciesOptions.filter(species => !isNonMosquito(species));
+        return species.filter(s => validOptions.has(s));
+    }, [storedSpecies, speciesOptions]);
+
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>LOADING...</h1>;
+        return <h1>{t('monthlySpecimenCountsLoading')}</h1>;
     }
 
     if (!getMonthlySpecimensCountResult.ok) {
-        return <h1>ERROR: {getMonthlySpecimensCountResult.error.message}</h1>;
+        return (
+            <h1>
+                {t('monthlySpecimenCountsError')}
+                {getMonthlySpecimensCountResult.error.message}
+            </h1>
+        );
     }
 
     const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;
 
     return (
         <div className="space-y-6">
+            <div className="flex flex-col gap-1.5">
+                <Label className="text-sm font-medium">
+                    {t('filterBySpecies')}
+                </Label>
+                <MultiSelect
+                    values={validSelectedSpecies}
+                    onValuesChange={setStoredSpecies}
+                >
+                    <MultiSelectTrigger>
+                        <MultiSelectValue placeholder={t('selectSpecies')} />
+                    </MultiSelectTrigger>
+                    <MultiSelectContent
+                        search={{
+                            placeholder: t('searchSpecies'),
+                            emptyMessage: t('noSpeciesFound'),
+                        }}
+                    >
+                        <MultiSelectGroup>
+                            {speciesOptions.map(species => (
+                                <MultiSelectItem key={species} value={species}>
+                                    {species}
+                                </MultiSelectItem>
+                            ))}
+                        </MultiSelectGroup>
+                    </MultiSelectContent>
+                </MultiSelect>
+            </div>
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
                     const specimenCountsByClass = sumSpecimenCountsByClass(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
+                        validSelectedSpecies,
                     );
                     const specimenCountsByMonth = groupSpecimenCountsByMonth(
                         specimenClassificationAxis,
                         monthlySpecimenCounts,
+                        validSelectedSpecies,
                     );
                     const specimenChartConfig = buildSpecimenChartConfig(
                         specimenClassificationAxis,

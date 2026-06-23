@@ -13,5 +13,6 @@ export const StorageKeys = {
         endMonth: 'operations.endMonth',
         selectedLocation: 'operations.selectedLocation',
         selectedMarkerId: 'operations.selectedMarkerId',
+        selectedSpecies: 'operations.selectedSpecies',
     },
 } as const;
