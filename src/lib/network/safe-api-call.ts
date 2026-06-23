@@ -22,10 +22,14 @@ export async function safeApiCall<T>(
     options?: RequestInit,
     validationSchema?: z.ZodType<T>,
 ): Promise<Result<T, NetworkError>> {
+    const method = options?.method?.toUpperCase() ?? 'GET';
+    const needsBody = ['POST', 'PUT', 'PATCH'].includes(method);
+    const body = needsBody ? (options?.body ?? '{}') : options?.body;
     let response: Response;
     try {
         response = await fetch(constructUrl(path), {
             ...options,
+            body,
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
