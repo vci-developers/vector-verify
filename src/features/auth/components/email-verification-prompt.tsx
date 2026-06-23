@@ -66,8 +66,8 @@ export default function EmailVerificationForm() {
             <>
                 <Separator className="my-6" />
                 <p className="text-muted-foreground text-center text-sm">
-                    Verification email will be sent in the next few minutes.
-                    Please check your email.
+                    Verification email sent successfully. Please check your
+                    email.
                 </p>
             </>
         );

@@ -1,22 +1,23 @@
-'use client';
-
 import { Separator } from '@/components/ui/separator';
 import AuthShell from '@/features/auth/components/auth-shell';
-import EmailVerificationForm from '@/features/auth/components/email-verification-form';
+import EmailVerificationForm from '@/features/auth/components/email-verification-prompt';
 import SignupForm from '@/features/auth/components/signup-form';
+import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
+import { cookies } from 'next/dist/server/request/cookies';
 import Link from 'next/link';
-import { useState } from 'react';
 
-export default function SignupPage() {
-    const [showVerify, setShowVerify] = useState(false);
-    if (!showVerify) {
+export default async function SignupPage() {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get(ACCESS_COOKIE_NAME)?.value;
+
+    if (!accessToken) {
         return (
             <AuthShell
                 title="Create your account"
                 description="Set up access to your VectorVerify workspace."
                 imageSrc="/assets/auth/images/Signup.png"
             >
-                <SignupForm setShowVerify={setShowVerify} />
+                <SignupForm />
                 <Separator className="my-6" />
                 <p className="text-muted-foreground text-center text-sm">
                     Already have an account?{' '}

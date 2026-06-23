@@ -23,11 +23,7 @@ import { useState } from 'react';
 import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-user-profile-schema';
 import { useSearchParams } from 'next/navigation';
 
-interface LoginFormProps {
-    setShowVerify: (value: boolean) => void;
-}
-
-export default function LoginForm({ setShowVerify }: LoginFormProps) {
+export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const callbackUrl = useSearchParams().get('callbackUrl');
@@ -80,8 +76,7 @@ export default function LoginForm({ setShowVerify }: LoginFormProps) {
             }
 
             if (!userProfileResult.data.user.emailVerified) {
-                setShowVerify(true);
-                return;
+                router.refresh();
             }
         }
 

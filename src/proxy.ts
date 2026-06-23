@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
     ACCESS_COOKIE_NAME,
     VERIFIED_COOKIE_NAME,
-} from './lib/auth-session/cookies';
+} from '@/lib/auth-session/cookies';
 
 const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
 const AUTH_ONLY_ROUTES = new Set(['/verify-email']);
