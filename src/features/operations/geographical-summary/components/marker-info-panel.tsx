@@ -2,9 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
-import SelectableInfoPanel, {
-    SelectableInfoPanelRow,
-} from '@/features/operations/geographical-summary/components/selectable-info-panel';
+import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
+import SelectableInfoPanelRow from '@/features/operations/geographical-summary/components/selectable-info-panel-row';
 
 interface MarkerInfoPanelProps {
     markers: SiteMarker[];

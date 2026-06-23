@@ -2,9 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import type { DeviceMarker } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
-import SelectableInfoPanel, {
-    SelectableInfoPanelRow,
-} from '@/features/operations/geographical-summary/components/selectable-info-panel';
+import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
+import SelectableInfoPanelRow from '@/features/operations/geographical-summary/components/selectable-info-panel-row';
 
 interface DeviceInfoPanelProps {
     markers: DeviceMarker[];
