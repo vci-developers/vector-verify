@@ -7,10 +7,12 @@ import type { NetworkError } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-export default function EmailVerificationForm() {
+export default function EmailVerificationPrompt() {
     const [submitted, setSubmitted] = useState(false);
     const router = useRouter();
+    const t = useTranslations('Auth');
 
     async function sendEmail() {
         const response = await fetch('/api/auth/verification-email', {
@@ -41,11 +43,10 @@ export default function EmailVerificationForm() {
                     return (
                         <>
                             <p className="text-muted-foreground text-center text-sm">
-                                Couldn&apos;t send verification email. Please
-                                try again or contact support.
+                                {t('verificationEmailFailedMessage')}
                             </p>
                             <Button className="w-full" onClick={sendEmail}>
-                                Verify email
+                                {t('verifyEmailButton')}
                             </Button>
                         </>
                     );
@@ -58,7 +59,7 @@ export default function EmailVerificationForm() {
     if (!submitted) {
         return (
             <Button className="w-full" onClick={sendEmail}>
-                Verify email
+                {t('verifyEmailButton')}
             </Button>
         );
     } else {
@@ -66,8 +67,7 @@ export default function EmailVerificationForm() {
             <>
                 <Separator className="my-6" />
                 <p className="text-muted-foreground text-center text-sm">
-                    Verification email sent successfully. Please check your
-                    email.
+                    {t('verificationEmailSuccessMessage')}
                 </p>
             </>
         );

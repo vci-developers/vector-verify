@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { verifyEmail } from '@/api/auth/verify-email';
 import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
 import { Button } from '@/components/ui/button';
+import { getTranslations } from 'next-intl/server';
 
 interface VerifyEmailPageProps {
     searchParams: Promise<{ token?: string }>;
@@ -12,7 +13,10 @@ interface VerifyEmailPageProps {
 export default async function VerifyEmailPage({
     searchParams,
 }: VerifyEmailPageProps) {
-    function resendVerificationCode() {}
+    const t = await getTranslations('Auth');
+    async function resendVerificationCode() {
+        redirect('/login');
+    }
 
     const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
     if (!accessToken) return;
@@ -21,11 +25,11 @@ export default async function VerifyEmailPage({
     if (!token) {
         return (
             <AuthShell
-                title="Verify your email"
-                description="Email verification in progress."
+                title={t('verifyYourEmail')}
+                description={t('verifyEmailDescription')}
                 imageSrc="/assets/auth/images/Login.png"
             >
-                <p>Invalid email verification link. Please check your email.</p>
+                <p>{t('missingVerificationToken')}</p>
             </AuthShell>
         );
     } else {
@@ -48,29 +52,26 @@ export default async function VerifyEmailPage({
                     'Verification token is required' ? (
                         <>
                             <p className="text-muted-foreground text-center text-sm">
-                                Invalid email verification link. Please check
-                                your email for the link or click the button to
-                                receive the verification email.
+                                {t('invalidVerificationLink')}
                             </p>
                             <Button onClick={resendVerificationCode}>
-                                Resend verification email
+                                {t('resendVerificationEmailButton')}
                             </Button>
                         </>
                     ) : response.error.message ===
                       'Invalid or expired verification token' ? (
                         <>
                             <p className="text-muted-foreground text-center text-sm">
-                                Invalid verification code.
+                                {t('invalidOrExpiredVerificationLink')}
                             </p>
                             <Button onClick={resendVerificationCode}>
-                                Resend verification email
+                                {t('resendVerificationEmailButton')}
                             </Button>
                         </>
                     ) : response.error.message ===
                       'Verification token does not match the authenticated user' ? (
                         <p className="text-muted-foreground text-center text-sm">
-                            Please log in with the account that received the
-                            verification email.
+                            {t('accountVerificationTokenMismatch')}
                         </p>
                     ) : (
                         <p className="text-muted-foreground text-center text-sm">

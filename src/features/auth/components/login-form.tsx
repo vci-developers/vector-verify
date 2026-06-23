@@ -22,11 +22,13 @@ import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
 import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-user-profile-schema';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const callbackUrl = useSearchParams().get('callbackUrl');
+    const t = useTranslations('Auth');
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -97,7 +99,7 @@ export default function LoginForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="login-rhf-email">
-                                Email
+                                {t('email')}
                             </FieldLabel>
                             <div className="relative">
                                 <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -105,7 +107,7 @@ export default function LoginForm() {
                                     {...field}
                                     id="login-rhf-email"
                                     aria-invalid={fieldState.invalid}
-                                    placeholder="name@example.com"
+                                    placeholder={t('emailPlaceholder')}
                                     autoComplete="off"
                                     className="pl-10"
                                 />
@@ -122,7 +124,7 @@ export default function LoginForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="login-rhf-password">
-                                Password
+                                {t('password')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -160,7 +162,7 @@ export default function LoginForm() {
                     className="w-full"
                     disabled={loginForm.formState.isSubmitting}
                 >
-                    Login
+                    {t('loginButton')}
                 </Button>
             </Field>
         </form>

@@ -31,11 +31,13 @@ import {
 } from '@/components/ui/select';
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function SignupForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const t = useTranslations('Auth');
 
     const { data: getProgramsResult, isPending: isGetsProgramsPending } =
         useGetPrograms();
@@ -89,7 +91,7 @@ export default function SignupForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="signup-email">
-                                Email
+                                {t('email')}
                             </FieldLabel>
                             <div className="relative">
                                 <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -97,7 +99,7 @@ export default function SignupForm() {
                                     {...field}
                                     id="signup-email"
                                     aria-invalid={fieldState.invalid}
-                                    placeholder="name@example.com"
+                                    placeholder={t('emailPlaceholder')}
                                     autoComplete="off"
                                     className="pl-10"
                                 />
@@ -118,13 +120,13 @@ export default function SignupForm() {
                                 data-invalid={fieldState.invalid}
                             >
                                 <FieldLabel htmlFor="signup-name">
-                                    Name
+                                    {t('name')}
                                 </FieldLabel>
                                 <Input
                                     {...field}
                                     id="signup-name"
                                     aria-invalid={fieldState.invalid}
-                                    placeholder="Your name here"
+                                    placeholder={t('namePlaceholder')}
                                     autoComplete="off"
                                 />
                                 {fieldState.invalid && (
@@ -145,7 +147,7 @@ export default function SignupForm() {
                                 }
                             >
                                 <FieldLabel htmlFor="signup-program">
-                                    Program
+                                    {t('program')}
                                 </FieldLabel>
                                 <Select
                                     onValueChange={val =>
@@ -172,10 +174,10 @@ export default function SignupForm() {
                                         <SelectValue
                                             placeholder={
                                                 isGetsProgramsPending
-                                                    ? 'Loading programs...'
+                                                    ? t('programsLoading')
                                                     : hasProgramsError
-                                                      ? 'Unable to load programs'
-                                                      : 'Select a program'
+                                                      ? t('programsError')
+                                                      : t('programsPlaceholder')
                                             }
                                         />
                                     </SelectTrigger>
@@ -223,7 +225,7 @@ export default function SignupForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="signup-password">
-                                Password
+                                {t('password')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -259,7 +261,7 @@ export default function SignupForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="signup-confirm-password">
-                                Confirm Password
+                                {t('confirmPassword')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -305,7 +307,7 @@ export default function SignupForm() {
                     className="w-full"
                     disabled={signupForm.formState.isSubmitting}
                 >
-                    Create Account
+                    {t('createAccountButton')}
                 </Button>
             </Field>
         </form>
