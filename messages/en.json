@@ -21,7 +21,11 @@
     "Auth": {
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
-        "accessDenied": "Access Denied"
+        "notWhitelistedTitle": "Your account is awaiting approval",
+        "notWhitelistedDescription": "A program administrator needs to approve your account before you can access VectorVerify. Please check back once your account has been approved.",
+        "noAccessTitle": "You don't have access to this feature",
+        "noAccessDescription": "Your account doesn't have permission for this feature. If you think this is a mistake, contact your program administrator.",
+        "returnHome": "Return home"
     },
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
