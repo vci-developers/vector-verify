@@ -20,10 +20,17 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-user-profile-schema';
+import { useSearchParams } from 'next/navigation';
 
-export default function LoginForm() {
+interface LoginFormProps {
+    setShowVerify: (value: boolean) => void;
+}
+
+export default function LoginForm({ setShowVerify }: LoginFormProps) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const callbackUrl = useSearchParams().get('callbackUrl');
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -49,6 +56,33 @@ export default function LoginForm() {
         if (!response.ok || !loginResult.ok) {
             console.error('Login Failed');
             return;
+        }
+
+        if (callbackUrl) {
+            router.replace(callbackUrl);
+            router.refresh();
+        } else {
+            const userProfileResponse = await fetch('api/users/profile', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            const userProfileResult: Result<
+                GetUserProfileSuccessPayload,
+                NetworkError
+            > = await userProfileResponse.json();
+
+            if (!userProfileResponse.ok || !userProfileResult.ok) {
+                console.error('Failed to Retrieve User Profile');
+                return;
+            }
+
+            if (!userProfileResult.data.user.emailVerified) {
+                setShowVerify(true);
+                return;
+            }
         }
 
         router.replace('/');

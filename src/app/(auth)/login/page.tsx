@@ -1,26 +1,43 @@
+'use client';
+
 import { Separator } from '@/components/ui/separator';
 import AuthShell from '@/features/auth/components/auth-shell';
+import EmailVerificationForm from '@/features/auth/components/email-verification-form';
 import LoginForm from '@/features/auth/components/login-form';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function LoginPage() {
-    return (
-        <AuthShell
-            title="Welcome back"
-            description="Sign in to continue to your dashboard."
-            imageSrc="/assets/auth/images/Login.png"
-        >
-            <LoginForm />
-            <Separator className="my-6" />
-            <p className="text-muted-foreground text-center text-sm">
-                Don&apos;t have an account?{' '}
-                <Link
-                    href="/signup"
-                    className="text-primary font-medium hover:underline"
-                >
-                    Create one
-                </Link>
-            </p>
-        </AuthShell>
-    );
+    const [showVerify, setShowVerify] = useState(false);
+    if (!showVerify) {
+        return (
+            <AuthShell
+                title="Welcome back"
+                description="Sign in to continue to your dashboard."
+                imageSrc="/assets/auth/images/Login.png"
+            >
+                <LoginForm setShowVerify={setShowVerify} />
+                <Separator className="my-6" />
+                <p className="text-muted-foreground text-center text-sm">
+                    Don&apos;t have an account?{' '}
+                    <Link
+                        href="/signup"
+                        className="text-primary font-medium hover:underline"
+                    >
+                        Create one
+                    </Link>
+                </p>
+            </AuthShell>
+        );
+    } else {
+        return (
+            <AuthShell
+                title="Verify your email"
+                description="Press 'Verify email' to send a verification email to your email address, then click the link to verify."
+                imageSrc="/assets/auth/images/Login.png"
+            >
+                <EmailVerificationForm />
+            </AuthShell>
+        );
+    }
 }

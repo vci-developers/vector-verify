@@ -32,7 +32,11 @@ import {
 } from '@/components/ui/select';
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 
-export default function SignupForm() {
+interface SignupFormProps {
+    setShowVerify: (value: boolean) => void;
+}
+
+export default function SignupForm({ setShowVerify }: SignupFormProps) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -73,6 +77,9 @@ export default function SignupForm() {
             console.error('Signup failed', signupResult);
             return;
         }
+
+        setShowVerify(true);
+        return;
 
         router.replace('/');
         router.refresh();
