@@ -5,6 +5,7 @@ import { verifyEmail } from '@/api/auth/verify-email';
 import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
 import { Button } from '@/components/ui/button';
 import { getTranslations } from 'next-intl/server';
+import { Separator } from '@/components/ui/separator';
 
 interface VerifyEmailPageProps {
     searchParams: Promise<{ token?: string }>;
@@ -29,6 +30,7 @@ export default async function VerifyEmailPage({
                 description={t('verifyEmailDescription')}
                 imageSrc="/assets/auth/images/Login.png"
             >
+                <Separator className="my-6" />
                 <p>{t('missingVerificationToken')}</p>
             </AuthShell>
         );
@@ -48,6 +50,7 @@ export default async function VerifyEmailPage({
                     description="Email verification in progress."
                     imageSrc="/assets/auth/images/Login.png"
                 >
+                    <Separator className="my-6" />
                     {response.error.message ===
                     'Verification token is required' ? (
                         <>

@@ -42,6 +42,7 @@ export default function EmailVerificationPrompt() {
                 default:
                     return (
                         <>
+                            <Separator className="my-6" />
                             <p className="text-muted-foreground text-center text-sm">
                                 {t('verificationEmailFailedMessage')}
                             </p>
