@@ -36,22 +36,28 @@ const COMPOSITION_SECTIONS: {
 ];
 
 interface OperationsSpecimenCompositionProps {
-    locationQueryParam: LocationQueryParam;
+    locationQueryParams: LocationQueryParam[];
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsSpecimenComposition({
-    locationQueryParam,
+    locationQueryParams,
     startDate,
     endDate,
 }: OperationsSpecimenCompositionProps) {
     const t = useTranslations('OperationsSpecimenComposition');
-    const locationFilter =
-        'district' in locationQueryParam
-            ? { districts: [locationQueryParam.district] }
-            : { siteIds: [locationQueryParam.siteId] };
-
+    const locationFilter = locationQueryParams.every(p => 'district' in p)
+        ? {
+              districts: locationQueryParams.map(
+                  p => (p as { district: string }).district,
+              ),
+          }
+        : {
+              siteIds: locationQueryParams.flatMap(p =>
+                  'siteId' in p ? [p.siteId] : [],
+              ),
+          };
     const getMonthlySpecimensCountQueryParams: GetMonthlySpecimensCountQueryParams =
         {
             startDate,

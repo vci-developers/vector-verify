@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/button';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectGroup,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from '@/components/ui/multi-select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { OperationsTab } from '@/features/operations/components/operations-page-client';
 import { Download } from 'lucide-react';
@@ -19,8 +18,8 @@ interface OperationsHeaderProps {
     onTabChange: (tab: OperationsTab) => void;
     locationTypeName: string;
     locationDropdownOptions: string[];
-    selectedLocation: string;
-    onLocationChange: (location: string) => void;
+    selectedLocations: string[];
+    onLocationsChange: (locations: string[]) => void;
     startMonth: Date;
     endMonth: Date;
     onStartMonthChange: (month: Date) => void;
@@ -34,8 +33,8 @@ export default function OperationsHeader({
     onTabChange,
     locationTypeName,
     locationDropdownOptions,
-    selectedLocation,
-    onLocationChange,
+    selectedLocations,
+    onLocationsChange,
     startMonth,
     endMonth,
     onStartMonthChange,
@@ -45,26 +44,31 @@ export default function OperationsHeader({
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <Select
-                    value={selectedLocation}
-                    onValueChange={onLocationChange}
+                <MultiSelect
+                    values={selectedLocations}
+                    onValuesChange={onLocationsChange}
                 >
-                    <SelectTrigger className="w-52">
-                        <SelectValue
-                            placeholder={`Select a ${locationTypeName.toLowerCase()}`}
+                    <MultiSelectTrigger className="w-52">
+                        <MultiSelectValue
+                            placeholder={`Select ${locationTypeName.toLocaleLowerCase()}(s)`}
+                            overflowBehavior="cutoff"
                         />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>{locationTypeName}</SelectLabel>
+                    </MultiSelectTrigger>
+                    <MultiSelectContent
+                        search={{
+                            placeholder: `Search ${locationTypeName.toLocaleLowerCase()}s...`,
+                            emptyMessage: 'No results.',
+                        }}
+                    >
+                        <MultiSelectGroup>
                             {locationDropdownOptions.map(option => (
-                                <SelectItem key={option} value={option}>
+                                <MultiSelectItem key={option} value={option}>
                                     {option}
-                                </SelectItem>
+                                </MultiSelectItem>
                             ))}
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+                        </MultiSelectGroup>
+                    </MultiSelectContent>
+                </MultiSelect>
 
                 <div className="flex items-center gap-2">
                     <MonthRangePicker
@@ -77,7 +81,7 @@ export default function OperationsHeader({
 
                     <Button
                         variant="default"
-                        disabled={!selectedLocation}
+                        disabled={selectedLocations.length === 0}
                         onClick={onExportClick}
                     >
                         <Download className="h-4 w-4" />

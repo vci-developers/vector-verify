@@ -17,7 +17,7 @@ import ExportDialog from '@/features/operations/components/export/export-dialog'
 import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { useLocationSelection } from '@/lib/location/use-location-selection';
+import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
 
 const OPERATIONS_TABS = [
     {
@@ -70,16 +70,19 @@ export default function OperationsPageClient() {
         : [];
 
     const {
-        selectedLocation,
-        setSelectedLocation,
+        selectedLocations,
+        setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
-        locationQueryParam,
-        descendantsOfSelectedLocation,
-    } = useLocationSelection(
+        locationQueryParams,
+        descendantsOfSelectedLocations,
+    } = useLocationMultiSelection(
         accessibleSites,
-        StorageKeys.operations.selectedLocation,
+        StorageKeys.operations.selectedLocations,
     );
+
+    //temporary until each tab is adjusted for handling multiple locations
+    const locationQueryParam = locationQueryParams[0]!;
 
     const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
         string | null
@@ -87,7 +90,7 @@ export default function OperationsPageClient() {
 
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [locationQueryParam, startMonth, endMonth, setSelectedMarkerId]);
+    }, [selectedLocations, startMonth, endMonth, setSelectedMarkerId]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -136,8 +139,8 @@ export default function OperationsPageClient() {
                         onTabChange={setActiveTab}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
-                        selectedLocation={selectedLocation}
-                        onLocationChange={setSelectedLocation}
+                        selectedLocations={selectedLocations}
+                        onLocationsChange={setSelectedLocations}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={setStartMonth}
@@ -147,7 +150,7 @@ export default function OperationsPageClient() {
 
                     <Separator />
 
-                    {!locationQueryParam ? (
+                    {locationQueryParams.length === 0 ? (
                         <div className="relative">
                             <SkeletonList count={5} height="xl" width="full" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -161,7 +164,7 @@ export default function OperationsPageClient() {
                         <Fragment>
                             {activeTab === 'specimen-composition' && (
                                 <OperationsSpecimenComposition
-                                    locationQueryParam={locationQueryParam}
+                                    locationQueryParams={locationQueryParams}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -170,9 +173,11 @@ export default function OperationsPageClient() {
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
                                     locationQueryParam={locationQueryParam}
-                                    selectedLocation={selectedLocation}
+                                    selectedLocation={
+                                        selectedLocations[0] ?? ''
+                                    }
                                     descendantsOfSelectedLocation={
-                                        descendantsOfSelectedLocation
+                                        descendantsOfSelectedLocations
                                     }
                                     startDate={startDate}
                                     endDate={endDate}
@@ -184,7 +189,9 @@ export default function OperationsPageClient() {
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
                                     locationQueryParam={locationQueryParam}
-                                    selectedLocationName={selectedLocation}
+                                    selectedLocationName={
+                                        selectedLocations[0] ?? ''
+                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -207,7 +214,7 @@ export default function OperationsPageClient() {
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
                 locationQueryParam={locationQueryParam!}
-                locationName={selectedLocation}
+                locationName={selectedLocations.join(', ')}
                 startDate={startDate}
                 endDate={endDate}
             />
