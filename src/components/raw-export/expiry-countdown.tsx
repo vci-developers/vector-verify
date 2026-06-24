@@ -11,15 +11,16 @@ export default function ExpiryCountdown({
     expiresAt,
     onExpire,
 }: ExpiryCountdownProps) {
+    const expiresAtMs = expiresAt * 1000;
     const [remainingMs, setRemainingMs] = useState(
-        Math.max(0, expiresAt - Date.now()),
+        Math.max(0, expiresAtMs - Date.now()),
     );
 
     useEffect(() => {
         function tick() {
-            const remaining = Math.max(0, expiresAt - Date.now());
-            setRemainingMs(remaining);
-            if (remaining <= 0) onExpire();
+            const remainingTime = Math.max(0, expiresAtMs - Date.now());
+            setRemainingMs(remainingTime);
+            if (remainingTime <= 0) onExpire();
         }
 
         tick();
