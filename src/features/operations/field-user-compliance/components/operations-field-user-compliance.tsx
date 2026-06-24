@@ -26,6 +26,7 @@ export default function OperationsFieldUserCompliance({
         ...buildSiteFilter(locationQueryParam),
         startDate,
         endDate,
+        type: 'SURVEILLANCE',
     });
 
     const { months, monthYearKeys } = useMemo(() => {
