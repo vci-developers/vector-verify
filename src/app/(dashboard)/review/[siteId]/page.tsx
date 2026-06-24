@@ -33,7 +33,7 @@ export default async function ReviewSiteDetailPage({
     const queryClient = new QueryClient();
 
     const getAllSessionsQueryParams: GetAllSessionsQueryParams = {
-        siteId,
+        siteIds: [siteId],
         startDate,
         endDate,
         type: 'SURVEILLANCE',

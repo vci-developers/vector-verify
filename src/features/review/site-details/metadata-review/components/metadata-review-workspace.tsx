@@ -37,7 +37,12 @@ export default function MetadataReviewWorkspace({
     const queryClient = useQueryClient();
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({ siteId, startDate, endDate, type: 'SURVEILLANCE' });
+        useGetAllSessions({
+            siteIds: [siteId],
+            startDate,
+            endDate,
+            type: 'SURVEILLANCE',
+        });
     const allSessionsForSite = getAllSessionsResult?.ok
         ? getAllSessionsResult.data.sessions
         : [];
@@ -136,7 +141,7 @@ export default function MetadataReviewWorkspace({
                         resetResolutions();
                         queryClient.invalidateQueries({
                             queryKey: sessionKeys.allSessions({
-                                siteId,
+                                siteIds: [siteId],
                                 startDate,
                                 endDate,
                                 type: 'SURVEILLANCE',

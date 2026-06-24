@@ -30,7 +30,7 @@ export default function CertificationWorkspace({
     const [hasAcknowledged, setHasAcknowledged] = useState(false);
 
     const { data: getAllSessionsResult } = useGetAllSessions({
-        siteId,
+        siteIds: [siteId],
         startDate,
         endDate,
         type: 'SURVEILLANCE',
