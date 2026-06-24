@@ -26,7 +26,7 @@ export default function ExpiryCountdown({
         tick();
         const intervalId = setInterval(tick, 1000);
         return () => clearInterval(intervalId);
-    }, [expiresAt, onExpire]);
+    }, [expiresAtMs, onExpire]);
 
     const totalSeconds = Math.ceil(remainingMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
