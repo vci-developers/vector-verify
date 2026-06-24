@@ -4,7 +4,10 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -56,7 +59,7 @@ export default function ReviewSitesList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            ...locationQueryParam,
+            ...buildSiteFilter(locationQueryParam),
             startDate,
             endDate,
             type: 'SURVEILLANCE',

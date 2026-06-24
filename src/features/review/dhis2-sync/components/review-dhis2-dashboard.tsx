@@ -4,7 +4,10 @@ import { useMemo, useState } from 'react';
 import Dhis2CycleSegment from './dhis2-cycle-segment';
 import Dhis2SyncToolbar from './dhis2-sync-toolbar';
 import type { Site } from '@/api/site/validation/site-schema';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { useTranslations } from 'next-intl';
@@ -51,7 +54,7 @@ export default function ReviewDhis2Dashboard({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            ...locationQueryParam,
+            ...buildSiteFilter(locationQueryParam),
             startDate,
             endDate,
             type: 'SURVEILLANCE',

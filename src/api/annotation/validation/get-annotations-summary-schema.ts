@@ -1,8 +1,9 @@
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 import { z } from 'zod';
 
 export const getAnnotationsSummaryQueryParamsSchema = z.object({
     district: z.string().optional(),
-    siteId: z.coerce.number().optional(),
+    siteIds: arrayQueryParamSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
 });

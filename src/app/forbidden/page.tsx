@@ -1,19 +1,49 @@
 import LogoutButton from '@/components/auth-session/logout-button';
 import { Button } from '@/components/ui/button';
-import { ShieldX } from 'lucide-react';
+import { cn } from '@/utils/cn';
+import { Hourglass, ShieldX } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
-export default function ForbiddenPage() {
+interface ForbiddenPageProps {
+    searchParams: Promise<{
+        reason?: string;
+    }>;
+}
+
+export default async function ForbiddenPage({
+    searchParams,
+}: ForbiddenPageProps) {
+    const { reason: accessDenialReason } = await searchParams;
+    const isPendingApproval = accessDenialReason === 'not-whitelisted';
+    const VariantIcon = isPendingApproval ? Hourglass : ShieldX;
+    const titleKey = isPendingApproval
+        ? 'notWhitelistedTitle'
+        : 'noAccessTitle';
+    const descriptionKey = isPendingApproval
+        ? 'notWhitelistedDescription'
+        : 'noAccessDescription';
+    const t = await getTranslations('Auth');
+
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-6">
-            <div className="bg-destructive/10 rounded-full p-6">
-                <ShieldX className="text-destructive h-12 w-12" />
+            <div
+                className={cn(
+                    'rounded-full p-6',
+                    isPendingApproval ? 'bg-success/10' : 'bg-destructive/10',
+                )}
+            >
+                <VariantIcon
+                    className={cn(
+                        'h-12 w-12',
+                        isPendingApproval ? 'text-success' : 'text-destructive',
+                    )}
+                />
             </div>
             <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-semibold">Access Denied</h1>
+                <h1 className="text-2xl font-semibold">{t(titleKey)}</h1>
                 <p className="text-muted-foreground max-w-sm text-sm">
-                    You don&apos;t have permission to view this page. Contact
-                    our technical team if you think this is a mistake.
+                    {t(descriptionKey)}
                 </p>
             </div>
             <div className="flex flex-col items-center gap-4">
@@ -21,6 +51,7 @@ export default function ForbiddenPage() {
                     {/* TODO: Revert to "/" / Return to Dashboard once the dashboard is restored. */}
                     <Link href="/operations">Return to Operations</Link>
                 </Button>
+
                 <LogoutButton />
             </div>
         </div>
