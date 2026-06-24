@@ -151,8 +151,9 @@ _Avoid_: Raw export (capitalise), DB dump, backup
 `POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
 access to an export (or report) path served directly by the backend. The browser
 downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
-only by **Raw Data Export**; the endpoint can also sign a **Report Export** path,
-which is not yet adopted. _Avoid_: Presigned link, temp link, download token
+only by **Raw Data Export**; the endpoint can also sign a **Report Export**
+path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
+token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only
