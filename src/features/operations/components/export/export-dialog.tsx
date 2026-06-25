@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { triggerFileDownload } from '@/lib/download/trigger-file-download';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import {
@@ -92,16 +93,10 @@ export default function ExportDialog({
                 return;
             }
 
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-
-            const anchor = document.createElement('a');
-            anchor.href = url;
-            anchor.download = `${locationName}-report-${startDate}-to-${endDate}.xlsx`;
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-            URL.revokeObjectURL(url);
+            await triggerFileDownload(
+                response,
+                `${locationName}-report-${startDate}-to-${endDate}.xlsx`,
+            );
 
             handleOpenChange(false);
         } catch {

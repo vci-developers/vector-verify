@@ -1,10 +1,11 @@
 'use client';
 
+import { useGetSpecimenById } from '@/api/specimen/hooks/use-get-specimen-by-id';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
+import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { MapPin } from 'lucide-react';
-import Image from 'next/image';
 import { Fragment } from 'react';
 
 interface SpecimenImageViewerProps {
@@ -14,8 +15,13 @@ interface SpecimenImageViewerProps {
 export default function SpecimenImageViewer({
     specimen,
 }: SpecimenImageViewerProps) {
+    const { data: getSpecimenByIdResult } = useGetSpecimenById(specimen.id);
+
+    const currentSpecimen =
+        getSpecimenByIdResult?.ok === true
+            ? getSpecimenByIdResult.data
+            : specimen;
     const site = specimen.session?.site;
-    const thumbnailUrl = specimen.thumbnailUrl;
 
     return (
         <Card>
@@ -34,23 +40,7 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-md">
-                    {thumbnailUrl ? (
-                        <Image
-                            src={`/api${thumbnailUrl}`}
-                            alt={`Specimen ${specimen?.specimenId}`}
-                            fill
-                            unoptimized
-                            className="object-contain"
-                        />
-                    ) : (
-                        <div className="flex h-full items-center justify-center">
-                            <p className="text-muted-foreground text-sm">
-                                No image available
-                            </p>
-                        </div>
-                    )}
-                </div>
+                <SpecimenImageCarousel specimen={currentSpecimen} />
 
                 <Separator />
 

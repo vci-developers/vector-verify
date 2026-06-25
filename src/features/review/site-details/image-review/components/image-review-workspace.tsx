@@ -3,7 +3,8 @@
 import { useGetAllSpecimens } from '@/api/specimen/hooks/use-get-all-specimens';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { Button } from '@/components/ui/button';
-import ImageReviewCarousel from './image-review-carousel';
+import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
+import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useState } from 'react';
@@ -14,6 +15,7 @@ interface ImageReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    collectionCycleId?: number;
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }
@@ -25,7 +27,8 @@ export default function ImageReviewWorkspace({
     onGoToPreviousStep,
     onGoToNextStep,
 }: ImageReviewWorkspaceProps) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [currentImageBeingViewed, setCurrentImageBeingViewed] =
+        useState<SpecimenImage | null>(null);
     const {
         page: currentSpecimenNumber,
         nextPage: goToNextSpecimen,
@@ -42,12 +45,19 @@ export default function ImageReviewWorkspace({
         });
 
     if (isGetAllSpecimensPending || !getAllSpecimensResult) {
-        return <h1>Loading...</h1>;
+        return (
+            <p className="text-muted-foreground text-sm">
+                Loading specimens...
+            </p>
+        );
     }
 
     if (!getAllSpecimensResult.ok) {
         return (
-            <h1>Error: {networkErrorMessage(getAllSpecimensResult.error)}</h1>
+            <p className="text-destructive text-sm">
+                Error loading specimens:{' '}
+                {networkErrorMessage(getAllSpecimensResult.error)}
+            </p>
         );
     }
 
@@ -82,18 +92,14 @@ export default function ImageReviewWorkspace({
     const totalSpecimensToReview = allSpecimensForSite.length;
     const currentSpecimenBeingReviewed =
         allSpecimensForSite[currentSpecimenNumber - 1]!;
-    const currentImageBeingViewed =
-        currentSpecimenBeingReviewed.images?.[currentImageIndex] ?? null;
     const isOnFirstSpecimen = currentSpecimenNumber === 1;
     const isOnLastSpecimen = currentSpecimenNumber === totalSpecimensToReview;
 
     function handleGoToPreviousSpecimen() {
-        setCurrentImageIndex(0);
         goToPreviousSpecimen(totalSpecimensToReview);
     }
 
     function handleGoToNextSpecimen() {
-        setCurrentImageIndex(0);
         goToNextSpecimen(totalSpecimensToReview);
     }
 
@@ -130,11 +136,10 @@ export default function ImageReviewWorkspace({
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardContent className="p-4">
-                        <ImageReviewCarousel
+                        <SpecimenImageCarousel
                             key={currentSpecimenBeingReviewed.id}
                             specimen={currentSpecimenBeingReviewed}
-                            currentImageIndex={currentImageIndex}
-                            onCurrentImageIndexChange={setCurrentImageIndex}
+                            onCurrentImageChange={setCurrentImageBeingViewed}
                         />
                     </CardContent>
                 </Card>

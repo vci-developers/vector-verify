@@ -1,5 +1,6 @@
 import { sessionTypeSchema } from '@/api/session/validation/session-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
+import { booleanQueryParamSchema } from '@/lib/network/validation/boolean-query-param-schema';
 import { z } from 'zod';
 
 export const getAllSpecimensQueryParamsSchema = z
@@ -9,9 +10,9 @@ export const getAllSpecimensQueryParamsSchema = z
         programId: z.coerce.number().optional(),
         district: z.string().optional(),
         specimenId: z.string().optional(),
-        shouldProcessFurther: z.coerce.boolean().optional(),
-        hasImages: z.coerce.boolean().optional(),
-        includeAllImages: z.coerce.boolean().optional(),
+        shouldProcessFurther: booleanQueryParamSchema().optional(),
+        hasImages: booleanQueryParamSchema().optional(),
+        includeAllImages: booleanQueryParamSchema().optional(),
         species: z.string().optional(),
         sex: z.string().optional(),
         abdomenStatus: z.string().optional(),

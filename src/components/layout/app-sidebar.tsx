@@ -3,14 +3,16 @@
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import {
+    BookOpen,
     ChevronUp,
     ClipboardCheck,
-    LayoutDashboard,
+    // LayoutDashboard,
     Moon,
     PencilRuler,
     Microscope,
     Sun,
     type LucideIcon,
+    Code2,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
@@ -28,6 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -37,6 +40,9 @@ import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
 import LogoutButton from '../auth-session/logout-button';
 import LocaleSwitcher from './locale-switcher';
+import { Badge } from '../ui/badge';
+import { Fragment, useState } from 'react';
+import RawDataExportDialog from '../raw-export/raw-data-export-dialog';
 
 type NavigationItem = {
     name: string;
@@ -46,12 +52,13 @@ type NavigationItem = {
 };
 
 const navigation: NavigationItem[] = [
-    {
-        name: 'Dashboard',
-        href: '/',
-        icon: LayoutDashboard,
-        canAccess: () => true,
-    },
+    // TODO: Revert — Dashboard nav item temporarily hidden while the dashboard is under construction.
+    // {
+    //     name: 'Dashboard',
+    //     href: '/',
+    //     icon: LayoutDashboard,
+    //     canAccess: () => true,
+    // },
     {
         name: 'Review',
         href: '/review',
@@ -71,6 +78,12 @@ const navigation: NavigationItem[] = [
         canAccess: permissions =>
             permissions.annotations.viewAndWriteAnnotationTasks,
     },
+    {
+        name: 'Documentation',
+        href: '/docs',
+        icon: BookOpen,
+        canAccess: () => true,
+    },
 ];
 
 interface AppSidebarProps {
@@ -84,6 +97,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const [isRawDataExportOpen, setIsRawDataExportOpen] = useState(false);
 
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
@@ -172,24 +187,79 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                             </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel className="space-y-1">
-                                <div className="text-sm leading-none font-medium">
-                                    {userProfile.email}
+                        <DropdownMenuContent align="end" className="w-64">
+                            <DropdownMenuLabel className="p-0 font-normal">
+                                <div className="flex items-start gap-2 px-2 py-2">
+                                    <Avatar className="border-primary/40 h-9 w-9 border">
+                                        <AvatarFallback className="font-semibold">
+                                            {userProfile.email
+                                                .charAt(0)
+                                                .toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex min-w-0 flex-col gap-1">
+                                        <span className="truncate text-sm leading-none font-medium">
+                                            {userProfile.name ??
+                                                userProfile.email.split('@')[0]}
+                                        </span>
+                                        <span className="text-muted-foreground truncate text-xs leading-none">
+                                            {userProfile.email}
+                                        </span>
+                                        {userPermissions.devMode && (
+                                            <Badge
+                                                variant="secondary"
+                                                className="mt-1"
+                                            >
+                                                <Code2 />
+                                                Developer Status
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </DropdownMenuLabel>
+
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleThemeToggle}>
-                                <ThemeIcon className="h-4 w-4" />
-                                {isDark ? 'Light mode' : 'Dark mode'}
-                            </DropdownMenuItem>
-                            <LocaleSwitcher />
+
+                            <DropdownMenuGroup>
+                                <DropdownMenuLabel className="text-muted-foreground py-1 text-xs font-normal">
+                                    Preferences
+                                </DropdownMenuLabel>
+                                <DropdownMenuItem onClick={handleThemeToggle}>
+                                    <ThemeIcon className="h-4 w-4" />
+                                    {isDark ? 'Light mode' : 'Dark mode'}
+                                </DropdownMenuItem>
+                                <LocaleSwitcher />
+                            </DropdownMenuGroup>
+
+                            {userPermissions.devMode && (
+                                <Fragment>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onSelect={() =>
+                                            setIsRawDataExportOpen(true)
+                                        }
+                                    >
+                                        <Code2 className="h-4 w-4" />
+                                        Raw Data Export
+                                    </DropdownMenuItem>
+                                </Fragment>
+                            )}
+
                             <DropdownMenuSeparator />
+
                             <DropdownMenuItem asChild>
                                 <LogoutButton />
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    {userPermissions.devMode && (
+                        <RawDataExportDialog
+                            open={isRawDataExportOpen}
+                            onOpenChange={setIsRawDataExportOpen}
+                            programId={getUserPermissionsResult.data.programId}
+                        />
+                    )}
                 </div>
             </SidebarContent>
 

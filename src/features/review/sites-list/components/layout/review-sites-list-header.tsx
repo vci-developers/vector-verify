@@ -1,3 +1,5 @@
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
+import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,
@@ -9,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ReviewTab } from '../review-sites-list-page-client';
+import type { ReviewTab } from '@/features/review/sites-list/components/review-sites-list-page-client';
 
 interface ReviewSitesListHeaderProps {
     tabs: readonly { value: ReviewTab; label: string }[];
@@ -19,10 +21,15 @@ interface ReviewSitesListHeaderProps {
     locationDropdownOptions: string[];
     selectedLocation: string;
     onLocationChange: (location: string) => void;
+    collectionCycles: CollectionCycle[];
+    selectedCycleIds: number[];
+    onCycleIdsChange: (ids: number[]) => void;
+    disabled: boolean;
     startMonth: Date;
     endMonth: Date;
     onStartMonthChange: (month: Date) => void;
     onEndMonthChange: (month: Date) => void;
+    maxDate: Date;
 }
 
 export default function ReviewSitesListHeader({
@@ -33,14 +40,19 @@ export default function ReviewSitesListHeader({
     locationDropdownOptions,
     selectedLocation,
     onLocationChange,
+    collectionCycles,
+    selectedCycleIds,
+    onCycleIdsChange,
+    disabled,
     startMonth,
     endMonth,
     onStartMonthChange,
     onEndMonthChange,
+    maxDate,
 }: ReviewSitesListHeaderProps) {
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
+            <div className="space-y-4">
                 <Select
                     value={selectedLocation}
                     onValueChange={onLocationChange}
@@ -62,31 +74,39 @@ export default function ReviewSitesListHeader({
                     </SelectContent>
                 </Select>
 
+                <Tabs
+                    value={activeTab}
+                    onValueChange={value => onTabChange(value as ReviewTab)}
+                >
+                    <TabsList className="bg-muted/50 rounded-full p-1">
+                        {tabs.map(tab => (
+                            <TabsTrigger
+                                key={tab.value}
+                                value={tab.value}
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                            >
+                                {tab.label}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <CollectionCyclePicker
+                    collectionCycles={collectionCycles}
+                    selectedCycleIds={selectedCycleIds}
+                    onChange={onCycleIdsChange}
+                    disabled={disabled}
+                />
                 <MonthRangePicker
                     startMonth={startMonth}
                     endMonth={endMonth}
                     onStartMonthChange={onStartMonthChange}
                     onEndMonthChange={onEndMonthChange}
-                    maxDate={new Date()}
+                    maxDate={maxDate}
                 />
             </div>
-
-            <Tabs
-                value={activeTab}
-                onValueChange={value => onTabChange(value as ReviewTab)}
-            >
-                <TabsList className="bg-muted/50 rounded-full p-1">
-                    {tabs.map(tab => (
-                        <TabsTrigger
-                            key={tab.value}
-                            value={tab.value}
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
-                        >
-                            {tab.label}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
         </div>
     );
 }
