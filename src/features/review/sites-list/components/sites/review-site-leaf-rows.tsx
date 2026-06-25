@@ -22,6 +22,7 @@ interface ReviewSiteLeafRowsProps {
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     startDate: string;
     endDate: string;
+    collectionCycleId?: number;
 }
 
 function buildReviewHref(
@@ -29,12 +30,16 @@ function buildReviewHref(
     startDate: string,
     endDate: string,
     displayName: string,
+    collectionCycleId?: number,
 ) {
     const queryParams = new URLSearchParams({
         startDate,
         endDate,
         displayName,
     });
+    if (collectionCycleId !== undefined) {
+        queryParams.set('collectionCycleId', String(collectionCycleId));
+    }
     return `/review/${site.siteId}?${queryParams.toString()}`;
 }
 
@@ -44,6 +49,7 @@ export default function ReviewSiteLeafRows({
     sessionCountsBySiteId,
     startDate,
     endDate,
+    collectionCycleId,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
     if (sites.length === 0) return null;
@@ -126,6 +132,7 @@ export default function ReviewSiteLeafRows({
                                 startDate,
                                 endDate,
                                 getDisplayName(site),
+                                collectionCycleId,
                             )}
                             className={rowClassName}
                         >

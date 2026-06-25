@@ -4,7 +4,10 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { useMemo } from 'react';
 import { buildSiteMarkers } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import type { Site } from '@/api/site/validation/site-schema';
 
 interface UseSiteMarkersParams {
@@ -20,10 +23,7 @@ export function useSiteMarkers({
     startDate,
     endDate,
 }: UseSiteMarkersParams) {
-    const locationFilter =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
+    const locationFilter = buildSiteFilter(locationQueryParam);
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({

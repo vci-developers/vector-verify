@@ -45,7 +45,7 @@ export default async function DashboardLayout({
             redirect('/login');
         }
         if (authorizedGetUserProfileResult.error.kind === 'forbidden') {
-            redirect('/forbidden');
+            redirect('/forbidden?reason=not-whitelisted');
         }
         return (
             <h1>

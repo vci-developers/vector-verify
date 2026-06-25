@@ -46,12 +46,7 @@ function getSubmitButtonLabel(status: Dhis2SyncSiteStatus): string {
     }
 }
 
-function getSubmitBlockReason(
-    status: Dhis2SyncSiteStatus,
-    siteHasUnassignedSessions: boolean,
-): string | undefined {
-    if (siteHasUnassignedSessions)
-        return "Resolve this site's unassigned sessions in Review first.";
+function getSubmitBlockReason(status: Dhis2SyncSiteStatus): string | undefined {
     if (status === 'queued' || status === 'running')
         return 'A submission is already in progress.';
     return undefined;
@@ -61,7 +56,6 @@ interface Dhis2SiteRowProps {
     site: Site;
     collectionCycle: CollectionCycle;
     siteSessionSummary: ReviewSiteSessionSummary;
-    siteHasUnassignedSessions: boolean;
     isSelected: boolean;
     onToggleSelected: () => void;
 }
@@ -70,7 +64,6 @@ export default function Dhis2SiteRow({
     site,
     collectionCycle,
     siteSessionSummary,
-    siteHasUnassignedSessions,
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
@@ -147,13 +140,10 @@ export default function Dhis2SiteRow({
         status === undefined ||
         status === 'queued' ||
         status === 'running' ||
-        status === 'submitted' ||
-        siteHasUnassignedSessions;
+        status === 'submitted';
 
     const submitBlockReason =
-        status !== undefined
-            ? getSubmitBlockReason(status, siteHasUnassignedSessions)
-            : undefined;
+        status !== undefined ? getSubmitBlockReason(status) : undefined;
 
     function handleSubmit(irsData: SiteIrsData[]) {
         createDhis2SyncTask({

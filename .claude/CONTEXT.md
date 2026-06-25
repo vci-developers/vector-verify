@@ -17,6 +17,26 @@ access VectorVerify directly. _Avoid_: Collector, field worker, field team
 performs both the Annotation and Review workflows in VectorVerify. _Avoid_:
 Expert reviewer, annotator, program editor, supervisor
 
+### Access & Authorization
+
+**Whitelisted**: An account state (`user.isWhitelisted`) meaning a program
+administrator has approved the user for VectorVerify access. A logged-in user
+who is not yet whitelisted is _awaiting approval_ and can reach no feature page.
+_Avoid_: Approved, enabled, active (distinct from `isActive`)
+
+**Access Denial**: The single `/forbidden` page covers two distinct situations,
+distinguished by a cosmetic `?reason=` param (UX only — real access control is
+enforced server-side in each route's layout, never by this param):
+
+- **Pending approval** (`reason=not-whitelisted`): logged-in but not yet
+  whitelisted; no feature is reachable, so the only action is Logout.
+- **No access** (default — no `reason` param): a whitelisted user who lacks the
+  privilege for a specific feature (Annotation / Operations / Review); offered a
+  link home (`/`) plus Logout as a fallback. Any unrecognized `reason` also
+  falls through to this state.
+
+_Avoid_: Forbidden (alone, ambiguous between the two reasons)
+
 ### Workflows
 
 **Annotation**: A task-based workflow in which a VCO labels mosquito specimens
@@ -121,8 +141,19 @@ health officers. _Avoid_: Export (alone, ambiguous — see Flagged ambiguities)
 from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
-in the global user menu, not the Operations page. Audience: developers. _Avoid_:
-Raw export (capitalise), DB dump, backup
+in the global user menu, not the Operations page. Audience: developers.
+Delivered as a temporary, expiring **Signed Export URL** (obtained via
+`POST /export/sign`) that the developer clicks to download directly from the
+backend — VectorVerify signs the request but no longer proxies the CSV stream.
+_Avoid_: Raw export (capitalise), DB dump, backup
+
+**Signed Export URL**: A short-lived, pre-signed URL returned by
+`POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
+access to an export (or report) path served directly by the backend. The browser
+downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
+only by **Raw Data Export**; the endpoint can also sign a **Report Export**
+path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
+token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only

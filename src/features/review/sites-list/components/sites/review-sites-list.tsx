@@ -4,7 +4,10 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { Site } from '@/api/site/validation/site-schema';
 import { ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -56,7 +59,7 @@ export default function ReviewSitesList({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            ...locationQueryParam,
+            ...buildSiteFilter(locationQueryParam),
             startDate,
             endDate,
             type: 'SURVEILLANCE',
@@ -95,10 +98,8 @@ export default function ReviewSitesList({
 
     const cycleSegments = useMemo(() => {
         if (selectedCycleIds.length === 0) return allCycleSegments;
-        return allCycleSegments.filter(
-            cycleSegment =>
-                cycleSegment.cycle !== null &&
-                selectedCycleIds.includes(cycleSegment.cycle.id),
+        return allCycleSegments.filter(cycleSegment =>
+            selectedCycleIds.includes(cycleSegment.cycle.id),
         );
     }, [allCycleSegments, selectedCycleIds]);
 
@@ -169,31 +170,22 @@ export default function ReviewSitesList({
         return (
             <div className="space-y-2">
                 {cycleSegments.map(cycleSegment => {
-                    const key =
-                        cycleSegment.cycle !== null
-                            ? String(cycleSegment.cycle.id)
-                            : 'unassigned';
+                    const key = String(cycleSegment.cycle.id);
                     const isCollapsed = collapsedSegments.has(key);
 
-                    const segmentStartDate =
-                        cycleSegment.cycle !== null
-                            ? format(
-                                  new Date(cycleSegment.cycle.startDate),
-                                  'yyyy-MM-dd',
-                              )
-                            : startDate;
-                    const segmentEndDate =
-                        cycleSegment.cycle !== null
-                            ? format(
-                                  new Date(cycleSegment.cycle.endDate),
-                                  'yyyy-MM-dd',
-                              )
-                            : endDate;
+                    const segmentStartDate = format(
+                        new Date(cycleSegment.cycle.startDate),
+                        'yyyy-MM-dd',
+                    );
+                    const segmentEndDate = format(
+                        new Date(cycleSegment.cycle.endDate),
+                        'yyyy-MM-dd',
+                    );
 
-                    const label =
-                        cycleSegment.cycle !== null
-                            ? formatCollectionCycleLabel(cycleSegment.cycle, t)
-                            : t('unassignedSessions');
+                    const label = formatCollectionCycleLabel(
+                        cycleSegment.cycle,
+                        t,
+                    );
 
                     return (
                         <Collapsible
@@ -213,6 +205,7 @@ export default function ReviewSitesList({
                                     parentPath={key}
                                     startDate={segmentStartDate}
                                     endDate={segmentEndDate}
+                                    collectionCycleId={cycleSegment.cycle.id}
                                     sessionCountsBySiteId={
                                         cycleSegment.sessionSummaryBySiteId
                                     }
