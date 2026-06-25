@@ -20,6 +20,7 @@ import type { CollectionCycle } from '@/api/collection-cycle/validation/collecti
 import { buildCollectionCycleSegments } from '@/features/review/sites-list/utils/build-collection-cycle-segments';
 import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
 import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
+import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import ReviewSiteHierarchy from '@/features/review/sites-list/components/sites/review-site-hierarchy';
 import { type ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
@@ -73,8 +74,9 @@ export default function ReviewSitesList({
         if (!getAllSessionsResult?.ok) return map;
 
         for (const session of getAllSessionsResult.data.sessions) {
-            const monthKey = format(
-                new Date(session.collectionDate),
+            const monthKey = formatDateInTimezone(
+                session.collectionDate,
+                'UTC',
                 'yyyy-MM',
             );
             if (!map.has(monthKey)) map.set(monthKey, new Map());
@@ -173,14 +175,22 @@ export default function ReviewSitesList({
                     const key = String(cycleSegment.cycle.id);
                     const isCollapsed = collapsedSegments.has(key);
 
-                    const segmentStartDate = format(
-                        new Date(cycleSegment.cycle.startDate),
-                        'yyyy-MM-dd',
-                    );
-                    const segmentEndDate = format(
-                        new Date(cycleSegment.cycle.endDate),
-                        'yyyy-MM-dd',
-                    );
+                    const segmentStartDate =
+                        cycleSegment.cycle !== null
+                            ? formatDateInTimezone(
+                                  cycleSegment.cycle.startDate,
+                                  cycleSegment.cycle.timezone,
+                                  'yyyy-MM-dd',
+                              )
+                            : startDate;
+                    const segmentEndDate =
+                        cycleSegment.cycle !== null
+                            ? formatDateInTimezone(
+                                  cycleSegment.cycle.endDate,
+                                  cycleSegment.cycle.timezone,
+                                  'yyyy-MM-dd',
+                              )
+                            : endDate;
 
                     const label = formatCollectionCycleLabel(
                         cycleSegment.cycle,

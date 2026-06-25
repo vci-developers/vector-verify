@@ -8,6 +8,7 @@ export const collectionCycleSchema = z.object({
     cycleNumber: z.number(),
     startDate: z.number(),
     endDate: z.number(),
+    timezone: z.string().nullable(),
     createdAt: z.number(),
     updatedAt: z.number(),
     collectionSchedule: collectionScheduleSchema.optional(),

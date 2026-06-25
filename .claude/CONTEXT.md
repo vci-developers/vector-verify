@@ -77,6 +77,18 @@ by a VCO during Review (the exception case). Note: adoption is not yet universal
 established, produce sessions with no cycle assignment. _Avoid_: Reporting
 period, month (when a custom cycle is in use)
 
+**Timezone**: The IANA timezone name (e.g. `Africa/Kampala`) used to display
+Session collection dates and Collection Cycle windows in the region where
+collection happened — never the reviewer's browser timezone. Owned by the
+**Collection Schedule** and denormalized onto every **Collection Cycle** it
+generates. Because a Schedule is program-scoped with only one active per program
+(and all a program's sites share it), **a Site is governed by exactly one
+timezone at a time** — a single Site whose Sessions span two timezones is a data
+error, not a valid state. The value is unvalidated free text on the backend and
+may be `null` (cycles predating the column, or schedules with no timezone); the
+web app falls back to UTC for display when it is `null`. _Avoid_: browser
+timezone, local time, offset
+
 **Session**: A single field data collection event at a site, conducted by a VHT
 using the VectorCam mobile app. Only sessions of type `SURVEILLANCE` enter the
 Review workflow. `collectionCycleId` is nullable — sessions from programs
