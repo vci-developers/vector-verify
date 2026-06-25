@@ -19,7 +19,7 @@ interface MetadataReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
-    collectionCycleId?: number | 'null';
+    collectionCycleId?: number;
     onGoToNextStep: () => void;
 }
 
@@ -152,8 +152,7 @@ export default function MetadataReviewWorkspace({
                     if (result.ok) {
                         resetResolutions();
                         queryClient.invalidateQueries({
-                            queryKey:
-                                sessionKeys.allSessions(sessionQueryParams),
+                            queryKey: sessionKeys.root,
                         });
                         for (const session of allSessionsForSite) {
                             queryClient.invalidateQueries({

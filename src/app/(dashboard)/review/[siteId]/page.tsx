@@ -36,12 +36,10 @@ export default async function ReviewSiteDetailPage({
         collectionCycleId: collectionCycleIdParam,
     } = await searchParams;
 
-    const collectionCycleId: number | 'null' | undefined =
+    const collectionCycleId: number | undefined =
         collectionCycleIdParam === undefined
             ? undefined
-            : collectionCycleIdParam === 'null'
-              ? 'null'
-              : Number(collectionCycleIdParam);
+            : Number(collectionCycleIdParam);
 
     const queryClient = new QueryClient();
 

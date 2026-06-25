@@ -27,7 +27,7 @@ interface ReviewSiteHierarchyProps {
     parentPath: string;
     startDate: string;
     endDate: string;
-    collectionCycleId?: number | 'null';
+    collectionCycleId?: number;
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onTogglePath: (path: string, descendantPaths: string[]) => void;

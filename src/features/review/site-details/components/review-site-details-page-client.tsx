@@ -20,7 +20,7 @@ interface ReviewSiteDetailsPageClientProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
-    collectionCycleId?: number | 'null';
+    collectionCycleId?: number;
     siteName?: string;
 }
 

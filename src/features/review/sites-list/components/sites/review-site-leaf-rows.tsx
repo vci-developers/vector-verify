@@ -22,7 +22,7 @@ interface ReviewSiteLeafRowsProps {
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     startDate: string;
     endDate: string;
-    collectionCycleId?: number | 'null';
+    collectionCycleId?: number;
 }
 
 function buildReviewHref(
@@ -30,7 +30,7 @@ function buildReviewHref(
     startDate: string,
     endDate: string,
     displayName: string,
-    collectionCycleId?: number | 'null',
+    collectionCycleId?: number,
 ) {
     const queryParams = new URLSearchParams({
         startDate,

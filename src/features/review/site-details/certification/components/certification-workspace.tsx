@@ -17,7 +17,7 @@ interface CertificationWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
-    collectionCycleId?: number | 'null';
+    collectionCycleId?: number;
     onGoToPreviousStep: () => void;
 }
 
