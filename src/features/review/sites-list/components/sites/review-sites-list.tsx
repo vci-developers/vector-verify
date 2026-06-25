@@ -216,6 +216,11 @@ export default function ReviewSitesList({
                                     parentPath={key}
                                     startDate={segmentStartDate}
                                     endDate={segmentEndDate}
+                                    collectionCycleId={
+                                        cycleSegment.cycle !== null
+                                            ? cycleSegment.cycle.id
+                                            : 'null'
+                                    }
                                     sessionCountsBySiteId={
                                         cycleSegment.sessionSummaryBySiteId
                                     }

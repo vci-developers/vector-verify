@@ -27,6 +27,7 @@ interface ReviewSiteHierarchyProps {
     parentPath: string;
     startDate: string;
     endDate: string;
+    collectionCycleId?: number | 'null';
     sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
     expandedSitePaths: Set<string>;
     onTogglePath: (path: string, descendantPaths: string[]) => void;
@@ -37,6 +38,7 @@ export default function ReviewSiteHierarchy({
     parentPath,
     startDate,
     endDate,
+    collectionCycleId,
     sessionCountsBySiteId,
     expandedSitePaths,
     onTogglePath,
@@ -55,6 +57,7 @@ export default function ReviewSiteHierarchy({
                     sessionCountsBySiteId={sessionCountsBySiteId}
                     startDate={startDate}
                     endDate={endDate}
+                    collectionCycleId={collectionCycleId}
                 />
             )}
             renderGroupContent={sitesInGroup => {
