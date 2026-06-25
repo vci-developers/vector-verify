@@ -173,11 +173,9 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
-                                    locationQueryParam={locationQueryParam}
-                                    selectedLocation={
-                                        selectedLocations[0] ?? ''
-                                    }
-                                    descendantsOfSelectedLocation={
+                                    siteIds={selectedSiteIdsParam}
+                                    selectedLocations={selectedLocations}
+                                    descendantsOfSelectedLocations={
                                         descendantsOfSelectedLocations
                                     }
                                     startDate={startDate}
@@ -198,7 +196,7 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'field-user-compliance' && (
                                 <OperationsFieldUserCompliance
-                                    locationQueryParam={locationQueryParam}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

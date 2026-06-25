@@ -16,7 +16,6 @@ import {
 import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
 import { useTranslations, useFormatter } from 'next-intl';
-import { useForm } from 'react-hook-form';
 
 const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 

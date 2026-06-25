@@ -4,33 +4,27 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { useMemo } from 'react';
 import { buildSiteMarkers } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import type { Site } from '@/api/site/validation/site-schema';
 
 interface UseSiteMarkersParams {
-    locationQueryParam: LocationQueryParam;
-    descendantsOfSelectedLocation: Site[];
+    siteIds: number[];
+    descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
 }
 
 export function useSiteMarkers({
-    locationQueryParam,
-    descendantsOfSelectedLocation,
+    siteIds,
+    descendantsOfSelectedLocations,
     startDate,
     endDate,
 }: UseSiteMarkersParams) {
-    const locationFilter =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
-
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
             startDate,
             endDate,
             type: 'SURVEILLANCE',
-            ...locationFilter,
+            siteIds,
         });
 
     const {
@@ -40,7 +34,7 @@ export function useSiteMarkers({
         startDate,
         endDate,
         sessionType: 'SURVEILLANCE',
-        ...locationFilter,
+        siteIds,
     });
 
     const isPending = isGetAllSessionsPending || isGetSpecimensCountPending;
@@ -52,12 +46,12 @@ export function useSiteMarkers({
         return buildSiteMarkers(
             getSpecimensCountResult.data.data,
             getAllSessionsResult.data.sessions,
-            descendantsOfSelectedLocation,
+            descendantsOfSelectedLocations,
         );
     }, [
         getAllSessionsResult,
         getSpecimensCountResult,
-        descendantsOfSelectedLocation,
+        descendantsOfSelectedLocations,
     ]);
 
     return {

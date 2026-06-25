@@ -1,11 +1,12 @@
 import { sessionTypeSchema } from '@/api/session/validation/session-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 import { booleanQueryParamSchema } from '@/lib/network/validation/boolean-query-param-schema';
 import { z } from 'zod';
 
 export const getSpecimensCountQueryParamsSchema = z.object({
     sessionId: z.coerce.number().optional(),
-    siteId: z.coerce.number().optional(),
+    siteIds: arrayQueryParamSchema.optional(),
     district: z.string().optional(),
     specimenId: z.string().optional(),
     shouldProcessFurther: booleanQueryParamSchema().optional(),

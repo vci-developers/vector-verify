@@ -4,11 +4,12 @@ import {
     sessionStateSchema,
     sessionTypeSchema,
 } from '@/api/session/validation/session-schema';
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 
 export const getAllSessionsQueryParamsSchema = z
     .object({
         district: z.string().optional(),
-        siteId: z.coerce.number().optional(),
+        siteIds: arrayQueryParamSchema.optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
         state: sessionStateSchema.optional(),
@@ -17,7 +18,7 @@ export const getAllSessionsQueryParamsSchema = z
     .refine(
         queryParams =>
             queryParams.district !== undefined ||
-            queryParams.siteId !== undefined,
+            queryParams.siteIds !== undefined,
         { message: 'Either district or siteId must be provided' },
     );
 

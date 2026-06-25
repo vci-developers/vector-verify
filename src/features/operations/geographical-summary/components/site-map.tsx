@@ -18,14 +18,14 @@ const DEFAULT_ZOOM = 2;
 
 interface SiteMapProps {
     markers: SiteMarker[];
-    selectedLocation: string;
+    selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
 }
 
 export default function SiteMap({
     markers,
-    selectedLocation,
+    selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
 }: SiteMapProps) {
@@ -60,7 +60,7 @@ export default function SiteMap({
                 >
                     <MapNavigator
                         bounds={markerBounds}
-                        selectedLocation={selectedLocation}
+                        selectedLocations={selectedLocations}
                     />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
