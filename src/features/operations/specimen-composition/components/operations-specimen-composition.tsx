@@ -11,7 +11,6 @@ import {
     groupSpecimenCountsByMonth,
     sumSpecimenCountsByClass,
 } from '../utils/specimen-composition-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import {
     MultiSelect,
     MultiSelectTrigger,
@@ -36,34 +35,23 @@ const COMPOSITION_SECTIONS: {
 ];
 
 interface OperationsSpecimenCompositionProps {
-    locationQueryParams: LocationQueryParam[];
+    siteIds: number[];
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsSpecimenComposition({
-    locationQueryParams,
+    siteIds,
     startDate,
     endDate,
 }: OperationsSpecimenCompositionProps) {
     const t = useTranslations('OperationsSpecimenComposition');
-    const locationFilter = locationQueryParams.every(p => 'district' in p)
-        ? {
-              districts: locationQueryParams.map(
-                  p => (p as { district: string }).district,
-              ),
-          }
-        : {
-              siteIds: locationQueryParams.flatMap(p =>
-                  'siteId' in p ? [p.siteId] : [],
-              ),
-          };
     const getMonthlySpecimensCountQueryParams: GetMonthlySpecimensCountQueryParams =
         {
             startDate,
             endDate,
             sessionType: 'SURVEILLANCE',
-            ...locationFilter,
+            siteIds,
         };
 
     const {

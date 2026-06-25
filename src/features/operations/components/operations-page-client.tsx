@@ -75,6 +75,7 @@ export default function OperationsPageClient() {
         locationTypeName,
         locationDropdownOptions,
         locationQueryParams,
+        selectedSiteIdsParam,
         descendantsOfSelectedLocations,
     } = useLocationMultiSelection(
         accessibleSites,
@@ -150,7 +151,7 @@ export default function OperationsPageClient() {
 
                     <Separator />
 
-                    {locationQueryParams.length === 0 ? (
+                    {!selectedSiteIdsParam ? (
                         <div className="relative">
                             <SkeletonList count={5} height="xl" width="full" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -164,7 +165,7 @@ export default function OperationsPageClient() {
                         <Fragment>
                             {activeTab === 'specimen-composition' && (
                                 <OperationsSpecimenComposition
-                                    locationQueryParams={locationQueryParams}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -188,10 +189,8 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
-                                    locationQueryParam={locationQueryParam}
-                                    selectedLocationName={
-                                        selectedLocations[0] ?? ''
-                                    }
+                                    siteIds={selectedSiteIdsParam}
+                                    selectedLocationNames={selectedLocations}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

@@ -4,29 +4,25 @@ import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotat
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
 import { Card, CardContent } from '@/components/ui/card';
 import SpecimenConfusionMatrix from './specimen-confusion-matrix';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
+import { useFormatter } from 'next-intl';
 
 interface OperationsAiPerformanceProps {
-    locationQueryParam: LocationQueryParam;
-    selectedLocationName: string;
+    siteIds: number[];
+    selectedLocationNames: string[];
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsAiPerformance({
-    locationQueryParam,
-    selectedLocationName,
+    siteIds,
+    selectedLocationNames,
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
-    const annotationLocationQueryParams =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
-
+    const f = useFormatter();
     const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
-        ...annotationLocationQueryParams,
+        siteIds,
         startDate,
         endDate,
     };
@@ -63,8 +59,10 @@ export default function OperationsAiPerformance({
             <div className="border-accent bg-accent/40 text-accent-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-sm">
                 <Info className="h-4 w-4" />
                 <span>
-                    Coverage reflects reviewed specimens for
-                    {` ${selectedLocationName} `}
+                    Coverage reflects reviewed specimens for{' '}
+                    {f.list(selectedLocationNames, {
+                        type: 'conjunction',
+                    })}{' '}
                     where review means annotated or flagged.
                 </span>
             </div>
@@ -111,7 +109,7 @@ export default function OperationsAiPerformance({
                         confusionMatrix={
                             annotationsSummary.confusionMatrices.species
                         }
-                        selectedLocationName={selectedLocationName}
+                        selectedLocationNames={selectedLocationNames}
                     />
                 )}
 
@@ -124,7 +122,7 @@ export default function OperationsAiPerformance({
                         confusionMatrix={
                             annotationsSummary.confusionMatrices.sex
                         }
-                        selectedLocationName={selectedLocationName}
+                        selectedLocationNames={selectedLocationNames}
                     />
                 )}
 
@@ -137,7 +135,7 @@ export default function OperationsAiPerformance({
                         confusionMatrix={
                             annotationsSummary.confusionMatrices.abdomenStatus
                         }
-                        selectedLocationName={selectedLocationName}
+                        selectedLocationNames={selectedLocationNames}
                     />
                 )}
             </div>

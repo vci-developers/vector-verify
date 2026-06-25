@@ -49,21 +49,6 @@ export function useLocationMultiSelection(
         [usesLegacyStructure, accessibleSites, topLevelSites],
     );
 
-    const selectedSiteIds = useMemo(() => {
-        if (usesLegacyStructure) return [];
-        return selectedLocations
-            .map(name => topLevelSites.find(site => site.name === name)?.siteId)
-            .filter((id): id is number => id !== undefined);
-    }, [usesLegacyStructure, selectedLocations, topLevelSites]);
-
-    const locationQueryParams: LocationQueryParam[] | undefined =
-        useMemo(() => {
-            if (selectedLocations.length === 0) return [];
-            return usesLegacyStructure
-                ? selectedLocations.map(district => ({ district }))
-                : selectedSiteIds.map(siteId => ({ siteId }));
-        }, [selectedLocations, usesLegacyStructure, selectedSiteIds]);
-
     const descendantsOfSelectedLocations = useMemo(() => {
         if (selectedLocations.length === 0) return [];
         if (usesLegacyStructure) {
@@ -71,6 +56,9 @@ export function useLocationMultiSelection(
                 selectedLocations.includes(site.district?.trim() ?? ''),
             );
         }
+        const selectedSiteIds = selectedLocations
+            .map(name => topLevelSites.find(s => s.name === name)?.siteId)
+            .filter((id): id is number => id !== undefined);
         return selectedSiteIds.flatMap(id =>
             getSiteAndDescendants(accessibleSites, id),
         );
@@ -78,8 +66,24 @@ export function useLocationMultiSelection(
         selectedLocations,
         usesLegacyStructure,
         accessibleSites,
-        selectedSiteIds,
+        topLevelSites,
     ]);
+
+    const locationQueryParams: LocationQueryParam[] = useMemo(() => {
+        if (selectedLocations.length === 0) return [];
+        if (usesLegacyStructure) {
+            return selectedLocations.map(district => ({ district }));
+        }
+        return selectedLocations
+            .map(name => topLevelSites.find(s => s.name === name)?.siteId)
+            .filter((id): id is number => id !== undefined)
+            .map(siteId => ({ siteId }));
+    }, [selectedLocations, usesLegacyStructure, topLevelSites]);
+
+    const selectedSiteIdsParam: number[] | undefined = useMemo(() => {
+        if (descendantsOfSelectedLocations.length === 0) return undefined;
+        return descendantsOfSelectedLocations.map(site => site.siteId);
+    }, [descendantsOfSelectedLocations]);
 
     return {
         selectedLocations,
@@ -87,6 +91,7 @@ export function useLocationMultiSelection(
         locationTypeName,
         locationDropdownOptions,
         locationQueryParams,
+        selectedSiteIdsParam,
         descendantsOfSelectedLocations,
     };
 }
