@@ -3,8 +3,6 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
-import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import {
     applyConflictResolutions,
     buildMetadataRows,
@@ -22,6 +20,7 @@ interface MetadataReviewWorkspaceProps {
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
+    timezone?: string;
     onGoToNextStep: () => void;
 }
 
@@ -30,6 +29,7 @@ export default function MetadataReviewWorkspace({
     startDate,
     endDate,
     collectionCycleId,
+    timezone,
     onGoToNextStep,
 }: MetadataReviewWorkspaceProps) {
     const {
@@ -60,31 +60,6 @@ export default function MetadataReviewWorkspace({
     const allSessionsForSite = getAllSessionsResult?.ok
         ? getAllSessionsResult.data.sessions
         : [];
-
-    const { data: getUserPermissionsResult } = useGetUserPermissions();
-    const programId = getUserPermissionsResult?.ok
-        ? getUserPermissionsResult.data.programId
-        : undefined;
-
-    const { data: getCollectionCyclesResult } = useGetCollectionCycles(
-        programId ?? 0,
-        { startDate: startDate ?? '', endDate: endDate ?? '' },
-        {
-            enabled:
-                programId !== undefined &&
-                startDate !== undefined &&
-                endDate !== undefined,
-        },
-    );
-
-    const timezoneByCycleId = new Map<number, string | null>(
-        getCollectionCyclesResult?.ok
-            ? getCollectionCyclesResult.data.collectionCycles.map(cycle => [
-                  cycle.id,
-                  cycle.timezone,
-              ])
-            : [],
-    );
 
     const allSurveillanceFormQueriesForSite =
         useGetSurveillanceFormsBySessionIds(
@@ -205,7 +180,7 @@ export default function MetadataReviewWorkspace({
 
             <MetadataReviewTable
                 sessions={allSessionsForSite}
-                timezoneByCycleId={timezoneByCycleId}
+                timezone={timezone ?? null}
                 metadataRows={metadataRows}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm

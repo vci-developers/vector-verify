@@ -16,6 +16,7 @@ interface ImageReviewWorkspaceProps {
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
+    timezone?: string;
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }

@@ -216,6 +216,7 @@ export default function ReviewSitesList({
                                     startDate={segmentStartDate}
                                     endDate={segmentEndDate}
                                     collectionCycleId={cycleSegment.cycle.id}
+                                    timezone={cycleSegment.cycle.timezone}
                                     sessionCountsBySiteId={
                                         cycleSegment.sessionSummaryBySiteId
                                     }

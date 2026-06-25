@@ -86,8 +86,14 @@ generates. Because a Schedule is program-scoped with only one active per program
 timezone at a time** — a single Site whose Sessions span two timezones is a data
 error, not a valid state. The value is unvalidated free text on the backend and
 may be `null` (cycles predating the column, or schedules with no timezone); the
-web app falls back to UTC for display when it is `null`. _Avoid_: browser
-timezone, local time, offset
+web app falls back to UTC for display when it is `null`. Timezone is
+**display-only**: which Cycle a Session belongs to is decided by the backend as
+a raw instant comparison (`cycle.startDate <= collectionDate < cycle.endDate`)
+and is timezone-independent — the frontend timezone can never move a Session
+between Cycles, only change the calendar day a `collectionDate` is _rendered_
+as. (The backend exposes no get-single-cycle endpoint and Sessions carry no
+timezone of their own — it lives only on the Cycle.) _Avoid_: browser timezone,
+local time, offset
 
 **Session**: A single field data collection event at a site, conducted by a VHT
 using the VectorCam mobile app. Only sessions of type `SURVEILLANCE` enter the

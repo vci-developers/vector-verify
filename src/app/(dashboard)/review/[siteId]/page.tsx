@@ -21,6 +21,7 @@ interface ReviewSiteDetailPageProps {
         endDate?: string;
         displayName?: string;
         collectionCycleId?: string;
+        timezone?: string;
     }>;
 }
 
@@ -34,6 +35,7 @@ export default async function ReviewSiteDetailPage({
         endDate,
         displayName,
         collectionCycleId: collectionCycleIdParam,
+        timezone,
     } = await searchParams;
 
     const collectionCycleId: number | undefined =
@@ -106,6 +108,7 @@ export default async function ReviewSiteDetailPage({
                 startDate={startDate}
                 endDate={endDate}
                 collectionCycleId={collectionCycleId}
+                timezone={timezone}
                 siteName={displayName}
             />
         </HydrationBoundary>

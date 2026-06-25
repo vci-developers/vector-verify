@@ -30,7 +30,7 @@ import {
 
 interface MetadataReviewTableProps {
     sessions: Session[];
-    timezoneByCycleId: Map<number, string | null>;
+    timezone: string | null;
     metadataRows: MetadataRow[];
     sessionIdsWithoutSurveillanceForm: Set<number>;
     resolutionsByMetadataRowId: Map<string, string>;
@@ -43,7 +43,7 @@ interface MetadataReviewTableProps {
 
 export default function MetadataReviewTable({
     sessions,
-    timezoneByCycleId,
+    timezone,
     metadataRows,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
@@ -83,11 +83,7 @@ export default function MetadataReviewTable({
                             >
                                 {formatDateInTimezone(
                                     session.collectionDate,
-                                    session.collectionCycleId !== null
-                                        ? (timezoneByCycleId.get(
-                                              session.collectionCycleId,
-                                          ) ?? null)
-                                        : null,
+                                    timezone,
                                     'MMM d, yyyy',
                                 )}
                                 {sessionIdsWithoutSurveillanceForm.has(
