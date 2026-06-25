@@ -86,24 +86,16 @@ export default function ReviewDhis2Dashboard({
         );
     }, [getAllSessionsResult, collectionCycles]);
 
-    const sitesWithUnassignedSessions = useMemo(() => {
-        const unassignedSegment = allCycleSegments.find(
-            segment => segment.cycle === null,
-        );
-        return new Set(unassignedSegment?.sessionSummaryBySiteId.keys() ?? []);
-    }, [allCycleSegments]);
-
     const cycleSubmissionGroups = useMemo(
         () =>
             allCycleSegments
                 .filter(
                     segment =>
-                        segment.cycle !== null &&
-                        (selectedCycleIds.length === 0 ||
-                            selectedCycleIds.includes(segment.cycle.id)),
+                        selectedCycleIds.length === 0 ||
+                        selectedCycleIds.includes(segment.cycle.id),
                 )
                 .map(segment => {
-                    const cycle = segment.cycle!;
+                    const cycle = segment.cycle;
                     const sessionSummaryBySiteId =
                         segment.sessionSummaryBySiteId;
                     const submittableSites = sites.filter(site => {
@@ -229,9 +221,6 @@ export default function ReviewDhis2Dashboard({
                                                 site.siteId,
                                             )!
                                         }
-                                        siteHasUnassignedSessions={sitesWithUnassignedSessions.has(
-                                            site.siteId,
-                                        )}
                                         isSelected={selectedSiteRowKeys.has(
                                             siteRowKey(
                                                 group.cycle.id,

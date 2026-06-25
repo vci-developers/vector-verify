@@ -3,6 +3,7 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { usePutSessionById } from '@/api/session/hooks/use-put-session-by-id';
 import { sessionKeys } from '@/api/session/session-keys';
+import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ interface CertificationWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    collectionCycleId?: number;
     onGoToPreviousStep: () => void;
 }
 
@@ -23,18 +25,29 @@ export default function CertificationWorkspace({
     siteId,
     startDate,
     endDate,
+    collectionCycleId,
     onGoToPreviousStep,
 }: CertificationWorkspaceProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const [hasAcknowledged, setHasAcknowledged] = useState(false);
 
-    const { data: getAllSessionsResult } = useGetAllSessions({
-        siteIds: [siteId],
-        startDate,
-        endDate,
-        type: 'SURVEILLANCE',
-    });
+    const sessionQueryParams: GetAllSessionsQueryParams =
+        collectionCycleId !== undefined
+            ? {
+                  siteIds: [siteId],
+                  collectionCycleId,
+                  type: 'SURVEILLANCE',
+              }
+            : {
+                  siteIds: [siteId],
+                  startDate,
+                  endDate,
+                  type: 'SURVEILLANCE',
+              };
+
+    const { data: getAllSessionsResult } =
+        useGetAllSessions(sessionQueryParams);
     const { mutateAsync: putSessionById, isPending: isPutSessionByIdPending } =
         usePutSessionById();
 

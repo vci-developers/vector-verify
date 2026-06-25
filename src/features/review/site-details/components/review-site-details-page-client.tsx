@@ -20,6 +20,7 @@ interface ReviewSiteDetailsPageClientProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    collectionCycleId?: number;
     siteName?: string;
 }
 
@@ -27,6 +28,7 @@ export default function ReviewSiteDetailsPageClient({
     siteId,
     startDate,
     endDate,
+    collectionCycleId,
     siteName,
 }: ReviewSiteDetailsPageClientProps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -63,6 +65,7 @@ export default function ReviewSiteDetailsPageClient({
                                 siteId={siteId}
                                 startDate={startDate}
                                 endDate={endDate}
+                                collectionCycleId={collectionCycleId}
                                 onGoToNextStep={goToNextStep}
                             />
                         )}
@@ -71,6 +74,7 @@ export default function ReviewSiteDetailsPageClient({
                                 siteId={siteId}
                                 startDate={startDate}
                                 endDate={endDate}
+                                collectionCycleId={collectionCycleId}
                                 onGoToPreviousStep={goToPreviousStep}
                                 onGoToNextStep={goToNextStep}
                             />
@@ -80,6 +84,7 @@ export default function ReviewSiteDetailsPageClient({
                                 siteId={siteId}
                                 startDate={startDate}
                                 endDate={endDate}
+                                collectionCycleId={collectionCycleId}
                                 onGoToPreviousStep={goToPreviousStep}
                             />
                         )}

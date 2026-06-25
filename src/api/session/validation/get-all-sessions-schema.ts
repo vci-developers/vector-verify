@@ -12,6 +12,7 @@ export const getAllSessionsQueryParamsSchema = z
         siteIds: arrayQueryParamSchema.optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
+        collectionCycleId: z.coerce.number().optional(),
         state: sessionStateSchema.optional(),
         type: sessionTypeSchema.optional(),
     })

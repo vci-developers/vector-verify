@@ -20,6 +20,7 @@ export const getSessionsQueryParamsSchema = z.object({
     type: sessionTypeSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
+    collectionCycleId: z.coerce.number().optional(),
     limit: z.coerce.number().min(1).max(100).optional(),
     offset: z.coerce.number().min(0).optional(),
     sortBy: z
