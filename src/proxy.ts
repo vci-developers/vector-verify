@@ -5,7 +5,7 @@ import {
 } from '@/lib/auth-session/cookies';
 
 const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
-const AUTH_ONLY_ROUTES = new Set(['/verify-email']);
+const AUTH_ONLY_ROUTES = new Set(['/verify-email', '/email-verification']);
 const PUBLIC_PREFIXES = ['/docs'];
 
 export async function proxy(request: NextRequest) {
@@ -28,8 +28,10 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    if (!accessToken && !isPublic && !isAuthOnly && !emailVerified) {
-        return NextResponse.redirect(new URL('/login', request.url));
+    if (accessToken && !emailVerified && !isAuthOnly) {
+        return NextResponse.redirect(
+            new URL('/email-verification', request.url),
+        );
     }
 
     if (!accessToken && isAuthOnly) {
@@ -39,6 +41,10 @@ export async function proxy(request: NextRequest) {
             request.nextUrl.pathname + request.nextUrl.search,
         );
         return NextResponse.redirect(loginUrl);
+    }
+
+    if (!accessToken && !isPublic) {
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     return NextResponse.next();

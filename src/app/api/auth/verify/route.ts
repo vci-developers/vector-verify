@@ -1,8 +1,8 @@
-import { verifyEmail } from '@/api/auth/verify-email';
+import { postVerifyEmail } from '@/api/auth/post-verify-email';
 import type {
-    VerifyEmailRequestBody,
-    VerifyEmailResponseBody,
-} from '@/api/auth/validation/verify-email-schema';
+    PostVerifyEmailRequestBody,
+    PostVerifyEmailResponseBody,
+} from '@/api/auth/validation/post-verify-email-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
@@ -10,7 +10,7 @@ import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { setVerifiedEmailCookie } from '@/lib/auth-session/cookies';
 
 export async function POST(request: Request) {
-    let requestBody: VerifyEmailRequestBody;
+    let requestBody: PostVerifyEmailRequestBody;
 
     try {
         requestBody = await request.json();
@@ -23,18 +23,23 @@ export async function POST(request: Request) {
         return NextResponse.json(requestBodyErrorResult, { status: 400 });
     }
 
-    const verifyEmailResult: Result<VerifyEmailResponseBody, NetworkError> =
-        await withAuthSession<VerifyEmailResponseBody>(accessToken =>
-            verifyEmail(accessToken, requestBody),
-        );
+    const postVerifyEmailResult: Result<
+        PostVerifyEmailResponseBody,
+        NetworkError
+    > = await withAuthSession<PostVerifyEmailResponseBody>(accessToken =>
+        postVerifyEmail(accessToken, requestBody),
+    );
 
-    const response = NextResponse.json(verifyEmailResult, {
-        status: verifyEmailResult.ok
+    const response = NextResponse.json(postVerifyEmailResult, {
+        status: postVerifyEmailResult.ok
             ? 200
-            : (verifyEmailResult.error.status ?? 400),
+            : (postVerifyEmailResult.error.status ?? 400),
     });
 
-    if (verifyEmailResult.ok && verifyEmailResult.data.user.emailVerified) {
+    if (
+        postVerifyEmailResult.ok &&
+        postVerifyEmailResult.data.user.emailVerified
+    ) {
         setVerifiedEmailCookie(response);
     }
 

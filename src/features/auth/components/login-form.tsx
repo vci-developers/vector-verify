@@ -27,7 +27,7 @@ import { useTranslations } from 'next-intl';
 export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
-    const callbackUrl = useSearchParams().get('callbackUrl');
+    const redirect = useSearchParams().get('redirect');
     const t = useTranslations('Auth');
 
     const loginForm = useForm<LoginFormInput>({
@@ -56,30 +56,28 @@ export default function LoginForm() {
             return;
         }
 
-        if (callbackUrl) {
-            router.replace(callbackUrl);
+        const userProfileResponse = await fetch('api/users/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+        const userProfileResult: Result<
+            GetUserProfileSuccessPayload,
+            NetworkError
+        > = await userProfileResponse.json();
+
+        if (!userProfileResponse.ok || !userProfileResult.ok) {
+            console.error('Failed to Retrieve User Profile');
+            return;
+        }
+
+        if (!userProfileResult.data.user.emailVerified) {
+            if (redirect) {
+                router.replace(redirect);
+            }
             router.refresh();
-        } else {
-            const userProfileResponse = await fetch('api/users/profile', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            const userProfileResult: Result<
-                GetUserProfileSuccessPayload,
-                NetworkError
-            > = await userProfileResponse.json();
-
-            if (!userProfileResponse.ok || !userProfileResult.ok) {
-                console.error('Failed to Retrieve User Profile');
-                return;
-            }
-
-            if (!userProfileResult.data.user.emailVerified) {
-                router.refresh();
-            }
         }
 
         router.replace('/');

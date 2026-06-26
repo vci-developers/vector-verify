@@ -1,11 +1,12 @@
 import AuthShell from '@/features/auth/components/auth-shell';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { verifyEmail } from '@/api/auth/verify-email';
-import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
+import { postVerifyEmail } from '@/api/auth/post-verify-email';
 import { Button } from '@/components/ui/button';
 import { getTranslations } from 'next-intl/server';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
+import { Fragment } from 'react/jsx-runtime';
 
 interface VerifyEmailPageProps {
     searchParams: Promise<{ token?: string }>;
@@ -15,12 +16,6 @@ export default async function VerifyEmailPage({
     searchParams,
 }: VerifyEmailPageProps) {
     const t = await getTranslations('Auth');
-    async function resendVerificationCode() {
-        redirect('/login');
-    }
-
-    const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value;
-    if (!accessToken) return;
 
     const { token } = await searchParams;
     if (!token) {
@@ -35,15 +30,13 @@ export default async function VerifyEmailPage({
             </AuthShell>
         );
     } else {
-        const response = await verifyEmail(accessToken, {
-            token,
-        });
+        const response = await withAuthSession(accessToken =>
+            postVerifyEmail(accessToken, {
+                token,
+            }),
+        );
 
         if (!response.ok) {
-            console.error(
-                'Email Verification Failed: ',
-                response.error.message,
-            );
             return (
                 <AuthShell
                     title="Verify your email"
@@ -53,24 +46,28 @@ export default async function VerifyEmailPage({
                     <Separator className="my-6" />
                     {response.error.message ===
                     'Verification token is required' ? (
-                        <>
+                        <Fragment>
                             <p className="text-muted-foreground text-center text-sm">
                                 {t('invalidVerificationLink')}
                             </p>
-                            <Button onClick={resendVerificationCode}>
-                                {t('resendVerificationEmailButton')}
+                            <Button asChild>
+                                <Link href="/email-verification">
+                                    {t('resendVerificationEmailButton')}
+                                </Link>
                             </Button>
-                        </>
+                        </Fragment>
                     ) : response.error.message ===
                       'Invalid or expired verification token' ? (
-                        <>
+                        <Fragment>
                             <p className="text-muted-foreground text-center text-sm">
                                 {t('invalidOrExpiredVerificationLink')}
                             </p>
-                            <Button onClick={resendVerificationCode}>
-                                {t('resendVerificationEmailButton')}
+                            <Button asChild>
+                                <Link href="/email-verification">
+                                    {t('resendVerificationEmailButton')}
+                                </Link>
                             </Button>
-                        </>
+                        </Fragment>
                     ) : response.error.message ===
                       'Verification token does not match the authenticated user' ? (
                         <p className="text-muted-foreground text-center text-sm">

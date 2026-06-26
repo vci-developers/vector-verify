@@ -47,7 +47,7 @@
         "verifyEmailDescription": "Email verification in progress.",
         "missingVerificationToken": "Invalid email verification link. Please check your email.",
         "invalidVerificationLink": "Invalid email verification link. Please check your email for the link or click the button to receive the verification email.",
-        "invalidOrExpiredVerificationLink": "This verification link is invalid or has expired.",
+        "invalidOrExpiredVerificationLink": "This verification link is invalid or has expired. Please click the button to resend the verification email",
         "accountVerificationTokenMismatch": "Please log in with the account that received the verification email.",
         "resendVerificationEmailButton": "Resend verification email",
         "notWhitelistedTitle": "Your account is awaiting approval",

@@ -1,15 +1,15 @@
 import { type Result } from '@/lib/result/result';
 import {
-    verificationEmailResponseSchema,
-    type VerificationEmailResponseBody,
-} from '@/api/auth/validation/send-verification-email-schema';
+    postSendEmailVerificationResponseSchema,
+    type PostSendEmailVerificationResponseBody,
+} from '@/api/auth/validation/post-send-email-verification-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 
-export async function sendVerificationEmail(
+export async function postSendVerificationEmail(
     accessToken: string,
-): Promise<Result<VerificationEmailResponseBody, NetworkError>> {
-    return safeApiCall<VerificationEmailResponseBody>(
+): Promise<Result<PostSendEmailVerificationResponseBody, NetworkError>> {
+    return safeApiCall<PostSendEmailVerificationResponseBody>(
         '/users/email/send-verification',
         {
             method: 'POST',
@@ -17,6 +17,6 @@ export async function sendVerificationEmail(
                 Authorization: `Bearer ${accessToken}`,
             },
         },
-        verificationEmailResponseSchema,
+        postSendEmailVerificationResponseSchema,
     );
 }
