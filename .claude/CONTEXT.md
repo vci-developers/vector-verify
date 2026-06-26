@@ -155,6 +155,34 @@ annotation. _Avoid_: Image-based
 Operations page, scoped to the selected location and date range. Audience:
 health officers. _Avoid_: Export (alone, ambiguous — see Flagged ambiguities)
 
+**Device**: A physical Android phone running the VectorCam mobile app, used by a
+VHT to capture sessions in the field. Registered per program (`GET /devices/`)
+with `deviceId`, `model`, `registeredAt`, `submittedAt`. Every device in the
+program is a field device — VCOs never use devices, so there is no "VCO device".
+A session carries the producing `deviceId` (FK) plus a free-text
+`collectorName`; there is **no device→user link**, so device activity is the
+only robust proxy for field-collector activity. UI label is always "Devices",
+never "Users". _Avoid_: User, phone, handset (in UI-facing language)
+
+**Device Activity**: A device's status derived entirely from the sessions it
+produced — **never** from the device registry (`GET /devices/`), which has no
+location. A device "belongs" to a location only through its sessions' `siteId`s,
+so activity is computed from `/sessions/` grouped by `deviceId` and scoped to
+the selected location's sites, exactly like Unique Sites. Activity is measured
+by **rolling calendar months**, not collection cycles — the same model for every
+program, so the device view is consistent whether or not a program has a
+Collection Schedule. The location's device **universe** = devices with ≥1
+session at a site in the selected location over the last **6 calendar months**.
+Three location-scoped tiers, which reconcile to that universe: **Active**
+(submitted in the location in the current month), **Lapsing** (submitted in the
+location within the last 3 months, not the current month), **Inactive** (in the
+6-month universe but no session in the last 3 months — "used to collect here,
+went quiet"). Shown as headline cards for the selected location; in the map's
+Devices view, markers are keyed by `siteId` and encode size = active device
+count, color = site health (active vs lapsing). Activity is always evaluated
+**as-of-today**, independent of the page's month filter. _Avoid_:
+Online/offline, connected
+
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
