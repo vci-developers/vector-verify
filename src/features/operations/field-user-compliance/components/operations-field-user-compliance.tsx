@@ -9,12 +9,14 @@ import FieldUserComplianceChart from '@/features/operations/field-user-complianc
 
 interface OperationsFieldUserComplianceProps {
     siteIds: number[];
+    siteIdToLocationLabel: Map<number, string>;
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsFieldUserCompliance({
     siteIds,
+    siteIdToLocationLabel,
     startDate,
     endDate,
 }: OperationsFieldUserComplianceProps) {
@@ -22,6 +24,7 @@ export default function OperationsFieldUserCompliance({
         siteIds,
         startDate,
         endDate,
+        type: 'SURVEILLANCE',
     });
 
     const { months, monthYearKeys } = useMemo(() => {
@@ -56,6 +59,7 @@ export default function OperationsFieldUserCompliance({
         buildFieldUserComplianceData(
             getAllSessionsResult.data.sessions,
             monthYearKeys,
+            siteIdToLocationLabel,
         );
 
     return (

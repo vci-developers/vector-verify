@@ -4,9 +4,10 @@ import {
     sessionStateSchema,
     sessionTypeSchema,
 } from '@/api/session/validation/session-schema';
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 
 export const getSessionsQueryParamsSchema = z.object({
-    siteId: z.coerce.number().optional(),
+    siteIds: arrayQueryParamSchema.optional(),
     programId: z.coerce.number().optional(),
     district: z.string().optional(),
     deviceId: z.coerce.number().optional(),

@@ -83,7 +83,7 @@ export default function FieldUserComplianceChart({
                                 <TableBody>
                                     {collectorRows.map((row, rowIndex) => (
                                         <ComplianceCollectorTableRow
-                                            key={`${row.collectorName}/${row.collectorTitle}`}
+                                            key={`${row.locationLabel}/${row.collectorName}/${row.collectorTitle}`}
                                             row={row}
                                             monthYearKeys={monthYearKeys}
                                             color={buildChartPillColor(

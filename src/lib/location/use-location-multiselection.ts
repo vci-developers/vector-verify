@@ -85,6 +85,32 @@ export function useLocationMultiSelection(
         return descendantsOfSelectedLocations.map(site => site.siteId);
     }, [descendantsOfSelectedLocations]);
 
+    const siteIdToLocationLabel = useMemo(() => {
+        const map = new Map<number, string>();
+        if (usesLegacyStructure) {
+            for (const site of descendantsOfSelectedLocations) {
+                map.set(site.siteId, site.district?.trim() ?? '');
+            }
+        } else {
+            for (const topSite of topLevelSites) {
+                if (!selectedLocations.includes(topSite.name ?? '')) continue;
+                for (const descendant of getSiteAndDescendants(
+                    accessibleSites,
+                    topSite.siteId,
+                )) {
+                    map.set(descendant.siteId, topSite.name ?? '');
+                }
+            }
+        }
+        return map;
+    }, [
+        usesLegacyStructure,
+        descendantsOfSelectedLocations,
+        topLevelSites,
+        selectedLocations,
+        accessibleSites,
+    ]);
+
     return {
         selectedLocations,
         setSelectedLocations,
@@ -93,5 +119,6 @@ export function useLocationMultiSelection(
         locationQueryParams,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
+        siteIdToLocationLabel,
     };
 }

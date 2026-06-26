@@ -27,6 +27,9 @@ export default function ComplianceCollectorTableRow({
                 <p className="text-muted-foreground text-xs">
                     {row.collectorTitle}
                 </p>
+                <p className="text-muted-foreground text-xs">
+                    {row.locationLabel}
+                </p>
             </TableCell>
             {sessionChartPills.map((segment, index) => {
                 if (segment.type === 'empty') {

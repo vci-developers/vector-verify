@@ -77,6 +77,7 @@ export default function OperationsPageClient() {
         locationQueryParams,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
+        siteIdToLocationLabel,
     } = useLocationMultiSelection(
         accessibleSites,
         StorageKeys.operations.selectedLocations,
@@ -197,6 +198,9 @@ export default function OperationsPageClient() {
                             {activeTab === 'field-user-compliance' && (
                                 <OperationsFieldUserCompliance
                                     siteIds={selectedSiteIdsParam}
+                                    siteIdToLocationLabel={
+                                        siteIdToLocationLabel
+                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
