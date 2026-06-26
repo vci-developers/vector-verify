@@ -21,6 +21,7 @@ interface ReviewSiteDetailsPageClientProps {
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
+    timezone?: string;
     siteName?: string;
 }
 
@@ -29,6 +30,7 @@ export default function ReviewSiteDetailsPageClient({
     startDate,
     endDate,
     collectionCycleId,
+    timezone,
     siteName,
 }: ReviewSiteDetailsPageClientProps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -66,6 +68,7 @@ export default function ReviewSiteDetailsPageClient({
                                 startDate={startDate}
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}
+                                timezone={timezone}
                                 onGoToNextStep={goToNextStep}
                             />
                         )}
@@ -75,6 +78,7 @@ export default function ReviewSiteDetailsPageClient({
                                 startDate={startDate}
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}
+                                timezone={timezone}
                                 onGoToPreviousStep={goToPreviousStep}
                                 onGoToNextStep={goToNextStep}
                             />
@@ -85,6 +89,7 @@ export default function ReviewSiteDetailsPageClient({
                                 startDate={startDate}
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}
+                                timezone={timezone}
                                 onGoToPreviousStep={goToPreviousStep}
                             />
                         )}

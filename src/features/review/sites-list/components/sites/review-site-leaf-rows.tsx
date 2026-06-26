@@ -23,6 +23,7 @@ interface ReviewSiteLeafRowsProps {
     startDate: string;
     endDate: string;
     collectionCycleId?: number;
+    timezone?: string | null;
 }
 
 function buildReviewHref(
@@ -31,6 +32,7 @@ function buildReviewHref(
     endDate: string,
     displayName: string,
     collectionCycleId?: number,
+    timezone?: string | null,
 ) {
     const queryParams = new URLSearchParams({
         startDate,
@@ -39,6 +41,9 @@ function buildReviewHref(
     });
     if (collectionCycleId !== undefined) {
         queryParams.set('collectionCycleId', String(collectionCycleId));
+    }
+    if (timezone != null) {
+        queryParams.set('timezone', timezone);
     }
     return `/review/${site.siteId}?${queryParams.toString()}`;
 }
@@ -50,6 +55,7 @@ export default function ReviewSiteLeafRows({
     startDate,
     endDate,
     collectionCycleId,
+    timezone,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
     if (sites.length === 0) return null;
@@ -133,6 +139,7 @@ export default function ReviewSiteLeafRows({
                                 endDate,
                                 getDisplayName(site),
                                 collectionCycleId,
+                                timezone,
                             )}
                             className={rowClassName}
                         >

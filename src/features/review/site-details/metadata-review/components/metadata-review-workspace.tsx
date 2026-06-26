@@ -20,6 +20,7 @@ interface MetadataReviewWorkspaceProps {
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
+    timezone?: string;
     onGoToNextStep: () => void;
 }
 
@@ -28,6 +29,7 @@ export default function MetadataReviewWorkspace({
     startDate,
     endDate,
     collectionCycleId,
+    timezone,
     onGoToNextStep,
 }: MetadataReviewWorkspaceProps) {
     const {
@@ -178,6 +180,7 @@ export default function MetadataReviewWorkspace({
 
             <MetadataReviewTable
                 sessions={allSessionsForSite}
+                timezone={timezone ?? null}
                 metadataRows={metadataRows}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm
