@@ -189,7 +189,7 @@ export default function OperationsPageClient() {
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
                                     siteIds={selectedSiteIdsParam}
-                                    selectedLocationNames={selectedLocations}
+                                    selectedLocationNames={selectedLocations.sort()}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
