@@ -42,7 +42,7 @@ function buildReviewHref(
     if (collectionCycleId !== undefined) {
         queryParams.set('collectionCycleId', String(collectionCycleId));
     }
-    if (timezone !== undefined && timezone !== null) {
+    if (timezone != null) {
         queryParams.set('timezone', timezone);
     }
     return `/review/${site.siteId}?${queryParams.toString()}`;
