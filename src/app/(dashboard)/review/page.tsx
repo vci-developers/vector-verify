@@ -8,7 +8,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewSitesListPageClient from '@/features/review/sites-list/components/review-sites-list-page-client';
+import ReviewSitesListPageClient from '@/features/review-legacy/sites-list/components/review-sites-list-page-client';
 
 export default async function ReviewSiteListPage() {
     const queryClient = new QueryClient();

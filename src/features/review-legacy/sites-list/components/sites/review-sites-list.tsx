@@ -17,12 +17,12 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
-import { buildCollectionCycleSegments } from '@/features/review/sites-list/utils/build-collection-cycle-segments';
-import { accumulateSessionSummary } from '@/features/review/sites-list/utils/accumulate-session-summary';
-import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
+import { buildCollectionCycleSegments } from '@/features/review-legacy/sites-list/utils/build-collection-cycle-segments';
+import { accumulateSessionSummary } from '@/features/review-legacy/sites-list/utils/accumulate-session-summary';
+import { formatCollectionCycleLabel } from '@/features/review-legacy/sites-list/utils/format-collection-cycle-label';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import ReviewSiteHierarchy from '@/features/review/sites-list/components/sites/review-site-hierarchy';
-import { type ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
+import ReviewSiteHierarchy from '@/features/review-legacy/sites-list/components/sites/review-site-hierarchy';
+import { type ReviewSiteSessionSummary } from '@/features/review-legacy/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
 interface ReviewSiteListProps {

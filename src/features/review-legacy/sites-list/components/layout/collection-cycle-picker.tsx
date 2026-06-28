@@ -10,7 +10,7 @@ import {
     MultiSelectValue,
 } from '@/components/ui/multi-select';
 import { useTranslations } from 'next-intl';
-import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
+import { formatCollectionCycleLabel } from '@/features/review-legacy/sites-list/utils/format-collection-cycle-label';
 
 interface CollectionCyclePickerProps {
     collectionCycles: CollectionCycle[];

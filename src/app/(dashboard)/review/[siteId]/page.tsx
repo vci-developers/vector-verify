@@ -7,7 +7,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewSiteDetailsPageClient from '@/features/review/site-details/components/review-site-details-page-client';
+import ReviewSiteDetailsPageClient from '@/features/review-legacy/site-details/components/review-site-details-page-client';
 import { getSurveillanceFormBySessionId } from '@/api/surveillance-form/get-surveillance-form-by-session-id';
 import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import { getAllSessions } from '@/api/session/get-all-sessions';

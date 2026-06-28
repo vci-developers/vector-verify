@@ -2,7 +2,7 @@ import type { Session } from '@/api/session/validation/session-schema';
 import {
     emptySessionSummary,
     type ReviewSiteSessionSummary,
-} from '@/features/review/utils/review-site-session-summary';
+} from '@/features/review-legacy/utils/review-site-session-summary';
 
 export function accumulateSessionSummary(
     existingSummary: ReviewSiteSessionSummary | undefined,

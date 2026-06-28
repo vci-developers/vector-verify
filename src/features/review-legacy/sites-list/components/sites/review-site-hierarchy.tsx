@@ -1,13 +1,13 @@
 'use client';
 
 import type { Site } from '@/api/site/validation/site-schema';
-import SiteHierarchy from '@/features/review/components/site-hierarchy';
-import ReviewVisitCoverageBadge from '@/features/review/sites-list/components/sites/review-visit-coverage-badge';
-import ReviewSiteLeafRows from '@/features/review/sites-list/components/sites/review-site-leaf-rows';
+import SiteHierarchy from '@/features/review-legacy/components/site-hierarchy';
+import ReviewVisitCoverageBadge from '@/features/review-legacy/sites-list/components/sites/review-visit-coverage-badge';
+import ReviewSiteLeafRows from '@/features/review-legacy/sites-list/components/sites/review-site-leaf-rows';
 import {
     getSiteSessionCount,
     type ReviewSiteSessionSummary,
-} from '@/features/review/utils/review-site-session-summary';
+} from '@/features/review-legacy/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 import { Fragment } from 'react/jsx-runtime';
 

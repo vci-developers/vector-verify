@@ -9,11 +9,11 @@ import { ClipboardList } from 'lucide-react';
 import { Fragment, useState, useEffect } from 'react';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
-import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
+import ReviewSitesListHeader from '@/features/review-legacy/sites-list/components/layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
-import ReviewDhis2Dashboard from '@/features/review/dhis2-sync/components/review-dhis2-dashboard';
+import ReviewSitesList from '@/features/review-legacy/sites-list/components/sites/review-sites-list';
+import ReviewDhis2Dashboard from '@/features/review-legacy/dhis2-sync/components/review-dhis2-dashboard';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 

@@ -6,14 +6,14 @@ import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hoo
 import {
     applyConflictResolutions,
     buildMetadataRows,
-} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
+} from '@/features/review-legacy/site-details/metadata-review/utils/metadata-review-helpers';
 import { Button } from '@/components/ui/button';
 import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
-import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
+import { useMetadataReviewState } from '@/features/review-legacy/site-details/metadata-review/utils/use-metadata-review-state';
 
 interface MetadataReviewWorkspaceProps {
     siteId: number;

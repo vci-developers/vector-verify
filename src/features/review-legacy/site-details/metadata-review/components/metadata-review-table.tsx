@@ -26,7 +26,7 @@ import {
     formatDisplayValue,
     numberFieldNames,
     type MetadataRow,
-} from '@/features/review/site-details/metadata-review/utils/metadata-review-helpers';
+} from '@/features/review-legacy/site-details/metadata-review/utils/metadata-review-helpers';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
