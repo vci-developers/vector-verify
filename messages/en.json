@@ -30,7 +30,8 @@
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
-        "badgeLabel": "Cycle {cycleNumber}"
+        "badgeLabel": "Cycle {cycleNumber}",
+        "unassigned": "Unassigned"
     },
     "OperationsSpecimenComposition": {
         "monthlySpecimenCountsLoading": "LOADING...",
@@ -57,7 +58,9 @@
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
-        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
+        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
+        "sessionCount": "{count, plural, one {# session} other {# sessions}}",
+        "noSessions": "No sessions"
     },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",

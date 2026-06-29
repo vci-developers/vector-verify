@@ -8,7 +8,7 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewPageClient from '@/features/review/sites-list/components/review-page-client';
+import ReviewSitesListPageClient from '@/features/review/sites-list/components/review-sites-list-page-client';
 
 export default async function ReviewNextPage() {
     const queryClient = new QueryClient();
@@ -37,7 +37,7 @@ export default async function ReviewNextPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewPageClient />
+            <ReviewSitesListPageClient />
         </HydrationBoundary>
     );
 }
