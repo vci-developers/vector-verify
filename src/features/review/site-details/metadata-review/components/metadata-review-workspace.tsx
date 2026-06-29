@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import MetadataReviewTable from './metadata-review-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
+import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import { useMetadataReviewState } from '@/features/review/site-details/metadata-review/utils/use-metadata-review-state';
 
@@ -18,6 +19,8 @@ interface MetadataReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    collectionCycleId?: number;
+    timezone?: string;
     onGoToNextStep: () => void;
 }
 
@@ -25,6 +28,8 @@ export default function MetadataReviewWorkspace({
     siteId,
     startDate,
     endDate,
+    collectionCycleId,
+    timezone,
     onGoToNextStep,
 }: MetadataReviewWorkspaceProps) {
     const {
@@ -36,8 +41,22 @@ export default function MetadataReviewWorkspace({
 
     const queryClient = useQueryClient();
 
+    const sessionQueryParams: GetAllSessionsQueryParams =
+        collectionCycleId !== undefined
+            ? {
+                  siteIds: [siteId],
+                  collectionCycleId,
+                  type: 'SURVEILLANCE',
+              }
+            : {
+                  siteIds: [siteId],
+                  startDate,
+                  endDate,
+                  type: 'SURVEILLANCE',
+              };
+
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({ siteId, startDate, endDate, type: 'SURVEILLANCE' });
+        useGetAllSessions(sessionQueryParams);
     const allSessionsForSite = getAllSessionsResult?.ok
         ? getAllSessionsResult.data.sessions
         : [];
@@ -135,12 +154,7 @@ export default function MetadataReviewWorkspace({
                     if (result.ok) {
                         resetResolutions();
                         queryClient.invalidateQueries({
-                            queryKey: sessionKeys.allSessions({
-                                siteId,
-                                startDate,
-                                endDate,
-                                type: 'SURVEILLANCE',
-                            }),
+                            queryKey: sessionKeys.root,
                         });
                         for (const session of allSessionsForSite) {
                             queryClient.invalidateQueries({
@@ -166,6 +180,7 @@ export default function MetadataReviewWorkspace({
 
             <MetadataReviewTable
                 sessions={allSessionsForSite}
+                timezone={timezone ?? null}
                 metadataRows={metadataRows}
                 sessionIdsWithoutSurveillanceForm={
                     sessionIdsWithoutSurveillanceForm

@@ -6,7 +6,7 @@ import {
     BookOpen,
     ChevronUp,
     ClipboardCheck,
-    LayoutDashboard,
+    // LayoutDashboard,
     Moon,
     PencilRuler,
     Microscope,
@@ -52,12 +52,13 @@ type NavigationItem = {
 };
 
 const navigation: NavigationItem[] = [
-    {
-        name: 'Dashboard',
-        href: '/',
-        icon: LayoutDashboard,
-        canAccess: () => true,
-    },
+    // TODO: Revert — Dashboard nav item temporarily hidden while the dashboard is under construction.
+    // {
+    //     name: 'Dashboard',
+    //     href: '/',
+    //     icon: LayoutDashboard,
+    //     canAccess: () => true,
+    // },
     {
         name: 'Review',
         href: '/review',

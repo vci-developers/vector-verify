@@ -17,11 +17,14 @@ export const ANOPHELES_COLOR = {
     critical: 'var(--count-critical)',
 } as const;
 
-export interface SiteMarker {
+export interface GeocodableMarker {
     id: string;
+    locationQuery: string;
+}
+
+export interface SiteMarker extends GeocodableMarker {
     siteName: string;
     parentLocationName: string;
-    locationQuery: string;
     sessionCount: number;
     totalSpecimens: number;
     anophelesCount: number;
@@ -29,12 +32,8 @@ export interface SiteMarker {
     lastCollectionDate?: number;
 }
 
-function buildLegacyLocationQuery(
-    villageName: string | null | undefined,
-    parish: string | null | undefined,
-    subCounty: string | null | undefined,
-    district: string | null | undefined,
-): string {
+function buildLegacyLocationQuery(site: Site): string {
+    const { villageName, parish, subCounty, district } = site;
     const cleanDistrict = district?.replace(/ District$/i, '').trim();
     const countryPart = cleanDistrict ? `${cleanDistrict}, Uganda` : 'Uganda';
 
@@ -62,6 +61,12 @@ function buildHierarchicalLocationQuery(site: Site): string {
     );
     const topLevelRegion = ancestorNames[0];
     return [site.name, topLevelRegion].filter(Boolean).join(', ');
+}
+
+export function buildSiteLocationQuery(site: Site): string {
+    return isLegacySite(site)
+        ? buildLegacyLocationQuery(site)
+        : buildHierarchicalLocationQuery(site);
 }
 
 function buildParentLocationName(site: Site): string {
@@ -191,14 +196,7 @@ export function buildSiteMarkers(
                 .map(([species, count]) => ({ species, count }))
                 .sort((a, b) => b.count - a.count);
 
-            const locationQuery = isLegacySite(markerSite)
-                ? buildLegacyLocationQuery(
-                      markerSite.villageName,
-                      markerSite.parish,
-                      markerSite.subCounty,
-                      markerSite.district,
-                  )
-                : buildHierarchicalLocationQuery(markerSite);
+            const locationQuery = buildSiteLocationQuery(markerSite);
 
             return {
                 id: markerName,

@@ -20,6 +20,8 @@ interface ReviewSiteDetailPageProps {
         startDate?: string;
         endDate?: string;
         displayName?: string;
+        collectionCycleId?: string;
+        timezone?: string;
     }>;
 }
 
@@ -28,16 +30,34 @@ export default async function ReviewSiteDetailPage({
     searchParams,
 }: ReviewSiteDetailPageProps) {
     const siteId = Number((await params).siteId);
-    const { startDate, endDate, displayName } = await searchParams;
+    const {
+        startDate,
+        endDate,
+        displayName,
+        collectionCycleId: collectionCycleIdParam,
+        timezone,
+    } = await searchParams;
+
+    const collectionCycleId: number | undefined =
+        collectionCycleIdParam === undefined
+            ? undefined
+            : Number(collectionCycleIdParam);
 
     const queryClient = new QueryClient();
 
-    const getAllSessionsQueryParams: GetAllSessionsQueryParams = {
-        siteId,
-        startDate,
-        endDate,
-        type: 'SURVEILLANCE',
-    };
+    const getAllSessionsQueryParams: GetAllSessionsQueryParams =
+        collectionCycleId !== undefined
+            ? {
+                  siteIds: [siteId],
+                  collectionCycleId,
+                  type: 'SURVEILLANCE',
+              }
+            : {
+                  siteIds: [siteId],
+                  startDate,
+                  endDate,
+                  type: 'SURVEILLANCE',
+              };
 
     const authorizedGetAllSessionsResult = await withAuthSession(
         async accessToken => {
@@ -87,6 +107,8 @@ export default async function ReviewSiteDetailPage({
                 siteId={siteId}
                 startDate={startDate}
                 endDate={endDate}
+                collectionCycleId={collectionCycleId}
+                timezone={timezone}
                 siteName={displayName}
             />
         </HydrationBoundary>
