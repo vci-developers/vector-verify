@@ -8,30 +8,26 @@ export function buildCollectionCycleSegments(
     cycles: CollectionCycle[],
 ) {
     const segmentByCycleId = new Map<
-        number | null,
+        number,
         {
-            cycle: CollectionCycle | null;
+            cycle: CollectionCycle;
             sessionSummaryBySiteId: Map<number, ReviewSiteSessionSummary>;
         }
-    >([
-        ...cycles.map(
+    >(
+        cycles.map(
             cycle =>
                 [
                     cycle.id,
                     { cycle, sessionSummaryBySiteId: new Map() },
                 ] as const,
         ),
-        [null, { cycle: null, sessionSummaryBySiteId: new Map() }],
-    ]);
+    );
 
     for (const session of sessions) {
         const { collectionCycleId } = session;
-        const resolvedCycleId =
-            collectionCycleId !== null &&
-            segmentByCycleId.has(collectionCycleId)
-                ? collectionCycleId
-                : null;
-        const cycleSegment = segmentByCycleId.get(resolvedCycleId)!;
+        if (collectionCycleId === null) continue;
+        const cycleSegment = segmentByCycleId.get(collectionCycleId);
+        if (cycleSegment === undefined) continue;
         cycleSegment.sessionSummaryBySiteId.set(
             session.siteId,
             accumulateSessionSummary(
@@ -41,11 +37,5 @@ export function buildCollectionCycleSegments(
         );
     }
 
-    const assignedSegments = cycles.map(
-        cycle => segmentByCycleId.get(cycle.id)!,
-    );
-    const unassignedSegment = segmentByCycleId.get(null)!;
-    if (unassignedSegment.sessionSummaryBySiteId.size > 0)
-        assignedSegments.push(unassignedSegment);
-    return assignedSegments;
+    return cycles.map(cycle => segmentByCycleId.get(cycle.id)!);
 }

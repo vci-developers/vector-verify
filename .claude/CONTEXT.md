@@ -77,6 +77,24 @@ by a VCO during Review (the exception case). Note: adoption is not yet universal
 established, produce sessions with no cycle assignment. _Avoid_: Reporting
 period, month (when a custom cycle is in use)
 
+**Timezone**: The IANA timezone name (e.g. `Africa/Kampala`) used to display
+Session collection dates and Collection Cycle windows in the region where
+collection happened — never the reviewer's browser timezone. Owned by the
+**Collection Schedule** and denormalized onto every **Collection Cycle** it
+generates. Because a Schedule is program-scoped with only one active per program
+(and all a program's sites share it), **a Site is governed by exactly one
+timezone at a time** — a single Site whose Sessions span two timezones is a data
+error, not a valid state. The value is unvalidated free text on the backend and
+may be `null` (cycles predating the column, or schedules with no timezone); the
+web app falls back to UTC for display when it is `null`. Timezone is
+**display-only**: which Cycle a Session belongs to is decided by the backend as
+a raw instant comparison (`cycle.startDate <= collectionDate < cycle.endDate`)
+and is timezone-independent — the frontend timezone can never move a Session
+between Cycles, only change the calendar day a `collectionDate` is _rendered_
+as. (The backend exposes no get-single-cycle endpoint and Sessions carry no
+timezone of their own — it lives only on the Cycle.) _Avoid_: browser timezone,
+local time, offset
+
 **Session**: A single field data collection event at a site, conducted by a VHT
 using the VectorCam mobile app. Only sessions of type `SURVEILLANCE` enter the
 Review workflow. `collectionCycleId` is nullable — sessions from programs
@@ -137,12 +155,51 @@ annotation. _Avoid_: Image-based
 Operations page, scoped to the selected location and date range. Audience:
 health officers. _Avoid_: Export (alone, ambiguous — see Flagged ambiguities)
 
+**Device**: A physical Android phone running the VectorCam mobile app, used by a
+VHT to capture sessions in the field. Registered per program (`GET /devices/`)
+with `deviceId`, `model`, `registeredAt`, `submittedAt`. Every device in the
+program is a field device — VCOs never use devices, so there is no "VCO device".
+A session carries the producing `deviceId` (FK) plus a free-text
+`collectorName`; there is **no device→user link**, so device activity is the
+only robust proxy for field-collector activity. UI label is always "Devices",
+never "Users". _Avoid_: User, phone, handset (in UI-facing language)
+
+**Device Activity**: A device's status derived entirely from the sessions it
+produced — **never** from the device registry (`GET /devices/`), which has no
+location. A device "belongs" to a location only through its sessions' `siteId`s,
+so activity is computed from `/sessions/` grouped by `deviceId` and scoped to
+the selected location's sites, exactly like Unique Sites. Activity is measured
+by **rolling calendar months**, not collection cycles — the same model for every
+program, so the device view is consistent whether or not a program has a
+Collection Schedule. The location's device **universe** = devices with ≥1
+session at a site in the selected location over the last **6 calendar months**.
+Three location-scoped tiers, which reconcile to that universe: **Active**
+(submitted in the location in the current month), **Lapsing** (submitted in the
+location within the last 3 months, not the current month), **Inactive** (in the
+6-month universe but no session in the last 3 months — "used to collect here,
+went quiet"). Shown as headline cards for the selected location; in the map's
+Devices view, markers are keyed by `siteId` and encode size = active device
+count, color = site health (active vs lapsing). Activity is always evaluated
+**as-of-today**, independent of the page's month filter. _Avoid_:
+Online/offline, connected
+
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
-in the global user menu, not the Operations page. Audience: developers. _Avoid_:
-Raw export (capitalise), DB dump, backup
+in the global user menu, not the Operations page. Audience: developers.
+Delivered as a temporary, expiring **Signed Export URL** (obtained via
+`POST /export/sign`) that the developer clicks to download directly from the
+backend — VectorVerify signs the request but no longer proxies the CSV stream.
+_Avoid_: Raw export (capitalise), DB dump, backup
+
+**Signed Export URL**: A short-lived, pre-signed URL returned by
+`POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
+access to an export (or report) path served directly by the backend. The browser
+downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
+only by **Raw Data Export**; the endpoint can also sign a **Report Export**
+path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
+token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only

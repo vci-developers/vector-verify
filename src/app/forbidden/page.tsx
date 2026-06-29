@@ -47,11 +47,11 @@ export default async function ForbiddenPage({
                 </p>
             </div>
             <div className="flex flex-col items-center gap-4">
-                {!isPendingApproval && (
-                    <Button asChild variant="outline" className="w-full">
-                        <Link href="/">{t('returnHome')}</Link>
-                    </Button>
-                )}
+                <Button asChild variant="outline" className="w-full">
+                    {/* TODO: Revert to "/" / Return to Dashboard once the dashboard is restored. */}
+                    <Link href="/operations">Return to Operations</Link>
+                </Button>
+
                 <LogoutButton />
             </div>
         </div>

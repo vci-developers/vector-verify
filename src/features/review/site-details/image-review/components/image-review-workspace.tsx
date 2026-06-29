@@ -15,6 +15,8 @@ interface ImageReviewWorkspaceProps {
     siteId: number;
     startDate?: string;
     endDate?: string;
+    collectionCycleId?: number;
+    timezone?: string;
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }

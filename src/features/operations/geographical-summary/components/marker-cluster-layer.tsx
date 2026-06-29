@@ -5,27 +5,28 @@ import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
-import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
+import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
 type ClusterGroup = L.MarkerClusterGroup & {
     _spiderfied: L.MarkerCluster | null;
 };
 
-interface MarkerLayerProps {
-    markers: SiteMarker[];
+interface MarkerClusterLayerProps {
+    markers: GeocodableMarker[];
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
+    renderIcon: (markerId: string, isSelected: boolean) => L.DivIcon;
 }
 
-export default function MarkerLayer({
+export default function MarkerClusterLayer({
     markers,
     markerIdsToGeocodedPosition,
     selectedMarkerId,
     onMarkerSelect,
-}: MarkerLayerProps) {
+    renderIcon,
+}: MarkerClusterLayerProps) {
     const map = useMap();
     const clusterRef = useRef<ClusterGroup | null>(null);
     const markerRefs = useRef<Map<string, L.Marker>>(new Map());
@@ -90,9 +91,8 @@ export default function MarkerLayer({
                             else markerRefs.current.delete(marker.id);
                         }}
                         position={position}
-                        icon={createSpecimenMarkerIcon(
-                            marker.totalSpecimens,
-                            marker.anophelesCount,
+                        icon={renderIcon(
+                            marker.id,
                             selectedMarkerId === marker.id,
                         )}
                         eventHandlers={{

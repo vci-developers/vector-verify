@@ -74,7 +74,6 @@ export default function OperationsPageClient() {
         setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
-        locationQueryParams,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
@@ -82,9 +81,6 @@ export default function OperationsPageClient() {
         accessibleSites,
         StorageKeys.operations.selectedLocations,
     );
-
-    //temporary until each tab is adjusted for handling multiple locations
-    const locationQueryParam = locationQueryParams[0]!;
 
     const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
         string | null
@@ -214,7 +210,7 @@ export default function OperationsPageClient() {
                 open={isExportDialogOpen}
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
-                locationQueryParam={locationQueryParam!}
+                siteIds={selectedSiteIdsParam!}
                 locationName={selectedLocations.join(', ')}
                 startDate={startDate}
                 endDate={endDate}

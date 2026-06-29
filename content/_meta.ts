@@ -7,12 +7,18 @@ const meta: MetaRecord = {
     },
     index: 'Introduction',
     'getting-started': 'Getting Started',
-    'user-roles': 'User Roles',
+    'user-roles': {
+        title: 'User Roles',
+        display: 'hidden',
+    },
     dashboard: 'Dashboard',
     review: 'Review',
     annotation: 'Annotation',
     operations: 'Operations',
-    'developer-reference': 'Developer Reference',
+    'developer-reference': {
+        title: 'Developer Reference',
+        display: 'hidden',
+    },
 };
 
 export default meta;

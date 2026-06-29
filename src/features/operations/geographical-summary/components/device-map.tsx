@@ -2,24 +2,27 @@
 
 import { DivIcon } from 'leaflet';
 import { useMemo } from 'react';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
-import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
+import { useTranslations } from 'next-intl';
+import type { DeviceMarker } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
+import { createDeviceMarkerIcon } from '@/features/operations/geographical-summary/components/create-device-marker-icon';
 import GeocodedClusterMap from '@/features/operations/geographical-summary/components/geocoded-cluster-map';
-import MarkerInfoPanel from '@/features/operations/geographical-summary/components/marker-info-panel';
+import DeviceInfoPanel from '@/features/operations/geographical-summary/components/device-info-panel';
 
-interface SiteMapProps {
-    markers: SiteMarker[];
+interface DeviceMapProps {
+    markers: DeviceMarker[];
     selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
 }
 
-export default function SiteMap({
+export default function DeviceMap({
     markers,
     selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
-}: SiteMapProps) {
+}: DeviceMapProps) {
+    const t = useTranslations('OperationsGeographicalSummary');
+
     const markerById = useMemo(
         () => new Map(markers.map(marker => [marker.id, marker])),
         [markers],
@@ -34,15 +37,15 @@ export default function SiteMap({
             renderIcon={(markerId, isSelected) => {
                 const marker = markerById.get(markerId);
                 if (!marker) return new DivIcon();
-                return createSpecimenMarkerIcon(
-                    marker.totalSpecimens,
-                    marker.anophelesCount,
+                return createDeviceMarkerIcon(
+                    marker.activeDeviceCount,
+                    marker.lapsingDeviceCount,
                     isSelected,
                 );
             }}
-            loadingLabel="Locating sites…"
+            loadingLabel={t('locatingDevices')}
             renderSidePanel={isLoading => (
-                <MarkerInfoPanel
+                <DeviceInfoPanel
                     markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}

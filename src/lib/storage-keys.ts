@@ -14,5 +14,6 @@ export const StorageKeys = {
         selectedLocations: 'operations.selectedLocations',
         selectedMarkerId: 'operations.selectedMarkerId',
         selectedSpecies: 'operations.selectedSpecies',
+        geographicalView: 'operations.geographicalView',
     },
 } as const;

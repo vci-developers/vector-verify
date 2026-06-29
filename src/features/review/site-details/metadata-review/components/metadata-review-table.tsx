@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { format } from 'date-fns';
+import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { cn } from '@/utils/cn';
 import { CircleCheck, TriangleAlert } from 'lucide-react';
 import {
@@ -30,6 +30,7 @@ import {
 
 interface MetadataReviewTableProps {
     sessions: Session[];
+    timezone: string | null;
     metadataRows: MetadataRow[];
     sessionIdsWithoutSurveillanceForm: Set<number>;
     resolutionsByMetadataRowId: Map<string, string>;
@@ -42,6 +43,7 @@ interface MetadataReviewTableProps {
 
 export default function MetadataReviewTable({
     sessions,
+    timezone,
     metadataRows,
     sessionIdsWithoutSurveillanceForm,
     resolutionsByMetadataRowId,
@@ -79,8 +81,9 @@ export default function MetadataReviewTable({
                                 key={session.sessionId}
                                 className="border-border border"
                             >
-                                {format(
-                                    new Date(session.collectionDate),
+                                {formatDateInTimezone(
+                                    session.collectionDate,
+                                    timezone,
                                     'MMM d, yyyy',
                                 )}
                                 {sessionIdsWithoutSurveillanceForm.has(
