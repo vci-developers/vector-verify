@@ -13,10 +13,11 @@ import {
     emptySessionSummary,
     isSiteFullyReviewed,
 } from '@/features/review/utils/review-site-session-summary';
+import MetadataReviewWorkspace from '@/features/review/workspace/metadata/components/metadata-review-workspace';
 import { isLegacySite } from '@/lib/location/location-query';
 import { ClipboardList, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import ReviewWorkspaceHeader from './layout/review-workspace-header';
 
 const REVIEW_STEP_LABEL_KEYS = [
@@ -30,6 +31,7 @@ interface ReviewWorkspacePageClientProps {
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
+    timezone?: string;
 }
 
 export default function ReviewWorkspacePageClient({
@@ -37,6 +39,7 @@ export default function ReviewWorkspacePageClient({
     startDate,
     endDate,
     collectionCycleId,
+    timezone,
 }: ReviewWorkspacePageClientProps) {
     const t = useTranslations('ReviewWorkspace');
     const tCommon = useTranslations('Common');
@@ -113,30 +116,43 @@ export default function ReviewWorkspacePageClient({
                             </div>
                         )}
 
-                        {/* Placeholder step body — Steps 07–13 replace each
-                            slot with its real workspace. */}
-                        <div className="text-muted-foreground py-12 text-center text-sm">
-                            {t('stepComingSoon', { step: currentStepLabel })}
-                        </div>
+                        {currentStepIndex === 0 ? (
+                            <MetadataReviewWorkspace
+                                sessions={sessions}
+                                timezone={timezone}
+                                readOnly={readOnly}
+                                onGoToNextStep={goToNextStep}
+                            />
+                        ) : (
+                            <Fragment>
+                                {/* Placeholder step body — Steps 12–13 replace
+                                    each slot with its real workspace and own
+                                    nav, retiring this temporary footer. */}
+                                <div className="text-muted-foreground py-12 text-center text-sm">
+                                    {t('stepComingSoon', {
+                                        step: currentStepLabel,
+                                    })}
+                                </div>
 
-                        <div className="flex justify-between">
-                            <Button
-                                variant="outline"
-                                onClick={goToPreviousStep}
-                                disabled={currentStepIndex === 0}
-                            >
-                                {tCommon('previous')}
-                            </Button>
-                            <Button
-                                onClick={goToNextStep}
-                                disabled={
-                                    currentStepIndex ===
-                                    REVIEW_STEP_LABEL_KEYS.length - 1
-                                }
-                            >
-                                {tCommon('next')}
-                            </Button>
-                        </div>
+                                <div className="flex justify-between">
+                                    <Button
+                                        variant="outline"
+                                        onClick={goToPreviousStep}
+                                    >
+                                        {tCommon('previous')}
+                                    </Button>
+                                    <Button
+                                        onClick={goToNextStep}
+                                        disabled={
+                                            currentStepIndex ===
+                                            REVIEW_STEP_LABEL_KEYS.length - 1
+                                        }
+                                    >
+                                        {tCommon('next')}
+                                    </Button>
+                                </div>
+                            </Fragment>
+                        )}
                     </CardContent>
                 </Card>
             )}

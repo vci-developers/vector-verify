@@ -29,6 +29,7 @@ export default async function ReviewWorkspacePage({
         startDate,
         endDate,
         collectionCycleId: collectionCycleIdParam,
+        timezone,
     } = await searchParams;
 
     const collectionCycleId: number | undefined =
@@ -75,6 +76,7 @@ export default async function ReviewWorkspacePage({
                 startDate={startDate}
                 endDate={endDate}
                 collectionCycleId={collectionCycleId}
+                timezone={timezone}
             />
         </HydrationBoundary>
     );
