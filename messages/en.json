@@ -65,6 +65,14 @@
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
         "sitesVisited": "{visited} of {total} visited"
     },
+    "ReviewWorkspace": {
+        "backToSites": "Back to Sites",
+        "metadataStep": "Metadata Review",
+        "imageStep": "Image Review",
+        "certificationStep": "Certification",
+        "readOnlyNotice": "This unit is fully reviewed and is shown in read-only mode.",
+        "stepComingSoon": "{step} is coming soon."
+    },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
         "devices": "Devices",

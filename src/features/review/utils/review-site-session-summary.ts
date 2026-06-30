@@ -25,5 +25,16 @@ export const REVIEW_STATE_SEVERITY_ORDER = [
 export function getSiteOverallReviewState(
     summary: ReviewSiteSessionSummary,
 ): (typeof REVIEW_STATE_SEVERITY_ORDER)[number] | null {
-    return REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null;
+    return (
+        REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null
+    );
+}
+
+export function isSiteFullyReviewed(
+    summary: ReviewSiteSessionSummary,
+): boolean {
+    const overallReviewState = getSiteOverallReviewState(summary);
+    return (
+        overallReviewState === 'CERTIFIED' || overallReviewState === 'SUBMITTED'
+    );
 }
