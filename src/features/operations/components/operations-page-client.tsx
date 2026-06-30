@@ -185,9 +185,6 @@ export default function OperationsPageClient() {
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
                                     siteIds={selectedSiteIdsParam}
-                                    siteIdToLocationLabel={
-                                        siteIdToLocationLabel
-                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

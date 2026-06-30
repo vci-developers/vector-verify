@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
-import { useTranslations, useFormatter } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 
@@ -25,7 +25,6 @@ interface SpecimenConfusionMatrixProps {
     groundTruthAxisLabel: string;
     predictionAxisLabel: string;
     confusionMatrix: AnnotationConfusionMatrix;
-    selectedLocationNames: string[];
 }
 
 export default function SpecimenConfusionMatrix({
@@ -34,10 +33,8 @@ export default function SpecimenConfusionMatrix({
     groundTruthAxisLabel,
     predictionAxisLabel,
     confusionMatrix,
-    selectedLocationNames,
 }: SpecimenConfusionMatrixProps) {
     const t = useTranslations('OperationsAIPerformance');
-    const f = useFormatter();
 
     const classLabels = Array.from(
         new Set([
@@ -355,9 +352,6 @@ export default function SpecimenConfusionMatrix({
                         <p className="text-muted-foreground text-sm leading-6">
                             {t('matrixCompares', {
                                 category: classificationCategory,
-                                location: f.list(selectedLocationNames, {
-                                    type: 'conjunction',
-                                }),
                             })}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">
