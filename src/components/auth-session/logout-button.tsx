@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { logout } from '@/lib/auth-session/logout';
 import { LogOut } from 'lucide-react';
+import { StorageKeys } from '@/lib/storage-keys';
 
 export default function LogoutButton() {
     const queryClient = useQueryClient();
 
     async function handleLogout() {
         queryClient.clear();
+        Object.values(StorageKeys)
+            .flatMap(Object.values)
+            .forEach(key => localStorage.removeItem(key));
         await logout();
     }
 
