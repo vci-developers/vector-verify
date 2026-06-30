@@ -4,7 +4,10 @@ import { useGetAnnotationsSummary } from '@/api/annotation/hooks/use-get-annotat
 import type { GetAnnotationsSummaryQueryParams } from '@/api/annotation/validation/get-annotations-summary-schema';
 import { Card, CardContent } from '@/components/ui/card';
 import SpecimenConfusionMatrix from './specimen-confusion-matrix';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import { Info } from 'lucide-react';
 
 interface OperationsAiPerformanceProps {
@@ -20,13 +23,8 @@ export default function OperationsAiPerformance({
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
-    const annotationLocationQueryParams =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
-
     const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
-        ...annotationLocationQueryParams,
+        ...buildSiteFilter(locationQueryParam),
         startDate,
         endDate,
     };

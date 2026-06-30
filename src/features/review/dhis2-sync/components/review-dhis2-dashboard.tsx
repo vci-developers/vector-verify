@@ -4,7 +4,10 @@ import { useMemo, useState } from 'react';
 import Dhis2CycleSegment from './dhis2-cycle-segment';
 import Dhis2SyncToolbar from './dhis2-sync-toolbar';
 import type { Site } from '@/api/site/validation/site-schema';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildSiteFilter,
+    type LocationQueryParam,
+} from '@/lib/location/location-query';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { useTranslations } from 'next-intl';
@@ -51,7 +54,7 @@ export default function ReviewDhis2Dashboard({
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
-            ...locationQueryParam,
+            ...buildSiteFilter(locationQueryParam),
             startDate,
             endDate,
             type: 'SURVEILLANCE',
@@ -83,24 +86,16 @@ export default function ReviewDhis2Dashboard({
         );
     }, [getAllSessionsResult, collectionCycles]);
 
-    const sitesWithUnassignedSessions = useMemo(() => {
-        const unassignedSegment = allCycleSegments.find(
-            segment => segment.cycle === null,
-        );
-        return new Set(unassignedSegment?.sessionSummaryBySiteId.keys() ?? []);
-    }, [allCycleSegments]);
-
     const cycleSubmissionGroups = useMemo(
         () =>
             allCycleSegments
                 .filter(
                     segment =>
-                        segment.cycle !== null &&
-                        (selectedCycleIds.length === 0 ||
-                            selectedCycleIds.includes(segment.cycle.id)),
+                        selectedCycleIds.length === 0 ||
+                        selectedCycleIds.includes(segment.cycle.id),
                 )
                 .map(segment => {
-                    const cycle = segment.cycle!;
+                    const cycle = segment.cycle;
                     const sessionSummaryBySiteId =
                         segment.sessionSummaryBySiteId;
                     const submittableSites = sites.filter(site => {
@@ -226,9 +221,6 @@ export default function ReviewDhis2Dashboard({
                                                 site.siteId,
                                             )!
                                         }
-                                        siteHasUnassignedSessions={sitesWithUnassignedSessions.has(
-                                            site.siteId,
-                                        )}
                                         isSelected={selectedSiteRowKeys.has(
                                             siteRowKey(
                                                 group.cycle.id,

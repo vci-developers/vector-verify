@@ -21,13 +21,24 @@
     "Auth": {
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
-        "accessDenied": "Access Denied"
+        "notWhitelistedTitle": "Your account is awaiting approval",
+        "notWhitelistedDescription": "A program administrator needs to approve your account before you can access VectorVerify. Please check back once your account has been approved.",
+        "noAccessTitle": "You don't have access to this feature",
+        "noAccessDescription": "Your account doesn't have permission for this feature. If you think this is a mistake, contact your program administrator.",
+        "returnHome": "Return home"
     },
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
-        "badgeLabel": "Cycle {cycleNumber}",
-        "unassignedSessions": "Unassigned Sessions"
+        "badgeLabel": "Cycle {cycleNumber}"
+    },
+    "OperationsSpecimenComposition": {
+        "monthlySpecimenCountsLoading": "LOADING...",
+        "monthlySpecimenCountsError": "ERROR: ",
+        "filterBySpecies": "Filter by Species",
+        "selectSpecies": "Select species...",
+        "searchSpecies": "Search species...",
+        "noSpeciesFound": "No species found."
     },
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
@@ -47,5 +58,33 @@
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
+    },
+    "OperationsGeographicalSummary": {
+        "specimens": "Specimens",
+        "devices": "Devices",
+        "noDeviceActivity": "No device activity to display.",
+        "deviceActivityError": "Failed to load device activity. Check the console for details.",
+        "active": "Active",
+        "lapsing": "Lapsing",
+        "inactive": "Inactive",
+        "unknownSite": "Unknown site",
+        "sitesCount": "{count, plural, one {# site} other {# sites}}",
+        "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
+        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}",
+        "siteSessionCount": "{count, plural, one {# session} other {# sessions}}",
+        "siteSpecimenCount": "{count, plural, one {# specimen} other {# specimens}}",
+        "siteAnophelesCount": "{count, number} Anopheles",
+        "siteSpeciesCount": "{species}: {count, number}",
+        "siteLastCollection": "Last: {date}",
+        "locatingSites": "Locating sites…",
+        "locatingDevices": "Locating devices…",
+        "legendMarkerTitle": "Each marker represents a collection site",
+        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity as of today over a rolling 6-month window, independent of the selected date range.",
+        "legendSizeTitle": "Marker Size",
+        "legendSizeSubtitle": "Scaled by active device count",
+        "legendColorTitle": "Marker Color — Site Health",
+        "legendActive": "Has an active device this month",
+        "legendLapsing": "Only lapsing devices",
+        "legendInactive": "All devices inactive"
     }
 }

@@ -21,6 +21,14 @@ export const getMonthlySpecimensCountResponseSchema = z.object({
             species: z.record(z.string(), z.number()),
             sex: z.record(z.string(), z.number()),
             abdomenStatus: z.record(z.string(), z.number()),
+            sexBySpecies: z.record(
+                z.string(),
+                z.record(z.string(), z.number()),
+            ),
+            abdomenStatusBySpecies: z.record(
+                z.string(),
+                z.record(z.string(), z.number()),
+            ),
             totalSpecimens: z.number(),
         }),
     ),
