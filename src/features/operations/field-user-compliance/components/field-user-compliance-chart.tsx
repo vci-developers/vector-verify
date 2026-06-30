@@ -13,6 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import ComplianceCollectorTableRow from '@/features/operations/field-user-compliance/components/compliance-collector-table-row';
+import { useTranslations } from 'next-intl';
 
 function buildChartPillColor(index: number, total: number): string {
     const startHue = 133;
@@ -37,21 +38,22 @@ export default function FieldUserComplianceChart({
     totalCollectors,
     activeCollectors,
 }: FieldUserComplianceChartProps) {
+    const t = useTranslations('OperationsFieldTeamPerformance');
     const monthYearKeys = months.map(month => format(month, 'yyyy-MM'));
     return (
         <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <CardTitle>Field Team Performance</CardTitle>
+                    <CardTitle>{t('fieldTeamPerformance')}</CardTitle>
                     <div className="flex items-center gap-2">
                         <StatBadge
-                            label="District Collectors"
+                            label={t('districtCollectors')}
                             value={totalCollectors}
                         />
                         <StatBadge
-                            label="Active Collectors"
+                            label={t('activeCollectors')}
                             value={activeCollectors}
-                            description="Submitted this or last month"
+                            description={t('submittedThisOrLastMonth')}
                         />
                     </div>
                 </div>
@@ -59,7 +61,7 @@ export default function FieldUserComplianceChart({
             <CardContent className="px-6 py-0 pb-4">
                 {collectorRows.length === 0 ? (
                     <p className="text-muted-foreground text-sm">
-                        No submissions found for this location and date range.
+                        {t('noSubmissionsFound')}
                     </p>
                 ) : (
                     <ScrollArea className="h-[45vh] w-full">
@@ -68,7 +70,7 @@ export default function FieldUserComplianceChart({
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="text-muted-foreground bg-card sticky top-0 left-0 z-20 w-px px-4 py-3 text-xs">
-                                            Collector
+                                            {t('collector')}
                                         </TableHead>
                                         {months.map(month => (
                                             <TableHead
@@ -83,7 +85,7 @@ export default function FieldUserComplianceChart({
                                 <TableBody>
                                     {collectorRows.map((row, rowIndex) => (
                                         <ComplianceCollectorTableRow
-                                            key={`${row.collectorName}/${row.collectorTitle}`}
+                                            key={`${row.locationLabel}/${row.collectorName}/${row.collectorTitle}`}
                                             row={row}
                                             monthYearKeys={monthYearKeys}
                                             color={buildChartPillColor(

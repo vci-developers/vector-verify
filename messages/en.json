@@ -32,6 +32,14 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}"
     },
+    "Operations": {
+        "operations": "Operations",
+        "operationsDescription": "Monitor field operations by location",
+        "selectALocation": "Select a location to view data.",
+        "selectDropdownPlaceholder": "Select {locationType}(s)",
+        "searchLocationPlaceholder": "Search {locationType}s",
+        "exportData": "Export Data"
+    },
     "OperationsSpecimenComposition": {
         "monthlySpecimenCountsLoading": "LOADING...",
         "monthlySpecimenCountsError": "ERROR: ",
@@ -49,7 +57,7 @@
         "specificity": "Specificity",
         "specimensLabeledAs": "{count, plural, one {# specimen''s label was} other {# specimens'' labels were}} {category, select, unknown {or contained ''{category}''} other {{category}}}. ",
         "interpretation": "Interpretation",
-        "matrixCompares": "The matrix compares visual verification {category} labels from {location} against the VectorCam {category} prediction for the selected date range.",
+        "matrixCompares": "The matrix compares visual verification {category} labels from the selected location(s) against the VectorCam {category} prediction for the selected date range.",
         "eachCellShows": "Each cell shows the specimen count and that cell's share of the visual verification row. Each per-label metric is computed as a one-vs-rest comparison for that label.",
         "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
         "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
@@ -86,5 +94,14 @@
         "legendActive": "Has an active device this month",
         "legendLapsing": "Only lapsing devices",
         "legendInactive": "All devices inactive"
+    },
+    "OperationsFieldTeamPerformance": {
+        "fieldTeamPerformance": "Field Team Performance",
+        "districtCollectors": "District Collectors",
+        "activeCollectors": "Active Collectors",
+        "submittedThisOrLastMonth": "Submitted this or last month",
+        "noSubmissionsFound": "No submissions found for this location and date range.",
+        "collector": "Collector",
+        "session": "session"
     }
 }

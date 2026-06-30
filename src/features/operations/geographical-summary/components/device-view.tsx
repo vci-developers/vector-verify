@@ -10,38 +10,36 @@ import {
     buildDeviceMarkers,
     DEVICE_HEALTH_COLOR,
 } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import type { Site } from '@/api/site/validation/site-schema';
 
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
-    locationQueryParam: LocationQueryParam;
-    selectedLocation: string;
-    descendantsOfSelectedLocation: Site[];
+    siteIds: number[];
+    selectedLocations: string[];
+    descendantsOfSelectedLocations: Site[];
 }
 
 export default function DeviceView({
-    locationQueryParam,
-    selectedLocation,
-    descendantsOfSelectedLocation,
+    siteIds,
+    selectedLocations,
+    descendantsOfSelectedLocations,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
-    const { deviceActivity, isPending, isError } =
-        useDeviceActivity(locationQueryParam);
+    const { deviceActivity, isPending, isError } = useDeviceActivity(siteIds);
 
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [locationQueryParam]);
+    }, [siteIds]);
 
     const deviceMarkers = useMemo(() => {
         if (!deviceActivity) return [];
         return buildDeviceMarkers(
             deviceActivity.sites,
-            descendantsOfSelectedLocation,
+            descendantsOfSelectedLocations,
         ).sort(
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
@@ -49,7 +47,7 @@ export default function DeviceView({
                 secondMarker.lapsingDeviceCount -
                     firstMarker.lapsingDeviceCount,
         );
-    }, [deviceActivity, descendantsOfSelectedLocation]);
+    }, [deviceActivity, descendantsOfSelectedLocations]);
 
     if (isPending) {
         return (
@@ -111,7 +109,7 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
                         markers={deviceMarkers}
-                        selectedLocation={selectedLocation}
+                        selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}
                     />

@@ -18,7 +18,7 @@ const DEFAULT_ZOOM = 2;
 
 interface GeocodedClusterMapProps {
     markers: GeocodableMarker[];
-    selectedLocation: string;
+    selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
     renderIcon: (markerId: string, isSelected: boolean) => DivIcon;
@@ -28,7 +28,7 @@ interface GeocodedClusterMapProps {
 
 export default function GeocodedClusterMap({
     markers,
-    selectedLocation,
+    selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
     renderIcon,
@@ -55,7 +55,7 @@ export default function GeocodedClusterMap({
                 >
                     <MapNavigator
                         bounds={markerBounds}
-                        selectedLocation={selectedLocation}
+                        selectedLocations={selectedLocations}
                     />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
