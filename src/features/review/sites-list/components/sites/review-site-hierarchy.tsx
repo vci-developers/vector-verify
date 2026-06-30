@@ -3,7 +3,11 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import type { ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
 import { isLegacySite } from '@/lib/location/location-query';
-import { getLocationTypeName, getTopLevelSites } from '@/lib/location/site-tree';
+import {
+    getLocationTypeName,
+    getSiteAndDescendants,
+    getTopLevelSites,
+} from '@/lib/location/site-tree';
 import ReviewCollapsibleLocationGroup from './review-collapsible-location-group';
 import ReviewSiteLeafRows from './review-site-leaf-rows';
 
@@ -18,11 +22,13 @@ const LEGACY_HIERARCHY_LEVELS = [
 interface ReviewSiteHierarchyProps {
     sites: Site[];
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteHierarchy({
     sites,
     summaryBySiteId,
+    buildSiteHref,
 }: ReviewSiteHierarchyProps) {
     if (sites.length === 0) return null;
 
@@ -31,12 +37,15 @@ export default function ReviewSiteHierarchy({
             sites={sites}
             depth={0}
             summaryBySiteId={summaryBySiteId}
+            buildSiteHref={buildSiteHref}
         />
     ) : (
         <HierarchicalSiteLevel
             allSites={sites}
             sitesAtLevel={getTopLevelSites(sites)}
+            depth={0}
             summaryBySiteId={summaryBySiteId}
+            buildSiteHref={buildSiteHref}
         />
     );
 }
@@ -45,10 +54,12 @@ function LegacySiteLevel({
     sites,
     depth,
     summaryBySiteId,
+    buildSiteHref,
 }: {
     sites: Site[];
     depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }) {
     const level = LEGACY_HIERARCHY_LEVELS[depth]!;
 
@@ -58,6 +69,7 @@ function LegacySiteLevel({
                 sites={sites}
                 getDisplayName={site => site[level.key] ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
+                buildSiteHref={buildSiteHref}
             />
         );
     }
@@ -78,11 +90,15 @@ function LegacySiteLevel({
                     key={name}
                     locationName={name}
                     locationTypeName={level.label}
+                    siteIds={groupSites.map(site => site.siteId)}
+                    sessionSummaryBySiteId={summaryBySiteId}
+                    defaultOpen={depth > 0}
                 >
                     <LegacySiteLevel
                         sites={groupSites}
                         depth={depth + 1}
                         summaryBySiteId={summaryBySiteId}
+                        buildSiteHref={buildSiteHref}
                     />
                 </ReviewCollapsibleLocationGroup>
             ))}
@@ -93,11 +109,15 @@ function LegacySiteLevel({
 function HierarchicalSiteLevel({
     allSites,
     sitesAtLevel,
+    depth,
     summaryBySiteId,
+    buildSiteHref,
 }: {
     allSites: Site[];
     sitesAtLevel: Site[];
+    depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }) {
     if (sitesAtLevel.length === 0) return null;
 
@@ -111,6 +131,7 @@ function HierarchicalSiteLevel({
                 sites={sitesAtLevel}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
+                buildSiteHref={buildSiteHref}
             />
         );
     }
@@ -123,16 +144,34 @@ function HierarchicalSiteLevel({
                 const childSites = allSites
                     .filter(other => other.parentId === site.siteId)
                     .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+                // Sentinel sites under this group = its leaf descendants.
+                const sentinelSiteIds = getSiteAndDescendants(
+                    allSites,
+                    site.siteId,
+                )
+                    .filter(
+                        descendant =>
+                            descendant.siteId !== site.siteId &&
+                            !allSites.some(
+                                other => other.parentId === descendant.siteId,
+                            ),
+                    )
+                    .map(descendant => descendant.siteId);
                 return (
                     <ReviewCollapsibleLocationGroup
                         key={site.siteId}
                         locationName={site.name ?? 'Unknown'}
                         locationTypeName={locationTypeName}
+                        siteIds={sentinelSiteIds}
+                        sessionSummaryBySiteId={summaryBySiteId}
+                        defaultOpen={depth > 0}
                     >
                         <HierarchicalSiteLevel
                             allSites={allSites}
                             sitesAtLevel={childSites}
+                            depth={depth + 1}
                             summaryBySiteId={summaryBySiteId}
+                            buildSiteHref={buildSiteHref}
                         />
                     </ReviewCollapsibleLocationGroup>
                 );

@@ -58,9 +58,12 @@
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
+        "inReview": "In Review",
+        "certified": "Certified",
+        "submitted": "Submitted",
+        "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
-        "sessionCount": "{count, plural, one {# session} other {# sessions}}",
-        "noSessions": "No sessions"
+        "sitesVisited": "{visited} of {total} visited"
     },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",

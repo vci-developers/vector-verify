@@ -14,3 +14,16 @@ export function emptySessionSummary(): ReviewSiteSessionSummary {
 export function getSiteSessionCount(summary: ReviewSiteSessionSummary): number {
     return Object.values(summary).reduce((total, count) => total + count, 0);
 }
+
+export const REVIEW_STATE_SEVERITY_ORDER = [
+    'NEEDS_REVIEW',
+    'IN_REVIEW',
+    'CERTIFIED',
+    'SUBMITTED',
+] as const satisfies readonly SessionState[];
+
+export function getSiteOverallReviewState(
+    summary: ReviewSiteSessionSummary,
+): (typeof REVIEW_STATE_SEVERITY_ORDER)[number] | null {
+    return REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null;
+}

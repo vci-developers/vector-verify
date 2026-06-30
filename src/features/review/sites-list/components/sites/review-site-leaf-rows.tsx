@@ -3,66 +3,117 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
 import {
+    getSiteOverallReviewState,
     getSiteSessionCount,
+    REVIEW_STATE_SEVERITY_ORDER,
     type ReviewSiteSessionSummary,
 } from '@/features/review/utils/review-site-session-summary';
 import { cn } from '@/utils/cn';
 import { MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+
+type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
+
+const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+    NEEDS_REVIEW: 'needsReview',
+    IN_REVIEW: 'inReview',
+    CERTIFIED: 'certified',
+    SUBMITTED: 'submitted',
+};
+
+const REVIEW_STATE_BADGE_VARIANT: Record<
+    ReviewState,
+    'destructive' | 'outline' | 'default' | 'secondary'
+> = {
+    NEEDS_REVIEW: 'destructive',
+    IN_REVIEW: 'outline',
+    CERTIFIED: 'default',
+    SUBMITTED: 'secondary',
+};
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
     summaryBySiteId,
+    buildSiteHref,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
 
     return (
         <div className="space-y-1">
             {sites.map(site => {
+                const displayName = getDisplayName(site);
                 const summary = summaryBySiteId.get(site.siteId);
-                const sessionCount = summary ? getSiteSessionCount(summary) : 0;
-                const hasSessions = sessionCount > 0;
+                const hasSessions =
+                    summary !== undefined && getSiteSessionCount(summary) > 0;
+                const overallState = summary
+                    ? getSiteOverallReviewState(summary)
+                    : null;
+
+                const rowHeader = (
+                    <div className="flex items-center gap-3">
+                        <div
+                            className={cn(
+                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                                hasSessions ? 'bg-primary/10' : 'bg-muted',
+                            )}
+                        >
+                            <MapPin
+                                className={cn(
+                                    'h-4 w-4',
+                                    hasSessions
+                                        ? 'text-primary'
+                                        : 'text-muted-foreground',
+                                )}
+                            />
+                        </div>
+                        <span className="text-sm">{displayName}</span>
+                    </div>
+                );
+
+                const statusBadge = overallState ? (
+                    <Badge variant={REVIEW_STATE_BADGE_VARIANT[overallState]}>
+                        {t(REVIEW_STATE_LABEL_KEY[overallState])}
+                    </Badge>
+                ) : (
+                    <Badge variant="outline">{t('noSessions')}</Badge>
+                );
+
+                const href = hasSessions
+                    ? buildSiteHref?.(site.siteId)
+                    : undefined;
+
+                if (href !== undefined) {
+                    return (
+                        <Link
+                            key={site.siteId}
+                            href={href}
+                            className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-md px-3 py-2"
+                        >
+                            {rowHeader}
+                            {statusBadge}
+                        </Link>
+                    );
+                }
 
                 return (
                     <div
                         key={site.siteId}
                         className={cn(
-                            'flex items-center justify-between rounded-md px-3 py-2',
-                            hasSessions ? 'hover:bg-muted/50' : 'opacity-60',
+                            'flex items-center justify-between gap-3 rounded-md px-3 py-2',
+                            !hasSessions && 'opacity-60',
                         )}
                     >
-                        <div className="flex items-center gap-3">
-                            <div
-                                className={cn(
-                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                                    hasSessions ? 'bg-primary/10' : 'bg-muted',
-                                )}
-                            >
-                                <MapPin
-                                    className={cn(
-                                        'h-4 w-4',
-                                        hasSessions
-                                            ? 'text-primary'
-                                            : 'text-muted-foreground',
-                                    )}
-                                />
-                            </div>
-                            <span className="text-sm">
-                                {getDisplayName(site)}
-                            </span>
-                        </div>
-                        <Badge variant={hasSessions ? 'default' : 'outline'}>
-                            {hasSessions
-                                ? t('sessionCount', { count: sessionCount })
-                                : t('noSessions')}
-                        </Badge>
+                        {rowHeader}
+                        {statusBadge}
                     </div>
                 );
             })}

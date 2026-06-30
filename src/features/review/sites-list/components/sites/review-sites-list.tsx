@@ -23,6 +23,20 @@ import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
+function buildReviewUnitHref(siteId: number, segment: ReviewSegment): string {
+    const queryParams = new URLSearchParams({
+        startDate: segment.startDate,
+        endDate: segment.endDate,
+    });
+    if (segment.collectionCycleId !== undefined) {
+        queryParams.set('collectionCycleId', String(segment.collectionCycleId));
+    }
+    if (segment.timezone != null) {
+        queryParams.set('timezone', segment.timezone);
+    }
+    return `/review-next/${siteId}?${queryParams.toString()}`;
+}
+
 interface ReviewSitesListProps {
     sites: Site[];
     locationQueryParam: LocationQueryParam;
@@ -107,20 +121,28 @@ export default function ReviewSitesList({
 
     return (
         <div className="space-y-2">
-            {segments.map(segment => (
-                <Collapsible key={segment.key} defaultOpen>
-                    <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
-                        <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-                        {getSegmentLabel(segment)}
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <ReviewSiteHierarchy
-                            sites={sites}
-                            summaryBySiteId={segment.summaryBySiteId}
-                        />
-                    </CollapsibleContent>
-                </Collapsible>
-            ))}
+            {segments.map(segment => {
+                const buildSiteHref =
+                    segment.kind === 'unassigned'
+                        ? undefined
+                        : (siteId: number) =>
+                              buildReviewUnitHref(siteId, segment);
+                return (
+                    <Collapsible key={segment.key} defaultOpen>
+                        <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
+                            <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                            {getSegmentLabel(segment)}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <ReviewSiteHierarchy
+                                sites={sites}
+                                summaryBySiteId={segment.summaryBySiteId}
+                                buildSiteHref={buildSiteHref}
+                            />
+                        </CollapsibleContent>
+                    </Collapsible>
+                );
+            })}
         </div>
     );
 }
