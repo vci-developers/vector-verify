@@ -9,18 +9,22 @@ import { useFormatter } from 'next-intl';
 
 interface OperationsAiPerformanceProps {
     siteIds: number[];
-    selectedLocationNames: string[];
+    siteIdToLocationLabel: Map<number, string>;
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsAiPerformance({
     siteIds,
-    selectedLocationNames,
+    siteIdToLocationLabel,
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
     const f = useFormatter();
+    const selectedLocationNames = [
+        ...new Set(siteIdToLocationLabel.values()),
+    ].sort();
+
     const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
         siteIds,
         startDate,

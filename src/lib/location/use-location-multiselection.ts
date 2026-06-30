@@ -1,8 +1,5 @@
 import type { Site } from '@/api/site/validation/site-schema';
-import {
-    isLegacySite,
-    type LocationQueryParam,
-} from '@/lib/location/location-query';
+import { isLegacySite } from '@/lib/location/location-query';
 import {
     getLocationTypeName,
     getSiteAndDescendants,
@@ -28,7 +25,7 @@ export function useLocationMultiSelection(
     );
 
     const usesLegacyStructure =
-        accessibleSites.length > 0 && isLegacySite(accessibleSites[0]!);
+        accessibleSites.length > 0 && accessibleSites.some(isLegacySite);
 
     const topLevelSites = useMemo(
         () => (usesLegacyStructure ? [] : getTopLevelSites(accessibleSites)),
@@ -69,17 +66,6 @@ export function useLocationMultiSelection(
         topLevelSites,
     ]);
 
-    const locationQueryParams: LocationQueryParam[] = useMemo(() => {
-        if (selectedLocations.length === 0) return [];
-        if (usesLegacyStructure) {
-            return selectedLocations.map(district => ({ district }));
-        }
-        return selectedLocations
-            .map(name => topLevelSites.find(s => s.name === name)?.siteId)
-            .filter((id): id is number => id !== undefined)
-            .map(siteId => ({ siteId }));
-    }, [selectedLocations, usesLegacyStructure, topLevelSites]);
-
     const selectedSiteIdsParam: number[] | undefined = useMemo(() => {
         if (descendantsOfSelectedLocations.length === 0) return undefined;
         return descendantsOfSelectedLocations.map(site => site.siteId);
@@ -116,7 +102,6 @@ export function useLocationMultiSelection(
         setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
-        locationQueryParams,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,

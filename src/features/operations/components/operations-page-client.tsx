@@ -185,7 +185,9 @@ export default function OperationsPageClient() {
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
                                     siteIds={selectedSiteIdsParam}
-                                    selectedLocationNames={selectedLocations.sort()}
+                                    siteIdToLocationLabel={
+                                        siteIdToLocationLabel
+                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -211,7 +213,9 @@ export default function OperationsPageClient() {
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
                 siteIds={selectedSiteIdsParam!}
-                locationName={selectedLocations.join(', ')}
+                locationName={[...new Set(siteIdToLocationLabel.values())].join(
+                    ', ',
+                )}
                 startDate={startDate}
                 endDate={endDate}
             />

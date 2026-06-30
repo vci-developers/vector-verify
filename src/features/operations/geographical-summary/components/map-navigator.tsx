@@ -22,7 +22,7 @@ export default function MapNavigator({
 
     const { data: geocodeResult } = useGetGeocode(
         { location: selectedLocations[0] ?? '' },
-        { enabled: !bounds && selectedLocations.length <= 1 },
+        { enabled: !bounds },
     );
 
     useEffect(() => {

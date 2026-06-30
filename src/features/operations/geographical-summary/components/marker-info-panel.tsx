@@ -38,11 +38,11 @@ export default function MarkerInfoPanel({
         <SelectableInfoPanel
             countLabel={t('sitesCount', { count: markers.length })}
         >
-            {markersGroupedByLocation.map(([district, groupMarkers]) => (
-                <div key={district}>
+            {markersGroupedByLocation.map(([location, groupMarkers]) => (
+                <div key={location}>
                     <div className="border-border bg-muted/30 border-b px-3 py-1.5">
                         <p className="text-foreground text-sm font-medium">
-                            {district}
+                            {location}
                         </p>
                     </div>
                     {groupMarkers.map(marker => {
