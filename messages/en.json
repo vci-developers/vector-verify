@@ -32,6 +32,14 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}"
     },
+    "Operations": {
+        "operations": "Operations",
+        "operationsDescription": "Monitor field operations by location",
+        "selectALocation": "Select a location to view data.",
+        "selectDropdownPlaceholder": "Select {locationType}(s)",
+        "searchLocationPlaceholder": "Search {locationType}s",
+        "exportData": "Export Data"
+    },
     "OperationsSpecimenComposition": {
         "monthlySpecimenCountsLoading": "LOADING...",
         "monthlySpecimenCountsError": "ERROR: ",
@@ -86,5 +94,14 @@
         "legendActive": "Has an active device this month",
         "legendLapsing": "Only lapsing devices",
         "legendInactive": "All devices inactive"
+    },
+    "OperationsFieldTeamPerformance": {
+        "fieldTeamPerformance": "Field Team Performance",
+        "districtCollectors": "District Collectors",
+        "activeCollectors": "Active Collectors",
+        "submittedThisOrLastMonth": "Submitted this or last month",
+        "noSubmissionsFound": "No submissions found for this location and date range.",
+        "collector": "Collector",
+        "session": "session"
     }
 }

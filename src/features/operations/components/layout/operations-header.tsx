@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { OperationsTab } from '@/features/operations/components/operations-page-client';
 import { Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
@@ -41,6 +42,8 @@ export default function OperationsHeader({
     onEndMonthChange,
     onExportClick,
 }: OperationsHeaderProps) {
+    const t = useTranslations('Operations');
+    const tCommon = useTranslations('Common');
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -50,14 +53,20 @@ export default function OperationsHeader({
                 >
                     <MultiSelectTrigger className="w-52">
                         <MultiSelectValue
-                            placeholder={`Select ${locationTypeName.toLocaleLowerCase()}(s)`}
+                            placeholder={t('selectDropdownPlaceholder', {
+                                locationType:
+                                    locationTypeName.toLocaleLowerCase(),
+                            })}
                             overflowBehavior="cutoff"
                         />
                     </MultiSelectTrigger>
                     <MultiSelectContent
                         search={{
-                            placeholder: `Search ${locationTypeName.toLocaleLowerCase()}s...`,
-                            emptyMessage: 'No results.',
+                            placeholder: t('searchLocationPlaceholder', {
+                                locationType:
+                                    locationTypeName.toLocaleLowerCase(),
+                            }),
+                            emptyMessage: tCommon('noResults'),
                         }}
                     >
                         <MultiSelectGroup>
@@ -85,7 +94,7 @@ export default function OperationsHeader({
                         onClick={onExportClick}
                     >
                         <Download className="h-4 w-4" />
-                        Export Data
+                        {t('exportData')}
                     </Button>
                 </div>
             </div>

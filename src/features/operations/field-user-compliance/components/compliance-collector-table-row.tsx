@@ -1,6 +1,7 @@
 import { buildSessionChartPills } from '@/features/operations/field-user-compliance/utils/build-session-chart-pills';
 import type { CollectorRow } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { useTranslations } from 'next-intl';
 
 interface ComplianceCollectorTableRowProps {
     row: CollectorRow;
@@ -13,6 +14,7 @@ export default function ComplianceCollectorTableRow({
     monthYearKeys,
     color,
 }: ComplianceCollectorTableRowProps) {
+    const t = useTranslations('OperationsFieldTeamPerformance');
     const sessionChartPills = buildSessionChartPills(
         monthYearKeys,
         row.sessionCountsByMonth,
@@ -45,7 +47,7 @@ export default function ComplianceCollectorTableRow({
                             className="flex h-8 w-full items-center justify-center rounded-full px-4 text-sm font-medium text-white"
                             style={{ backgroundColor: color }}
                         >
-                            {segment.totalCount} session
+                            {segment.totalCount} {t('session')}
                             {segment.totalCount !== 1 ? 's' : ''}
                         </div>
                     </TableCell>

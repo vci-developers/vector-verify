@@ -18,6 +18,7 @@ import OperationsSpecimenComposition from '@/features/operations/specimen-compos
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
+import { useTranslations } from 'next-intl';
 
 const OPERATIONS_TABS = [
     {
@@ -46,6 +47,8 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
+    const t = useTranslations('Operations');
+    const tCommmon = useTranslations('Common');
     const [activeTab, setActiveTab] = useLocalStorage<OperationsTab>(
         StorageKeys.operations.activeTab,
         'geographical-summary',
@@ -93,11 +96,13 @@ export default function OperationsPageClient() {
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
             <PageShell
-                title="Operations"
-                description="Monitor field operations by location"
+                title={t('operations')}
+                description={t('operationsDescription')}
                 icon={Microscope}
             >
-                <p className="text-muted-foreground text-sm">Loading...</p>
+                <p className="text-muted-foreground text-sm">
+                    {tCommmon('loading')}
+                </p>
             </PageShell>
         );
     }
@@ -105,8 +110,8 @@ export default function OperationsPageClient() {
     if (!getUserPermissionsResult.ok) {
         return (
             <PageShell
-                title="Operations"
-                description="Monitor field operations by location"
+                title={t('operations')}
+                description={t('operationsDescription')}
                 icon={Microscope}
             >
                 <p className="text-destructive text-sm">
@@ -125,8 +130,8 @@ export default function OperationsPageClient() {
 
     return (
         <PageShell
-            title="Operations"
-            description="Monitor field operations by location"
+            title={t('operations')}
+            description={t('operationsDescription')}
             icon={Microscope}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
@@ -154,7 +159,7 @@ export default function OperationsPageClient() {
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a location to view data.
+                                    {t('selectALocation')}
                                 </p>
                             </div>
                         </div>
