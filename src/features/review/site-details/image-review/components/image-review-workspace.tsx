@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-image-schema';
 import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { usePagination } from '@/lib/hooks/use-pagination';
-import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageReviewDetails from './image-review-details';
+import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { cn } from '@/utils/cn';
 
 interface ImageReviewWorkspaceProps {
     siteId: number;
@@ -45,11 +47,23 @@ export default function ImageReviewWorkspace({
             includeAllImages: true,
         });
 
+    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
+        useGetAllSessions({
+            siteIds: [siteId],
+            startDate,
+            endDate,
+            type: 'SURVEILLANCE',
+        });
+
     if (isGetAllSpecimensPending || !getAllSpecimensResult) {
         return (
             <p className="text-muted-foreground text-sm">
                 Loading specimens...
             </p>
+        );
+    } else if (isGetAllSessionsPending || !getAllSessionsResult) {
+        return (
+            <p className="text-muted-foreground text-sm">Loading sessions...</p>
         );
     }
 
@@ -61,8 +75,32 @@ export default function ImageReviewWorkspace({
             </p>
         );
     }
+    if (!getAllSessionsResult.ok) {
+        return (
+            <p className="text-destructive text-sm">
+                Error loading sessions:{' '}
+                {networkErrorMessage(getAllSessionsResult.error)}
+            </p>
+        );
+    }
 
     const allSpecimensForSite = getAllSpecimensResult.data.specimens;
+    const allSessionsForSite = getAllSessionsResult.data.sessions;
+    const totalSpecimensUploaded = allSpecimensForSite.length;
+    const expectedSpecimensCount = allSessionsForSite.reduce(
+        (total, session) => total + (session.expectedSpecimens ?? 0),
+        0,
+    );
+    const hasReliableExpectedCount =
+        expectedSpecimensCount != null &&
+        expectedSpecimensCount > 0 &&
+        totalSpecimensUploaded <= expectedSpecimensCount;
+    const specimensUploadedLabel = hasReliableExpectedCount
+        ? `${totalSpecimensUploaded} of ${expectedSpecimensCount} Specimens Uploaded`
+        : `${totalSpecimensUploaded} Specimens Uploaded`;
+    const isMissingExpectedSpecimens =
+        hasReliableExpectedCount &&
+        totalSpecimensUploaded < expectedSpecimensCount;
 
     if (allSpecimensForSite.length === 0) {
         return (
@@ -106,6 +144,19 @@ export default function ImageReviewWorkspace({
 
     return (
         <div className="space-y-4">
+            <div
+                className={cn(
+                    isMissingExpectedSpecimens &&
+                        'text-destructive font-medium',
+                )}
+            >
+                {isMissingExpectedSpecimens && (
+                    <AlertCircle className="h-3.5 w-3.5" />
+                )}
+                <p className="text-medium font-semibold">
+                    {specimensUploadedLabel}
+                </p>
+            </div>
             <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">
                     Specimen {currentSpecimenNumber} of {totalSpecimensToReview}
