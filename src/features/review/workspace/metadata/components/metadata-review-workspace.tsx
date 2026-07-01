@@ -25,8 +25,11 @@ import { buildUnitIdentitySections } from '../utils/group-session-units-by-ident
 import {
     buildDynamicSessionSection,
     buildSurveillanceSection,
+    flattenQuestions,
     type MetadataSection,
 } from '../utils/metadata-section';
+import { evaluateDisabledRowIds } from '../utils/evaluate-question-answerability';
+import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import MetadataReviewTable from './metadata-review-table';
 
 interface MetadataReviewWorkspaceProps {
@@ -48,7 +51,6 @@ export default function MetadataReviewWorkspace({
     const queryClient = useQueryClient();
     const {
         resolutionsByMetadataRowId,
-        disabledRowIds,
         handleConflictResolutionChange,
         resetResolutions,
     } = useMetadataReviewState();
@@ -105,6 +107,7 @@ export default function MetadataReviewWorkspace({
     let sections: MetadataSection[];
     let resolvableSessions: Session[];
     let sessionsMissingSurveillanceForm: Session[] = [];
+    let questionsById = new Map<number, FormQuestion>();
 
     if (isDynamicFormMode) {
         if (formAnswerQueries.some(query => query.isPending)) {
@@ -139,6 +142,12 @@ export default function MetadataReviewWorkspace({
         resolvableSessions = sessions;
         const currentFormQuestions =
             getCurrentFormByProgramIdResult.data.questions ?? [];
+        questionsById = new Map(
+            flattenQuestions(currentFormQuestions).map(question => [
+                question.id,
+                question,
+            ]),
+        );
         sections = [
             buildDynamicSessionSection(
                 resolvableSessions,
@@ -216,12 +225,21 @@ export default function MetadataReviewWorkspace({
         ];
     }
 
+    const disabledRowIds = evaluateDisabledRowIds(
+        sections,
+        resolutionsByMetadataRowId,
+        questionsById,
+    );
+
     const hasConflicts = sections.some(section =>
         section.rows.some(row => row.hasConflict),
     );
     const areAllConflictsResolved = sections.every(section =>
         section.rows.every(
-            row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
+            row =>
+                !row.hasConflict ||
+                resolutionsByMetadataRowId.has(row.id) ||
+                disabledRowIds.has(row.id),
         ),
     );
 
@@ -243,6 +261,7 @@ export default function MetadataReviewWorkspace({
                 } = applyConflictResolutions(
                     section.rows,
                     resolutionsByMetadataRowId,
+                    disabledRowIds,
                 );
                 const requestBody: ResolveSessionConflictsRequestBody =
                     section.sessionUnitIdBySessionId

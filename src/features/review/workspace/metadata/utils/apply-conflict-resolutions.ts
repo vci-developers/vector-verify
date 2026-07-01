@@ -10,6 +10,7 @@ import {
 export function applyConflictResolutions(
     metadataRows: MetadataRow[],
     resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
 ): {
     resolvedData: Partial<Session>;
     resolvedSurveillanceForm: Partial<SurveillanceForm>;
@@ -20,9 +21,9 @@ export function applyConflictResolutions(
     const resolvedFormAnswers: Partial<FormAnswer>[] = [];
 
     for (const metadataRow of metadataRows) {
-        const chosenDisplayValue = resolutionsByMetadataRowId.get(
-            metadataRow.id,
-        );
+        const chosenDisplayValue = disabledRowIds.has(metadataRow.id)
+            ? NOT_APPLICABLE
+            : resolutionsByMetadataRowId.get(metadataRow.id);
         if (chosenDisplayValue === undefined) continue;
 
         if (metadataRow.entity === 'formAnswer') {

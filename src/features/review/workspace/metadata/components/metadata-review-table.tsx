@@ -93,11 +93,12 @@ export default function MetadataReviewTable({
                                 </TableRow>
                             )}
                             {section.rows.map(row => {
-                                const isResolved =
-                                    resolutionsByMetadataRowId.has(row.id);
                                 const isRowDisabled = disabledRowIds.has(
                                     row.id,
                                 );
+                                const isResolved =
+                                    resolutionsByMetadataRowId.has(row.id) ||
+                                    isRowDisabled;
                                 const chosenResolution = isRowDisabled
                                     ? NOT_APPLICABLE
                                     : resolutionsByMetadataRowId.get(row.id);
