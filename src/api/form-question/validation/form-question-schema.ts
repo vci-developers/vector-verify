@@ -19,6 +19,7 @@ export const formQuestionSchema = z.object({
     type: formQuestionTypeSchema,
     required: z.boolean(),
     answerScope: formQuestionScopeSchema,
+    isUnitIdentityComponent: z.boolean(),
     options: z.array(z.string()).nullable(),
     order: z.number(),
     prerequisite: prerequisiteExpressionSchema.nullable(),

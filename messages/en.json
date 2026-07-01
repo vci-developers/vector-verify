@@ -86,7 +86,8 @@
         "resolveSuccess": "Conflicts resolved.",
         "resolveError": "Failed to resolve conflicts.",
         "currentFormError": "Could not determine the form type for this program.",
-        "formAnswersError": "Failed to load form answers."
+        "formAnswersError": "Failed to load form answers.",
+        "sessionSectionTitle": "Session"
     },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",

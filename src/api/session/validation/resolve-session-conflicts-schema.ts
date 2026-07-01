@@ -4,8 +4,9 @@ import { surveillanceFormSchema } from '@/api/surveillance-form/validation/surve
 import { formAnswerSchema } from '@/api/form-answer/validation/form-answer-schema';
 
 export const resolveSessionConflictsRequestSchema = z.object({
-    sessionIds: z.array(z.number()),
-    resolvedData: sessionSchema.partial(),
+    sessionIds: z.array(z.number()).optional(),
+    sessionUnitIds: z.array(z.number()).optional(),
+    resolvedData: sessionSchema.partial().optional(),
     resolvedSurveillanceForm: surveillanceFormSchema.partial().optional(),
     resolvedFormAnswers: z.array(formAnswerSchema.partial()).optional(),
 });

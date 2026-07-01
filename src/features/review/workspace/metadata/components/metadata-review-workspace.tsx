@@ -7,23 +7,26 @@ import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-f
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { sessionKeys } from '@/api/session/session-keys';
 import type { Session } from '@/api/session/validation/session-schema';
+import type { ResolveSessionConflictsRequestBody } from '@/api/session/validation/resolve-session-conflicts-schema';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
 import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import { Button } from '@/components/ui/button';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { toastResult } from '@/lib/network/toast-result';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { useQueryClient } from '@tanstack/react-query';
 import { TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { useMetadataReviewState } from '../hooks/use-metadata-review-state';
 import { applyConflictResolutions } from '../utils/apply-conflict-resolutions';
+import { buildUnitIdentitySections } from '../utils/group-session-units-by-identity';
 import {
-    buildDynamicMetadataRows,
-    buildSurveillanceMetadataRows,
-    type MetadataRow,
-} from '../utils/metadata-row';
+    buildDynamicSessionSection,
+    buildSurveillanceSection,
+    type MetadataSection,
+} from '../utils/metadata-section';
 import MetadataReviewTable from './metadata-review-table';
 
 interface MetadataReviewWorkspaceProps {
@@ -49,6 +52,7 @@ export default function MetadataReviewWorkspace({
         handleConflictResolutionChange,
         resetResolutions,
     } = useMetadataReviewState();
+    const [isResolving, setIsResolving] = useState(false);
 
     const sessionIds = sessions.map(session => session.sessionId);
 
@@ -70,10 +74,8 @@ export default function MetadataReviewWorkspace({
         isDynamicFormMode ? sessionIds : [],
     );
 
-    const {
-        mutate: resolveSessionConflicts,
-        isPending: isResolveSessionConflictsPending,
-    } = useResolveSessionConflicts();
+    const { mutateAsync: resolveSessionConflictsAsync } =
+        useResolveSessionConflicts();
 
     if (sessions.length === 0) {
         return (
@@ -100,7 +102,7 @@ export default function MetadataReviewWorkspace({
         );
     }
 
-    let metadataRows: MetadataRow[];
+    let sections: MetadataSection[];
     let resolvableSessions: Session[];
     let sessionsMissingSurveillanceForm: Session[] = [];
 
@@ -135,11 +137,20 @@ export default function MetadataReviewWorkspace({
         );
 
         resolvableSessions = sessions;
-        metadataRows = buildDynamicMetadataRows(
-            sessions,
-            getCurrentFormByProgramIdResult.data.questions ?? [],
-            formAnswersBySessionId,
-        );
+        const currentFormQuestions =
+            getCurrentFormByProgramIdResult.data.questions ?? [];
+        sections = [
+            buildDynamicSessionSection(
+                resolvableSessions,
+                currentFormQuestions,
+                formAnswersBySessionId,
+            ),
+            ...buildUnitIdentitySections(
+                resolvableSessions,
+                currentFormQuestions,
+                formAnswersBySessionId,
+            ),
+        ];
     } else {
         if (surveillanceFormQueries.some(query => query.isPending)) {
             return <SkeletonList count={6} height="lg" width="full" />;
@@ -197,61 +208,85 @@ export default function MetadataReviewWorkspace({
               )
             : [];
 
-        metadataRows = buildSurveillanceMetadataRows(
-            resolvableSessions,
-            surveillanceFormBySessionId,
-        );
+        sections = [
+            buildSurveillanceSection(
+                resolvableSessions,
+                surveillanceFormBySessionId,
+            ),
+        ];
     }
 
-    const hasConflicts = metadataRows.some(
-        metadataRow => metadataRow.hasConflict,
+    const hasConflicts = sections.some(section =>
+        section.rows.some(row => row.hasConflict),
     );
-    const areAllConflictsResolved = metadataRows.every(
-        metadataRow =>
-            !metadataRow.hasConflict ||
-            resolutionsByMetadataRowId.has(metadataRow.id),
+    const areAllConflictsResolved = sections.every(section =>
+        section.rows.every(
+            row => !row.hasConflict || resolutionsByMetadataRowId.has(row.id),
+        ),
     );
 
-    function resolveConflictsAndContinue() {
-        const { resolvedData, resolvedSurveillanceForm, resolvedFormAnswers } =
-            applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
-
-        resolveSessionConflicts(
-            {
-                sessionIds: resolvableSessions.map(
-                    session => session.sessionId,
-                ),
-                resolvedData,
-                ...(isDynamicFormMode
-                    ? { resolvedFormAnswers }
-                    : { resolvedSurveillanceForm }),
-            },
-            {
-                onSuccess: resolveResult => {
-                    toastResult(resolveResult, {
-                        success: t('resolveSuccess'),
-                        error: t('resolveError'),
-                    });
-                    if (!resolveResult.ok) return;
-                    resetResolutions();
-                    queryClient.invalidateQueries({
-                        queryKey: sessionKeys.root,
-                    });
-                    for (const session of resolvableSessions) {
-                        queryClient.invalidateQueries({
-                            queryKey: isDynamicFormMode
-                                ? formAnswerKeys.formAnswersBySessionId(
-                                      session.sessionId,
-                                  )
-                                : surveillanceFormKeys.surveillanceFormBySessionId(
-                                      session.sessionId,
-                                  ),
-                        });
-                    }
-                    onGoToNextStep();
-                },
-            },
+    async function resolveConflictsAndContinue() {
+        const resolvableSessionIds = resolvableSessions.map(
+            session => session.sessionId,
         );
+        const sectionsToResolve = sections.filter(section =>
+            section.rows.some(row => resolutionsByMetadataRowId.has(row.id)),
+        );
+
+        setIsResolving(true);
+        const outcomes = await Promise.allSettled(
+            sectionsToResolve.map(section => {
+                const {
+                    resolvedData,
+                    resolvedSurveillanceForm,
+                    resolvedFormAnswers,
+                } = applyConflictResolutions(
+                    section.rows,
+                    resolutionsByMetadataRowId,
+                );
+                const requestBody: ResolveSessionConflictsRequestBody =
+                    section.sessionUnitIdBySessionId
+                        ? {
+                              sessionUnitIds: [
+                                  ...section.sessionUnitIdBySessionId.values(),
+                              ],
+                              resolvedFormAnswers,
+                          }
+                        : {
+                              sessionIds: resolvableSessionIds,
+                              resolvedData,
+                              ...(Object.keys(resolvedSurveillanceForm).length >
+                                  0 && { resolvedSurveillanceForm }),
+                              ...(resolvedFormAnswers.length > 0 && {
+                                  resolvedFormAnswers,
+                              }),
+                          };
+                return resolveSessionConflictsAsync(requestBody);
+            }),
+        );
+        setIsResolving(false);
+
+        const allResolved = outcomes.every(
+            outcome => outcome.status === 'fulfilled' && outcome.value.ok,
+        );
+        if (!allResolved) {
+            toast.error(t('resolveError'));
+            return;
+        }
+
+        toast.success(t('resolveSuccess'));
+        resetResolutions();
+        queryClient.invalidateQueries({ queryKey: sessionKeys.root });
+        for (const session of resolvableSessions) {
+            queryClient.invalidateQueries({
+                queryKey: isDynamicFormMode
+                    ? formAnswerKeys.formAnswersBySessionId(session.sessionId)
+                    : surveillanceFormKeys.surveillanceFormBySessionId(
+                          session.sessionId,
+                      ),
+            });
+        }
+        onGoToNextStep();
     }
 
     const showResolveAction = !readOnly && hasConflicts;
@@ -283,7 +318,7 @@ export default function MetadataReviewWorkspace({
             <MetadataReviewTable
                 sessions={resolvableSessions}
                 timezone={timezone ?? null}
-                metadataRows={metadataRows}
+                sections={sections}
                 resolutionsByMetadataRowId={resolutionsByMetadataRowId}
                 onConflictResolutionChange={handleConflictResolutionChange}
                 disabledRowIds={disabledRowIds}
@@ -293,15 +328,10 @@ export default function MetadataReviewWorkspace({
             <div className="flex justify-end">
                 {showResolveAction ? (
                     <Button
-                        onClick={resolveConflictsAndContinue}
-                        disabled={
-                            !areAllConflictsResolved ||
-                            isResolveSessionConflictsPending
-                        }
+                        onClick={() => void resolveConflictsAndContinue()}
+                        disabled={!areAllConflictsResolved || isResolving}
                     >
-                        {isResolveSessionConflictsPending
-                            ? t('resolving')
-                            : t('resolveAndContinue')}
+                        {isResolving ? t('resolving') : t('resolveAndContinue')}
                     </Button>
                 ) : (
                     <Button onClick={onGoToNextStep}>

@@ -67,11 +67,16 @@ export interface MetadataRow {
     label: string;
     entity: 'session' | 'surveillanceForm' | 'formAnswer';
     fieldName: string;
-    // For formAnswer rows this is the dynamic question's own `type`, echoed back
-    // as the answer `dataType` on resolve.
     fieldType: FormQuestionType;
     fieldValueBySessionId: Map<number, unknown>;
     hasConflict: boolean;
+}
+
+export interface MetadataSection {
+    key: string;
+    title: string | null;
+    rows: MetadataRow[];
+    sessionUnitIdBySessionId?: Map<number, number>;
 }
 
 export function formatDisplayValue(value: unknown): string {
@@ -79,6 +84,86 @@ export function formatDisplayValue(value: unknown): string {
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     return String(value);
+}
+
+export function flattenQuestions(questions: FormQuestion[]): FormQuestion[] {
+    const flattenedQuestions: FormQuestion[] = [];
+    for (const question of questions) {
+        flattenedQuestions.push(question);
+        if (question.subQuestions?.length) {
+            flattenedQuestions.push(...flattenQuestions(question.subQuestions));
+        }
+    }
+    return flattenedQuestions;
+}
+
+export function buildSurveillanceSection(
+    sessions: Session[],
+    surveillanceFormBySessionId: Map<number, SurveillanceForm | null>,
+): MetadataSection {
+    const rows = buildSessionCoreRows(sessions);
+
+    const hasAnySurveillanceForm = [
+        ...surveillanceFormBySessionId.values(),
+    ].some(surveillanceForm => surveillanceForm !== null);
+    if (hasAnySurveillanceForm) {
+        for (const {
+            fieldName,
+            label,
+            fieldType,
+        } of SURVEILLANCE_FORM_FIELDS) {
+            rows.push(
+                buildMetadataRow(
+                    'surveillanceForm',
+                    fieldName,
+                    label,
+                    fieldType,
+                    new Map(
+                        sessions.map(session => [
+                            session.sessionId,
+                            surveillanceFormBySessionId.get(
+                                session.sessionId,
+                            )?.[fieldName] ?? null,
+                        ]),
+                    ),
+                ),
+            );
+        }
+    }
+
+    return { key: 'session', title: null, rows };
+}
+
+export function buildDynamicSessionSection(
+    sessions: Session[],
+    currentFormQuestions: FormQuestion[],
+    formAnswersBySessionId: Map<number, FormAnswer[]>,
+): MetadataSection {
+    const rows = buildSessionCoreRows(sessions);
+
+    for (const question of flattenQuestions(currentFormQuestions).filter(
+        question => question.answerScope === 'SESSION',
+    )) {
+        rows.push(
+            buildMetadataRow(
+                'formAnswer',
+                String(question.id),
+                question.label,
+                question.type,
+                new Map(
+                    sessions.map(session => [
+                        session.sessionId,
+                        formAnswersBySessionId
+                            .get(session.sessionId)
+                            ?.find(answer => answer.questionId === question.id)
+                            ?.value ?? null,
+                    ]),
+                ),
+            ),
+        );
+    }
+
+    return { key: 'session', title: null, rows };
 }
 
 function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
@@ -98,100 +183,21 @@ function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
     );
 }
 
-export function buildSurveillanceMetadataRows(
-    sessions: Session[],
-    surveillanceFormBySessionId: Map<number, SurveillanceForm | null>,
-): MetadataRow[] {
-    const metadataRows = buildSessionCoreRows(sessions);
-
-    const hasAnySurveillanceForm = [
-        ...surveillanceFormBySessionId.values(),
-    ].some(surveillanceForm => surveillanceForm !== null);
-    if (!hasAnySurveillanceForm) return metadataRows;
-
-    for (const { fieldName, label, fieldType } of SURVEILLANCE_FORM_FIELDS) {
-        metadataRows.push(
-            buildMetadataRow(
-                'surveillanceForm',
-                fieldName,
-                label,
-                fieldType,
-                new Map(
-                    sessions.map(session => [
-                        session.sessionId,
-                        surveillanceFormBySessionId.get(session.sessionId)?.[
-                            fieldName
-                        ] ?? null,
-                    ]),
-                ),
-            ),
-        );
-    }
-
-    return metadataRows;
-}
-
-export function buildDynamicMetadataRows(
-    sessions: Session[],
-    currentFormQuestions: FormQuestion[],
-    formAnswersBySessionId: Map<number, FormAnswer[]>,
-): MetadataRow[] {
-    const metadataRows = buildSessionCoreRows(sessions);
-
-    for (const question of flattenSessionScopedQuestions(
-        currentFormQuestions,
-    )) {
-        metadataRows.push(
-            buildMetadataRow(
-                'formAnswer',
-                String(question.id),
-                question.label,
-                question.type,
-                new Map(
-                    sessions.map(session => [
-                        session.sessionId,
-                        formAnswersBySessionId
-                            .get(session.sessionId)
-                            ?.find(answer => answer.questionId === question.id)
-                            ?.value ?? null,
-                    ]),
-                ),
-            ),
-        );
-    }
-
-    return metadataRows;
-}
-
-function flattenSessionScopedQuestions(
-    questions: FormQuestion[],
-): FormQuestion[] {
-    const sessionScopedQuestions: FormQuestion[] = [];
-    for (const question of questions) {
-        if (question.answerScope === 'SESSION') {
-            sessionScopedQuestions.push(question);
-        }
-        if (question.subQuestions?.length) {
-            sessionScopedQuestions.push(
-                ...flattenSessionScopedQuestions(question.subQuestions),
-            );
-        }
-    }
-    return sessionScopedQuestions;
-}
-
-function buildMetadataRow(
+export function buildMetadataRow(
     entity: MetadataRow['entity'],
     fieldName: string,
     label: string,
     fieldType: FormQuestionType,
     fieldValueBySessionId: Map<number, unknown>,
+    groupKey?: string,
 ): MetadataRow {
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(formatDisplayValue),
     );
     return {
-        id: `${entity}.${fieldName}`,
+        id: groupKey
+            ? `${groupKey}.${entity}.${fieldName}`
+            : `${entity}.${fieldName}`,
         label,
         entity,
         fieldName,

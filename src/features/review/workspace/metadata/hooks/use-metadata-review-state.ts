@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { NOT_APPLICABLE } from '../utils/metadata-row';
+import { NOT_APPLICABLE } from '../utils/metadata-section';
 
 const SURVEILLANCE_FIELD_DEPENDENCIES: Record<
     string,

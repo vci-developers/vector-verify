@@ -5,7 +5,7 @@ import {
     BOOLEAN_TRUE_DISPLAY,
     NOT_APPLICABLE,
     type MetadataRow,
-} from './metadata-row';
+} from './metadata-section';
 
 export function applyConflictResolutions(
     metadataRows: MetadataRow[],
