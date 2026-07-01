@@ -12,8 +12,9 @@ Use `sessionIds` when resolving conflicts between sessions. All sessions must
 exist and belong to the same site and the same Collection Cycle. For sessions
 with no Collection Cycle (`collectionCycleId` null), the backend falls back to
 requiring the same calendar month and year. This pairing — `(site, cycle)`, or
-`(site, month)` when cycle-less — is the **Review Unit** (see `.claude/CONTEXT.md`);
-a single resolve call must never span more than one Review Unit.
+`(site, month)` when cycle-less — is the **Review Unit** (see
+`.claude/CONTEXT.md`); a single resolve call must never span more than one
+Review Unit.
 
 Session mode can update:
 

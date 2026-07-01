@@ -38,6 +38,7 @@ export default function CertificationWorkspace({
     const certifier = sessions.find(
         session => session.certifiedBy != null,
     )?.certifiedBy;
+    console.log('certifier', certifier);
 
     if (readOnly) {
         return (
@@ -139,8 +140,7 @@ export default function CertificationWorkspace({
                             <p className="text-warning-foreground text-xs font-medium">
                                 {t('overwriteCertifierNotice', {
                                     name:
-                                        certifier.name ??
-                                        t('unknownCertifier'),
+                                        certifier.name ?? t('unknownCertifier'),
                                     date: formatDateInTimezone(
                                         certifier.certifiedAt,
                                         timezone ?? null,

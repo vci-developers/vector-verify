@@ -114,7 +114,7 @@
         "metadataStep": "Metadata Review",
         "imageStep": "Image Review",
         "certificationStep": "Certification",
-        "readOnlyNotice": "This unit is fully reviewed and is shown in read-only mode."
+        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode."
     },
     "ReviewMetadata": {
         "intro": "Review and resolve any conflicting values across sessions. Sessions must agree before continuing.",
@@ -137,7 +137,7 @@
         "previousSpecimen": "Previous Specimen",
         "nextSpecimen": "Next Specimen",
         "emptyTitle": "No specimens to review",
-        "emptyDescription": "There are no specimens for this unit. You can continue to certification.",
+        "emptyDescription": "There are no specimens for this site. You can continue to certification.",
         "continueToCertification": "Continue to Certification",
         "specimenId": "Specimen ID",
         "sessionId": "Session ID",
@@ -154,8 +154,8 @@
         "abdomenStatus": "Abdomen Status"
     },
     "ReviewCertification": {
-        "title": "Certify Review Unit",
-        "intro": "You are about to certify {count, plural, one {# session} other {# sessions}} for this Review Unit. This action is permanent.",
+        "title": "Certify Site",
+        "intro": "You are about to certify {count, plural, one {# session} other {# sessions}} for this site. This action is permanent.",
         "responsibilityTitle": "You are taking responsibility for this data",
         "lockedNotice": "Once certified, this data will be locked. No further changes can be made.",
         "confirmListTitle": "By certifying, you confirm:",
@@ -168,7 +168,7 @@
         "certifying": "Certifying…",
         "certifySuccess": "Certified {count, plural, one {# session} other {# sessions}}.",
         "certifyError": "Failed to certify {count, plural, one {# session} other {# sessions}}.",
-        "summaryTitle": "This Review Unit is fully reviewed",
+        "summaryTitle": "This site is fully reviewed",
         "lastCertifiedBy": "Last certified by {name} on {date}.",
         "certifiedFallback": "All {count, plural, one {# session is} other {# sessions are}} certified.",
         "unknownCertifier": "an unknown user"

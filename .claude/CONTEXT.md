@@ -118,11 +118,11 @@ that never enter the Review workflow.
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via
-`GET /sessions/{id}/units`. Carries only `{ id, sessionId, frontendId,
-unitOrder }` — it has **no intrinsic semantic identity fields**. The mobile app
-guarantees distinct units within one Session. Session Units exist only under
-**Dynamic Form** programs (legacy/surveillance programs have none). _Avoid_:
-sub-session, repeat, group
+`GET /sessions/{id}/units`. Carries only
+`{ id, sessionId, frontendId, unitOrder }` — it has **no intrinsic semantic
+identity fields**. The mobile app guarantees distinct units within one Session.
+Session Units exist only under **Dynamic Form** programs (legacy/surveillance
+programs have none). _Avoid_: sub-session, repeat, group
 
 **Form Mode**: Which form system a Program uses — **exclusive per program**.
 **Surveillance Form** (legacy, e.g. Uganda): a fixed-schema form
@@ -142,8 +142,8 @@ Determines which target ids a **Metadata Conflict** resolves against —
 **Unit Identity**: The set of a Session Unit's `SESSION_UNIT`-scoped answers
 whose question is flagged `isUnitIdentityComponent: true`. Their combined values
 **identify** the unit and are used to match the "same" unit across Sessions in a
-Review Unit (group by the identity-value tuple). Identity components are shown as
-the unit's **header/title**, never as resolvable conflict rows. Non-identity
+Review Unit (group by the identity-value tuple). Identity components are shown
+as the unit's **header/title**, never as resolvable conflict rows. Non-identity
 `SESSION_UNIT` answers are the resolvable rows. _Avoid_: unit key, unit name
 
 **Metadata Conflict**: A field/question that holds differing values across the
