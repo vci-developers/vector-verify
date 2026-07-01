@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import {
     Collapsible,
     CollapsibleContent,
@@ -25,6 +26,16 @@ function getCoverageTintClass(visitedPercentage: number): string {
         return 'bg-warning/10 hover:bg-warning/20';
     }
     return 'bg-destructive/10 hover:bg-destructive/20';
+}
+
+function getCoverageBadgeClass(visitedPercentage: number): string {
+    if (visitedPercentage >= HIGH_VISIT_COVERAGE_PERCENT) {
+        return 'bg-success/10 text-success border-success/50';
+    }
+    if (visitedPercentage >= MEDIUM_VISIT_COVERAGE_PERCENT) {
+        return 'bg-warning/20 text-warning border-warning/50';
+    }
+    return 'bg-destructive/20 text-destructive border-destructive/50';
 }
 
 interface ReviewCollapsibleLocationGroupProps {
@@ -90,6 +101,12 @@ export default function ReviewCollapsibleLocationGroup({
                             total: totalSiteCount,
                         })}
                     </span>
+                    <Badge
+                        variant="outline"
+                        className={getCoverageBadgeClass(visitedPercentage)}
+                    >
+                        {visitedPercentage}%
+                    </Badge>
                 </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
