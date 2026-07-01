@@ -23,7 +23,7 @@ export default function ReviewWorkspaceHeader({
         <div className="space-y-4">
             <div className="flex items-center gap-3">
                 <Link
-                    href="/review-next"
+                    href="/review"
                     className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
                 >
                     <ChevronLeft className="h-4 w-3" />

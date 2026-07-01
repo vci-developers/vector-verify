@@ -100,7 +100,7 @@ export default function CertificationWorkspace({
         }
 
         toast.success(t('certifySuccess', { count: sessionCount }));
-        router.push('/review-next');
+        router.push('/review');
     }
 
     return (

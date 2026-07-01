@@ -37,7 +37,7 @@ function buildReviewWorkspaceHref(
     if (segment.timezone != null) {
         queryParams.set('timezone', segment.timezone);
     }
-    return `/review-next/${siteId}?${queryParams.toString()}`;
+    return `/review/${siteId}?${queryParams.toString()}`;
 }
 
 interface ReviewSitesListProps {
