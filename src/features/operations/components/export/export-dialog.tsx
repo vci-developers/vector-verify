@@ -14,7 +14,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { triggerFileDownload } from '@/lib/download/trigger-file-download';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import {
     networkErrorMessage,
@@ -28,7 +27,7 @@ interface ExportDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     programId: number;
-    locationQueryParam: LocationQueryParam;
+    siteIds: number[];
     locationName: string;
     startDate?: string;
     endDate?: string;
@@ -38,7 +37,7 @@ export default function ExportDialog({
     open,
     onOpenChange,
     programId,
-    locationQueryParam,
+    siteIds,
     locationName,
     startDate,
     endDate,
@@ -56,11 +55,6 @@ export default function ExportDialog({
         setError(null);
 
         try {
-            const locationFilter =
-                'district' in locationQueryParam
-                    ? { districts: [locationQueryParam.district] }
-                    : { siteIds: [locationQueryParam.siteId] };
-
             const queryString =
                 constructQueryString<GetSessionsReportQueryParams>(
                     {
@@ -68,7 +62,7 @@ export default function ExportDialog({
                         endDate,
                         sessionType: 'SURVEILLANCE',
                         programId: programId,
-                        ...locationFilter,
+                        siteIds,
                     },
                     getSessionsReportQueryParamsSchema,
                 );

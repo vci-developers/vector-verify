@@ -9,14 +9,14 @@ import MarkerInfoPanel from '@/features/operations/geographical-summary/componen
 
 interface SiteMapProps {
     markers: SiteMarker[];
-    selectedLocation: string;
+    selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
 }
 
 export default function SiteMap({
     markers,
-    selectedLocation,
+    selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
 }: SiteMapProps) {
@@ -28,7 +28,7 @@ export default function SiteMap({
     return (
         <GeocodedClusterMap
             markers={markers}
-            selectedLocation={selectedLocation}
+            selectedLocations={selectedLocations}
             selectedMarkerId={selectedMarkerId}
             onMarkerSelect={onMarkerSelect}
             renderIcon={(markerId, isSelected) => {
