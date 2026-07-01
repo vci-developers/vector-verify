@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import LogoutButton from '@/components/auth-session/logout-button';
 
 export default function EmailVerificationPrompt() {
     const [submitted, setSubmitted] = useState(false);
@@ -27,6 +28,8 @@ export default function EmailVerificationPrompt() {
                         <Button className="w-full" onClick={sendEmail}>
                             {t('verifyEmailButton')}
                         </Button>
+                        <Separator className="my-6" />
+                        <LogoutButton />
                     </Fragment>
                 );
             },
@@ -35,19 +38,28 @@ export default function EmailVerificationPrompt() {
 
     if (!submitted) {
         return (
-            <Button className="w-full" onClick={sendEmail} disabled={isPending}>
-                {isPending
-                    ? t('verificationEmailLoadingMessage')
-                    : t('verifyEmailButton')}
-            </Button>
+            <Fragment>
+                <Button
+                    className="w-full"
+                    onClick={sendEmail}
+                    disabled={isPending}
+                >
+                    {isPending
+                        ? t('verificationEmailLoadingMessage')
+                        : t('verifyEmailButton')}
+                </Button>
+                <Separator className="my-6" />
+                <LogoutButton />
+            </Fragment>
         );
     } else {
         return (
             <Fragment>
-                <Separator className="my-6" />
-                <p className="text-muted-foreground text-center text-sm">
+                <p className="text-center text-sm">
                     {t('verificationEmailSuccessMessage')}
                 </p>
+                <Separator className="my-6" />
+                <LogoutButton />
             </Fragment>
         );
     }

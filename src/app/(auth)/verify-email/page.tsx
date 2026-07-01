@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { Fragment } from 'react/jsx-runtime';
+import LogoutButton from '@/components/auth-session/logout-button';
 
 interface VerifyEmailPageProps {
     searchParams: Promise<{ token?: string }>;
@@ -70,9 +71,12 @@ export default async function VerifyEmailPage({
                         </Fragment>
                     ) : response.error.message ===
                       'Verification token does not match the authenticated user' ? (
-                        <p className="text-muted-foreground text-center text-sm">
-                            {t('accountVerificationTokenMismatch')}
-                        </p>
+                        <Fragment>
+                            <p className="text-muted-foreground text-center text-sm">
+                                {t('accountVerificationTokenMismatch')}
+                            </p>
+                            <LogoutButton />
+                        </Fragment>
                     ) : (
                         <p className="text-muted-foreground text-center text-sm">
                             response.error.message
