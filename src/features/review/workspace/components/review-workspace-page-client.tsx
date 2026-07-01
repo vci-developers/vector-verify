@@ -4,7 +4,6 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
@@ -17,9 +16,10 @@ import MetadataReviewWorkspace from '@/features/review/workspace/metadata/compon
 import { isLegacySite } from '@/lib/location/location-query';
 import { ClipboardList, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import ReviewWorkspaceHeader from './layout/review-workspace-header';
 import ImageReviewWorkspace from '../image/components/image-review-workspace';
+import CertificationWorkspace from '../certification/components/certification-workspace';
 
 const REVIEW_STEP_LABEL_KEYS = [
     'metadataStep',
@@ -43,7 +43,6 @@ export default function ReviewWorkspacePageClient({
     timezone,
 }: ReviewWorkspacePageClientProps) {
     const t = useTranslations('ReviewWorkspace');
-    const tCommon = useTranslations('Common');
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
     const sessionQueryParams: GetAllSessionsQueryParams =
@@ -78,7 +77,6 @@ export default function ReviewWorkspacePageClient({
     const readOnly = isSiteFullyReviewed(sessionSummary);
 
     const stepLabels = REVIEW_STEP_LABEL_KEYS.map(key => t(key));
-    const currentStepLabel = stepLabels[currentStepIndex]!;
 
     function goToPreviousStep() {
         setCurrentStepIndex(index => Math.max(index - 1, 0));
@@ -147,34 +145,12 @@ export default function ReviewWorkspacePageClient({
                                 onGoToNextStep={goToNextStep}
                             />
                         ) : (
-                            <Fragment>
-                                {/* Placeholder step body — Step 13 replaces the
-                                    Certification slot with its real workspace and
-                                    own nav, retiring this temporary footer. */}
-                                <div className="text-muted-foreground py-12 text-center text-sm">
-                                    {t('stepComingSoon', {
-                                        step: currentStepLabel,
-                                    })}
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <Button
-                                        variant="outline"
-                                        onClick={goToPreviousStep}
-                                    >
-                                        {tCommon('previous')}
-                                    </Button>
-                                    <Button
-                                        onClick={goToNextStep}
-                                        disabled={
-                                            currentStepIndex ===
-                                            REVIEW_STEP_LABEL_KEYS.length - 1
-                                        }
-                                    >
-                                        {tCommon('next')}
-                                    </Button>
-                                </div>
-                            </Fragment>
+                            <CertificationWorkspace
+                                sessions={sessions}
+                                readOnly={readOnly}
+                                timezone={timezone}
+                                onGoToPreviousStep={goToPreviousStep}
+                            />
                         )}
                     </CardContent>
                 </Card>
