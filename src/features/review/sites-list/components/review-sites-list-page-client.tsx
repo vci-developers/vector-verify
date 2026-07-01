@@ -15,6 +15,7 @@ import { useLocationSelection } from '@/lib/location/use-location-selection';
 import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
+import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
 
 const REVIEW_TABS = [
     { value: 'sites-list', label: 'SITES LIST' },
@@ -71,7 +72,10 @@ export default function ReviewSitesListPageClient() {
         locationDropdownOptions,
         locationQueryParam,
         descendantsOfSelectedLocation,
-    } = useLocationSelection(accessibleSites, StorageKeys.review.selectedLocation);
+    } = useLocationSelection(
+        accessibleSites,
+        StorageKeys.review.selectedLocation,
+    );
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -189,7 +193,16 @@ export default function ReviewSitesListPageClient() {
                                 selectedCycleIds={selectedCycleIds}
                             />
                         )
-                    ) : null}
+                    ) : (
+                        <ReviewDhis2Dashboard
+                            sites={descendantsOfSelectedLocation}
+                            locationQueryParam={locationQueryParam}
+                            startMonth={startMonth}
+                            endMonth={endMonth}
+                            collectionCycles={collectionCycles}
+                            selectedCycleIds={selectedCycleIds}
+                        />
+                    )}
                 </CardContent>
             </Card>
         </PageShell>

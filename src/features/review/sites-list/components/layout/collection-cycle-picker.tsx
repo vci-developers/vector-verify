@@ -9,7 +9,7 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from '@/components/ui/multi-select';
-import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
+import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import { useTranslations } from 'next-intl';
 
 interface CollectionCyclePickerProps {
@@ -51,19 +51,7 @@ export default function CollectionCyclePicker({
                             })}
                             className="pr-6"
                         >
-                            {t('cycleLabel', {
-                                cycleNumber: cycle.cycleNumber,
-                                start: formatDateInTimezone(
-                                    cycle.startDate,
-                                    cycle.timezone,
-                                    'MMM d',
-                                ),
-                                end: formatDateInTimezone(
-                                    cycle.endDate,
-                                    cycle.timezone,
-                                    'MMM d, yyyy',
-                                ),
-                            })}
+                            {formatCollectionCycleLabel(cycle)}
                         </MultiSelectItem>
                     ))}
                 </MultiSelectGroup>

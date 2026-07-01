@@ -38,3 +38,10 @@ export function isSiteFullyReviewed(
         overallReviewState === 'CERTIFIED' || overallReviewState === 'SUBMITTED'
     );
 }
+
+export function isSiteFullySubmittedToDhis2(
+    summary: ReviewSiteSessionSummary,
+): boolean {
+    const total = getSiteSessionCount(summary);
+    return total > 0 && summary.SUBMITTED === total;
+}
