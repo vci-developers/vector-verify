@@ -19,11 +19,19 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { StorageKeys } from '@/lib/storage-keys';
 
 export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+
+    //TODO: temporary fix for clearing stale state in local storage
+    useEffect(() => {
+        Object.values(StorageKeys)
+            .flatMap(Object.values)
+            .forEach(key => localStorage.removeItem(key));
+    }, []);
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
