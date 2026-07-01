@@ -23,7 +23,10 @@ import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
-function buildReviewWorkspaceHref(siteId: number, segment: ReviewSegment): string {
+function buildReviewWorkspaceHref(
+    siteId: number,
+    segment: ReviewSegment,
+): string {
     const queryParams = new URLSearchParams({
         startDate: segment.startDate,
         endDate: segment.endDate,
@@ -94,8 +97,6 @@ export default function ReviewSitesList({
                 });
             case 'month':
                 return format(parseISO(segment.startDate), 'MMMM yyyy');
-            case 'unassigned':
-                return t('unassigned');
         }
     }
 
@@ -122,11 +123,8 @@ export default function ReviewSitesList({
     return (
         <div className="space-y-2">
             {segments.map(segment => {
-                const buildSiteHref =
-                    segment.kind === 'unassigned'
-                        ? undefined
-                        : (siteId: number) =>
-                              buildReviewWorkspaceHref(siteId, segment);
+                const buildSiteHref = (siteId: number) =>
+                    buildReviewWorkspaceHref(siteId, segment);
                 return (
                     <Collapsible key={segment.key} defaultOpen>
                         <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">

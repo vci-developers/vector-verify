@@ -3,12 +3,7 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
 import { accumulateSessionSummary } from '@/features/review/utils/accumulate-session-summary';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import {
-    eachMonthOfInterval,
-    endOfMonth,
-    format,
-    startOfMonth,
-} from 'date-fns';
+import { eachMonthOfInterval, endOfMonth, format } from 'date-fns';
 
 export type ReviewSegment = {
     key: string;
@@ -17,11 +12,7 @@ export type ReviewSegment = {
     collectionCycleId?: number;
     timezone?: string | null;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
-} & (
-    | { kind: 'cycle'; cycleNumber: number }
-    | { kind: 'month' }
-    | { kind: 'unassigned' }
-);
+} & ({ kind: 'cycle'; cycleNumber: number } | { kind: 'month' });
 
 function addSessionToSummary(
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>,
@@ -47,13 +38,7 @@ export function buildReviewSegments({
     endMonth: Date;
 }): ReviewSegment[] {
     if (collectionCycles.length > 0) {
-        return buildCycleSegments(
-            sessions,
-            collectionCycles,
-            selectedCycleIds,
-            startMonth,
-            endMonth,
-        );
+        return buildCycleSegments(sessions, collectionCycles, selectedCycleIds);
     }
     return buildMonthSegments(sessions, startMonth, endMonth);
 }
@@ -62,8 +47,6 @@ function buildCycleSegments(
     sessions: Session[],
     collectionCycles: CollectionCycle[],
     selectedCycleIds: number[],
-    startMonth: Date,
-    endMonth: Date,
 ): ReviewSegment[] {
     const summaryBySiteIdByCycleId = new Map<
         number,
@@ -77,17 +60,12 @@ function buildCycleSegments(
                 ] as const,
         ),
     );
-    const unassignedSummaryBySiteId = new Map<
-        number,
-        ReviewSiteSessionSummary
-    >();
 
     for (const session of sessions) {
-        const targetSummaryBySiteId =
-            session.collectionCycleId === null
-                ? unassignedSummaryBySiteId
-                : summaryBySiteIdByCycleId.get(session.collectionCycleId);
-
+        if (session.collectionCycleId === null) continue;
+        const targetSummaryBySiteId = summaryBySiteIdByCycleId.get(
+            session.collectionCycleId,
+        );
         if (targetSummaryBySiteId === undefined) continue;
         addSessionToSummary(targetSummaryBySiteId, session);
     }
@@ -95,7 +73,7 @@ function buildCycleSegments(
     const isCycleListed = (cycleId: number) =>
         selectedCycleIds.length === 0 || selectedCycleIds.includes(cycleId);
 
-    const segments: ReviewSegment[] = collectionCycles
+    return collectionCycles
         .filter(cycle => isCycleListed(cycle.id))
         .map(
             (cycle): ReviewSegment => ({
@@ -117,18 +95,6 @@ function buildCycleSegments(
                 summaryBySiteId: summaryBySiteIdByCycleId.get(cycle.id)!,
             }),
         );
-
-    if (selectedCycleIds.length === 0 && unassignedSummaryBySiteId.size > 0) {
-        segments.push({
-            kind: 'unassigned',
-            key: 'unassigned',
-            startDate: format(startOfMonth(startMonth), 'yyyy-MM-dd'),
-            endDate: format(endOfMonth(endMonth), 'yyyy-MM-dd'),
-            summaryBySiteId: unassignedSummaryBySiteId,
-        });
-    }
-
-    return segments;
 }
 
 function buildMonthSegments(

@@ -19,6 +19,7 @@ import { ClipboardList, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
 import ReviewWorkspaceHeader from './layout/review-workspace-header';
+import ImageReviewWorkspace from '../image/components/image-review-workspace';
 
 const REVIEW_STEP_LABEL_KEYS = [
     'metadataStep',
@@ -135,11 +136,21 @@ export default function ReviewWorkspacePageClient({
                                     onGoToNextStep={goToNextStep}
                                 />
                             )
+                        ) : currentStepIndex === 1 ? (
+                            <ImageReviewWorkspace
+                                siteId={siteId}
+                                startDate={startDate}
+                                endDate={endDate}
+                                collectionCycleId={collectionCycleId}
+                                timezone={timezone}
+                                onGoToPreviousStep={goToPreviousStep}
+                                onGoToNextStep={goToNextStep}
+                            />
                         ) : (
                             <Fragment>
-                                {/* Placeholder step body — Steps 12–13 replace
-                                    each slot with its real workspace and own
-                                    nav, retiring this temporary footer. */}
+                                {/* Placeholder step body — Step 13 replaces the
+                                    Certification slot with its real workspace and
+                                    own nav, retiring this temporary footer. */}
                                 <div className="text-muted-foreground py-12 text-center text-sm">
                                     {t('stepComingSoon', {
                                         step: currentStepLabel,
