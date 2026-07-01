@@ -38,7 +38,6 @@ export default function CertificationWorkspace({
     const certifier = sessions.find(
         session => session.certifiedBy != null,
     )?.certifiedBy;
-    console.log('certifier', certifier);
 
     if (readOnly) {
         return (

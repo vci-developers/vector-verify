@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { getSiteLabelParts } from '../utils/get-site-label-parts';
 import Dhis2IrsDialog from './dhis2-irs-dialog';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
@@ -56,6 +57,7 @@ interface Dhis2SiteRowProps {
     site: Site;
     collectionCycle: CollectionCycle;
     siteSessionSummary: ReviewSiteSessionSummary;
+    certifierName?: string;
     isSelected: boolean;
     onToggleSelected: () => void;
 }
@@ -64,9 +66,11 @@ export default function Dhis2SiteRow({
     site,
     collectionCycle,
     siteSessionSummary,
+    certifierName,
     isSelected,
     onToggleSelected,
 }: Dhis2SiteRowProps) {
+    const t = useTranslations('Dhis2Submissions');
     const [isSiteIrsDialogOpen, setIsSiteIrsDialogOpen] = useState(false);
     const dialogSubmissions = useMemo(
         () => [{ site, collectionCycle }],
@@ -188,6 +192,12 @@ export default function Dhis2SiteRow({
                                     </TooltipContent>
                                 </Tooltip>
                             )}
+                            <span className="text-muted-foreground truncate pt-1 text-xs">
+                                {t('certifiedBy', {
+                                    name:
+                                        certifierName ?? t('unknownCertifier'),
+                                })}
+                            </span>
                         </div>
                     </div>
                 </TableCell>

@@ -172,5 +172,9 @@
         "lastCertifiedBy": "Last certified by {name} on {date}.",
         "certifiedFallback": "All {count, plural, one {# session is} other {# sessions are}} certified.",
         "unknownCertifier": "an unknown user"
+    },
+    "Dhis2Submissions": {
+        "certifiedBy": "Certified by: {name}",
+        "unknownCertifier": "an unknown user"
     }
 }

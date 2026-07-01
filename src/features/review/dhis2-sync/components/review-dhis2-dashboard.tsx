@@ -208,6 +208,14 @@ export default function ReviewDhis2Dashboard({
                             siteCount={group.submittableSites.length}
                         >
                             {group.submittableSites.map(site => {
+                                const certifierName =
+                                    getAllSessionsResult.data.sessions.find(
+                                        session =>
+                                            session.siteId === site.siteId &&
+                                            session.collectionCycleId ===
+                                                group.cycle.id &&
+                                            session.certifiedBy != null,
+                                    )?.certifiedBy?.name ?? undefined;
                                 return (
                                     <Dhis2SiteRow
                                         key={site.siteId}
@@ -218,6 +226,7 @@ export default function ReviewDhis2Dashboard({
                                                 site.siteId,
                                             )!
                                         }
+                                        certifierName={certifierName}
                                         isSelected={selectedSiteRowKeys.has(
                                             siteRowKey(
                                                 group.cycle.id,
