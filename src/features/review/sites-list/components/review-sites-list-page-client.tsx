@@ -48,14 +48,15 @@ export default function ReviewSitesListPageClient() {
         ? getUserPermissionsResult.data.programId
         : undefined;
 
-    const { data: getProgramsResult } = useGetPrograms(
-        { programId },
-        { enabled: programId !== undefined },
-    );
+    const { data: getUgandaProgramsResult } = useGetPrograms({
+        country: 'Uganda',
+    });
 
     const isUgandaProgram =
-        getProgramsResult?.ok === true &&
-        getProgramsResult.data.programs[0]?.country === 'Uganda';
+        getUgandaProgramsResult?.ok === true &&
+        getUgandaProgramsResult.data.programs.some(
+            program => program.programId === programId,
+        );
 
     const visibleTabs = REVIEW_TABS.filter(
         tab => tab.value !== 'submissions' || isUgandaProgram,
