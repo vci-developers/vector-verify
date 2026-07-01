@@ -1,3 +1,8 @@
+import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
+import type {
+    FormQuestion,
+    FormQuestionType,
+} from '@/api/form-question/validation/form-question-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 
@@ -5,28 +10,22 @@ export const NOT_APPLICABLE = 'N/A';
 export const BOOLEAN_TRUE_DISPLAY = 'Yes';
 export const BOOLEAN_FALSE_DISPLAY = 'No';
 
-type MetadataFieldType = 'string' | 'number' | 'boolean';
-
 const SESSION_FIELDS = [
-    {
-        fieldName: 'collectorName',
-        label: 'Collector Name',
-        fieldType: 'string',
-    },
+    { fieldName: 'collectorName', label: 'Collector Name', fieldType: 'text' },
     {
         fieldName: 'collectorTitle',
         label: 'Collector Title',
-        fieldType: 'string',
+        fieldType: 'text',
     },
     {
         fieldName: 'collectionMethod',
         label: 'Collection Method',
-        fieldType: 'string',
+        fieldType: 'text',
     },
 ] as const satisfies readonly {
     fieldName: keyof Session;
     label: string;
-    fieldType: MetadataFieldType;
+    fieldType: FormQuestionType;
 }[];
 
 const SURVEILLANCE_FORM_FIELDS = [
@@ -50,8 +49,8 @@ const SURVEILLANCE_FORM_FIELDS = [
         label: 'LLINs Available',
         fieldType: 'number',
     },
-    { fieldName: 'llinType', label: 'LLIN Type', fieldType: 'string' },
-    { fieldName: 'llinBrand', label: 'LLIN Brand', fieldType: 'string' },
+    { fieldName: 'llinType', label: 'LLIN Type', fieldType: 'text' },
+    { fieldName: 'llinBrand', label: 'LLIN Brand', fieldType: 'text' },
     {
         fieldName: 'numPeopleSleptUnderLlin',
         label: 'People Under LLIN',
@@ -60,15 +59,17 @@ const SURVEILLANCE_FORM_FIELDS = [
 ] as const satisfies readonly {
     fieldName: keyof SurveillanceForm;
     label: string;
-    fieldType: MetadataFieldType;
+    fieldType: FormQuestionType;
 }[];
 
 export interface MetadataRow {
     id: string;
     label: string;
-    entity: 'session' | 'surveillanceForm';
+    entity: 'session' | 'surveillanceForm' | 'formAnswer';
     fieldName: string;
-    fieldType: MetadataFieldType;
+    // For formAnswer rows this is the dynamic question's own `type`, echoed back
+    // as the answer `dataType` on resolve.
+    fieldType: FormQuestionType;
     fieldValueBySessionId: Map<number, unknown>;
     hasConflict: boolean;
 }
@@ -80,25 +81,28 @@ export function formatDisplayValue(value: unknown): string {
     return String(value);
 }
 
-export function buildMetadataRows(
+function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
+    return SESSION_FIELDS.map(({ fieldName, label, fieldType }) =>
+        buildMetadataRow(
+            'session',
+            fieldName,
+            label,
+            fieldType,
+            new Map(
+                sessions.map(session => [
+                    session.sessionId,
+                    session[fieldName],
+                ]),
+            ),
+        ),
+    );
+}
+
+export function buildSurveillanceMetadataRows(
     sessions: Session[],
     surveillanceFormBySessionId: Map<number, SurveillanceForm | null>,
 ): MetadataRow[] {
-    const metadataRows: MetadataRow[] = SESSION_FIELDS.map(
-        ({ fieldName, label, fieldType }) =>
-            buildMetadataRow(
-                'session',
-                fieldName,
-                label,
-                fieldType,
-                new Map(
-                    sessions.map(session => [
-                        session.sessionId,
-                        session[fieldName],
-                    ]),
-                ),
-            ),
-    );
+    const metadataRows = buildSessionCoreRows(sessions);
 
     const hasAnySurveillanceForm = [
         ...surveillanceFormBySessionId.values(),
@@ -127,11 +131,60 @@ export function buildMetadataRows(
     return metadataRows;
 }
 
+export function buildDynamicMetadataRows(
+    sessions: Session[],
+    currentFormQuestions: FormQuestion[],
+    formAnswersBySessionId: Map<number, FormAnswer[]>,
+): MetadataRow[] {
+    const metadataRows = buildSessionCoreRows(sessions);
+
+    for (const question of flattenSessionScopedQuestions(
+        currentFormQuestions,
+    )) {
+        metadataRows.push(
+            buildMetadataRow(
+                'formAnswer',
+                String(question.id),
+                question.label,
+                question.type,
+                new Map(
+                    sessions.map(session => [
+                        session.sessionId,
+                        formAnswersBySessionId
+                            .get(session.sessionId)
+                            ?.find(answer => answer.questionId === question.id)
+                            ?.value ?? null,
+                    ]),
+                ),
+            ),
+        );
+    }
+
+    return metadataRows;
+}
+
+function flattenSessionScopedQuestions(
+    questions: FormQuestion[],
+): FormQuestion[] {
+    const sessionScopedQuestions: FormQuestion[] = [];
+    for (const question of questions) {
+        if (question.answerScope === 'SESSION') {
+            sessionScopedQuestions.push(question);
+        }
+        if (question.subQuestions?.length) {
+            sessionScopedQuestions.push(
+                ...flattenSessionScopedQuestions(question.subQuestions),
+            );
+        }
+    }
+    return sessionScopedQuestions;
+}
+
 function buildMetadataRow(
     entity: MetadataRow['entity'],
     fieldName: string,
     label: string,
-    fieldType: MetadataFieldType,
+    fieldType: FormQuestionType,
     fieldValueBySessionId: Map<number, unknown>,
 ): MetadataRow {
     const distinctDisplayValues = new Set(

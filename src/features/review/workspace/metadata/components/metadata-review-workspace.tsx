@@ -1,5 +1,9 @@
 'use client';
 
+import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
+import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
+import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
+import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { sessionKeys } from '@/api/session/session-keys';
 import type { Session } from '@/api/session/validation/session-schema';
@@ -15,11 +19,16 @@ import { TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMetadataReviewState } from '../hooks/use-metadata-review-state';
 import { applyConflictResolutions } from '../utils/apply-conflict-resolutions';
-import { buildMetadataRows } from '../utils/metadata-row';
+import {
+    buildDynamicMetadataRows,
+    buildSurveillanceMetadataRows,
+    type MetadataRow,
+} from '../utils/metadata-row';
 import MetadataReviewTable from './metadata-review-table';
 
 interface MetadataReviewWorkspaceProps {
     sessions: Session[];
+    programId: number;
     timezone?: string;
     readOnly: boolean;
     onGoToNextStep: () => void;
@@ -27,6 +36,7 @@ interface MetadataReviewWorkspaceProps {
 
 export default function MetadataReviewWorkspace({
     sessions,
+    programId,
     timezone,
     readOnly,
     onGoToNextStep,
@@ -40,8 +50,24 @@ export default function MetadataReviewWorkspace({
         resetResolutions,
     } = useMetadataReviewState();
 
+    const sessionIds = sessions.map(session => session.sessionId);
+
+    const {
+        data: getCurrentFormByProgramIdResult,
+        isPending: isGetCurrentFormByProgramIdPending,
+    } = useGetCurrentFormByProgramId(programId);
+
+    const isDynamicFormMode = getCurrentFormByProgramIdResult?.ok === true;
+    const isSurveillanceFormMode =
+        getCurrentFormByProgramIdResult !== undefined &&
+        !getCurrentFormByProgramIdResult.ok &&
+        getCurrentFormByProgramIdResult.error.kind === 'not_found';
+
     const surveillanceFormQueries = useGetSurveillanceFormsBySessionIds(
-        sessions.map(session => session.sessionId),
+        isSurveillanceFormMode ? sessionIds : [],
+    );
+    const formAnswerQueries = useGetFormAnswersBySessionIds(
+        isDynamicFormMode ? sessionIds : [],
     );
 
     const {
@@ -54,61 +80,129 @@ export default function MetadataReviewWorkspace({
             <p className="text-muted-foreground text-sm">{t('noSessions')}</p>
         );
     }
-    if (surveillanceFormQueries.some(query => query.isPending)) {
+
+    if (
+        isGetCurrentFormByProgramIdPending ||
+        !getCurrentFormByProgramIdResult
+    ) {
         return <SkeletonList count={6} height="lg" width="full" />;
     }
 
-    const failedSurveillanceFormQuery = surveillanceFormQueries.find(
-        query =>
-            query.data &&
-            !query.data.ok &&
-            query.data.error.kind !== 'not_found',
-    );
     if (
-        failedSurveillanceFormQuery?.data &&
-        !failedSurveillanceFormQuery.data.ok
+        !getCurrentFormByProgramIdResult.ok &&
+        getCurrentFormByProgramIdResult.error.kind !== 'not_found'
     ) {
         return (
             <p className="text-destructive text-sm">
-                {failedSurveillanceFormQuery.data.error.message}
+                {getCurrentFormByProgramIdResult.error.message ??
+                    t('currentFormError')}
             </p>
         );
     }
 
-    const surveillanceFormBySessionId = new Map<
-        number,
-        SurveillanceForm | null
-    >(
-        sessions.map((session, index) => {
-            const surveillanceFormResult = surveillanceFormQueries[index]?.data;
-            return [
-                session.sessionId,
-                surveillanceFormResult?.ok ? surveillanceFormResult.data : null,
-            ];
-        }),
-    );
+    let metadataRows: MetadataRow[];
+    let resolvableSessions: Session[];
+    let sessionsMissingSurveillanceForm: Session[] = [];
 
-    const hasAnySurveillanceForm = [
-        ...surveillanceFormBySessionId.values(),
-    ].some(surveillanceForm => surveillanceForm !== null);
+    if (isDynamicFormMode) {
+        if (formAnswerQueries.some(query => query.isPending)) {
+            return <SkeletonList count={6} height="lg" width="full" />;
+        }
 
-    const resolvableSessions = hasAnySurveillanceForm
-        ? sessions.filter(
-              session =>
-                  surveillanceFormBySessionId.get(session.sessionId) != null,
-          )
-        : sessions;
-    const sessionsMissingSurveillanceForm = hasAnySurveillanceForm
-        ? sessions.filter(
-              session =>
-                  surveillanceFormBySessionId.get(session.sessionId) == null,
-          )
-        : [];
+        const failedFormAnswerQuery = formAnswerQueries.find(
+            query =>
+                query.data &&
+                !query.data.ok &&
+                query.data.error.kind !== 'not_found',
+        );
+        if (failedFormAnswerQuery?.data && !failedFormAnswerQuery.data.ok) {
+            return (
+                <p className="text-destructive text-sm">
+                    {failedFormAnswerQuery.data.error.message ??
+                        t('formAnswersError')}
+                </p>
+            );
+        }
 
-    const metadataRows = buildMetadataRows(
-        resolvableSessions,
-        surveillanceFormBySessionId,
-    );
+        const formAnswersBySessionId = new Map<number, FormAnswer[]>(
+            sessions.map((session, index) => {
+                const formAnswersResult = formAnswerQueries[index]?.data;
+                return [
+                    session.sessionId,
+                    formAnswersResult?.ok ? formAnswersResult.data.answers : [],
+                ];
+            }),
+        );
+
+        resolvableSessions = sessions;
+        metadataRows = buildDynamicMetadataRows(
+            sessions,
+            getCurrentFormByProgramIdResult.data.questions ?? [],
+            formAnswersBySessionId,
+        );
+    } else {
+        if (surveillanceFormQueries.some(query => query.isPending)) {
+            return <SkeletonList count={6} height="lg" width="full" />;
+        }
+
+        const failedSurveillanceFormQuery = surveillanceFormQueries.find(
+            query =>
+                query.data &&
+                !query.data.ok &&
+                query.data.error.kind !== 'not_found',
+        );
+        if (
+            failedSurveillanceFormQuery?.data &&
+            !failedSurveillanceFormQuery.data.ok
+        ) {
+            return (
+                <p className="text-destructive text-sm">
+                    {failedSurveillanceFormQuery.data.error.message}
+                </p>
+            );
+        }
+
+        const surveillanceFormBySessionId = new Map<
+            number,
+            SurveillanceForm | null
+        >(
+            sessions.map((session, index) => {
+                const surveillanceFormResult =
+                    surveillanceFormQueries[index]?.data;
+                return [
+                    session.sessionId,
+                    surveillanceFormResult?.ok
+                        ? surveillanceFormResult.data
+                        : null,
+                ];
+            }),
+        );
+
+        const hasAnySurveillanceForm = [
+            ...surveillanceFormBySessionId.values(),
+        ].some(surveillanceForm => surveillanceForm !== null);
+
+        resolvableSessions = hasAnySurveillanceForm
+            ? sessions.filter(
+                  session =>
+                      surveillanceFormBySessionId.get(session.sessionId) !=
+                      null,
+              )
+            : sessions;
+        sessionsMissingSurveillanceForm = hasAnySurveillanceForm
+            ? sessions.filter(
+                  session =>
+                      surveillanceFormBySessionId.get(session.sessionId) ==
+                      null,
+              )
+            : [];
+
+        metadataRows = buildSurveillanceMetadataRows(
+            resolvableSessions,
+            surveillanceFormBySessionId,
+        );
+    }
+
     const hasConflicts = metadataRows.some(
         metadataRow => metadataRow.hasConflict,
     );
@@ -119,14 +213,18 @@ export default function MetadataReviewWorkspace({
     );
 
     function resolveConflictsAndContinue() {
-        const { resolvedData, resolvedSurveillanceForm } =
+        const { resolvedData, resolvedSurveillanceForm, resolvedFormAnswers } =
             applyConflictResolutions(metadataRows, resolutionsByMetadataRowId);
 
         resolveSessionConflicts(
             {
-                sessionIds: resolvableSessions.map(session => session.sessionId),
+                sessionIds: resolvableSessions.map(
+                    session => session.sessionId,
+                ),
                 resolvedData,
-                resolvedSurveillanceForm,
+                ...(isDynamicFormMode
+                    ? { resolvedFormAnswers }
+                    : { resolvedSurveillanceForm }),
             },
             {
                 onSuccess: resolveResult => {
@@ -141,10 +239,13 @@ export default function MetadataReviewWorkspace({
                     });
                     for (const session of resolvableSessions) {
                         queryClient.invalidateQueries({
-                            queryKey:
-                                surveillanceFormKeys.surveillanceFormBySessionId(
-                                    session.sessionId,
-                                ),
+                            queryKey: isDynamicFormMode
+                                ? formAnswerKeys.formAnswersBySessionId(
+                                      session.sessionId,
+                                  )
+                                : surveillanceFormKeys.surveillanceFormBySessionId(
+                                      session.sessionId,
+                                  ),
                         });
                     }
                     onGoToNextStep();

@@ -1,3 +1,4 @@
+import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import {
@@ -12,9 +13,11 @@ export function applyConflictResolutions(
 ): {
     resolvedData: Partial<Session>;
     resolvedSurveillanceForm: Partial<SurveillanceForm>;
+    resolvedFormAnswers: Partial<FormAnswer>[];
 } {
     const resolvedData: Partial<Session> = {};
     const resolvedSurveillanceForm: Partial<SurveillanceForm> = {};
+    const resolvedFormAnswers: Partial<FormAnswer>[] = [];
 
     for (const metadataRow of metadataRows) {
         const chosenDisplayValue = resolutionsByMetadataRowId.get(
@@ -22,11 +25,22 @@ export function applyConflictResolutions(
         );
         if (chosenDisplayValue === undefined) continue;
 
+        if (metadataRow.entity === 'formAnswer') {
+            resolvedFormAnswers.push({
+                questionId: Number(metadataRow.fieldName),
+                value:
+                    chosenDisplayValue === NOT_APPLICABLE
+                        ? null
+                        : chosenDisplayValue,
+                dataType: metadataRow.fieldType,
+            });
+            continue;
+        }
+
         const resolvedFieldValue = toResolvedFieldValue(
             chosenDisplayValue,
             metadataRow.fieldType,
         );
-
         if (metadataRow.entity === 'session') {
             Object.assign(resolvedData, {
                 [metadataRow.fieldName]: resolvedFieldValue,
@@ -38,7 +52,7 @@ export function applyConflictResolutions(
         }
     }
 
-    return { resolvedData, resolvedSurveillanceForm };
+    return { resolvedData, resolvedSurveillanceForm, resolvedFormAnswers };
 }
 
 function toResolvedFieldValue(

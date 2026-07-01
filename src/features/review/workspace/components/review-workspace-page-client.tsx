@@ -57,6 +57,9 @@ export default function ReviewWorkspacePageClient({
     const accessibleSites = getUserPermissionsResult?.ok
         ? getUserPermissionsResult.data.permissions.sites.canAccessSites
         : [];
+    const programId = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.programId
+        : undefined;
     const site = accessibleSites.find(
         accessibleSite => accessibleSite.siteId === siteId,
     );
@@ -117,12 +120,21 @@ export default function ReviewWorkspacePageClient({
                         )}
 
                         {currentStepIndex === 0 ? (
-                            <MetadataReviewWorkspace
-                                sessions={sessions}
-                                timezone={timezone}
-                                readOnly={readOnly}
-                                onGoToNextStep={goToNextStep}
-                            />
+                            programId === undefined ? (
+                                <SkeletonList
+                                    count={6}
+                                    height="lg"
+                                    width="full"
+                                />
+                            ) : (
+                                <MetadataReviewWorkspace
+                                    sessions={sessions}
+                                    programId={programId}
+                                    timezone={timezone}
+                                    readOnly={readOnly}
+                                    onGoToNextStep={goToNextStep}
+                                />
+                            )
                         ) : (
                             <Fragment>
                                 {/* Placeholder step body — Steps 12–13 replace

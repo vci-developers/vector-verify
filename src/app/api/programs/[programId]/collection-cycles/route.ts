@@ -7,16 +7,13 @@ import { err } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 
-interface GetCollectionCyclesRouteParams {
+interface RouteParams {
     params: Promise<{
         programId: string;
     }>;
 }
 
-export async function GET(
-    request: Request,
-    { params }: GetCollectionCyclesRouteParams,
-) {
+export async function GET(request: Request, { params }: RouteParams) {
     const programId = Number((await params).programId);
 
     const url = new URL(request.url);

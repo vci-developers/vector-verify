@@ -84,7 +84,9 @@
         "resolving": "Resolving…",
         "continueToImageReview": "Continue to Image Review",
         "resolveSuccess": "Conflicts resolved.",
-        "resolveError": "Failed to resolve conflicts."
+        "resolveError": "Failed to resolve conflicts.",
+        "currentFormError": "Could not determine the form type for this program.",
+        "formAnswersError": "Failed to load form answers."
     },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
