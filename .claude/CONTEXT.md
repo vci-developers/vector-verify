@@ -217,27 +217,43 @@ produced — **never** from the device registry (`GET /devices/`), which has no
 location. A device "belongs" to a location only through its sessions' `siteId`s,
 so activity is computed from `/sessions/` grouped by `deviceId` and scoped to
 the selected location's sites, exactly like Unique Sites. Activity is measured
-by **rolling calendar months**, not collection cycles — the same model for every
-program, so the device view is consistent whether or not a program has a
-Collection Schedule. The location's device **universe** = devices with ≥1
-session at a site in the selected location over the last **6 calendar months**.
-Three location-scoped tiers, which reconcile to that universe: **Active**
-(submitted in the location in the current month), **Lapsing** (submitted in the
-location within the last 3 months, not the current month), **Inactive** (in the
-6-month universe but no session in the last 3 months — "used to collect here,
-went quiet"). Shown as headline cards for the selected location; in the map's
-Devices view, markers **aggregate leaf Sentinel Sites into one marker per
-parent** (keyed by the parent marker name via `getMarkerName`/`getMarkerSite`,
-exactly like the Specimens view) — answering "how many devices are active in
-this area", not per-household — and encode size = active device count, color =
-site health (active vs lapsing). **Every device is counted exactly once** (dedup
-by `deviceId`): counted at the site of its **latest** session, with its single
-status. The map markers are therefore just those unique devices grouped by site
-— each tier sums back to its headline card and all tiers sum to the total — so a
+by **Collection Cycles**: the **current cycle** is the cycle whose window
+contains today (`startDate <= now < endDate`), falling back to the most recent
+cycle that has already started when today lands in a gap or past the last cycle
+(comparison is raw-instant/epoch, so timezone-independent). Membership of a
+session in a cycle is **never recomputed on the frontend** — it is read from the
+backend-assigned `session.collectionCycleId` (id equality), so there is no
+boundary-day timezone bug. The location's device **universe** = devices with ≥1
+session at a site in the selected location over the **current cycle + the 2
+previous cycles** (a bounded 3-cycle window — wide enough that inactive devices
+still have a session in it and are therefore mappable). Programs with **no
+Collection Schedule** fall back to the equivalent **calendar-month** model
+(current month + 2 previous months), mirroring `buildReviewSegments`
+(`collectionCycles.length > 0 ? cycles : months`); this fallback clause is
+temporary and to be removed once all programs have cycles. Two location-scoped
+tiers, which reconcile to that universe: **Active** (≥1 session in the **current
+cycle**) and **Inactive** (in the 3-cycle universe but no session in the current
+cycle — "used to collect here, went quiet"). **Lapsing no longer exists.** Shown
+as headline cards for the selected location; in the map's Devices view, markers
+**aggregate leaf Sentinel Sites into one marker per parent** (keyed by the
+parent marker name via `getMarkerName`/`getMarkerSite`, exactly like the
+Specimens view) — answering "how many devices are active in this area", not
+per-household — and encode **size = active device count**, **color = binary
+health** (green if the marker has ≥1 active device, else grey). **All** markers
+are drawn, active and inactive: an all-inactive area renders as a small grey dot
+(active count 0 → minimum radius), so active areas dominate visually while
+silent areas remain visible. The map and the info-panel list **share one marker
+array** (the map applies no active-only filter), so the panel is a complete
+ledger of the universe. **Every device is counted exactly once** (dedup by
+`deviceId`): counted at the site of its **latest** session in the window, with
+its single status. The map markers are therefore just those unique devices
+grouped by site — each tier sums back to its headline card and both tiers sum to
+the total (reconciliation holds across both the cards and the panel) — so a
 device is **never** counted at two sites, even if its sessions span several.
 _Avoid_: per-site classification (double-counts roaming devices — the original
-bug). Activity is always evaluated **as-of-today**, independent of the page's
-month filter. _Avoid_: Online/offline, connected
+bug). Activity is always evaluated **as-of-today** (the current cycle),
+independent of the page's date filter. _Avoid_: Online/offline, connected,
+Lapsing (removed), rolling calendar months (replaced by cycles)
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
