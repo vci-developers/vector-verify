@@ -9,34 +9,30 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from '@/components/ui/multi-select';
+import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import { useTranslations } from 'next-intl';
-import { formatCollectionCycleLabel } from '@/features/review/sites-list/utils/format-collection-cycle-label';
 
 interface CollectionCyclePickerProps {
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
-    onChange: (ids: number[]) => void;
-    disabled?: boolean;
+    onSelectedCycleIdsChange: (cycleIds: number[]) => void;
+    disabled: boolean;
 }
 
 export default function CollectionCyclePicker({
     collectionCycles,
     selectedCycleIds,
-    onChange,
+    onSelectedCycleIdsChange,
     disabled,
 }: CollectionCyclePickerProps) {
     const t = useTranslations('CollectionCycle');
 
-    const selectedCycleIdStrings = selectedCycleIds.map(String);
-
-    function handleCollectionCycleIdsChange(stringIds: string[]) {
-        onChange(stringIds.map(Number));
-    }
-
     return (
         <MultiSelect
-            values={selectedCycleIdStrings}
-            onValuesChange={handleCollectionCycleIdsChange}
+            values={selectedCycleIds.map(String)}
+            onValuesChange={values =>
+                onSelectedCycleIdsChange(values.map(Number))
+            }
         >
             <MultiSelectTrigger className="w-52" disabled={disabled}>
                 <MultiSelectValue
@@ -55,7 +51,7 @@ export default function CollectionCyclePicker({
                             })}
                             className="pr-6"
                         >
-                            {formatCollectionCycleLabel(cycle, t)}
+                            {formatCollectionCycleLabel(cycle)}
                         </MultiSelectItem>
                     ))}
                 </MultiSelectGroup>

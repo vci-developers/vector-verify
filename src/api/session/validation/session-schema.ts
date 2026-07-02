@@ -39,6 +39,14 @@ export const sessionSchema = z.object({
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
     collectionCycleId: z.number().nullable(),
+    certifiedBy: z
+        .object({
+            userId: z.number(),
+            name: z.string().nullable(),
+            certifiedAt: z.number().nullable(),
+        })
+        .nullable()
+        .optional(),
     site: siteSchema.optional(),
     device: deviceSchema.optional(),
 });

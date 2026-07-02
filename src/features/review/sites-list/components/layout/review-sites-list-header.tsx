@@ -23,7 +23,7 @@ interface ReviewSitesListHeaderProps {
     onLocationChange: (location: string) => void;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
-    onCycleIdsChange: (ids: number[]) => void;
+    onSelectedCycleIdsChange: (ids: number[]) => void;
     disabled: boolean;
     startMonth: Date;
     endMonth: Date;
@@ -42,7 +42,7 @@ export default function ReviewSitesListHeader({
     onLocationChange,
     collectionCycles,
     selectedCycleIds,
-    onCycleIdsChange,
+    onSelectedCycleIdsChange,
     disabled,
     startMonth,
     endMonth,
@@ -96,7 +96,7 @@ export default function ReviewSitesListHeader({
                 <CollectionCyclePicker
                     collectionCycles={collectionCycles}
                     selectedCycleIds={selectedCycleIds}
-                    onChange={onCycleIdsChange}
+                    onSelectedCycleIdsChange={onSelectedCycleIdsChange}
                     disabled={disabled}
                 />
                 <MonthRangePicker

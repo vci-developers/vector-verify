@@ -47,6 +47,16 @@ Distinct from Review. _Avoid_: Expert review, labeling
 surveillance data quality and certifies it for submission to national health
 systems. Distinct from Annotation. _Avoid_: Data review (ambiguous), QA
 
+**Review Unit**: The atomic scope a VCO certifies or resolves conflicts within —
+exactly one **Sentinel Site** paired with exactly one **Collection Cycle**. For
+programs with no Collection Schedule (no cycles), the unit falls back to one
+**Sentinel Site** paired with one **calendar month**. The Review date filter
+(`startDate`/`endDate`) only selects which Cycles or months are _listed_; it
+never widens a unit to span multiple Cycles or months. A VCO can never certify
+or resolve a conflict across more than one Review Unit at a time. Mirrors the
+**Sync Task** key (`collectionCycleId, siteId`). _Avoid_: site-month, period,
+batch, the selected range (as a unit)
+
 ### Core Entities
 
 **Program**: The top-level organizational unit. All sites, users, sessions, and
@@ -105,6 +115,44 @@ have no cycle. _Avoid_: Submission, collection event
 `IN_REVIEW` → `CERTIFIED` → `SUBMITTED`. `NOT_APPLICABLE` is set on
 non-surveillance sessions (type `CALIBRATION`, `PRACTICE`, `DATA_COLLECTION`)
 that never enter the Review workflow.
+
+**Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
+trap or room visited within one household visit), fetched via
+`GET /sessions/{id}/units`. Carries only
+`{ id, sessionId, frontendId, unitOrder }` — it has **no intrinsic semantic
+identity fields**. The mobile app guarantees distinct units within one Session.
+Session Units exist only under **Dynamic Form** programs (legacy/surveillance
+programs have none). _Avoid_: sub-session, repeat, group
+
+**Form Mode**: Which form system a Program uses — **exclusive per program**.
+**Surveillance Form** (legacy, e.g. Uganda): a fixed-schema form
+(`GET /sessions/{id}/surveillance-form`) with a hardcoded field set. **Dynamic
+Form**: a versioned, admin-defined question set
+(`GET /programs/{id}/forms/current`); answers via
+`GET /sessions/{id}/forms/answers`. Mode is detected by the current-form
+endpoint — `not_found` ⇒ Surveillance/legacy — **never by hardcoding country**.
+A program is in exactly one mode at a time. _Avoid_: custom form, legacy vs new
+(when precision matters)
+
+**Form Answer Scope**: A Dynamic Form question's `answerScope`, either `SESSION`
+(one answer per Session) or `SESSION_UNIT` (one answer per Session Unit).
+Determines which target ids a **Metadata Conflict** resolves against —
+`sessionIds` for `SESSION`, `sessionUnitIds` for `SESSION_UNIT`.
+
+**Unit Identity**: The set of a Session Unit's `SESSION_UNIT`-scoped answers
+whose question is flagged `isUnitIdentityComponent: true`. Their combined values
+**identify** the unit and are used to match the "same" unit across Sessions in a
+Review Unit (group by the identity-value tuple). Identity components are shown
+as the unit's **header/title**, never as resolvable conflict rows. Non-identity
+`SESSION_UNIT` answers are the resolvable rows. _Avoid_: unit key, unit name
+
+**Metadata Conflict**: A field/question that holds differing values across the
+Sessions (or matched Session Units) of one **Review Unit**, which a VCO must
+resolve to a single agreed value before Certification, via
+`POST /sessions/conflicts/resolve`. `SESSION`-scoped conflicts (core session
+fields, surveillance-form fields, session-scoped dynamic answers) resolve with
+`sessionIds`; `SESSION_UNIT`-scoped conflicts resolve with `sessionUnitIds`, one
+call per **Unit Identity** group. _Avoid_: discrepancy, mismatch
 
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
