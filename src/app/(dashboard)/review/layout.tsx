@@ -45,5 +45,8 @@ export default async function ReviewLayout({ children }: ReviewLayoutProps) {
         redirect('/forbidden');
     }
 
+    // TODO: Revert — Review temporarily disabled. Remove the redirect below to restore.
+    redirect('/operations');
+
     return <Fragment>{children}</Fragment>;
 }

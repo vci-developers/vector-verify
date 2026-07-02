@@ -5,7 +5,7 @@ import type { UserPermissions } from '@/api/user/validation/user-permissions-sch
 import {
     BookOpen,
     ChevronUp,
-    ClipboardCheck,
+    // ClipboardCheck,
     // LayoutDashboard,
     Moon,
     PencilRuler,
@@ -59,12 +59,13 @@ const navigation: NavigationItem[] = [
     //     icon: LayoutDashboard,
     //     canAccess: () => true,
     // },
-    {
-        name: 'Review',
-        href: '/review',
-        icon: ClipboardCheck,
-        canAccess: permissions => permissions.sites.writeSiteMetadata,
-    },
+    // TODO: Revert — Review nav item temporarily hidden.
+    // {
+    //     name: 'Review',
+    //     href: '/review',
+    //     icon: ClipboardCheck,
+    //     canAccess: permissions => permissions.sites.writeSiteMetadata,
+    // },
     {
         name: 'Operations',
         href: '/operations',
