@@ -92,21 +92,27 @@ export function buildDeviceActivity(
 ): DeviceActivity {
     const summaryByDeviceId = new Map<
         number,
-        { latestSiteId: number; latestSubmittedAt: number; isActive: boolean }
+        {
+            latestSiteId: number;
+            latestCollectionDate: number;
+            isActive: boolean;
+        }
     >();
     for (const session of sessions) {
         const deviceActivitySummary = summaryByDeviceId.get(session.deviceId);
         if (deviceActivitySummary === undefined) {
             summaryByDeviceId.set(session.deviceId, {
                 latestSiteId: session.siteId,
-                latestSubmittedAt: session.submittedAt,
+                latestCollectionDate: session.collectionDate,
                 isActive: isSessionInCurrentPeriod(session),
             });
             continue;
         }
-        if (session.submittedAt > deviceActivitySummary.latestSubmittedAt) {
+        if (
+            session.collectionDate > deviceActivitySummary.latestCollectionDate
+        ) {
             deviceActivitySummary.latestSiteId = session.siteId;
-            deviceActivitySummary.latestSubmittedAt = session.submittedAt;
+            deviceActivitySummary.latestCollectionDate = session.collectionDate;
         }
         deviceActivitySummary.isActive ||= isSessionInCurrentPeriod(session);
     }
