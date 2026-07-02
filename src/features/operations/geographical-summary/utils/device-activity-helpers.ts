@@ -88,7 +88,7 @@ export interface DeviceActivity {
 
 export function buildDeviceActivity(
     sessions: Session[],
-    isSessionInCurrentPeriod: (session: Session) => boolean,
+    isSessionInCurrentCycle: (session: Session) => boolean,
 ): DeviceActivity {
     const summaryByDeviceId = new Map<
         number,
@@ -104,7 +104,7 @@ export function buildDeviceActivity(
             summaryByDeviceId.set(session.deviceId, {
                 latestSiteId: session.siteId,
                 latestCollectionDate: session.collectionDate,
-                isActive: isSessionInCurrentPeriod(session),
+                isActive: isSessionInCurrentCycle(session),
             });
             continue;
         }
@@ -114,7 +114,7 @@ export function buildDeviceActivity(
             deviceActivitySummary.latestSiteId = session.siteId;
             deviceActivitySummary.latestCollectionDate = session.collectionDate;
         }
-        deviceActivitySummary.isActive ||= isSessionInCurrentPeriod(session);
+        deviceActivitySummary.isActive ||= isSessionInCurrentCycle(session);
     }
 
     const activityBySite = new Map<number, SiteDeviceActivity>();

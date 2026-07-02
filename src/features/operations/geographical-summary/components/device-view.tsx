@@ -15,12 +15,14 @@ import type { Site } from '@/api/site/validation/site-schema';
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
+    programId: number;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
 }
 
 export default function DeviceView({
+    programId,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
@@ -29,7 +31,10 @@ export default function DeviceView({
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
-    const { deviceActivity, isPending, isError } = useDeviceActivity(siteIds);
+    const { deviceActivity, isPending, isError } = useDeviceActivity(
+        programId,
+        siteIds,
+    );
 
     useEffect(() => {
         setSelectedMarkerId(null);
