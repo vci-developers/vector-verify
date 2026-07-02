@@ -1,107 +1,181 @@
 'use client';
 
 import type { Site } from '@/api/site/validation/site-schema';
-import SiteHierarchy from '@/features/review/components/site-hierarchy';
-import ReviewVisitCoverageBadge from '@/features/review/sites-list/components/sites/review-visit-coverage-badge';
-import ReviewSiteLeafRows from '@/features/review/sites-list/components/sites/review-site-leaf-rows';
+import type { ReviewSiteSessionSummary } from '@/features/review/utils/review-site-session-summary';
+import { isLegacySite } from '@/lib/location/location-query';
 import {
-    getSiteSessionCount,
-    type ReviewSiteSessionSummary,
-} from '@/features/review/utils/review-site-session-summary';
-import { useTranslations } from 'next-intl';
-import { Fragment } from 'react/jsx-runtime';
+    getLocationTypeName,
+    getSiteAndDescendants,
+    getTopLevelSites,
+} from '@/lib/location/site-tree';
+import ReviewCollapsibleLocationGroup from './review-collapsible-location-group';
+import ReviewSiteLeafRows from './review-site-leaf-rows';
 
-function getVisitCoverageBackgroundColor(
-    percentage: number,
-    highThreshold = 80,
-    mediumThreshold = 50,
-): string {
-    if (percentage >= highThreshold) return 'bg-success/10 hover:bg-success/20';
-    if (percentage >= mediumThreshold)
-        return 'bg-warning/10 hover:bg-warning/20';
-    return 'bg-destructive/10 hover:bg-destructive/20';
-}
+const LEGACY_HIERARCHY_LEVELS = [
+    { key: 'subCounty', label: 'Subcounty' },
+    { key: 'healthCenter', label: 'Health Center' },
+    { key: 'parish', label: 'Parish' },
+    { key: 'villageName', label: 'Village' },
+    { key: 'houseNumber', label: 'House' },
+] as const;
 
 interface ReviewSiteHierarchyProps {
     sites: Site[];
-    parentPath: string;
-    startDate: string;
-    endDate: string;
-    collectionCycleId?: number;
-    timezone?: string | null;
-    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
-    expandedSitePaths: Set<string>;
-    onTogglePath: (path: string, descendantPaths: string[]) => void;
+    summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteHierarchy({
     sites,
-    parentPath,
-    startDate,
-    endDate,
-    collectionCycleId,
-    timezone,
-    sessionCountsBySiteId,
-    expandedSitePaths,
-    onTogglePath,
+    summaryBySiteId,
+    buildSiteHref,
 }: ReviewSiteHierarchyProps) {
-    const t = useTranslations('ReviewSitesList');
-    return (
-        <SiteHierarchy
+    if (sites.length === 0) return null;
+
+    return isLegacySite(sites[0]!) ? (
+        <LegacySiteLevel
             sites={sites}
-            parentPath={parentPath}
-            expandedSitePaths={expandedSitePaths}
-            onTogglePath={onTogglePath}
-            renderLeafRows={(leafSites, getDisplayName) => (
-                <ReviewSiteLeafRows
-                    sites={leafSites}
-                    getDisplayName={getDisplayName}
-                    sessionCountsBySiteId={sessionCountsBySiteId}
-                    startDate={startDate}
-                    endDate={endDate}
-                    collectionCycleId={collectionCycleId}
-                    timezone={timezone}
-                />
-            )}
-            renderGroupContent={sitesInGroup => {
-                const visitedCount = sitesInGroup.filter(site => {
-                    const summary = sessionCountsBySiteId.get(site.siteId);
-                    return (
-                        summary !== undefined &&
-                        getSiteSessionCount(summary) > 0
-                    );
-                }).length;
-                const visitedPercentage =
-                    sitesInGroup.length > 0
-                        ? Math.round((visitedCount / sitesInGroup.length) * 100)
-                        : 0;
-                const needsReviewSiteCount = sitesInGroup.filter(
-                    site =>
-                        (sessionCountsBySiteId.get(site.siteId)?.NEEDS_REVIEW ??
-                            0) > 0,
-                ).length;
-                return {
-                    headerClassName:
-                        getVisitCoverageBackgroundColor(visitedPercentage),
-                    summaryContent: (
-                        <Fragment>
-                            {needsReviewSiteCount > 0 && (
-                                <span className="text-destructive text-xs tabular-nums">
-                                    {t('sitesNeedReview', {
-                                        count: needsReviewSiteCount,
-                                    })}
-                                </span>
-                            )}
-                            <span className="text-muted-foreground text-xs tabular-nums">
-                                {visitedCount} of {sitesInGroup.length} visited
-                            </span>
-                            <ReviewVisitCoverageBadge
-                                visitedPercentage={visitedPercentage}
-                            />
-                        </Fragment>
-                    ),
-                };
-            }}
+            depth={0}
+            summaryBySiteId={summaryBySiteId}
+            buildSiteHref={buildSiteHref}
         />
+    ) : (
+        <HierarchicalSiteLevel
+            allSites={sites}
+            sitesAtLevel={getTopLevelSites(sites)}
+            depth={0}
+            summaryBySiteId={summaryBySiteId}
+            buildSiteHref={buildSiteHref}
+        />
+    );
+}
+
+function LegacySiteLevel({
+    sites,
+    depth,
+    summaryBySiteId,
+    buildSiteHref,
+}: {
+    sites: Site[];
+    depth: number;
+    summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
+}) {
+    const level = LEGACY_HIERARCHY_LEVELS[depth]!;
+
+    if (depth === LEGACY_HIERARCHY_LEVELS.length - 1) {
+        return (
+            <ReviewSiteLeafRows
+                sites={sites}
+                getDisplayName={site => site[level.key] ?? 'Unknown'}
+                summaryBySiteId={summaryBySiteId}
+                buildSiteHref={buildSiteHref}
+            />
+        );
+    }
+
+    const sitesByName: Record<string, Site[]> = {};
+    for (const site of sites) {
+        const name = site[level.key] ?? 'Unknown';
+        (sitesByName[name] ??= []).push(site);
+    }
+    const groups = Object.entries(sitesByName).sort(([a], [b]) =>
+        a.localeCompare(b),
+    );
+
+    return (
+        <div className="space-y-1">
+            {groups.map(([name, groupSites]) => (
+                <ReviewCollapsibleLocationGroup
+                    key={name}
+                    locationName={name}
+                    locationTypeName={level.label}
+                    siteIds={groupSites.map(site => site.siteId)}
+                    sessionSummaryBySiteId={summaryBySiteId}
+                    defaultOpen={depth > 0}
+                >
+                    <LegacySiteLevel
+                        sites={groupSites}
+                        depth={depth + 1}
+                        summaryBySiteId={summaryBySiteId}
+                        buildSiteHref={buildSiteHref}
+                    />
+                </ReviewCollapsibleLocationGroup>
+            ))}
+        </div>
+    );
+}
+
+function HierarchicalSiteLevel({
+    allSites,
+    sitesAtLevel,
+    depth,
+    summaryBySiteId,
+    buildSiteHref,
+}: {
+    allSites: Site[];
+    sitesAtLevel: Site[];
+    depth: number;
+    summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
+}) {
+    if (sitesAtLevel.length === 0) return null;
+
+    const isLeafLevel = sitesAtLevel.every(
+        site => !allSites.some(other => other.parentId === site.siteId),
+    );
+
+    if (isLeafLevel) {
+        return (
+            <ReviewSiteLeafRows
+                sites={sitesAtLevel}
+                getDisplayName={site => site.name ?? 'Unknown'}
+                summaryBySiteId={summaryBySiteId}
+                buildSiteHref={buildSiteHref}
+            />
+        );
+    }
+
+    const locationTypeName = getLocationTypeName(sitesAtLevel[0]!);
+
+    return (
+        <div className="space-y-1">
+            {sitesAtLevel.map(site => {
+                const childSites = allSites
+                    .filter(other => other.parentId === site.siteId)
+                    .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+                // Sentinel sites under this group = its leaf descendants.
+                const sentinelSiteIds = getSiteAndDescendants(
+                    allSites,
+                    site.siteId,
+                )
+                    .filter(
+                        descendant =>
+                            descendant.siteId !== site.siteId &&
+                            !allSites.some(
+                                other => other.parentId === descendant.siteId,
+                            ),
+                    )
+                    .map(descendant => descendant.siteId);
+                return (
+                    <ReviewCollapsibleLocationGroup
+                        key={site.siteId}
+                        locationName={site.name ?? 'Unknown'}
+                        locationTypeName={locationTypeName}
+                        siteIds={sentinelSiteIds}
+                        sessionSummaryBySiteId={summaryBySiteId}
+                        defaultOpen={depth > 0}
+                    >
+                        <HierarchicalSiteLevel
+                            allSites={allSites}
+                            sitesAtLevel={childSites}
+                            depth={depth + 1}
+                            summaryBySiteId={summaryBySiteId}
+                            buildSiteHref={buildSiteHref}
+                        />
+                    </ReviewCollapsibleLocationGroup>
+                );
+            })}
+        </div>
     );
 }

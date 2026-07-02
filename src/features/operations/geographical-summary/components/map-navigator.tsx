@@ -11,17 +11,17 @@ const SELECTED_LOCATION_ZOOM = 10;
 
 interface MapNavigatorProps {
     bounds: LatLngBoundsExpression | null;
-    selectedLocation: string;
+    selectedLocations: string[];
 }
 
 export default function MapNavigator({
     bounds,
-    selectedLocation,
+    selectedLocations,
 }: MapNavigatorProps) {
     const map = useMap();
 
     const { data: geocodeResult } = useGetGeocode(
-        { location: selectedLocation },
+        { location: selectedLocations[0] ?? '' },
         { enabled: !bounds },
     );
 

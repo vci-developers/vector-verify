@@ -1,5 +1,7 @@
+import { getAllSessions } from '@/api/session/get-all-sessions';
 import { sessionKeys } from '@/api/session/session-keys';
-import { surveillanceFormKeys } from '@/api/surveillance-form/surveillance-form-keys';
+import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
+import ReviewWorkspacePageClient from '@/features/review/workspace/components/review-workspace-page-client';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import {
     dehydrate,
@@ -7,33 +9,25 @@ import {
     QueryClient,
 } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
-import ReviewSiteDetailsPageClient from '@/features/review/site-details/components/review-site-details-page-client';
-import { getSurveillanceFormBySessionId } from '@/api/surveillance-form/get-surveillance-form-by-session-id';
-import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
-import { getAllSessions } from '@/api/session/get-all-sessions';
 
-interface ReviewSiteDetailPageProps {
-    params: Promise<{
-        siteId: string;
-    }>;
+interface ReviewWorkspacePageProps {
+    params: Promise<{ siteId: string }>;
     searchParams: Promise<{
         startDate?: string;
         endDate?: string;
-        displayName?: string;
         collectionCycleId?: string;
         timezone?: string;
     }>;
 }
 
-export default async function ReviewSiteDetailPage({
+export default async function ReviewWorkspacePage({
     params,
     searchParams,
-}: ReviewSiteDetailPageProps) {
+}: ReviewWorkspacePageProps) {
     const siteId = Number((await params).siteId);
     const {
         startDate,
         endDate,
-        displayName,
         collectionCycleId: collectionCycleIdParam,
         timezone,
     } = await searchParams;
@@ -47,17 +41,8 @@ export default async function ReviewSiteDetailPage({
 
     const getAllSessionsQueryParams: GetAllSessionsQueryParams =
         collectionCycleId !== undefined
-            ? {
-                  siteIds: [siteId],
-                  collectionCycleId,
-                  type: 'SURVEILLANCE',
-              }
-            : {
-                  siteIds: [siteId],
-                  startDate,
-                  endDate,
-                  type: 'SURVEILLANCE',
-              };
+            ? { siteIds: [siteId], collectionCycleId, type: 'SURVEILLANCE' }
+            : { siteIds: [siteId], startDate, endDate, type: 'SURVEILLANCE' };
 
     const authorizedGetAllSessionsResult = await withAuthSession(
         async accessToken => {
@@ -70,23 +55,6 @@ export default async function ReviewSiteDetailPage({
                 sessionKeys.allSessions(getAllSessionsQueryParams),
                 getAllSessionsResult,
             );
-
-            if (getAllSessionsResult.ok) {
-                await Promise.all(
-                    getAllSessionsResult.data.sessions.map(async session => {
-                        const result = await getSurveillanceFormBySessionId(
-                            accessToken,
-                            session.sessionId,
-                        );
-                        queryClient.setQueryData(
-                            surveillanceFormKeys.surveillanceFormBySessionId(
-                                session.sessionId,
-                            ),
-                            result,
-                        );
-                    }),
-                );
-            }
 
             return getAllSessionsResult;
         },
@@ -103,13 +71,12 @@ export default async function ReviewSiteDetailPage({
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ReviewSiteDetailsPageClient
+            <ReviewWorkspacePageClient
                 siteId={siteId}
                 startDate={startDate}
                 endDate={endDate}
                 collectionCycleId={collectionCycleId}
                 timezone={timezone}
-                siteName={displayName}
             />
         </HydrationBoundary>
     );

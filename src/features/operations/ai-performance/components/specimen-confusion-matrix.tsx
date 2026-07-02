@@ -25,7 +25,6 @@ interface SpecimenConfusionMatrixProps {
     groundTruthAxisLabel: string;
     predictionAxisLabel: string;
     confusionMatrix: AnnotationConfusionMatrix;
-    selectedLocationName: string;
 }
 
 export default function SpecimenConfusionMatrix({
@@ -34,7 +33,6 @@ export default function SpecimenConfusionMatrix({
     groundTruthAxisLabel,
     predictionAxisLabel,
     confusionMatrix,
-    selectedLocationName,
 }: SpecimenConfusionMatrixProps) {
     const t = useTranslations('OperationsAIPerformance');
 
@@ -354,7 +352,6 @@ export default function SpecimenConfusionMatrix({
                         <p className="text-muted-foreground text-sm leading-6">
                             {t('matrixCompares', {
                                 category: classificationCategory,
-                                location: selectedLocationName,
                             })}
                         </p>
                         <p className="text-muted-foreground text-sm leading-6">

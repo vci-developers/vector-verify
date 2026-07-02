@@ -38,8 +38,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
-import { formatCollectionCycleLabel } from '../../sites-list/utils/format-collection-cycle-label';
-import { useTranslations } from 'next-intl';
+import { formatCollectionCycleLabel } from '../../utils/format-collection-cycle-label';
 import Dhis2DryRunPreviewItem from './dhis2-dry-run-preview-item';
 import { usePostDhis2SyncDryRun } from '@/api/dhis2/hooks/use-post-dhis2-sync-dry-run';
 import type { Dhis2SyncSiteResultStatus } from '@/api/dhis2/validation/dhis2-sync-result-schema';
@@ -58,7 +57,6 @@ export default function Dhis2IrsDialog({
     submissions,
     onConfirmSubmission,
 }: Dhis2IrsDialogProps) {
-    const t = useTranslations('CollectionCycle');
     const irsForm = useForm<Dhis2IrsFormInput>({
         resolver: zodResolver(dhis2IrsFormSchema),
         defaultValues: {
@@ -216,7 +214,6 @@ export default function Dhis2IrsDialog({
                                         <p className="text-muted-foreground text-xs">
                                             {formatCollectionCycleLabel(
                                                 collectionCycle,
-                                                t,
                                             )}
                                         </p>
                                     </div>

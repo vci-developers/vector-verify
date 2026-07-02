@@ -32,32 +32,13 @@
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
         "badgeLabel": "Cycle {cycleNumber}"
     },
-    "OperationsSpecimenComposition": {
-        "monthlySpecimenCountsLoading": "LOADING...",
-        "monthlySpecimenCountsError": "ERROR: ",
-        "filterBySpecies": "Filter by Species",
-        "selectSpecies": "Select species...",
-        "searchSpecies": "Search species...",
-        "noSpeciesFound": "No species found."
-    },
-    "OperationsAIPerformance": {
-        "accuracy": "Accuracy",
-        "correctOf": "{numCorrect} correct of {total} {category} comparisons",
-        "perLabelMetrics": "Per-Label Metrics",
-        "label": "Label",
-        "sensitivity": "Sensitivity",
-        "specificity": "Specificity",
-        "specimensLabeledAs": "{count, plural, one {# specimen''s label was} other {# specimens'' labels were}} {category, select, unknown {or contained ''{category}''} other {{category}}}. ",
-        "interpretation": "Interpretation",
-        "matrixCompares": "The matrix compares visual verification {category} labels from {location} against the VectorCam {category} prediction for the selected date range.",
-        "eachCellShows": "Each cell shows the specimen count and that cell's share of the visual verification row. Each per-label metric is computed as a one-vs-rest comparison for that label.",
-        "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
-        "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
-        "labelExclusionExplanation": "Cannot be Determined specimens, UNKNOWN specimens, and specimens with labels containing 'unknown' were excluded from the sensitivity and specificity calculations due to ambiguity. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded. A label containing 'unknown' indicates annotator uncertainty."
-    },
-    "ReviewSitesList": {
-        "needsReview": "Needs Review",
-        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}"
+    "Operations": {
+        "operations": "Operations",
+        "operationsDescription": "Monitor field operations by location",
+        "selectALocation": "Select a location to view data.",
+        "selectDropdownPlaceholder": "Select {locationType}(s)",
+        "searchLocationPlaceholder": "Search {locationType}s",
+        "exportData": "Export Data"
     },
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
@@ -86,5 +67,114 @@
         "legendActive": "Has an active device this month",
         "legendLapsing": "Only lapsing devices",
         "legendInactive": "All devices inactive"
+    },
+    "OperationsSpecimenComposition": {
+        "monthlySpecimenCountsLoading": "LOADING...",
+        "monthlySpecimenCountsError": "ERROR: ",
+        "filterBySpecies": "Filter by Species",
+        "selectSpecies": "Select species...",
+        "searchSpecies": "Search species...",
+        "noSpeciesFound": "No species found."
+    },
+    "OperationsAIPerformance": {
+        "accuracy": "Accuracy",
+        "correctOf": "{numCorrect} correct of {total} {category} comparisons",
+        "perLabelMetrics": "Per-Label Metrics",
+        "label": "Label",
+        "sensitivity": "Sensitivity",
+        "specificity": "Specificity",
+        "specimensLabeledAs": "{count, plural, one {# specimen''s label was} other {# specimens'' labels were}} {category, select, unknown {or contained ''{category}''} other {{category}}}. ",
+        "interpretation": "Interpretation",
+        "matrixCompares": "The matrix compares visual verification {category} labels from the selected location(s) against the VectorCam {category} prediction for the selected date range.",
+        "eachCellShows": "Each cell shows the specimen count and that cell's share of the visual verification row. Each per-label metric is computed as a one-vs-rest comparison for that label.",
+        "sensitivityExplanation": "Sensitivity = TP / (TP + FN). It measures how often VectorCam correctly identifies specimens that truly belong to that label.",
+        "specificityExplanation": "Specificity = TN / (TN + FP). It measures how often VectorCam correctly avoids assigning that label when the specimen truly belongs to another label.",
+        "labelExclusionExplanation": "Cannot be Determined specimens, UNKNOWN specimens, and specimens with labels containing 'unknown' were excluded from the sensitivity and specificity calculations due to ambiguity. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded. A label containing 'unknown' indicates annotator uncertainty."
+    },
+    "OperationsFieldTeamPerformance": {
+        "fieldTeamPerformance": "Field Team Performance",
+        "districtCollectors": "District Collectors",
+        "activeCollectors": "Active Collectors",
+        "submittedThisOrLastMonth": "Submitted this or last month",
+        "noSubmissionsFound": "No submissions found for this location and date range.",
+        "collector": "Collector",
+        "session": "session"
+    },
+    "ReviewSitesList": {
+        "needsReview": "Needs Review",
+        "inReview": "In Review",
+        "certified": "Certified",
+        "submitted": "Submitted",
+        "noSessions": "No sessions",
+        "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
+        "sitesVisited": "{visited} of {total} visited"
+    },
+    "ReviewWorkspace": {
+        "backToSites": "Back to Sites",
+        "metadataStep": "Metadata Review",
+        "imageStep": "Image Review",
+        "certificationStep": "Certification",
+        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode."
+    },
+    "ReviewMetadata": {
+        "intro": "Review and resolve any conflicting values across sessions. Sessions must agree before continuing.",
+        "resolution": "Resolution",
+        "selectValuePlaceholder": "Select value",
+        "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
+        "missingSurveillanceFormNotice": "Excluded from this resolution — {count, plural, one {# session} other {# sessions}} missing a surveillance form: {dates}.",
+        "noSessions": "No sessions found for this Sentinel Site.",
+        "resolveAndContinue": "Resolve & Continue",
+        "resolving": "Resolving…",
+        "continueToImageReview": "Continue to Image Review",
+        "resolveSuccess": "Conflicts resolved.",
+        "resolveError": "Failed to resolve conflicts.",
+        "currentFormError": "Could not determine the form type for this program.",
+        "formAnswersError": "Failed to load form answers.",
+        "sessionSectionTitle": "Session"
+    },
+    "ReviewImage": {
+        "specimenCounter": "Specimen {current} of {total}",
+        "previousSpecimen": "Previous Specimen",
+        "nextSpecimen": "Next Specimen",
+        "emptyTitle": "No specimens to review",
+        "emptyDescription": "There are no specimens for this site. You can continue to certification.",
+        "continueToCertification": "Continue to Certification",
+        "specimenId": "Specimen ID",
+        "sessionId": "Session ID",
+        "imagesCaptured": "Images Captured",
+        "needsFurtherProcessing": "Needs Further Processing",
+        "yes": "Yes",
+        "no": "No",
+        "currentImage": "Current Image",
+        "capturedAt": "Captured At",
+        "submittedAt": "Submitted At",
+        "modelPredictions": "Model Predictions",
+        "species": "Species",
+        "sex": "Sex",
+        "abdomenStatus": "Abdomen Status"
+    },
+    "ReviewCertification": {
+        "title": "Certify Site",
+        "intro": "You are about to certify {count, plural, one {# session} other {# sessions}} for this site. This action is permanent.",
+        "responsibilityTitle": "You are taking responsibility for this data",
+        "lockedNotice": "Once certified, this data will be locked. No further changes can be made.",
+        "confirmListTitle": "By certifying, you confirm:",
+        "confirmMetadata": "All metadata discrepancies have been resolved",
+        "confirmImages": "All specimen images have been reviewed",
+        "confirmAccuracy": "The data is complete and accurate to the best of your knowledge",
+        "overwriteCertifierNotice": "Last certified by {name} on {date}. Certifying now replaces them as the certifier of record for all sessions.",
+        "acknowledgement": "I have reviewed the data and take responsibility for certifying it as accurate.",
+        "certifyButton": "Certify {count, plural, one {# session} other {# sessions}}",
+        "certifying": "Certifying…",
+        "certifySuccess": "Certified {count, plural, one {# session} other {# sessions}}.",
+        "certifyError": "Failed to certify {count, plural, one {# session} other {# sessions}}.",
+        "summaryTitle": "This site is fully reviewed",
+        "lastCertifiedBy": "Last certified by {name} on {date}.",
+        "certifiedFallback": "All {count, plural, one {# session is} other {# sessions are}} certified.",
+        "unknownCertifier": "an unknown user"
+    },
+    "Dhis2Submissions": {
+        "certifiedBy": "Certified by: {name}",
+        "unknownCertifier": "an unknown user"
     }
 }

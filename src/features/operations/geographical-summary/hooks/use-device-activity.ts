@@ -4,11 +4,10 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useMemo } from 'react';
 import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { buildDeviceActivity } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 
 const INACTIVE_MAX_MONTHS = 5;
 
-export function useDeviceActivity(locationQueryParam: LocationQueryParam) {
+export function useDeviceActivity(siteIds: number[]) {
     const { startDate, endDate } = useMemo(() => {
         const today = new Date();
         return {
@@ -20,17 +19,12 @@ export function useDeviceActivity(locationQueryParam: LocationQueryParam) {
         };
     }, []);
 
-    const locationFilter =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
-
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
             startDate,
             endDate,
             type: 'SURVEILLANCE',
-            ...locationFilter,
+            siteIds,
         });
 
     const deviceActivity = useMemo(() => {
