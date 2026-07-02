@@ -39,7 +39,6 @@ export default function DeviceMap({
                 if (!marker) return new DivIcon();
                 return createDeviceMarkerIcon(
                     marker.activeDeviceCount,
-                    marker.lapsingDeviceCount,
                     isSelected,
                 );
             }}

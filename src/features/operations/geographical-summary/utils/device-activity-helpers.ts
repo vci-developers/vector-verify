@@ -1,72 +1,139 @@
+import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Session } from '@/api/session/validation/session-schema';
-import { differenceInCalendarMonths } from 'date-fns';
+import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 
-const LAPSING_MAX_MONTHS = 2;
-const INACTIVE_MAX_MONTHS = 5;
+const RECENT_PERIOD_COUNT = 3;
 
-type DeviceStatus = 'active' | 'lapsing' | 'inactive';
+export interface DeviceActivityWindow {
+    startDate: string;
+    endDate: string;
+    currentCycleId: number | null;
+}
+
+export function resolveCurrentCycle(
+    collectionCycles: CollectionCycle[],
+    currentDate: number,
+): CollectionCycle | null {
+    return (
+        collectionCycles.find(
+            cycle =>
+                cycle.startDate <= currentDate && currentDate < cycle.endDate,
+        ) ??
+        collectionCycles
+            .filter(cycle => cycle.startDate <= currentDate)
+            .sort(
+                (firstCycle, secondCycle) =>
+                    secondCycle.startDate - firstCycle.startDate,
+            )[0] ??
+        null
+    );
+}
+
+export function resolveDeviceActivityWindow(
+    collectionCycles: CollectionCycle[],
+    currentDate: number,
+): DeviceActivityWindow {
+    const currentCycle = resolveCurrentCycle(collectionCycles, currentDate);
+    if (currentCycle === null) return resolveMonthWindow(currentDate);
+
+    const recentCycles = collectionCycles
+        .filter(cycle => cycle.startDate <= currentCycle.startDate)
+        .sort(
+            (firstCycle, secondCycle) =>
+                secondCycle.startDate - firstCycle.startDate,
+        )
+        .slice(0, RECENT_PERIOD_COUNT);
+    const earliestRecentCycle =
+        recentCycles[recentCycles.length - 1] ?? currentCycle;
+
+    return {
+        startDate: formatDateInTimezone(
+            earliestRecentCycle.startDate,
+            earliestRecentCycle.timezone,
+            'yyyy-MM-dd',
+        ),
+        endDate: formatDateInTimezone(
+            currentCycle.endDate,
+            currentCycle.timezone,
+            'yyyy-MM-dd',
+        ),
+        currentCycleId: currentCycle.id,
+    };
+}
+
+function resolveMonthWindow(currentDate: number): DeviceActivityWindow {
+    return {
+        startDate: format(
+            startOfMonth(subMonths(currentDate, RECENT_PERIOD_COUNT - 1)),
+            'yyyy-MM-dd',
+        ),
+        endDate: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
+        currentCycleId: null,
+    };
+}
 
 export interface SiteDeviceActivity {
     siteId: number;
     activeDeviceCountAtSite: number;
-    lapsingDeviceCountAtSite: number;
     inactiveDeviceCountAtSite: number;
 }
 
 export interface DeviceActivity {
     activeDeviceCount: number;
-    lapsingDeviceCount: number;
     inactiveDeviceCount: number;
     totalDeviceCount: number;
     sites: SiteDeviceActivity[];
 }
 
-export function buildDeviceActivity(sessions: Session[]): DeviceActivity {
-    const now = new Date();
-
-    const latestSessionByDevice = new Map<
+export function buildDeviceActivity(
+    sessions: Session[],
+    isSessionInCurrentPeriod: (session: Session) => boolean,
+): DeviceActivity {
+    const summaryByDeviceId = new Map<
         number,
-        { siteId: number; submittedAt: number }
+        { latestSiteId: number; latestSubmittedAt: number; isActive: boolean }
     >();
     for (const session of sessions) {
-        const latestSession = latestSessionByDevice.get(session.deviceId);
-        if (
-            latestSession === undefined ||
-            session.submittedAt > latestSession.submittedAt
-        ) {
-            latestSessionByDevice.set(session.deviceId, {
-                siteId: session.siteId,
-                submittedAt: session.submittedAt,
+        const deviceActivitySummary = summaryByDeviceId.get(session.deviceId);
+        if (deviceActivitySummary === undefined) {
+            summaryByDeviceId.set(session.deviceId, {
+                latestSiteId: session.siteId,
+                latestSubmittedAt: session.submittedAt,
+                isActive: isSessionInCurrentPeriod(session),
             });
+            continue;
         }
+        if (session.submittedAt > deviceActivitySummary.latestSubmittedAt) {
+            deviceActivitySummary.latestSiteId = session.siteId;
+            deviceActivitySummary.latestSubmittedAt = session.submittedAt;
+        }
+        deviceActivitySummary.isActive ||= isSessionInCurrentPeriod(session);
     }
 
     const activityBySite = new Map<number, SiteDeviceActivity>();
     let activeDeviceCount = 0;
-    let lapsingDeviceCount = 0;
     let inactiveDeviceCount = 0;
 
-    for (const { siteId, submittedAt } of latestSessionByDevice.values()) {
-        const status = deviceStatusFromLatestSession(submittedAt, now);
-        if (status === null) continue;
-
-        let siteActivity = activityBySite.get(siteId);
+    for (const deviceActivitySummary of summaryByDeviceId.values()) {
+        let siteActivity = activityBySite.get(
+            deviceActivitySummary.latestSiteId,
+        );
         if (!siteActivity) {
             siteActivity = {
-                siteId,
+                siteId: deviceActivitySummary.latestSiteId,
                 activeDeviceCountAtSite: 0,
-                lapsingDeviceCountAtSite: 0,
                 inactiveDeviceCountAtSite: 0,
             };
-            activityBySite.set(siteId, siteActivity);
+            activityBySite.set(
+                deviceActivitySummary.latestSiteId,
+                siteActivity,
+            );
         }
 
-        if (status === 'active') {
+        if (deviceActivitySummary.isActive) {
             activeDeviceCount++;
             siteActivity.activeDeviceCountAtSite++;
-        } else if (status === 'lapsing') {
-            lapsingDeviceCount++;
-            siteActivity.lapsingDeviceCountAtSite++;
         } else {
             inactiveDeviceCount++;
             siteActivity.inactiveDeviceCountAtSite++;
@@ -75,24 +142,8 @@ export function buildDeviceActivity(sessions: Session[]): DeviceActivity {
 
     return {
         activeDeviceCount,
-        lapsingDeviceCount,
         inactiveDeviceCount,
-        totalDeviceCount:
-            activeDeviceCount + lapsingDeviceCount + inactiveDeviceCount,
+        totalDeviceCount: activeDeviceCount + inactiveDeviceCount,
         sites: [...activityBySite.values()],
     };
-}
-
-function deviceStatusFromLatestSession(
-    latestSession: number,
-    now: Date,
-): DeviceStatus | null {
-    const monthsSinceLastSession = differenceInCalendarMonths(
-        now,
-        latestSession,
-    );
-    if (monthsSinceLastSession > INACTIVE_MAX_MONTHS) return null;
-    if (monthsSinceLastSession <= 0) return 'active';
-    if (monthsSinceLastSession <= LAPSING_MAX_MONTHS) return 'lapsing';
-    return 'inactive';
 }

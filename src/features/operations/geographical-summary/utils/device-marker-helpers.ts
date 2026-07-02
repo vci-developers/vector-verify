@@ -9,14 +9,12 @@ import {
 
 export const DEVICE_HEALTH_COLOR = {
     active: 'var(--success)',
-    lapsing: 'var(--warning)',
     inactive: 'var(--count-none)',
 } as const;
 
 export interface DeviceMarker extends GeocodableMarker {
     siteName: string | null;
     activeDeviceCount: number;
-    lapsingDeviceCount: number;
     inactiveDeviceCount: number;
 }
 
@@ -39,7 +37,6 @@ export function buildDeviceMarkers(
         {
             markerSite: Site;
             activeDeviceCount: number;
-            lapsingDeviceCount: number;
             inactiveDeviceCount: number;
         }
     >();
@@ -58,9 +55,6 @@ export function buildDeviceMarkers(
             activeDeviceCount:
                 (deviceData?.activeDeviceCount ?? 0) +
                 siteActivity.activeDeviceCountAtSite,
-            lapsingDeviceCount:
-                (deviceData?.lapsingDeviceCount ?? 0) +
-                siteActivity.lapsingDeviceCountAtSite,
             inactiveDeviceCount:
                 (deviceData?.inactiveDeviceCount ?? 0) +
                 siteActivity.inactiveDeviceCountAtSite,
@@ -73,7 +67,6 @@ export function buildDeviceMarkers(
             siteName: markerName,
             locationQuery: buildSiteLocationQuery(deviceData.markerSite),
             activeDeviceCount: deviceData.activeDeviceCount,
-            lapsingDeviceCount: deviceData.lapsingDeviceCount,
             inactiveDeviceCount: deviceData.inactiveDeviceCount,
         }),
     );
