@@ -10,6 +10,7 @@ export interface SiteDeviceActivity {
     siteId: number;
     activeDeviceCountAtSite: number;
     lapsingDeviceCountAtSite: number;
+    inactiveDeviceCountAtSite: number;
 }
 
 export interface DeviceActivity {
@@ -23,76 +24,63 @@ export interface DeviceActivity {
 export function buildDeviceActivity(sessions: Session[]): DeviceActivity {
     const now = new Date();
 
-    const latestSessionBySiteDevice = new Map<number, Map<number, number>>();
+    const latestSessionByDevice = new Map<
+        number,
+        { siteId: number; submittedAt: number }
+    >();
     for (const session of sessions) {
-        let latestSessionByDevice = latestSessionBySiteDevice.get(
-            session.siteId,
-        );
-        if (!latestSessionByDevice) {
-            latestSessionByDevice = new Map();
-            latestSessionBySiteDevice.set(
-                session.siteId,
-                latestSessionByDevice,
-            );
-        }
-        recordLatestSession(
-            latestSessionByDevice,
-            session.deviceId,
-            session.submittedAt,
-        );
-    }
-
-    const latestSessionByDevice = new Map<number, number>();
-    for (const sessionsByDevice of latestSessionBySiteDevice.values()) {
-        for (const [deviceId, submittedAt] of sessionsByDevice) {
-            recordLatestSession(latestSessionByDevice, deviceId, submittedAt);
+        const latestSession = latestSessionByDevice.get(session.deviceId);
+        if (
+            latestSession === undefined ||
+            session.submittedAt > latestSession.submittedAt
+        ) {
+            latestSessionByDevice.set(session.deviceId, {
+                siteId: session.siteId,
+                submittedAt: session.submittedAt,
+            });
         }
     }
 
-    const deviceStatuses = [...latestSessionByDevice.values()].map(
-        latestSession => deviceStatusFromLatestSession(latestSession, now),
-    );
+    const activityBySite = new Map<number, SiteDeviceActivity>();
+    let activeDeviceCount = 0;
+    let lapsingDeviceCount = 0;
+    let inactiveDeviceCount = 0;
+
+    for (const { siteId, submittedAt } of latestSessionByDevice.values()) {
+        const status = deviceStatusFromLatestSession(submittedAt, now);
+        if (status === null) continue;
+
+        let siteActivity = activityBySite.get(siteId);
+        if (!siteActivity) {
+            siteActivity = {
+                siteId,
+                activeDeviceCountAtSite: 0,
+                lapsingDeviceCountAtSite: 0,
+                inactiveDeviceCountAtSite: 0,
+            };
+            activityBySite.set(siteId, siteActivity);
+        }
+
+        if (status === 'active') {
+            activeDeviceCount++;
+            siteActivity.activeDeviceCountAtSite++;
+        } else if (status === 'lapsing') {
+            lapsingDeviceCount++;
+            siteActivity.lapsingDeviceCountAtSite++;
+        } else {
+            inactiveDeviceCount++;
+            siteActivity.inactiveDeviceCountAtSite++;
+        }
+    }
 
     return {
-        activeDeviceCount: deviceStatuses.filter(status => status === 'active')
-            .length,
-        lapsingDeviceCount: deviceStatuses.filter(
-            status => status === 'lapsing',
-        ).length,
-        inactiveDeviceCount: deviceStatuses.filter(
-            status => status === 'inactive',
-        ).length,
-        totalDeviceCount: deviceStatuses.filter(status => status !== null)
-            .length,
-        sites: [...latestSessionBySiteDevice].map(
-            ([siteId, sessionsByDevice]) => {
-                const deviceStatusesAtSite = [...sessionsByDevice.values()].map(
-                    latestSession =>
-                        deviceStatusFromLatestSession(latestSession, now),
-                );
-                return {
-                    siteId,
-                    activeDeviceCountAtSite: deviceStatusesAtSite.filter(
-                        status => status === 'active',
-                    ).length,
-                    lapsingDeviceCountAtSite: deviceStatusesAtSite.filter(
-                        status => status === 'lapsing',
-                    ).length,
-                };
-            },
-        ),
+        activeDeviceCount,
+        lapsingDeviceCount,
+        inactiveDeviceCount,
+        totalDeviceCount:
+            activeDeviceCount + lapsingDeviceCount + inactiveDeviceCount,
+        sites: [...activityBySite.values()],
     };
-}
-
-function recordLatestSession(
-    latestSessionByDevice: Map<number, number>,
-    deviceId: number,
-    submittedAt: number,
-): void {
-    const latestSession = latestSessionByDevice.get(deviceId);
-    if (latestSession === undefined || submittedAt > latestSession) {
-        latestSessionByDevice.set(deviceId, submittedAt);
-    }
 }
 
 function deviceStatusFromLatestSession(

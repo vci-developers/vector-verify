@@ -226,10 +226,18 @@ Three location-scoped tiers, which reconcile to that universe: **Active**
 location within the last 3 months, not the current month), **Inactive** (in the
 6-month universe but no session in the last 3 months — "used to collect here,
 went quiet"). Shown as headline cards for the selected location; in the map's
-Devices view, markers are keyed by `siteId` and encode size = active device
-count, color = site health (active vs lapsing). Activity is always evaluated
-**as-of-today**, independent of the page's month filter. _Avoid_:
-Online/offline, connected
+Devices view, markers **aggregate leaf Sentinel Sites into one marker per
+parent** (keyed by the parent marker name via `getMarkerName`/`getMarkerSite`,
+exactly like the Specimens view) — answering "how many devices are active in
+this area", not per-household — and encode size = active device count, color =
+site health (active vs lapsing). **Every device is counted exactly once** (dedup
+by `deviceId`): counted at the site of its **latest** session, with its single
+status. The map markers are therefore just those unique devices grouped by site
+— each tier sums back to its headline card and all tiers sum to the total — so a
+device is **never** counted at two sites, even if its sessions span several.
+_Avoid_: per-site classification (double-counts roaming devices — the original
+bug). Activity is always evaluated **as-of-today**, independent of the page's
+month filter. _Avoid_: Online/offline, connected
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
