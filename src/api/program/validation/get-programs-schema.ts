@@ -10,7 +10,6 @@ export const getProgramsResponseSchema = z.object({
 });
 
 export const getProgramsQueryParamsSchema = z.object({
-    programId: z.coerce.number().optional(),
     name: z.string().optional(),
     country: z.string().optional(),
     limit: z.coerce.number().min(1).max(100).optional(),
