@@ -11,8 +11,9 @@ export const StorageKeys = {
         activeTab: 'operations.activeTab',
         startMonth: 'operations.startMonth',
         endMonth: 'operations.endMonth',
-        selectedLocation: 'operations.selectedLocation',
+        selectedLocations: 'operations.selectedLocations',
         selectedMarkerId: 'operations.selectedMarkerId',
         selectedSpecies: 'operations.selectedSpecies',
+        geographicalView: 'operations.geographicalView',
     },
 } as const;

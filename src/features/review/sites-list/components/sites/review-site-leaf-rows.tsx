@@ -2,148 +2,118 @@
 
 import type { Site } from '@/api/site/validation/site-schema';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/utils/cn';
-import { Lock, MapPin } from 'lucide-react';
-import Link from 'next/link';
-import { Fragment } from 'react';
-import { useTranslations } from 'next-intl';
 import {
-    isSiteFullyCertified,
-    isSiteFullyReviewed,
-    isSiteFullySubmittedToDhis2,
+    getSiteOverallReviewState,
     getSiteSessionCount,
+    REVIEW_STATE_SEVERITY_ORDER,
     type ReviewSiteSessionSummary,
-    emptySessionSummary,
 } from '@/features/review/utils/review-site-session-summary';
+import { cn } from '@/utils/cn';
+import { MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
+
+const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+    NEEDS_REVIEW: 'needsReview',
+    IN_REVIEW: 'inReview',
+    CERTIFIED: 'certified',
+    SUBMITTED: 'submitted',
+};
+
+const REVIEW_STATE_BADGE_VARIANT: Record<
+    ReviewState,
+    'destructive' | 'outline' | 'default' | 'secondary'
+> = {
+    NEEDS_REVIEW: 'destructive',
+    IN_REVIEW: 'outline',
+    CERTIFIED: 'default',
+    SUBMITTED: 'secondary',
+};
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
     getDisplayName: (site: Site) => string;
-    sessionCountsBySiteId: Map<number, ReviewSiteSessionSummary>;
-    startDate: string;
-    endDate: string;
-    collectionCycleId?: number;
-}
-
-function buildReviewHref(
-    site: Site,
-    startDate: string,
-    endDate: string,
-    displayName: string,
-    collectionCycleId?: number,
-) {
-    const queryParams = new URLSearchParams({
-        startDate,
-        endDate,
-        displayName,
-    });
-    if (collectionCycleId !== undefined) {
-        queryParams.set('collectionCycleId', String(collectionCycleId));
-    }
-    return `/review/${site.siteId}?${queryParams.toString()}`;
+    summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
+    buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteLeafRows({
     sites,
     getDisplayName,
-    sessionCountsBySiteId,
-    startDate,
-    endDate,
-    collectionCycleId,
+    summaryBySiteId,
+    buildSiteHref,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
-    if (sites.length === 0) return null;
 
     return (
         <div className="space-y-1">
             {sites.map(site => {
-                const summary =
-                    sessionCountsBySiteId.get(site.siteId) ??
-                    emptySessionSummary();
-                const sessionCount = getSiteSessionCount(summary);
-                const isLocked = isSiteFullyReviewed(summary);
+                const displayName = getDisplayName(site);
+                const summary = summaryBySiteId.get(site.siteId);
+                const hasSessions =
+                    summary !== undefined && getSiteSessionCount(summary) > 0;
+                const overallState = summary
+                    ? getSiteOverallReviewState(summary)
+                    : null;
 
-                const hasSessions = sessionCount > 0;
-                const rowClassName = cn(
-                    'flex items-center justify-between rounded-md px-3 py-2',
-                    hasSessions && !isLocked
-                        ? 'cursor-pointer hover:bg-muted/50'
-                        : 'cursor-not-allowed opacity-60',
-                );
-
-                const rowContent = (
-                    <Fragment>
-                        <div className="flex items-center gap-3">
-                            <div
+                const rowHeader = (
+                    <div className="flex items-center gap-3">
+                        <div
+                            className={cn(
+                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                                hasSessions ? 'bg-primary/10' : 'bg-muted',
+                            )}
+                        >
+                            <MapPin
                                 className={cn(
-                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                                    hasSessions ? 'bg-primary/10' : 'bg-muted',
+                                    'h-4 w-4',
+                                    hasSessions
+                                        ? 'text-primary'
+                                        : 'text-muted-foreground',
                                 )}
-                            >
-                                <MapPin
-                                    className={cn(
-                                        'h-4 w-4',
-                                        hasSessions
-                                            ? 'text-primary'
-                                            : 'text-muted-foreground',
-                                    )}
-                                />
-                            </div>
-                            <span className="text-sm">
-                                {getDisplayName(site)}
-                            </span>
+                            />
                         </div>
-                        <div className="flex items-center gap-2">
-                            {summary.NEEDS_REVIEW > 0 && (
-                                <Badge variant="destructive">
-                                    {t('needsReview')}
-                                </Badge>
-                            )}
-                            {isSiteFullySubmittedToDhis2(summary) ? (
-                                <Badge variant="secondary">
-                                    Submitted to DHIS2
-                                </Badge>
-                            ) : isSiteFullyCertified(summary) ? (
-                                <Badge variant="default">Certified</Badge>
-                            ) : (
-                                <Badge
-                                    variant={
-                                        hasSessions ? 'default' : 'outline'
-                                    }
-                                >
-                                    {hasSessions
-                                        ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`
-                                        : 'No sessions'}
-                                </Badge>
-                            )}
-                            {isLocked && (
-                                <Lock className="text-muted-foreground h-4 w-4" />
-                            )}
-                        </div>
-                    </Fragment>
+                        <span className="text-sm">{displayName}</span>
+                    </div>
                 );
 
-                if (hasSessions && !isLocked) {
+                const statusBadge = overallState ? (
+                    <Badge variant={REVIEW_STATE_BADGE_VARIANT[overallState]}>
+                        {t(REVIEW_STATE_LABEL_KEY[overallState])}
+                    </Badge>
+                ) : (
+                    <Badge variant="outline">{t('noSessions')}</Badge>
+                );
+
+                const href = hasSessions
+                    ? buildSiteHref?.(site.siteId)
+                    : undefined;
+
+                if (href !== undefined) {
                     return (
                         <Link
                             key={site.siteId}
-                            href={buildReviewHref(
-                                site,
-                                startDate,
-                                endDate,
-                                getDisplayName(site),
-                                collectionCycleId,
-                            )}
-                            className={rowClassName}
+                            href={href}
+                            className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-md px-3 py-2"
                         >
-                            {rowContent}
+                            {rowHeader}
+                            {statusBadge}
                         </Link>
                     );
                 }
 
                 return (
-                    <div key={site.siteId} className={rowClassName}>
-                        {rowContent}
+                    <div
+                        key={site.siteId}
+                        className={cn(
+                            'flex items-center justify-between gap-3 rounded-md px-3 py-2',
+                            !hasSessions && 'opacity-60',
+                        )}
+                    >
+                        {rowHeader}
+                        {statusBadge}
                     </div>
                 );
             })}
