@@ -69,7 +69,7 @@ export function buildSiteLocationQuery(site: Site): string {
         : buildHierarchicalLocationQuery(site);
 }
 
-function buildParentLocationName(site: Site): string {
+export function buildParentLocationName(site: Site): string {
     if (isLegacySite(site)) {
         return [site.district, site.subCounty, site.parish]
             .filter(Boolean)

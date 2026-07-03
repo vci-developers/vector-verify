@@ -2,6 +2,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { SiteDeviceActivity } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
 import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import {
+    buildParentLocationName,
     buildSiteLocationQuery,
     getMarkerName,
     getMarkerSite,
@@ -14,6 +15,7 @@ export const DEVICE_HEALTH_COLOR = {
 
 export interface DeviceMarker extends GeocodableMarker {
     siteName: string | null;
+    parentLocationName: string;
     activeDeviceCount: number;
     inactiveDeviceCount: number;
 }
@@ -65,6 +67,7 @@ export function buildDeviceMarkers(
         ([markerName, deviceData]) => ({
             id: markerName,
             siteName: markerName,
+            parentLocationName: buildParentLocationName(deviceData.markerSite),
             locationQuery: buildSiteLocationQuery(deviceData.markerSite),
             activeDeviceCount: deviceData.activeDeviceCount,
             inactiveDeviceCount: deviceData.inactiveDeviceCount,

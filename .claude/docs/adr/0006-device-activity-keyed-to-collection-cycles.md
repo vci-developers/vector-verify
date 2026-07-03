@@ -13,8 +13,8 @@ months** and exposed three tiers — Active / Lapsing / Inactive — deliberatel
 The foundation of ADR 0002 is unchanged: activity is still derived from
 `/sessions/` grouped by `deviceId` and scoped by the sessions' `siteId`s — the
 device registry (`GET /devices/`) is still rejected as a source because it has
-no location. Only the time model (months → cycles) and the tiering (three →
-two) are reversed here.
+no location. Only the time model (months → cycles) and the tiering (three → two)
+are reversed here.
 
 **Current cycle** = the Collection Cycle whose window contains today
 (`startDate <= now < endDate`), falling back to the most recent cycle that has
@@ -35,11 +35,11 @@ recomputed on the frontend.
   a Collection Schedule have no cycles at all, so the device map would break for
   every legacy program until adoption is universal.
 - **Cycles with a temporary calendar-month fallback (chosen).** Programs with
-  cycles use the current cycle + 2 previous cycles as the universe; programs with
-  no Collection Schedule fall back to current month + 2 previous months, mirroring
-  `buildReviewSegments` (`collectionCycles.length > 0 ? cycles : months`). The
-  fallback is explicitly temporary and to be removed once all programs have
-  cycles.
+  cycles use the current cycle + 2 previous cycles as the universe; programs
+  with no Collection Schedule fall back to current month + 2 previous months,
+  mirroring `buildReviewSegments`
+  (`collectionCycles.length > 0 ? cycles : months`). The fallback is explicitly
+  temporary and to be removed once all programs have cycles.
 
 ## Consequences
 
@@ -51,20 +51,48 @@ recomputed on the frontend.
   the headline cards, legend, and info-panel row drop the Lapsing line.
 - **Bounded 3-cycle universe.** The universe = unique devices with ≥1 session in
   the current + 2 previous cycles. This keeps "Inactive" meaningful ("recently
-  operated here, silent this cycle" rather than "churned out years ago") and keeps
-  the fetch bounded. It is the only defensible denominator, since the device
-  schema carries no per-site roster of "expected" devices.
-- **No frontend cycle date-math.** Membership is read from `collectionCycleId`, so
-  there is no boundary-day timezone bug from re-deriving which cycle a session
-  falls in. The only instant comparison we perform is selecting the current cycle
-  (`startDate <= now < endDate`), which is epoch-vs-epoch and timezone-independent.
-  A future change that recomputes membership from `collectionDate` + cycle windows
-  would reintroduce that bug and must be avoided.
+  operated here, silent this cycle" rather than "churned out years ago") and
+  keeps the fetch bounded. It is the only defensible denominator, since the
+  device schema carries no per-site roster of "expected" devices.
+- **The session fetch uses a `collectionDate` window; classification is by cycle
+  id in memory.** `useDeviceActivity` requests `/sessions/` with a plain
+  `startDate`/`endDate` window spanning the 3-cycle range
+  (`startDate = earliestRecentCycle.startDate`,
+  `endDate = currentCycle.endDate`, formatted in the cycle's timezone), then
+  classifies each fetched session into the current cycle in memory by
+  `collectionCycleId` id-equality. This mirrors `buildReviewSegments`, which is
+  the established app-wide pattern (fetch wide by `collectionDate`, bucket
+  precise by `collectionCycleId`) — device activity uses no bespoke fetch key.
+  An **assigned-cycle** fetch bound (`cycleStartDate`/`cycleEndDate`, filtering
+  on each session's assigned cycle) was considered and rejected: it would make
+  device activity the only caller of those params, and its one advantage —
+  fetching a session whose `collectionDate` falls outside the window but whose
+  assigned cycle is inside it — does not arise under the **adjacent-only**
+  reassignment rule (a session assigned to the current cycle sits at most one
+  cycle away by `collectionDate`, i.e. inside the 3-cycle window), so the
+  **Active** count is identical either way. The only residual divergence is a
+  device whose _sole_ session in the universe was reassigned across the _outer_
+  edge of the 3-cycle window, which nudges the Inactive denominator by at most
+  one — an acceptable trade for staying on the shared pattern.
+- **No frontend cycle date-math, with one scoped exception.** Current-cycle
+  membership is read from `collectionCycleId` (id-equality), so there is no
+  boundary-day timezone bug from re-deriving which cycle a session falls in —
+  the `collectionDate` window only bounds _which sessions are fetched_, never
+  _which cycle a session belongs to_. The only instant comparison we perform is
+  selecting the current cycle (`startDate <= now < endDate`), which is
+  epoch-vs-epoch and timezone-independent. The **sole exception** is the
+  calendar-month fallback for programs with **no Collection Schedule**: those
+  sessions carry `collectionCycleId: null`, so there is no id to read and
+  membership is computed from `collectionDate` (formatted in **UTC**, matching
+  the backend's date interpretation). This exception is temporary and disappears
+  when the fallback is removed. A future change that recomputes cycle membership
+  from `collectionDate` for programs that _do_ have cycles would reintroduce the
+  boundary bug and must be avoided.
 - **Map and info panel share one marker array; all markers are drawn.** Active
-  markers render green and sized by active-device count; all-inactive areas render
-  as small grey dots (active count 0 → minimum radius). Because both surfaces read
-  the same array, the panel is a complete ledger and both tiers sum back to their
-  headline cards.
-- **Pagination still required (carried forward from ADR 0002).** The 3-cycle fetch
-  must still paginate `/sessions/` (page-limited to 100) or device counts
+  markers render green and sized by active-device count; all-inactive areas
+  render as small grey dots (active count 0 → minimum radius). Because both
+  surfaces read the same array, the panel is a complete ledger and both tiers
+  sum back to their headline cards.
+- **Pagination still required (carried forward from ADR 0002).** The 3-cycle
+  fetch must still paginate `/sessions/` (page-limited to 100) or device counts
   undercount; `getAllSessions` already does this.

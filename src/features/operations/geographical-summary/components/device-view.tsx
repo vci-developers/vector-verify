@@ -49,8 +49,8 @@ export default function DeviceView({
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
                     firstMarker.activeDeviceCount ||
-                secondMarker.lapsingDeviceCount -
-                    firstMarker.lapsingDeviceCount,
+                secondMarker.inactiveDeviceCount -
+                    firstMarker.inactiveDeviceCount,
         );
     }, [deviceActivity, descendantsOfSelectedLocations]);
 
@@ -58,7 +58,6 @@ export default function DeviceView({
         return (
             <div className="space-y-3">
                 <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-13 w-28" />
                     <Skeleton className="h-13 w-28" />
                     <Skeleton className="h-13 w-28" />
                 </div>
@@ -89,7 +88,6 @@ export default function DeviceView({
 
     const tiers = [
         { key: 'active', count: deviceActivity.activeDeviceCount },
-        { key: 'lapsing', count: deviceActivity.lapsingDeviceCount },
         { key: 'inactive', count: deviceActivity.inactiveDeviceCount },
     ] as const;
 
@@ -147,16 +145,6 @@ export default function DeviceView({
                                 }}
                             />
                             {t('legendActive')}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor:
-                                        DEVICE_HEALTH_COLOR.lapsing,
-                                }}
-                            />
-                            {t('legendLapsing')}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span
