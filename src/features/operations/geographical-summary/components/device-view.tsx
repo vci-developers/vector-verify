@@ -43,7 +43,7 @@ export default function DeviceView({
     const mappedDeviceActivity = useMemo(() => {
         if (!deviceActivity) return null;
         const mapped = buildDeviceMarkers(
-            deviceActivity.sites,
+            deviceActivity,
             descendantsOfSelectedLocations,
         );
         return {

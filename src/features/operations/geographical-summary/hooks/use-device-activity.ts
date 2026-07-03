@@ -3,25 +3,19 @@
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import { useMemo } from 'react';
-import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import {
     buildDeviceActivity,
+    buildMonthWindow,
     resolveDeviceActivityWindow,
 } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
 
 const CYCLE_LOOKBACK_MONTHS = 12;
 
 export function useDeviceActivity(programId: number, siteIds: number[]) {
-    const cycleLookbackWindow = useMemo(() => {
-        const currentDate = new Date();
-        return {
-            startDate: format(
-                startOfMonth(subMonths(currentDate, CYCLE_LOOKBACK_MONTHS)),
-                'yyyy-MM-dd',
-            ),
-            endDate: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
-        };
-    }, []);
+    const cycleLookbackWindow = useMemo(
+        () => buildMonthWindow(Date.now(), CYCLE_LOOKBACK_MONTHS),
+        [],
+    );
 
     const {
         data: getCollectionCyclesResult,

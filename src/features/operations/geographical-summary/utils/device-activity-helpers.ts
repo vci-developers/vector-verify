@@ -11,6 +11,13 @@ export interface DeviceActivityWindow {
     currentCycleId: number | null;
 }
 
+function sortByLatestCycle(cycles: CollectionCycle[]): CollectionCycle[] {
+    return [...cycles].sort(
+        (firstCycle, secondCycle) =>
+            secondCycle.startDate - firstCycle.startDate,
+    );
+}
+
 function resolveCurrentCycle(
     collectionCycles: CollectionCycle[],
     currentDate: number,
@@ -20,12 +27,9 @@ function resolveCurrentCycle(
             cycle =>
                 cycle.startDate <= currentDate && currentDate < cycle.endDate,
         ) ??
-        collectionCycles
-            .filter(cycle => cycle.startDate <= currentDate)
-            .sort(
-                (firstCycle, secondCycle) =>
-                    secondCycle.startDate - firstCycle.startDate,
-            )[0] ??
+        sortByLatestCycle(
+            collectionCycles.filter(cycle => cycle.startDate <= currentDate),
+        )[0] ??
         null
     );
 }
@@ -37,13 +41,11 @@ export function resolveDeviceActivityWindow(
     const currentCycle = resolveCurrentCycle(collectionCycles, currentDate);
     if (currentCycle === null) return resolveMonthWindow(currentDate);
 
-    const recentCycles = collectionCycles
-        .filter(cycle => cycle.startDate <= currentCycle.startDate)
-        .sort(
-            (firstCycle, secondCycle) =>
-                secondCycle.startDate - firstCycle.startDate,
-        )
-        .slice(0, RECENT_PERIOD_COUNT);
+    const recentCycles = sortByLatestCycle(
+        collectionCycles.filter(
+            cycle => cycle.startDate <= currentCycle.startDate,
+        ),
+    ).slice(0, RECENT_PERIOD_COUNT);
     const earliestRecentCycle =
         recentCycles[recentCycles.length - 1] ?? currentCycle;
 
@@ -62,13 +64,19 @@ export function resolveDeviceActivityWindow(
     };
 }
 
-function resolveMonthWindow(currentDate: number): DeviceActivityWindow {
+export function buildMonthWindow(currentDate: number, monthsBack: number) {
     return {
         startDate: format(
-            startOfMonth(subMonths(currentDate, RECENT_PERIOD_COUNT - 1)),
+            startOfMonth(subMonths(currentDate, monthsBack)),
             'yyyy-MM-dd',
         ),
         endDate: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
+    };
+}
+
+function resolveMonthWindow(currentDate: number): DeviceActivityWindow {
+    return {
+        ...buildMonthWindow(currentDate, RECENT_PERIOD_COUNT - 1),
         currentCycleId: null,
     };
 }
@@ -79,18 +87,11 @@ export interface SiteDeviceActivity {
     inactiveDeviceCountAtSite: number;
 }
 
-export interface DeviceActivity {
-    activeDeviceCount: number;
-    inactiveDeviceCount: number;
-    totalDeviceCount: number;
-    sites: SiteDeviceActivity[];
-}
-
 export function buildDeviceActivity(
     sessions: Session[],
     currentCycleId: number | null,
     currentDate: number,
-): DeviceActivity {
+): SiteDeviceActivity[] {
     const currentMonthKey = formatDateInTimezone(currentDate, 'UTC', 'yyyy-MM');
     const isSessionInCurrentCycle = (session: Session): boolean =>
         currentCycleId !== null
@@ -126,8 +127,6 @@ export function buildDeviceActivity(
     }
 
     const activityBySite = new Map<number, SiteDeviceActivity>();
-    let activeDeviceCount = 0;
-    let inactiveDeviceCount = 0;
 
     for (const deviceActivitySummary of summaryByDeviceId.values()) {
         let siteActivity = activityBySite.get(
@@ -146,18 +145,11 @@ export function buildDeviceActivity(
         }
 
         if (deviceActivitySummary.isActive) {
-            activeDeviceCount++;
             siteActivity.activeDeviceCountAtSite++;
         } else {
-            inactiveDeviceCount++;
             siteActivity.inactiveDeviceCountAtSite++;
         }
     }
 
-    return {
-        activeDeviceCount,
-        inactiveDeviceCount,
-        totalDeviceCount: activeDeviceCount + inactiveDeviceCount,
-        sites: [...activityBySite.values()],
-    };
+    return [...activityBySite.values()];
 }
