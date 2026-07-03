@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
 import GeocodedClusterMap from '@/features/operations/geographical-summary/components/geocoded-cluster-map';
-import MarkerInfoPanel from '@/features/operations/geographical-summary/components/marker-info-panel';
+import SpecimenInfoPanel from '@/features/operations/geographical-summary/components/specimen-info-panel';
 
 interface SiteMapProps {
     markers: SiteMarker[];
@@ -42,7 +42,7 @@ export default function SiteMap({
             }}
             loadingLabel="Locating sites…"
             renderSidePanel={isLoading => (
-                <MarkerInfoPanel
+                <SpecimenInfoPanel
                     markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}

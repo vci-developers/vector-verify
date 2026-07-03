@@ -20,10 +20,17 @@ export interface DeviceMarker extends GeocodableMarker {
     inactiveDeviceCount: number;
 }
 
+export interface MappedDeviceActivity {
+    markers: DeviceMarker[];
+    activeDeviceCount: number;
+    inactiveDeviceCount: number;
+    totalDeviceCount: number;
+}
+
 export function buildDeviceMarkers(
     sites: SiteDeviceActivity[],
     descendantsOfSelectedLocation: Site[],
-): DeviceMarker[] {
+): MappedDeviceActivity {
     const sitesById = new Map(
         descendantsOfSelectedLocation.map(site => [site.siteId, site]),
     );
@@ -63,7 +70,7 @@ export function buildDeviceMarkers(
         });
     }
 
-    return Array.from(markerNameToDeviceData.entries()).map(
+    const markers = Array.from(markerNameToDeviceData.entries()).map(
         ([markerName, deviceData]) => ({
             id: markerName,
             siteName: markerName,
@@ -73,4 +80,18 @@ export function buildDeviceMarkers(
             inactiveDeviceCount: deviceData.inactiveDeviceCount,
         }),
     );
+
+    let activeDeviceCount = 0;
+    let inactiveDeviceCount = 0;
+    for (const marker of markers) {
+        activeDeviceCount += marker.activeDeviceCount;
+        inactiveDeviceCount += marker.inactiveDeviceCount;
+    }
+
+    return {
+        markers,
+        activeDeviceCount,
+        inactiveDeviceCount,
+        totalDeviceCount: activeDeviceCount + inactiveDeviceCount,
+    };
 }

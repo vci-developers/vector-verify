@@ -8,8 +8,6 @@ import {
     buildDeviceActivity,
     resolveDeviceActivityWindow,
 } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
-import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import type { Session } from '@/api/session/validation/session-schema';
 
 const CYCLE_LOOKBACK_MONTHS = 12;
 
@@ -51,30 +49,16 @@ export function useDeviceActivity(programId: number, siteIds: number[]) {
             { enabled: deviceActivityWindow !== null },
         );
 
-    const isSessionInCurrentCycle = useMemo(() => {
-        if (deviceActivityWindow === null) return () => false;
-        const { currentCycleId } = deviceActivityWindow;
-        if (currentCycleId !== null) {
-            return (session: Session) =>
-                session.collectionCycleId === currentCycleId;
-        }
-        const currentMonthKey = formatDateInTimezone(
-            Date.now(),
-            'UTC',
-            'yyyy-MM',
-        );
-        return (session: Session) =>
-            formatDateInTimezone(session.collectionDate, 'UTC', 'yyyy-MM') ===
-            currentMonthKey;
-    }, [deviceActivityWindow]);
-
     const deviceActivity = useMemo(() => {
-        if (!getAllSessionsResult?.ok) return null;
+        if (!getAllSessionsResult?.ok || deviceActivityWindow === null) {
+            return null;
+        }
         return buildDeviceActivity(
             getAllSessionsResult.data.sessions,
-            isSessionInCurrentCycle,
+            deviceActivityWindow.currentCycleId,
+            Date.now(),
         );
-    }, [getAllSessionsResult, isSessionInCurrentCycle]);
+    }, [getAllSessionsResult, deviceActivityWindow]);
 
     const isError =
         (!isGetCollectionCyclesPending && !getCollectionCyclesResult?.ok) ||

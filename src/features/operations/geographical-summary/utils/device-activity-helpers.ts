@@ -11,7 +11,7 @@ export interface DeviceActivityWindow {
     currentCycleId: number | null;
 }
 
-export function resolveCurrentCycle(
+function resolveCurrentCycle(
     collectionCycles: CollectionCycle[],
     currentDate: number,
 ): CollectionCycle | null {
@@ -88,8 +88,16 @@ export interface DeviceActivity {
 
 export function buildDeviceActivity(
     sessions: Session[],
-    isSessionInCurrentCycle: (session: Session) => boolean,
+    currentCycleId: number | null,
+    currentDate: number,
 ): DeviceActivity {
+    const currentMonthKey = formatDateInTimezone(currentDate, 'UTC', 'yyyy-MM');
+    const isSessionInCurrentCycle = (session: Session): boolean =>
+        currentCycleId !== null
+            ? session.collectionCycleId === currentCycleId
+            : formatDateInTimezone(session.collectionDate, 'UTC', 'yyyy-MM') ===
+              currentMonthKey;
+
     const summaryByDeviceId = new Map<
         number,
         {

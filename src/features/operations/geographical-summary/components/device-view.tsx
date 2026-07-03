@@ -40,18 +40,22 @@ export default function DeviceView({
         setSelectedMarkerId(null);
     }, [siteIds]);
 
-    const deviceMarkers = useMemo(() => {
-        if (!deviceActivity) return [];
-        return buildDeviceMarkers(
+    const mappedDeviceActivity = useMemo(() => {
+        if (!deviceActivity) return null;
+        const mapped = buildDeviceMarkers(
             deviceActivity.sites,
             descendantsOfSelectedLocations,
-        ).sort(
-            (firstMarker, secondMarker) =>
-                secondMarker.activeDeviceCount -
-                    firstMarker.activeDeviceCount ||
-                secondMarker.inactiveDeviceCount -
-                    firstMarker.inactiveDeviceCount,
         );
+        return {
+            ...mapped,
+            markers: [...mapped.markers].sort(
+                (firstMarker, secondMarker) =>
+                    secondMarker.activeDeviceCount -
+                        firstMarker.activeDeviceCount ||
+                    secondMarker.inactiveDeviceCount -
+                        firstMarker.inactiveDeviceCount,
+            ),
+        };
     }, [deviceActivity, descendantsOfSelectedLocations]);
 
     if (isPending) {
@@ -76,7 +80,7 @@ export default function DeviceView({
         );
     }
 
-    if (!deviceActivity || deviceActivity.totalDeviceCount === 0) {
+    if (!mappedDeviceActivity || mappedDeviceActivity.totalDeviceCount === 0) {
         return (
             <Card className="border-border/50 p-0">
                 <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
@@ -87,8 +91,8 @@ export default function DeviceView({
     }
 
     const tiers = [
-        { key: 'active', count: deviceActivity.activeDeviceCount },
-        { key: 'inactive', count: deviceActivity.inactiveDeviceCount },
+        { key: 'active', count: mappedDeviceActivity.activeDeviceCount },
+        { key: 'inactive', count: mappedDeviceActivity.inactiveDeviceCount },
     ] as const;
 
     return (
@@ -111,7 +115,7 @@ export default function DeviceView({
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
-                        markers={deviceMarkers}
+                        markers={mappedDeviceActivity.markers}
                         selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}

@@ -48,6 +48,7 @@
         "active": "Active",
         "inactive": "Inactive",
         "unknownSite": "Unknown site",
+        "unknownLocation": "Unknown location",
         "sitesCount": "{count, plural, one {# site} other {# sites}}",
         "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
         "siteInactiveCount": "{count, plural, one {# inactive device} other {# inactive devices}}",
