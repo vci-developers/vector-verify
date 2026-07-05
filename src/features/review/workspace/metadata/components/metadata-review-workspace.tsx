@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { useQueryClient } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react';
+import { Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -231,9 +231,6 @@ export default function MetadataReviewWorkspace({
         questionsById,
     );
 
-    const hasConflicts = sections.some(section =>
-        section.rows.some(row => row.hasConflict),
-    );
     const areAllConflictsResolved = sections.every(section =>
         section.rows.every(
             row =>
@@ -243,6 +240,18 @@ export default function MetadataReviewWorkspace({
         ),
     );
 
+    const unresolvedConflictCount = sections.reduce(
+        (count, section) =>
+            count +
+            section.rows.filter(
+                row =>
+                    row.hasConflict &&
+                    !resolutionsByMetadataRowId.has(row.id) &&
+                    !disabledRowIds.has(row.id),
+            ).length,
+        0,
+    );
+
     async function resolveConflictsAndContinue() {
         const resolvableSessionIds = resolvableSessions.map(
             session => session.sessionId,
@@ -250,6 +259,11 @@ export default function MetadataReviewWorkspace({
         const sectionsToResolve = sections.filter(section =>
             section.rows.some(row => resolutionsByMetadataRowId.has(row.id)),
         );
+
+        if (sectionsToResolve.length === 0) {
+            onGoToNextStep();
+            return;
+        }
 
         setIsResolving(true);
         const outcomes = await Promise.allSettled(
@@ -308,12 +322,22 @@ export default function MetadataReviewWorkspace({
         onGoToNextStep();
     }
 
-    const showResolveAction = !readOnly && hasConflicts;
-
     return (
         <div className="space-y-4">
             {!readOnly && (
-                <p className="text-muted-foreground text-sm">{t('intro')}</p>
+                <div className="text-muted-foreground space-y-2 text-sm">
+                    <p>{t('intro')}</p>
+                    <div className="flex flex-wrap gap-x-6 gap-y-1">
+                        <span className="flex items-center gap-1.5">
+                            <TriangleAlert className="text-destructive h-3.5 w-3.5 shrink-0" />
+                            {t('legendConflict')}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                            <Pencil className="h-3.5 w-3.5 shrink-0" />
+                            {t('legendEdit')}
+                        </span>
+                    </div>
+                </div>
             )}
 
             {sessionsMissingSurveillanceForm.length > 0 && (
@@ -344,13 +368,21 @@ export default function MetadataReviewWorkspace({
                 readOnly={readOnly}
             />
 
-            <div className="flex justify-end">
-                {showResolveAction ? (
+            <div className="flex items-center justify-end gap-3">
+                {!readOnly && unresolvedConflictCount > 0 && (
+                    <p className="text-destructive flex items-center gap-1.5 text-sm">
+                        <TriangleAlert className="h-4 w-4 shrink-0" />
+                        {t('conflictsRemaining', {
+                            count: unresolvedConflictCount,
+                        })}
+                    </p>
+                )}
+                {!readOnly ? (
                     <Button
                         onClick={() => void resolveConflictsAndContinue()}
                         disabled={!areAllConflictsResolved || isResolving}
                     >
-                        {isResolving ? t('resolving') : t('resolveAndContinue')}
+                        {isResolving ? t('saving') : t('saveAndContinue')}
                     </Button>
                 ) : (
                     <Button onClick={onGoToNextStep}>

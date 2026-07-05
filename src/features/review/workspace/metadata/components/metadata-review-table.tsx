@@ -11,15 +11,16 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import { CircleCheck, TriangleAlert } from 'lucide-react';
+import { CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import {
     formatDisplayValue,
     NOT_APPLICABLE,
     type MetadataSection,
 } from '../utils/metadata-section';
 import ConflictResolutionControl from './conflict-resolution-control';
+import { Button } from '@/components/ui/button';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
@@ -45,13 +46,14 @@ export default function MetadataReviewTable({
 }: MetadataReviewTableProps) {
     const t = useTranslations('ReviewMetadata');
 
-    const showResolutionColumn =
-        !readOnly &&
-        sections.some(section => section.rows.some(row => row.hasConflict));
+    const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
 
     const showSectionHeaders = sections.length > 1;
-    const sectionHeaderColSpan =
-        1 + sessions.length + (showResolutionColumn ? 1 : 0);
+    const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
+
+    function startEditingRow(rowId: string) {
+        setEditingRowIds(previousRowIds => new Set(previousRowIds).add(rowId));
+    }
 
     return (
         <div className="overflow-x-auto">
@@ -71,9 +73,9 @@ export default function MetadataReviewTable({
                                 )}
                             </TableHead>
                         ))}
-                        {showResolutionColumn && (
+                        {!readOnly && (
                             <TableHead className="border-border bg-background sticky right-0 z-20 border font-semibold">
-                                {t('resolution')}
+                                {t('valueColumn')}
                             </TableHead>
                         )}
                     </TableRow>
@@ -110,6 +112,16 @@ export default function MetadataReviewTable({
                                     ),
                                 ];
                                 const isUnitRow = section.title !== null;
+
+                                const controlValue =
+                                    chosenResolution ??
+                                    (row.hasConflict
+                                        ? undefined
+                                        : resolutionOptions[0]);
+                                const showControl =
+                                    row.hasConflict ||
+                                    editingRowIds.has(row.id) ||
+                                    resolutionsByMetadataRowId.has(row.id);
 
                                 return (
                                     <TableRow
@@ -177,9 +189,13 @@ export default function MetadataReviewTable({
                                                 </TableCell>
                                             );
                                         })}
-                                        {showResolutionColumn && (
+                                        {!readOnly && (
                                             <TableCell className="border-border bg-background sticky right-0 z-20 border">
-                                                {row.hasConflict && (
+                                                {isRowDisabled ? (
+                                                    <span className="text-muted-foreground pl-3 text-sm">
+                                                        {NOT_APPLICABLE}
+                                                    </span>
+                                                ) : showControl ? (
                                                     <ConflictResolutionControl
                                                         fieldType={
                                                             row.fieldType
@@ -187,15 +203,34 @@ export default function MetadataReviewTable({
                                                         options={
                                                             resolutionOptions
                                                         }
-                                                        value={chosenResolution}
+                                                        value={controlValue}
                                                         onValueChange={value =>
                                                             onConflictResolutionChange(
                                                                 row.id,
                                                                 value,
                                                             )
                                                         }
-                                                        disabled={isRowDisabled}
+                                                        disabled={false}
                                                     />
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        onClick={() =>
+                                                            startEditingRow(
+                                                                row.id,
+                                                            )
+                                                        }
+                                                        aria-label={t(
+                                                            'editValueLabel',
+                                                        )}
+                                                        className="h-auto w-72 justify-between px-3 py-1.5 font-normal"
+                                                    >
+                                                        <span className="truncate">
+                                                            {controlValue ??
+                                                                NOT_APPLICABLE}
+                                                        </span>
+                                                        <Pencil className="text-muted-foreground ml-2 h-3.5 w-3.5 shrink-0" />
+                                                    </Button>
                                                 )}
                                             </TableCell>
                                         )}

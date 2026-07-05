@@ -10,7 +10,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslations } from 'next-intl';
-import { NOT_APPLICABLE } from '../utils/metadata-section';
+import {
+    BOOLEAN_FALSE_DISPLAY,
+    BOOLEAN_TRUE_DISPLAY,
+    NOT_APPLICABLE,
+} from '../utils/metadata-section';
 
 interface ConflictResolutionControlProps {
     fieldType: FormQuestionType;
@@ -35,17 +39,24 @@ export default function ConflictResolutionControl({
     }
 
     if (fieldType === 'boolean') {
+        const booleanOptions = [
+            ...new Set([
+                BOOLEAN_TRUE_DISPLAY,
+                BOOLEAN_FALSE_DISPLAY,
+                ...options,
+            ]),
+        ];
         return (
             <Select
                 value={value}
                 onValueChange={onValueChange}
                 disabled={disabled}
             >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-72">
                     <SelectValue placeholder={t('selectValuePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                    {options.map(option => (
+                    {booleanOptions.map(option => (
                         <SelectItem key={option} value={option}>
                             {option}
                         </SelectItem>
@@ -56,7 +67,7 @@ export default function ConflictResolutionControl({
     }
 
     return (
-        <ComboBox
+                <ComboBox
             options={options}
             value={value}
             onValueChange={onValueChange}
@@ -67,6 +78,7 @@ export default function ConflictResolutionControl({
                     : undefined
             }
             disabled={disabled}
+            className="w-72"
         />
     );
 }
