@@ -126,7 +126,7 @@ export default function ImageReviewWorkspace({
               count: totalSpecimensUploaded,
               total: expectedSpecimensCount,
           })
-        : t('numSpecimensUploaded', { count: totalSpecimensUploaded });
+        : '';
 
     if (specimens.length === 0) {
         return (
