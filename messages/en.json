@@ -133,6 +133,8 @@
         "sessionSectionTitle": "Session"
     },
     "ReviewImage": {
+        "numSpecimensUploadedOfExpected": "{count} Uploaded of {total, plural, one {# Expected Specimen} other {# Expected Specimens}}",
+        "numSpecimensUploaded": "{count, plural, one {# Specimen Uploaded} other {# Specimens Uploaded}}",
         "specimenCounter": "Specimen {current} of {total}",
         "previousSpecimen": "Previous Specimen",
         "nextSpecimen": "Next Specimen",

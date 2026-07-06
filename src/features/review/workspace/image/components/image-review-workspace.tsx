@@ -112,7 +112,7 @@ export default function ImageReviewWorkspace({
         0,
     );
     const isMissingExpectedCounts = allSessionsForSite.some(
-        session => session.expectedSpecimens == null,
+        session => session.expectedSpecimens === undefined,
     );
     const hasReliableExpectedCount =
         !isMissingExpectedCounts &&
@@ -122,8 +122,11 @@ export default function ImageReviewWorkspace({
         hasReliableExpectedCount &&
         totalSpecimensUploaded < expectedSpecimensCount;
     const specimensUploadedLabel = hasReliableExpectedCount
-        ? `${totalSpecimensUploaded} of ${expectedSpecimensCount} Specimens Uploaded`
-        : `${totalSpecimensUploaded} Specimens Uploaded`;
+        ? t('numSpecimensUploadedOfExpected', {
+              count: totalSpecimensUploaded,
+              total: expectedSpecimensCount,
+          })
+        : t('numSpecimensUploaded', { count: totalSpecimensUploaded });
 
     if (specimens.length === 0) {
         return (
@@ -153,19 +156,22 @@ export default function ImageReviewWorkspace({
 
     return (
         <div className="space-y-4">
-            <div
-                className={cn(
-                    'flex items-center gap-1',
-                    isMissingExpectedSpecimens && 'text-destructive',
-                )}
-            >
-                {isMissingExpectedSpecimens && (
-                    <AlertCircle className="h-3.5 w-3.5" />
-                )}
-                <p className="text-sm font-semibold">
-                    {specimensUploadedLabel}
-                </p>
-            </div>
+            {hasReliableExpectedCount && (
+                <div
+                    className={cn(
+                        'flex items-center gap-1',
+                        isMissingExpectedSpecimens && 'text-destructive',
+                    )}
+                >
+                    {isMissingExpectedSpecimens && (
+                        <AlertCircle className="h-3.5 w-3.5" />
+                    )}
+                    <p className="text-sm font-semibold">
+                        {specimensUploadedLabel}
+                    </p>
+                </div>
+            )}
+
             <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">
                     {t('specimenCounter', {
