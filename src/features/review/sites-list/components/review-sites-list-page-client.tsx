@@ -2,20 +2,20 @@
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
+import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { format, startOfMonth, subMonths, endOfMonth } from 'date-fns';
-import { ClipboardList } from 'lucide-react';
-import { Fragment, useState, useEffect } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
-import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
-import ReviewDhis2Dashboard from '@/features/review/dhis2-sync/components/review-dhis2-dashboard';
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
+import { ClipboardList } from 'lucide-react';
+import { useState } from 'react';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
-import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
+import { StorageKeys } from '@/lib/storage-keys';
+import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
+import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
+import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
 
 const REVIEW_TABS = [
     { value: 'sites-list', label: 'SITES LIST' },
@@ -48,14 +48,15 @@ export default function ReviewSitesListPageClient() {
         ? getUserPermissionsResult.data.programId
         : undefined;
 
-    const { data: getProgramsResult } = useGetPrograms(
-        { programId },
-        { enabled: programId !== undefined },
-    );
+    const { data: getUgandaProgramsResult } = useGetPrograms({
+        country: 'Uganda',
+    });
 
     const isUgandaProgram =
-        getProgramsResult?.ok === true &&
-        getProgramsResult.data.programs[0]?.country === 'Uganda';
+        getUgandaProgramsResult?.ok === true &&
+        getUgandaProgramsResult.data.programs.some(
+            program => program.programId === programId,
+        );
 
     const visibleTabs = REVIEW_TABS.filter(
         tab => tab.value !== 'submissions' || isUgandaProgram,
@@ -77,14 +78,7 @@ export default function ReviewSitesListPageClient() {
         StorageKeys.review.selectedLocation,
     );
 
-    const [expandedSitePaths, setExpandedSitePaths] = useLocalStorage<
-        Set<string>
-    >(StorageKeys.review.expandedSitePaths, new Set());
-    const [collapsedSegments, setCollapsedSegments] = useLocalStorage<
-        Set<string>
-    >(StorageKeys.review.collapsedSegments, new Set());
-
-    const startDate = format(startMonth, 'yyyy-MM-dd');
+    const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
     const {
@@ -99,20 +93,6 @@ export default function ReviewSitesListPageClient() {
     const collectionCycles = getCollectionCyclesResult?.ok
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
-
-    const isCycleMode = collectionCycles.length > 0;
-
-    useEffect(() => {
-        setExpandedSitePaths(new Set());
-        setCollapsedSegments(new Set());
-    }, [
-        locationQueryParam,
-        startMonth,
-        endMonth,
-        isCycleMode,
-        setExpandedSitePaths,
-        setCollapsedSegments,
-    ]);
 
     function resetCycleFilter() {
         setSelectedCycleIds([]);
@@ -170,14 +150,14 @@ export default function ReviewSitesListPageClient() {
                     <ReviewSitesListHeader
                         tabs={visibleTabs}
                         activeTab={activeTab}
-                        onTabChange={tab => setActiveTab(tab)}
+                        onTabChange={setActiveTab}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocation={selectedLocation}
                         onLocationChange={handleLocationChange}
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
-                        onCycleIdsChange={setSelectedCycleIds}
+                        onSelectedCycleIdsChange={setSelectedCycleIds}
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0
@@ -201,44 +181,28 @@ export default function ReviewSitesListPageClient() {
                                 </p>
                             </div>
                         </div>
+                    ) : activeTab === 'sites-list' ? (
+                        isGetCollectionCyclesPending ? (
+                            <SkeletonList count={5} height="xl" width="full" />
+                        ) : (
+                            <ReviewSitesList
+                                sites={descendantsOfSelectedLocation}
+                                locationQueryParam={locationQueryParam}
+                                startMonth={startMonth}
+                                endMonth={endMonth}
+                                collectionCycles={collectionCycles}
+                                selectedCycleIds={selectedCycleIds}
+                            />
+                        )
                     ) : (
-                        <Fragment>
-                            {activeTab === 'sites-list' &&
-                                (isGetCollectionCyclesPending ? (
-                                    <SkeletonList
-                                        count={5}
-                                        height="xl"
-                                        width="full"
-                                    />
-                                ) : (
-                                    <ReviewSitesList
-                                        sites={descendantsOfSelectedLocation}
-                                        locationQueryParam={locationQueryParam}
-                                        startMonth={startMonth}
-                                        endMonth={endMonth}
-                                        collectionCycles={collectionCycles}
-                                        selectedCycleIds={selectedCycleIds}
-                                        expandedSitePaths={expandedSitePaths}
-                                        setExpandedSitePaths={
-                                            setExpandedSitePaths
-                                        }
-                                        collapsedSegments={collapsedSegments}
-                                        setCollapsedSegments={
-                                            setCollapsedSegments
-                                        }
-                                    />
-                                ))}
-                            {activeTab === 'submissions' && (
-                                <ReviewDhis2Dashboard
-                                    sites={descendantsOfSelectedLocation}
-                                    locationQueryParam={locationQueryParam}
-                                    startMonth={startMonth}
-                                    endMonth={endMonth}
-                                    collectionCycles={collectionCycles}
-                                    selectedCycleIds={selectedCycleIds}
-                                />
-                            )}
-                        </Fragment>
+                        <ReviewDhis2Dashboard
+                            sites={descendantsOfSelectedLocation}
+                            locationQueryParam={locationQueryParam}
+                            startMonth={startMonth}
+                            endMonth={endMonth}
+                            collectionCycles={collectionCycles}
+                            selectedCycleIds={selectedCycleIds}
+                        />
                     )}
                 </CardContent>
             </Card>

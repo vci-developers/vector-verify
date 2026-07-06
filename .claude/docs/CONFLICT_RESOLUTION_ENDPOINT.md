@@ -9,7 +9,12 @@ session units, not both.
 ## Session Conflicts
 
 Use `sessionIds` when resolving conflicts between sessions. All sessions must
-exist, belong to the same site, and be in the same month and year.
+exist and belong to the same site and the same Collection Cycle. For sessions
+with no Collection Cycle (`collectionCycleId` null), the backend falls back to
+requiring the same calendar month and year. This pairing — `(site, cycle)`, or
+`(site, month)` when cycle-less — is the **Review Unit** (see
+`.claude/CONTEXT.md`); a single resolve call must never span more than one
+Review Unit.
 
 Session mode can update:
 
@@ -41,7 +46,8 @@ Dynamic form questions in this mode must have `answerScope: "SESSION"`.
 
 Use `sessionUnitIds` when resolving conflicts between repeated collection units
 within sessions. All units must exist, and their parent sessions must belong to
-the same site and month/year.
+the same Review Unit — the same site and Collection Cycle (or same site and
+month/year when the sessions have no cycle).
 
 Unit mode only updates dynamic form answers. `resolvedData` and
 `resolvedSurveillanceForm` are rejected in this mode.
