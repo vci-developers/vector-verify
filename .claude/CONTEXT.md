@@ -268,9 +268,8 @@ they have none. The selector picks one program (`programId`) **or** all programs
 combined (`globalOnly=true`). The reviewer's goal is to check whether each
 program has as many active users as expected and to watch user trends over time.
 Certification and submission series are deferred to a fast-follow, not v1.
-_Avoid_: Active Users
-(collides with `isActive`/Whitelisted), Device Activity (different population),
-User Activity (ambiguous with Device Activity)
+_Avoid_: Active Users (collides with `isActive`/Whitelisted), Device Activity
+(different population), User Activity (ambiguous with Device Activity)
 
 **Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
 `GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
