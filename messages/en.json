@@ -133,7 +133,8 @@
         "sessionSectionTitle": "Session"
     },
     "ReviewImage": {
-        "numSpecimensUploadedOfExpected": "{count} Uploaded of {total, plural, one {# Expected Specimen} other {# Expected Specimens}}",
+        "missingSpecimensBadge": "Missing Specimens",
+        "specimensNotUploaded": "{count, plural, one {# specimen was} other {# specimens were}} not uploaded. Please contact the corresponding field user to the {site} site.",
         "specimenCounter": "Specimen {current} of {total}",
         "previousSpecimen": "Previous Specimen",
         "nextSpecimen": "Next Specimen",

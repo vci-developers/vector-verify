@@ -11,12 +11,18 @@ import { AlertCircle, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import ImageReviewDetails from './image-review-details';
-import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { cn } from '@/utils/cn';
-import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
+import type { Session } from '@/api/session/validation/session-schema';
+import { Badge } from '@/components/ui/badge';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ImageReviewWorkspaceProps {
     siteId: number;
+    siteName: string;
+    sessions: Session[];
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
@@ -27,6 +33,8 @@ interface ImageReviewWorkspaceProps {
 
 export default function ImageReviewWorkspace({
     siteId,
+    siteName,
+    sessions,
     startDate,
     endDate,
     collectionCycleId,
@@ -60,29 +68,7 @@ export default function ImageReviewWorkspace({
     const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
         useGetAllSpecimens(specimenQueryParams);
 
-    const sessionsQueryParams: GetAllSessionsQueryParams =
-        collectionCycleId !== undefined
-            ? {
-                  siteIds: [siteId],
-                  collectionCycleId,
-                  type: 'SURVEILLANCE',
-              }
-            : {
-                  siteIds: [siteId],
-                  startDate,
-                  endDate,
-                  type: 'SURVEILLANCE',
-              };
-
-    const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions(sessionsQueryParams);
-
-    if (
-        isGetAllSpecimensPending ||
-        !getAllSpecimensResult ||
-        isGetAllSessionsPending ||
-        !getAllSessionsResult
-    ) {
+    if (isGetAllSpecimensPending || !getAllSpecimensResult) {
         return <SkeletonList count={1} height="xl" width="full" />;
     }
 
@@ -94,24 +80,15 @@ export default function ImageReviewWorkspace({
         );
     }
 
-    if (!getAllSessionsResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
-        );
-    }
-
     const specimens = getAllSpecimensResult.data.specimens;
     const allSpecimensForSite = getAllSpecimensResult.data.specimens;
 
-    const allSessionsForSite = getAllSessionsResult.data.sessions;
     const totalSpecimensUploaded = allSpecimensForSite.length;
-    const expectedSpecimensCount = allSessionsForSite.reduce(
+    const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
     );
-    const isMissingExpectedCounts = allSessionsForSite.some(
+    const isMissingExpectedCounts = sessions.some(
         session => session.expectedSpecimens === undefined,
     );
     const hasReliableExpectedCount =
@@ -121,12 +98,6 @@ export default function ImageReviewWorkspace({
     const isMissingExpectedSpecimens =
         hasReliableExpectedCount &&
         totalSpecimensUploaded < expectedSpecimensCount;
-    const specimensUploadedLabel = hasReliableExpectedCount
-        ? t('numSpecimensUploadedOfExpected', {
-              count: totalSpecimensUploaded,
-              total: expectedSpecimensCount,
-          })
-        : '';
 
     if (specimens.length === 0) {
         return (
@@ -156,29 +127,33 @@ export default function ImageReviewWorkspace({
 
     return (
         <div className="space-y-4">
-            {hasReliableExpectedCount && (
-                <div
-                    className={cn(
-                        'flex items-center gap-1',
-                        isMissingExpectedSpecimens && 'text-destructive',
-                    )}
-                >
-                    {isMissingExpectedSpecimens && (
-                        <AlertCircle className="h-3.5 w-3.5" />
-                    )}
-                    <p className="text-sm font-semibold">
-                        {specimensUploadedLabel}
-                    </p>
-                </div>
-            )}
-
             <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">
-                    {t('specimenCounter', {
-                        current: specimenIndex + 1,
-                        total: totalSpecimens,
-                    })}
-                </p>
+                <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold">
+                        {t('specimenCounter', {
+                            current: specimenIndex + 1,
+                            total: totalSpecimens,
+                        })}
+                    </p>
+                    {isMissingExpectedSpecimens ? (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Badge variant="destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {t('missingSpecimensBadge')}
+                                </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {t('specimensNotUploaded', {
+                                    count:
+                                        expectedSpecimensCount -
+                                        totalSpecimensUploaded,
+                                    site: siteName,
+                                })}
+                            </TooltipContent>
+                        </Tooltip>
+                    ) : null}
+                </div>
                 <div className="flex gap-2">
                     <Button
                         type="button"
