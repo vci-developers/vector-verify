@@ -8,27 +8,35 @@ import {
     type ChartConfig,
 } from '@/components/ui/chart';
 import { format, parseISO } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { CartesianGrid, Label, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface ActiveUserTrendChartProps {
-    data: ActiveMetricSnapshot[];
-    config: ChartConfig;
-    xAxisLabel: string;
-    yAxisLabel: string;
+    metrics: ActiveMetricSnapshot[];
 }
 
 export default function ActiveUserTrendChart({
-    data,
-    config,
-    xAxisLabel,
-    yAxisLabel,
+    metrics,
 }: ActiveUserTrendChartProps) {
+    const t = useTranslations('UserAnalytics');
+
+    const config: ChartConfig = {
+        a1Count: { label: t('a1Label'), color: 'var(--chart-1)' },
+        a7Count: { label: t('a7Label'), color: 'var(--chart-2)' },
+        a30Count: { label: t('a30Label'), color: 'var(--chart-3)' },
+    };
+    const metricsBySnapshotDate = [...metrics].sort(
+        (firstSnapshot, secondSnapshot) =>
+            firstSnapshot.snapshotDate.localeCompare(
+                secondSnapshot.snapshotDate,
+            ),
+    );
     const seriesKeys = Object.keys(config);
 
     return (
         <ChartContainer config={config} className="h-72 w-full">
             <LineChart
-                data={data}
+                data={metricsBySnapshotDate}
                 margin={{ top: 8, right: 12, bottom: 32, left: 12 }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
@@ -42,7 +50,7 @@ export default function ActiveUserTrendChart({
                     }
                 >
                     <Label
-                        value={xAxisLabel}
+                        value={t('axisDateLabel')}
                         position="bottom"
                         className="fill-muted-foreground text-sm font-bold"
                     />
@@ -54,7 +62,7 @@ export default function ActiveUserTrendChart({
                     allowDecimals={false}
                 >
                     <Label
-                        value={yAxisLabel}
+                        value={t('axisActiveUsersLabel')}
                         angle={-90}
                         position="left"
                         className="fill-muted-foreground text-sm font-bold"

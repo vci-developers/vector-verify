@@ -13,10 +13,6 @@ import { networkErrorMessage } from '@/lib/network/network-error';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-    buildActiveUserChartConfig,
-    sortActiveMetricsByDate,
-} from '@/components/user-analytics/active-user-chart-helpers';
-import {
     buildActiveMetricsRange,
     DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
     type ActiveMetricsRangePreset,
@@ -53,14 +49,14 @@ export default function UserAnalyticsDialog({
           )?.name
         : undefined;
 
-    const chartConfig = buildActiveUserChartConfig({
-        a1Count: t('a1Label'),
-        a7Count: t('a7Label'),
-        a30Count: t('a30Label'),
-    });
-    const chartData = getMetricsResult?.ok
-        ? sortActiveMetricsByDate(getMetricsResult.data.metrics)
-        : [];
+    const metrics = getMetricsResult?.ok ? getMetricsResult.data.metrics : [];
+    const stateMessage = isMetricsPending
+        ? t('loading')
+        : getMetricsResult && !getMetricsResult.ok
+          ? networkErrorMessage(getMetricsResult.error)
+          : metrics.length === 0
+            ? t('empty')
+            : null;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,34 +76,15 @@ export default function UserAnalyticsDialog({
                         onValueChange={setRangePreset}
                     />
 
-                    {isMetricsPending ? (
-                        <ActiveUserStateMessage message={t('loading')} />
-                    ) : getMetricsResult && !getMetricsResult.ok ? (
-                        <ActiveUserStateMessage
-                            message={networkErrorMessage(
-                                getMetricsResult.error,
-                            )}
-                        />
-                    ) : chartData.length === 0 ? (
-                        <ActiveUserStateMessage message={t('empty')} />
+                    {stateMessage ? (
+                        <div className="text-muted-foreground flex h-72 w-full items-center justify-center text-sm">
+                            {stateMessage}
+                        </div>
                     ) : (
-                        <ActiveUserTrendChart
-                            data={chartData}
-                            config={chartConfig}
-                            xAxisLabel={t('axisDateLabel')}
-                            yAxisLabel={t('axisActiveUsersLabel')}
-                        />
+                        <ActiveUserTrendChart metrics={metrics} />
                     )}
                 </div>
             </DialogContent>
         </Dialog>
-    );
-}
-
-function ActiveUserStateMessage({ message }: { message: string }) {
-    return (
-        <div className="text-muted-foreground flex h-72 w-full items-center justify-center text-sm">
-            {message}
-        </div>
     );
 }
