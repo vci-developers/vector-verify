@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import { booleanQueryParamSchema } from '@/lib/network/validation/boolean-query-param-schema';
 import { activeMetricSnapshotSchema } from '@/api/user/validation/get-user-active-metrics-schema';
 
 export const getAllUserActiveMetricsQueryParamsSchema = z.object({
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    programId: z.coerce.number().optional(),
-    globalOnly: booleanQueryParamSchema().optional(),
+    startDate: z.string(),
+    endDate: z.string(),
+    programId: z.coerce.number(),
 });
 
 export const getAllUserActiveMetricsResponseSchema = z.object({
