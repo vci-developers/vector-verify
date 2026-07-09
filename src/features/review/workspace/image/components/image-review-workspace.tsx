@@ -18,10 +18,10 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { Site } from '@/api/site/validation/site-schema';
 
 interface ImageReviewWorkspaceProps {
-    siteId: number;
-    siteName: string;
+    site: Site;
     sessions: Session[];
     startDate?: string;
     endDate?: string;
@@ -32,8 +32,7 @@ interface ImageReviewWorkspaceProps {
 }
 
 export default function ImageReviewWorkspace({
-    siteId,
-    siteName,
+    site,
     sessions,
     startDate,
     endDate,
@@ -52,13 +51,13 @@ export default function ImageReviewWorkspace({
     const specimenQueryParams: GetAllSpecimensQueryParams =
         collectionCycleId !== undefined
             ? {
-                  siteId,
+                  siteId: site.siteId,
                   collectionCycleId,
                   sessionType: 'SURVEILLANCE',
                   includeAllImages: true,
               }
             : {
-                  siteId,
+                  siteId: site.siteId,
                   startDate,
                   endDate,
                   sessionType: 'SURVEILLANCE',
@@ -148,7 +147,14 @@ export default function ImageReviewWorkspace({
                                     count:
                                         expectedSpecimensCount -
                                         totalSpecimensUploaded,
-                                    site: siteName,
+                                    site:
+                                        site.name ??
+                                        site.houseNumber ??
+                                        site.villageName ??
+                                        site.healthCenter ??
+                                        site.subCounty ??
+                                        site.district ??
+                                        'Unknown',
                                 })}
                             </TooltipContent>
                         </Tooltip>
