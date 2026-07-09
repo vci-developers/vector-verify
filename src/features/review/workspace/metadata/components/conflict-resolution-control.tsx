@@ -67,7 +67,7 @@ export default function ConflictResolutionControl({
     }
 
     return (
-                <ComboBox
+        <ComboBox
             options={options}
             value={value}
             onValueChange={onValueChange}
