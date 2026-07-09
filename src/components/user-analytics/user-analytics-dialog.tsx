@@ -22,41 +22,36 @@ import {
     type ActiveMetricsRangePreset,
 } from '@/components/user-analytics/build-active-metrics-range';
 import ActiveUserTrendChart from '@/components/user-analytics/active-user-trend-chart';
-import UserAnalyticsProgramSelect from '@/components/user-analytics/user-analytics-program-select';
 import UserAnalyticsRangeTabs from '@/components/user-analytics/user-analytics-range-tabs';
 
 interface UserAnalyticsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    programId: number;
 }
 
 export default function UserAnalyticsDialog({
     open,
     onOpenChange,
+    programId,
 }: UserAnalyticsDialogProps) {
     const t = useTranslations('UserAnalytics');
-    const [selectedProgram, setSelectedProgram] = useState<number | 'all'>(
-        'all',
-    );
     const [rangePreset, setRangePreset] = useState<ActiveMetricsRangePreset>(
         DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
     );
 
-    const { data: getProgramsResult, isPending: isProgramsPending } =
-        useGetPrograms();
-    const programs = getProgramsResult?.ok
-        ? getProgramsResult.data.programs
-        : [];
-    const hasProgramsError = getProgramsResult?.ok === false;
-
-    const isAllPrograms = selectedProgram === 'all';
     const { data: getMetricsResult, isPending: isMetricsPending } =
         useGetAllUserActiveMetrics({
             ...buildActiveMetricsRange(rangePreset),
-            ...(isAllPrograms
-                ? { globalOnly: true }
-                : { programId: selectedProgram }),
+            programId,
         });
+
+    const { data: getProgramsResult } = useGetPrograms();
+    const programName = getProgramsResult?.ok
+        ? getProgramsResult.data.programs.find(
+              program => program.programId === programId,
+          )?.name
+        : undefined;
 
     const chartConfig = buildActiveUserChartConfig({
         a1Count: t('a1Label'),
@@ -72,25 +67,18 @@ export default function UserAnalyticsDialog({
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{t('title')}</DialogTitle>
-                    <DialogDescription>{t('description')}</DialogDescription>
+                    <DialogDescription>
+                        {programName
+                            ? t('programDescription', { programName })
+                            : t('description')}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="sm:w-64">
-                            <UserAnalyticsProgramSelect
-                                value={selectedProgram}
-                                onValueChange={setSelectedProgram}
-                                programs={programs}
-                                isLoading={isProgramsPending}
-                                hasError={hasProgramsError}
-                            />
-                        </div>
-                        <UserAnalyticsRangeTabs
-                            value={rangePreset}
-                            onValueChange={setRangePreset}
-                        />
-                    </div>
+                    <UserAnalyticsRangeTabs
+                        value={rangePreset}
+                        onValueChange={setRangePreset}
+                    />
 
                     {isMetricsPending ? (
                         <ActiveUserStateMessage message={t('loading')} />

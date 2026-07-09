@@ -278,6 +278,9 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                             <UserAnalyticsDialog
                                 open={isUserAnalyticsOpen}
                                 onOpenChange={setIsUserAnalyticsOpen}
+                                programId={
+                                    getUserPermissionsResult.data.programId
+                                }
                             />
                         </Fragment>
                     )}

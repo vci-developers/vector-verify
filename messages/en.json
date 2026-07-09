@@ -180,11 +180,8 @@
     "UserAnalytics": {
         "menuItem": "User Analytics",
         "title": "User Analytics",
-        "description": "Active web-app users over time for the selected program.",
-        "allPrograms": "All programs",
-        "selectProgram": "Select a program",
-        "loadingPrograms": "Loading programs…",
-        "programsError": "Unable to load programs",
+        "description": "Active web-app users over time for your program.",
+        "programDescription": "Active web-app users over time for {programName}.",
         "range30d": "30 days",
         "range90d": "90 days",
         "range1y": "1 year",

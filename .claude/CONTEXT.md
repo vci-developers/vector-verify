@@ -261,15 +261,15 @@ certifying), **not** field collectors — it is categorically distinct from
 **Device Activity**, which tracks VHTs via their devices. v1 sources
 `GET /users/active-metrics` only, plotting the daily **Active User** A1/A7/A30
 snapshots as three overlaid lines over a preset window (30d / 90d / 1y, default
-90d). The audience is a **program-less developer/data reviewer** (not a program
-member), so a **single-program selector** (reusing `GET /programs/`) is the
-primary control — the dialog never defaults to the viewer's own program, because
-they have none. The selector picks one program (`programId`) **or** all programs
-combined (`globalOnly=true`). The reviewer's goal is to check whether each
-program has as many active users as expected and to watch user trends over time.
-Certification and submission series are deferred to a fast-follow, not v1.
-_Avoid_: Active Users (collides with `isActive`/Whitelisted), Device Activity
-(different population), User Activity (ambiguous with Device Activity)
+90d). Scope is **always the viewer's own program** (`profile.programId`) — there
+is no program selector, and the cross-program (`programId` free choice) and
+combined (`globalOnly=true`) backend views are not exposed in the web app
+(decided in PR #163 review, July 2026, superseding the original "program-less
+developer" audience). A devMode user whose `programId` is `null` gets an
+explanatory "no program" empty state instead of a chart. Certification and
+submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
+(collides with `isActive`/Whitelisted), Device Activity (different population),
+User Activity (ambiguous with Device Activity)
 
 **Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
 `GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
