@@ -190,6 +190,26 @@ export default function CompositionChartPair({
                         </ChartContainer>
                     </div>
                 </div>
+                <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
+                    {specimenClasses.map(specimenClass => (
+                        <span
+                            key={specimenClass}
+                            className="flex items-center gap-1.5"
+                        >
+                            <span
+                                className="inline-block h-3 w-3 shrink-0 rounded-full"
+                                style={{
+                                    backgroundColor:
+                                        specimenChartConfig[specimenClass]
+                                            ?.color,
+                                }}
+                            />
+                            <span className="text-muted-foreground text-sm">
+                                {specimenChartConfig[specimenClass]?.label}
+                            </span>
+                        </span>
+                    ))}
+                </div>
             </CardContent>
         </Card>
     );
