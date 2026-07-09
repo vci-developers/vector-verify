@@ -1,6 +1,6 @@
 'use client';
 
-import type { ActiveMetricSnapshot } from '@/api/user/validation/get-user-active-metrics-schema';
+import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-snapshot-schema';
 import {
     ChartContainer,
     ChartTooltip,

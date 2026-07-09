@@ -1,4 +1,4 @@
-import type { ActiveMetricSnapshot } from '@/api/user/validation/get-user-active-metrics-schema';
+import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-snapshot-schema';
 import type { ChartConfig } from '@/components/ui/chart';
 
 export type ActiveUserSeriesKey = 'a1Count' | 'a7Count' | 'a30Count';

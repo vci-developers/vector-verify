@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeMetricSnapshotSchema } from '@/api/user/validation/get-user-active-metrics-schema';
+import { activeMetricSnapshotSchema } from '@/api/user/validation/active-metric-snapshot-schema';
 
 export const getAllUserActiveMetricsQueryParamsSchema = z.object({
     startDate: z.string(),
