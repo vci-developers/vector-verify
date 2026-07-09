@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
@@ -118,7 +120,7 @@ export default function CompositionChartPair({
                             </PieChart>
                         </ChartContainer>
                     </div>
-                    <div className="h-62.5 w-full min-w-0 flex-1">
+                    <div className="h-72 w-full min-w-0 flex-1">
                         <ChartContainer
                             config={specimenChartConfig}
                             className="h-full w-full"
@@ -186,29 +188,15 @@ export default function CompositionChartPair({
                                         }}
                                     />
                                 ))}
+                                <ChartLegend
+                                    wrapperStyle={{ paddingTop: '1rem' }}
+                                    content={
+                                        <ChartLegendContent className="text-muted-foreground flex-wrap" />
+                                    }
+                                />
                             </AreaChart>
                         </ChartContainer>
                     </div>
-                </div>
-                <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
-                    {specimenClasses.map(specimenClass => (
-                        <span
-                            key={specimenClass}
-                            className="flex items-center gap-1.5"
-                        >
-                            <span
-                                className="inline-block h-3 w-3 shrink-0 rounded-full"
-                                style={{
-                                    backgroundColor:
-                                        specimenChartConfig[specimenClass]
-                                            ?.color,
-                                }}
-                            />
-                            <span className="text-muted-foreground text-sm">
-                                {specimenChartConfig[specimenClass]?.label}
-                            </span>
-                        </span>
-                    ))}
                 </div>
             </CardContent>
         </Card>
