@@ -5,25 +5,27 @@ import { useTranslations } from 'next-intl';
 import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
 import SelectableInfoPanelRow from '@/features/operations/geographical-summary/components/selectable-info-panel-row';
 
-interface MarkerInfoPanelProps {
-    markers: { id: string; siteName: string; parentLocationName: string }[];
+interface MarkerInfoPanelProps<Marker> {
+    markers: Marker[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
-    renderMarkerDetails: (markerId: string) => ReactNode;
+    renderMarkerDetails: (marker: Marker) => ReactNode;
     isLoading: boolean;
 }
 
-export default function MarkerInfoPanel({
+export default function MarkerInfoPanel<
+    Marker extends { id: string; siteName: string; parentLocationName: string },
+>({
     markers,
     selectedMarkerId,
     onMarkerSelect,
     renderMarkerDetails,
     isLoading,
-}: MarkerInfoPanelProps) {
+}: MarkerInfoPanelProps<Marker>) {
     const t = useTranslations('OperationsGeographicalSummary');
 
     const markersGroupedByLocation = useMemo(() => {
-        const groups = new Map<string, MarkerInfoPanelProps['markers']>();
+        const groups = new Map<string, Marker[]>();
         for (const marker of markers) {
             const topLevel =
                 marker.parentLocationName.split(' · ')[0] ||
@@ -70,7 +72,7 @@ export default function MarkerInfoPanel({
                                     </p>
                                 )}
                                 <div className="text-muted-foreground mt-1.5 space-y-0.5">
-                                    {renderMarkerDetails(marker.id)}
+                                    {renderMarkerDetails(marker)}
                                 </div>
                             </SelectableInfoPanelRow>
                         );

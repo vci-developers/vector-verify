@@ -48,24 +48,20 @@ export default function DeviceMap({
                     markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}
-                    renderMarkerDetails={markerId => {
-                        const marker = markerById.get(markerId);
-                        if (!marker) return null;
-                        return (
-                            <Fragment>
-                                <p>
-                                    {t('siteActiveCount', {
-                                        count: marker.activeDeviceCount,
-                                    })}
-                                </p>
-                                <p>
-                                    {t('siteInactiveCount', {
-                                        count: marker.inactiveDeviceCount,
-                                    })}
-                                </p>
-                            </Fragment>
-                        );
-                    }}
+                    renderMarkerDetails={marker => (
+                        <Fragment>
+                            <p>
+                                {t('siteActiveCount', {
+                                    count: marker.activeDeviceCount,
+                                })}
+                            </p>
+                            <p>
+                                {t('siteInactiveCount', {
+                                    count: marker.inactiveDeviceCount,
+                                })}
+                            </p>
+                        </Fragment>
+                    )}
                     isLoading={isLoading}
                 />
             )}
