@@ -5,17 +5,11 @@ import { useTranslations } from 'next-intl';
 import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
 import SelectableInfoPanelRow from '@/features/operations/geographical-summary/components/selectable-info-panel-row';
 
-export interface MarkerRow {
-    id: string;
-    siteName: string | null;
-    parentLocationName: string;
-    details: ReactNode;
-}
-
 interface MarkerInfoPanelProps {
-    markers: MarkerRow[];
+    markers: { id: string; siteName: string; parentLocationName: string }[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
+    renderMarkerDetails: (markerId: string) => ReactNode;
     isLoading: boolean;
 }
 
@@ -23,12 +17,13 @@ export default function MarkerInfoPanel({
     markers,
     selectedMarkerId,
     onMarkerSelect,
+    renderMarkerDetails,
     isLoading,
 }: MarkerInfoPanelProps) {
     const t = useTranslations('OperationsGeographicalSummary');
 
     const markersGroupedByLocation = useMemo(() => {
-        const groups = new Map<string, MarkerRow[]>();
+        const groups = new Map<string, MarkerInfoPanelProps['markers']>();
         for (const marker of markers) {
             const topLevel =
                 marker.parentLocationName.split(' · ')[0] ||
@@ -67,7 +62,7 @@ export default function MarkerInfoPanel({
                                 }
                             >
                                 <p className="font-semibold">
-                                    {marker.siteName ?? t('unknownSite')}
+                                    {marker.siteName}
                                 </p>
                                 {marker.parentLocationName && (
                                     <p className="text-muted-foreground mt-0.5">
@@ -75,7 +70,7 @@ export default function MarkerInfoPanel({
                                     </p>
                                 )}
                                 <div className="text-muted-foreground mt-1.5 space-y-0.5">
-                                    {marker.details}
+                                    {renderMarkerDetails(marker.id)}
                                 </div>
                             </SelectableInfoPanelRow>
                         );

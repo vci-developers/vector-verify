@@ -14,7 +14,7 @@ export const DEVICE_HEALTH_COLOR = {
 } as const;
 
 export interface DeviceMarker extends GeocodableMarker {
-    siteName: string | null;
+    siteName: string;
     parentLocationName: string;
     activeDeviceCount: number;
     inactiveDeviceCount: number;
