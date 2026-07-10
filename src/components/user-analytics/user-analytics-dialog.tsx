@@ -37,10 +37,13 @@ export default function UserAnalyticsDialog({
     );
 
     const { data: getMetricsResult, isPending: isMetricsPending } =
-        useGetAllUserActiveMetrics({
-            ...buildActiveMetricsRange(rangePreset),
-            programId,
-        });
+        useGetAllUserActiveMetrics(
+            {
+                ...buildActiveMetricsRange(rangePreset),
+                programId,
+            },
+            { enabled: open },
+        );
 
     const { data: getProgramsResult } = useGetPrograms();
     const programName = getProgramsResult?.ok
