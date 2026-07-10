@@ -40,22 +40,18 @@ export default function DeviceView({
         setSelectedMarkerId(null);
     }, [siteIds]);
 
-    const mappedDeviceActivity = useMemo(() => {
+    const deviceMarkers = useMemo(() => {
         if (!deviceActivity) return null;
-        const mapped = buildDeviceMarkers(
+        return buildDeviceMarkers(
             deviceActivity,
             descendantsOfSelectedLocations,
+        ).sort(
+            (firstMarker, secondMarker) =>
+                secondMarker.activeDeviceCount -
+                    firstMarker.activeDeviceCount ||
+                secondMarker.inactiveDeviceCount -
+                    firstMarker.inactiveDeviceCount,
         );
-        return {
-            ...mapped,
-            markers: [...mapped.markers].sort(
-                (firstMarker, secondMarker) =>
-                    secondMarker.activeDeviceCount -
-                        firstMarker.activeDeviceCount ||
-                    secondMarker.inactiveDeviceCount -
-                        firstMarker.inactiveDeviceCount,
-            ),
-        };
     }, [deviceActivity, descendantsOfSelectedLocations]);
 
     if (isPending) {
@@ -80,7 +76,7 @@ export default function DeviceView({
         );
     }
 
-    if (!mappedDeviceActivity || mappedDeviceActivity.totalDeviceCount === 0) {
+    if (!deviceMarkers || deviceMarkers.length === 0) {
         return (
             <Card className="border-border/50 p-0">
                 <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
@@ -90,9 +86,17 @@ export default function DeviceView({
         );
     }
 
+    const deviceCounts = deviceMarkers.reduce(
+        (counts, marker) => ({
+            active: counts.active + marker.activeDeviceCount,
+            inactive: counts.inactive + marker.inactiveDeviceCount,
+        }),
+        { active: 0, inactive: 0 },
+    );
+
     const tiers = [
-        { key: 'active', count: mappedDeviceActivity.activeDeviceCount },
-        { key: 'inactive', count: mappedDeviceActivity.inactiveDeviceCount },
+        { key: 'active', count: deviceCounts.active },
+        { key: 'inactive', count: deviceCounts.inactive },
     ] as const;
 
     return (
@@ -115,7 +119,7 @@ export default function DeviceView({
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
-                        markers={mappedDeviceActivity.markers}
+                        markers={deviceMarkers}
                         selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}

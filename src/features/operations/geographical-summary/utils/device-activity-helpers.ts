@@ -5,12 +5,6 @@ import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 
 const RECENT_PERIOD_COUNT = 3;
 
-export interface DeviceActivityWindow {
-    startDate: string;
-    endDate: string;
-    currentCycleId: number | null;
-}
-
 function sortByLatestCycle(cycles: CollectionCycle[]): CollectionCycle[] {
     return [...cycles].sort(
         (firstCycle, secondCycle) =>
@@ -37,9 +31,14 @@ function resolveCurrentCycle(
 export function resolveDeviceActivityWindow(
     collectionCycles: CollectionCycle[],
     currentDate: number,
-): DeviceActivityWindow {
+) {
     const currentCycle = resolveCurrentCycle(collectionCycles, currentDate);
-    if (currentCycle === null) return resolveMonthWindow(currentDate);
+    if (currentCycle === null) {
+        return {
+            ...buildMonthWindow(currentDate, RECENT_PERIOD_COUNT - 1),
+            currentCycleId: null,
+        };
+    }
 
     const recentCycles = sortByLatestCycle(
         collectionCycles.filter(
@@ -71,13 +70,6 @@ export function buildMonthWindow(currentDate: number, monthsBack: number) {
             'yyyy-MM-dd',
         ),
         endDate: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
-    };
-}
-
-function resolveMonthWindow(currentDate: number): DeviceActivityWindow {
-    return {
-        ...buildMonthWindow(currentDate, RECENT_PERIOD_COUNT - 1),
-        currentCycleId: null,
     };
 }
 
