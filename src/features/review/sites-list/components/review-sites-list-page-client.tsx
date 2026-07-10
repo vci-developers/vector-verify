@@ -16,6 +16,7 @@ import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS = [
     { value: 'sites-list', label: 'SITES LIST' },
@@ -25,6 +26,8 @@ const REVIEW_TABS = [
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
 
 export default function ReviewSitesListPageClient() {
+    const t = useTranslations('Review');
+    const tCommon = useTranslations('Common');
     const [activeTab, setActiveTab] = useLocalStorage<ReviewTab>(
         StorageKeys.review.activeTab,
         'sites-list',
@@ -116,11 +119,13 @@ export default function ReviewSitesListPageClient() {
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
             <PageShell
-                title="Review"
-                description="Review submitted session data by location"
+                title={t('review')}
+                description={t('reviewDescription')}
                 icon={ClipboardList}
             >
-                <p className="text-muted-foreground text-sm">Loading...</p>
+                <p className="text-muted-foreground text-sm">
+                    {tCommon('loading')}
+                </p>
             </PageShell>
         );
     }
@@ -128,8 +133,8 @@ export default function ReviewSitesListPageClient() {
     if (!getUserPermissionsResult.ok) {
         return (
             <PageShell
-                title="Review"
-                description="Review submitted session data by location"
+                title={t('review')}
+                description={t('reviewDescription')}
                 icon={ClipboardList}
             >
                 <p className="text-destructive text-sm">
@@ -141,8 +146,8 @@ export default function ReviewSitesListPageClient() {
 
     return (
         <PageShell
-            title="Review"
-            description="Review submitted session data by location"
+            title={t('review')}
+            description={t('reviewDescription')}
             icon={ClipboardList}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
@@ -172,14 +177,11 @@ export default function ReviewSitesListPageClient() {
                     <Separator />
 
                     {!locationQueryParam ? (
-                        <div className="relative">
-                            <SkeletonList count={5} height="xl" width="full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                                <p className="text-muted-foreground text-sm">
-                                    Select a location to view data.
-                                </p>
-                            </div>
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                            <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                {t('selectALocation')}
+                            </p>
                         </div>
                     ) : activeTab === 'sites-list' ? (
                         isGetCollectionCyclesPending ? (

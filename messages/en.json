@@ -100,6 +100,11 @@
         "collector": "Collector",
         "session": "session"
     },
+    "Review": {
+        "review": "Review",
+        "reviewDescription": "Review submitted session data by location",
+        "selectALocation": "Select a location to view data."
+    },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "inReview": "In Review",
