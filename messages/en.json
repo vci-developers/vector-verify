@@ -125,7 +125,7 @@
         "valueColumn": "Value",
         "selectValuePlaceholder": "Select value",
         "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
-        "missingSurveillanceFormNotice": "Excluded from this resolution — {count, plural, one {# session} other {# sessions}} missing a surveillance form: {dates}.",
+        "missingSurveillanceFormNotice": "{count, plural, one {# session is missing a surveillance form} other {# sessions are missing surveillance forms}} and won't receive the values saved here: {dates}. Follow up with the field team to submit the missing {count, plural, one {form} other {forms}} before certifying.",
         "noSessions": "No sessions found for this Sentinel Site.",
         "saveAndContinue": "Save & Continue",
         "saving": "Saving…",

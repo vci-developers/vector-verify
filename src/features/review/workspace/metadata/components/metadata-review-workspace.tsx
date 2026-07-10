@@ -328,10 +328,12 @@ export default function MetadataReviewWorkspace({
                 <div className="text-muted-foreground space-y-2 text-sm">
                     <p>{t('intro')}</p>
                     <div className="flex flex-wrap gap-x-6 gap-y-1">
-                        <span className="flex items-center gap-1.5">
-                            <TriangleAlert className="text-destructive h-3.5 w-3.5 shrink-0" />
-                            {t('legendConflict')}
-                        </span>
+                        {unresolvedConflictCount > 0 && (
+                            <span className="text-destructive flex items-center gap-1.5">
+                                <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
+                                {t('legendConflict')}
+                            </span>
+                        )}
                         <span className="flex items-center gap-1.5">
                             <Pencil className="h-3.5 w-3.5 shrink-0" />
                             {t('legendEdit')}
@@ -341,21 +343,25 @@ export default function MetadataReviewWorkspace({
             )}
 
             {sessionsMissingSurveillanceForm.length > 0 && (
-                <p className="text-destructive flex items-start gap-2 text-sm">
-                    <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                    {t('missingSurveillanceFormNotice', {
-                        count: sessionsMissingSurveillanceForm.length,
-                        dates: sessionsMissingSurveillanceForm
-                            .map(session =>
-                                formatDateInTimezone(
-                                    session.collectionDate,
-                                    timezone ?? null,
-                                    'MMM d, yyyy',
-                                ),
-                            )
-                            .join(', '),
-                    })}
-                </p>
+                <div className="border-warning/40 bg-warning/5 rounded-lg border p-4">
+                    <div className="flex items-center gap-3">
+                        <TriangleAlert className="text-warning h-5 w-5 shrink-0" />
+                        <p className="text-sm">
+                            {t('missingSurveillanceFormNotice', {
+                                count: sessionsMissingSurveillanceForm.length,
+                                dates: sessionsMissingSurveillanceForm
+                                    .map(session =>
+                                        formatDateInTimezone(
+                                            session.collectionDate,
+                                            timezone ?? null,
+                                            'MMM d, yyyy',
+                                        ),
+                                    )
+                                    .join(', '),
+                            })}
+                        </p>
+                    </div>
+                </div>
             )}
 
             <MetadataReviewTable
