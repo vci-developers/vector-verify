@@ -138,6 +138,7 @@ export default function ReviewWorkspacePageClient({
                             <ImageReviewWorkspace
                                 site={site!}
                                 sessions={sessions}
+                                readOnly={readOnly}
                                 startDate={startDate}
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}

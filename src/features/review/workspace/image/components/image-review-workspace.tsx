@@ -19,10 +19,12 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import type { Site } from '@/api/site/validation/site-schema';
+import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 
 interface ImageReviewWorkspaceProps {
     site: Site;
     sessions: Session[];
+    readOnly: boolean;
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
@@ -34,6 +36,7 @@ interface ImageReviewWorkspaceProps {
 export default function ImageReviewWorkspace({
     site,
     sessions,
+    readOnly,
     startDate,
     endDate,
     collectionCycleId,
@@ -80,27 +83,33 @@ export default function ImageReviewWorkspace({
     }
 
     const specimens = getAllSpecimensResult.data.specimens;
-    const allSpecimensForSite = getAllSpecimensResult.data.specimens;
 
-    const totalSpecimensUploaded = allSpecimensForSite.length;
+    const totalSpecimens = specimens.length;
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
     );
-    const isMissingExpectedCounts = sessions.some(
-        session => session.expectedSpecimens === undefined,
-    );
-    const hasReliableExpectedCount =
-        !isMissingExpectedCounts &&
-        expectedSpecimensCount > 0 &&
-        totalSpecimensUploaded <= expectedSpecimensCount;
-    const isMissingExpectedSpecimens =
-        hasReliableExpectedCount &&
-        totalSpecimensUploaded < expectedSpecimensCount;
+    const missingSpecimenCount = expectedSpecimensCount - totalSpecimens;
 
     if (specimens.length === 0) {
         return (
             <div className="space-y-4">
+                {!readOnly && missingSpecimenCount > 0 ? (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Badge variant="destructive">
+                                <AlertCircle className="h-3 w-3" />
+                                {t('missingSpecimensBadge')}
+                            </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {t('specimensNotUploaded', {
+                                count: expectedSpecimensCount - totalSpecimens,
+                                site: getSiteLabelParts(site).primaryLabel,
+                            })}
+                        </TooltipContent>
+                    </Tooltip>
+                ) : null}
                 <div className="bg-muted/30 flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                     <ImageOff className="text-muted-foreground/60 mb-4 h-12 w-12" />
                     <h3 className="text-sm font-semibold">{t('emptyTitle')}</h3>
@@ -121,7 +130,6 @@ export default function ImageReviewWorkspace({
         );
     }
 
-    const totalSpecimens = specimens.length;
     const currentSpecimen = specimens[specimenIndex]!;
 
     return (
@@ -134,7 +142,7 @@ export default function ImageReviewWorkspace({
                             total: totalSpecimens,
                         })}
                     </p>
-                    {isMissingExpectedSpecimens ? (
+                    {!readOnly && missingSpecimenCount > 0 ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Badge variant="destructive">
@@ -145,16 +153,8 @@ export default function ImageReviewWorkspace({
                             <TooltipContent>
                                 {t('specimensNotUploaded', {
                                     count:
-                                        expectedSpecimensCount -
-                                        totalSpecimensUploaded,
-                                    site:
-                                        site.name ??
-                                        site.houseNumber ??
-                                        site.villageName ??
-                                        site.healthCenter ??
-                                        site.subCounty ??
-                                        site.district ??
-                                        'Unknown',
+                                        expectedSpecimensCount - totalSpecimens,
+                                    site: getSiteLabelParts(site).primaryLabel,
                                 })}
                             </TooltipContent>
                         </Tooltip>
