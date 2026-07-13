@@ -12,7 +12,6 @@ import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformance from '@/features/operations/ai-performance/components/operations-ai-performance';
 import OperationsGeographicalSummary from '@/features/operations/geographical-summary/components/operations-geographical-summary';
-import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
@@ -48,7 +47,7 @@ export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
     const t = useTranslations('Operations');
-    const tCommmon = useTranslations('Common');
+    const tCommon = useTranslations('Common');
     const [activeTab, setActiveTab] = useLocalStorage<OperationsTab>(
         StorageKeys.operations.activeTab,
         'geographical-summary',
@@ -101,7 +100,7 @@ export default function OperationsPageClient() {
                 icon={Microscope}
             >
                 <p className="text-muted-foreground text-sm">
-                    {tCommmon('loading')}
+                    {tCommon('loading')}
                 </p>
             </PageShell>
         );
@@ -154,14 +153,11 @@ export default function OperationsPageClient() {
                     <Separator />
 
                     {!selectedSiteIdsParam ? (
-                        <div className="relative">
-                            <SkeletonList count={5} height="xl" width="full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                                <p className="text-muted-foreground text-sm">
-                                    {t('selectALocation')}
-                                </p>
-                            </div>
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                            <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                {t('selectALocation')}
+                            </p>
                         </div>
                     ) : (
                         <Fragment>

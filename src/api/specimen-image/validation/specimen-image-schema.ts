@@ -21,7 +21,7 @@ export const sexSchema = z.enum(['Female', 'Male', 'Unknown']);
 
 export const abdomenStatusSchema = z.enum([
     'Unfed',
-    'Fully fed',
+    'Fully Fed',
     'Gravid',
     'Unknown',
 ]);
