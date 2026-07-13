@@ -18,11 +18,10 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { Site } from '@/api/site/validation/site-schema';
-import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 
 interface ImageReviewWorkspaceProps {
-    site: Site;
+    siteId: number;
+    siteName: string | undefined;
     sessions: Session[];
     readOnly: boolean;
     startDate?: string;
@@ -34,7 +33,8 @@ interface ImageReviewWorkspaceProps {
 }
 
 export default function ImageReviewWorkspace({
-    site,
+    siteId,
+    siteName,
     sessions,
     readOnly,
     startDate,
@@ -54,13 +54,13 @@ export default function ImageReviewWorkspace({
     const specimenQueryParams: GetAllSpecimensQueryParams =
         collectionCycleId !== undefined
             ? {
-                  siteId: site.siteId,
+                  siteId: siteId,
                   collectionCycleId,
                   sessionType: 'SURVEILLANCE',
                   includeAllImages: true,
               }
             : {
-                  siteId: site.siteId,
+                  siteId: siteId,
                   startDate,
                   endDate,
                   sessionType: 'SURVEILLANCE',
@@ -105,7 +105,7 @@ export default function ImageReviewWorkspace({
                         <TooltipContent>
                             {t('specimensNotUploaded', {
                                 count: expectedSpecimensCount - totalSpecimens,
-                                site: getSiteLabelParts(site).primaryLabel,
+                                site: siteName ?? 'Unknown',
                             })}
                         </TooltipContent>
                     </Tooltip>
@@ -154,7 +154,7 @@ export default function ImageReviewWorkspace({
                                 {t('specimensNotUploaded', {
                                     count:
                                         expectedSpecimensCount - totalSpecimens,
-                                    site: getSiteLabelParts(site).primaryLabel,
+                                    site: siteName ?? 'Unknown',
                                 })}
                             </TooltipContent>
                         </Tooltip>
