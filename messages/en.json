@@ -79,6 +79,7 @@
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
+        "noConfusionMatrixData": "No verified {category} comparisons in this date range.",
         "perLabelMetrics": "Per-Label Metrics",
         "label": "Label",
         "sensitivity": "Sensitivity",
