@@ -19,19 +19,12 @@ export async function proxy(request: NextRequest) {
         PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
     const isAuthOnly = AUTH_ONLY_ROUTES.has(pathname);
 
-    if (
-        !pathname.includes('/forbidden') &&
-        (isPublic || isAuthOnly) &&
-        accessToken &&
-        emailVerified
-    ) {
+    if (!pathname.includes('/forbidden') && isPublic && accessToken) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    if (accessToken && !emailVerified && !isAuthOnly) {
-        return NextResponse.redirect(
-            new URL('/email-verification', request.url),
-        );
+    if (accessToken && emailVerified && isAuthOnly) {
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     if (!accessToken && isAuthOnly) {
@@ -43,7 +36,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    if (!accessToken && !isPublic) {
+    if (!accessToken && !isPublic && !isAuthOnly) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 

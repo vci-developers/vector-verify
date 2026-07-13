@@ -27,7 +27,12 @@ export default async function VerifyEmailPage({
                 imageSrc="/assets/auth/images/Login.png"
             >
                 <Separator className="my-6" />
-                <p>{t('missingVerificationToken')}</p>
+                <div className="flex flex-col items-center gap-4">
+                    <p className="text-muted-foreground text-center text-sm">
+                        {t('missingVerificationToken')}
+                    </p>
+                    <LogoutButton />
+                </div>
             </AuthShell>
         );
     } else {
@@ -40,48 +45,55 @@ export default async function VerifyEmailPage({
         if (!response.ok) {
             return (
                 <AuthShell
-                    title="Verify your email"
-                    description="Email verification in progress."
+                    title={t('verifyYourEmail')}
+                    description={t('verifyEmailIssueDescription')}
                     imageSrc="/assets/auth/images/Login.png"
                 >
                     <Separator className="my-6" />
-                    {response.error.message ===
-                    'Verification token is required' ? (
-                        <Fragment>
-                            <p className="text-muted-foreground text-center text-sm">
-                                {t('invalidVerificationLink')}
-                            </p>
-                            <Button asChild>
-                                <Link href="/email-verification">
-                                    {t('resendVerificationEmailButton')}
-                                </Link>
-                            </Button>
-                        </Fragment>
-                    ) : response.error.message ===
-                      'Invalid or expired verification token' ? (
-                        <Fragment>
-                            <p className="text-muted-foreground text-center text-sm">
-                                {t('invalidOrExpiredVerificationLink')}
-                            </p>
-                            <Button asChild>
-                                <Link href="/email-verification">
-                                    {t('resendVerificationEmailButton')}
-                                </Link>
-                            </Button>
-                        </Fragment>
-                    ) : response.error.message ===
-                      'Verification token does not match the authenticated user' ? (
-                        <Fragment>
-                            <p className="text-muted-foreground text-center text-sm">
-                                {t('accountVerificationTokenMismatch')}
-                            </p>
-                            <LogoutButton />
-                        </Fragment>
-                    ) : (
-                        <p className="text-muted-foreground text-center text-sm">
-                            response.error.message
-                        </p>
-                    )}
+                    <div className="flex flex-col items-center gap-4">
+                        {response.error.message ===
+                        'Verification token is required' ? (
+                            <Fragment>
+                                <p className="text-muted-foreground text-center text-sm">
+                                    {t('invalidVerificationLink')}
+                                </p>
+                                <Button className="w-full">
+                                    <Link href="/email-verification">
+                                        {t('resendVerificationEmailButton')}
+                                    </Link>
+                                </Button>
+                                <LogoutButton />
+                            </Fragment>
+                        ) : response.error.message ===
+                          'Invalid or expired verification token' ? (
+                            <Fragment>
+                                <p className="text-muted-foreground text-center text-sm">
+                                    {t('invalidOrExpiredVerificationLink')}
+                                </p>
+                                <Button className="w-full">
+                                    <Link href="/email-verification">
+                                        {t('resendVerificationEmailButton')}
+                                    </Link>
+                                </Button>
+                                <LogoutButton />
+                            </Fragment>
+                        ) : response.error.message ===
+                          'Verification token does not match the authenticated user' ? (
+                            <Fragment>
+                                <p className="text-muted-foreground text-center text-sm">
+                                    {t('accountVerificationTokenMismatch')}
+                                </p>
+                                <LogoutButton />
+                            </Fragment>
+                        ) : (
+                            <Fragment>
+                                <p className="text-muted-foreground text-center text-sm">
+                                    response.error.message
+                                </p>
+                                <LogoutButton />
+                            </Fragment>
+                        )}
+                    </div>
                 </AuthShell>
             );
         } else {
