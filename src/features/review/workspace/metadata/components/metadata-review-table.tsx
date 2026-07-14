@@ -69,6 +69,12 @@ export default function MetadataReviewTable({
                                     timezone,
                                     'MMM d, yyyy',
                                 )}
+                                {' — '}
+                                {formatDateInTimezone(
+                                    session.createdAt,
+                                    timezone,
+                                    'HH:mm',
+                                )}
                             </TableHead>
                         ))}
                         {showResolutionColumn && (
