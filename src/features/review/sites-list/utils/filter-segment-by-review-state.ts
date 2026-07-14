@@ -1,0 +1,29 @@
+import {
+    getSiteOverallReviewState,
+    type REVIEW_STATE_SEVERITY_ORDER,
+} from '@/features/review/utils/review-site-session-summary';
+import type { ReviewSegment } from '@/features/review/sites-list/utils/build-review-segments';
+
+export type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
+
+export function filterSegmentByReviewState(
+    segment: ReviewSegment,
+    selectedStates: ReviewState[],
+): { visibleSiteIds: Set<number>; totalWithData: number } {
+    const isStateSelected = (state: ReviewState) =>
+        selectedStates.length === 0 || selectedStates.includes(state);
+
+    const visibleSiteIds = new Set<number>();
+
+    for (const [siteId, summary] of segment.summaryBySiteId) {
+        const overallState = getSiteOverallReviewState(summary);
+        if (overallState !== null && isStateSelected(overallState)) {
+            visibleSiteIds.add(siteId);
+        }
+    }
+
+    return {
+        visibleSiteIds,
+        totalWithData: segment.summaryBySiteId.size,
+    };
+}

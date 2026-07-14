@@ -114,7 +114,39 @@ have no cycle. _Avoid_: Submission, collection event
 **Session State**: The lifecycle stage of a Session. In order: `NEEDS_REVIEW` →
 `IN_REVIEW` → `CERTIFIED` → `SUBMITTED`. `NOT_APPLICABLE` is set on
 non-surveillance sessions (type `CALIBRATION`, `PRACTICE`, `DATA_COLLECTION`)
-that never enter the Review workflow.
+that never enter the Review workflow. _Avoid_: `IN_PROGRESS` (used loosely in
+tickets to mean `IN_REVIEW` — there is no `IN_PROGRESS` state).
+
+**Site Review State**: The single state badge shown on a Sentinel Site row in
+the Review sites list, derived per Review Segment by `getSiteOverallReviewState`
+as the **most severe unresolved** state across that site's sessions in the
+segment — the first non-zero count walking
+`NEEDS_REVIEW → IN_REVIEW → CERTIFIED → SUBMITTED`. So one un-reviewed session
+drags a mostly-certified site back to **Needs Review**; **Certified** means
+"nothing left to review here, not yet fully in DHIS2"; **Submitted** means fully
+shipped. A site with no sessions in the segment has no Site Review State (shows
+"No Sessions"). This derived value — not the individual session counts — is what
+the **State filter** matches against. _Avoid_: site status, badge state.
+
+**State Filter**: A Review sites-list filter (multi-select, empty = show all,
+mirroring the Collection Cycle picker) over the four **Site Review State**
+values. A Sentinel Site row is shown when its Site Review State is in the
+selected set; no-session rows are hidden whenever any state is selected.
+Filtering hides non-matching leaf rows and prunes location groups that end up
+with zero matching leaves; it never hides a **Collection Cycle** segment (an
+emptied cycle still renders, so its count badge can report a zero). Group
+coverage stats (visited/ total and the %/tint) stay **filter-blind** — they
+measure collection coverage of the location, a fixed property, not the filtered
+subset. _Avoid_: status filter.
+
+**Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
+Collection Cycle segment header in the Review sites list. Shown **only while the
+State Filter is active**. `X` = Sentinel Site rows currently visible in that
+cycle under the filter (filter-aware numerator); `total` = Sentinel Sites with
+data in that cycle (fixed denominator — the source of truth, never shrinks with
+the filter). Per-cycle, never aggregated across cycles. Follows the Gmail/GOV.UK
+"X of Y" convention: numerator moves, denominator holds still. _Avoid_: showing
+it at 25-of-25 when no filter is active; a filter-relative denominator.
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via
