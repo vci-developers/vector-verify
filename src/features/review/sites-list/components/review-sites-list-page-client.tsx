@@ -7,39 +7,29 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useState } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
-import { StorageKeys } from '@/lib/storage-keys';
+import {
+    useReviewFilters,
+    type ReviewTab,
+} from '@/features/review/view-state/use-review-filters';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
 import { useTranslations } from 'next-intl';
 
-const REVIEW_TABS = [
+const REVIEW_TABS: readonly { value: ReviewTab; label: string }[] = [
     { value: 'sites-list', label: 'SITES LIST' },
     { value: 'submissions', label: 'SUBMISSIONS' },
-] as const;
-
-export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
+];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
-    const [activeTab, setActiveTab] = useLocalStorage<ReviewTab>(
-        StorageKeys.review.activeTab,
-        'sites-list',
-    );
-    const [startMonth, setStartMonth] = useLocalStorage(
-        StorageKeys.review.startMonth,
-        startOfMonth(subMonths(new Date(), 2)),
-    );
-    const [endMonth, setEndMonth] = useLocalStorage(
-        StorageKeys.review.endMonth,
-        startOfMonth(new Date()),
-    );
+    const [filters, setFilters] = useReviewFilters();
+    const { activeTab, startMonth, endMonth, selectedLocation } = filters;
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
 
     const {
@@ -70,16 +60,11 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     const {
-        selectedLocation,
-        setSelectedLocation,
         locationTypeName,
         locationDropdownOptions,
         locationQueryParam,
         descendantsOfSelectedLocation,
-    } = useLocationSelection(
-        accessibleSites,
-        StorageKeys.review.selectedLocation,
-    );
+    } = useLocationSelection(accessibleSites, selectedLocation);
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -101,18 +86,22 @@ export default function ReviewSitesListPageClient() {
         setSelectedCycleIds([]);
     }
 
+    function handleTabChange(tab: ReviewTab) {
+        setFilters({ activeTab: tab });
+    }
+
     function handleLocationChange(location: string) {
-        setSelectedLocation(location);
+        setFilters({ selectedLocation: location });
         resetCycleFilter();
     }
 
     function handleStartMonthChange(month: Date) {
-        setStartMonth(month);
+        setFilters({ startMonth: month });
         resetCycleFilter();
     }
 
     function handleEndMonthChange(month: Date) {
-        setEndMonth(month);
+        setFilters({ endMonth: month });
         resetCycleFilter();
     }
 
@@ -155,7 +144,7 @@ export default function ReviewSitesListPageClient() {
                     <ReviewSitesListHeader
                         tabs={visibleTabs}
                         activeTab={activeTab}
-                        onTabChange={setActiveTab}
+                        onTabChange={handleTabChange}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocation={selectedLocation}

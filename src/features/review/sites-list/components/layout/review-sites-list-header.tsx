@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ReviewTab } from '@/features/review/sites-list/components/review-sites-list-page-client';
+import type { ReviewTab } from '@/features/review/view-state/use-review-filters';
 
 interface ReviewSitesListHeaderProps {
     tabs: readonly { value: ReviewTab; label: string }[];

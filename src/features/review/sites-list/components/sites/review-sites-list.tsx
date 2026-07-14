@@ -20,12 +20,14 @@ import {
 } from '@/lib/location/location-query';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 function buildReviewWorkspaceHref(
     siteId: number,
     segment: ReviewSegment,
+    listQueryString: string,
 ): string {
     const queryParams = new URLSearchParams({
         startDate: segment.startDate,
@@ -36,6 +38,9 @@ function buildReviewWorkspaceHref(
     }
     if (segment.timezone != null) {
         queryParams.set('timezone', segment.timezone);
+    }
+    if (listQueryString) {
+        queryParams.set('back', listQueryString);
     }
     return `/review/${siteId}?${queryParams.toString()}`;
 }
@@ -58,6 +63,7 @@ export default function ReviewSitesList({
     selectedCycleIds,
 }: ReviewSitesListProps) {
     const t = useTranslations('CollectionCycle');
+    const listSearchParams = useSearchParams();
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -124,7 +130,11 @@ export default function ReviewSitesList({
         <div className="space-y-2">
             {segments.map(segment => {
                 const buildSiteHref = (siteId: number) =>
-                    buildReviewWorkspaceHref(siteId, segment);
+                    buildReviewWorkspaceHref(
+                        siteId,
+                        segment,
+                        listSearchParams.toString(),
+                    );
                 return (
                     <Collapsible key={segment.key} defaultOpen>
                         <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
