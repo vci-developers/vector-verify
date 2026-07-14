@@ -42,9 +42,9 @@ Operations) is currently showing — active tab, date range, selected location,
 species filter, geographical view. Carried in the URL as search params, so a
 view is shareable, bookmarkable, and survives reload; a fresh navigation starts
 from defaults. A param at its default value is omitted, so a bare `/review` or
-`/operations` URL always means "the current defaults" — a bookmark taken
-without touching a filter never freezes the month range that happened to be
-default the day it was saved. Never stored in browser storage — view state carries no user
+`/operations` URL always means "the current defaults" — a bookmark taken without
+touching a filter never freezes the month range that happened to be default the
+day it was saved. Never stored in browser storage — view state carries no user
 identity, and keeping it in `localStorage` is what let one user's view leak into
 the next login on a shared device. Distinct from **ephemeral interaction state**
 (expanded tree rows, a selected map marker), which lives in memory and resets on

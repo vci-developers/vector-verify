@@ -32,11 +32,11 @@ default.
 Add `nuqs` and delete the mirror:
 
 - `NuqsAdapter` wraps the app in the root layout.
-- Each feature keeps one hook module colocating its parser definitions with
-  the hook (the documented nuqs client-side hook-reuse pattern; the separate
+- Each feature keeps one hook module colocating its parser definitions with the
+  hook (the documented nuqs client-side hook-reuse pattern; the separate
   `searchParams.ts` file is nuqs's server-side pattern and is not needed while
-  parsing stays client-side). The month param becomes one custom
-  `createParser` reusing the existing parse/format logic.
+  parsing stays client-side). The month param becomes one custom `createParser`
+  reusing the existing parse/format logic.
 - `useReviewFilters` / `useOperationsFilters` remain as thin purpose-named
   wrappers whose body is a `useQueryStates` call, so components never see the
   library and the internals stay swappable.
