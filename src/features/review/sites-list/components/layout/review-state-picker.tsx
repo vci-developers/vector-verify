@@ -16,28 +16,28 @@ import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site
 import { useTranslations } from 'next-intl';
 
 interface ReviewStatePickerProps {
-    selectedStates: ReviewState[];
-    onSelectedStatesChange: (states: ReviewState[]) => void;
+    selectedReviewStates: ReviewState[];
+    onSelectedReviewStatesChange: (states: ReviewState[]) => void;
     disabled: boolean;
 }
 
 export default function ReviewStatePicker({
-    selectedStates,
-    onSelectedStatesChange,
+    selectedReviewStates,
+    onSelectedReviewStatesChange,
     disabled,
 }: ReviewStatePickerProps) {
     const t = useTranslations('ReviewSitesList');
 
     return (
         <MultiSelect
-            values={selectedStates}
+            values={selectedReviewStates}
             onValuesChange={values =>
-                onSelectedStatesChange(values as ReviewState[])
+                onSelectedReviewStatesChange(values as ReviewState[])
             }
         >
             <MultiSelectTrigger className="w-52" disabled={disabled}>
                 <MultiSelectValue
-                    placeholder={t('allStates')}
+                    placeholder={t('filterByState')}
                     overflowBehavior="cutoff"
                 />
             </MultiSelectTrigger>

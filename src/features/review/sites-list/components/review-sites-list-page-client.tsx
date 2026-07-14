@@ -16,6 +16,7 @@ import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import type { ReviewState } from '@/features/review/sites-list/utils/filter-segment-by-review-state';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS = [
@@ -41,6 +42,9 @@ export default function ReviewSitesListPageClient() {
         startOfMonth(new Date()),
     );
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
+    const [selectedReviewStates, setSelectedReviewStates] = useState<
+        ReviewState[]
+    >([]);
 
     const {
         data: getUserPermissionsResult,
@@ -97,23 +101,24 @@ export default function ReviewSitesListPageClient() {
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
 
-    function resetCycleFilter() {
+    function resetFilters() {
         setSelectedCycleIds([]);
+        setSelectedReviewStates([]);
     }
 
     function handleLocationChange(location: string) {
         setSelectedLocation(location);
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleStartMonthChange(month: Date) {
         setStartMonth(month);
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleEndMonthChange(month: Date) {
         setEndMonth(month);
-        resetCycleFilter();
+        resetFilters();
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -163,6 +168,8 @@ export default function ReviewSitesListPageClient() {
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
                         onSelectedCycleIdsChange={setSelectedCycleIds}
+                        selectedReviewStates={selectedReviewStates}
+                        onSelectedReviewStatesChange={setSelectedReviewStates}
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0

@@ -15,10 +15,11 @@ export const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
 
 export function filterSegmentByReviewState(
     segment: ReviewSegment,
-    selectedStates: ReviewState[],
+    selectedReviewStates: ReviewState[],
 ): { visibleSiteIds: Set<number>; totalWithData: number } {
     const isStateSelected = (state: ReviewState) =>
-        selectedStates.length === 0 || selectedStates.includes(state);
+        selectedReviewStates.length === 0 ||
+        selectedReviewStates.includes(state);
 
     const visibleSiteIds = new Set<number>();
 
