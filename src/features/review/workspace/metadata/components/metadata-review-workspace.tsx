@@ -328,16 +328,16 @@ export default function MetadataReviewWorkspace({
                 <div className="text-muted-foreground space-y-2 text-sm">
                     <p>{t('intro')}</p>
                     <div className="flex flex-col gap-y-2">
+                        <span className="flex items-center gap-1.5">
+                            <Pencil className="h-3.5 w-3.5 shrink-0" />
+                            {t('legendEdit')}
+                        </span>
                         {unresolvedConflictCount > 0 && (
                             <span className="text-destructive flex items-center gap-1.5">
                                 <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
                                 {t('legendConflict')}
                             </span>
                         )}
-                        <span className="flex items-center gap-1.5">
-                            <Pencil className="h-3.5 w-3.5 shrink-0" />
-                            {t('legendEdit')}
-                        </span>
                     </div>
                 </div>
             )}
