@@ -327,7 +327,7 @@ export default function MetadataReviewWorkspace({
             {!readOnly && (
                 <div className="text-muted-foreground space-y-2 text-sm">
                     <p>{t('intro')}</p>
-                    <div className="flex flex-wrap gap-x-6 gap-y-1">
+                    <div className="flex flex-col gap-y-2">
                         {unresolvedConflictCount > 0 && (
                             <span className="text-destructive flex items-center gap-1.5">
                                 <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
