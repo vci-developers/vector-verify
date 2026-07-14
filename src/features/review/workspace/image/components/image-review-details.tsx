@@ -19,6 +19,7 @@ export default function ImageReviewDetails({
     timezone,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
+    console.log(specimen);
 
     const totalImagesUploaded = specimen.images?.length ?? 0;
     const expectedImagesCount = specimen.expectedImages;
@@ -48,6 +49,12 @@ export default function ImageReviewDetails({
               'MMM d, yyyy h:mm a',
           )
         : '—';
+
+    function getMaxConfidencePercentage(logits: number[]): number {
+        const exps = logits.map(x => Math.exp(x));
+        const sumExps = exps.reduce((a, b) => a + b, 0);
+        return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
+    }
 
     return (
         <div className="space-y-4">
@@ -124,6 +131,43 @@ export default function ImageReviewDetails({
                         {t('abdomenStatus')}
                     </dt>
                     <dd>{currentImage?.abdomenStatus ?? '—'}</dd>
+                </dl>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+                <p className="text-sm font-semibold">{t('modelConfidence')}</p>
+                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                    <dt className="text-muted-foreground">{t('species')}</dt>
+                    <dd>
+                        {currentImage?.species
+                            ? (getMaxConfidencePercentage(
+                                  currentImage!.inferenceResult!.speciesLogits,
+                              ) ?? null) + '%'
+                            : '—'}
+                    </dd>
+
+                    <dt className="text-muted-foreground">{t('sex')}</dt>
+                    <dd>
+                        {currentImage?.sex
+                            ? (getMaxConfidencePercentage(
+                                  currentImage!.inferenceResult!.sexLogits,
+                              ) ?? null) + '%'
+                            : '—'}
+                    </dd>
+
+                    <dt className="text-muted-foreground">
+                        {t('abdomenStatus')}
+                    </dt>
+                    <dd>
+                        {currentImage?.abdomenStatus
+                            ? (getMaxConfidencePercentage(
+                                  currentImage!.inferenceResult!
+                                      .abdomenStatusLogits,
+                              ) ?? null) + '%'
+                            : '—'}
+                    </dd>
                 </dl>
             </div>
         </div>
