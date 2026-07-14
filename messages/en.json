@@ -110,6 +110,7 @@
         "inReview": "In Review",
         "certified": "Certified",
         "submitted": "Submitted",
+        "allStates": "All States",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
         "sitesVisited": "{visited} of {total} visited"

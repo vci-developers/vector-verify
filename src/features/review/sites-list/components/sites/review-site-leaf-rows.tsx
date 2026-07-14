@@ -5,22 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import {
     getSiteOverallReviewState,
     getSiteSessionCount,
-    REVIEW_STATE_SEVERITY_ORDER,
     type ReviewSiteSessionSummary,
 } from '@/features/review/utils/review-site-session-summary';
+import {
+    REVIEW_STATE_LABEL_KEY,
+    type ReviewState,
+} from '@/features/review/sites-list/utils/filter-segment-by-review-state';
 import { cn } from '@/utils/cn';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-
-type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
-
-const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
-    NEEDS_REVIEW: 'needsReview',
-    IN_REVIEW: 'inReview',
-    CERTIFIED: 'certified',
-    SUBMITTED: 'submitted',
-};
 
 const REVIEW_STATE_BADGE_VARIANT: Record<
     ReviewState,

@@ -6,6 +6,13 @@ import type { ReviewSegment } from '@/features/review/sites-list/utils/build-rev
 
 export type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
 
+export const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+    NEEDS_REVIEW: 'needsReview',
+    IN_REVIEW: 'inReview',
+    CERTIFIED: 'certified',
+    SUBMITTED: 'submitted',
+};
+
 export function filterSegmentByReviewState(
     segment: ReviewSegment,
     selectedStates: ReviewState[],
