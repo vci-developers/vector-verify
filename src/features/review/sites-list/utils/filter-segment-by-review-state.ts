@@ -16,7 +16,7 @@ export const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
 export function filterSegmentByReviewState(
     segment: ReviewSegment,
     selectedReviewStates: ReviewState[],
-): { visibleSiteIds: Set<number>; totalWithData: number } {
+): Set<number> {
     const isStateSelected = (state: ReviewState) =>
         selectedReviewStates.length === 0 ||
         selectedReviewStates.includes(state);
@@ -30,8 +30,5 @@ export function filterSegmentByReviewState(
         }
     }
 
-    return {
-        visibleSiteIds,
-        totalWithData: segment.summaryBySiteId.size,
-    };
+    return visibleSiteIds;
 }

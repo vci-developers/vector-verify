@@ -142,11 +142,14 @@ subset. _Avoid_: status filter.
 **Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
 Collection Cycle segment header in the Review sites list. Shown **only while the
 State Filter is active**. `X` = Sentinel Site rows currently visible in that
-cycle under the filter (filter-aware numerator); `total` = Sentinel Sites with
-data in that cycle (fixed denominator — the source of truth, never shrinks with
-the filter). Per-cycle, never aggregated across cycles. Follows the Gmail/GOV.UK
-"X of Y" convention: numerator moves, denominator holds still. _Avoid_: showing
-it at 25-of-25 when no filter is active; a filter-relative denominator.
+cycle under the filter (filter-aware numerator); `total` = every Sentinel Site
+in the selected location (fixed denominator — the leaf sites in the tree, the
+same population the group coverage "of Y" badge counts, so the two denominators
+agree; independent of the segment, never shrinks with the filter). Per-cycle,
+never aggregated across cycles. Follows the Gmail/GOV.UK "X of Y" convention:
+numerator moves, denominator holds still. _Avoid_: showing it at 25-of-25 when
+no filter is active; a filter-relative denominator; a "sites with data"
+denominator (reads too low next to the coverage badge).
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via

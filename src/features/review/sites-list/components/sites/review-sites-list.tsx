@@ -15,9 +15,17 @@ import {
     type ReviewSegment,
 } from '@/features/review/sites-list/utils/build-review-segments';
 import {
+    filterSegmentByReviewState,
+    type ReviewState,
+} from '@/features/review/sites-list/utils/filter-segment-by-review-state';
+import {
     buildSiteFilter,
     type LocationQueryParam,
 } from '@/lib/location/location-query';
+import {
+    getSentinelSiteIds,
+    getVisibleSitesAndAncestors,
+} from '@/lib/location/site-tree';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -47,6 +55,7 @@ interface ReviewSitesListProps {
     endMonth: Date;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
+    selectedReviewStates: ReviewState[];
 }
 
 export default function ReviewSitesList({
@@ -56,8 +65,15 @@ export default function ReviewSitesList({
     endMonth,
     collectionCycles,
     selectedCycleIds,
+    selectedReviewStates,
 }: ReviewSitesListProps) {
     const t = useTranslations('CollectionCycle');
+    const tSitesList = useTranslations('ReviewSitesList');
+    const isFilterActive = selectedReviewStates.length > 0;
+    const sentinelSiteCount = useMemo(
+        () => getSentinelSiteIds(sites).length,
+        [sites],
+    );
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -125,15 +141,30 @@ export default function ReviewSitesList({
             {segments.map(segment => {
                 const buildSiteHref = (siteId: number) =>
                     buildReviewWorkspaceHref(siteId, segment);
+                const visibleSiteIds = filterSegmentByReviewState(
+                    segment,
+                    selectedReviewStates,
+                );
+                const visibleSites = isFilterActive
+                    ? getVisibleSitesAndAncestors(sites, visibleSiteIds)
+                    : sites;
                 return (
                     <Collapsible key={segment.key} defaultOpen>
                         <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
                             <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                             {getSegmentLabel(segment)}
+                            {isFilterActive && (
+                                <span className="text-muted-foreground/70 ml-1 tracking-normal normal-case">
+                                    {tSitesList('showingSitesCount', {
+                                        visible: visibleSiteIds.size,
+                                        total: sentinelSiteCount,
+                                    })}
+                                </span>
+                            )}
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                             <ReviewSiteHierarchy
-                                sites={sites}
+                                sites={visibleSites}
                                 summaryBySiteId={segment.summaryBySiteId}
                                 buildSiteHref={buildSiteHref}
                             />

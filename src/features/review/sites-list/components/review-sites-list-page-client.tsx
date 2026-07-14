@@ -201,6 +201,7 @@ export default function ReviewSitesListPageClient() {
                                 endMonth={endMonth}
                                 collectionCycles={collectionCycles}
                                 selectedCycleIds={selectedCycleIds}
+                                selectedReviewStates={selectedReviewStates}
                             />
                         )
                     ) : (

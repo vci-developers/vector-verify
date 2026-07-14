@@ -113,7 +113,8 @@
         "filterByState": "Filter by state",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
-        "sitesVisited": "{visited} of {total} visited"
+        "sitesVisited": "{visited} of {total} visited",
+        "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}"
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",
