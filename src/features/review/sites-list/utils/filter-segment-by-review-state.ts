@@ -1,17 +1,8 @@
 import {
     getSiteOverallReviewState,
-    type REVIEW_STATE_SEVERITY_ORDER,
+    type ReviewState,
 } from '@/features/review/utils/review-site-session-summary';
 import type { ReviewSegment } from '@/features/review/sites-list/utils/build-review-segments';
-
-export type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
-
-export const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
-    NEEDS_REVIEW: 'needsReview',
-    IN_REVIEW: 'inReview',
-    CERTIFIED: 'certified',
-    SUBMITTED: 'submitted',
-};
 
 export function filterSegmentByReviewState(
     segment: ReviewSegment,

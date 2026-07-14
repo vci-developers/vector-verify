@@ -20,8 +20,11 @@ export function getLocationTypeName(site: Site): string {
 }
 
 export function getSentinelSiteIds(sites: Site[]): number[] {
+    const parentIds = new Set(
+        sites.map(site => site.parentId).filter(id => id != null),
+    );
     return sites
-        .filter(site => !sites.some(other => other.parentId === site.siteId))
+        .filter(site => !parentIds.has(site.siteId))
         .map(site => site.siteId);
 }
 

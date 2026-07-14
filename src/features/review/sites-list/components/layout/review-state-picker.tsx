@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/multi-select';
 import {
     REVIEW_STATE_LABEL_KEY,
+    REVIEW_STATE_SEVERITY_ORDER,
     type ReviewState,
-} from '@/features/review/sites-list/utils/filter-segment-by-review-state';
-import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
+} from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
 interface ReviewStatePickerProps {

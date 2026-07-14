@@ -1,7 +1,7 @@
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 import ReviewStatePicker from '@/features/review/sites-list/components/layout/review-state-picker';
-import type { ReviewState } from '@/features/review/sites-list/utils/filter-segment-by-review-state';
+import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,

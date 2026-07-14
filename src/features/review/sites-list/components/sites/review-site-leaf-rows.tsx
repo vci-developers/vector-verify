@@ -5,12 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import {
     getSiteOverallReviewState,
     getSiteSessionCount,
-    type ReviewSiteSessionSummary,
-} from '@/features/review/utils/review-site-session-summary';
-import {
     REVIEW_STATE_LABEL_KEY,
+    type ReviewSiteSessionSummary,
     type ReviewState,
-} from '@/features/review/sites-list/utils/filter-segment-by-review-state';
+} from '@/features/review/utils/review-site-session-summary';
 import { cn } from '@/utils/cn';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';

@@ -137,7 +137,13 @@ with zero matching leaves; it never hides a **Collection Cycle** segment (an
 emptied cycle still renders, so its count badge can report a zero). Group
 coverage stats (visited/ total and the %/tint) stay **filter-blind** — they
 measure collection coverage of the location, a fixed property, not the filtered
-subset. _Avoid_: status filter.
+subset. To keep coverage filter-blind, the site hierarchy always receives the
+**full** `sites` array (coverage denominators walk the full tree) and a separate
+`visibleSiteIds` set threaded to the leaf rows decides which rows render — the
+hierarchy must never be handed a pre-filtered `sites` array, because its group
+coverage counts are derived from whatever array it is given. _Avoid_: status
+filter; pre-filtering `sites` before the hierarchy (collapses coverage
+denominators to the visible subset, e.g. 2-of-2-100% instead of 2-of-20-25%).
 
 **Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
 Collection Cycle segment header in the Review sites list. Shown **only while the

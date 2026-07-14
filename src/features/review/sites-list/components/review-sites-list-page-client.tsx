@@ -16,7 +16,7 @@ import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
-import type { ReviewState } from '@/features/review/sites-list/utils/filter-segment-by-review-state';
+import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS = [
