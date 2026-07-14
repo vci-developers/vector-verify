@@ -5,7 +5,6 @@ import {
     getSiteAndDescendants,
     getTopLevelSites,
 } from '@/lib/location/site-tree';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useMemo } from 'react';
 
 function getUniqueDistricts(sites: Site[]): string[] {
@@ -17,13 +16,8 @@ function getUniqueDistricts(sites: Site[]): string[] {
 
 export function useLocationMultiSelection(
     accessibleSites: Site[],
-    storageKey: string,
+    selectedLocations: string[],
 ) {
-    const [selectedLocations, setSelectedLocations] = useLocalStorage<string[]>(
-        storageKey,
-        [],
-    );
-
     const usesLegacyStructure =
         accessibleSites.length > 0 && accessibleSites.some(isLegacySite);
 
@@ -98,8 +92,6 @@ export function useLocationMultiSelection(
     ]);
 
     return {
-        selectedLocations,
-        setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
