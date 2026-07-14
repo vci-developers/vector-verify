@@ -68,12 +68,11 @@ export default function MetadataReviewTable({
                                     session.collectionDate,
                                     timezone,
                                     'MMM d, yyyy',
-                                )}
-                                {' — '}
+                                )}{' '}
                                 {formatDateInTimezone(
                                     session.createdAt,
                                     timezone,
-                                    'HH:mm',
+                                    'h:mm a',
                                 )}
                             </TableHead>
                         ))}
