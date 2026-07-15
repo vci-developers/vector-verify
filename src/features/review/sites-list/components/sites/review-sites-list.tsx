@@ -18,9 +18,9 @@ import { filterSegmentByReviewState } from '@/features/review/sites-list/utils/f
 import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
 import {
     buildSiteFilter,
+    isLegacySite,
     type LocationQueryParam,
 } from '@/lib/location/location-query';
-import { getSentinelSiteIds } from '@/lib/location/site-tree';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -64,11 +64,14 @@ export default function ReviewSitesList({
 }: ReviewSitesListProps) {
     const t = useTranslations('CollectionCycle');
     const tSitesList = useTranslations('ReviewSitesList');
-    const isFilterActive = selectedReviewStates.length > 0;
-    const sentinelSiteCount = useMemo(
-        () => getSentinelSiteIds(sites).length,
-        [sites],
-    );
+    const sentinelSiteCount = useMemo(() => {
+        if (sites.length === 0) return 0;
+        if (isLegacySite(sites[0]!)) return sites.length;
+        const parentIds = new Set(
+            sites.map(site => site.parentId).filter(id => id != null),
+        );
+        return sites.filter(site => !parentIds.has(site.siteId)).length;
+    }, [sites]);
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -136,16 +139,19 @@ export default function ReviewSitesList({
             {segments.map(segment => {
                 const buildSiteHref = (siteId: number) =>
                     buildReviewWorkspaceHref(siteId, segment);
-                const visibleSiteIds = filterSegmentByReviewState(
-                    segment,
-                    selectedReviewStates,
-                );
+                const visibleSiteIds =
+                    selectedReviewStates.length > 0
+                        ? filterSegmentByReviewState(
+                              segment,
+                              selectedReviewStates,
+                          )
+                        : undefined;
                 return (
                     <Collapsible key={segment.key} defaultOpen>
                         <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
                             <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                             {getSegmentLabel(segment)}
-                            {isFilterActive && (
+                            {visibleSiteIds && (
                                 <span className="text-muted-foreground/70 ml-1 tracking-normal normal-case">
                                     {tSitesList('showingSitesCount', {
                                         visible: visibleSiteIds.size,
@@ -155,18 +161,14 @@ export default function ReviewSitesList({
                             )}
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            {isFilterActive && visibleSiteIds.size === 0 ? (
+                            {visibleSiteIds?.size === 0 ? (
                                 <p className="text-muted-foreground py-6 text-center text-sm">
                                     {tSitesList('noSitesMatchFilter')}
                                 </p>
                             ) : (
                                 <ReviewSiteHierarchy
                                     sites={sites}
-                                    visibleSiteIds={
-                                        isFilterActive
-                                            ? visibleSiteIds
-                                            : undefined
-                                    }
+                                    visibleSiteIds={visibleSiteIds}
                                     summaryBySiteId={segment.summaryBySiteId}
                                     buildSiteHref={buildSiteHref}
                                 />

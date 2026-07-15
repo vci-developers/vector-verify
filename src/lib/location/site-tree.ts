@@ -1,5 +1,4 @@
 import type { Site } from '@/api/site/validation/site-schema';
-import { isLegacySite } from '@/lib/location/location-query';
 
 export function getTopLevelSites(accessibleSites: Site[]): Site[] {
     const allAccessibleSiteIds = new Set(
@@ -18,18 +17,6 @@ export function getTopLevelSites(accessibleSites: Site[]): Site[] {
 
 export function getLocationTypeName(site: Site): string {
     return Object.keys(site.locationHierarchy).at(-1) ?? 'Location';
-}
-
-export function getSentinelSiteIds(sites: Site[]): number[] {
-    if (sites.length === 0) return [];
-    if (isLegacySite(sites[0]!)) return sites.map(site => site.siteId);
-
-    const parentIds = new Set(
-        sites.map(site => site.parentId).filter(id => id != null),
-    );
-    return sites
-        .filter(site => !parentIds.has(site.siteId))
-        .map(site => site.siteId);
 }
 
 export function getSiteAndDescendants(

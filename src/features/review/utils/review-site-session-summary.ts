@@ -26,7 +26,7 @@ export type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
 
 export function getSiteOverallReviewState(
     summary: ReviewSiteSessionSummary,
-): (typeof REVIEW_STATE_SEVERITY_ORDER)[number] | null {
+): ReviewState | null {
     return (
         REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null
     );
