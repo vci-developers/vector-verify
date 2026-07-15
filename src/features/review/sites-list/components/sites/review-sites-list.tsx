@@ -20,10 +20,7 @@ import {
     buildSiteFilter,
     type LocationQueryParam,
 } from '@/lib/location/location-query';
-import {
-    getSentinelSiteIds,
-    getVisibleSitesAndAncestors,
-} from '@/lib/location/site-tree';
+import { getSentinelSiteIds } from '@/lib/location/site-tree';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -143,9 +140,6 @@ export default function ReviewSitesList({
                     segment,
                     selectedReviewStates,
                 );
-                const visibleSites = isFilterActive
-                    ? getVisibleSitesAndAncestors(sites, visibleSiteIds)
-                    : sites;
                 return (
                     <Collapsible key={segment.key} defaultOpen>
                         <CollapsibleTrigger className="group text-muted-foreground flex w-full items-center gap-2 py-3 text-xs font-semibold tracking-widest uppercase">
@@ -162,7 +156,10 @@ export default function ReviewSitesList({
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                             <ReviewSiteHierarchy
-                                sites={visibleSites}
+                                sites={sites}
+                                visibleSiteIds={
+                                    isFilterActive ? visibleSiteIds : undefined
+                                }
                                 summaryBySiteId={segment.summaryBySiteId}
                                 buildSiteHref={buildSiteHref}
                             />

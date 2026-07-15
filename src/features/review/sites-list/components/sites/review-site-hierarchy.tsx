@@ -21,12 +21,14 @@ const LEGACY_HIERARCHY_LEVELS = [
 
 interface ReviewSiteHierarchyProps {
     sites: Site[];
+    visibleSiteIds?: Set<number>;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteHierarchy({
     sites,
+    visibleSiteIds,
     summaryBySiteId,
     buildSiteHref,
 }: ReviewSiteHierarchyProps) {
@@ -35,6 +37,7 @@ export default function ReviewSiteHierarchy({
     return isLegacySite(sites[0]!) ? (
         <LegacySiteLevel
             sites={sites}
+            visibleSiteIds={visibleSiteIds}
             depth={0}
             summaryBySiteId={summaryBySiteId}
             buildSiteHref={buildSiteHref}
@@ -43,6 +46,7 @@ export default function ReviewSiteHierarchy({
         <HierarchicalSiteLevel
             allSites={sites}
             sitesAtLevel={getTopLevelSites(sites)}
+            visibleSiteIds={visibleSiteIds}
             depth={0}
             summaryBySiteId={summaryBySiteId}
             buildSiteHref={buildSiteHref}
@@ -52,11 +56,13 @@ export default function ReviewSiteHierarchy({
 
 function LegacySiteLevel({
     sites,
+    visibleSiteIds,
     depth,
     summaryBySiteId,
     buildSiteHref,
 }: {
     sites: Site[];
+    visibleSiteIds?: Set<number>;
     depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
@@ -67,6 +73,7 @@ function LegacySiteLevel({
         return (
             <ReviewSiteLeafRows
                 sites={sites}
+                visibleSiteIds={visibleSiteIds}
                 getDisplayName={site => site[level.key] ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
                 buildSiteHref={buildSiteHref}
@@ -96,6 +103,7 @@ function LegacySiteLevel({
                 >
                     <LegacySiteLevel
                         sites={groupSites}
+                        visibleSiteIds={visibleSiteIds}
                         depth={depth + 1}
                         summaryBySiteId={summaryBySiteId}
                         buildSiteHref={buildSiteHref}
@@ -109,12 +117,14 @@ function LegacySiteLevel({
 function HierarchicalSiteLevel({
     allSites,
     sitesAtLevel,
+    visibleSiteIds,
     depth,
     summaryBySiteId,
     buildSiteHref,
 }: {
     allSites: Site[];
     sitesAtLevel: Site[];
+    visibleSiteIds?: Set<number>;
     depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
@@ -129,6 +139,7 @@ function HierarchicalSiteLevel({
         return (
             <ReviewSiteLeafRows
                 sites={sitesAtLevel}
+                visibleSiteIds={visibleSiteIds}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
                 buildSiteHref={buildSiteHref}
@@ -169,6 +180,7 @@ function HierarchicalSiteLevel({
                         <HierarchicalSiteLevel
                             allSites={allSites}
                             sitesAtLevel={childSites}
+                            visibleSiteIds={visibleSiteIds}
                             depth={depth + 1}
                             summaryBySiteId={summaryBySiteId}
                             buildSiteHref={buildSiteHref}

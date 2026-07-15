@@ -28,27 +28,6 @@ export function getSentinelSiteIds(sites: Site[]): number[] {
         .map(site => site.siteId);
 }
 
-export function getVisibleSitesAndAncestors(
-    sites: Site[],
-    visibleSiteIds: Set<number>,
-): Site[] {
-    const siteById = new Map(sites.map(site => [site.siteId, site] as const));
-    const visibleSiteAndAncestorIds = new Set<number>(visibleSiteIds);
-
-    for (const visibleSiteId of visibleSiteIds) {
-        let ancestorId = siteById.get(visibleSiteId)?.parentId;
-        while (
-            ancestorId != null &&
-            !visibleSiteAndAncestorIds.has(ancestorId)
-        ) {
-            visibleSiteAndAncestorIds.add(ancestorId);
-            ancestorId = siteById.get(ancestorId)?.parentId;
-        }
-    }
-
-    return sites.filter(site => visibleSiteAndAncestorIds.has(site.siteId));
-}
-
 export function getSiteAndDescendants(
     accessibleSites: Site[],
     ancestorSiteId: number,
