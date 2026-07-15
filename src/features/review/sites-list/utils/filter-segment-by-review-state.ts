@@ -8,18 +8,14 @@ export function filterSegmentByReviewState(
     segment: ReviewSegment,
     selectedReviewStates: ReviewState[],
 ): Set<number> {
-    const isStateSelected = (state: ReviewState) =>
-        selectedReviewStates.length === 0 ||
-        selectedReviewStates.includes(state);
-
+    const selectedStateSet = new Set(selectedReviewStates);
     const visibleSiteIds = new Set<number>();
 
     for (const [siteId, summary] of segment.summaryBySiteId) {
         const overallState = getSiteOverallReviewState(summary);
-        if (overallState !== null && isStateSelected(overallState)) {
+        if (overallState !== null && selectedStateSet.has(overallState)) {
             visibleSiteIds.add(siteId);
         }
     }
-
     return visibleSiteIds;
 }
