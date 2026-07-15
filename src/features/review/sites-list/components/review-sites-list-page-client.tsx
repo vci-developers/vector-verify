@@ -26,6 +26,8 @@ const REVIEW_TABS = [
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
 
+const DEFAULT_REVIEW_STATE_FILTER: ReviewState[] = ['NEEDS_REVIEW'];
+
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
@@ -44,7 +46,7 @@ export default function ReviewSitesListPageClient() {
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
     const [selectedReviewStates, setSelectedReviewStates] = useState<
         ReviewState[]
-    >([]);
+    >(DEFAULT_REVIEW_STATE_FILTER);
 
     const {
         data: getUserPermissionsResult,
@@ -103,7 +105,7 @@ export default function ReviewSitesListPageClient() {
 
     function resetFilters() {
         setSelectedCycleIds([]);
-        setSelectedReviewStates([]);
+        setSelectedReviewStates(DEFAULT_REVIEW_STATE_FILTER);
     }
 
     function handleLocationChange(location: string) {

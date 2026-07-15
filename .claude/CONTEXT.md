@@ -130,8 +130,16 @@ the **State filter** matches against. _Avoid_: site status, badge state.
 
 **State Filter**: A Review sites-list filter (multi-select, empty = show all,
 mirroring the Collection Cycle picker) over the four **Site Review State**
-values. A Sentinel Site row is shown when its Site Review State is in the
-selected set; no-session rows are hidden whenever any state is selected.
+values. It **defaults to `NEEDS_REVIEW` selected** — the filter is active on
+first paint and re-seeds to `NEEDS_REVIEW` on every
+location/start-month/end-month change (`resetFilters`), because surfacing what
+needs a VCO's attention is the resting state of Review, not a one-time greeting.
+Empty (show all) stays reachable by deselecting, but it is an escape hatch that
+never survives a location/month change. A Sentinel Site row is shown when its
+Site Review State is in the selected set; no-session rows are hidden whenever
+any state is selected. Because the default is non-empty, a clean location
+(nothing needs review) lands directly on "No sites match filter" / "Showing 0 of
+N" rather than the full list — that is the intended signal, not a regression.
 Filtering hides non-matching leaf rows and prunes location groups that end up
 with zero matching leaves; it never hides a **Collection Cycle** segment (an
 emptied cycle still renders, so its count badge can report a zero). Group
@@ -148,23 +156,25 @@ denominators to the visible subset, e.g. 2-of-2-100% instead of 2-of-20-25%).
 **Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
 segment header in the Review sites list. Renders on **any** segment header —
 Collection Cycle **or** calendar month — because both segment kinds share one
-header component. Shown **only while the State Filter is active**. `X` =
-Sentinel Site rows currently visible in that segment under the filter
-(filter-aware numerator); `total` = every Sentinel Site (leaf site) in the
-selected location, counted **structurally** — the same leaf definition the group
-coverage badge uses, so the header `total` and the group `total`s reconcile.
-Legacy/Uganda: the `sites` array is already leaf-level (each row is a full
-house), so `total` = `sites.length`. Hierarchical/non-Uganda: `sites` flattens
-every tree level together, so the leaves are the rows nobody points to as a
-`parentId` — `sites.filter(s => !parentIds.has(s.siteId))`. This is a **wider,
-location-spanning** denominator than the group "of Y" (which counts leaves under
-one group), independent of the segment, never shrinks with the filter.
-Per-segment display, never aggregated across segments. Follows the Gmail/GOV.UK
-"X of Y" convention: numerator moves, denominator holds still. _Avoid_: showing
-it at 25-of-25 when no filter is active; a filter-relative denominator; using
-`hasData` for `total` (that counts only ever-visited leaves, so it undercounts
-the never-visited "No sessions" rows the list still renders, and disagrees with
-the structural group totals).
+header component. Shown **only while the State Filter is active** — which, since
+the filter **defaults to `NEEDS_REVIEW`**, means it is present on first paint; a
+badge on landing is expected, not the "no filter active" case the _Avoid_ note
+below warns against. `X` = Sentinel Site rows currently visible in that segment
+under the filter (filter-aware numerator); `total` = every Sentinel Site (leaf
+site) in the selected location, counted **structurally** — the same leaf
+definition the group coverage badge uses, so the header `total` and the group
+`total`s reconcile. Legacy/Uganda: the `sites` array is already leaf-level (each
+row is a full house), so `total` = `sites.length`. Hierarchical/non-Uganda:
+`sites` flattens every tree level together, so the leaves are the rows nobody
+points to as a `parentId` — `sites.filter(s => !parentIds.has(s.siteId))`. This
+is a **wider, location-spanning** denominator than the group "of Y" (which
+counts leaves under one group), independent of the segment, never shrinks with
+the filter. Per-segment display, never aggregated across segments. Follows the
+Gmail/GOV.UK "X of Y" convention: numerator moves, denominator holds still.
+_Avoid_: showing it at 25-of-25 when no filter is active; a filter-relative
+denominator; using `hasData` for `total` (that counts only ever-visited leaves,
+so it undercounts the never-visited "No sessions" rows the list still renders,
+and disagrees with the structural group totals).
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via
