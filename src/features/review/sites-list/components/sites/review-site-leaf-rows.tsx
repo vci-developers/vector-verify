@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import {
     getSiteOverallReviewState,
     getSiteSessionCount,
-    REVIEW_STATE_LABEL_KEY,
     type ReviewSiteSessionSummary,
     type ReviewState,
 } from '@/features/review/utils/review-site-session-summary';
@@ -13,6 +12,13 @@ import { cn } from '@/utils/cn';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+
+const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+    NEEDS_REVIEW: 'needsReview',
+    IN_REVIEW: 'inReview',
+    CERTIFIED: 'certified',
+    SUBMITTED: 'submitted',
+};
 
 const REVIEW_STATE_BADGE_VARIANT: Record<
     ReviewState,

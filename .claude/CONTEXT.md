@@ -146,16 +146,18 @@ filter; pre-filtering `sites` before the hierarchy (collapses coverage
 denominators to the visible subset, e.g. 2-of-2-100% instead of 2-of-20-25%).
 
 **Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
-Collection Cycle segment header in the Review sites list. Shown **only while the
-State Filter is active**. `X` = Sentinel Site rows currently visible in that
-cycle under the filter (filter-aware numerator); `total` = every Sentinel Site
-in the selected location (fixed denominator — the leaf sites in the tree, the
-same population the group coverage "of Y" badge counts, so the two denominators
-agree; independent of the segment, never shrinks with the filter). Per-cycle,
-never aggregated across cycles. Follows the Gmail/GOV.UK "X of Y" convention:
-numerator moves, denominator holds still. _Avoid_: showing it at 25-of-25 when
-no filter is active; a filter-relative denominator; a "sites with data"
-denominator (reads too low next to the coverage badge).
+segment header in the Review sites list. Renders on **any** segment header —
+Collection Cycle **or** calendar month — because both segment kinds share one
+header component. Shown **only while the State Filter is active**. `X` =
+Sentinel Site rows currently visible in that segment under the filter
+(filter-aware numerator); `total` = every Sentinel Site in the selected location
+(fixed denominator — the leaf sites in the tree, the same population the group
+coverage "of Y" badge counts, so the two denominators agree; independent of the
+segment, never shrinks with the filter). Per-segment, never aggregated across
+segments. Follows the Gmail/GOV.UK "X of Y" convention: numerator moves,
+denominator holds still. _Avoid_: showing it at 25-of-25 when no filter is
+active; a filter-relative denominator; a "sites with data" denominator (reads
+too low next to the coverage badge).
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via

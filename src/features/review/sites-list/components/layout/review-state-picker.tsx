@@ -9,11 +9,17 @@ import {
     MultiSelectValue,
 } from '@/components/ui/multi-select';
 import {
-    REVIEW_STATE_LABEL_KEY,
     REVIEW_STATE_SEVERITY_ORDER,
     type ReviewState,
 } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
+
+const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+    NEEDS_REVIEW: 'needsReview',
+    IN_REVIEW: 'inReview',
+    CERTIFIED: 'certified',
+    SUBMITTED: 'submitted',
+};
 
 interface ReviewStatePickerProps {
     selectedReviewStates: ReviewState[];
