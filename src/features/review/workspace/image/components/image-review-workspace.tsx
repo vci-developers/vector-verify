@@ -18,12 +18,12 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { Site } from '@/api/site/validation/site-schema';
+import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 
 interface ImageReviewWorkspaceProps {
-    siteId: number;
-    siteName: string | undefined;
+    site: Site;
     sessions: Session[];
-    readOnly: boolean;
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
@@ -33,10 +33,8 @@ interface ImageReviewWorkspaceProps {
 }
 
 export default function ImageReviewWorkspace({
-    siteId,
-    siteName,
+    site,
     sessions,
-    readOnly,
     startDate,
     endDate,
     collectionCycleId,
@@ -54,13 +52,13 @@ export default function ImageReviewWorkspace({
     const specimenQueryParams: GetAllSpecimensQueryParams =
         collectionCycleId !== undefined
             ? {
-                  siteId: siteId,
+                  siteId: site.siteId,
                   collectionCycleId,
                   sessionType: 'SURVEILLANCE',
                   includeAllImages: true,
               }
             : {
-                  siteId: siteId,
+                  siteId: site.siteId,
                   startDate,
                   endDate,
                   sessionType: 'SURVEILLANCE',
@@ -91,10 +89,12 @@ export default function ImageReviewWorkspace({
     );
     const missingSpecimenCount = expectedSpecimensCount - totalSpecimens;
 
+    const siteLabel = getSiteLabelParts(site).primaryLabel;
+
     if (specimens.length === 0) {
         return (
             <div className="space-y-4">
-                {!readOnly && missingSpecimenCount > 0 ? (
+                {missingSpecimenCount > 0 ? (
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Badge variant="destructive">
@@ -105,7 +105,7 @@ export default function ImageReviewWorkspace({
                         <TooltipContent>
                             {t('specimensNotUploaded', {
                                 count: expectedSpecimensCount - totalSpecimens,
-                                site: siteName ?? 'Unknown',
+                                site: siteLabel,
                             })}
                         </TooltipContent>
                     </Tooltip>
@@ -142,7 +142,7 @@ export default function ImageReviewWorkspace({
                             total: totalSpecimens,
                         })}
                     </p>
-                    {!readOnly && missingSpecimenCount > 0 ? (
+                    {missingSpecimenCount > 0 ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Badge variant="destructive">
@@ -154,7 +154,7 @@ export default function ImageReviewWorkspace({
                                 {t('specimensNotUploaded', {
                                     count:
                                         expectedSpecimensCount - totalSpecimens,
-                                    site: siteName ?? 'Unknown',
+                                    site: siteLabel,
                                 })}
                             </TooltipContent>
                         </Tooltip>
