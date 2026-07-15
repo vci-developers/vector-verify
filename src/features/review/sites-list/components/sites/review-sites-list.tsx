@@ -126,7 +126,7 @@ export default function ReviewSitesList({
     if (sites.length === 0) {
         return (
             <p className="text-muted-foreground py-12 text-center text-sm">
-                No sites found for this location.
+                {tSitesList('noSitesForLocation')}
             </p>
         );
     }
@@ -155,14 +155,22 @@ export default function ReviewSitesList({
                             )}
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <ReviewSiteHierarchy
-                                sites={sites}
-                                visibleSiteIds={
-                                    isFilterActive ? visibleSiteIds : undefined
-                                }
-                                summaryBySiteId={segment.summaryBySiteId}
-                                buildSiteHref={buildSiteHref}
-                            />
+                            {isFilterActive && visibleSiteIds.size === 0 ? (
+                                <p className="text-muted-foreground py-6 text-center text-sm">
+                                    {tSitesList('noSitesMatchFilter')}
+                                </p>
+                            ) : (
+                                <ReviewSiteHierarchy
+                                    sites={sites}
+                                    visibleSiteIds={
+                                        isFilterActive
+                                            ? visibleSiteIds
+                                            : undefined
+                                    }
+                                    summaryBySiteId={segment.summaryBySiteId}
+                                    buildSiteHref={buildSiteHref}
+                                />
+                            )}
                         </CollapsibleContent>
                     </Collapsible>
                 );

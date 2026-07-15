@@ -114,7 +114,9 @@
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
         "sitesVisited": "{visited} of {total} visited",
-        "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}"
+        "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
+        "noSitesForLocation": "No sites found for this location.",
+        "noSitesMatchFilter": "No sites match this filter."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",

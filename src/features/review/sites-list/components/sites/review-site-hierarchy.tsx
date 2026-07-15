@@ -19,6 +19,16 @@ const LEGACY_HIERARCHY_LEVELS = [
     { key: 'houseNumber', label: 'House' },
 ] as const;
 
+function hasVisibleSite(
+    groupSites: Site[],
+    visibleSiteIds: Set<number> | undefined,
+): boolean {
+    return (
+        visibleSiteIds === undefined ||
+        groupSites.some(site => visibleSiteIds.has(site.siteId))
+    );
+}
+
 interface ReviewSiteHierarchyProps {
     sites: Site[];
     visibleSiteIds?: Set<number>;
@@ -86,9 +96,9 @@ function LegacySiteLevel({
         const name = site[level.key] ?? 'Unknown';
         (sitesByName[name] ??= []).push(site);
     }
-    const groups = Object.entries(sitesByName).sort(([a], [b]) =>
-        a.localeCompare(b),
-    );
+    const groups = Object.entries(sitesByName)
+        .filter(entry => hasVisibleSite(entry[1], visibleSiteIds))
+        .sort(([a], [b]) => a.localeCompare(b));
 
     return (
         <div className="space-y-1">
@@ -168,6 +178,12 @@ function HierarchicalSiteLevel({
                             ),
                     )
                     .map(descendant => descendant.siteId);
+                if (
+                    visibleSiteIds !== undefined &&
+                    !sentinelSiteIds.some(siteId => visibleSiteIds.has(siteId))
+                ) {
+                    return null;
+                }
                 return (
                     <ReviewCollapsibleLocationGroup
                         key={site.siteId}
