@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
 
 interface ImageReviewDetailsProps {
     specimen: Specimen;
@@ -19,7 +20,6 @@ export default function ImageReviewDetails({
     timezone,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
-    console.log(specimen);
 
     const totalImagesUploaded = specimen.images?.length ?? 0;
     const expectedImagesCount = specimen.expectedImages;
@@ -55,6 +55,26 @@ export default function ImageReviewDetails({
         const sumExps = exps.reduce((a, b) => a + b, 0);
         return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
     }
+
+    const modelConfidencePercentages = {
+        species: currentImage?.species
+            ? (getMaxConfidencePercentage(
+                  currentImage!.inferenceResult!.speciesLogits,
+              ) ?? null)
+            : null,
+        sex: currentImage?.sex
+            ? (getMaxConfidencePercentage(
+                  currentImage!.inferenceResult!.sexLogits,
+              ) ?? null)
+            : null,
+        abdomenStatus: currentImage?.abdomenStatus
+            ? (getMaxConfidencePercentage(
+                  currentImage!.inferenceResult!.abdomenStatusLogits,
+              ) ?? null)
+            : null,
+    };
+
+    const isLoading = !specimen || !currentImage;
 
     return (
         <div className="space-y-4">
@@ -139,35 +159,30 @@ export default function ImageReviewDetails({
             <div className="space-y-3">
                 <p className="text-sm font-semibold">{t('modelConfidence')}</p>
                 <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-muted-foreground">{t('species')}</dt>
-                    <dd>
-                        {currentImage?.species
-                            ? (getMaxConfidencePercentage(
-                                  currentImage!.inferenceResult!.speciesLogits,
-                              ) ?? null) + '%'
-                            : '—'}
-                    </dd>
+                    <ConfidencePredictionRow
+                        category={t('species')}
+                        label={currentImage?.species}
+                        confidencePercentage={
+                            modelConfidencePercentages.species
+                        }
+                        isLoading={isLoading}
+                    />
 
-                    <dt className="text-muted-foreground">{t('sex')}</dt>
-                    <dd>
-                        {currentImage?.sex
-                            ? (getMaxConfidencePercentage(
-                                  currentImage!.inferenceResult!.sexLogits,
-                              ) ?? null) + '%'
-                            : '—'}
-                    </dd>
+                    <ConfidencePredictionRow
+                        category={t('sex')}
+                        label={currentImage?.sex}
+                        confidencePercentage={modelConfidencePercentages.sex}
+                        isLoading={isLoading}
+                    />
 
-                    <dt className="text-muted-foreground">
-                        {t('abdomenStatus')}
-                    </dt>
-                    <dd>
-                        {currentImage?.abdomenStatus
-                            ? (getMaxConfidencePercentage(
-                                  currentImage!.inferenceResult!
-                                      .abdomenStatusLogits,
-                              ) ?? null) + '%'
-                            : '—'}
-                    </dd>
+                    <ConfidencePredictionRow
+                        category={t('abdomenStatus')}
+                        label={currentImage?.abdomenStatus}
+                        confidencePercentage={
+                            modelConfidencePercentages.abdomenStatus
+                        }
+                        isLoading={isLoading}
+                    />
                 </dl>
             </div>
         </div>
