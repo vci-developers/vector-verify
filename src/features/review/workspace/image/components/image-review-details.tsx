@@ -50,7 +50,12 @@ export default function ImageReviewDetails({
           )
         : '—';
 
-    function getMaxConfidencePercentage(logits: number[]): number {
+    function getMaxConfidencePercentage(
+        logits: number[] | undefined,
+    ): number | null {
+        if (!logits || logits.length === 0) {
+            return null;
+        }
         const exps = logits.map(x => Math.exp(x));
         const sumExps = exps.reduce((a, b) => a + b, 0);
         return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
@@ -58,19 +63,19 @@ export default function ImageReviewDetails({
 
     const modelConfidencePercentages = {
         species: currentImage?.species
-            ? (getMaxConfidencePercentage(
-                  currentImage!.inferenceResult!.speciesLogits,
-              ) ?? null)
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.speciesLogits,
+              )
             : null,
         sex: currentImage?.sex
-            ? (getMaxConfidencePercentage(
-                  currentImage!.inferenceResult!.sexLogits,
-              ) ?? null)
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.sexLogits,
+              )
             : null,
         abdomenStatus: currentImage?.abdomenStatus
-            ? (getMaxConfidencePercentage(
-                  currentImage!.inferenceResult!.abdomenStatusLogits,
-              ) ?? null)
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.abdomenStatusLogits,
+              )
             : null,
     };
 
