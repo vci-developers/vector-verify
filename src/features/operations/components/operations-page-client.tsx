@@ -171,6 +171,9 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
                                     siteIds={selectedSiteIdsParam}
                                     selectedLocations={selectedLocations}
                                     descendantsOfSelectedLocations={

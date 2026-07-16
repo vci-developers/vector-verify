@@ -1,7 +1,8 @@
 'use client';
 
 import { DivIcon } from 'leaflet';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { createSpecimenMarkerIcon } from '@/features/operations/geographical-summary/components/create-specimen-marker-icon';
 import GeocodedClusterMap from '@/features/operations/geographical-summary/components/geocoded-cluster-map';
@@ -20,6 +21,8 @@ export default function SiteMap({
     selectedMarkerId,
     onMarkerSelect,
 }: SiteMapProps) {
+    const t = useTranslations('OperationsGeographicalSummary');
+
     const markerById = useMemo(
         () => new Map(markers.map(marker => [marker.id, marker])),
         [markers],
@@ -46,6 +49,49 @@ export default function SiteMap({
                     markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}
+                    renderMarkerDetails={marker => (
+                        <Fragment>
+                            <p>
+                                {t('siteSessionCount', {
+                                    count: marker.sessionCount,
+                                })}
+                            </p>
+                            <p>
+                                {t('siteSpecimenCount', {
+                                    count: marker.totalSpecimens,
+                                })}
+                            </p>
+                            <p>
+                                {t('siteAnophelesCount', {
+                                    count: marker.anophelesCount,
+                                })}
+                            </p>
+                            {marker.speciesBreakdown.length > 0 && (
+                                <div className="border-border mt-1 space-y-0.5 border-t pt-1">
+                                    {marker.speciesBreakdown.map(
+                                        ({ species, count }) => (
+                                            <p key={species}>
+                                                <span className="mr-1">↳</span>
+                                                {t('siteSpeciesCount', {
+                                                    species,
+                                                    count,
+                                                })}
+                                            </p>
+                                        ),
+                                    )}
+                                </div>
+                            )}
+                            {marker.lastCollectionDate && (
+                                <p className="mt-1">
+                                    {t('siteLastCollection', {
+                                        date: new Date(
+                                            marker.lastCollectionDate,
+                                        ).toLocaleDateString(),
+                                    })}
+                                </p>
+                            )}
+                        </Fragment>
+                    )}
                     isLoading={isLoading}
                 />
             )}
