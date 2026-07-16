@@ -254,6 +254,32 @@ token
 features (currently just the Raw Data Export). When on, a "Developer Mode" badge
 shows in the user menu. _Avoid_: Debug mode, admin mode, dev flag
 
+**User Analytics**: A `devMode`-gated trend chart of **VectorVerify user (VCO)**
+activity over time, opened from a dialog directly under **Raw Data Export** in
+the sidebar user menu. Measures _web-app users_ (people logging in and
+certifying), **not** field collectors — it is categorically distinct from
+**Device Activity**, which tracks VHTs via their devices. v1 sources
+`GET /users/active-metrics` only, plotting the daily **Active User** A1/A7/A30
+snapshots as three overlaid lines over a preset window (30d / 90d / 1y, default
+90d). Scope is **always the viewer's own program** (`profile.programId`) — there
+is no program selector, and the cross-program (`programId` free choice) and
+combined (`globalOnly=true`) backend views are not exposed in the web app
+(decided in PR #163 review, July 2026, superseding the original "program-less
+developer" audience). A devMode user whose `programId` is `null` gets an
+explanatory "no program" empty state instead of a chart. Certification and
+submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
+(collides with `isActive`/Whitelisted), Device Activity (different population),
+User Activity (ambiguous with Device Activity)
+
+**Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
+`GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
+the trailing 1 day (≈ DAU), **A7** = trailing 7 days (≈ WAU), **A30** = trailing
+30 days (≈ MAU). Rows are either program-scoped (`programId` set) or global
+(`programId: null`, returned via `globalOnly=true`). "Active" here means
+authenticated web-app usage — a login-driven metric, unrelated to the `isActive`
+account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as an
+explanatory gloss, but the field names are a1Count/a7Count/a30Count)
+
 ## Relationships
 
 - A **Program** contains many **Sites**
