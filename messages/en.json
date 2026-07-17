@@ -42,6 +42,8 @@
         "verificationEmailFailedMessage": "Couldn't send verification email. Please try again or contact support.",
         "verificationEmailSuccessMessage": "Verification email sent successfully. Please check your email.",
         "verificationEmailLoadingMessage": "Sending...",
+        "verificationEmailCooldownMessage": "You can resend in {time, plural, one {# second} other {# seconds}}.",
+        "verificationEmailResendMessage": "Resend verification email",
         "verifyEmailButton": "Verify email",
         "verifyYourEmail": "Verify your email",
         "emailVerificationPromptDescription": "Press 'Verify email' to send a verification email to your email address, then click the link to verify.",

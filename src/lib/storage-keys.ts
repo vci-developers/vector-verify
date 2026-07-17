@@ -1,4 +1,7 @@
 export const StorageKeys = {
+    auth: {
+        emailSentTimestamp: 'auth.lastSent',
+    },
     review: {
         activeTab: 'review.activeTab',
         startMonth: 'review.startMonth',
