@@ -1,7 +1,7 @@
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 import ReviewStatePicker from '@/features/review/sites-list/components/layout/review-state-picker';
-import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
     Select,
@@ -26,8 +26,8 @@ interface ReviewSitesListHeaderProps {
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
     onSelectedCycleIdsChange: (ids: number[]) => void;
-    selectedReviewStates: ReviewState[];
-    onSelectedReviewStatesChange: (states: ReviewState[]) => void;
+    selectedReviewStates: SessionState[];
+    onSelectedReviewStatesChange: (states: SessionState[]) => void;
     disabled: boolean;
     startMonth: Date;
     endMonth: Date;

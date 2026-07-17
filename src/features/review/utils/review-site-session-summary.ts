@@ -22,11 +22,9 @@ export const REVIEW_STATE_SEVERITY_ORDER = [
     'SUBMITTED',
 ] as const satisfies readonly SessionState[];
 
-export type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
-
 export function getSiteOverallReviewState(
     summary: ReviewSiteSessionSummary,
-): ReviewState | null {
+): (typeof REVIEW_STATE_SEVERITY_ORDER)[number] | null {
     return (
         REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null
     );

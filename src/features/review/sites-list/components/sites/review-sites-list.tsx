@@ -15,7 +15,7 @@ import {
     type ReviewSegment,
 } from '@/features/review/sites-list/utils/build-review-segments';
 import { filterSegmentByReviewState } from '@/features/review/sites-list/utils/filter-segment-by-review-state';
-import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import {
     buildSiteFilter,
     isLegacySite,
@@ -50,7 +50,7 @@ interface ReviewSitesListProps {
     endMonth: Date;
     collectionCycles: CollectionCycle[];
     selectedCycleIds: number[];
-    selectedReviewStates: ReviewState[];
+    selectedReviewStates: SessionState[];
 }
 
 export default function ReviewSitesList({

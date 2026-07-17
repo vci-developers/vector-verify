@@ -16,7 +16,7 @@ import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
-import type { ReviewState } from '@/features/review/utils/review-site-session-summary';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS = [
@@ -26,7 +26,7 @@ const REVIEW_TABS = [
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
 
-const DEFAULT_REVIEW_STATE_FILTER: ReviewState[] = ['NEEDS_REVIEW'];
+const DEFAULT_REVIEW_STATE_FILTER: SessionState[] = ['NEEDS_REVIEW'];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
@@ -45,7 +45,7 @@ export default function ReviewSitesListPageClient() {
     );
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
     const [selectedReviewStates, setSelectedReviewStates] = useState<
-        ReviewState[]
+        SessionState[]
     >(DEFAULT_REVIEW_STATE_FILTER);
 
     const {

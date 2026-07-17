@@ -8,13 +8,14 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from '@/components/ui/multi-select';
-import {
-    REVIEW_STATE_SEVERITY_ORDER,
-    type ReviewState,
-} from '@/features/review/utils/review-site-session-summary';
+import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import { useTranslations } from 'next-intl';
 
-const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+const REVIEW_STATE_LABEL_KEY: Record<
+    (typeof REVIEW_STATE_SEVERITY_ORDER)[number],
+    string
+> = {
     NEEDS_REVIEW: 'needsReview',
     IN_REVIEW: 'inReview',
     CERTIFIED: 'certified',
@@ -22,8 +23,8 @@ const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
 };
 
 interface ReviewStatePickerProps {
-    selectedReviewStates: ReviewState[];
-    onSelectedReviewStatesChange: (states: ReviewState[]) => void;
+    selectedReviewStates: SessionState[];
+    onSelectedReviewStatesChange: (states: SessionState[]) => void;
     disabled: boolean;
 }
 
@@ -38,7 +39,7 @@ export default function ReviewStatePicker({
         <MultiSelect
             values={selectedReviewStates}
             onValuesChange={values =>
-                onSelectedReviewStatesChange(values as ReviewState[])
+                onSelectedReviewStatesChange(values as SessionState[])
             }
         >
             <MultiSelectTrigger className="w-52" disabled={disabled}>
