@@ -57,53 +57,35 @@ export default function EmailVerificationPrompt() {
         });
     }
 
-    if (!submitted) {
-        return (
-            <Fragment>
-                {hasError && (
-                    <p className="text-muted-foreground p-2 text-center text-sm">
-                        {t('verificationEmailFailedMessage')}
-                    </p>
-                )}
-                <Button
-                    className="w-full"
-                    onClick={sendEmail}
-                    disabled={isPending || isOnCooldown}
-                >
-                    {isPending
-                        ? t('verificationEmailLoadingMessage')
-                        : isOnCooldown
-                          ? t('verificationEmailCooldownMessage', {
-                                time: secondsRemaining,
-                            })
-                          : t('verifyEmailButton')}
-                </Button>
-                <Separator className="my-6" />
-                <LogoutButton />
-            </Fragment>
-        );
-    } else {
-        return (
-            <Fragment>
+    return (
+        <Fragment>
+            {hasError && (
+                <p className="text-muted-foreground p-2 text-center text-sm">
+                    {t('verificationEmailFailedMessage')}
+                </p>
+            )}
+            {submitted && (
                 <p className="text-muted-foreground p-2 text-center text-sm">
                     {t('verificationEmailSuccessMessage')}
                 </p>
-                <Button
-                    className="w-full"
-                    onClick={sendEmail}
-                    disabled={isPending || isOnCooldown}
-                >
-                    {isPending
-                        ? t('verificationEmailLoadingMessage')
-                        : isOnCooldown
-                          ? t('verificationEmailCooldownMessage', {
-                                time: secondsRemaining,
-                            })
-                          : t('verificationEmailResendMessage')}
-                </Button>
-                <Separator className="my-6" />
-                <LogoutButton />
-            </Fragment>
-        );
-    }
+            )}
+            <Button
+                className="w-full"
+                onClick={sendEmail}
+                disabled={isPending || isOnCooldown}
+            >
+                {isPending
+                    ? t('verificationEmailLoadingMessage')
+                    : isOnCooldown
+                      ? t('verificationEmailCooldownMessage', {
+                            time: secondsRemaining,
+                        })
+                      : hasError || submitted
+                        ? t('verificationEmailResendMessage')
+                        : t('verifyEmailButton')}
+            </Button>
+            <Separator className="my-6" />
+            <LogoutButton />
+        </Fragment>
+    );
 }
