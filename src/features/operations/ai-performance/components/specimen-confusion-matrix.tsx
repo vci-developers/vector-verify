@@ -89,6 +89,20 @@ export default function SpecimenConfusionMatrix({
         0,
     );
 
+    if (totalSpecimensInMatrix === 0) {
+        return (
+            <Card className="gap-0 lg:col-span-2">
+                <CardContent className="space-y-6">
+                    <p className="text-muted-foreground w-full justify-center text-sm">
+                        {t('noConfusionMatrixData', {
+                            category: classificationCategory,
+                        })}
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const totalCorrectPredictions = classLabels.reduce(
         (totalSpecimens, classLabel) =>
             totalSpecimens + getSpecimenCountForCell(classLabel, classLabel),

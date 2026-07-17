@@ -77,6 +77,7 @@
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
+        "noConfusionMatrixData": "No verified {category} comparisons in this date range; there are no annotations to compare with VectorCam's predictions.",
         "perLabelMetrics": "Per-Label Metrics",
         "label": "Label",
         "sensitivity": "Sensitivity",
