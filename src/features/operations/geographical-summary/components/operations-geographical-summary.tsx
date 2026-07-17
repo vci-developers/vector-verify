@@ -20,10 +20,7 @@ import { Fragment, useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
-const GEOGRAPHICAL_VIEWS: readonly GeographicalView[] = [
-    'specimens',
-    'devices',
-];
+const GEOGRAPHICAL_VIEWS: GeographicalView[] = ['specimens', 'devices'];
 
 interface OperationsGeographicalSummaryProps {
     siteIds: number[];
