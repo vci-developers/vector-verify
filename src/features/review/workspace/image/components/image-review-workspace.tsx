@@ -7,19 +7,14 @@ import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { AlertCircle, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
-import { Badge } from '@/components/ui/badge';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
+import MissingSpecimensTooltip from './missing-specimens-tooltip';
 
 interface ImageReviewWorkspaceProps {
     site: Site;
@@ -94,22 +89,10 @@ export default function ImageReviewWorkspace({
     if (specimens.length === 0) {
         return (
             <div className="space-y-4">
-                {missingSpecimenCount > 0 ? (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Badge variant="destructive">
-                                <AlertCircle className="h-3 w-3" />
-                                {t('missingSpecimensBadge')}
-                            </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {t('specimensNotUploaded', {
-                                count: expectedSpecimensCount - totalSpecimens,
-                                site: siteLabel,
-                            })}
-                        </TooltipContent>
-                    </Tooltip>
-                ) : null}
+                <MissingSpecimensTooltip
+                    specimensMissing={missingSpecimenCount}
+                    siteLabel={siteLabel}
+                />
                 <div className="bg-muted/30 flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                     <ImageOff className="text-muted-foreground/60 mb-4 h-12 w-12" />
                     <h3 className="text-sm font-semibold">{t('emptyTitle')}</h3>
@@ -142,23 +125,10 @@ export default function ImageReviewWorkspace({
                             total: totalSpecimens,
                         })}
                     </p>
-                    {missingSpecimenCount > 0 ? (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Badge variant="destructive">
-                                    <AlertCircle className="h-3 w-3" />
-                                    {t('missingSpecimensBadge')}
-                                </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {t('specimensNotUploaded', {
-                                    count:
-                                        expectedSpecimensCount - totalSpecimens,
-                                    site: siteLabel,
-                                })}
-                            </TooltipContent>
-                        </Tooltip>
-                    ) : null}
+                    <MissingSpecimensTooltip
+                        specimensMissing={missingSpecimenCount}
+                        siteLabel={siteLabel}
+                    />
                 </div>
                 <div className="flex gap-2">
                     <Button
