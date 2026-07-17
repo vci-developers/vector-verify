@@ -21,7 +21,7 @@ import {
 } from '@/features/operations/view-state/use-operations-filters';
 import { useTranslations } from 'next-intl';
 
-const OPERATIONS_TABS: readonly {
+const OPERATIONS_TABS: {
     value: OperationsTab;
     label: string;
     shouldRender: (permissions: UserPermissions) => boolean;
@@ -177,7 +177,6 @@ export default function OperationsPageClient() {
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
                                     siteIds={selectedSiteIdsParam}
-                                    selectedLocations={selectedLocations}
                                     descendantsOfSelectedLocations={
                                         descendantsOfSelectedLocations
                                     }

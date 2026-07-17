@@ -20,7 +20,7 @@ import ReviewSitesList from '@/features/review/sites-list/components/sites/revie
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
 import { useTranslations } from 'next-intl';
 
-const REVIEW_TABS: readonly { value: ReviewTab; label: string }[] = [
+const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
     { value: 'sites-list', label: 'SITES LIST' },
     { value: 'submissions', label: 'SUBMISSIONS' },
 ];

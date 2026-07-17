@@ -27,7 +27,6 @@ const GEOGRAPHICAL_VIEWS: readonly GeographicalView[] = [
 
 interface OperationsGeographicalSummaryProps {
     siteIds: number[];
-    selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
@@ -37,7 +36,6 @@ interface OperationsGeographicalSummaryProps {
 
 export default function OperationsGeographicalSummary({
     siteIds,
-    selectedLocations,
     descendantsOfSelectedLocations,
     startDate,
     endDate,
@@ -55,7 +53,8 @@ export default function OperationsGeographicalSummary({
     if (!isPending && markers.length > 0) siteMapMounted.current = true;
 
     const t = useTranslations('OperationsGeographicalSummary');
-    const [{ geographicalView }, setFilters] = useOperationsFilters();
+    const [{ geographicalView, selectedLocations }, setFilters] =
+        useOperationsFilters();
 
     return (
         <div className="mt-4 space-y-3">
