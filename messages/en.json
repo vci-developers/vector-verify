@@ -46,12 +46,11 @@
         "noDeviceActivity": "No device activity to display.",
         "deviceActivityError": "Failed to load device activity. Check the console for details.",
         "active": "Active",
-        "lapsing": "Lapsing",
         "inactive": "Inactive",
-        "unknownSite": "Unknown site",
+        "unknownLocation": "Unknown location",
         "sitesCount": "{count, plural, one {# site} other {# sites}}",
         "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
-        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}",
+        "siteInactiveCount": "{count, plural, one {# inactive device} other {# inactive devices}}",
         "siteSessionCount": "{count, plural, one {# session} other {# sessions}}",
         "siteSpecimenCount": "{count, plural, one {# specimen} other {# specimens}}",
         "siteAnophelesCount": "{count, number} Anopheles",
@@ -60,12 +59,11 @@
         "locatingSites": "Locating sites…",
         "locatingDevices": "Locating devices…",
         "legendMarkerTitle": "Each marker represents a collection site",
-        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity as of today over a rolling 6-month window, independent of the selected date range.",
+        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity in the current collection cycle, independent of the selected date range.",
         "legendSizeTitle": "Marker Size",
         "legendSizeSubtitle": "Scaled by active device count",
         "legendColorTitle": "Marker Color — Site Health",
-        "legendActive": "Has an active device this month",
-        "legendLapsing": "Only lapsing devices",
+        "legendActive": "Has an active device this cycle",
         "legendInactive": "All devices inactive"
     },
     "OperationsSpecimenComposition": {
@@ -181,5 +179,21 @@
     "Dhis2Submissions": {
         "certifiedBy": "Certified by: {name}",
         "unknownCertifier": "an unknown user"
+    },
+    "UserAnalytics": {
+        "menuItem": "User Analytics",
+        "title": "User Analytics",
+        "description": "Active web-app users over time for your program.",
+        "programDescription": "Active web-app users over time for {programName}.",
+        "range30d": "30 days",
+        "range90d": "90 days",
+        "range1y": "1 year",
+        "a1Label": "Daily",
+        "a7Label": "Weekly",
+        "a30Label": "Monthly",
+        "axisDateLabel": "Date",
+        "axisActiveUsersLabel": "Active users",
+        "loading": "Loading active-user metrics…",
+        "empty": "No active-user snapshots in this window."
     }
 }

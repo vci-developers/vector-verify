@@ -23,6 +23,7 @@ const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
 type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
 
 interface OperationsGeographicalSummaryProps {
+    programId: number;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
@@ -33,6 +34,7 @@ interface OperationsGeographicalSummaryProps {
 }
 
 export default function OperationsGeographicalSummary({
+    programId,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
@@ -81,6 +83,7 @@ export default function OperationsGeographicalSummary({
 
             {geographicalView === 'devices' && (
                 <DeviceView
+                    programId={programId}
                     siteIds={siteIds}
                     selectedLocations={selectedLocations}
                     descendantsOfSelectedLocations={
