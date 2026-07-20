@@ -18,6 +18,7 @@ import {
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
@@ -25,12 +26,17 @@ const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
     { value: 'submissions', label: 'SUBMISSIONS' },
 ];
 
+const DEFAULT_REVIEW_STATE_FILTER: SessionState[] = ['NEEDS_REVIEW'];
+
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useReviewFilters();
     const { activeTab, startMonth, endMonth, selectedLocation } = filters;
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
+    const [selectedReviewStates, setSelectedReviewStates] = useState<
+        SessionState[]
+    >(DEFAULT_REVIEW_STATE_FILTER);
 
     const {
         data: getUserPermissionsResult,
@@ -82,8 +88,9 @@ export default function ReviewSitesListPageClient() {
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
 
-    function resetCycleFilter() {
+    function resetFilters() {
         setSelectedCycleIds([]);
+        setSelectedReviewStates(DEFAULT_REVIEW_STATE_FILTER);
     }
 
     function handleTabChange(tab: ReviewTab) {
@@ -92,17 +99,17 @@ export default function ReviewSitesListPageClient() {
 
     function handleLocationChange(location: string) {
         setFilters({ selectedLocation: location });
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleStartMonthChange(month: Date) {
         setFilters({ startMonth: month });
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleEndMonthChange(month: Date) {
         setFilters({ endMonth: month });
-        resetCycleFilter();
+        resetFilters();
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -152,6 +159,8 @@ export default function ReviewSitesListPageClient() {
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
                         onSelectedCycleIdsChange={setSelectedCycleIds}
+                        selectedReviewStates={selectedReviewStates}
+                        onSelectedReviewStatesChange={setSelectedReviewStates}
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0
@@ -183,6 +192,7 @@ export default function ReviewSitesListPageClient() {
                                 endMonth={endMonth}
                                 collectionCycles={collectionCycles}
                                 selectedCycleIds={selectedCycleIds}
+                                selectedReviewStates={selectedReviewStates}
                             />
                         )
                     ) : (
