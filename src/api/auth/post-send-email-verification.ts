@@ -6,7 +6,7 @@ import {
 import type { NetworkError } from '@/lib/network/network-error';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 
-export async function postSendVerificationEmail(
+export async function postSendEmailVerification(
     accessToken: string,
 ): Promise<Result<PostSendEmailVerificationResponseBody, NetworkError>> {
     return safeApiCall<PostSendEmailVerificationResponseBody>(

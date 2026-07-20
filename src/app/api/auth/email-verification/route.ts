@@ -1,4 +1,4 @@
-import { postSendVerificationEmail } from '@/api/auth/post-send-verification-email';
+import { postSendEmailVerification } from '@/api/auth/post-send-email-verification';
 import { type PostSendEmailVerificationResponseBody } from '@/api/auth/validation/post-send-email-verification-schema';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { NextResponse } from 'next/server';
@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST() {
     const postSendEmailVerificationResult =
         await withAuthSession<PostSendEmailVerificationResponseBody>(
-            postSendVerificationEmail,
+            postSendEmailVerification,
         );
 
     return NextResponse.json(postSendEmailVerificationResult, {

@@ -14,7 +14,7 @@ type PostSendEmailVerificationMutationOptions = Omit<
 >;
 
 async function postSendEmailVerification(): Promise<PostSendEmailVerificationResult> {
-    const response = await fetch('/api/auth/verification-email', {
+    const response = await fetch('/api/auth/email-verification', {
         method: 'POST',
         credentials: 'include',
     });
