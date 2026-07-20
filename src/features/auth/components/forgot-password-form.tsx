@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
     forgotPasswordFormSchema,
     type ForgotPasswordFormInput,
-} from '../validation/forgot-password-form-schema';
+} from '@/features/auth/validation/forgot-password-form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     Field,

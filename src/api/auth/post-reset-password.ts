@@ -8,7 +8,7 @@ import { safeApiCall } from '@/lib/network/safe-api-call';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 
-export async function resetPassword(
+export async function postResetPassword(
     requestBody: PostResetPasswordRequestBody,
 ): Promise<Result<PostResetPasswordResponseBody, NetworkError>> {
     const parsedRequestBody =
