@@ -62,13 +62,26 @@ export default function MetadataReviewTable({
                         {sessions.map(session => (
                             <TableHead
                                 key={session.sessionId}
-                                className="border-border border"
+                                className="border-border border p-2"
                             >
-                                {formatDateInTimezone(
-                                    session.collectionDate,
-                                    timezone,
-                                    'MMM d, yyyy',
-                                )}
+                                <div>
+                                    {t('collectionDate')}
+                                    {formatDateInTimezone(
+                                        session.collectionDate,
+                                        timezone,
+                                        'MMM d, yyyy',
+                                    )}
+                                </div>
+                                <div>
+                                    {t('sessionCreated')}
+                                    <span className="block pl-4">
+                                        {formatDateInTimezone(
+                                            session.createdAt,
+                                            timezone,
+                                            'MMM d, yyyy h:mm a',
+                                        )}
+                                    </span>
+                                </div>
                             </TableHead>
                         ))}
                         {showResolutionColumn && (

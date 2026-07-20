@@ -122,6 +122,8 @@
     },
     "ReviewMetadata": {
         "intro": "Review and resolve any conflicting values across sessions. Sessions must agree before continuing.",
+        "collectionDate": "Collection Date: ",
+        "sessionCreated": "Session Created: ",
         "resolution": "Resolution",
         "selectValuePlaceholder": "Select value",
         "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
