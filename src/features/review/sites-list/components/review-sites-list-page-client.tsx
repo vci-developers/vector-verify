@@ -9,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
-import { useState } from 'react';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
 import {
     useReviewFilters,
@@ -18,7 +17,7 @@ import {
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
-import type { SessionState } from '@/api/session/validation/session-schema';
+import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
@@ -26,17 +25,18 @@ const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
     { value: 'submissions', label: 'SUBMISSIONS' },
 ];
 
-const DEFAULT_REVIEW_STATE_FILTER: SessionState[] = ['NEEDS_REVIEW'];
-
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useReviewFilters();
-    const { activeTab, startMonth, endMonth, selectedLocation } = filters;
-    const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
-    const [selectedReviewStates, setSelectedReviewStates] = useState<
-        SessionState[]
-    >(DEFAULT_REVIEW_STATE_FILTER);
+    const {
+        activeTab,
+        startMonth,
+        endMonth,
+        selectedLocation,
+        selectedCycleIds,
+        selectedReviewStates,
+    } = filters;
 
     const {
         data: getUserPermissionsResult,
@@ -88,28 +88,20 @@ export default function ReviewSitesListPageClient() {
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
 
-    function resetFilters() {
-        setSelectedCycleIds([]);
-        setSelectedReviewStates(DEFAULT_REVIEW_STATE_FILTER);
-    }
-
     function handleTabChange(tab: ReviewTab) {
         setFilters({ activeTab: tab });
     }
 
     function handleLocationChange(location: string) {
-        setFilters({ selectedLocation: location });
-        resetFilters();
+        setFilters({ selectedLocation: location, selectedCycleIds: [] });
     }
 
     function handleStartMonthChange(month: Date) {
-        setFilters({ startMonth: month });
-        resetFilters();
+        setFilters({ startMonth: month, selectedCycleIds: [] });
     }
 
     function handleEndMonthChange(month: Date) {
-        setFilters({ endMonth: month });
-        resetFilters();
+        setFilters({ endMonth: month, selectedCycleIds: [] });
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -158,9 +150,16 @@ export default function ReviewSitesListPageClient() {
                         onLocationChange={handleLocationChange}
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
-                        onSelectedCycleIdsChange={setSelectedCycleIds}
+                        onSelectedCycleIdsChange={selectedCycleIds =>
+                            setFilters({ selectedCycleIds })
+                        }
                         selectedReviewStates={selectedReviewStates}
-                        onSelectedReviewStatesChange={setSelectedReviewStates}
+                        onSelectedReviewStatesChange={selectedReviewStates =>
+                            setFilters({
+                                selectedReviewStates:
+                                    selectedReviewStates as (typeof REVIEW_STATE_SEVERITY_ORDER)[number][],
+                            })
+                        }
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0
