@@ -10,7 +10,7 @@ type PostSendEmailVerificationResult = Result<
 
 type PostSendEmailVerificationMutationOptions = Omit<
     UseMutationOptions<PostSendEmailVerificationResult, NetworkError>,
-    'mutationfn'
+    'mutationFn'
 >;
 
 async function postSendEmailVerification(): Promise<PostSendEmailVerificationResult> {
