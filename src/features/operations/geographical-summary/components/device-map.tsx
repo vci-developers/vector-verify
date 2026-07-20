@@ -1,12 +1,12 @@
 'use client';
 
 import { DivIcon } from 'leaflet';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { DeviceMarker } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
 import { createDeviceMarkerIcon } from '@/features/operations/geographical-summary/components/create-device-marker-icon';
 import GeocodedClusterMap from '@/features/operations/geographical-summary/components/geocoded-cluster-map';
-import DeviceInfoPanel from '@/features/operations/geographical-summary/components/device-info-panel';
+import MarkerInfoPanel from '@/features/operations/geographical-summary/components/marker-info-panel';
 
 interface DeviceMapProps {
     markers: DeviceMarker[];
@@ -39,16 +39,29 @@ export default function DeviceMap({
                 if (!marker) return new DivIcon();
                 return createDeviceMarkerIcon(
                     marker.activeDeviceCount,
-                    marker.lapsingDeviceCount,
                     isSelected,
                 );
             }}
             loadingLabel={t('locatingDevices')}
             renderSidePanel={isLoading => (
-                <DeviceInfoPanel
+                <MarkerInfoPanel
                     markers={markers}
                     selectedMarkerId={selectedMarkerId}
                     onMarkerSelect={onMarkerSelect}
+                    renderMarkerDetails={marker => (
+                        <Fragment>
+                            <p>
+                                {t('siteActiveCount', {
+                                    count: marker.activeDeviceCount,
+                                })}
+                            </p>
+                            <p>
+                                {t('siteInactiveCount', {
+                                    count: marker.inactiveDeviceCount,
+                                })}
+                            </p>
+                        </Fragment>
+                    )}
                     isLoading={isLoading}
                 />
             )}

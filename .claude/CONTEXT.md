@@ -231,19 +231,52 @@ produced — **never** from the device registry (`GET /devices/`), which has no
 location. A device "belongs" to a location only through its sessions' `siteId`s,
 so activity is computed from `/sessions/` grouped by `deviceId` and scoped to
 the selected location's sites, exactly like Unique Sites. Activity is measured
-by **rolling calendar months**, not collection cycles — the same model for every
-program, so the device view is consistent whether or not a program has a
-Collection Schedule. The location's device **universe** = devices with ≥1
-session at a site in the selected location over the last **6 calendar months**.
-Three location-scoped tiers, which reconcile to that universe: **Active**
-(submitted in the location in the current month), **Lapsing** (submitted in the
-location within the last 3 months, not the current month), **Inactive** (in the
-6-month universe but no session in the last 3 months — "used to collect here,
-went quiet"). Shown as headline cards for the selected location; in the map's
-Devices view, markers are keyed by `siteId` and encode size = active device
-count, color = site health (active vs lapsing). Activity is always evaluated
-**as-of-today**, independent of the page's month filter. _Avoid_:
-Online/offline, connected
+by **Collection Cycles**: the **current cycle** is the cycle whose window
+contains today (`startDate <= now < endDate`), falling back to the most recent
+cycle that has already started when today lands in a gap or past the last cycle
+(comparison is raw-instant/epoch, so timezone-independent). Membership of a
+session in a cycle is **never recomputed on the frontend** — it is read from the
+backend-assigned `session.collectionCycleId` (id equality), so there is no
+boundary-day timezone bug. The session fetch uses a plain `collectionDate`
+window (`startDate`/`endDate` on `/sessions/`) spanning the 3-cycle range, then
+classifies in memory by `collectionCycleId` id-equality — mirroring
+`buildReviewSegments` (the app-wide "fetch wide by collectionDate, bucket
+precise by cycle id" pattern), not a bespoke assigned-cycle fetch. Under the
+**adjacent-only** reassignment rule this yields the same Active count as an
+assigned-cycle fetch would. The **one exception** is the calendar-month fallback
+for programs with no Collection Schedule: those sessions have
+`collectionCycleId: null`, so membership there is computed from `collectionDate`
+in **UTC** — a temporary path that disappears with the fallback. The location's
+device **universe** = devices with ≥1 session at a site in the selected location
+over the **current cycle + the 2 previous cycles** (a bounded 3-cycle window —
+wide enough that inactive devices still have a session in it and are therefore
+mappable). Programs with **no Collection Schedule** fall back to the equivalent
+**calendar-month** model (current month + 2 previous months), mirroring
+`buildReviewSegments` (`collectionCycles.length > 0 ? cycles : months`); this
+fallback clause is temporary and to be removed once all programs have cycles.
+Two location-scoped tiers, which reconcile to that universe: **Active** (≥1
+session in the **current cycle**) and **Inactive** (in the 3-cycle universe but
+no session in the current cycle — "used to collect here, went quiet"). **Lapsing
+no longer exists.** Shown as headline cards for the selected location; in the
+map's Devices view, markers **aggregate leaf Sentinel Sites into one marker per
+parent** (keyed by the parent marker name via `getMarkerName`/`getMarkerSite`,
+exactly like the Specimens view) — answering "how many devices are active in
+this area", not per-household — and encode **size = active device count**,
+**color = binary health** (green if the marker has ≥1 active device, else grey).
+**All** markers are drawn, active and inactive: an all-inactive area renders as
+a small grey dot (active count 0 → minimum radius), so active areas dominate
+visually while silent areas remain visible. The map and the info-panel list
+**share one marker array** (the map applies no active-only filter), so the panel
+is a complete ledger of the universe. **Every device is counted exactly once**
+(dedup by `deviceId`): counted at the site of its **latest** session in the
+window, with its single status. The map markers are therefore just those unique
+devices grouped by site — each tier sums back to its headline card and both
+tiers sum to the total (reconciliation holds across both the cards and the
+panel) — so a device is **never** counted at two sites, even if its sessions
+span several. _Avoid_: per-site classification (double-counts roaming devices —
+the original bug). Activity is always evaluated **as-of-today** (the current
+cycle), independent of the page's date filter. _Avoid_: Online/offline,
+connected, Lapsing (removed), rolling calendar months (replaced by cycles)
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
@@ -267,6 +300,32 @@ token
 `permissions.devMode` on the user permissions payload, unlocking developer-only
 features (currently just the Raw Data Export). When on, a "Developer Mode" badge
 shows in the user menu. _Avoid_: Debug mode, admin mode, dev flag
+
+**User Analytics**: A `devMode`-gated trend chart of **VectorVerify user (VCO)**
+activity over time, opened from a dialog directly under **Raw Data Export** in
+the sidebar user menu. Measures _web-app users_ (people logging in and
+certifying), **not** field collectors — it is categorically distinct from
+**Device Activity**, which tracks VHTs via their devices. v1 sources
+`GET /users/active-metrics` only, plotting the daily **Active User** A1/A7/A30
+snapshots as three overlaid lines over a preset window (30d / 90d / 1y, default
+90d). Scope is **always the viewer's own program** (`profile.programId`) — there
+is no program selector, and the cross-program (`programId` free choice) and
+combined (`globalOnly=true`) backend views are not exposed in the web app
+(decided in PR #163 review, July 2026, superseding the original "program-less
+developer" audience). A devMode user whose `programId` is `null` gets an
+explanatory "no program" empty state instead of a chart. Certification and
+submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
+(collides with `isActive`/Whitelisted), Device Activity (different population),
+User Activity (ambiguous with Device Activity)
+
+**Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
+`GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
+the trailing 1 day (≈ DAU), **A7** = trailing 7 days (≈ WAU), **A30** = trailing
+30 days (≈ MAU). Rows are either program-scoped (`programId` set) or global
+(`programId: null`, returned via `globalOnly=true`). "Active" here means
+authenticated web-app usage — a login-driven metric, unrelated to the `isActive`
+account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as an
+explanatory gloss, but the field names are a1Count/a7Count/a30Count)
 
 ## Relationships
 

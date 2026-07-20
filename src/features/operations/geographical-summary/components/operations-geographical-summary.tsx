@@ -23,6 +23,7 @@ const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 const GEOGRAPHICAL_VIEWS: GeographicalView[] = ['specimens', 'devices'];
 
 interface OperationsGeographicalSummaryProps {
+    programId: number;
     siteIds: number[];
     descendantsOfSelectedLocations: Site[];
     startDate: string;
@@ -32,6 +33,7 @@ interface OperationsGeographicalSummaryProps {
 }
 
 export default function OperationsGeographicalSummary({
+    programId,
     siteIds,
     descendantsOfSelectedLocations,
     startDate,
@@ -78,6 +80,7 @@ export default function OperationsGeographicalSummary({
 
             {geographicalView === 'devices' && (
                 <DeviceView
+                    programId={programId}
                     siteIds={siteIds}
                     selectedLocations={selectedLocations}
                     descendantsOfSelectedLocations={
