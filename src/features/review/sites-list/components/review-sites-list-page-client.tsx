@@ -16,6 +16,7 @@ import { StorageKeys } from '@/lib/storage-keys';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import type { SessionState } from '@/api/session/validation/session-schema';
 import { useTranslations } from 'next-intl';
 
 const REVIEW_TABS = [
@@ -24,6 +25,8 @@ const REVIEW_TABS = [
 ] as const;
 
 export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
+
+const DEFAULT_REVIEW_STATE_FILTER: SessionState[] = ['NEEDS_REVIEW'];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
@@ -41,6 +44,9 @@ export default function ReviewSitesListPageClient() {
         startOfMonth(new Date()),
     );
     const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
+    const [selectedReviewStates, setSelectedReviewStates] = useState<
+        SessionState[]
+    >(DEFAULT_REVIEW_STATE_FILTER);
 
     const {
         data: getUserPermissionsResult,
@@ -97,23 +103,24 @@ export default function ReviewSitesListPageClient() {
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
 
-    function resetCycleFilter() {
+    function resetFilters() {
         setSelectedCycleIds([]);
+        setSelectedReviewStates(DEFAULT_REVIEW_STATE_FILTER);
     }
 
     function handleLocationChange(location: string) {
         setSelectedLocation(location);
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleStartMonthChange(month: Date) {
         setStartMonth(month);
-        resetCycleFilter();
+        resetFilters();
     }
 
     function handleEndMonthChange(month: Date) {
         setEndMonth(month);
-        resetCycleFilter();
+        resetFilters();
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -163,6 +170,8 @@ export default function ReviewSitesListPageClient() {
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
                         onSelectedCycleIdsChange={setSelectedCycleIds}
+                        selectedReviewStates={selectedReviewStates}
+                        onSelectedReviewStatesChange={setSelectedReviewStates}
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0
@@ -194,6 +203,7 @@ export default function ReviewSitesListPageClient() {
                                 endMonth={endMonth}
                                 collectionCycles={collectionCycles}
                                 selectedCycleIds={selectedCycleIds}
+                                selectedReviewStates={selectedReviewStates}
                             />
                         )
                     ) : (
