@@ -4,6 +4,7 @@ import { format, isSameMonth, subMonths } from 'date-fns';
 export interface CollectorRow {
     collectorTitle: string;
     collectorName: string;
+    locationLabel: string;
     sessionCountsByMonth: Record<string, number>;
 }
 
@@ -16,6 +17,7 @@ export interface FieldUserComplianceData {
 export function buildFieldUserComplianceData(
     sessions: Session[],
     monthYearKeys: string[],
+    siteIdToLocationLabel: Map<number, string>,
 ): FieldUserComplianceData {
     const now = new Date();
     const previousMonth = subMonths(now, 1);
@@ -25,6 +27,7 @@ export function buildFieldUserComplianceData(
         {
             collectorTitle: string;
             collectorName: string;
+            locationLabel: string;
             sessionCountsByMonth: Record<string, number>;
             hasRecentSubmission: boolean;
         }
@@ -33,11 +36,13 @@ export function buildFieldUserComplianceData(
     for (const session of sessions) {
         const collectorName = session.collectorName.trim();
         const collectorTitle = session.collectorTitle.trim();
-        const collectorKey = `${collectorName}/${collectorTitle}`;
+        const locationLabel = siteIdToLocationLabel.get(session.siteId) ?? '';
+        const collectorKey = `${locationLabel}/${collectorName}/${collectorTitle}`;
         if (!collectorMap.has(collectorKey)) {
             collectorMap.set(collectorKey, {
                 collectorTitle,
                 collectorName,
+                locationLabel,
                 sessionCountsByMonth: Object.fromEntries(
                     monthYearKeys.map(month => [month, 0]),
                 ),
@@ -61,18 +66,25 @@ export function buildFieldUserComplianceData(
             entry.hasRecentSubmission = true;
         }
     }
-
-    const collectors = [...collectorMap.values()].sort((a, b) =>
-        a.collectorTitle.localeCompare(b.collectorTitle),
+    const collectors = [...collectorMap.values()].sort(
+        (a, b) =>
+            a.locationLabel.localeCompare(b.locationLabel) ||
+            a.collectorTitle.localeCompare(b.collectorTitle),
     );
 
     return {
         totalCollectors: collectors.length,
         activeCollectors: collectors.filter(c => c.hasRecentSubmission).length,
         collectorRows: collectors.map(
-            ({ collectorTitle, collectorName, sessionCountsByMonth }) => ({
+            ({
                 collectorTitle,
                 collectorName,
+                locationLabel,
+                sessionCountsByMonth,
+            }) => ({
+                collectorTitle,
+                collectorName,
+                locationLabel,
                 sessionCountsByMonth,
             }),
         ),

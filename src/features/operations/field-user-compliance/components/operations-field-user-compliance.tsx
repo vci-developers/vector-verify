@@ -2,28 +2,26 @@
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-    buildSiteFilter,
-    type LocationQueryParam,
-} from '@/lib/location/location-query';
 import { buildFieldUserComplianceData } from '@/features/operations/field-user-compliance/utils/field-user-compliance-data';
 import { eachMonthOfInterval, format, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import FieldUserComplianceChart from '@/features/operations/field-user-compliance/components/field-user-compliance-chart';
 
 interface OperationsFieldUserComplianceProps {
-    locationQueryParam: LocationQueryParam;
+    siteIds: number[];
+    siteIdToLocationLabel: Map<number, string>;
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsFieldUserCompliance({
-    locationQueryParam,
+    siteIds,
+    siteIdToLocationLabel,
     startDate,
     endDate,
 }: OperationsFieldUserComplianceProps) {
     const { data: getAllSessionsResult, isPending } = useGetAllSessions({
-        ...buildSiteFilter(locationQueryParam),
+        siteIds,
         startDate,
         endDate,
         type: 'SURVEILLANCE',
@@ -61,6 +59,7 @@ export default function OperationsFieldUserCompliance({
         buildFieldUserComplianceData(
             getAllSessionsResult.data.sessions,
             monthYearKeys,
+            siteIdToLocationLabel,
         );
 
     return (

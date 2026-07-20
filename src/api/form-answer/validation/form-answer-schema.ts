@@ -1,3 +1,4 @@
+import { sessionUnitSchema } from '@/api/session-unit/validation/session-unit-schema';
 import { z } from 'zod';
 
 export const formAnswerSchema = z.object({
@@ -5,12 +6,14 @@ export const formAnswerSchema = z.object({
     frontendId: z.string().nullable(),
     questionId: z.number(),
     parentId: z.number().nullable(),
+    sessionUnitId: z.number().nullable(),
+    sessionUnit: sessionUnitSchema.nullable(),
     prerequisite: z.unknown(),
     label: z.string().nullable(),
     type: z.string().nullable(),
     required: z.boolean().nullable(),
     options: z.array(z.unknown()).nullable(),
-    value: z.string(),
+    value: z.string().nullable(),
     dataType: z.string(),
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),

@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
 import type { Site } from '@/api/site/validation/site-schema';
-import type { LocationQueryParam } from '@/lib/location/location-query';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { StorageKeys } from '@/lib/storage-keys';
 import {
@@ -24,9 +23,10 @@ const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
 type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
 
 interface OperationsGeographicalSummaryProps {
-    locationQueryParam: LocationQueryParam;
-    selectedLocation: string;
-    descendantsOfSelectedLocation: Site[];
+    programId: number;
+    siteIds: number[];
+    selectedLocations: string[];
+    descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
     selectedMarkerId: string | null;
@@ -34,17 +34,18 @@ interface OperationsGeographicalSummaryProps {
 }
 
 export default function OperationsGeographicalSummary({
-    locationQueryParam,
-    selectedLocation,
-    descendantsOfSelectedLocation,
+    programId,
+    siteIds,
+    selectedLocations,
+    descendantsOfSelectedLocations,
     startDate,
     endDate,
     selectedMarkerId,
     setSelectedMarkerId,
 }: OperationsGeographicalSummaryProps) {
     const { markers, totalSites, isPending, isError } = useSiteMarkers({
-        locationQueryParam,
-        descendantsOfSelectedLocation,
+        siteIds,
+        descendantsOfSelectedLocations,
         startDate,
         endDate,
     });
@@ -82,10 +83,11 @@ export default function OperationsGeographicalSummary({
 
             {geographicalView === 'devices' && (
                 <DeviceView
-                    locationQueryParam={locationQueryParam}
-                    selectedLocation={selectedLocation}
-                    descendantsOfSelectedLocation={
-                        descendantsOfSelectedLocation
+                    programId={programId}
+                    siteIds={siteIds}
+                    selectedLocations={selectedLocations}
+                    descendantsOfSelectedLocations={
+                        descendantsOfSelectedLocations
                     }
                 />
             )}
@@ -112,7 +114,7 @@ export default function OperationsGeographicalSummary({
                             {siteMapMounted.current ? (
                                 <SiteMap
                                     markers={markers}
-                                    selectedLocation={selectedLocation}
+                                    selectedLocations={selectedLocations}
                                     selectedMarkerId={selectedMarkerId}
                                     onMarkerSelect={setSelectedMarkerId}
                                 />
@@ -130,7 +132,7 @@ export default function OperationsGeographicalSummary({
                             ) : (
                                 <SiteMap
                                     markers={markers}
-                                    selectedLocation={selectedLocation}
+                                    selectedLocations={selectedLocations}
                                     selectedMarkerId={selectedMarkerId}
                                     onMarkerSelect={setSelectedMarkerId}
                                 />

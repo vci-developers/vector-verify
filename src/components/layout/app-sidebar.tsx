@@ -13,8 +13,10 @@ import {
     Sun,
     type LucideIcon,
     Code2,
+    LineChart,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
     Sidebar,
@@ -43,6 +45,7 @@ import LocaleSwitcher from './locale-switcher';
 import { Badge } from '../ui/badge';
 import { Fragment, useState } from 'react';
 import RawDataExportDialog from '../raw-export/raw-data-export-dialog';
+import UserAnalyticsDialog from '@/components/user-analytics/user-analytics-dialog';
 
 type NavigationItem = {
     name: string;
@@ -99,6 +102,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     } = useGetUserPermissions();
 
     const [isRawDataExportOpen, setIsRawDataExportOpen] = useState(false);
+    const [isUserAnalyticsOpen, setIsUserAnalyticsOpen] = useState(false);
+    const t = useTranslations('UserAnalytics');
 
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
@@ -242,6 +247,14 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                         <Code2 className="h-4 w-4" />
                                         Raw Data Export
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onSelect={() =>
+                                            setIsUserAnalyticsOpen(true)
+                                        }
+                                    >
+                                        <LineChart className="h-4 w-4" />
+                                        {t('menuItem')}
+                                    </DropdownMenuItem>
                                 </Fragment>
                             )}
 
@@ -254,11 +267,22 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                     </DropdownMenu>
 
                     {userPermissions.devMode && (
-                        <RawDataExportDialog
-                            open={isRawDataExportOpen}
-                            onOpenChange={setIsRawDataExportOpen}
-                            programId={getUserPermissionsResult.data.programId}
-                        />
+                        <Fragment>
+                            <RawDataExportDialog
+                                open={isRawDataExportOpen}
+                                onOpenChange={setIsRawDataExportOpen}
+                                programId={
+                                    getUserPermissionsResult.data.programId
+                                }
+                            />
+                            <UserAnalyticsDialog
+                                open={isUserAnalyticsOpen}
+                                onOpenChange={setIsUserAnalyticsOpen}
+                                programId={
+                                    getUserPermissionsResult.data.programId
+                                }
+                            />
+                        </Fragment>
                     )}
                 </div>
             </SidebarContent>

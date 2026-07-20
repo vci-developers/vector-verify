@@ -15,21 +15,28 @@ export function getSiteSessionCount(summary: ReviewSiteSessionSummary): number {
     return Object.values(summary).reduce((total, count) => total + count, 0);
 }
 
-export function isSiteFullyReviewed(
+export const REVIEW_STATE_SEVERITY_ORDER = [
+    'NEEDS_REVIEW',
+    'IN_REVIEW',
+    'CERTIFIED',
+    'SUBMITTED',
+] as const satisfies readonly SessionState[];
+
+export function getSiteOverallReviewState(
     summary: ReviewSiteSessionSummary,
-): boolean {
+): (typeof REVIEW_STATE_SEVERITY_ORDER)[number] | null {
     return (
-        getSiteSessionCount(summary) > 0 &&
-        summary.NEEDS_REVIEW === 0 &&
-        summary.IN_REVIEW === 0
+        REVIEW_STATE_SEVERITY_ORDER.find(state => summary[state] > 0) ?? null
     );
 }
 
-export function isSiteFullyCertified(
+export function isSiteFullyReviewed(
     summary: ReviewSiteSessionSummary,
 ): boolean {
-    const total = getSiteSessionCount(summary);
-    return total > 0 && summary.CERTIFIED === total;
+    const overallReviewState = getSiteOverallReviewState(summary);
+    return (
+        overallReviewState === 'CERTIFIED' || overallReviewState === 'SUBMITTED'
+    );
 }
 
 export function isSiteFullySubmittedToDhis2(

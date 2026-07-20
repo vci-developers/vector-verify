@@ -12,12 +12,12 @@ import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformance from '@/features/operations/ai-performance/components/operations-ai-performance';
 import OperationsGeographicalSummary from '@/features/operations/geographical-summary/components/operations-geographical-summary';
-import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { useLocationSelection } from '@/lib/location/use-location-selection';
+import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
+import { useTranslations } from 'next-intl';
 
 const OPERATIONS_TABS = [
     {
@@ -46,6 +46,8 @@ const OPERATIONS_TABS = [
 export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
 
 export default function OperationsPageClient() {
+    const t = useTranslations('Operations');
+    const tCommon = useTranslations('Common');
     const [activeTab, setActiveTab] = useLocalStorage<OperationsTab>(
         StorageKeys.operations.activeTab,
         'geographical-summary',
@@ -70,15 +72,16 @@ export default function OperationsPageClient() {
         : [];
 
     const {
-        selectedLocation,
-        setSelectedLocation,
+        selectedLocations,
+        setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
-        locationQueryParam,
-        descendantsOfSelectedLocation,
-    } = useLocationSelection(
+        selectedSiteIdsParam,
+        descendantsOfSelectedLocations,
+        siteIdToLocationLabel,
+    } = useLocationMultiSelection(
         accessibleSites,
-        StorageKeys.operations.selectedLocation,
+        StorageKeys.operations.selectedLocations,
     );
 
     const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
@@ -87,16 +90,18 @@ export default function OperationsPageClient() {
 
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [locationQueryParam, startMonth, endMonth, setSelectedMarkerId]);
+    }, [selectedLocations, startMonth, endMonth, setSelectedMarkerId]);
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
             <PageShell
-                title="Operations"
-                description="Monitor field operations by location"
+                title={t('operations')}
+                description={t('operationsDescription')}
                 icon={Microscope}
             >
-                <p className="text-muted-foreground text-sm">Loading...</p>
+                <p className="text-muted-foreground text-sm">
+                    {tCommon('loading')}
+                </p>
             </PageShell>
         );
     }
@@ -104,8 +109,8 @@ export default function OperationsPageClient() {
     if (!getUserPermissionsResult.ok) {
         return (
             <PageShell
-                title="Operations"
-                description="Monitor field operations by location"
+                title={t('operations')}
+                description={t('operationsDescription')}
                 icon={Microscope}
             >
                 <p className="text-destructive text-sm">
@@ -124,8 +129,8 @@ export default function OperationsPageClient() {
 
     return (
         <PageShell
-            title="Operations"
-            description="Monitor field operations by location"
+            title={t('operations')}
+            description={t('operationsDescription')}
             icon={Microscope}
         >
             <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
@@ -136,8 +141,8 @@ export default function OperationsPageClient() {
                         onTabChange={setActiveTab}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
-                        selectedLocation={selectedLocation}
-                        onLocationChange={setSelectedLocation}
+                        selectedLocations={selectedLocations}
+                        onLocationsChange={setSelectedLocations}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={setStartMonth}
@@ -147,21 +152,18 @@ export default function OperationsPageClient() {
 
                     <Separator />
 
-                    {!locationQueryParam ? (
-                        <div className="relative">
-                            <SkeletonList count={5} height="xl" width="full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                                <p className="text-muted-foreground text-sm">
-                                    Select a location to view data.
-                                </p>
-                            </div>
+                    {!selectedSiteIdsParam ? (
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                            <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                {t('selectALocation')}
+                            </p>
                         </div>
                     ) : (
                         <Fragment>
                             {activeTab === 'specimen-composition' && (
                                 <OperationsSpecimenComposition
-                                    locationQueryParam={locationQueryParam}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -169,10 +171,13 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
-                                    locationQueryParam={locationQueryParam}
-                                    selectedLocation={selectedLocation}
-                                    descendantsOfSelectedLocation={
-                                        descendantsOfSelectedLocation
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
+                                    siteIds={selectedSiteIdsParam}
+                                    selectedLocations={selectedLocations}
+                                    descendantsOfSelectedLocations={
+                                        descendantsOfSelectedLocations
                                     }
                                     startDate={startDate}
                                     endDate={endDate}
@@ -183,8 +188,7 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'ai-performance' && (
                                 <OperationsAiPerformance
-                                    locationQueryParam={locationQueryParam}
-                                    selectedLocationName={selectedLocation}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -192,7 +196,10 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'field-user-compliance' && (
                                 <OperationsFieldUserCompliance
-                                    locationQueryParam={locationQueryParam}
+                                    siteIds={selectedSiteIdsParam}
+                                    siteIdToLocationLabel={
+                                        siteIdToLocationLabel
+                                    }
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
@@ -206,8 +213,10 @@ export default function OperationsPageClient() {
                 open={isExportDialogOpen}
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
-                locationQueryParam={locationQueryParam!}
-                locationName={selectedLocation}
+                siteIds={selectedSiteIdsParam!}
+                locationName={[...new Set(siteIdToLocationLabel.values())].join(
+                    ', ',
+                )}
                 startDate={startDate}
                 endDate={endDate}
             />

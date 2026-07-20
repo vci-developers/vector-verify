@@ -1,46 +1,68 @@
 'use client';
 
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import { useMemo } from 'react';
-import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
-import { buildDeviceActivity } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
-import type { LocationQueryParam } from '@/lib/location/location-query';
+import {
+    buildDeviceActivity,
+    buildMonthWindow,
+    resolveDeviceActivityWindow,
+} from '@/features/operations/geographical-summary/utils/device-activity-helpers';
 
-const INACTIVE_MAX_MONTHS = 5;
+const CYCLE_LOOKBACK_MONTHS = 12;
 
-export function useDeviceActivity(locationQueryParam: LocationQueryParam) {
-    const { startDate, endDate } = useMemo(() => {
-        const today = new Date();
-        return {
-            startDate: format(
-                startOfMonth(subMonths(today, INACTIVE_MAX_MONTHS)),
-                'yyyy-MM-dd',
-            ),
-            endDate: format(endOfMonth(today), 'yyyy-MM-dd'),
-        };
-    }, []);
+export function useDeviceActivity(programId: number, siteIds: number[]) {
+    const cycleLookbackWindow = useMemo(
+        () => buildMonthWindow(Date.now(), CYCLE_LOOKBACK_MONTHS),
+        [],
+    );
 
-    const locationFilter =
-        'district' in locationQueryParam
-            ? { district: locationQueryParam.district }
-            : { siteId: locationQueryParam.siteId };
+    const {
+        data: getCollectionCyclesResult,
+        isPending: isGetCollectionCyclesPending,
+    } = useGetCollectionCycles(programId, cycleLookbackWindow);
+
+    const deviceActivityWindow = useMemo(() => {
+        if (isGetCollectionCyclesPending || !getCollectionCyclesResult?.ok) {
+            return null;
+        }
+        return resolveDeviceActivityWindow(
+            getCollectionCyclesResult.data.collectionCycles,
+            Date.now(),
+        );
+    }, [isGetCollectionCyclesPending, getCollectionCyclesResult]);
 
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
-        useGetAllSessions({
-            startDate,
-            endDate,
-            type: 'SURVEILLANCE',
-            ...locationFilter,
-        });
+        useGetAllSessions(
+            {
+                startDate: deviceActivityWindow?.startDate ?? '',
+                endDate: deviceActivityWindow?.endDate ?? '',
+                type: 'SURVEILLANCE',
+                siteIds,
+            },
+            { enabled: deviceActivityWindow !== null },
+        );
 
     const deviceActivity = useMemo(() => {
-        if (!getAllSessionsResult?.ok) return null;
-        return buildDeviceActivity(getAllSessionsResult.data.sessions);
-    }, [getAllSessionsResult]);
+        if (!getAllSessionsResult?.ok || deviceActivityWindow === null) {
+            return null;
+        }
+        return buildDeviceActivity(
+            getAllSessionsResult.data.sessions,
+            deviceActivityWindow.currentCycleId,
+            Date.now(),
+        );
+    }, [getAllSessionsResult, deviceActivityWindow]);
+
+    const isError =
+        (!isGetCollectionCyclesPending && !getCollectionCyclesResult?.ok) ||
+        (deviceActivityWindow !== null &&
+            !isGetAllSessionsPending &&
+            !getAllSessionsResult?.ok);
 
     return {
         deviceActivity,
-        isPending: isGetAllSessionsPending,
-        isError: !isGetAllSessionsPending && !getAllSessionsResult?.ok,
+        isPending: !isError && deviceActivity === null,
+        isError,
     };
 }

@@ -10,11 +10,10 @@ import {
 } from '@/lib/location/location-query';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
-import { useTranslations } from 'next-intl';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { buildCollectionCycleSegments } from '../../sites-list/utils/build-collection-cycle-segments';
+import { buildReviewSegments } from '../../sites-list/utils/build-review-segments';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { formatCollectionCycleLabel } from '../../sites-list/utils/format-collection-cycle-label';
+import { formatCollectionCycleLabel } from '../../utils/format-collection-cycle-label';
 import Dhis2SiteRow from './dhis2-site-row';
 import {
     isSiteFullyReviewed,
@@ -43,7 +42,6 @@ export default function ReviewDhis2Dashboard({
     collectionCycles,
     selectedCycleIds,
 }: ReviewDhis2DashboardProps) {
-    const t = useTranslations('CollectionCycle');
     const queryClient = useQueryClient();
     const { mutate: createDhis2SyncTask } = usePostDhis2SyncTask();
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -78,49 +76,48 @@ export default function ReviewDhis2Dashboard({
         });
     }
 
-    const allCycleSegments = useMemo(() => {
+    const cycleSubmissionGroups = useMemo(() => {
         if (!getAllSessionsResult?.ok) return [];
-        return buildCollectionCycleSegments(
-            getAllSessionsResult.data.sessions,
+        return buildReviewSegments({
+            sessions: getAllSessionsResult.data.sessions,
             collectionCycles,
-        );
-    }, [getAllSessionsResult, collectionCycles]);
-
-    const cycleSubmissionGroups = useMemo(
-        () =>
-            allCycleSegments
-                .filter(
-                    segment =>
-                        selectedCycleIds.length === 0 ||
-                        selectedCycleIds.includes(segment.cycle.id),
-                )
-                .map(segment => {
-                    const cycle = segment.cycle;
-                    const sessionSummaryBySiteId =
-                        segment.sessionSummaryBySiteId;
-                    const submittableSites = sites.filter(site => {
-                        const siteSessionSummary = sessionSummaryBySiteId.get(
-                            site.siteId,
-                        );
-                        return (
-                            siteSessionSummary !== undefined &&
-                            isSiteFullyReviewed(siteSessionSummary)
-                        );
-                    });
-                    const submittedCount = submittableSites.filter(site =>
-                        isSiteFullySubmittedToDhis2(
-                            sessionSummaryBySiteId.get(site.siteId)!,
-                        ),
-                    ).length;
-                    return {
-                        cycle,
-                        sessionSummaryBySiteId,
-                        submittableSites,
-                        submittedCount,
-                    };
-                }),
-        [allCycleSegments, selectedCycleIds, sites],
-    );
+            selectedCycleIds,
+            startMonth,
+            endMonth,
+        })
+            .filter(segment => segment.kind === 'cycle')
+            .map(segment => {
+                const cycle = collectionCycles.find(
+                    candidate => candidate.id === segment.collectionCycleId,
+                )!;
+                const summaryBySiteId = segment.summaryBySiteId;
+                const submittableSites = sites.filter(site => {
+                    const siteSessionSummary = summaryBySiteId.get(site.siteId);
+                    return (
+                        siteSessionSummary !== undefined &&
+                        isSiteFullyReviewed(siteSessionSummary)
+                    );
+                });
+                const submittedCount = submittableSites.filter(site =>
+                    isSiteFullySubmittedToDhis2(
+                        summaryBySiteId.get(site.siteId)!,
+                    ),
+                ).length;
+                return {
+                    cycle,
+                    summaryBySiteId,
+                    submittableSites,
+                    submittedCount,
+                };
+            });
+    }, [
+        getAllSessionsResult,
+        collectionCycles,
+        selectedCycleIds,
+        startMonth,
+        endMonth,
+        sites,
+    ]);
 
     const selectedSubmissions = useMemo<
         { site: Site; collectionCycle: CollectionCycle }[]
@@ -206,21 +203,30 @@ export default function ReviewDhis2Dashboard({
                     {cycleSubmissionGroups.map(group => (
                         <Dhis2CycleSegment
                             key={group.cycle.id}
-                            label={formatCollectionCycleLabel(group.cycle, t)}
+                            label={formatCollectionCycleLabel(group.cycle)}
                             submittedCount={group.submittedCount}
                             siteCount={group.submittableSites.length}
                         >
                             {group.submittableSites.map(site => {
+                                const certifierName =
+                                    getAllSessionsResult.data.sessions.find(
+                                        session =>
+                                            session.siteId === site.siteId &&
+                                            session.collectionCycleId ===
+                                                group.cycle.id &&
+                                            session.certifiedBy != null,
+                                    )?.certifiedBy?.name ?? undefined;
                                 return (
                                     <Dhis2SiteRow
                                         key={site.siteId}
                                         site={site}
                                         collectionCycle={group.cycle}
                                         siteSessionSummary={
-                                            group.sessionSummaryBySiteId.get(
+                                            group.summaryBySiteId.get(
                                                 site.siteId,
                                             )!
                                         }
+                                        certifierName={certifierName}
                                         isSelected={selectedSiteRowKeys.has(
                                             siteRowKey(
                                                 group.cycle.id,
