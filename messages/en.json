@@ -139,6 +139,8 @@
         "sessionSectionTitle": "Session"
     },
     "ReviewImage": {
+        "missingSpecimensBadge": "Missing Specimens",
+        "specimensNotUploaded": "{count, plural, one {# specimen was} other {# specimens were}} not uploaded. Please contact the field user responsible for the {site} site.",
         "specimenCounter": "Specimen {current} of {total}",
         "previousSpecimen": "Previous Specimen",
         "nextSpecimen": "Next Specimen",
