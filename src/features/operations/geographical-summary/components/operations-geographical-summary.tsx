@@ -8,19 +8,17 @@ import { useTranslations } from 'next-intl';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
 import type { Site } from '@/api/site/validation/site-schema';
-import {
-    useOperationsFilters,
-    type GeographicalView,
-} from '@/features/operations/view-state/use-operations-filters';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
+import { useGeographicalView } from '@/features/operations/geographical-summary/view-state/use-geographical-view';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
+    GEOGRAPHICAL_VIEWS,
+    type GeographicalView,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { Fragment, useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
-
-const GEOGRAPHICAL_VIEWS: GeographicalView[] = ['specimens', 'devices'];
 
 interface OperationsGeographicalSummaryProps {
     programId: number;
@@ -52,17 +50,15 @@ export default function OperationsGeographicalSummary({
     if (!isPending && markers.length > 0) siteMapMounted.current = true;
 
     const t = useTranslations('OperationsGeographicalSummary');
-    const [{ geographicalView, selectedLocations }, setFilters] =
-        useOperationsFilters();
+    const [{ selectedLocations }] = useOperationsFilters();
+    const [geographicalView, setGeographicalView] = useGeographicalView();
 
     return (
         <div className="mt-4 space-y-3">
             <Tabs
                 value={geographicalView}
                 onValueChange={value =>
-                    setFilters({
-                        geographicalView: value as GeographicalView,
-                    })
+                    setGeographicalView(value as GeographicalView)
                 }
             >
                 <TabsList className="bg-muted/50 rounded-full p-1">

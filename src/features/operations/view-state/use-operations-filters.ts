@@ -3,7 +3,7 @@
 import {
     getDefaultMonthRange,
     parseAsMonth,
-} from '@/lib/view-state/month-param';
+} from '@/lib/view-state/month-range';
 import {
     parseAsArrayOf,
     parseAsString,
@@ -25,25 +25,16 @@ const operationsSearchParams = {
     endMonth: parseAsMonth.withDefault(monthDefaults.endMonth),
     selectedLocations: parseAsArrayOf(parseAsString).withDefault([]),
     selectedSpecies: parseAsArrayOf(parseAsString),
-    geographicalView: parseAsStringLiteral([
-        'specimens',
-        'devices',
-    ]).withDefault('specimens'),
 };
 
 export type OperationsTab = inferParserType<
     typeof operationsSearchParams.activeTab
 >;
 
-export type GeographicalView = inferParserType<
-    typeof operationsSearchParams.geographicalView
->;
-
 const operationsUrlKeys = {
     activeTab: 'tab',
     selectedLocations: 'location',
     selectedSpecies: 'species',
-    geographicalView: 'view',
 } as const;
 
 export function useOperationsFilters() {

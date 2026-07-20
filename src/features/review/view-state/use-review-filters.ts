@@ -3,7 +3,7 @@
 import {
     getDefaultMonthRange,
     parseAsMonth,
-} from '@/lib/view-state/month-param';
+} from '@/lib/view-state/month-range';
 import {
     parseAsString,
     parseAsStringLiteral,
