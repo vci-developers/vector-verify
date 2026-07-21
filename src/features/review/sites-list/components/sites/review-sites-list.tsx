@@ -23,12 +23,14 @@ import {
 } from '@/lib/location/location-query';
 import { endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 function buildReviewWorkspaceHref(
     siteId: number,
     segment: ReviewSegment,
+    listQueryString: string,
 ): string {
     const queryParams = new URLSearchParams({
         startDate: segment.startDate,
@@ -39,6 +41,9 @@ function buildReviewWorkspaceHref(
     }
     if (segment.timezone != null) {
         queryParams.set('timezone', segment.timezone);
+    }
+    if (listQueryString) {
+        queryParams.set('back', listQueryString);
     }
     return `/review/${siteId}?${queryParams.toString()}`;
 }
@@ -64,6 +69,7 @@ export default function ReviewSitesList({
 }: ReviewSitesListProps) {
     const t = useTranslations('CollectionCycle');
     const tSitesList = useTranslations('ReviewSitesList');
+    const listSearchParams = useSearchParams();
     const sentinelSiteCount = useMemo(() => {
         if (sites.length === 0) return 0;
         if (isLegacySite(sites[0]!)) return sites.length;
@@ -138,7 +144,11 @@ export default function ReviewSitesList({
         <div className="space-y-2">
             {segments.map(segment => {
                 const buildSiteHref = (siteId: number) =>
-                    buildReviewWorkspaceHref(siteId, segment);
+                    buildReviewWorkspaceHref(
+                        siteId,
+                        segment,
+                        listSearchParams.toString(),
+                    );
                 const visibleSiteIds =
                     selectedReviewStates.length > 0
                         ? filterSegmentByReviewState(

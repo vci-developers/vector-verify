@@ -7,46 +7,36 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
-import { useState } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
-import { StorageKeys } from '@/lib/storage-keys';
+import {
+    useReviewFilters,
+    type ReviewTab,
+} from '@/features/review/view-state/use-review-filters';
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
-import type { SessionState } from '@/api/session/validation/session-schema';
+import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
-const REVIEW_TABS = [
+const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
     { value: 'sites-list', label: 'SITES LIST' },
     { value: 'submissions', label: 'SUBMISSIONS' },
-] as const;
-
-export type ReviewTab = (typeof REVIEW_TABS)[number]['value'];
-
-const DEFAULT_REVIEW_STATE_FILTER: SessionState[] = ['NEEDS_REVIEW'];
+];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
-    const [activeTab, setActiveTab] = useLocalStorage<ReviewTab>(
-        StorageKeys.review.activeTab,
-        'sites-list',
-    );
-    const [startMonth, setStartMonth] = useLocalStorage(
-        StorageKeys.review.startMonth,
-        startOfMonth(subMonths(new Date(), 2)),
-    );
-    const [endMonth, setEndMonth] = useLocalStorage(
-        StorageKeys.review.endMonth,
-        startOfMonth(new Date()),
-    );
-    const [selectedCycleIds, setSelectedCycleIds] = useState<number[]>([]);
-    const [selectedReviewStates, setSelectedReviewStates] = useState<
-        SessionState[]
-    >(DEFAULT_REVIEW_STATE_FILTER);
+    const [filters, setFilters] = useReviewFilters();
+    const {
+        activeTab,
+        startMonth,
+        endMonth,
+        selectedLocation,
+        selectedCycleIds,
+        selectedReviewStates,
+    } = filters;
 
     const {
         data: getUserPermissionsResult,
@@ -76,16 +66,11 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     const {
-        selectedLocation,
-        setSelectedLocation,
         locationTypeName,
         locationDropdownOptions,
         locationQueryParam,
         descendantsOfSelectedLocation,
-    } = useLocationSelection(
-        accessibleSites,
-        StorageKeys.review.selectedLocation,
-    );
+    } = useLocationSelection(accessibleSites, selectedLocation);
 
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -103,24 +88,20 @@ export default function ReviewSitesListPageClient() {
         ? getCollectionCyclesResult.data.collectionCycles
         : [];
 
-    function resetFilters() {
-        setSelectedCycleIds([]);
-        setSelectedReviewStates(DEFAULT_REVIEW_STATE_FILTER);
+    function handleTabChange(tab: ReviewTab) {
+        setFilters({ activeTab: tab });
     }
 
     function handleLocationChange(location: string) {
-        setSelectedLocation(location);
-        resetFilters();
+        setFilters({ selectedLocation: location, selectedCycleIds: [] });
     }
 
     function handleStartMonthChange(month: Date) {
-        setStartMonth(month);
-        resetFilters();
+        setFilters({ startMonth: month, selectedCycleIds: [] });
     }
 
     function handleEndMonthChange(month: Date) {
-        setEndMonth(month);
-        resetFilters();
+        setFilters({ endMonth: month, selectedCycleIds: [] });
     }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
@@ -162,16 +143,23 @@ export default function ReviewSitesListPageClient() {
                     <ReviewSitesListHeader
                         tabs={visibleTabs}
                         activeTab={activeTab}
-                        onTabChange={setActiveTab}
+                        onTabChange={handleTabChange}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocation={selectedLocation}
                         onLocationChange={handleLocationChange}
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
-                        onSelectedCycleIdsChange={setSelectedCycleIds}
+                        onSelectedCycleIdsChange={selectedCycleIds =>
+                            setFilters({ selectedCycleIds })
+                        }
                         selectedReviewStates={selectedReviewStates}
-                        onSelectedReviewStatesChange={setSelectedReviewStates}
+                        onSelectedReviewStatesChange={selectedReviewStates =>
+                            setFilters({
+                                selectedReviewStates:
+                                    selectedReviewStates as (typeof REVIEW_STATE_SEVERITY_ORDER)[number][],
+                            })
+                        }
                         disabled={
                             isGetCollectionCyclesPending ||
                             collectionCycles.length === 0

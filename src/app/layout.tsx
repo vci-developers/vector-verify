@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
@@ -36,19 +37,21 @@ export default async function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
             >
-                <NextIntlClientProvider messages={messages}>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        <TooltipProvider delayDuration={200}>
-                            <TanstackProvider>{children}</TanstackProvider>
-                        </TooltipProvider>
-                        <Toaster />
-                    </ThemeProvider>
-                </NextIntlClientProvider>
+                <NuqsAdapter>
+                    <NextIntlClientProvider messages={messages}>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="system"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            <TooltipProvider delayDuration={200}>
+                                <TanstackProvider>{children}</TanstackProvider>
+                            </TooltipProvider>
+                            <Toaster />
+                        </ThemeProvider>
+                    </NextIntlClientProvider>
+                </NuqsAdapter>
             </body>
         </html>
     );
