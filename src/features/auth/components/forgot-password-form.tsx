@@ -36,8 +36,12 @@ export default function ForgotPasswordForm() {
         setSubmitted(false);
         setHasError(false);
         postForgotPassword(data, {
-            onSuccess: () => {
-                setSubmitted(true);
+            onSuccess: result => {
+                if (result.ok) {
+                    setSubmitted(true);
+                } else {
+                    setHasError(true);
+                }
             },
             onError: () => setHasError(true),
         });

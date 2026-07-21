@@ -14,9 +14,6 @@ export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
 
-    // TODO: handle preventing users from accessing
-    // /forgot-password and /reset-password through typing the URL
-
     if (
         !pathname.includes('/forbidden') &&
         PUBLIC_ROUTES.has(pathname) &&
