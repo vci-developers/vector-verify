@@ -108,7 +108,6 @@ function LegacySiteLevel({
                     locationName={name}
                     locationTypeName={level.label}
                     siteIds={groupSites.map(site => site.siteId)}
-                    visibleSiteIds={visibleSiteIds}
                     sessionSummaryBySiteId={summaryBySiteId}
                     defaultOpen={depth > 0}
                 >
@@ -191,7 +190,6 @@ function HierarchicalSiteLevel({
                         locationName={site.name ?? 'Unknown'}
                         locationTypeName={locationTypeName}
                         siteIds={sentinelSiteIds}
-                        visibleSiteIds={visibleSiteIds}
                         sessionSummaryBySiteId={summaryBySiteId}
                         defaultOpen={depth > 0}
                     >

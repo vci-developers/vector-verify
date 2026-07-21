@@ -42,7 +42,6 @@ interface ReviewCollapsibleLocationGroupProps {
     locationName: string;
     locationTypeName: string;
     siteIds: number[];
-    visibleSiteIds?: Set<number>;
     sessionSummaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     defaultOpen: boolean;
     children: React.ReactNode;
@@ -52,7 +51,6 @@ export default function ReviewCollapsibleLocationGroup({
     locationName,
     locationTypeName,
     siteIds,
-    visibleSiteIds,
     sessionSummaryBySiteId,
     defaultOpen,
     children,
@@ -66,12 +64,7 @@ export default function ReviewCollapsibleLocationGroup({
         const summary = sessionSummaryBySiteId.get(siteId);
         if (summary === undefined) continue;
         if (getSiteSessionCount(summary) > 0) visitedSiteCount += 1;
-        if (
-            (visibleSiteIds === undefined || visibleSiteIds.has(siteId)) &&
-            summary.NEEDS_REVIEW > 0
-        ) {
-            needsReviewSiteCount += 1;
-        }
+        if (summary.NEEDS_REVIEW > 0) needsReviewSiteCount += 1;
     }
     const totalSiteCount = siteIds.length;
     const visitedPercentage =

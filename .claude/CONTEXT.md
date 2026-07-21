@@ -330,17 +330,17 @@ the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
 in the global user menu, not the Operations page. Audience: developers.
 Delivered as a temporary, expiring **Signed Export URL** (obtained via
-`POST /export/sign`) that the developer clicks to download directly from the
+`POST /resources/sign`) that the developer clicks to download directly from the
 backend — VectorVerify signs the request but no longer proxies the CSV stream.
 _Avoid_: Raw export (capitalise), DB dump, backup
 
 **Signed Export URL**: A short-lived, pre-signed URL returned by
-`POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
-access to an export (or report) path served directly by the backend. The browser
-downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
-only by **Raw Data Export**; the endpoint can also sign a **Report Export**
-path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
-token
+`POST /resources/sign` (`{ url, expiresAt }`) granting temporary
+_unauthenticated_ access to an export (or report) path served directly by the
+backend. The browser downloads from it directly, bypassing VectorVerify's BFF
+proxy. Currently used only by **Raw Data Export**; the endpoint can also sign a
+**Report Export** path, which is not yet adopted. _Avoid_: Presigned link, temp
+link, download token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only

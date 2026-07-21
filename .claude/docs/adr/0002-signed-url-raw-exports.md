@@ -6,6 +6,11 @@ Date: 2026-06-24
 
 Accepted
 
+> **Update (2026-07-21):** The backend endpoint was renamed
+> `POST /export/sign` → `POST /resources/sign`. The decision recorded here is
+> unchanged; the original endpoint references below are preserved as-written for
+> the historical record.
+
 ## Context
 
 Each **Raw Data Export** (Specimens, Surveillance Forms, Annotations) was served
