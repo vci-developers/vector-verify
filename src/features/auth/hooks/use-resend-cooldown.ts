@@ -34,15 +34,9 @@ export function useResendCooldown(storageKey: string) {
         setSecondsRemaining(COOLDOWN_SECONDS);
     }, [storageKey]);
 
-    const clearCooldown = useCallback(() => {
-        window.localStorage.removeItem(storageKey);
-        setSecondsRemaining(0);
-    }, [storageKey]);
-
     return {
         secondsRemaining,
         isOnCooldown: secondsRemaining > 0,
         startCooldown,
-        clearCooldown,
     };
 }

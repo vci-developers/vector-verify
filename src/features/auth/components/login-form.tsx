@@ -80,6 +80,7 @@ export default function LoginForm() {
             router.refresh();
         }
 
+        window.localStorage.clear();
         router.replace('/');
         router.refresh();
     }

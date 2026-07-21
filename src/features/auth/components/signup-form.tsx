@@ -75,6 +75,7 @@ export default function SignupForm() {
             console.error('Signup failed', signupResult);
             return;
         }
+        window.localStorage.clear();
         router.refresh();
     }
 
