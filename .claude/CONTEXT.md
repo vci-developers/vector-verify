@@ -329,18 +329,29 @@ from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
 in the global user menu, not the Operations page. Audience: developers.
-Delivered as a temporary, expiring **Signed Export URL** (obtained via
+Delivered as a temporary, expiring **Signed Resource URL** (obtained via
 `POST /resources/sign`) that the developer clicks to download directly from the
 backend — VectorVerify signs the request but no longer proxies the CSV stream.
 _Avoid_: Raw export (capitalise), DB dump, backup
 
-**Signed Export URL**: A short-lived, pre-signed URL returned by
+**Signed Resource URL**: A short-lived, pre-signed URL returned by
 `POST /resources/sign` (`{ url, expiresAt }`) granting temporary
-_unauthenticated_ access to an export (or report) path served directly by the
-backend. The browser downloads from it directly, bypassing VectorVerify's BFF
-proxy. Currently used only by **Raw Data Export**; the endpoint can also sign a
-**Report Export** path, which is not yet adopted. _Avoid_: Presigned link, temp
-link, download token
+_unauthenticated_ access to a backend **resource path** — an export, a report,
+or a **specimen image** — served directly by the backend, bypassing
+VectorVerify's BFF proxy. The sign call itself is authenticated (it flows through
+the BFF with the user's bearer token), so a URL can only be _obtained_ by a
+logged-in user; the signature is a short-lived capability, and the backend
+returns **401 Unauthorized** (not `404`) once it expires. TTL depends on the
+resource: **5 minutes** for export/report downloads, **1 hour** for specimen
+images. Two consumption modes: **download** (an export/report path; the browser
+saves the file directly — Raw Data Export) and **inline render** (a **specimen
+image** path rendered straight into an `<img>`, so the full image bytes travel
+browser ↔ backend and never through the Amplify size-limited BFF proxy — the fix
+for large-image `413`s). The endpoint was renamed `/export/sign` →
+`/resources/sign` (VCV-287) to reflect this generalization beyond exports. A
+**Report Export** path can also be signed, but that is not yet adopted. _Avoid_:
+Signed Export URL (too narrow — it also signs images), Presigned link, temp link,
+download token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only

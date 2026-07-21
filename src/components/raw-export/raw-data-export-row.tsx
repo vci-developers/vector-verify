@@ -1,6 +1,6 @@
 import { Download, Link2, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/button';
-import { usePostResourcesSign } from '@/api/resources/hooks/use-post-resources-sign';
+import { useSignResourceForDownload } from '@/api/resources/hooks/use-sign-resource-for-download';
 import { useState } from 'react';
 import type { PostResourcesSignSuccessPayload } from '@/api/resources/validation/post-resources-sign-schema';
 import { networkErrorMessage } from '@/lib/network/network-error';
@@ -17,8 +17,8 @@ export default function RawDataExportRow({
     description,
     path,
 }: RawDataExportRowProps) {
-    const { mutateAsync: signResources, isPending: isPostSignResourcesPending } =
-        usePostResourcesSign();
+    const { mutateAsync: signResource, isPending: isSignResourcePending } =
+        useSignResourceForDownload();
     const [signedLink, setSignedLink] =
         useState<PostResourcesSignSuccessPayload | null>(null);
     const [hasExpired, setHasExpired] = useState(false);
@@ -28,7 +28,7 @@ export default function RawDataExportRow({
         setLinkError(null);
         setHasExpired(false);
 
-        const [outcome] = await Promise.allSettled([signResources({ path })]);
+        const [outcome] = await Promise.allSettled([signResource({ path })]);
 
         if (outcome.status === 'rejected') {
             setSignedLink(null);
@@ -71,16 +71,16 @@ export default function RawDataExportRow({
                         variant="outline"
                         size="sm"
                         onClick={handleGenerateLink}
-                        disabled={isPostSignResourcesPending}
+                        disabled={isSignResourcePending}
                     >
-                        {isPostSignResourcesPending ? (
+                        {isSignResourcePending ? (
                             <Loader2 className="animate-spin" />
                         ) : hasExpired ? (
                             <RefreshCw />
                         ) : (
                             <Link2 />
                         )}
-                        {isPostSignResourcesPending
+                        {isSignResourcePending
                             ? 'Generating…'
                             : hasExpired
                               ? 'Regenerate'

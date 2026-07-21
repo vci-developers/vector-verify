@@ -5,7 +5,6 @@ import type { GetMonthlySpecimensCountQueryParams } from './validation/get-month
 
 export const specimenKeys = {
     root: ['specimens'] as const,
-    specimenById: (specimenId: number) => ['specimens', specimenId] as const,
     specimens: (queryParams?: GetSpecimensQueryParams) =>
         ['specimens', queryParams] as const,
     specimensCount: (queryParams?: GetSpecimensCountQueryParams) =>

@@ -6,14 +6,14 @@ import type {
 import type { NetworkError } from '@/lib/network/network-error';
 import { useMutation } from '@tanstack/react-query';
 
-type PostResourcesSignMutationResult = Result<
+type SignResourceMutationResult = Result<
     PostResourcesSignSuccessPayload,
     NetworkError
 >;
 
-async function signResources(
+async function signResource(
     requestBody: PostResourcesSignRequestBody,
-): Promise<PostResourcesSignMutationResult> {
+): Promise<SignResourceMutationResult> {
     const response = await fetch('/api/resources/sign', {
         method: 'POST',
         credentials: 'include',
@@ -23,13 +23,13 @@ async function signResources(
         body: JSON.stringify(requestBody),
     });
 
-    const result: PostResourcesSignMutationResult = await response.json();
+    const result: SignResourceMutationResult = await response.json();
     return result;
 }
 
-export function usePostResourcesSign() {
+export function useSignResourceForDownload() {
     return useMutation({
         mutationFn: (requestBody: PostResourcesSignRequestBody) =>
-            signResources(requestBody),
+            signResource(requestBody),
     });
 }
