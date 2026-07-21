@@ -8,24 +8,21 @@ import { useTranslations } from 'next-intl';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
 import type { Site } from '@/api/site/validation/site-schema';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
+import { useGeographicalView } from '@/features/operations/geographical-summary/view-state/use-geographical-view';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
+    GEOGRAPHICAL_VIEWS,
+    type GeographicalView,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { Fragment, useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
-const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
-
-type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
-
 interface OperationsGeographicalSummaryProps {
     programId: number;
     siteIds: number[];
-    selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
@@ -36,7 +33,6 @@ interface OperationsGeographicalSummaryProps {
 export default function OperationsGeographicalSummary({
     programId,
     siteIds,
-    selectedLocations,
     descendantsOfSelectedLocations,
     startDate,
     endDate,
@@ -54,11 +50,8 @@ export default function OperationsGeographicalSummary({
     if (!isPending && markers.length > 0) siteMapMounted.current = true;
 
     const t = useTranslations('OperationsGeographicalSummary');
-    const [geographicalView, setGeographicalView] =
-        useLocalStorage<GeographicalView>(
-            StorageKeys.operations.geographicalView,
-            'specimens',
-        );
+    const [{ selectedLocations }] = useOperationsFilters();
+    const [geographicalView, setGeographicalView] = useGeographicalView();
 
     return (
         <div className="mt-4 space-y-3">

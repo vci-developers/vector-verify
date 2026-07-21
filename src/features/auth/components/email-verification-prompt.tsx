@@ -3,49 +3,25 @@
 import { usePostSendEmailVerification } from '@/api/auth/hooks/use-post-send-email-verification';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import LogoutButton from '@/components/auth-session/logout-button';
 import { StorageKeys } from '@/lib/storage-keys';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-
-const RESEND_COOLDOWN_SECONDS = 60;
+import { useResendCooldown } from '@/features/auth/hooks/use-resend-cooldown';
 
 export default function EmailVerificationPrompt() {
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [secondsRemaining, setSecondsRemaining] = useState(0);
-    const [emailSentTimestamp, setEmailSentTimestamp] = useLocalStorage<number>(
-        StorageKeys.auth.emailSentTimestamp,
-        0,
+    const { secondsRemaining, isOnCooldown, startCooldown } = useResendCooldown(
+        StorageKeys.auth.verificationEmailSentTimestamp,
     );
     const t = useTranslations('Auth');
     const { mutate: sendEmailVerification, isPending } =
         usePostSendEmailVerification();
 
-    useEffect(() => {
-        function updateRemaining() {
-            if (!emailSentTimestamp) {
-                setSecondsRemaining(0);
-                return;
-            }
-            const elapsedSeconds = (Date.now() - emailSentTimestamp) / 1000;
-            const remainingTime = Math.ceil(
-                RESEND_COOLDOWN_SECONDS - elapsedSeconds,
-            );
-            setSecondsRemaining(remainingTime > 0 ? remainingTime : 0);
-        }
-
-        updateRemaining();
-        const intervalId = setInterval(updateRemaining, 1000);
-        return () => clearInterval(intervalId);
-    }, [emailSentTimestamp]);
-
-    const isOnCooldown = secondsRemaining > 0;
-
     async function sendEmail() {
         setHasError(false);
-        setEmailSentTimestamp(Date.now());
+        startCooldown();
 
         sendEmailVerification(undefined, {
             onSuccess: data => {

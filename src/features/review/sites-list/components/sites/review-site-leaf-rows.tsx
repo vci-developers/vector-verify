@@ -13,9 +13,10 @@ import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-type ReviewState = (typeof REVIEW_STATE_SEVERITY_ORDER)[number];
-
-const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
+const REVIEW_STATE_LABEL_KEY: Record<
+    (typeof REVIEW_STATE_SEVERITY_ORDER)[number],
+    string
+> = {
     NEEDS_REVIEW: 'needsReview',
     IN_REVIEW: 'inReview',
     CERTIFIED: 'certified',
@@ -23,7 +24,7 @@ const REVIEW_STATE_LABEL_KEY: Record<ReviewState, string> = {
 };
 
 const REVIEW_STATE_BADGE_VARIANT: Record<
-    ReviewState,
+    (typeof REVIEW_STATE_SEVERITY_ORDER)[number],
     'destructive' | 'outline' | 'default' | 'secondary'
 > = {
     NEEDS_REVIEW: 'destructive',
@@ -34,6 +35,7 @@ const REVIEW_STATE_BADGE_VARIANT: Record<
 
 interface ReviewSiteLeafRowsProps {
     sites: Site[];
+    visibleSiteIds?: Set<number>;
     getDisplayName: (site: Site) => string;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
@@ -41,15 +43,21 @@ interface ReviewSiteLeafRowsProps {
 
 export default function ReviewSiteLeafRows({
     sites,
+    visibleSiteIds,
     getDisplayName,
     summaryBySiteId,
     buildSiteHref,
 }: ReviewSiteLeafRowsProps) {
     const t = useTranslations('ReviewSitesList');
 
+    const visibleSites =
+        visibleSiteIds === undefined
+            ? sites
+            : sites.filter(site => visibleSiteIds.has(site.siteId));
+
     return (
         <div className="space-y-1">
-            {sites.map(site => {
+            {visibleSites.map(site => {
                 const displayName = getDisplayName(site);
                 const summary = summaryBySiteId.get(site.siteId);
                 const hasSessions =

@@ -20,8 +20,7 @@ import {
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
 import { useMemo } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 
@@ -59,10 +58,7 @@ export default function OperationsSpecimenComposition({
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
-    const [storedSpecies, setStoredSpecies] = useLocalStorage<string[] | null>(
-        StorageKeys.operations.selectedSpecies,
-        null,
-    );
+    const [{ selectedSpecies }, setFilters] = useOperationsFilters();
     const speciesOptions = useMemo(() => {
         if (!getMonthlySpecimensCountResult?.ok) return [];
         return getSpeciesOptions(getMonthlySpecimensCountResult.data.data);
@@ -71,10 +67,10 @@ export default function OperationsSpecimenComposition({
     const validSelectedSpecies = useMemo(() => {
         const validOptions = new Set(speciesOptions);
         const species =
-            storedSpecies ??
+            selectedSpecies ??
             speciesOptions.filter(species => !isNonMosquito(species));
-        return species.filter(s => validOptions.has(s));
-    }, [storedSpecies, speciesOptions]);
+        return species.filter(speciesName => validOptions.has(speciesName));
+    }, [selectedSpecies, speciesOptions]);
 
     if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
         return <h1>{t('monthlySpecimenCountsLoading')}</h1>;
@@ -99,7 +95,9 @@ export default function OperationsSpecimenComposition({
                 </Label>
                 <MultiSelect
                     values={validSelectedSpecies}
-                    onValuesChange={setStoredSpecies}
+                    onValuesChange={species =>
+                        setFilters({ selectedSpecies: species })
+                    }
                 >
                     <MultiSelectTrigger>
                         <MultiSelectValue placeholder={t('selectSpecies')} />

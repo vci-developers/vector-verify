@@ -144,9 +144,13 @@
         "inReview": "In Review",
         "certified": "Certified",
         "submitted": "Submitted",
+        "filterByState": "Filter by state",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
-        "sitesVisited": "{visited} of {total} visited"
+        "sitesVisited": "{visited} of {total} visited",
+        "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
+        "noSitesForLocation": "No sites found for this location.",
+        "noSitesMatchFilter": "No sites match this filter."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",

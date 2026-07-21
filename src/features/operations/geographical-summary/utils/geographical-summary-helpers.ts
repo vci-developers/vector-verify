@@ -3,6 +3,10 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { GetSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-specimens-count-schema';
 import { isLegacySite } from '@/lib/location/location-query';
 
+export const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
+
+export type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
+
 export const ANOPHELES_THRESHOLD = {
     low: 10,
     moderate: 50,
