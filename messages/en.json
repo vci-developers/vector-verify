@@ -20,12 +20,26 @@
     },
     "Auth": {
         "welcomeBack": "Welcome back",
+        "email": "Email",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password",
         "createAccount": "Create your account",
         "notWhitelistedTitle": "Your account is awaiting approval",
         "notWhitelistedDescription": "A program administrator needs to approve your account before you can access VectorVerify. Please check back once your account has been approved.",
         "noAccessTitle": "You don't have access to this feature",
         "noAccessDescription": "Your account doesn't have permission for this feature. If you think this is a mistake, contact your program administrator.",
-        "returnHome": "Return home"
+        "returnHome": "Return home",
+        "forgotPassword": "Forgot password",
+        "forgotPasswordDescription": "Enter your email to receive a link to reset your password.",
+        "returnToLogin": "Return to login",
+        "sendResetLink": "Send password reset link",
+        "passwordResetLinkSent": "If an account with a verified email exists for this address, a password reset link has been sent.",
+        "resetPassword": "Reset password",
+        "resetPasswordDescription": "Enter your new password and re-enter it to confirm the change.",
+        "invalidResetPasswordLink": "This link is invalid or expired. Please go to the Forgot Password page to send a valid link to your email.",
+        "userNotFoundOrEmailNotVerified": "Could not find this user, or the email has not been verified. Please go to the Forgot Password page to send a valid link or contact support",
+        "passwordHasBeenReset": "Your password has been reset!",
+        "somethingWentWrong": "Something went wrong. Please try again later or contact support."
     },
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
@@ -153,7 +167,7 @@
         "currentImage": "Current Image",
         "capturedAt": "Captured At",
         "submittedAt": "Submitted At",
-        "modelPredictions": "Model Predictions",
+        "modelPredictionsAndConfidence": "Model Predictions and Confidence",
         "species": "Species",
         "sex": "Sex",
         "abdomenStatus": "Abdomen Status"

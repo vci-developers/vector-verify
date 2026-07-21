@@ -1,16 +1,17 @@
 import { Separator } from '@/components/ui/separator';
 import AuthShell from '@/features/auth/components/auth-shell';
 import ForgotPasswordForm from '@/features/auth/components/forgot-password-form';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+    const t = await getTranslations('Auth');
     return (
         <AuthShell
-            title="Forgot password"
-            description="Enter your email to receive a link to reset your password."
+            title={t('forgotPassword')}
+            description={t('forgotPasswordDescription')}
             imageSrc="/assets/auth/images/Login.png"
         >
-            {/* Note: imageSrc is currently a placeholder, cannot pass an empty imageSrc without issues */}
             <ForgotPasswordForm></ForgotPasswordForm>
             <Separator className="my-6" />
             <p className="text-muted-foreground text-center text-sm">
@@ -18,7 +19,7 @@ export default function ForgotPasswordPage() {
                     href="/login"
                     className="text-primary font-medium hover:underline"
                 >
-                    Return to login
+                    {t('returnToLogin')}
                 </Link>
             </p>
         </AuthShell>

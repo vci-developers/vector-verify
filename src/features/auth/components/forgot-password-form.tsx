@@ -16,9 +16,14 @@ import { Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { usePostForgotPassword } from '@/api/auth/hooks/use-post-forgot-password';
+import { useTranslations } from 'next-intl';
 
 export default function ForgotPasswordForm() {
-    const [sentEmail, setSentEmail] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const { mutate: postForgotPassword, isPending } = usePostForgotPassword();
+    const t = useTranslations('Auth');
 
     const forgotPasswordForm = useForm<ForgotPasswordFormInput>({
         resolver: zodResolver(forgotPasswordFormSchema),
@@ -28,18 +33,14 @@ export default function ForgotPasswordForm() {
     });
 
     async function onSubmit(data: ForgotPasswordFormInput) {
-        // TODO: API call + handling here
-        // Display the email sent message
-        setSentEmail(true);
-    }
-
-    // Not sure if there should be some resend button
-    if (sentEmail) {
-        return (
-            <p className="text-muted-foreground text-center text-sm">
-                Sent! Check your email for the password reset link.
-            </p>
-        );
+        setSubmitted(false);
+        setHasError(false);
+        postForgotPassword(data, {
+            onSuccess: () => {
+                setSubmitted(true);
+            },
+            onError: () => setHasError(true),
+        });
     }
 
     return (
@@ -55,7 +56,7 @@ export default function ForgotPasswordForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="reset-password-rhf-email">
-                                Email
+                                {t('email')}
                             </FieldLabel>
                             <div className="relative">
                                 <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -80,11 +81,21 @@ export default function ForgotPasswordForm() {
                     type="submit"
                     form="forgot-password-rhf"
                     className="w-full"
-                    disabled={forgotPasswordForm.formState.isSubmitting}
+                    disabled={isPending}
                 >
-                    Send Email
+                    {t('sendResetLink')}
                 </Button>
             </Field>
+            {submitted && (
+                <p className="text-muted-foreground text-center text-sm">
+                    {t('passwordResetLinkSent')}
+                </p>
+            )}
+            {hasError && (
+                <p className="text-muted-foreground text-center text-sm">
+                    {t('somethingWentWrong')}
+                </p>
+            )}
         </form>
     );
 }

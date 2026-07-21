@@ -17,11 +17,22 @@ import { Eye, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { usePostResetPassword } from '@/api/auth/hooks/use-post-reset-password';
+import { useTranslations } from 'next-intl';
 
-export default function ResetPasswordForm() {
+interface ResetPasswordProps {
+    token: string;
+}
+
+export default function ResetPasswordForm({ token }: ResetPasswordProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const t = useTranslations('Auth');
+
+    const { mutate: postResetPassword, isPending } = usePostResetPassword();
 
     const resetPasswordForm = useForm<ResetPasswordFormInput>({
         resolver: zodResolver(resetPasswordFormSchema),
@@ -32,22 +43,53 @@ export default function ResetPasswordForm() {
     });
 
     async function onSubmit(data: ResetPasswordFormInput) {
-        // TODO: API call + handling here
-        // Password reset successfully! (adjust later to be changed on success only)
-        setPasswordResetSuccess(true);
+        postResetPassword(
+            { newPassword: data.password, token },
+            {
+                onSuccess: result => {
+                    if (result.ok) {
+                        setSubmitted(true);
+                        setHasError(false);
+                    } else {
+                        setErrorMessage(
+                            result.error.status === 400
+                                ? t('invalidResetPasswordLink')
+                                : result.error.status === 404
+                                  ? t('userNotFoundOrEmailNotVerified')
+                                  : t('somethingWentWrong'),
+                        );
+                    }
+                },
+                onError: () => {
+                    setHasError(true);
+                },
+            },
+        );
     }
 
-    if (passwordResetSuccess) {
+    if (submitted) {
         return (
             <div className="text-center">
                 <p className="text-muted-foreground text-sm leading-loose">
-                    Your password has been reset!
+                    {t('passwordHasBeenReset')}
                 </p>
                 <Link
                     href="/login"
                     className="text-primary text-sm font-medium hover:underline"
                 >
-                    Return to login
+                    {t('returnToLogin')}
+                </Link>
+            </div>
+        );
+    }
+    if (errorMessage) {
+        return (
+            <div className="flex flex-col items-center gap-4">
+                <p className="text-muted-foreground text-center text-sm">
+                    {errorMessage}
+                </p>
+                <Link className="w-full" href="/forgot-password">
+                    <Button className="w-full"> {t('forgotPassword')}</Button>
                 </Link>
             </div>
         );
@@ -66,7 +108,7 @@ export default function ResetPasswordForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="reset-password-password">
-                                New Password
+                                {t('newPassword')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -102,7 +144,7 @@ export default function ResetPasswordForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="reset-password-confirm-password">
-                                Confirm Password
+                                {t('confirmPassword')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -141,14 +183,19 @@ export default function ResetPasswordForm() {
                     )}
                 />
             </FieldGroup>
+            {hasError && (
+                <p className="text-muted-foreground text-center text-sm">
+                    {t('somethingWentWrong')}
+                </p>
+            )}
             <Field orientation="horizontal">
                 <Button
                     type="submit"
                     form="reset-password-rhf"
                     className="w-full"
-                    disabled={resetPasswordForm.formState.isSubmitting}
+                    disabled={isPending}
                 >
-                    Reset Password
+                    {t('resetPassword')}
                 </Button>
             </Field>
         </form>
