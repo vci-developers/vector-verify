@@ -204,5 +204,8 @@
         "axisActiveUsersLabel": "Active users",
         "loading": "Loading active-user metrics…",
         "empty": "No active-user snapshots in this window."
+    },
+    "AnnotationWorkspace": {
+        "flaggedSpecimenDefinition": "A flagged specimen is one that cannot be confidently identified due to poor specimen or image quality."
     }
 }

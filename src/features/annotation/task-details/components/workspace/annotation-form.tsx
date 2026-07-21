@@ -50,6 +50,7 @@ import {
     deserializeAnnotationFormArtifacts,
     serializeAnnotationFormArtifacts,
 } from '@/features/annotation/task-details/lib/annotation-form-artifacts-serializer';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationFormProps {
     annotation: Annotation;
@@ -64,6 +65,7 @@ export default function AnnotationForm({
     onSubmit,
     onCancel,
 }: AnnotationFormProps) {
+    const t = useTranslations('AnnotationWorkspace');
     const [genus, anophelesSpecies] =
         annotation.visualSpecies?.split(' ') ?? [];
     const annotationForm = useForm<AnnotationFormInput>({
@@ -471,6 +473,10 @@ export default function AnnotationForm({
                             )}
                         />
                     </FieldGroup>
+
+                    <p className="text-muted-foreground text-center text-sm">
+                        {t('flaggedSpecimenDefinition')}
+                    </p>
 
                     <div className="flex justify-end gap-2">
                         {onCancel && (
