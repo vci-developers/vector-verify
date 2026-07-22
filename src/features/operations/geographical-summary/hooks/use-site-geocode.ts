@@ -7,7 +7,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
-export function useSiteGeocode(markers: GeocodableMarker[]): {
+export function useSiteGeocode(
+    markers: GeocodableMarker[],
+    country: string,
+): {
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     isGeocoding: boolean;
 } {
@@ -48,10 +51,12 @@ export function useSiteGeocode(markers: GeocodableMarker[]): {
                 const geocodeResult = await queryClient.fetchQuery({
                     queryKey: geocodeKeys.geocode({
                         location: marker.locationQuery,
+                        country,
                     }),
                     queryFn: () =>
                         fetchGeocode({
                             location: marker.locationQuery,
+                            country,
                         }),
                 });
 
@@ -71,7 +76,7 @@ export function useSiteGeocode(markers: GeocodableMarker[]): {
             cancelled = true;
             setIsGeocoding(false);
         };
-    }, [markerIds, queryClient]);
+    }, [markerIds, country, queryClient]);
 
     return { markerIdsToGeocodedPosition, isGeocoding };
 }
