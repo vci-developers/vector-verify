@@ -338,9 +338,9 @@ _Avoid_: Raw export (capitalise), DB dump, backup
 `POST /resources/sign` (`{ url, expiresAt }`) granting temporary
 _unauthenticated_ access to a backend **resource path** — an export, a report,
 or a **specimen image** — served directly by the backend, bypassing
-VectorVerify's BFF proxy. The sign call itself is authenticated (it flows through
-the BFF with the user's bearer token), so a URL can only be _obtained_ by a
-logged-in user; the signature is a short-lived capability, and the backend
+VectorVerify's BFF proxy. The sign call itself is authenticated (it flows
+through the BFF with the user's bearer token), so a URL can only be _obtained_
+by a logged-in user; the signature is a short-lived capability, and the backend
 returns **401 Unauthorized** (not `404`) once it expires. TTL depends on the
 resource: **5 minutes** for export/report downloads, **1 hour** for specimen
 images. Two consumption modes: **download** (an export/report path; the browser
@@ -350,8 +350,8 @@ browser ↔ backend and never through the Amplify size-limited BFF proxy — the
 for large-image `413`s). The endpoint was renamed `/export/sign` →
 `/resources/sign` (VCV-287) to reflect this generalization beyond exports. A
 **Report Export** path can also be signed, but that is not yet adopted. _Avoid_:
-Signed Export URL (too narrow — it also signs images), Presigned link, temp link,
-download token
+Signed Export URL (too narrow — it also signs images), Presigned link, temp
+link, download token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only
