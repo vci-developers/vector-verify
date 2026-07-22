@@ -2,7 +2,7 @@
 
 import { useGetMonthlySpecimensCount } from '@/api/specimen/hooks/use-get-monthly-specimens-count';
 import type { GetMonthlySpecimensCountQueryParams } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
-import CompositionChartPair from './composition-chart-pair';
+import CompositionChartPairLineChart from './composition-chart-pair-line-chart';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
@@ -23,6 +23,8 @@ import { useMemo } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import { Toggle } from '@/components/ui/toggle';
+import CompositionChartPairBarChart from './composition-chart-pair-bar-chart';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -89,34 +91,42 @@ export default function OperationsSpecimenComposition({
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col gap-1.5">
-                <Label className="text-sm font-medium">
-                    {t('filterBySpecies')}
-                </Label>
-                <MultiSelect
-                    values={validSelectedSpecies}
-                    onValuesChange={species =>
-                        setFilters({ selectedSpecies: species })
-                    }
-                >
-                    <MultiSelectTrigger>
-                        <MultiSelectValue placeholder={t('selectSpecies')} />
-                    </MultiSelectTrigger>
-                    <MultiSelectContent
-                        search={{
-                            placeholder: t('searchSpecies'),
-                            emptyMessage: t('noSpeciesFound'),
-                        }}
+            <div className="flex-gap flex justify-between">
+                <div className="flex flex-col gap-1.5">
+                    <Label className="text-sm font-medium">
+                        {t('filterBySpecies')}
+                    </Label>
+                    <MultiSelect
+                        values={validSelectedSpecies}
+                        onValuesChange={species =>
+                            setFilters({ selectedSpecies: species })
+                        }
                     >
-                        <MultiSelectGroup>
-                            {speciesOptions.map(species => (
-                                <MultiSelectItem key={species} value={species}>
-                                    {species}
-                                </MultiSelectItem>
-                            ))}
-                        </MultiSelectGroup>
-                    </MultiSelectContent>
-                </MultiSelect>
+                        <MultiSelectTrigger>
+                            <MultiSelectValue
+                                placeholder={t('selectSpecies')}
+                            />
+                        </MultiSelectTrigger>
+                        <MultiSelectContent
+                            search={{
+                                placeholder: t('searchSpecies'),
+                                emptyMessage: t('noSpeciesFound'),
+                            }}
+                        >
+                            <MultiSelectGroup>
+                                {speciesOptions.map(species => (
+                                    <MultiSelectItem
+                                        key={species}
+                                        value={species}
+                                    >
+                                        {species}
+                                    </MultiSelectItem>
+                                ))}
+                            </MultiSelectGroup>
+                        </MultiSelectContent>
+                    </MultiSelect>
+                </div>
+                <Toggle>toggle</Toggle>
             </div>
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
@@ -138,7 +148,14 @@ export default function OperationsSpecimenComposition({
                     );
 
                     return (
-                        <CompositionChartPair
+                        // <CompositionChartPairLineChart
+                        //     key={specimenClassificationAxis}
+                        //     title={title}
+                        //     specimenCountsByClass={specimenCountsByClass}
+                        //     specimenCountsByMonth={specimenCountsByMonth}
+                        //     specimenChartConfig={specimenChartConfig}
+                        // />
+                        <CompositionChartPairBarChart
                             key={specimenClassificationAxis}
                             title={title}
                             specimenCountsByClass={specimenCountsByClass}

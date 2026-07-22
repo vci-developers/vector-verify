@@ -20,7 +20,7 @@ import {
     YAxis,
 } from 'recharts';
 
-interface CompositionChartPairProps {
+interface CompositionChartPairLineChartProps {
     title: string;
     specimenCountsByClass: {
         specimenClass: string;
@@ -30,12 +30,12 @@ interface CompositionChartPairProps {
     specimenChartConfig: ChartConfig;
 }
 
-export default function CompositionChartPair({
+export default function CompositionChartPairLineChart({
     title,
     specimenCountsByClass,
     specimenCountsByMonth,
     specimenChartConfig,
-}: CompositionChartPairProps) {
+}: CompositionChartPairLineChartProps) {
     const specimenClasses = Object.keys(specimenChartConfig);
     const totalSpecimenCount = specimenCountsByClass.reduce(
         (sum, { specimenCount }) => sum + specimenCount,
