@@ -140,11 +140,11 @@ export default function OperationsSpecimenComposition({
                     >
                         <ToggleGroupItem value="bar">
                             <BarChart3 />
-                            Bar chart
+                            {t('barChart')}
                         </ToggleGroupItem>
                         <ToggleGroupItem value="line">
                             <LineChart />
-                            Line chart
+                            {t('lineChart')}
                         </ToggleGroupItem>
                     </ToggleGroup>
                 </div>

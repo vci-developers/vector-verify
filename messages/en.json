@@ -72,7 +72,9 @@
         "filterBySpecies": "Filter by Species",
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
-        "noSpeciesFound": "No species found."
+        "noSpeciesFound": "No species found.",
+        "barChart": "Bar chart",
+        "lineChart": "Line chart"
     },
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
