@@ -19,12 +19,13 @@ import {
     MultiSelectContent,
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
-import { Toggle } from '@/components/ui/toggle';
 import CompositionChartPairBarChart from './composition-chart-pair-bar-chart';
+import { BarChart3, LineChart } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -40,6 +41,8 @@ interface OperationsSpecimenCompositionProps {
     startDate: string;
     endDate: string;
 }
+
+type ChartType = 'bar' | 'line';
 
 export default function OperationsSpecimenComposition({
     siteIds,
@@ -59,6 +62,8 @@ export default function OperationsSpecimenComposition({
         data: getMonthlySpecimensCountResult,
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
+
+    const [chartType, setChartType] = useState<ChartType>('bar');
 
     const [{ selectedSpecies }, setFilters] = useOperationsFilters();
     const speciesOptions = useMemo(() => {
@@ -91,11 +96,11 @@ export default function OperationsSpecimenComposition({
 
     return (
         <div className="space-y-6">
-            <div className="flex-gap flex justify-between">
-                <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm font-medium">
-                        {t('filterBySpecies')}
-                    </Label>
+            <div className="flex flex-col gap-1.5">
+                <Label className="text-sm font-medium">
+                    {t('filterBySpecies')}
+                </Label>
+                <div className="flex-gap flex justify-between">
                     <MultiSelect
                         values={validSelectedSpecies}
                         onValuesChange={species =>
@@ -125,9 +130,27 @@ export default function OperationsSpecimenComposition({
                             </MultiSelectGroup>
                         </MultiSelectContent>
                     </MultiSelect>
+                    <ToggleGroup
+                        type="single"
+                        variant="outline"
+                        size="sm"
+                        value={chartType}
+                        onValueChange={(next: ChartType | '') => {
+                            if (next) setChartType(next);
+                        }}
+                    >
+                        <ToggleGroupItem value="bar">
+                            <BarChart3 />
+                            Bar chart
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="line">
+                            <LineChart />
+                            Line chart
+                        </ToggleGroupItem>
+                    </ToggleGroup>
                 </div>
-                <Toggle>toggle</Toggle>
             </div>
+
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
                     const specimenCountsByClass = sumSpecimenCountsByClass(
@@ -147,14 +170,15 @@ export default function OperationsSpecimenComposition({
                         ),
                     );
 
-                    return (
-                        // <CompositionChartPairLineChart
-                        //     key={specimenClassificationAxis}
-                        //     title={title}
-                        //     specimenCountsByClass={specimenCountsByClass}
-                        //     specimenCountsByMonth={specimenCountsByMonth}
-                        //     specimenChartConfig={specimenChartConfig}
-                        // />
+                    return chartType === 'line' ? (
+                        <CompositionChartPairLineChart
+                            key={specimenClassificationAxis}
+                            title={title}
+                            specimenCountsByClass={specimenCountsByClass}
+                            specimenCountsByMonth={specimenCountsByMonth}
+                            specimenChartConfig={specimenChartConfig}
+                        />
+                    ) : (
                         <CompositionChartPairBarChart
                             key={specimenClassificationAxis}
                             title={title}

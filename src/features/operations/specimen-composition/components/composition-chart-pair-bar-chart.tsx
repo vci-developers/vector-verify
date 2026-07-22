@@ -180,8 +180,8 @@ export default function CompositionChartPairBarChart({
                                             specimenChartConfig[specimenClass]
                                                 ?.color
                                         }
-                                        fillOpacity={0.8}
-                                        strokeWidth={1}
+                                        fillOpacity={0.75}
+                                        strokeWidth={2}
                                     />
                                 ))}
                                 <ChartLegend
