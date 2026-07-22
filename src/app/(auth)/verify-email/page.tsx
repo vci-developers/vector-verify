@@ -88,7 +88,7 @@ export default async function VerifyEmailPage({
                         ) : (
                             <Fragment>
                                 <p className="text-muted-foreground text-center text-sm">
-                                    response.error.message
+                                    {response.error.message}
                                 </p>
                                 <LogoutButton />
                             </Fragment>
