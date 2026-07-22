@@ -3,25 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartContainer,
-    ChartLegend,
-    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
 } from '@/components/ui/chart';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Label,
-    Pie,
-    PieChart,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import { Label, Pie, PieChart } from 'recharts';
+import CompositionLineChart from '@/features/operations/specimen-composition/components/composition-line-chart';
+import CompositionBarChart from '@/features/operations/specimen-composition/components/composition-bar-chart';
+
+type ChartType = 'bar' | 'line';
 
 interface CompositionChartPairProps {
     title: string;
+    chartType: ChartType;
     specimenCountsByClass: {
         specimenClass: string;
         specimenCount: number;
@@ -30,8 +24,9 @@ interface CompositionChartPairProps {
     specimenChartConfig: ChartConfig;
 }
 
-export default function CompositionChartPairBarChart({
+export default function CompositionChartPair({
     title,
+    chartType,
     specimenCountsByClass,
     specimenCountsByMonth,
     specimenChartConfig,
@@ -41,7 +36,6 @@ export default function CompositionChartPairBarChart({
         (sum, { specimenCount }) => sum + specimenCount,
         0,
     );
-
     return (
         <Card>
             <CardHeader>
@@ -125,72 +119,23 @@ export default function CompositionChartPairBarChart({
                             config={specimenChartConfig}
                             className="h-full w-full"
                         >
-                            <BarChart
-                                data={specimenCountsByMonth}
-                                margin={{
-                                    top: 8,
-                                    right: 12,
-                                    bottom: 32,
-                                    left: 12,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="month"
-                                    tickLine={false}
-                                    axisLine={false}
-                                >
-                                    <Label
-                                        value="Month"
-                                        position="bottom"
-                                        className="fill-muted-foreground text-sm font-bold"
-                                    />
-                                </XAxis>
-                                <YAxis
-                                    tickLine={false}
-                                    axisLine={false}
-                                    width={44}
-                                >
-                                    <Label
-                                        value="Specimen Count"
-                                        angle={-90}
-                                        position="left"
-                                        className="fill-muted-foreground text-sm font-bold"
-                                        style={{ textAnchor: 'middle' }}
-                                    />
-                                </YAxis>
-                                <ChartTooltip
-                                    content={
-                                        <ChartTooltipContent
-                                            className="min-w-45"
-                                            indicator="line"
-                                        />
+                            {chartType === 'bar' ? (
+                                <CompositionBarChart
+                                    specimenClasses={specimenClasses}
+                                    specimenCountsByMonth={
+                                        specimenCountsByMonth
                                     }
+                                    specimenChartConfig={specimenChartConfig}
                                 />
-                                {specimenClasses.map(specimenClass => (
-                                    <Bar
-                                        key={specimenClass}
-                                        dataKey={specimenClass}
-                                        stackId="specimens"
-                                        fill={
-                                            specimenChartConfig[specimenClass]
-                                                ?.color
-                                        }
-                                        stroke={
-                                            specimenChartConfig[specimenClass]
-                                                ?.color
-                                        }
-                                        fillOpacity={0.75}
-                                        strokeWidth={2}
-                                    />
-                                ))}
-                                <ChartLegend
-                                    wrapperStyle={{ paddingTop: '1rem' }}
-                                    content={
-                                        <ChartLegendContent className="text-muted-foreground flex-wrap" />
+                            ) : (
+                                <CompositionLineChart
+                                    specimenClasses={specimenClasses}
+                                    specimenCountsByMonth={
+                                        specimenCountsByMonth
                                     }
+                                    specimenChartConfig={specimenChartConfig}
                                 />
-                            </BarChart>
+                            )}
                         </ChartContainer>
                     </div>
                 </div>

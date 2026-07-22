@@ -2,7 +2,7 @@
 
 import { useGetMonthlySpecimensCount } from '@/api/specimen/hooks/use-get-monthly-specimens-count';
 import type { GetMonthlySpecimensCountQueryParams } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
-import CompositionChartPairLineChart from './composition-chart-pair-line-chart';
+import CompositionChartPair from '@/features/operations/specimen-composition/components/composition-chart-pair';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
@@ -23,7 +23,6 @@ import { useMemo, useState } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
-import CompositionChartPairBarChart from './composition-chart-pair-bar-chart';
 import { BarChart3, LineChart } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
@@ -170,18 +169,11 @@ export default function OperationsSpecimenComposition({
                         ),
                     );
 
-                    return chartType === 'line' ? (
-                        <CompositionChartPairLineChart
+                    return (
+                        <CompositionChartPair
                             key={specimenClassificationAxis}
                             title={title}
-                            specimenCountsByClass={specimenCountsByClass}
-                            specimenCountsByMonth={specimenCountsByMonth}
-                            specimenChartConfig={specimenChartConfig}
-                        />
-                    ) : (
-                        <CompositionChartPairBarChart
-                            key={specimenClassificationAxis}
-                            title={title}
+                            chartType={chartType}
                             specimenCountsByClass={specimenCountsByClass}
                             specimenCountsByMonth={specimenCountsByMonth}
                             specimenChartConfig={specimenChartConfig}
