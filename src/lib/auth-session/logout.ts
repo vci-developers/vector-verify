@@ -5,6 +5,5 @@ import { redirect } from 'next/navigation';
 
 export async function logout() {
     await clearAuthCookies();
-    localStorage.clear();
     redirect('/login');
 }

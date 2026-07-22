@@ -40,3 +40,8 @@ export function useResendCooldown(storageKey: string) {
         startCooldown,
     };
 }
+
+export function clearResendCooldown(storageKey: string) {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(storageKey);
+}

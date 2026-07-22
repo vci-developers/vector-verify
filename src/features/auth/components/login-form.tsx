@@ -23,6 +23,8 @@ import { useState } from 'react';
 import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-user-profile-schema';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { clearResendCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { StorageKeys } from '@/lib/storage-keys';
 
 export default function LoginForm() {
     const router = useRouter();
@@ -73,6 +75,8 @@ export default function LoginForm() {
             return;
         }
 
+        clearResendCooldown(StorageKeys.auth.verificationEmailSentTimestamp);
+
         if (!userProfileResult.data.user.emailVerified) {
             if (redirect) {
                 router.replace(redirect);
@@ -80,7 +84,6 @@ export default function LoginForm() {
             router.refresh();
         }
 
-        localStorage.clear();
         router.replace('/');
         router.refresh();
     }

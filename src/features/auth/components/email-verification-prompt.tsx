@@ -7,7 +7,7 @@ import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import LogoutButton from '@/components/auth-session/logout-button';
 import { StorageKeys } from '@/lib/storage-keys';
-import { useResendCooldown } from '@/features/auth/hooks/use-resend-cooldown';
+import { useResendCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function EmailVerificationPrompt() {
     const [submitted, setSubmitted] = useState(false);
