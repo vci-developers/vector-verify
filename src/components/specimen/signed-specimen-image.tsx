@@ -64,7 +64,6 @@ export default function SignedSpecimenImage({
             src={signedResource.url}
             alt={alt}
             fill={fill}
-            unoptimized
             sizes={sizes}
             className={className}
             onError={handleLoadError}
