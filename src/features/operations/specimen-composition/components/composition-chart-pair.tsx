@@ -3,13 +3,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
 } from '@/components/ui/chart';
-import { Label, Pie, PieChart } from 'recharts';
-import CompositionLineChart from '@/features/operations/specimen-composition/components/composition-line-chart';
-import CompositionBarChart from '@/features/operations/specimen-composition/components/composition-bar-chart';
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Label,
+    Pie,
+    PieChart,
+    XAxis,
+    YAxis,
+} from 'recharts';
+import { Fragment } from 'react/jsx-runtime';
 
 type ChartType = 'bar' | 'line';
 
@@ -36,6 +48,53 @@ export default function CompositionChartPair({
         (sum, { specimenCount }) => sum + specimenCount,
         0,
     );
+
+    const chartMargins = {
+        top: 8,
+        right: 12,
+        bottom: 32,
+        left: 12,
+    };
+
+    const chartAxes = (
+        <Fragment>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" tickLine={false} axisLine={false}>
+                <Label
+                    value="Month"
+                    position="bottom"
+                    className="fill-muted-foreground text-sm font-bold"
+                />
+            </XAxis>
+            <YAxis tickLine={false} axisLine={false} width={44}>
+                <Label
+                    value="Specimen Count"
+                    angle={-90}
+                    position="left"
+                    className="fill-muted-foreground text-sm font-bold"
+                    style={{ textAnchor: 'middle' }}
+                />
+            </YAxis>
+            <ChartTooltip
+                content={
+                    <ChartTooltipContent
+                        className="min-w-45"
+                        indicator="line"
+                    />
+                }
+            />
+        </Fragment>
+    );
+
+    const chartLegend = (
+        <ChartLegend
+            wrapperStyle={{ paddingTop: '1rem' }}
+            content={
+                <ChartLegendContent className="text-muted-foreground flex-wrap" />
+            }
+        />
+    );
+
     return (
         <Card>
             <CardHeader>
@@ -120,21 +179,63 @@ export default function CompositionChartPair({
                             className="h-full w-full"
                         >
                             {chartType === 'bar' ? (
-                                <CompositionBarChart
-                                    specimenClasses={specimenClasses}
-                                    specimenCountsByMonth={
-                                        specimenCountsByMonth
-                                    }
-                                    specimenChartConfig={specimenChartConfig}
-                                />
+                                <BarChart
+                                    data={specimenCountsByMonth}
+                                    margin={chartMargins}
+                                >
+                                    {chartAxes}
+                                    {specimenClasses.map(specimenClass => (
+                                        <Bar
+                                            key={specimenClass}
+                                            dataKey={specimenClass}
+                                            stackId="specimens"
+                                            fill={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            stroke={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            fillOpacity={0.75}
+                                            strokeWidth={1}
+                                        />
+                                    ))}
+                                    {chartLegend}
+                                </BarChart>
                             ) : (
-                                <CompositionLineChart
-                                    specimenClasses={specimenClasses}
-                                    specimenCountsByMonth={
-                                        specimenCountsByMonth
-                                    }
-                                    specimenChartConfig={specimenChartConfig}
-                                />
+                                <AreaChart
+                                    data={specimenCountsByMonth}
+                                    margin={chartMargins}
+                                >
+                                    {chartAxes}
+                                    {specimenClasses.map(specimenClass => (
+                                        <Area
+                                            key={specimenClass}
+                                            type="monotone"
+                                            dataKey={specimenClass}
+                                            fill={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            stroke={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            fillOpacity={0.2}
+                                            strokeWidth={3}
+                                            dot={{
+                                                r: 2,
+                                                fillOpacity: 1,
+                                            }}
+                                        />
+                                    ))}
+                                    {chartLegend}
+                                </AreaChart>
                             )}
                         </ChartContainer>
                     </div>

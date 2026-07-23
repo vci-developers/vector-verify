@@ -99,7 +99,7 @@ export default function OperationsSpecimenComposition({
                 <Label className="text-sm font-medium">
                     {t('filterBySpecies')}
                 </Label>
-                <div className="flex-gap flex justify-between">
+                <div className="flex justify-between gap-2">
                     <MultiSelect
                         values={validSelectedSpecies}
                         onValuesChange={species =>
