@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
 
 interface ImageReviewDetailsProps {
     specimen: Specimen;
@@ -48,6 +49,37 @@ export default function ImageReviewDetails({
               'MMM d, yyyy h:mm a',
           )
         : '—';
+
+    function getMaxConfidencePercentage(
+        logits: number[] | undefined,
+    ): number | null {
+        if (!logits || logits.length === 0) {
+            return null;
+        }
+        const exps = logits.map(x => Math.exp(x));
+        const sumExps = exps.reduce((a, b) => a + b, 0);
+        return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
+    }
+
+    const modelConfidencePercentages = {
+        species: currentImage?.species
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.speciesLogits,
+              )
+            : null,
+        sex: currentImage?.sex
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.sexLogits,
+              )
+            : null,
+        abdomenStatus: currentImage?.abdomenStatus
+            ? getMaxConfidencePercentage(
+                  currentImage?.inferenceResult?.abdomenStatusLogits,
+              )
+            : null,
+    };
+
+    const isLoading = !specimen || !currentImage;
 
     return (
         <div className="space-y-4">
@@ -124,6 +156,38 @@ export default function ImageReviewDetails({
                         {t('abdomenStatus')}
                     </dt>
                     <dd>{currentImage?.abdomenStatus ?? '—'}</dd>
+                </dl>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+                <p className="text-sm font-semibold">{t('modelConfidence')}</p>
+                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                    <ConfidencePredictionRow
+                        category={t('species')}
+                        label={currentImage?.species}
+                        confidencePercentage={
+                            modelConfidencePercentages.species
+                        }
+                        isLoading={isLoading}
+                    />
+
+                    <ConfidencePredictionRow
+                        category={t('sex')}
+                        label={currentImage?.sex}
+                        confidencePercentage={modelConfidencePercentages.sex}
+                        isLoading={isLoading}
+                    />
+
+                    <ConfidencePredictionRow
+                        category={t('abdomenStatus')}
+                        label={currentImage?.abdomenStatus}
+                        confidencePercentage={
+                            modelConfidencePercentages.abdomenStatus
+                        }
+                        isLoading={isLoading}
+                    />
                 </dl>
             </div>
         </div>

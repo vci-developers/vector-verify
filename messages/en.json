@@ -163,7 +163,8 @@
         "modelPredictions": "Model Predictions",
         "species": "Species",
         "sex": "Sex",
-        "abdomenStatus": "Abdomen Status"
+        "abdomenStatus": "Abdomen Status",
+        "modelConfidence": "Model Confidence"
     },
     "ReviewCertification": {
         "title": "Certify Site",
