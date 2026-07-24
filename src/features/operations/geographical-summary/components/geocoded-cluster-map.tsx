@@ -59,6 +59,7 @@ export default function GeocodedClusterMap({
                 >
                     <MapNavigator
                         bounds={markerBounds}
+                        country={country}
                         selectedLocations={selectedLocations}
                     />
                     <TileLayer
