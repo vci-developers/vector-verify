@@ -1,6 +1,5 @@
 'use client';
 
-import { useGetSpecimenById } from '@/api/specimen/hooks/use-get-specimen-by-id';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,12 +14,6 @@ interface SpecimenImageViewerProps {
 export default function SpecimenImageViewer({
     specimen,
 }: SpecimenImageViewerProps) {
-    const { data: getSpecimenByIdResult } = useGetSpecimenById(specimen.id);
-
-    const currentSpecimen =
-        getSpecimenByIdResult?.ok === true
-            ? getSpecimenByIdResult.data
-            : specimen;
     const site = specimen.session?.site;
 
     return (
@@ -40,7 +33,7 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                <SpecimenImageCarousel specimen={currentSpecimen} />
+                <SpecimenImageCarousel specimen={specimen} />
 
                 <Separator />
 
