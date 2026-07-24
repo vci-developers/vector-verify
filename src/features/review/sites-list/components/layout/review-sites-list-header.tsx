@@ -57,8 +57,8 @@ export default function ReviewSitesListHeader({
     maxDate,
 }: ReviewSitesListHeaderProps) {
     return (
-        <div className="flex items-start justify-between">
-            <div className="space-y-4">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
                 <Select
                     value={selectedLocation}
                     onValueChange={onLocationChange}
@@ -80,44 +80,46 @@ export default function ReviewSitesListHeader({
                     </SelectContent>
                 </Select>
 
-                <Tabs
-                    value={activeTab}
-                    onValueChange={value => onTabChange(value as ReviewTab)}
-                >
-                    <TabsList className="bg-muted/50 rounded-full p-1">
-                        {tabs.map(tab => (
-                            <TabsTrigger
-                                key={tab.value}
-                                value={tab.value}
-                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
-                            >
-                                {tab.label}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+                <div className="flex items-center gap-3">
+                    <ReviewStatePicker
+                        selectedReviewStates={selectedReviewStates}
+                        onSelectedReviewStatesChange={
+                            onSelectedReviewStatesChange
+                        }
+                        disabled={disabled}
+                    />
+                    <CollectionCyclePicker
+                        collectionCycles={collectionCycles}
+                        selectedCycleIds={selectedCycleIds}
+                        onSelectedCycleIdsChange={onSelectedCycleIdsChange}
+                        disabled={disabled}
+                    />
+                    <MonthRangePicker
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        onStartMonthChange={onStartMonthChange}
+                        onEndMonthChange={onEndMonthChange}
+                        maxDate={maxDate}
+                    />
+                </div>
             </div>
 
-            <div className="flex items-center gap-3">
-                <ReviewStatePicker
-                    selectedReviewStates={selectedReviewStates}
-                    onSelectedReviewStatesChange={onSelectedReviewStatesChange}
-                    disabled={disabled}
-                />
-                <CollectionCyclePicker
-                    collectionCycles={collectionCycles}
-                    selectedCycleIds={selectedCycleIds}
-                    onSelectedCycleIdsChange={onSelectedCycleIdsChange}
-                    disabled={disabled}
-                />
-                <MonthRangePicker
-                    startMonth={startMonth}
-                    endMonth={endMonth}
-                    onStartMonthChange={onStartMonthChange}
-                    onEndMonthChange={onEndMonthChange}
-                    maxDate={maxDate}
-                />
-            </div>
+            <Tabs
+                value={activeTab}
+                onValueChange={value => onTabChange(value as ReviewTab)}
+            >
+                <TabsList className="bg-muted/50 rounded-full p-1">
+                    {tabs.map(tab => (
+                        <TabsTrigger
+                            key={tab.value}
+                            value={tab.value}
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                        >
+                            {tab.label}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </Tabs>
         </div>
     );
 }

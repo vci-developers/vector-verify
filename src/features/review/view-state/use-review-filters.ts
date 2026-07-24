@@ -17,9 +17,11 @@ import {
 const monthDefaults = getDefaultMonthRange(new Date());
 
 const reviewSearchParams = {
-    activeTab: parseAsStringLiteral(['sites-list', 'submissions']).withDefault(
+    activeTab: parseAsStringLiteral([
         'sites-list',
-    ),
+        'submissions',
+        'sessions',
+    ]).withDefault('sites-list'),
     startMonth: parseAsMonth.withDefault(monthDefaults.startMonth),
     endMonth: parseAsMonth.withDefault(monthDefaults.endMonth),
     selectedLocation: parseAsString.withDefault(''),

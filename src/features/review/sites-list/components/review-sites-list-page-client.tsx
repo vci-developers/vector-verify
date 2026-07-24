@@ -23,6 +23,7 @@ import { useTranslations } from 'next-intl';
 const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
     { value: 'sites-list', label: 'SITES LIST' },
     { value: 'submissions', label: 'SUBMISSIONS' },
+    { value: 'sessions', label: 'SESSIONS' },
 ];
 
 export default function ReviewSitesListPageClient() {
@@ -194,7 +195,7 @@ export default function ReviewSitesListPageClient() {
                                 selectedReviewStates={selectedReviewStates}
                             />
                         )
-                    ) : (
+                    ) : activeTab === 'submissions' ? (
                         <ReviewDhis2Dashboard
                             sites={descendantsOfSelectedLocation}
                             locationQueryParam={locationQueryParam}
@@ -203,6 +204,13 @@ export default function ReviewSitesListPageClient() {
                             collectionCycles={collectionCycles}
                             selectedCycleIds={selectedCycleIds}
                         />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                            <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                {t('sessionsTableComingSoon')}
+                            </p>
+                        </div>
                     )}
                 </CardContent>
             </Card>
