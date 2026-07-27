@@ -14,7 +14,7 @@ export default function AnnotationWorkspaceSkeleton() {
                         <Skeleton className="h-4 w-32" />
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-4/3 w-full rounded-md" />
                         <Separator />
                         <div className="flex items-center gap-3">
                             <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
@@ -31,7 +31,7 @@ export default function AnnotationWorkspaceSkeleton() {
                         <CardTitle className="text-base">Annotation</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {Array.from({ length: 2 }).map((_, i) => (
+                        {Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="space-y-2">
                                 <Skeleton className="h-4 w-20" />
                                 <Skeleton className="h-9 w-full" />
