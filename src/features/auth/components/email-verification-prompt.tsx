@@ -1,6 +1,6 @@
 'use client';
 
-import { usePostSendEmailVerification } from '@/api/auth/hooks/use-post-send-email-verification';
+import { usePostSendVerification } from '@/api/user/hooks/use-post-send-verification';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Fragment, useState } from 'react';
@@ -16,14 +16,13 @@ export default function EmailVerificationPrompt() {
         StorageKeys.auth.verificationEmailSentTimestamp,
     );
     const t = useTranslations('Auth');
-    const { mutate: sendEmailVerification, isPending } =
-        usePostSendEmailVerification();
+    const { mutate: sendVerification, isPending } = usePostSendVerification();
 
     async function sendEmail() {
         setHasError(false);
         startCooldown();
 
-        sendEmailVerification(undefined, {
+        sendVerification(undefined, {
             onSuccess: data => {
                 if (data.ok) setSubmitted(true);
             },

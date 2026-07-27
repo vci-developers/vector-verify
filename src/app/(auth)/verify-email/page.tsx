@@ -1,6 +1,6 @@
 import AuthShell from '@/features/auth/components/auth-shell';
 import { redirect } from 'next/navigation';
-import { postVerifyEmail } from '@/api/auth/post-verify-email';
+import { postVerify } from '@/api/user/post-verify';
 import { Button } from '@/components/ui/button';
 import { getTranslations } from 'next-intl/server';
 import { Separator } from '@/components/ui/separator';
@@ -37,7 +37,7 @@ export default async function VerifyEmailPage({
         );
     } else {
         const response = await withAuthSession(accessToken =>
-            postVerifyEmail(accessToken, {
+            postVerify(accessToken, {
                 token,
             }),
         );

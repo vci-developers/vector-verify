@@ -1,24 +1,23 @@
 import type { NetworkError } from '@/lib/network/network-error';
 import {
-    postVerifyEmailRequestSchema,
-    postVerifyEmailResponseSchema,
-    type PostVerifyEmailRequestBody,
-    type PostVerifyEmailResponseBody,
-} from '@/api/auth/validation/post-verify-email-schema';
+    postVerifyRequestSchema,
+    postVerifyResponseSchema,
+    type PostVerifyRequestBody,
+    type PostVerifyResponseBody,
+} from '@/api/user/validation/post-verify-schema';
 import { err, type Result } from '@/lib/result/result';
 import { safeApiCall } from '@/lib/network/safe-api-call';
 
-export async function postVerifyEmail(
+export async function postVerify(
     accessToken: string,
-    requestBody: PostVerifyEmailRequestBody,
-): Promise<Result<PostVerifyEmailResponseBody, NetworkError>> {
-    const parsedRequestBody =
-        postVerifyEmailRequestSchema.safeParse(requestBody);
+    requestBody: PostVerifyRequestBody,
+): Promise<Result<PostVerifyResponseBody, NetworkError>> {
+    const parsedRequestBody = postVerifyRequestSchema.safeParse(requestBody);
     if (!parsedRequestBody.success) {
         return err({ kind: 'client' });
     }
 
-    return safeApiCall<PostVerifyEmailResponseBody>(
+    return safeApiCall<PostVerifyResponseBody>(
         '/users/email/verify',
         {
             method: 'POST',
@@ -27,6 +26,6 @@ export async function postVerifyEmail(
             },
             body: JSON.stringify(parsedRequestBody.data),
         },
-        postVerifyEmailResponseSchema,
+        postVerifyResponseSchema,
     );
 }
