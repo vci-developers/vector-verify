@@ -19,7 +19,7 @@ export async function GET(request: Request) {
                 kind: 'client',
                 status: 400,
                 message:
-                    'Invalid query parameters: district, startDate, and endDate are required',
+                    'Invalid query parameters: district, siteIds, or programId is required',
             }),
             { status: 400 },
         );

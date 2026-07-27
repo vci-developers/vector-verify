@@ -102,14 +102,14 @@
     "Review": {
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
-        "selectALocation": "Select a location to view data.",
-        "sessionsTableComingSoon": "Sessions table coming soon."
+        "selectALocation": "Select a location to view data."
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "inReview": "In Review",
         "certified": "Certified",
         "submitted": "Submitted",
+        "notApplicable": "Not Applicable",
         "filterByState": "Filter by state",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
@@ -117,6 +117,20 @@
         "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
         "noSitesForLocation": "No sites found for this location.",
         "noSitesMatchFilter": "No sites match this filter."
+    },
+    "ReviewSessionsTable": {
+        "collectionCycle": "Collection Cycle",
+        "session": "Session",
+        "site": "Site",
+        "collectionDate": "Collection Date",
+        "sessionCreated": "Session Created",
+        "state": "State",
+        "unassigned": "Unassigned",
+        "unknownSite": "Unknown Site",
+        "cycleNumber": "Cycle {cycleNumber}",
+        "noSessions": "No sessions found for this filter.",
+        "allLocations": "All locations",
+        "searchPlaceholder": "Search sessions..."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",

@@ -10,6 +10,7 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
+import { getDefaultMonthRange } from '@/lib/view-state/month-range';
 import {
     useReviewFilters,
     type ReviewTab,
@@ -17,6 +18,7 @@ import {
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import SessionsTab from '@/features/review/sessions-table/components/sessions-tab';
 import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 
@@ -90,6 +92,28 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     function handleTabChange(tab: ReviewTab) {
+        if (tab === 'sessions') {
+            setFilters({
+                activeTab: tab,
+                selectedLocation: '',
+                selectedCycleIds: [],
+                ...getDefaultMonthRange(new Date()),
+                selectedReviewStates: [],
+            });
+            return;
+        }
+
+        if (activeTab === 'sessions') {
+            setFilters({
+                activeTab: tab,
+                selectedLocation: '',
+                selectedCycleIds: [],
+                ...getDefaultMonthRange(new Date()),
+                selectedReviewStates: ['NEEDS_REVIEW'],
+            });
+            return;
+        }
+
         setFilters({ activeTab: tab });
     }
 
@@ -174,7 +198,20 @@ export default function ReviewSitesListPageClient() {
 
                     <Separator />
 
-                    {!locationQueryParam ? (
+                    {activeTab === 'sessions' ? (
+                        programId !== undefined && (
+                            <SessionsTab
+                                programId={programId}
+                                sites={accessibleSites}
+                                collectionCycles={collectionCycles}
+                                selectedCycleIds={selectedCycleIds}
+                                selectedReviewStates={selectedReviewStates}
+                                locationQueryParam={locationQueryParam}
+                                startMonth={startMonth}
+                                endMonth={endMonth}
+                            />
+                        )
+                    ) : !locationQueryParam ? (
                         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                             <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
                             <p className="text-muted-foreground text-sm">
@@ -195,7 +232,7 @@ export default function ReviewSitesListPageClient() {
                                 selectedReviewStates={selectedReviewStates}
                             />
                         )
-                    ) : activeTab === 'submissions' ? (
+                    ) : (
                         <ReviewDhis2Dashboard
                             sites={descendantsOfSelectedLocation}
                             locationQueryParam={locationQueryParam}
@@ -204,13 +241,6 @@ export default function ReviewSitesListPageClient() {
                             collectionCycles={collectionCycles}
                             selectedCycleIds={selectedCycleIds}
                         />
-                    ) : (
-                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-                            <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                            <p className="text-muted-foreground text-sm">
-                                {t('sessionsTableComingSoon')}
-                            </p>
-                        </div>
                     )}
                 </CardContent>
             </Card>
