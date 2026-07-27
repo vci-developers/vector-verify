@@ -37,7 +37,7 @@ function getSortValue(
             return cycle?.cycleNumber ?? -1;
         }
         case 'session':
-            return session.frontendId;
+            return session.sessionId;
         case 'site':
             return getSiteDisplayName(siteById.get(session.siteId)) ?? '';
         case 'collectionDate':

@@ -13,7 +13,17 @@ import {
     type SortColumn,
     type SortState,
 } from '@/features/review/sessions-table/utils/sort-sessions';
+import { useReassignSessionCycle } from '@/features/review/sessions-table/hooks/use-reassign-session-cycle';
+import ReassignmentConfirmDialog from '@/features/review/sessions-table/components/reassignment-confirm-dialog';
+import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -28,7 +38,7 @@ import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 
 const SESSION_STATE_TRANSLATION_KEY = {
     NEEDS_REVIEW: 'needsReview',
@@ -54,7 +64,7 @@ function matchesSearch(session: Session, siteName: string, search: string) {
     if (!search) return true;
     const needle = search.toLowerCase();
     return (
-        session.frontendId.toLowerCase().includes(needle) ||
+        String(session.sessionId).includes(needle) ||
         siteName.toLowerCase().includes(needle)
     );
 }
@@ -130,6 +140,14 @@ export default function SessionsTable({
         direction: 'asc',
     });
 
+    const {
+        requestReassignment,
+        isConfirmDialogOpen,
+        cancelReassignment,
+        confirmReassignment,
+        isReassigning,
+    } = useReassignSessionCycle();
+
     const rows = useMemo(
         () => sortSessions(filteredRows, sort, siteById, cycleById),
         [filteredRows, sort, siteById, cycleById],
@@ -157,6 +175,17 @@ export default function SessionsTable({
         );
     }
 
+    const reassignmentDialog = (
+        <ReassignmentConfirmDialog
+            open={isConfirmDialogOpen}
+            onOpenChange={open => {
+                if (!open) cancelReassignment();
+            }}
+            onConfirm={() => void confirmReassignment()}
+            isPending={isReassigning}
+        />
+    );
+
     if (isGetAllSessionsPending || !getAllSessionsResult) {
         return <SkeletonList count={5} height="xl" width="full" />;
     }
@@ -171,104 +200,154 @@ export default function SessionsTable({
 
     if (rows.length === 0) {
         return (
-            <p className="text-muted-foreground py-12 text-center text-sm">
-                {t('noSessions')}
-            </p>
+            <Fragment>
+                <p className="text-muted-foreground py-12 text-center text-sm">
+                    {t('noSessions')}
+                </p>
+                {reassignmentDialog}
+            </Fragment>
         );
     }
 
     return (
-        <Table
-            className="border-border rounded-md border"
-            containerClassName="max-h-[calc(100vh-24rem)] overflow-y-auto"
-        >
-            <TableHeader className="bg-background sticky top-0 z-10">
-                <TableRow>
-                    {(
-                        [
-                            ['collectionCycle', t('collectionCycle')],
-                            ['session', t('session')],
-                            ['site', t('site')],
-                            ['collectionDate', t('collectionDate')],
-                            ['sessionCreated', t('sessionCreated')],
-                            ['state', t('state')],
-                        ] as [SortColumn, string][]
-                    ).map(([column, label]) => (
-                        <TableHead key={column}>
-                            <button
-                                type="button"
-                                onClick={() => handleSort(column)}
-                                className="flex items-center gap-1"
-                            >
-                                {label}
-                                {renderSortIcon(column)}
-                            </button>
-                        </TableHead>
-                    ))}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {rows.map(session => {
-                    const site = siteById.get(session.siteId);
-                    const cycle =
-                        session.collectionCycleId !== null
-                            ? cycleById.get(session.collectionCycleId)
-                            : undefined;
-                    const timezone = cycle?.timezone ?? null;
-                    const reviewUnitHref =
-                        session.collectionCycleId !== null
-                            ? `/review/${session.siteId}?collectionCycleId=${session.collectionCycleId}`
-                            : `/review/${session.siteId}`;
-
-                    return (
-                        <TableRow key={session.sessionId}>
-                            <TableCell>
-                                {cycle
-                                    ? t('cycleNumber', {
-                                          cycleNumber: cycle.cycleNumber,
-                                      })
-                                    : t('unassigned')}
-                            </TableCell>
-                            <TableCell>
-                                <Link
-                                    href={reviewUnitHref}
-                                    className="text-primary hover:underline"
+        <Fragment>
+            <Table
+                className="border-border rounded-md border"
+                containerClassName="max-h-[calc(100vh-24rem)] overflow-y-auto"
+            >
+                <TableHeader className="bg-background sticky top-0 z-10">
+                    <TableRow>
+                        {(
+                            [
+                                ['collectionCycle', t('collectionCycle')],
+                                ['session', t('session')],
+                                ['site', t('site')],
+                                ['collectionDate', t('collectionDate')],
+                                ['sessionCreated', t('sessionCreated')],
+                                ['state', t('state')],
+                            ] as [SortColumn, string][]
+                        ).map(([column, label]) => (
+                            <TableHead key={column}>
+                                <button
+                                    type="button"
+                                    onClick={() => handleSort(column)}
+                                    className="flex items-center gap-1"
                                 >
-                                    {session.frontendId}
-                                </Link>
-                            </TableCell>
-                            <TableCell>
-                                {getSiteDisplayName(site) ?? t('unknownSite')}
-                            </TableCell>
-                            <TableCell>
-                                {formatDateInTimezone(
-                                    session.collectionDate,
-                                    timezone,
-                                    'MMM d, yyyy',
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                {formatDateInTimezone(
-                                    session.createdAt,
-                                    timezone,
-                                    'MMM d, yyyy h:mm a',
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                {session.state && (
-                                    <Badge variant="outline">
-                                        {tSitesList(
-                                            SESSION_STATE_TRANSLATION_KEY[
-                                                session.state
-                                            ],
-                                        )}
-                                    </Badge>
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
+                                    {label}
+                                    {renderSortIcon(column)}
+                                </button>
+                            </TableHead>
+                        ))}
+                        <TableHead>{t('reassignColumnHeader')}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {rows.map(session => {
+                        const site = siteById.get(session.siteId);
+                        const cycle =
+                            session.collectionCycleId !== null
+                                ? cycleById.get(session.collectionCycleId)
+                                : undefined;
+                        const timezone = cycle?.timezone ?? null;
+                        const reviewUnitHref =
+                            session.collectionCycleId !== null
+                                ? `/review/${session.siteId}?collectionCycleId=${session.collectionCycleId}`
+                                : `/review/${session.siteId}`;
+
+                        return (
+                            <TableRow key={session.sessionId}>
+                                <TableCell>
+                                    {cycle
+                                        ? t('cycleNumber', {
+                                              cycleNumber: cycle.cycleNumber,
+                                          })
+                                        : t('unassigned')}
+                                </TableCell>
+                                <TableCell>
+                                    <Link
+                                        href={reviewUnitHref}
+                                        className="text-primary hover:underline"
+                                    >
+                                        {session.sessionId}
+                                    </Link>
+                                </TableCell>
+                                <TableCell>
+                                    {getSiteDisplayName(site) ??
+                                        t('unknownSite')}
+                                </TableCell>
+                                <TableCell>
+                                    {formatDateInTimezone(
+                                        session.collectionDate,
+                                        timezone,
+                                        'MMM d, yyyy',
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {formatDateInTimezone(
+                                        session.createdAt,
+                                        timezone,
+                                        'MMM d, yyyy h:mm a',
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {session.state && (
+                                        <Badge variant="outline">
+                                            {tSitesList(
+                                                SESSION_STATE_TRANSLATION_KEY[
+                                                    session.state
+                                                ],
+                                            )}
+                                        </Badge>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    <Select
+                                        value={
+                                            session.collectionCycleId !== null
+                                                ? String(
+                                                      session.collectionCycleId,
+                                                  )
+                                                : undefined
+                                        }
+                                        onValueChange={value =>
+                                            void requestReassignment(
+                                                session,
+                                                Number(value),
+                                            )
+                                        }
+                                        disabled={isReassigning}
+                                    >
+                                        <SelectTrigger className="w-52">
+                                            <SelectValue
+                                                placeholder={t('unassigned')}
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {collectionCycles.map(
+                                                reassignmentCycle => (
+                                                    <SelectItem
+                                                        key={
+                                                            reassignmentCycle.id
+                                                        }
+                                                        value={String(
+                                                            reassignmentCycle.id,
+                                                        )}
+                                                    >
+                                                        {formatCollectionCycleLabel(
+                                                            reassignmentCycle,
+                                                        )}
+                                                    </SelectItem>
+                                                ),
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+            {reassignmentDialog}
+        </Fragment>
     );
 }

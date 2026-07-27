@@ -19,7 +19,7 @@ type GetAllSessionsQueryOptions = Omit<
     'queryKey' | 'queryFn'
 >;
 
-async function fetchAllSessions(
+export async function fetchAllSessions(
     queryParams: GetAllSessionsQueryParams,
 ): Promise<GetAllSessionsQueryResult> {
     const queryString = constructQueryString(
