@@ -5,7 +5,8 @@ import {
 } from '@/api/session/validation/session-schema';
 
 export const putSessionByIdRequestSchema = z.object({
-    state: sessionStateSchema,
+    state: sessionStateSchema.optional(),
+    collectionCycleId: z.number().nullable().optional(),
 });
 
 export const putSessionByIdResponseSchema = z.object({
