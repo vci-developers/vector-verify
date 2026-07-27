@@ -13,6 +13,7 @@ import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
+import AnnotationWorkspaceSkeleton from './annotation-workspace-skeleton';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -65,7 +66,7 @@ export default function AnnotationWorkspace({
     }
 
     if (!getAnnotationsResult || isGetAnnotationsPending) {
-        return <h1>Loading annotations...</h1>;
+        return <AnnotationWorkspaceSkeleton />;
     }
 
     if (!getAnnotationsResult.ok) {

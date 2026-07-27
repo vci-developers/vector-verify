@@ -8,6 +8,7 @@ import { usePagination } from '@/lib/hooks/use-pagination';
 import AnnotationTaskCard from '@/features/annotation/tasks-list/components/tasks/annotation-task-card';
 import AnnotationTasksPagination from '@/features/annotation/tasks-list/components/layout/annotation-tasks-pagination';
 import { Separator } from '@/components/ui/separator';
+import { SkeletonList } from '@/components/ui/skeleton-list';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -48,7 +49,7 @@ export default function AnnotationTasksList({
     } = useGetAnnotationTasks(getAnnotationTasksQueryParams);
 
     if (isGetAnnotationTasksPending || !getAnnotationTasksResult) {
-        return <h1>LOADING...</h1>;
+        return <SkeletonList count={3} height="xl" width="full" />;
     }
 
     if (!getAnnotationTasksResult.ok) {
