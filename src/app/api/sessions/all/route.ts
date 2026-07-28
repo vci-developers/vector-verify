@@ -18,8 +18,7 @@ export async function GET(request: Request) {
             err({
                 kind: 'client',
                 status: 400,
-                message:
-                    'Invalid query parameters: district, siteIds, or programId is required',
+                message: 'Invalid query parameters',
             }),
             { status: 400 },
         );
