@@ -18,20 +18,20 @@ import {
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
-import SessionsTab from '@/features/review/sessions-table/components/sessions-tab';
+import SessionsTable from '@/features/review/sessions-table/components/sessions-table';
 import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
-
-const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
-    { value: 'sites-list', label: 'SITES LIST' },
-    { value: 'submissions', label: 'SUBMISSIONS' },
-    { value: 'sessions', label: 'SESSIONS' },
-];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useReviewFilters();
+
+    const reviewTabs: { value: ReviewTab; label: string }[] = [
+        { value: 'sites-list', label: t('sitesListTab') },
+        { value: 'submissions', label: t('submissionsTab') },
+        { value: 'sessions', label: t('sessionsTab') },
+    ];
     const {
         activeTab,
         startMonth,
@@ -60,7 +60,7 @@ export default function ReviewSitesListPageClient() {
             program => program.programId === programId,
         );
 
-    const visibleTabs = REVIEW_TABS.filter(
+    const visibleTabs = reviewTabs.filter(
         tab => tab.value !== 'submissions' || isUgandaProgram,
     );
 
@@ -92,24 +92,16 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     function handleTabChange(tab: ReviewTab) {
-        if (tab === 'sessions') {
-            setFilters({
-                activeTab: tab,
-                selectedLocation: '',
-                selectedCycleIds: [],
-                ...getDefaultMonthRange(new Date()),
-                selectedReviewStates: [],
-            });
-            return;
-        }
+        const isSessionsTab = tab === 'sessions' || activeTab === 'sessions';
 
-        if (activeTab === 'sessions') {
+        if (isSessionsTab) {
             setFilters({
                 activeTab: tab,
                 selectedLocation: '',
                 selectedCycleIds: [],
                 ...getDefaultMonthRange(new Date()),
-                selectedReviewStates: ['NEEDS_REVIEW'],
+                selectedReviewStates:
+                    tab === 'sessions' ? [] : ['NEEDS_REVIEW'],
             });
             return;
         }
@@ -200,7 +192,7 @@ export default function ReviewSitesListPageClient() {
 
                     {activeTab === 'sessions' ? (
                         programId !== undefined && (
-                            <SessionsTab
+                            <SessionsTable
                                 programId={programId}
                                 sites={accessibleSites}
                                 collectionCycles={collectionCycles}

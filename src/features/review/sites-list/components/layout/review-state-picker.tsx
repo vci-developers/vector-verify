@@ -8,19 +8,12 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from '@/components/ui/multi-select';
-import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
+import {
+    REVIEW_STATE_LABEL_KEY,
+    REVIEW_STATE_SEVERITY_ORDER,
+} from '@/features/review/utils/review-site-session-summary';
 import type { SessionState } from '@/api/session/validation/session-schema';
 import { useTranslations } from 'next-intl';
-
-const REVIEW_STATE_LABEL_KEY: Record<
-    (typeof REVIEW_STATE_SEVERITY_ORDER)[number],
-    string
-> = {
-    NEEDS_REVIEW: 'needsReview',
-    IN_REVIEW: 'inReview',
-    CERTIFIED: 'certified',
-    SUBMITTED: 'submitted',
-};
 
 interface ReviewStatePickerProps {
     selectedReviewStates: SessionState[];

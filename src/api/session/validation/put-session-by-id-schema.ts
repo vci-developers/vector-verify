@@ -4,10 +4,17 @@ import {
     sessionStateSchema,
 } from '@/api/session/validation/session-schema';
 
-export const putSessionByIdRequestSchema = z.object({
-    state: sessionStateSchema.optional(),
-    collectionCycleId: z.number().nullable().optional(),
-});
+export const putSessionByIdRequestSchema = z
+    .object({
+        state: sessionStateSchema.optional(),
+        collectionCycleId: z.number().nullable().optional(),
+    })
+    .refine(
+        requestBody =>
+            requestBody.state !== undefined ||
+            requestBody.collectionCycleId !== undefined,
+        { message: 'Either state or collectionCycleId must be provided' },
+    );
 
 export const putSessionByIdResponseSchema = z.object({
     message: z.string(),

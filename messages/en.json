@@ -102,7 +102,10 @@
     "Review": {
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
-        "selectALocation": "Select a location to view data."
+        "selectALocation": "Select a location to view data.",
+        "sitesListTab": "SITES LIST",
+        "submissionsTab": "SUBMISSIONS",
+        "sessionsTab": "SESSIONS"
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
