@@ -13,6 +13,8 @@ import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
+import ErrorBanner from '@/components/ui/error-banner';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -27,6 +29,8 @@ export default function AnnotationWorkspace({
     page,
     onPageChange,
 }: AnnotationWorkspaceProps) {
+    const t = useTranslations('AnnotationWorkspace');
+    const tCommon = useTranslations('Common');
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
 
@@ -69,7 +73,7 @@ export default function AnnotationWorkspace({
     }
 
     if (!getAnnotationsResult.ok) {
-        return <h1>Error loading annotations</h1>;
+        return <ErrorBanner message={t('couldNotRetrieve')} />;
     }
 
     const annotation = getAnnotationsResult.data.annotations[0];
@@ -85,8 +89,8 @@ export default function AnnotationWorkspace({
         <div className="space-y-4">
             <p className="text-muted-foreground text-sm">
                 {status === 'PENDING'
-                    ? `${total} remaining`
-                    : `${page} of ${total}`}
+                    ? t('numRemaining', { count: total })
+                    : t('pageOfTotal', { page, total })}
             </p>
 
             <div className="grid grid-cols-2 gap-6">
@@ -97,7 +101,7 @@ export default function AnnotationWorkspace({
                     />
                 ) : (
                     <p className="text-muted-foreground text-sm">
-                        No specimen data
+                        {t('noSpecimenData')}
                     </p>
                 )}
 
@@ -125,7 +129,7 @@ export default function AnnotationWorkspace({
             {status !== 'PENDING' && !isEditing && (
                 <div className="flex items-center justify-between border-t pt-4">
                     <p className="text-muted-foreground text-sm">
-                        {page} of {total}
+                        {t('pageOfTotal', { page, total })}
                     </p>
                     <div className="flex gap-2">
                         <Button
@@ -135,7 +139,7 @@ export default function AnnotationWorkspace({
                             disabled={page <= 1}
                         >
                             <ChevronLeft className="mr-1 h-4 w-4" />
-                            Previous
+                            {tCommon('previous')}
                         </Button>
                         <Button
                             variant="outline"
@@ -143,7 +147,7 @@ export default function AnnotationWorkspace({
                             onClick={() => handlePageChange(page + 1)}
                             disabled={page >= total}
                         >
-                            Next
+                            {tCommon('next')}
                             <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>
                     </div>

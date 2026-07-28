@@ -8,6 +8,8 @@ import { usePagination } from '@/lib/hooks/use-pagination';
 import AnnotationTaskCard from '@/features/annotation/tasks-list/components/tasks/annotation-task-card';
 import AnnotationTasksPagination from '@/features/annotation/tasks-list/components/layout/annotation-tasks-pagination';
 import { Separator } from '@/components/ui/separator';
+import ErrorBanner from '@/components/ui/error-banner';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -20,6 +22,7 @@ export default function AnnotationTasksList({
     startDate,
     endDate,
 }: AnnotationTasksListProps) {
+    const t = useTranslations('Annotation');
     const {
         page,
         limit,
@@ -52,7 +55,7 @@ export default function AnnotationTasksList({
     }
 
     if (!getAnnotationTasksResult.ok) {
-        return <h1>ERROR: {getAnnotationTasksResult.error.message}</h1>;
+        return <ErrorBanner message={t('couldNotRetrieve')} />;
     }
 
     const annotationTasks = getAnnotationTasksResult.data.tasks;
