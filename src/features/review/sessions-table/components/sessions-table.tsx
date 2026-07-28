@@ -30,7 +30,7 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface SessionsTableProps {
     programId: number;
@@ -139,8 +139,25 @@ export default function SessionsTable({
         isReassigning,
     } = useReassignSessionCycle();
 
-    const rows = useMemo(
-        () => sortSessions(filteredRows, sort, siteById, cycleById),
+    const handleReassign = useCallback(
+        (session: Session, newCollectionCycleId: number) => {
+            void requestReassignment(session, newCollectionCycleId);
+        },
+        [requestReassignment],
+    );
+
+    const rowData = useMemo(
+        () =>
+            sortSessions(filteredRows, sort, siteById, cycleById).map(
+                session => ({
+                    session,
+                    site: siteById.get(session.siteId),
+                    cycle:
+                        session.collectionCycleId !== null
+                            ? cycleById.get(session.collectionCycleId)
+                            : undefined,
+                }),
+            ),
         [filteredRows, sort, siteById, cycleById],
     );
 
@@ -206,7 +223,7 @@ export default function SessionsTable({
         );
     }
 
-    if (rows.length === 0) {
+    if (rowData.length === 0) {
         return (
             <div className="flex flex-col space-y-4">
                 {searchInput}
@@ -248,33 +265,17 @@ export default function SessionsTable({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {rows.map(session => {
-                        const site = siteById.get(session.siteId);
-                        const cycle =
-                            session.collectionCycleId !== null
-                                ? cycleById.get(session.collectionCycleId)
-                                : undefined;
-
-                        return (
-                            <SessionsTableRow
-                                key={session.sessionId}
-                                session={session}
-                                site={site}
-                                cycle={cycle}
-                                collectionCycles={collectionCycles}
-                                isReassigning={isReassigning}
-                                onReassign={(
-                                    reassignedSession,
-                                    newCollectionCycleId,
-                                ) =>
-                                    void requestReassignment(
-                                        reassignedSession,
-                                        newCollectionCycleId,
-                                    )
-                                }
-                            />
-                        );
-                    })}
+                    {rowData.map(({ session, site, cycle }) => (
+                        <SessionsTableRow
+                            key={session.sessionId}
+                            session={session}
+                            site={site}
+                            cycle={cycle}
+                            collectionCycles={collectionCycles}
+                            isReassigning={isReassigning}
+                            onReassign={handleReassign}
+                        />
+                    ))}
                 </TableBody>
             </Table>
             {reassignmentDialog}

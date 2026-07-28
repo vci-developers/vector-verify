@@ -19,6 +19,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { memo } from 'react';
 
 const SESSION_STATE_LABEL_KEY: Record<SessionState, string> = {
     ...REVIEW_STATE_LABEL_KEY,
@@ -34,7 +35,7 @@ interface SessionsTableRowProps {
     onReassign: (session: Session, newCollectionCycleId: number) => void;
 }
 
-export default function SessionsTableRow({
+function SessionsTableRow({
     session,
     site,
     cycle,
@@ -118,3 +119,5 @@ export default function SessionsTableRow({
         </TableRow>
     );
 }
+
+export default memo(SessionsTableRow);
