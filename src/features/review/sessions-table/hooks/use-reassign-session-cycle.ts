@@ -61,41 +61,52 @@ export function useReassignSessionCycle() {
 
         setIsReassigning(true);
 
-        const affectedSiblingSessions = resetRequired
-            ? unitSessions.filter(
-                  otherSession =>
-                      otherSession.sessionId !== session.sessionId &&
-                      ((previousUnitWasFullyReviewed &&
-                          otherSession.collectionCycleId ===
-                              previousCollectionCycleId) ||
-                          (newUnitWasFullyReviewed &&
-                              otherSession.collectionCycleId ===
-                                  newCollectionCycleId)),
-              )
-            : [];
+        const movedSessionResult = await putSessionByIdAsync({
+            sessionId: session.sessionId,
+            requestBody: {
+                collectionCycleId: newCollectionCycleId,
+                ...(resetRequired ? { state: 'NEEDS_REVIEW' as const } : {}),
+            },
+        });
 
-        const outcomes = await Promise.allSettled([
-            putSessionByIdAsync({
-                sessionId: session.sessionId,
-                requestBody: {
-                    collectionCycleId: newCollectionCycleId,
-                    ...(resetRequired
-                        ? { state: 'NEEDS_REVIEW' as const }
-                        : {}),
-                },
-            }),
-            ...affectedSiblingSessions.map(otherSession =>
+        if (!movedSessionResult.ok) {
+            setIsReassigning(false);
+            toast.error(t('reassignError'));
+            return;
+        }
+
+        if (!resetRequired) {
+            setIsReassigning(false);
+            toast.success(t('reassignSuccess'));
+            return;
+        }
+
+        const affectedSiblingSessions = unitSessions.filter(
+            unitSession =>
+                unitSession.sessionId !== session.sessionId &&
+                ((previousUnitWasFullyReviewed &&
+                    unitSession.collectionCycleId ===
+                        previousCollectionCycleId) ||
+                    (newUnitWasFullyReviewed &&
+                        unitSession.collectionCycleId ===
+                            newCollectionCycleId)),
+        );
+
+        const siblingSessionResults = await Promise.allSettled(
+            affectedSiblingSessions.map(unitSession =>
                 putSessionByIdAsync({
-                    sessionId: otherSession.sessionId,
+                    sessionId: unitSession.sessionId,
                     requestBody: { state: 'NEEDS_REVIEW' },
                 }),
             ),
-        ]);
+        );
 
         setIsReassigning(false);
 
-        const failedCount = outcomes.filter(
-            outcome => outcome.status !== 'fulfilled' || !outcome.value.ok,
+        const failedCount = siblingSessionResults.filter(
+            siblingSessionResult =>
+                siblingSessionResult.status !== 'fulfilled' ||
+                !siblingSessionResult.value.ok,
         ).length;
 
         if (failedCount > 0) {
@@ -103,9 +114,7 @@ export function useReassignSessionCycle() {
             return;
         }
 
-        toast.success(
-            resetRequired ? t('reassignResetSuccess') : t('reassignSuccess'),
-        );
+        toast.success(t('reassignResetSuccess'));
     }
 
     async function requestReassignment(

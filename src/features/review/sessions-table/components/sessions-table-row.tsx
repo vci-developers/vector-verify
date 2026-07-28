@@ -95,7 +95,7 @@ export default function SessionsTableRow({
                     value={
                         session.collectionCycleId !== null
                             ? String(session.collectionCycleId)
-                            : undefined
+                            : ''
                     }
                     onValueChange={value => onReassign(session, Number(value))}
                     disabled={isReassigning}
