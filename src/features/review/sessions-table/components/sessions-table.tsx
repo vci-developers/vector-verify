@@ -93,6 +93,7 @@ export default function SessionsTable({
             ...(locationQueryParam ? buildSiteFilter(locationQueryParam) : {}),
             startDate,
             endDate,
+            type: 'SURVEILLANCE',
             ...(selectedCycleIds.length === 1
                 ? { collectionCycleId: selectedCycleIds[0] }
                 : {}),
