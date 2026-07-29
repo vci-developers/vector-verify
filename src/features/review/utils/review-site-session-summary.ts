@@ -22,14 +22,12 @@ export const REVIEW_STATE_SEVERITY_ORDER = [
     'SUBMITTED',
 ] as const satisfies readonly SessionState[];
 
-export const REVIEW_STATE_LABEL_KEY: Record<
-    (typeof REVIEW_STATE_SEVERITY_ORDER)[number],
-    string
-> = {
+export const REVIEW_STATE_LABEL_KEY: Record<SessionState, string> = {
     NEEDS_REVIEW: 'needsReview',
     IN_REVIEW: 'inReview',
     CERTIFIED: 'certified',
     SUBMITTED: 'submitted',
+    NOT_APPLICABLE: 'notApplicable',
 };
 
 export function getSiteOverallReviewState(

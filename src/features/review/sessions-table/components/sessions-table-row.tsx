@@ -1,7 +1,4 @@
-import type {
-    Session,
-    SessionState,
-} from '@/api/session/validation/session-schema';
+import type { Session } from '@/api/session/validation/session-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
@@ -21,16 +18,11 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { memo } from 'react';
 
-const SESSION_STATE_LABEL_KEY: Record<SessionState, string> = {
-    ...REVIEW_STATE_LABEL_KEY,
-    NOT_APPLICABLE: 'notApplicable',
-};
-
 interface SessionsTableRowProps {
     session: Session;
     site: Site | undefined;
-    cycle: CollectionCycle | undefined;
-    collectionCycles: CollectionCycle[];
+    sessionCollectionCycle: CollectionCycle | undefined;
+    allCollectionCycles: CollectionCycle[];
     isReassigning: boolean;
     onReassign: (session: Session, newCollectionCycleId: number) => void;
 }
@@ -38,15 +30,15 @@ interface SessionsTableRowProps {
 function SessionsTableRow({
     session,
     site,
-    cycle,
-    collectionCycles,
+    sessionCollectionCycle,
+    allCollectionCycles,
     isReassigning,
     onReassign,
 }: SessionsTableRowProps) {
     const t = useTranslations('ReviewSessionsTable');
     const tSitesList = useTranslations('ReviewSitesList');
 
-    const timezone = cycle?.timezone ?? null;
+    const timezone = sessionCollectionCycle?.timezone ?? null;
     const reviewUnitHref =
         session.collectionCycleId !== null
             ? `/review/${session.siteId}?collectionCycleId=${session.collectionCycleId}`
@@ -55,8 +47,10 @@ function SessionsTableRow({
     return (
         <TableRow>
             <TableCell>
-                {cycle
-                    ? t('cycleNumber', { cycleNumber: cycle.cycleNumber })
+                {sessionCollectionCycle
+                    ? t('cycleNumber', {
+                          cycleNumber: sessionCollectionCycle.cycleNumber,
+                      })
                     : t('unassigned')}
             </TableCell>
             <TableCell>
@@ -87,7 +81,7 @@ function SessionsTableRow({
             <TableCell>
                 {session.state && (
                     <Badge variant="outline">
-                        {tSitesList(SESSION_STATE_LABEL_KEY[session.state])}
+                        {tSitesList(REVIEW_STATE_LABEL_KEY[session.state])}
                     </Badge>
                 )}
             </TableCell>
@@ -105,7 +99,7 @@ function SessionsTableRow({
                         <SelectValue placeholder={t('unassigned')} />
                     </SelectTrigger>
                     <SelectContent>
-                        {collectionCycles.map(reassignmentCycle => (
+                        {allCollectionCycles.map(reassignmentCycle => (
                             <SelectItem
                                 key={reassignmentCycle.id}
                                 value={String(reassignmentCycle.id)}

@@ -153,7 +153,7 @@ export default function SessionsTable({
                 session => ({
                     session,
                     site: siteById.get(session.siteId),
-                    cycle:
+                    sessionCollectionCycle:
                         session.collectionCycleId !== null
                             ? cycleById.get(session.collectionCycleId)
                             : undefined,
@@ -266,17 +266,19 @@ export default function SessionsTable({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {rowData.map(({ session, site, cycle }) => (
-                        <SessionsTableRow
-                            key={session.sessionId}
-                            session={session}
-                            site={site}
-                            cycle={cycle}
-                            collectionCycles={collectionCycles}
-                            isReassigning={isReassigning}
-                            onReassign={handleReassign}
-                        />
-                    ))}
+                    {rowData.map(
+                        ({ session, site, sessionCollectionCycle }) => (
+                            <SessionsTableRow
+                                key={session.sessionId}
+                                session={session}
+                                site={site}
+                                sessionCollectionCycle={sessionCollectionCycle}
+                                allCollectionCycles={collectionCycles}
+                                isReassigning={isReassigning}
+                                onReassign={handleReassign}
+                            />
+                        ),
+                    )}
                 </TableBody>
             </Table>
             {reassignmentDialog}
