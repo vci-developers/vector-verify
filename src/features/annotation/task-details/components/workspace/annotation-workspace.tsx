@@ -15,6 +15,7 @@ import AnnotationReadonlyView from '@/features/annotation/task-details/component
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
 import ErrorBanner from '@/components/ui/error-banner';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -53,11 +54,18 @@ export default function AnnotationWorkspace({
         updateAnnotation(
             { annotationId, requestBody },
             {
-                onSuccess: () => {
-                    queryClient.invalidateQueries({
-                        queryKey: annotationKeys.root,
-                    });
-                    setIsEditing(false);
+                onSuccess: result => {
+                    if (result.ok) {
+                        queryClient.invalidateQueries({
+                            queryKey: annotationKeys.root,
+                        });
+                        setIsEditing(false);
+                    } else {
+                        toast.error(t('couldNotUpdate'));
+                    }
+                },
+                onError: () => {
+                    toast.error(t('couldNotUpdate'));
                 },
             },
         );
