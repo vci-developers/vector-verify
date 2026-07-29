@@ -8,12 +8,13 @@ import type { GetAnnotationsQueryParams } from '@/api/annotation/validation/get-
 import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PencilRuler } from 'lucide-react';
 import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
 import AnnotationWorkspaceSkeleton from './annotation-workspace-skeleton';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -28,6 +29,7 @@ export default function AnnotationWorkspace({
     page,
     onPageChange,
 }: AnnotationWorkspaceProps) {
+    const t = useTranslations('AnnotationWorkspace');
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
 
@@ -77,7 +79,14 @@ export default function AnnotationWorkspace({
     const total = getAnnotationsResult.data.total;
 
     if (!annotation || total === 0) {
-        return <h1>No annotations found</h1>;
+        return (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                <p className="text-muted-foreground text-sm">
+                    {t('noAnnotationsFound')}
+                </p>
+            </div>
+        );
     }
 
     const showForm = status === 'PENDING' || isEditing;

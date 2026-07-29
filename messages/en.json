@@ -206,7 +206,11 @@
         "loading": "Loading active-user metrics…",
         "empty": "No active-user snapshots in this window."
     },
+    "AnnotationTasksList": {
+        "noAnnotationTasksFound": "No annotation tasks found."
+    },
     "AnnotationWorkspace": {
-        "flaggedSpecimenDefinition": "A flagged specimen is one that cannot be confidently identified due to poor specimen or image quality."
+        "flaggedSpecimenDefinition": "A flagged specimen is one that cannot be confidently identified due to poor specimen or image quality.",
+        "noAnnotationsFound": "No annotations found."
     }
 }

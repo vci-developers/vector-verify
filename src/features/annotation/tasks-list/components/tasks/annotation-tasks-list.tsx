@@ -9,6 +9,8 @@ import AnnotationTaskCard from '@/features/annotation/tasks-list/components/task
 import AnnotationTasksPagination from '@/features/annotation/tasks-list/components/layout/annotation-tasks-pagination';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
+import { PencilRuler } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -21,6 +23,7 @@ export default function AnnotationTasksList({
     startDate,
     endDate,
 }: AnnotationTasksListProps) {
+    const t = useTranslations('AnnotationTasksList');
     const {
         page,
         limit,
@@ -63,7 +66,12 @@ export default function AnnotationTasksList({
     return (
         <div className="space-y-4">
             {annotationTasks.length === 0 ? (
-                <h1>No annotation tasks found</h1>
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                    <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                    <p className="text-muted-foreground text-sm">
+                        {t('noAnnotationTasksFound')}
+                    </p>
+                </div>
             ) : (
                 <div className="space-y-3">
                     {annotationTasks.map(task => (
