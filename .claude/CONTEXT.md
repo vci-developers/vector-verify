@@ -228,6 +228,15 @@ fields, surveillance-form fields, session-scoped dynamic answers) resolve with
 `sessionIds`; `SESSION_UNIT`-scoped conflicts resolve with `sessionUnitIds`, one
 call per **Unit Identity** group. _Avoid_: discrepancy, mismatch
 
+**Missing Surveillance Form**: A Surveillance-mode Session in a **Review Unit**
+that has no surveillance form while at least one sibling Session does. Such
+Sessions are **excluded from resolution** — values saved during Metadata Review
+do not apply to them — but they do **not block** the Review flow. The remedy is
+**out-of-band**: the VCO follows up with the VHT/field team to get the form
+submitted before certifying. UI treats this as a warning (amber), never an
+error, and the notice states that follow-up action. _Avoid_: error, blocked
+session
+
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
 sign-off
