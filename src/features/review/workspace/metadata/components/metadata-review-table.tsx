@@ -87,7 +87,7 @@ export default function MetadataReviewTable({
                             </TableHead>
                         ))}
                         {!readOnly && (
-                            <TableHead className="border-border bg-background sticky right-0 z-20 border font-semibold">
+                            <TableHead className="border-border bg-background sticky right-0 z-20 w-72 border font-semibold">
                                 {t('valueColumn')}
                             </TableHead>
                         )}
@@ -203,7 +203,7 @@ export default function MetadataReviewTable({
                                             );
                                         })}
                                         {!readOnly && (
-                                            <TableCell className="border-border bg-background sticky right-0 z-20 border">
+                                            <TableCell className="border-border bg-background sticky right-0 z-20 w-72 border">
                                                 {isRowDisabled ? (
                                                     <span className="text-muted-foreground pl-3 text-sm">
                                                         {NOT_APPLICABLE}
