@@ -13,7 +13,6 @@ import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
-import AnnotationWorkspaceSkeleton from './annotation-workspace-skeleton';
 import { useTranslations } from 'next-intl';
 
 interface AnnotationWorkspaceProps {
@@ -67,18 +66,16 @@ export default function AnnotationWorkspace({
         onPageChange(newPage);
     }
 
-    if (!getAnnotationsResult || isGetAnnotationsPending) {
-        return <AnnotationWorkspaceSkeleton />;
-    }
+    const isLoading = !getAnnotationsResult || isGetAnnotationsPending;
 
-    if (!getAnnotationsResult.ok) {
+    if (getAnnotationsResult && !getAnnotationsResult.ok) {
         return <h1>Error loading annotations</h1>;
     }
 
-    const annotation = getAnnotationsResult.data.annotations[0];
-    const total = getAnnotationsResult.data.total;
+    const annotation = getAnnotationsResult?.data.annotations[0] ?? undefined;
+    const total = getAnnotationsResult?.data.total ?? undefined;
 
-    if (!annotation || total === 0) {
+    if (!isLoading && (!annotation || total === 0)) {
         return (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                 <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />
@@ -100,7 +97,9 @@ export default function AnnotationWorkspace({
             </p>
 
             <div className="grid grid-cols-2 gap-6">
-                {annotation.specimen ? (
+                {!annotation ? (
+                    <SpecimenImageViewer isLoading />
+                ) : annotation.specimen ? (
                     <SpecimenImageViewer
                         key={annotation.specimen.id}
                         specimen={annotation.specimen}
@@ -116,23 +115,28 @@ export default function AnnotationWorkspace({
                         annotation={annotation}
                         isSubmitting={isUpdateAnnotationPending}
                         onSubmit={formData =>
-                            handleSubmitAnnotation(annotation.id, formData)
+                            handleSubmitAnnotation(
+                                annotation?.id || -1,
+                                formData,
+                            )
                         }
                         onCancel={
                             status !== 'PENDING' && isEditing
                                 ? () => setIsEditing(false)
                                 : undefined
                         }
+                        isLoading={isLoading}
                     />
                 ) : (
                     <AnnotationReadonlyView
                         annotation={annotation}
                         onEdit={() => setIsEditing(true)}
+                        isLoading={isLoading}
                     />
                 )}
             </div>
 
-            {status !== 'PENDING' && !isEditing && (
+            {total !== undefined && status !== 'PENDING' && !isEditing && (
                 <div className="flex items-center justify-between border-t pt-4">
                     <p className="text-muted-foreground text-sm">
                         {page} of {total}

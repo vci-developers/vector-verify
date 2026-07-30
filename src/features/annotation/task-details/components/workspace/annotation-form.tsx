@@ -51,12 +51,14 @@ import {
     serializeAnnotationFormArtifacts,
 } from '@/features/annotation/task-details/lib/annotation-form-artifacts-serializer';
 import { useTranslations } from 'next-intl';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnnotationFormProps {
-    annotation: Annotation;
+    annotation: Annotation | undefined;
     isSubmitting: boolean;
     onSubmit: (data: PutAnnotationByIdRequestBody) => void;
     onCancel?: () => void;
+    isLoading: boolean;
 }
 
 export default function AnnotationForm({
@@ -64,22 +66,25 @@ export default function AnnotationForm({
     isSubmitting,
     onSubmit,
     onCancel,
+    isLoading,
 }: AnnotationFormProps) {
     const t = useTranslations('AnnotationWorkspace');
     const [genus, anophelesSpecies] =
-        annotation.visualSpecies?.split(' ') ?? [];
+        annotation?.visualSpecies?.split(' ') ?? [];
     const annotationForm = useForm<AnnotationFormInput>({
         resolver: zodResolver(annotationFormSchema),
         defaultValues: {
             visualGenus: (genus as Genus) ?? undefined,
             visualAnophelesSpecies:
                 (anophelesSpecies as AnophelesSpecies) ?? undefined,
-            visualSex: (annotation.visualSex as Sex) ?? undefined,
+            visualSex: (annotation?.visualSex as Sex) ?? undefined,
             visualAbdomenStatus:
-                (annotation.visualAbdomenStatus as AbdomenStatus) ?? undefined,
-            artifacts: deserializeAnnotationFormArtifacts(annotation.artifacts),
-            notes: annotation.notes ?? undefined,
-            isFlagged: annotation.status === 'FLAGGED',
+                (annotation?.visualAbdomenStatus as AbdomenStatus) ?? undefined,
+            artifacts: deserializeAnnotationFormArtifacts(
+                annotation?.artifacts,
+            ),
+            notes: annotation?.notes ?? undefined,
+            isFlagged: annotation?.status === 'FLAGGED',
         },
     });
 
@@ -195,26 +200,32 @@ export default function AnnotationForm({
                                                 </span>
                                             )}
                                         </FieldLabel>
-                                        <Select
-                                            onValueChange={handleGenusChange}
-                                            value={field.value ?? ''}
-                                        >
-                                            <SelectTrigger id="annotation-rhf-genus">
-                                                <SelectValue placeholder="Select..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {genusSchema.options.map(
-                                                    option => (
-                                                        <SelectItem
-                                                            key={option}
-                                                            value={option}
-                                                        >
-                                                            {option}
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                        {isLoading ? (
+                                            <Skeleton className="h-9 w-full" />
+                                        ) : (
+                                            <Select
+                                                onValueChange={
+                                                    handleGenusChange
+                                                }
+                                                value={field.value ?? ''}
+                                            >
+                                                <SelectTrigger id="annotation-rhf-genus">
+                                                    <SelectValue placeholder="Select..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {genusSchema.options.map(
+                                                        option => (
+                                                            <SelectItem
+                                                                key={option}
+                                                                value={option}
+                                                            >
+                                                                {option}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
                                         {fieldState.invalid && (
                                             <FieldError
                                                 errors={[fieldState.error]}
@@ -237,35 +248,39 @@ export default function AnnotationForm({
                                                 </span>
                                             )}
                                         </FieldLabel>
-                                        <Select
-                                            disabled={!isAnopheles}
-                                            onValueChange={
-                                                handleAnophelesSpeciesChange
-                                            }
-                                            value={field.value ?? ''}
-                                        >
-                                            <SelectTrigger id="annotation-rhf-species">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isAnopheles
-                                                            ? 'Select...'
-                                                            : 'N/A'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {anophelesSpeciesSchema.options.map(
-                                                    option => (
-                                                        <SelectItem
-                                                            key={option}
-                                                            value={option}
-                                                        >
-                                                            {option}
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                        {isLoading ? (
+                                            <Skeleton className="h-9 w-full" />
+                                        ) : (
+                                            <Select
+                                                disabled={!isAnopheles}
+                                                onValueChange={
+                                                    handleAnophelesSpeciesChange
+                                                }
+                                                value={field.value ?? ''}
+                                            >
+                                                <SelectTrigger id="annotation-rhf-species">
+                                                    <SelectValue
+                                                        placeholder={
+                                                            isAnopheles
+                                                                ? 'Select...'
+                                                                : 'N/A'
+                                                        }
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {anophelesSpeciesSchema.options.map(
+                                                        option => (
+                                                            <SelectItem
+                                                                key={option}
+                                                                value={option}
+                                                            >
+                                                                {option}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
                                         {fieldState.invalid && (
                                             <FieldError
                                                 errors={[fieldState.error]}
@@ -289,33 +304,37 @@ export default function AnnotationForm({
                                                     </span>
                                                 )}
                                         </FieldLabel>
-                                        <Select
-                                            disabled={isNonMosquito}
-                                            onValueChange={handleSexChange}
-                                            value={field.value ?? ''}
-                                        >
-                                            <SelectTrigger id="annotation-rhf-sex">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isNonMosquito
-                                                            ? 'N/A'
-                                                            : 'Select...'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {sexSchema.options.map(
-                                                    option => (
-                                                        <SelectItem
-                                                            key={option}
-                                                            value={option}
-                                                        >
-                                                            {option}
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                        {isLoading ? (
+                                            <Skeleton className="h-9 w-full" />
+                                        ) : (
+                                            <Select
+                                                disabled={isNonMosquito}
+                                                onValueChange={handleSexChange}
+                                                value={field.value ?? ''}
+                                            >
+                                                <SelectTrigger id="annotation-rhf-sex">
+                                                    <SelectValue
+                                                        placeholder={
+                                                            isNonMosquito
+                                                                ? 'N/A'
+                                                                : 'Select...'
+                                                        }
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {sexSchema.options.map(
+                                                        option => (
+                                                            <SelectItem
+                                                                key={option}
+                                                                value={option}
+                                                            >
+                                                                {option}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
                                         {fieldState.invalid && (
                                             <FieldError
                                                 errors={[fieldState.error]}
@@ -340,35 +359,42 @@ export default function AnnotationForm({
                                                     </span>
                                                 )}
                                         </FieldLabel>
-                                        <Select
-                                            disabled={isNonMosquito || isMale}
-                                            onValueChange={
-                                                handleAbdomenStatusChange
-                                            }
-                                            value={field.value ?? ''}
-                                        >
-                                            <SelectTrigger id="annotation-rhf-abdomen">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isNonMosquito || isMale
-                                                            ? 'N/A'
-                                                            : 'Select...'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {abdomenStatusSchema.options.map(
-                                                    option => (
-                                                        <SelectItem
-                                                            key={option}
-                                                            value={option}
-                                                        >
-                                                            {option}
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                        {isLoading ? (
+                                            <Skeleton className="h-9 w-full" />
+                                        ) : (
+                                            <Select
+                                                disabled={
+                                                    isNonMosquito || isMale
+                                                }
+                                                onValueChange={
+                                                    handleAbdomenStatusChange
+                                                }
+                                                value={field.value ?? ''}
+                                            >
+                                                <SelectTrigger id="annotation-rhf-abdomen">
+                                                    <SelectValue
+                                                        placeholder={
+                                                            isNonMosquito ||
+                                                            isMale
+                                                                ? 'N/A'
+                                                                : 'Select...'
+                                                        }
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {abdomenStatusSchema.options.map(
+                                                        option => (
+                                                            <SelectItem
+                                                                key={option}
+                                                                value={option}
+                                                            >
+                                                                {option}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
                                         {fieldState.invalid && (
                                             <FieldError
                                                 errors={[fieldState.error]}
@@ -392,26 +418,32 @@ export default function AnnotationForm({
                                             </span>
                                         )}
                                     </FieldLabel>
-                                    <MultiSelect
-                                        values={field.value ?? []}
-                                        onValuesChange={handleArtifactSelected}
-                                    >
-                                        <MultiSelectTrigger className="w-full">
-                                            <MultiSelectValue placeholder="Select artifacts..." />
-                                        </MultiSelectTrigger>
-                                        <MultiSelectContent>
-                                            {annotationFormArtifactSchema.options.map(
-                                                option => (
-                                                    <MultiSelectItem
-                                                        key={option}
-                                                        value={option}
-                                                    >
-                                                        {option}
-                                                    </MultiSelectItem>
-                                                ),
-                                            )}
-                                        </MultiSelectContent>
-                                    </MultiSelect>
+                                    {isLoading ? (
+                                        <Skeleton className="h-9 w-full" />
+                                    ) : (
+                                        <MultiSelect
+                                            values={field.value ?? []}
+                                            onValuesChange={
+                                                handleArtifactSelected
+                                            }
+                                        >
+                                            <MultiSelectTrigger className="w-full">
+                                                <MultiSelectValue placeholder="Select artifacts..." />
+                                            </MultiSelectTrigger>
+                                            <MultiSelectContent>
+                                                {annotationFormArtifactSchema.options.map(
+                                                    option => (
+                                                        <MultiSelectItem
+                                                            key={option}
+                                                            value={option}
+                                                        >
+                                                            {option}
+                                                        </MultiSelectItem>
+                                                    ),
+                                                )}
+                                            </MultiSelectContent>
+                                        </MultiSelect>
+                                    )}
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -434,17 +466,21 @@ export default function AnnotationForm({
                                             </span>
                                         )}
                                     </FieldLabel>
-                                    <Textarea
-                                        {...field}
-                                        value={field.value ?? ''}
-                                        id="annotation-rhf-notes"
-                                        placeholder={
-                                            watchIsFlagged
-                                                ? 'Describe why this specimen is flagged...'
-                                                : 'Any additional observations...'
-                                        }
-                                        className="h-24 resize-none"
-                                    />
+                                    {isLoading ? (
+                                        <Skeleton className="h-24 w-full" />
+                                    ) : (
+                                        <Textarea
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            id="annotation-rhf-notes"
+                                            placeholder={
+                                                watchIsFlagged
+                                                    ? 'Describe why this specimen is flagged...'
+                                                    : 'Any additional observations...'
+                                            }
+                                            className="h-24 resize-none"
+                                        />
+                                    )}
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -457,20 +493,24 @@ export default function AnnotationForm({
                         <Controller
                             name="isFlagged"
                             control={annotationForm.control}
-                            render={({ field }) => (
-                                <Toggle
-                                    variant="outline"
-                                    pressed={field.value}
-                                    onPressedChange={handleIsFlaggedChange}
-                                    aria-label="Flag for review"
-                                    className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
-                                >
-                                    <Flag className="mr-2 h-4 w-4" />
-                                    {field.value
-                                        ? 'Specimen Flagged'
-                                        : 'Flag Specimen'}
-                                </Toggle>
-                            )}
+                            render={({ field }) =>
+                                isLoading ? (
+                                    <Skeleton className="h-9 w-full" />
+                                ) : (
+                                    <Toggle
+                                        variant="outline"
+                                        pressed={field.value}
+                                        onPressedChange={handleIsFlaggedChange}
+                                        aria-label="Flag for review"
+                                        className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
+                                    >
+                                        <Flag className="mr-2 h-4 w-4" />
+                                        {field.value
+                                            ? 'Specimen Flagged'
+                                            : 'Flag Specimen'}
+                                    </Toggle>
+                                )
+                            }
                         />
                     </FieldGroup>
 
@@ -489,7 +529,10 @@ export default function AnnotationForm({
                                 Cancel
                             </Button>
                         )}
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || isLoading}
+                        >
                             {isSubmitting
                                 ? 'Saving...'
                                 : onCancel
