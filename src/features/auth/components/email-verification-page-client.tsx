@@ -9,7 +9,7 @@ import LogoutButton from '@/components/auth-session/logout-button';
 import { StorageKeys } from '@/lib/storage-keys';
 import { useResendCooldown } from '@/lib/hooks/use-resend-cooldown';
 
-export default function EmailVerificationPrompt() {
+export default function EmailVerificationPageClient() {
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
     const { secondsRemaining, isOnCooldown, startCooldown } = useResendCooldown(

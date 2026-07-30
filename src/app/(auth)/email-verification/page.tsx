@@ -1,5 +1,5 @@
 import AuthShell from '@/features/auth/components/auth-shell';
-import EmailVerificationPrompt from '@/features/auth/components/email-verification-prompt';
+import EmailVerificationPageClient from '@/features/auth/components/email-verification-page-client';
 import { getTranslations } from 'next-intl/server';
 
 export default async function EmailVerificationPage() {
@@ -11,7 +11,7 @@ export default async function EmailVerificationPage() {
             description={t('emailVerificationPromptDescription')}
             imageSrc="/assets/auth/images/Login.png"
         >
-            <EmailVerificationPrompt />
+            <EmailVerificationPageClient />
         </AuthShell>
     );
 }

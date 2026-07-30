@@ -52,20 +52,7 @@ export default async function VerifyEmailPage({
                     <Separator className="my-6" />
                     <div className="flex flex-col items-center gap-4">
                         {response.error.message ===
-                        'Verification token is required' ? (
-                            <Fragment>
-                                <p className="text-muted-foreground text-center text-sm">
-                                    {t('invalidVerificationLink')}
-                                </p>
-                                <Button className="w-full">
-                                    <Link href="/email-verification">
-                                        {t('resendVerificationEmailButton')}
-                                    </Link>
-                                </Button>
-                                <LogoutButton />
-                            </Fragment>
-                        ) : response.error.message ===
-                          'Invalid or expired verification token' ? (
+                        'Invalid or expired verification token' ? (
                             <Fragment>
                                 <p className="text-muted-foreground text-center text-sm">
                                     {t('invalidOrExpiredVerificationLink')}
@@ -88,8 +75,13 @@ export default async function VerifyEmailPage({
                         ) : (
                             <Fragment>
                                 <p className="text-muted-foreground text-center text-sm">
-                                    {response.error.message}
+                                    {t('somethingWentWrong')}
                                 </p>
+                                <Button className="w-full">
+                                    <Link href="/email-verification">
+                                        {t('resendVerificationEmailButton')}
+                                    </Link>
+                                </Button>
                                 <LogoutButton />
                             </Fragment>
                         )}
