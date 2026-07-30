@@ -1,30 +1,35 @@
 'use client';
 
+import { useMemo, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import type { SiteMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import SelectableInfoPanel from '@/features/operations/geographical-summary/components/selectable-info-panel';
 import SelectableInfoPanelRow from '@/features/operations/geographical-summary/components/selectable-info-panel-row';
-import { useMemo } from 'react';
 
-interface MarkerInfoPanelProps {
-    markers: SiteMarker[];
+interface MarkerInfoPanelProps<Marker> {
+    markers: Marker[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
+    renderMarkerDetails: (marker: Marker) => ReactNode;
     isLoading: boolean;
 }
 
-export default function MarkerInfoPanel({
+export default function MarkerInfoPanel<
+    Marker extends { id: string; siteName: string; parentLocationName: string },
+>({
     markers,
     selectedMarkerId,
     onMarkerSelect,
+    renderMarkerDetails,
     isLoading,
-}: MarkerInfoPanelProps) {
+}: MarkerInfoPanelProps<Marker>) {
     const t = useTranslations('OperationsGeographicalSummary');
+
     const markersGroupedByLocation = useMemo(() => {
-        const groups = new Map<string, SiteMarker[]>();
+        const groups = new Map<string, Marker[]>();
         for (const marker of markers) {
             const topLevel =
-                marker.parentLocationName.split(' · ')[0] ?? 'Unknown';
+                marker.parentLocationName.split(' · ')[0] ||
+                t('unknownLocation');
             const group = groups.get(topLevel) ?? [];
             group.push(marker);
             groups.set(topLevel, group);
@@ -32,7 +37,7 @@ export default function MarkerInfoPanel({
         return Array.from(groups.entries()).sort(([a], [b]) =>
             a.localeCompare(b),
         );
-    }, [markers]);
+    }, [markers, t]);
 
     return (
         <SelectableInfoPanel
@@ -67,47 +72,7 @@ export default function MarkerInfoPanel({
                                     </p>
                                 )}
                                 <div className="text-muted-foreground mt-1.5 space-y-0.5">
-                                    <p>
-                                        {t('siteSessionCount', {
-                                            count: marker.sessionCount,
-                                        })}
-                                    </p>
-                                    <p>
-                                        {t('siteSpecimenCount', {
-                                            count: marker.totalSpecimens,
-                                        })}
-                                    </p>
-                                    <p>
-                                        {t('siteAnophelesCount', {
-                                            count: marker.anophelesCount,
-                                        })}
-                                    </p>
-                                    {marker.speciesBreakdown.length > 0 && (
-                                        <div className="border-border mt-1 space-y-0.5 border-t pt-1">
-                                            {marker.speciesBreakdown.map(
-                                                ({ species, count }) => (
-                                                    <p key={species}>
-                                                        <span className="mr-1">
-                                                            ↳
-                                                        </span>
-                                                        {t('siteSpeciesCount', {
-                                                            species,
-                                                            count,
-                                                        })}
-                                                    </p>
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
-                                    {marker.lastCollectionDate && (
-                                        <p className="mt-1">
-                                            {t('siteLastCollection', {
-                                                date: new Date(
-                                                    marker.lastCollectionDate,
-                                                ).toLocaleDateString(),
-                                            })}
-                                        </p>
-                                    )}
+                                    {renderMarkerDetails(marker)}
                                 </div>
                             </SelectableInfoPanelRow>
                         );

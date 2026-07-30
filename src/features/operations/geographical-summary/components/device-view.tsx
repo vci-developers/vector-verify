@@ -15,12 +15,16 @@ import type { Site } from '@/api/site/validation/site-schema';
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
+    programId: number;
+    country: string;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
 }
 
 export default function DeviceView({
+    programId,
+    country,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
@@ -29,23 +33,26 @@ export default function DeviceView({
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
-    const { deviceActivity, isPending, isError } = useDeviceActivity(siteIds);
+    const { deviceActivity, isPending, isError } = useDeviceActivity(
+        programId,
+        siteIds,
+    );
 
     useEffect(() => {
         setSelectedMarkerId(null);
     }, [siteIds]);
 
     const deviceMarkers = useMemo(() => {
-        if (!deviceActivity) return [];
+        if (!deviceActivity) return null;
         return buildDeviceMarkers(
-            deviceActivity.sites,
+            deviceActivity,
             descendantsOfSelectedLocations,
         ).sort(
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
                     firstMarker.activeDeviceCount ||
-                secondMarker.lapsingDeviceCount -
-                    firstMarker.lapsingDeviceCount,
+                secondMarker.inactiveDeviceCount -
+                    firstMarker.inactiveDeviceCount,
         );
     }, [deviceActivity, descendantsOfSelectedLocations]);
 
@@ -53,7 +60,6 @@ export default function DeviceView({
         return (
             <div className="space-y-3">
                 <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-13 w-28" />
                     <Skeleton className="h-13 w-28" />
                     <Skeleton className="h-13 w-28" />
                 </div>
@@ -72,7 +78,7 @@ export default function DeviceView({
         );
     }
 
-    if (!deviceActivity || deviceActivity.totalDeviceCount === 0) {
+    if (!deviceMarkers || deviceMarkers.length === 0) {
         return (
             <Card className="border-border/50 p-0">
                 <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
@@ -82,10 +88,17 @@ export default function DeviceView({
         );
     }
 
+    const deviceCounts = deviceMarkers.reduce(
+        (counts, marker) => ({
+            active: counts.active + marker.activeDeviceCount,
+            inactive: counts.inactive + marker.inactiveDeviceCount,
+        }),
+        { active: 0, inactive: 0 },
+    );
+
     const tiers = [
-        { key: 'active', count: deviceActivity.activeDeviceCount },
-        { key: 'lapsing', count: deviceActivity.lapsingDeviceCount },
-        { key: 'inactive', count: deviceActivity.inactiveDeviceCount },
+        { key: 'active', count: deviceCounts.active },
+        { key: 'inactive', count: deviceCounts.inactive },
     ] as const;
 
     return (
@@ -109,6 +122,7 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
                         markers={deviceMarkers}
+                        country={country}
                         selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}
@@ -142,16 +156,6 @@ export default function DeviceView({
                                 }}
                             />
                             {t('legendActive')}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor:
-                                        DEVICE_HEALTH_COLOR.lapsing,
-                                }}
-                            />
-                            {t('legendLapsing')}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span

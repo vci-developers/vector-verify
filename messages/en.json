@@ -46,12 +46,11 @@
         "noDeviceActivity": "No device activity to display.",
         "deviceActivityError": "Failed to load device activity. Check the console for details.",
         "active": "Active",
-        "lapsing": "Lapsing",
         "inactive": "Inactive",
-        "unknownSite": "Unknown site",
+        "unknownLocation": "Unknown location",
         "sitesCount": "{count, plural, one {# site} other {# sites}}",
         "siteActiveCount": "{count, plural, one {# active device} other {# active devices}}",
-        "siteLapsingCount": "{count, plural, one {# lapsing device} other {# lapsing devices}}",
+        "siteInactiveCount": "{count, plural, one {# inactive device} other {# inactive devices}}",
         "siteSessionCount": "{count, plural, one {# session} other {# sessions}}",
         "siteSpecimenCount": "{count, plural, one {# specimen} other {# specimens}}",
         "siteAnophelesCount": "{count, number} Anopheles",
@@ -60,12 +59,11 @@
         "locatingSites": "Locating sites…",
         "locatingDevices": "Locating devices…",
         "legendMarkerTitle": "Each marker represents a collection site",
-        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity as of today over a rolling 6-month window, independent of the selected date range.",
+        "legendMarkerSubtitle": "Positioned by geocoded location name. Reflects device activity in the current collection cycle, independent of the selected date range.",
         "legendSizeTitle": "Marker Size",
         "legendSizeSubtitle": "Scaled by active device count",
         "legendColorTitle": "Marker Color — Site Health",
-        "legendActive": "Has an active device this month",
-        "legendLapsing": "Only lapsing devices",
+        "legendActive": "Has an active device this cycle",
         "legendInactive": "All devices inactive"
     },
     "OperationsSpecimenComposition": {
@@ -79,6 +77,7 @@
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
+        "noConfusionMatrixData": "No verified {category} comparisons in this date range; there are no annotations to compare with VectorCam's predictions.",
         "perLabelMetrics": "Per-Label Metrics",
         "label": "Label",
         "sensitivity": "Sensitivity",
@@ -100,14 +99,23 @@
         "collector": "Collector",
         "session": "session"
     },
+    "Review": {
+        "review": "Review",
+        "reviewDescription": "Review submitted session data by location",
+        "selectALocation": "Select a location to view data."
+    },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "inReview": "In Review",
         "certified": "Certified",
         "submitted": "Submitted",
+        "filterByState": "Filter by state",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
-        "sitesVisited": "{visited} of {total} visited"
+        "sitesVisited": "{visited} of {total} visited",
+        "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
+        "noSitesForLocation": "No sites found for this location.",
+        "noSitesMatchFilter": "No sites match this filter."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",
@@ -123,6 +131,8 @@
         "conflictsRemaining": "{count, plural, one {# conflict left to resolve} other {# conflicts left to resolve}}",
         "editValueLabel": "Edit value",
         "valueColumn": "Value",
+        "collectionDate": "Collection Date: ",
+        "sessionCreated": "Session Created: ",
         "selectValuePlaceholder": "Select value",
         "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
         "missingSurveillanceFormNotice": "{count, plural, one {# session is missing a surveillance form} other {# sessions are missing surveillance forms}} and won't receive the values saved here: {dates}. Follow up with the field team to submit the missing {count, plural, one {form} other {forms}} before certifying.",
@@ -137,6 +147,8 @@
         "sessionSectionTitle": "Session"
     },
     "ReviewImage": {
+        "missingSpecimensBadge": "Missing Specimens",
+        "specimensNotUploaded": "{count, plural, one {# specimen was} other {# specimens were}} not uploaded. Please contact the field user responsible for the {site} site.",
         "specimenCounter": "Specimen {current} of {total}",
         "previousSpecimen": "Previous Specimen",
         "nextSpecimen": "Next Specimen",
@@ -155,7 +167,8 @@
         "modelPredictions": "Model Predictions",
         "species": "Species",
         "sex": "Sex",
-        "abdomenStatus": "Abdomen Status"
+        "abdomenStatus": "Abdomen Status",
+        "modelConfidence": "Model Confidence"
     },
     "ReviewCertification": {
         "title": "Certify Site",
@@ -180,5 +193,24 @@
     "Dhis2Submissions": {
         "certifiedBy": "Certified by: {name}",
         "unknownCertifier": "an unknown user"
+    },
+    "UserAnalytics": {
+        "menuItem": "User Analytics",
+        "title": "User Analytics",
+        "description": "Active web-app users over time for your program.",
+        "programDescription": "Active web-app users over time for {programName}.",
+        "range30d": "30 days",
+        "range90d": "90 days",
+        "range1y": "1 year",
+        "a1Label": "Daily",
+        "a7Label": "Weekly",
+        "a30Label": "Monthly",
+        "axisDateLabel": "Date",
+        "axisActiveUsersLabel": "Active users",
+        "loading": "Loading active-user metrics…",
+        "empty": "No active-user snapshots in this window."
+    },
+    "AnnotationWorkspace": {
+        "flaggedSpecimenDefinition": "A flagged specimen is one that cannot be confidently identified due to poor specimen or image quality."
     }
 }

@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
@@ -118,7 +120,7 @@ export default function CompositionChartPair({
                             </PieChart>
                         </ChartContainer>
                     </div>
-                    <div className="h-62.5 w-full min-w-0 flex-1">
+                    <div className="h-72 w-full min-w-0 flex-1">
                         <ChartContainer
                             config={specimenChartConfig}
                             className="h-full w-full"
@@ -186,6 +188,12 @@ export default function CompositionChartPair({
                                         }}
                                     />
                                 ))}
+                                <ChartLegend
+                                    wrapperStyle={{ paddingTop: '1rem' }}
+                                    content={
+                                        <ChartLegendContent className="text-muted-foreground flex-wrap" />
+                                    }
+                                />
                             </AreaChart>
                         </ChartContainer>
                     </div>

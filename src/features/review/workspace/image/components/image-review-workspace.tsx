@@ -11,9 +11,14 @@ import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import ImageReviewDetails from './image-review-details';
+import type { Session } from '@/api/session/validation/session-schema';
+import type { Site } from '@/api/site/validation/site-schema';
+import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
+import MissingSpecimensTooltip from './missing-specimens-tooltip';
 
 interface ImageReviewWorkspaceProps {
-    siteId: number;
+    site: Site;
+    sessions: Session[];
     startDate?: string;
     endDate?: string;
     collectionCycleId?: number;
@@ -23,7 +28,8 @@ interface ImageReviewWorkspaceProps {
 }
 
 export default function ImageReviewWorkspace({
-    siteId,
+    site,
+    sessions,
     startDate,
     endDate,
     collectionCycleId,
@@ -41,13 +47,13 @@ export default function ImageReviewWorkspace({
     const specimenQueryParams: GetAllSpecimensQueryParams =
         collectionCycleId !== undefined
             ? {
-                  siteId,
+                  siteId: site.siteId,
                   collectionCycleId,
                   sessionType: 'SURVEILLANCE',
                   includeAllImages: true,
               }
             : {
-                  siteId,
+                  siteId: site.siteId,
                   startDate,
                   endDate,
                   sessionType: 'SURVEILLANCE',
@@ -71,9 +77,22 @@ export default function ImageReviewWorkspace({
 
     const specimens = getAllSpecimensResult.data.specimens;
 
+    const totalSpecimens = specimens.length;
+    const expectedSpecimensCount = sessions.reduce(
+        (total, session) => total + (session.expectedSpecimens ?? 0),
+        0,
+    );
+    const missingSpecimenCount = expectedSpecimensCount - totalSpecimens;
+
+    const siteLabel = getSiteLabelParts(site).primaryLabel;
+
     if (specimens.length === 0) {
         return (
             <div className="space-y-4">
+                <MissingSpecimensTooltip
+                    specimensMissing={missingSpecimenCount}
+                    siteLabel={siteLabel}
+                />
                 <div className="bg-muted/30 flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                     <ImageOff className="text-muted-foreground/60 mb-4 h-12 w-12" />
                     <h3 className="text-sm font-semibold">{t('emptyTitle')}</h3>
@@ -94,18 +113,23 @@ export default function ImageReviewWorkspace({
         );
     }
 
-    const totalSpecimens = specimens.length;
     const currentSpecimen = specimens[specimenIndex]!;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">
-                    {t('specimenCounter', {
-                        current: specimenIndex + 1,
-                        total: totalSpecimens,
-                    })}
-                </p>
+                <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold">
+                        {t('specimenCounter', {
+                            current: specimenIndex + 1,
+                            total: totalSpecimens,
+                        })}
+                    </p>
+                    <MissingSpecimensTooltip
+                        specimensMissing={missingSpecimenCount}
+                        siteLabel={siteLabel}
+                    />
+                </div>
                 <div className="flex gap-2">
                     <Button
                         type="button"

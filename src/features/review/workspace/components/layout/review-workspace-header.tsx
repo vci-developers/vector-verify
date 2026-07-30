@@ -3,6 +3,7 @@
 import { cn } from '@/utils/cn';
 import { Check, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Fragment } from 'react';
 
@@ -18,12 +19,15 @@ export default function ReviewWorkspaceHeader({
     siteName,
 }: ReviewWorkspaceHeaderProps) {
     const t = useTranslations('ReviewWorkspace');
+    const searchParams = useSearchParams();
+    const listQueryString = searchParams.get('back');
+    const backHref = listQueryString ? `/review?${listQueryString}` : '/review';
 
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
                 <Link
-                    href="/review"
+                    href={backHref}
                     className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
                 >
                     <ChevronLeft className="h-4 w-3" />

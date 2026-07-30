@@ -1,26 +1,31 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
-import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
+import { endOfMonth, format } from 'date-fns';
 import { Microscope } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import OperationsHeader from '@/features/operations/components/layout/operations-header';
 import OperationsAiPerformance from '@/features/operations/ai-performance/components/operations-ai-performance';
 import OperationsGeographicalSummary from '@/features/operations/geographical-summary/components/operations-geographical-summary';
-import { SkeletonList } from '@/components/ui/skeleton-list';
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
+import {
+    useOperationsFilters,
+    type OperationsTab,
+} from '@/features/operations/view-state/use-operations-filters';
 import { useTranslations } from 'next-intl';
 
-const OPERATIONS_TABS = [
+const OPERATIONS_TABS: {
+    value: OperationsTab;
+    label: string;
+    shouldRender: (permissions: UserPermissions) => boolean;
+}[] = [
     {
         value: 'geographical-summary',
         label: 'GEOGRAPHICAL SUMMARY',
@@ -42,25 +47,13 @@ const OPERATIONS_TABS = [
         label: 'FIELD TEAM PERFORMANCE',
         shouldRender: () => true,
     },
-] as const;
-
-export type OperationsTab = (typeof OPERATIONS_TABS)[number]['value'];
+];
 
 export default function OperationsPageClient() {
     const t = useTranslations('Operations');
-    const tCommmon = useTranslations('Common');
-    const [activeTab, setActiveTab] = useLocalStorage<OperationsTab>(
-        StorageKeys.operations.activeTab,
-        'geographical-summary',
-    );
-    const [startMonth, setStartMonth] = useLocalStorage(
-        StorageKeys.operations.startMonth,
-        startOfMonth(subMonths(new Date(), 2)),
-    );
-    const [endMonth, setEndMonth] = useLocalStorage(
-        StorageKeys.operations.endMonth,
-        startOfMonth(new Date()),
-    );
+    const tCommon = useTranslations('Common');
+    const [filters, setFilters] = useOperationsFilters();
+    const { activeTab, startMonth, endMonth, selectedLocations } = filters;
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
@@ -73,25 +66,36 @@ export default function OperationsPageClient() {
         : [];
 
     const {
-        selectedLocations,
-        setSelectedLocations,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
-    } = useLocationMultiSelection(
-        accessibleSites,
-        StorageKeys.operations.selectedLocations,
-    );
+    } = useLocationMultiSelection(accessibleSites, selectedLocations);
 
-    const [selectedMarkerId, setSelectedMarkerId] = useLocalStorage<
-        string | null
-    >(StorageKeys.operations.selectedMarkerId, null);
+    const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
+        null,
+    );
 
     useEffect(() => {
         setSelectedMarkerId(null);
     }, [selectedLocations, startMonth, endMonth, setSelectedMarkerId]);
+
+    function handleTabChange(tab: OperationsTab) {
+        setFilters({ activeTab: tab });
+    }
+
+    function handleLocationsChange(locations: string[]) {
+        setFilters({ selectedLocations: locations });
+    }
+
+    function handleStartMonthChange(month: Date) {
+        setFilters({ startMonth: month });
+    }
+
+    function handleEndMonthChange(month: Date) {
+        setFilters({ endMonth: month });
+    }
 
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
         return (
@@ -101,7 +105,7 @@ export default function OperationsPageClient() {
                 icon={Microscope}
             >
                 <p className="text-muted-foreground text-sm">
-                    {tCommmon('loading')}
+                    {tCommon('loading')}
                 </p>
             </PageShell>
         );
@@ -139,29 +143,26 @@ export default function OperationsPageClient() {
                     <OperationsHeader
                         tabs={visibleTabs}
                         activeTab={activeTab}
-                        onTabChange={setActiveTab}
+                        onTabChange={handleTabChange}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocations={selectedLocations}
-                        onLocationsChange={setSelectedLocations}
+                        onLocationsChange={handleLocationsChange}
                         startMonth={startMonth}
                         endMonth={endMonth}
-                        onStartMonthChange={setStartMonth}
-                        onEndMonthChange={setEndMonth}
+                        onStartMonthChange={handleStartMonthChange}
+                        onEndMonthChange={handleEndMonthChange}
                         onExportClick={() => setIsExportDialogOpen(true)}
                     />
 
                     <Separator />
 
                     {!selectedSiteIdsParam ? (
-                        <div className="relative">
-                            <SkeletonList count={5} height="xl" width="full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                                <p className="text-muted-foreground text-sm">
-                                    {t('selectALocation')}
-                                </p>
-                            </div>
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                            <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                            <p className="text-muted-foreground text-sm">
+                                {t('selectALocation')}
+                            </p>
                         </div>
                     ) : (
                         <Fragment>
@@ -175,8 +176,10 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'geographical-summary' && (
                                 <OperationsGeographicalSummary
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
                                     siteIds={selectedSiteIdsParam}
-                                    selectedLocations={selectedLocations}
                                     descendantsOfSelectedLocations={
                                         descendantsOfSelectedLocations
                                     }

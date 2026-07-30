@@ -5,26 +5,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
 import type { Site } from '@/api/site/validation/site-schema';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
+import { useGeographicalView } from '@/features/operations/geographical-summary/view-state/use-geographical-view';
 import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
+    GEOGRAPHICAL_VIEWS,
+    type GeographicalView,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import { Fragment, useRef } from 'react';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
-const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
-
-type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
-
 interface OperationsGeographicalSummaryProps {
+    programId: number;
     siteIds: number[];
-    selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
@@ -33,30 +32,48 @@ interface OperationsGeographicalSummaryProps {
 }
 
 export default function OperationsGeographicalSummary({
+    programId,
     siteIds,
-    selectedLocations,
     descendantsOfSelectedLocations,
     startDate,
     endDate,
     selectedMarkerId,
     setSelectedMarkerId,
 }: OperationsGeographicalSummaryProps) {
-    const { markers, totalSites, isPending, isError } = useSiteMarkers({
+    const {
+        markers,
+        totalSites,
+        isPending: isMarkersPending,
+        isError: isMarkersError,
+    } = useSiteMarkers({
         siteIds,
         descendantsOfSelectedLocations,
         startDate,
         endDate,
     });
 
+    const {
+        data: getProgramsResult,
+        isPending: isProgramsPending,
+        isError: isProgramsError,
+    } = useGetPrograms();
+
+    const country = getProgramsResult?.ok
+        ? getProgramsResult.data.programs.find(
+              program => program.programId === programId,
+          )?.country
+        : undefined;
+
+    const isPending = isMarkersPending || isProgramsPending;
+    const isError = isMarkersError || isProgramsError;
+
     const siteMapMounted = useRef(false);
-    if (!isPending && markers.length > 0) siteMapMounted.current = true;
+    if (!isPending && markers.length > 0 && country)
+        siteMapMounted.current = true;
 
     const t = useTranslations('OperationsGeographicalSummary');
-    const [geographicalView, setGeographicalView] =
-        useLocalStorage<GeographicalView>(
-            StorageKeys.operations.geographicalView,
-            'specimens',
-        );
+    const [{ selectedLocations }] = useOperationsFilters();
+    const [geographicalView, setGeographicalView] = useGeographicalView();
 
     return (
         <div className="mt-4 space-y-3">
@@ -79,8 +96,10 @@ export default function OperationsGeographicalSummary({
                 </TabsList>
             </Tabs>
 
-            {geographicalView === 'devices' && (
+            {geographicalView === 'devices' && country && (
                 <DeviceView
+                    programId={programId}
+                    country={country}
                     siteIds={siteIds}
                     selectedLocations={selectedLocations}
                     descendantsOfSelectedLocations={
@@ -108,31 +127,25 @@ export default function OperationsGeographicalSummary({
 
                     <Card className="border-border/50 p-0">
                         <CardContent className="relative h-125 p-0">
-                            {siteMapMounted.current ? (
+                            {siteMapMounted.current && country ? (
                                 <SiteMap
                                     markers={markers}
+                                    country={country}
                                     selectedLocations={selectedLocations}
                                     selectedMarkerId={selectedMarkerId}
                                     onMarkerSelect={setSelectedMarkerId}
                                 />
-                            ) : isPending ? (
-                                <Skeleton className="h-full w-full rounded-md" />
                             ) : isError ? (
                                 <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                                     Failed to load session data. Check the
                                     console for details.
                                 </div>
-                            ) : markers.length === 0 ? (
+                            ) : !isPending && markers.length === 0 ? (
                                 <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                                     No site data found for the selected filters.
                                 </div>
                             ) : (
-                                <SiteMap
-                                    markers={markers}
-                                    selectedLocations={selectedLocations}
-                                    selectedMarkerId={selectedMarkerId}
-                                    onMarkerSelect={setSelectedMarkerId}
-                                />
+                                <Skeleton className="h-full w-full rounded-md" />
                             )}
                         </CardContent>
                     </Card>

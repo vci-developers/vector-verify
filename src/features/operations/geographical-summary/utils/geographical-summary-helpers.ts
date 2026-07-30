@@ -3,6 +3,10 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { GetSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-specimens-count-schema';
 import { isLegacySite } from '@/lib/location/location-query';
 
+export const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
+
+export type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
+
 export const ANOPHELES_THRESHOLD = {
     low: 10,
     moderate: 50,
@@ -69,7 +73,7 @@ export function buildSiteLocationQuery(site: Site): string {
         : buildHierarchicalLocationQuery(site);
 }
 
-function buildParentLocationName(site: Site): string {
+export function buildParentLocationName(site: Site): string {
     if (isLegacySite(site)) {
         return [site.district, site.subCounty, site.parish]
             .filter(Boolean)
@@ -80,7 +84,7 @@ function buildParentLocationName(site: Site): string {
         .join(' · ');
 }
 
-function getMarkerName(
+export function getMarkerName(
     site: Site,
     sitesById: Map<number, Site>,
 ): string | null {
@@ -92,7 +96,7 @@ function getMarkerName(
     return parentSite?.name ?? site.name ?? null;
 }
 
-function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
+export function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
     if (isLegacySite(site)) return site;
     if (site.parentId != null) {
         return sitesById.get(site.parentId) ?? site;
