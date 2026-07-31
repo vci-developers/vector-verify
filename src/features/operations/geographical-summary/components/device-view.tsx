@@ -16,6 +16,7 @@ const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
     programId: number;
+    country: string;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
@@ -23,6 +24,7 @@ interface DeviceViewProps {
 
 export default function DeviceView({
     programId,
+    country,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
@@ -120,6 +122,7 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
                         markers={deviceMarkers}
+                        country={country}
                         selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}
