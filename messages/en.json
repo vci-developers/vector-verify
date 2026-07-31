@@ -50,7 +50,6 @@
         "verifyEmailDescription": "Email verification in progress.",
         "verifyEmailIssueDescription": "There was a problem verifying your email.",
         "missingVerificationToken": "Invalid email verification link. Please check your email.",
-        "invalidOrExpiredVerificationLink": "This verification link is invalid or has expired. Please click the button to resend the verification email.",
         "accountVerificationTokenMismatch": "Please log in with the account that received the verification email.",
         "somethingWentWrong": "Something went wrong when verifying your email. Please resend the email verification or contact support.",
         "resendVerificationEmailButton": "Resend verification email",
