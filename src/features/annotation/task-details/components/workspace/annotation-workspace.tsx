@@ -72,8 +72,8 @@ export default function AnnotationWorkspace({
         return <h1>Error loading annotations</h1>;
     }
 
-    const annotation = getAnnotationsResult?.data.annotations[0] ?? undefined;
-    const total = getAnnotationsResult?.data.total ?? undefined;
+    const annotation = getAnnotationsResult?.data.annotations[0];
+    const total = getAnnotationsResult?.data.total;
 
     if (!isLoading && (!annotation || total === 0)) {
         return (
