@@ -32,6 +32,8 @@ import {
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { clearResendCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { StorageKeys } from '@/lib/storage-keys';
 
 export default function SignupForm() {
     const router = useRouter();
@@ -75,7 +77,7 @@ export default function SignupForm() {
             console.error('Signup failed', signupResult);
             return;
         }
-        window.localStorage.clear();
+        clearResendCooldown(StorageKeys.auth.verificationEmailSentTimestamp);
         router.refresh();
     }
 

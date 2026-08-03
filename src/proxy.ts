@@ -1,8 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import {
-    ACCESS_COOKIE_NAME,
-    VERIFIED_COOKIE_NAME,
-} from '@/lib/auth-session/cookies';
+import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
 
 const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
 const AUTH_ONLY_ROUTES = new Set(['/verify-email', '/email-verification']);
@@ -11,19 +8,17 @@ const PUBLIC_PREFIXES = ['/docs'];
 export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const accessToken = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
-    const emailVerified =
-        request.cookies.get(VERIFIED_COOKIE_NAME)?.value === 'true';
 
     const isPublic =
         PUBLIC_ROUTES.has(pathname) ||
         PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
     const isAuthOnly = AUTH_ONLY_ROUTES.has(pathname);
 
-    if (!pathname.includes('/forbidden') && isPublic && accessToken) {
-        return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    if (accessToken && emailVerified && isAuthOnly) {
+    if (
+        !pathname.includes('/forbidden') &&
+        PUBLIC_ROUTES.has(pathname) &&
+        accessToken
+    ) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 

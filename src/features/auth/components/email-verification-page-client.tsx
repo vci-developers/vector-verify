@@ -20,11 +20,15 @@ export default function EmailVerificationPageClient() {
 
     async function sendEmail() {
         setHasError(false);
-        startCooldown();
 
         sendVerification(undefined, {
             onSuccess: data => {
-                if (data.ok) setSubmitted(true);
+                if (data.ok) {
+                    setSubmitted(true);
+                    startCooldown();
+                } else {
+                    setHasError(true);
+                }
             },
             onError: () => {
                 setHasError(true);

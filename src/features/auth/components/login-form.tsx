@@ -80,6 +80,8 @@ export default function LoginForm() {
         if (!userProfileResult.data.user.emailVerified) {
             if (redirect) {
                 router.replace(redirect);
+                router.refresh();
+                return;
             }
             router.refresh();
         }

@@ -7,7 +7,6 @@ import type { NetworkError } from '@/lib/network/network-error';
 import { err, type Result } from '@/lib/result/result';
 import { NextResponse } from 'next/server';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
-import { setVerifiedEmailCookie } from '@/lib/auth-session/cookies';
 
 export async function POST(request: Request) {
     let requestBody: PostVerifyRequestBody;
@@ -28,15 +27,9 @@ export async function POST(request: Request) {
             postVerify(accessToken, requestBody),
         );
 
-    const response = NextResponse.json(postVerifyResult, {
+    return NextResponse.json(postVerifyResult, {
         status: postVerifyResult.ok
             ? 200
             : (postVerifyResult.error.status ?? 400),
     });
-
-    if (postVerifyResult.ok && postVerifyResult.data.user.emailVerified) {
-        setVerifiedEmailCookie(response);
-    }
-
-    return response;
 }
