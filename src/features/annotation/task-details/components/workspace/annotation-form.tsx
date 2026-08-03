@@ -210,6 +210,7 @@ export default function AnnotationForm({
                                                     handleGenusChange
                                                 }
                                                 value={field.value ?? ''}
+                                                disabled={isError}
                                             >
                                                 <SelectTrigger id="annotation-rhf-genus">
                                                     <SelectValue placeholder="Select..." />
@@ -254,7 +255,9 @@ export default function AnnotationForm({
                                             <Skeleton className="h-9 w-full" />
                                         ) : (
                                             <Select
-                                                disabled={!isAnopheles}
+                                                disabled={
+                                                    isError || !isAnopheles
+                                                }
                                                 onValueChange={
                                                     handleAnophelesSpeciesChange
                                                 }
@@ -310,7 +313,9 @@ export default function AnnotationForm({
                                             <Skeleton className="h-9 w-full" />
                                         ) : (
                                             <Select
-                                                disabled={isNonMosquito}
+                                                disabled={
+                                                    isError || isNonMosquito
+                                                }
                                                 onValueChange={handleSexChange}
                                                 value={field.value ?? ''}
                                             >
@@ -366,7 +371,9 @@ export default function AnnotationForm({
                                         ) : (
                                             <Select
                                                 disabled={
-                                                    isNonMosquito || isMale
+                                                    isError ||
+                                                    isNonMosquito ||
+                                                    isMale
                                                 }
                                                 onValueChange={
                                                     handleAbdomenStatusChange
@@ -429,7 +436,10 @@ export default function AnnotationForm({
                                                 handleArtifactSelected
                                             }
                                         >
-                                            <MultiSelectTrigger className="w-full">
+                                            <MultiSelectTrigger
+                                                className="w-full"
+                                                disabled={isError}
+                                            >
                                                 <MultiSelectValue placeholder="Select artifacts..." />
                                             </MultiSelectTrigger>
                                             <MultiSelectContent>
@@ -481,6 +491,7 @@ export default function AnnotationForm({
                                                     : 'Any additional observations...'
                                             }
                                             className="h-24 resize-none"
+                                            disabled={isError}
                                         />
                                     )}
                                     {fieldState.invalid && (
