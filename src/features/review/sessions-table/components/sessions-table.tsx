@@ -104,6 +104,11 @@ export default function SessionsTable({
         return getAllSessionsResult.data.sessions
             .filter(
                 session =>
+                    session.collectionCycleId === null ||
+                    cycleById.has(session.collectionCycleId),
+            )
+            .filter(
+                session =>
                     selectedCycleIds.length === 0 ||
                     (session.collectionCycleId !== null &&
                         selectedCycleIds.includes(session.collectionCycleId)),
@@ -121,6 +126,7 @@ export default function SessionsTable({
             });
     }, [
         getAllSessionsResult,
+        cycleById,
         selectedCycleIds,
         selectedReviewStates,
         siteById,

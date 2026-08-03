@@ -93,7 +93,7 @@ function SessionsTableRow({
                             : ''
                     }
                     onValueChange={value => onReassign(session, Number(value))}
-                    disabled={isReassigning}
+                    disabled={isReassigning || allCollectionCycles.length === 0}
                 >
                     <SelectTrigger className="w-52">
                         <SelectValue placeholder={t('unassigned')} />
