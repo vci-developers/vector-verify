@@ -72,8 +72,11 @@ export default function SpecimenImageViewer({
 
                 <div className="flex items-center gap-3">
                     <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
-                    {isLoading ? (
-                        <Skeleton className="h-4 w-full" />
+                    {isLoading || isError ? (
+                        <Skeleton
+                            className="h-4 w-full"
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     ) : (
                         <div>
                             {site ? (

@@ -102,11 +102,13 @@ export default function AnnotationWorkspace({
     return (
         <div className="space-y-4">
             {isError && <ErrorBanner message={t('couldNotRetrieve')} />}
-            <p className="text-muted-foreground text-sm">
-                {status === 'PENDING'
-                    ? t('numRemaining', { count: total ?? '---' })
-                    : t('pageOfTotal', { page, total: total ?? '---' })}
-            </p>
+            {total != undefined && (
+                <p className="text-muted-foreground text-sm">
+                    {status === 'PENDING'
+                        ? t('numRemaining', { count: total })
+                        : t('pageOfTotal', { page, total })}
+                </p>
+            )}
 
             <div className="grid grid-cols-2 gap-6">
                 {isLoading ? (
