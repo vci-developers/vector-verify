@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Fragment } from 'react';
 
 interface SpecimenImageViewerProps {
@@ -20,30 +21,20 @@ export default function SpecimenImageViewer({
     isError,
 }: SpecimenImageViewerProps) {
     const site = specimen?.session?.site;
+    const t = useTranslations('AnnotationWorkspace');
 
     return (
         <Card>
             <CardHeader className="pb-2">
-                {isLoading ? (
+                {isLoading || isError ? (
                     <Fragment>
                         <Skeleton
                             className="h-5 w-3/5 max-w-64"
-                            variant="destructive"
+                            variant={isError ? 'destructive' : 'default'}
                         />
                         <Skeleton
                             className="h-4 w-2/5 max-w-48"
-                            variant="destructive"
-                        />
-                    </Fragment>
-                ) : isError ? (
-                    <Fragment>
-                        <Skeleton
-                            className="h-5 w-3/5 max-w-64"
-                            variant="destructive"
-                        />
-                        <Skeleton
-                            className="h-4 w-2/5 max-w-48"
-                            variant="destructive"
+                            variant={isError ? 'destructive' : 'default'}
                         />
                     </Fragment>
                 ) : (
@@ -64,10 +55,15 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {isLoading ? (
-                    <Skeleton className="aspect-4/3 w-full rounded-lg" />
+                {isLoading || isError ? (
+                    <Skeleton
+                        className="aspect-4/3 w-full rounded-lg"
+                        variant={isError ? 'destructive' : 'default'}
+                    />
                 ) : !specimen ? (
-                    <Skeleton className="destructive aspect-4/3 w-full rounded-lg" />
+                    <div className="text-muted-foreground flex aspect-4/3 flex-col items-center justify-center rounded-lg border border-dashed text-center">
+                        {t('noSpecimenData')}
+                    </div>
                 ) : (
                     <SpecimenImageCarousel specimen={specimen} />
                 )}

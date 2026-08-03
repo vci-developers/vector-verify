@@ -109,19 +109,15 @@ export default function AnnotationWorkspace({
             </p>
 
             <div className="grid grid-cols-2 gap-6">
-                {annotation?.specimen ? (
-                    <SpecimenImageViewer
-                        key={annotation.specimen.id}
-                        specimen={annotation.specimen}
-                    />
-                ) : isLoading ? (
+                {isLoading ? (
                     <SpecimenImageViewer isLoading />
                 ) : isError ? (
                     <SpecimenImageViewer isError />
                 ) : (
-                    <p className="text-muted-foreground text-sm">
-                        {t('noSpecimenData')}
-                    </p>
+                    <SpecimenImageViewer
+                        key={annotation?.specimen?.id}
+                        specimen={annotation?.specimen}
+                    />
                 )}
 
                 {showForm ? (
