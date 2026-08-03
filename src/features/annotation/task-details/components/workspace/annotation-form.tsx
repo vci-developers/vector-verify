@@ -59,6 +59,7 @@ interface AnnotationFormProps {
     onSubmit: (data: PutAnnotationByIdRequestBody) => void;
     onCancel?: () => void;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function AnnotationForm({
@@ -67,6 +68,7 @@ export default function AnnotationForm({
     onSubmit,
     onCancel,
     isLoading,
+    isError,
 }: AnnotationFormProps) {
     const t = useTranslations('AnnotationWorkspace');
     const [genus, anophelesSpecies] =
@@ -501,6 +503,7 @@ export default function AnnotationForm({
                                         variant="outline"
                                         pressed={field.value}
                                         onPressedChange={handleIsFlaggedChange}
+                                        disabled={isError}
                                         aria-label="Flag for review"
                                         className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
                                     >
@@ -531,7 +534,7 @@ export default function AnnotationForm({
                         )}
                         <Button
                             type="submit"
-                            disabled={isSubmitting || isLoading}
+                            disabled={isSubmitting || isLoading || isError}
                         >
                             {isSubmitting
                                 ? 'Saving...'

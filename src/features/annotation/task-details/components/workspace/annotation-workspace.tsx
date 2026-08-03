@@ -77,6 +77,7 @@ export default function AnnotationWorkspace({
     }
 
     const isLoading = !getAnnotationsResult || isGetAnnotationsPending;
+    const isError = !isLoading && !getAnnotationsResult.ok;
 
     const annotation = getAnnotationsResult?.ok
         ? getAnnotationsResult.data.annotations[0]
@@ -100,9 +101,7 @@ export default function AnnotationWorkspace({
 
     return (
         <div className="space-y-4">
-            {!isLoading && !getAnnotationsResult.ok && (
-                <ErrorBanner message={t('couldNotRetrieve')} />
-            )}
+            {isError && <ErrorBanner message={t('couldNotRetrieve')} />}
             <p className="text-muted-foreground text-sm">
                 {status === 'PENDING'
                     ? t('numRemaining', { count: total ?? '---' })
@@ -110,13 +109,15 @@ export default function AnnotationWorkspace({
             </p>
 
             <div className="grid grid-cols-2 gap-6">
-                {!annotation ? (
-                    <SpecimenImageViewer isLoading />
-                ) : annotation.specimen ? (
+                {annotation?.specimen ? (
                     <SpecimenImageViewer
                         key={annotation.specimen.id}
                         specimen={annotation.specimen}
                     />
+                ) : isLoading ? (
+                    <SpecimenImageViewer isLoading />
+                ) : isError ? (
+                    <SpecimenImageViewer isError />
                 ) : (
                     <p className="text-muted-foreground text-sm">
                         {t('noSpecimenData')}
@@ -139,12 +140,14 @@ export default function AnnotationWorkspace({
                                 : undefined
                         }
                         isLoading={isLoading}
+                        isError={isError}
                     />
                 ) : (
                     <AnnotationReadonlyView
                         annotation={annotation}
                         onEdit={() => setIsEditing(true)}
                         isLoading={isLoading}
+                        isError={isError}
                     />
                 )}
             </div>

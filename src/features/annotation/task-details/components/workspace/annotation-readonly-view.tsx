@@ -14,12 +14,14 @@ interface AnnotationReadonlyViewProps {
     annotation: Annotation | undefined;
     onEdit: () => void;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function AnnotationReadonlyView({
     annotation,
     onEdit,
     isLoading,
+    isError,
 }: AnnotationReadonlyViewProps) {
     const annotationFormArtifacts =
         deserializeAnnotationFormArtifacts(annotation?.artifacts) ?? [];
@@ -41,7 +43,7 @@ export default function AnnotationReadonlyView({
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Annotation</CardTitle>
-                    {!isLoading && (
+                    {!isLoading && !isError && (
                         <Button variant="outline" size="icon" onClick={onEdit}>
                             <Pencil className="h-4 w-4" />
                         </Button>

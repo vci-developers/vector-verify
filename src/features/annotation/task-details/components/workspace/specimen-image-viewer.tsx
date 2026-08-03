@@ -9,13 +9,15 @@ import { MapPin } from 'lucide-react';
 import { Fragment } from 'react';
 
 interface SpecimenImageViewerProps {
-    specimen?: Specimen;
+    specimen?: Specimen | undefined;
     isLoading?: boolean;
+    isError?: boolean;
 }
 
 export default function SpecimenImageViewer({
     specimen,
     isLoading,
+    isError,
 }: SpecimenImageViewerProps) {
     const site = specimen?.session?.site;
 
@@ -24,8 +26,25 @@ export default function SpecimenImageViewer({
             <CardHeader className="pb-2">
                 {isLoading ? (
                     <Fragment>
-                        <Skeleton className="h-5 w-3/5 max-w-64" />
-                        <Skeleton className="h-4 w-2/5 max-w-48" />
+                        <Skeleton
+                            className="h-5 w-3/5 max-w-64"
+                            variant="destructive"
+                        />
+                        <Skeleton
+                            className="h-4 w-2/5 max-w-48"
+                            variant="destructive"
+                        />
+                    </Fragment>
+                ) : isError ? (
+                    <Fragment>
+                        <Skeleton
+                            className="h-5 w-3/5 max-w-64"
+                            variant="destructive"
+                        />
+                        <Skeleton
+                            className="h-4 w-2/5 max-w-48"
+                            variant="destructive"
+                        />
                     </Fragment>
                 ) : (
                     <Fragment>
@@ -45,8 +64,10 @@ export default function SpecimenImageViewer({
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {isLoading || !specimen ? (
+                {isLoading ? (
                     <Skeleton className="aspect-4/3 w-full rounded-lg" />
+                ) : !specimen ? (
+                    <Skeleton className="destructive aspect-4/3 w-full rounded-lg" />
                 ) : (
                     <SpecimenImageCarousel specimen={specimen} />
                 )}
