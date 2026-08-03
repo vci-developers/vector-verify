@@ -6,9 +6,10 @@ import {
 
 export const putSessionByIdRequestSchema = z
     .object({
-        state: sessionStateSchema.optional(),
-        collectionCycleId: z.number().nullable().optional(),
+        state: sessionStateSchema,
+        collectionCycleId: z.number().nullable(),
     })
+    .partial()
     .refine(
         requestBody =>
             requestBody.state !== undefined ||

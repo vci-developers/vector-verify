@@ -10,6 +10,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildSiteFilter } from '@/lib/location/location-query';
 import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { matchesSearch } from '@/features/review/sessions-table/utils/matches-search';
 import {
     sortSessions,
     type SortColumn,
@@ -41,15 +42,6 @@ interface SessionsTableProps {
     locationQueryParam: LocationQueryParam | undefined;
     startMonth: Date;
     endMonth: Date;
-}
-
-function matchesSearch(session: Session, siteName: string, search: string) {
-    if (!search) return true;
-    const needle = search.toLowerCase();
-    return (
-        String(session.sessionId).includes(needle) ||
-        siteName.toLowerCase().includes(needle)
-    );
 }
 
 export default function SessionsTable({
@@ -101,29 +93,24 @@ export default function SessionsTable({
 
     const filteredRows = useMemo(() => {
         if (!getAllSessionsResult?.ok) return [];
-        return getAllSessionsResult.data.sessions
-            .filter(
-                session =>
-                    session.collectionCycleId === null ||
-                    cycleById.has(session.collectionCycleId),
-            )
-            .filter(
-                session =>
-                    selectedCycleIds.length === 0 ||
+        return getAllSessionsResult.data.sessions.filter(
+            session =>
+                (session.collectionCycleId === null ||
+                    cycleById.has(session.collectionCycleId)) &&
+                (selectedCycleIds.length === 0 ||
                     (session.collectionCycleId !== null &&
-                        selectedCycleIds.includes(session.collectionCycleId)),
-            )
-            .filter(
-                session =>
-                    selectedReviewStates.length === 0 ||
+                        selectedCycleIds.includes(
+                            session.collectionCycleId,
+                        ))) &&
+                (selectedReviewStates.length === 0 ||
                     (session.state !== undefined &&
-                        selectedReviewStates.includes(session.state)),
-            )
-            .filter(session => {
-                const siteName =
-                    getSiteDisplayName(siteById.get(session.siteId)) ?? '';
-                return matchesSearch(session, siteName, search);
-            });
+                        selectedReviewStates.includes(session.state))) &&
+                matchesSearch(
+                    session,
+                    getSiteDisplayName(siteById.get(session.siteId)) ?? '',
+                    search,
+                ),
+        );
     }, [
         getAllSessionsResult,
         cycleById,
