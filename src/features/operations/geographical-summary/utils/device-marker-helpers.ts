@@ -23,6 +23,7 @@ export interface DeviceMarker extends GeocodableMarker {
 export function buildDeviceMarkers(
     sites: SiteDeviceActivity[],
     descendantsOfSelectedLocation: Site[],
+    country: string,
 ): DeviceMarker[] {
     const sitesById = new Map(
         descendantsOfSelectedLocation.map(site => [site.siteId, site]),
@@ -68,7 +69,10 @@ export function buildDeviceMarkers(
             id: markerName,
             siteName: markerName,
             parentLocationName: buildParentLocationName(deviceData.markerSite),
-            locationQuery: buildSiteLocationQuery(deviceData.markerSite),
+            locationQuery: buildSiteLocationQuery(
+                deviceData.markerSite,
+                country,
+            ),
             activeDeviceCount: deviceData.activeDeviceCount,
             inactiveDeviceCount: deviceData.inactiveDeviceCount,
         }),

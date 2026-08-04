@@ -18,7 +18,6 @@ const DEFAULT_ZOOM = 2;
 
 interface GeocodedClusterMapProps {
     markers: GeocodableMarker[];
-    country: string;
     selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
@@ -29,7 +28,6 @@ interface GeocodedClusterMapProps {
 
 export default function GeocodedClusterMap({
     markers,
-    country,
     selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
@@ -37,10 +35,8 @@ export default function GeocodedClusterMap({
     loadingLabel,
     renderSidePanel,
 }: GeocodedClusterMapProps) {
-    const { markerIdsToGeocodedPosition, isGeocoding } = useSiteGeocode(
-        markers,
-        country,
-    );
+    const { markerIdsToGeocodedPosition, isGeocoding } =
+        useSiteGeocode(markers);
 
     const markerBounds = useMemo(
         () => buildGeocodedBounds(markers, markerIdsToGeocodedPosition),
@@ -59,7 +55,6 @@ export default function GeocodedClusterMap({
                 >
                     <MapNavigator
                         bounds={markerBounds}
-                        country={country}
                         selectedLocations={selectedLocations}
                     />
                     <TileLayer
