@@ -122,7 +122,7 @@ export default function OperationsSpecimenComposition({
                 </MultiSelect>
             </div>
             {isLoading ? (
-                <SkeletonList count={3} className="h-72" width="full" />
+                <SkeletonList count={3} height="xxl" width="full" />
             ) : validSelectedSpecies.length === 0 ? (
                 <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
             ) : (

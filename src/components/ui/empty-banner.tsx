@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { cn } from '@/utils/cn';
 
 interface EmptyBannerProps {
     message: string;
