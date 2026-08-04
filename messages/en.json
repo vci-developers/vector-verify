@@ -67,8 +67,8 @@
         "legendInactive": "All devices inactive"
     },
     "OperationsSpecimenComposition": {
-        "monthlySpecimenCountsLoading": "LOADING...",
-        "monthlySpecimenCountsError": "ERROR: ",
+        "monthlySpecimenCountsError": "There was a problem fetching the specimen counts. Please try again later or contact support.",
+        "monthlySpecimenCountsEmpty": "No specimens found for this date range and species filter.",
         "filterBySpecies": "Filter by Species",
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",

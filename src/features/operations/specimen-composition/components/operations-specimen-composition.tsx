@@ -23,6 +23,8 @@ import { useMemo } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import { SkeletonList } from '@/components/ui/skeleton-list';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -72,11 +74,10 @@ export default function OperationsSpecimenComposition({
         return species.filter(speciesName => validOptions.has(speciesName));
     }, [selectedSpecies, speciesOptions]);
 
-    if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>{t('monthlySpecimenCountsLoading')}</h1>;
-    }
+    const isLoading =
+        isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult;
 
-    if (!getMonthlySpecimensCountResult.ok) {
+    if (!isLoading && !getMonthlySpecimensCountResult.ok) {
         return (
             <h1>
                 {t('monthlySpecimenCountsError')}
@@ -85,7 +86,9 @@ export default function OperationsSpecimenComposition({
         );
     }
 
-    const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;
+    const monthlySpecimenCounts = getMonthlySpecimensCountResult?.ok
+        ? getMonthlySpecimensCountResult.data.data
+        : undefined;
 
     return (
         <div className="space-y-6">
@@ -99,7 +102,7 @@ export default function OperationsSpecimenComposition({
                         setFilters({ selectedSpecies: species })
                     }
                 >
-                    <MultiSelectTrigger>
+                    <MultiSelectTrigger disabled={isLoading}>
                         <MultiSelectValue placeholder={t('selectSpecies')} />
                     </MultiSelectTrigger>
                     <MultiSelectContent
@@ -118,35 +121,43 @@ export default function OperationsSpecimenComposition({
                     </MultiSelectContent>
                 </MultiSelect>
             </div>
-            {COMPOSITION_SECTIONS.map(
-                ({ specimenClassificationAxis, title }) => {
-                    const specimenCountsByClass = sumSpecimenCountsByClass(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenCountsByMonth = groupSpecimenCountsByMonth(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenChartConfig = buildSpecimenChartConfig(
-                        specimenClassificationAxis,
-                        specimenCountsByClass.map(
-                            ({ specimenClass }) => specimenClass,
-                        ),
-                    );
+            {isLoading ? (
+                <SkeletonList count={3} className="h-72" width="full" />
+            ) : validSelectedSpecies.length === 0 ? (
+                <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
+            ) : (
+                monthlySpecimenCounts &&
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => {
+                        const specimenCountsByClass = sumSpecimenCountsByClass(
+                            specimenClassificationAxis,
+                            monthlySpecimenCounts,
+                            validSelectedSpecies,
+                        );
+                        const specimenCountsByMonth =
+                            groupSpecimenCountsByMonth(
+                                specimenClassificationAxis,
+                                monthlySpecimenCounts,
+                                validSelectedSpecies,
+                            );
+                        const specimenChartConfig = buildSpecimenChartConfig(
+                            specimenClassificationAxis,
+                            specimenCountsByClass.map(
+                                ({ specimenClass }) => specimenClass,
+                            ),
+                        );
 
-                    return (
-                        <CompositionChartPair
-                            key={specimenClassificationAxis}
-                            title={title}
-                            specimenCountsByClass={specimenCountsByClass}
-                            specimenCountsByMonth={specimenCountsByMonth}
-                            specimenChartConfig={specimenChartConfig}
-                        />
-                    );
-                },
+                        return (
+                            <CompositionChartPair
+                                key={specimenClassificationAxis}
+                                title={title}
+                                specimenCountsByClass={specimenCountsByClass}
+                                specimenCountsByMonth={specimenCountsByMonth}
+                                specimenChartConfig={specimenChartConfig}
+                            />
+                        );
+                    },
+                )
             )}
         </div>
     );
