@@ -1,12 +1,10 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { fetchAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { usePutSessionById } from '@/api/session/hooks/use-put-session-by-id';
-import { sessionKeys } from '@/api/session/session-keys';
 import type { Session } from '@/api/session/validation/session-schema';
 import { accumulateSessionSummary } from '@/features/review/utils/accumulate-session-summary';
 import {
@@ -42,11 +40,25 @@ interface CycleReassignment {
 
 export function useReassignSessionCycle() {
     const t = useTranslations('ReviewSessionsTable');
-    const queryClient = useQueryClient();
     const { mutateAsync: putSessionByIdAsync } = usePutSessionById();
     const [pendingReassignment, setPendingReassignment] =
         useState<CycleReassignment | null>(null);
     const [isReassigning, setIsReassigning] = useState(false);
+    const [sessionReassignmentRequest, setSessionReassignmentRequest] =
+        useState<{
+            session: Session;
+            newCollectionCycleId: number;
+        } | null>(null);
+
+    const { data: unitSessionsResult, isFetching: isUnitSessionsFetching } =
+        useGetAllSessions(
+            {
+                siteIds: sessionReassignmentRequest
+                    ? [sessionReassignmentRequest.session.siteId]
+                    : [],
+            },
+            { enabled: sessionReassignmentRequest !== null },
+        );
 
     const performReassignment = useCallback(
         async ({
@@ -123,53 +135,62 @@ export function useReassignSessionCycle() {
     );
 
     const requestReassignment = useCallback(
-        async (session: Session, newCollectionCycleId: number) => {
-            const unitSessionsResult = await queryClient.fetchQuery({
-                queryKey: sessionKeys.allSessions({
-                    siteIds: [session.siteId],
-                }),
-                queryFn: () => fetchAllSessions({ siteIds: [session.siteId] }),
-            });
-
-            if (!unitSessionsResult.ok) {
-                toast.error(t('reassignError'));
-                return;
-            }
-
-            const unitSessions = unitSessionsResult.data.sessions;
-
-            const previousUnitWasFullyReviewed = isSiteFullyReviewed(
-                getReviewUnitSessionSummary(
-                    unitSessions,
-                    session.siteId,
-                    session.collectionCycleId,
-                ),
-            );
-            const newUnitWasFullyReviewed = isSiteFullyReviewed(
-                getReviewUnitSessionSummary(
-                    unitSessions,
-                    session.siteId,
-                    newCollectionCycleId,
-                ),
-            );
-
-            const reassignment: CycleReassignment = {
-                session,
-                newCollectionCycleId,
-                unitSessions,
-                previousUnitWasFullyReviewed,
-                newUnitWasFullyReviewed,
-            };
-
-            if (!previousUnitWasFullyReviewed && !newUnitWasFullyReviewed) {
-                await performReassignment(reassignment);
-                return;
-            }
-
-            setPendingReassignment(reassignment);
+        (session: Session, newCollectionCycleId: number) => {
+            setSessionReassignmentRequest({ session, newCollectionCycleId });
         },
-        [queryClient, t, performReassignment],
+        [],
     );
+
+    useEffect(() => {
+        if (!sessionReassignmentRequest) return;
+        if (isUnitSessionsFetching || !unitSessionsResult) return;
+
+        const { session, newCollectionCycleId } = sessionReassignmentRequest;
+        setSessionReassignmentRequest(null);
+
+        if (!unitSessionsResult.ok) {
+            toast.error(t('reassignError'));
+            return;
+        }
+
+        const unitSessions = unitSessionsResult.data.sessions;
+
+        const previousUnitWasFullyReviewed = isSiteFullyReviewed(
+            getReviewUnitSessionSummary(
+                unitSessions,
+                session.siteId,
+                session.collectionCycleId,
+            ),
+        );
+        const newUnitWasFullyReviewed = isSiteFullyReviewed(
+            getReviewUnitSessionSummary(
+                unitSessions,
+                session.siteId,
+                newCollectionCycleId,
+            ),
+        );
+
+        const reassignment: CycleReassignment = {
+            session,
+            newCollectionCycleId,
+            unitSessions,
+            previousUnitWasFullyReviewed,
+            newUnitWasFullyReviewed,
+        };
+
+        if (!previousUnitWasFullyReviewed && !newUnitWasFullyReviewed) {
+            void performReassignment(reassignment);
+            return;
+        }
+
+        setPendingReassignment(reassignment);
+    }, [
+        sessionReassignmentRequest,
+        isUnitSessionsFetching,
+        unitSessionsResult,
+        t,
+        performReassignment,
+    ]);
 
     const cancelReassignment = useCallback(() => {
         setPendingReassignment(null);
@@ -187,6 +208,6 @@ export function useReassignSessionCycle() {
         isConfirmDialogOpen: pendingReassignment !== null,
         cancelReassignment,
         confirmReassignment,
-        isReassigning,
+        isReassigning: isReassigning || sessionReassignmentRequest !== null,
     };
 }
