@@ -224,7 +224,6 @@ export default function SessionsTable({
                 <p className="text-muted-foreground py-12 text-center text-sm">
                     {t('noSessions')}
                 </p>
-                {reassignmentDialog}
             </div>
         );
     }
