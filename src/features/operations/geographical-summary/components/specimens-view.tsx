@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import type { Site } from '@/api/site/validation/site-schema';
 import {
@@ -45,7 +45,7 @@ export default function SpecimensView({
     if (!isPending && markers.length > 0) siteMapMounted.current = true;
 
     return (
-        <>
+        <Fragment>
             <Card className="border-border/50 w-fit">
                 <CardContent className="flex items-center gap-3 px-4">
                     <p className="text-muted-foreground text-xs">
@@ -152,6 +152,6 @@ export default function SpecimensView({
                     </div>
                 </div>
             </div>
-        </>
+        </Fragment>
     );
 }
