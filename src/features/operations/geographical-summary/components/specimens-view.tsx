@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import type { Site } from '@/api/site/validation/site-schema';
@@ -32,6 +33,7 @@ export default function SpecimensView({
     selectedMarkerId,
     setSelectedMarkerId,
 }: SpecimensViewProps) {
+    const t = useTranslations('OperationsGeographicalSummary');
     const { markers, totalSites, isPending, isError } = useSiteMarkers({
         siteIds,
         descendantsOfSelectedLocations,
@@ -47,7 +49,7 @@ export default function SpecimensView({
             <Card className="border-border/50 w-fit">
                 <CardContent className="flex items-center gap-3 px-4">
                     <p className="text-muted-foreground text-xs">
-                        Unique Sites
+                        {t('uniqueSites')}
                     </p>
                     {isPending ? (
                         <Skeleton className="h-5 w-8" />
@@ -70,12 +72,11 @@ export default function SpecimensView({
                         />
                     ) : isError ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                            Failed to load session data. Check the console for
-                            details.
+                            {t('specimenDataError')}
                         </div>
                     ) : !isPending && markers.length === 0 ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                            No site data found for the selected filters.
+                            {t('noSpecimenData')}
                         </div>
                     ) : (
                         <Skeleton className="h-full w-full rounded-md" />
@@ -86,19 +87,19 @@ export default function SpecimensView({
             <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
                 <div className="space-y-1.5">
                     <p className="text-foreground font-medium">
-                        Each marker represents a collection site
+                        {t('specimenLegendMarkerTitle')}
                     </p>
-                    <p>
-                        Positioned by geocoded location name. Hover for details.
-                    </p>
-                </div>
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">Marker Size</p>
-                    <p>Scaled by total specimen count</p>
+                    <p>{t('specimenLegendMarkerSubtitle')}</p>
                 </div>
                 <div className="space-y-1.5">
                     <p className="text-foreground font-medium">
-                        Marker Color — Anopheles Count
+                        {t('specimenLegendSizeTitle')}
+                    </p>
+                    <p>{t('specimenLegendSizeSubtitle')}</p>
+                </div>
+                <div className="space-y-1.5">
+                    <p className="text-foreground font-medium">
+                        {t('specimenLegendColorTitle')}
                     </p>
                     <div className="flex flex-wrap gap-3">
                         <span className="flex items-center gap-1.5">
@@ -108,7 +109,7 @@ export default function SpecimensView({
                                     backgroundColor: ANOPHELES_COLOR.none,
                                 }}
                             />
-                            0 / No data
+                            {t('anophelesNoData')}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span

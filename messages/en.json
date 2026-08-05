@@ -43,8 +43,11 @@
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
         "devices": "Devices",
+        "uniqueSites": "Unique Sites",
         "noDeviceActivity": "No device activity to display.",
         "deviceActivityError": "Failed to load device activity. Check the console for details.",
+        "specimenDataError": "Failed to load session data. Check the console for details.",
+        "noSpecimenData": "No site data found for the selected filters.",
         "active": "Active",
         "inactive": "Inactive",
         "unknownLocation": "Unknown location",
@@ -64,7 +67,13 @@
         "legendSizeSubtitle": "Scaled by active device count",
         "legendColorTitle": "Marker Color — Site Health",
         "legendActive": "Has an active device this cycle",
-        "legendInactive": "All devices inactive"
+        "legendInactive": "All devices inactive",
+        "specimenLegendMarkerTitle": "Each marker represents a collection site",
+        "specimenLegendMarkerSubtitle": "Positioned by geocoded location name. Hover for details.",
+        "specimenLegendSizeTitle": "Marker Size",
+        "specimenLegendSizeSubtitle": "Scaled by total specimen count",
+        "specimenLegendColorTitle": "Marker Color — Anopheles Count",
+        "anophelesNoData": "0 / No data"
     },
     "OperationsSpecimenComposition": {
         "monthlySpecimenCountsLoading": "LOADING...",
