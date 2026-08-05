@@ -77,20 +77,19 @@ batch, the selected range (as a unit)
 forms belong to a program.
 
 **Program Country**: The `country` field on a **Program** (`GET /programs`),
-resolved by matching `programId`. Consumed **only** by the Geographical
-Summary tab's map subtree — no other Operations tab, and no Review feature,
-reads it. It does two independent jobs there: (1) for **legacy** Sites
-(`isLegacySite`, flat district/village schema — see **Site**), it is appended
-as literal text into the Nominatim geocoding query string
-(`buildLegacyLocationQuery`); hierarchical Sites' query text never includes
-it. (2) For **every** Site regardless of legacy/hierarchical, it is converted
-to an ISO alpha-2 country code and passed to Nominatim as a `countrycodes`
-restriction (`MapNavigator`, `useSiteGeocode`), narrowing every geocode
-search. Must never be hardcoded (the bug that motivated this entry: the
-geocoding query text was hardcoded to `'Uganda'`, silently wrong for every
-other program). Threaded via a scoped `CountryContext`
-(`geographical-summary/context/country-context.tsx`) rather than props, since
-it passes through map wrapper components (`SiteMap`, `DeviceMap`,
+resolved by matching `programId`. Consumed **only** by the Geographical Summary
+tab's map subtree — no other Operations tab, and no Review feature, reads it. It
+does two independent jobs there: (1) for **legacy** Sites (`isLegacySite`, flat
+district/village schema — see **Site**), it is appended as literal text into the
+Nominatim geocoding query string (`buildLegacyLocationQuery`); hierarchical
+Sites' query text never includes it. (2) For **every** Site regardless of
+legacy/hierarchical, it is converted to an ISO alpha-2 country code and passed
+to Nominatim as a `countrycodes` restriction (`MapNavigator`, `useSiteGeocode`),
+narrowing every geocode search. Must never be hardcoded (the bug that motivated
+this entry: the geocoding query text was hardcoded to `'Uganda'`, silently wrong
+for every other program). Threaded via a scoped `CountryContext`
+(`geographical-summary/context/country-context.tsx`) rather than props, since it
+passes through map wrapper components (`SiteMap`, `DeviceMap`,
 `GeocodedClusterMap`) that don't otherwise use it — see ADR-0007. _Avoid_:
 country (bare, ambiguous with the unrelated `country: 'Uganda'` filter param
 used elsewhere to detect legacy/Uganda programs, e.g.
