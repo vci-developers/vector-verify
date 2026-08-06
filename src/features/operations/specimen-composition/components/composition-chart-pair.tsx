@@ -12,6 +12,8 @@ import {
 import {
     Area,
     AreaChart,
+    Bar,
+    BarChart,
     CartesianGrid,
     Label,
     Pie,
@@ -19,9 +21,13 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { Fragment } from 'react/jsx-runtime';
+
+type ChartType = 'bar' | 'line';
 
 interface CompositionChartPairProps {
     title: string;
+    chartType: ChartType;
     specimenCountsByClass: {
         specimenClass: string;
         specimenCount: number;
@@ -32,6 +38,7 @@ interface CompositionChartPairProps {
 
 export default function CompositionChartPair({
     title,
+    chartType,
     specimenCountsByClass,
     specimenCountsByMonth,
     specimenChartConfig,
@@ -40,6 +47,52 @@ export default function CompositionChartPair({
     const totalSpecimenCount = specimenCountsByClass.reduce(
         (sum, { specimenCount }) => sum + specimenCount,
         0,
+    );
+
+    const chartMargins = {
+        top: 8,
+        right: 12,
+        bottom: 32,
+        left: 12,
+    };
+
+    const chartAxes = (
+        <Fragment>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" tickLine={false} axisLine={false}>
+                <Label
+                    value="Month"
+                    position="bottom"
+                    className="fill-muted-foreground text-sm font-bold"
+                />
+            </XAxis>
+            <YAxis tickLine={false} axisLine={false} width={44}>
+                <Label
+                    value="Specimen Count"
+                    angle={-90}
+                    position="left"
+                    className="fill-muted-foreground text-sm font-bold"
+                    style={{ textAnchor: 'middle' }}
+                />
+            </YAxis>
+            <ChartTooltip
+                content={
+                    <ChartTooltipContent
+                        className="min-w-45"
+                        indicator="line"
+                    />
+                }
+            />
+        </Fragment>
+    );
+
+    const chartLegend = (
+        <ChartLegend
+            wrapperStyle={{ paddingTop: '1rem' }}
+            content={
+                <ChartLegendContent className="text-muted-foreground flex-wrap" />
+            }
+        />
     );
 
     return (
@@ -125,76 +178,65 @@ export default function CompositionChartPair({
                             config={specimenChartConfig}
                             className="h-full w-full"
                         >
-                            <AreaChart
-                                data={specimenCountsByMonth}
-                                margin={{
-                                    top: 8,
-                                    right: 12,
-                                    bottom: 32,
-                                    left: 12,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="month"
-                                    tickLine={false}
-                                    axisLine={false}
+                            {chartType === 'bar' ? (
+                                <BarChart
+                                    data={specimenCountsByMonth}
+                                    margin={chartMargins}
                                 >
-                                    <Label
-                                        value="Month"
-                                        position="bottom"
-                                        className="fill-muted-foreground text-sm font-bold"
-                                    />
-                                </XAxis>
-                                <YAxis
-                                    tickLine={false}
-                                    axisLine={false}
-                                    width={44}
-                                >
-                                    <Label
-                                        value="Specimen Count"
-                                        angle={-90}
-                                        position="left"
-                                        className="fill-muted-foreground text-sm font-bold"
-                                        style={{ textAnchor: 'middle' }}
-                                    />
-                                </YAxis>
-                                <ChartTooltip
-                                    content={
-                                        <ChartTooltipContent
-                                            className="min-w-45"
-                                            indicator="line"
+                                    {chartAxes}
+                                    {specimenClasses.map(specimenClass => (
+                                        <Bar
+                                            key={specimenClass}
+                                            dataKey={specimenClass}
+                                            stackId="specimens"
+                                            fill={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            stroke={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            fillOpacity={0.75}
+                                            strokeWidth={1}
                                         />
-                                    }
-                                />
-                                {specimenClasses.map(specimenClass => (
-                                    <Area
-                                        key={specimenClass}
-                                        type="monotone"
-                                        dataKey={specimenClass}
-                                        fill={
-                                            specimenChartConfig[specimenClass]
-                                                ?.color
-                                        }
-                                        stroke={
-                                            specimenChartConfig[specimenClass]
-                                                ?.color
-                                        }
-                                        fillOpacity={0.2}
-                                        strokeWidth={3}
-                                        dot={{
-                                            r: 2,
-                                            fillOpacity: 1,
-                                        }}
-                                    />
-                                ))}
-                                <ChartLegend
-                                    wrapperStyle={{ paddingTop: '1rem' }}
-                                    content={
-                                        <ChartLegendContent className="text-muted-foreground flex-wrap" />
-                                    }
-                                />
-                            </AreaChart>
+                                    ))}
+                                    {chartLegend}
+                                </BarChart>
+                            ) : (
+                                <AreaChart
+                                    data={specimenCountsByMonth}
+                                    margin={chartMargins}
+                                >
+                                    {chartAxes}
+                                    {specimenClasses.map(specimenClass => (
+                                        <Area
+                                            key={specimenClass}
+                                            type="monotone"
+                                            dataKey={specimenClass}
+                                            fill={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            stroke={
+                                                specimenChartConfig[
+                                                    specimenClass
+                                                ]?.color
+                                            }
+                                            fillOpacity={0.2}
+                                            strokeWidth={3}
+                                            dot={{
+                                                r: 2,
+                                                fillOpacity: 1,
+                                            }}
+                                        />
+                                    ))}
+                                    {chartLegend}
+                                </AreaChart>
+                            )}
                         </ChartContainer>
                     </div>
                 </div>

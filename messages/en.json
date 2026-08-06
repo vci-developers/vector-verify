@@ -72,7 +72,9 @@
         "filterBySpecies": "Filter by Species",
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
-        "noSpeciesFound": "No species found."
+        "noSpeciesFound": "No species found.",
+        "barChart": "Bar chart",
+        "lineChart": "Line chart"
     },
     "OperationsAIPerformance": {
         "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
