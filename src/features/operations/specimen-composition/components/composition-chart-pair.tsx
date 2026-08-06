@@ -185,7 +185,7 @@ export default function CompositionChartPair({
                     </div>
                     <div className="h-72 w-full min-w-0 flex-1">
                         {isLoading ? (
-                            <Skeleton className="h-full w-full" />
+                            <Skeleton className="h-64 w-full" />
                         ) : (
                             <ChartContainer
                                 config={specimenChartConfig}
