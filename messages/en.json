@@ -75,6 +75,11 @@
         "noSpeciesFound": "No species found."
     },
     "OperationsAIPerformance": {
+        "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
+        "coverage": "Coverage",
+        "reviewedOfTotal": "{count} reviewed / {total} specimens",
+        "reviewedSpecimens": "Reviewed Specimens",
+        "annotatedAndFlagged": "{annotated} annotated and {flagged} flagged",
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
         "noConfusionMatrixData": "No verified {category} comparisons in this date range; there are no annotations to compare with VectorCam's predictions.",

@@ -7,6 +7,7 @@ import SpecimenConfusionMatrix from './specimen-confusion-matrix';
 import { Info } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 
 interface OperationsAiPerformanceProps {
     siteIds: number[];
@@ -19,6 +20,7 @@ export default function OperationsAiPerformance({
     startDate,
     endDate,
 }: OperationsAiPerformanceProps) {
+    const t = useTranslations('OperationsAIPerformance');
     const annotationsSummaryQueryParams: GetAnnotationsSummaryQueryParams = {
         siteIds,
         startDate,
@@ -54,7 +56,7 @@ export default function OperationsAiPerformance({
     const totalSpecimens = annotationsSummary?.total || 0;
 
     const reviewedSpecimensCoverage =
-        totalSpecimens && reviewedSpecimens && totalSpecimens > 0
+        totalSpecimens && totalSpecimens > 0
             ? (reviewedSpecimens / totalSpecimens) * 100
             : null;
 
@@ -62,10 +64,7 @@ export default function OperationsAiPerformance({
         <div className="space-y-4">
             <div className="border-accent bg-accent/40 text-accent-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-sm">
                 <Info className="h-4 w-4" />
-                <span>
-                    Coverage reflects reviewed specimens for the selected
-                    location(s) where review means annotated or flagged.
-                </span>
+                <span>{t('coverageReflects')}</span>
             </div>
 
             <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
@@ -73,7 +72,7 @@ export default function OperationsAiPerformance({
                     <Card className="border-success/40 bg-success/5 gap-0 py-0">
                         <CardContent className="p-4">
                             <p className="text-muted-foreground text-sm">
-                                Coverage
+                                {t('coverage')}
                             </p>
                             {isLoading ? (
                                 <div className="space-y-2 py-2">
@@ -89,10 +88,10 @@ export default function OperationsAiPerformance({
                                     </p>
 
                                     <p className="text-muted-foreground mt-2 text-xs">
-                                        {reviewedSpecimens.toLocaleString()}{' '}
-                                        reviewed /{' '}
-                                        {totalSpecimens.toLocaleString()} total
-                                        specimens
+                                        {t('reviewedOfTotal', {
+                                            count: reviewedSpecimens.toLocaleString(),
+                                            total: totalSpecimens.toLocaleString(),
+                                        })}
                                     </p>
                                 </Fragment>
                             )}
@@ -102,7 +101,7 @@ export default function OperationsAiPerformance({
                     <Card className="border-border bg-card gap-0 py-0">
                         <CardContent className="p-4">
                             <p className="text-muted-foreground text-sm">
-                                Reviewed Specimens
+                                {t('reviewedSpecimens')}
                             </p>
                             {isLoading ? (
                                 <div className="space-y-2 py-2">
@@ -116,12 +115,14 @@ export default function OperationsAiPerformance({
                                             '—'}
                                     </p>
                                     <p className="text-muted-foreground mt-2 text-xs">
-                                        {annotatedSpecimens?.toLocaleString() ||
-                                            '—'}{' '}
-                                        annotated and{' '}
-                                        {flaggedSpecimens?.toLocaleString() ||
-                                            '—'}{' '}
-                                        flagged
+                                        {t('annotatedAndFlagged', {
+                                            annotated:
+                                                annotatedSpecimens?.toLocaleString() ||
+                                                '—',
+                                            flagged:
+                                                flaggedSpecimens?.toLocaleString() ||
+                                                '—',
+                                        })}
                                     </p>
                                 </Fragment>
                             )}
