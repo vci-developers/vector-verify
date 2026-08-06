@@ -10,11 +10,7 @@ interface CountryProviderProps {
 }
 
 export function CountryProvider({ value, children }: CountryProviderProps) {
-    return (
-        <CountryContext.Provider value={value}>
-            {children}
-        </CountryContext.Provider>
-    );
+    return <CountryContext value={value}>{children}</CountryContext>;
 }
 
 export function useCountry(): string {

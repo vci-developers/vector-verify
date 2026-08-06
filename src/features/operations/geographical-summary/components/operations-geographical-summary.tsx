@@ -1,6 +1,7 @@
 'use client';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
@@ -49,53 +50,73 @@ export default function OperationsGeographicalSummary({
     const [{ selectedLocations }] = useOperationsFilters();
     const [geographicalView, setGeographicalView] = useGeographicalView();
 
+    const tabs = (
+        <Tabs
+            value={geographicalView}
+            onValueChange={value =>
+                setGeographicalView(value as GeographicalView)
+            }
+        >
+            <TabsList className="bg-muted/50 rounded-full p-1">
+                {GEOGRAPHICAL_VIEWS.map(view => (
+                    <TabsTrigger
+                        key={view}
+                        value={view}
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                    >
+                        {t(view)}
+                    </TabsTrigger>
+                ))}
+            </TabsList>
+        </Tabs>
+    );
+
+    if (isProgramsPending) {
+        return (
+            <div className="mt-4 space-y-3">
+                {tabs}
+                <Skeleton className="h-125 w-full rounded-md" />
+            </div>
+        );
+    }
+
+    if (isProgramsError || !country) {
+        return (
+            <div className="mt-4 space-y-3">
+                {tabs}
+                <p className="text-destructive text-sm">{t('countryError')}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="mt-4 space-y-3">
-            <Tabs
-                value={geographicalView}
-                onValueChange={value =>
-                    setGeographicalView(value as GeographicalView)
-                }
-            >
-                <TabsList className="bg-muted/50 rounded-full p-1">
-                    {GEOGRAPHICAL_VIEWS.map(view => (
-                        <TabsTrigger
-                            key={view}
-                            value={view}
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
-                        >
-                            {t(view)}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
+            {tabs}
 
-            {!isProgramsPending && !isProgramsError && country && (
-                <CountryProvider value={country}>
-                    {geographicalView === 'devices' ? (
-                        <DeviceView
-                            programId={programId}
-                            siteIds={siteIds}
-                            selectedLocations={selectedLocations}
-                            descendantsOfSelectedLocations={
-                                descendantsOfSelectedLocations
-                            }
-                        />
-                    ) : (
-                        <SpecimensView
-                            siteIds={siteIds}
-                            descendantsOfSelectedLocations={
-                                descendantsOfSelectedLocations
-                            }
-                            startDate={startDate}
-                            endDate={endDate}
-                            selectedLocations={selectedLocations}
-                            selectedMarkerId={selectedMarkerId}
-                            setSelectedMarkerId={setSelectedMarkerId}
-                        />
-                    )}
-                </CountryProvider>
-            )}
+            <CountryProvider value={country}>
+                {geographicalView === 'devices' ? (
+                    <DeviceView
+                        programId={programId}
+                        siteIds={siteIds}
+                        selectedLocations={selectedLocations}
+                        descendantsOfSelectedLocations={
+                            descendantsOfSelectedLocations
+                        }
+                    />
+                ) : (
+                    <SpecimensView
+                        siteIds={siteIds}
+                        descendantsOfSelectedLocations={
+                            descendantsOfSelectedLocations
+                        }
+                        startDate={startDate}
+                        endDate={endDate}
+                        selectedLocations={selectedLocations}
+                        selectedMarkerId={selectedMarkerId}
+                        setSelectedMarkerId={setSelectedMarkerId}
+                    />
+                )}
+            </CountryProvider>
         </div>
     );
 }
