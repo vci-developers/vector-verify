@@ -23,7 +23,6 @@ import { useMemo, useState } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
-import { SkeletonList } from '@/components/ui/skeleton-list';
 import EmptyBanner from '@/components/ui/empty-banner';
 import { BarChart3, LineChart } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
