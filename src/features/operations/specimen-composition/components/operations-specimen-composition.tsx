@@ -106,7 +106,7 @@ export default function OperationsSpecimenComposition({
                             setFilters({ selectedSpecies: species })
                         }
                     >
-                        <MultiSelectTrigger>
+                        <MultiSelectTrigger className="min-w-0 flex-1">
                             <MultiSelectValue
                                 placeholder={t('selectSpecies')}
                             />
@@ -137,6 +137,7 @@ export default function OperationsSpecimenComposition({
                         onValueChange={(next: ChartType | '') => {
                             if (next) setChartType(next);
                         }}
+                        className="shrink-0"
                     >
                         <ToggleGroupItem value="bar">
                             <BarChart3 />

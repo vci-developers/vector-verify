@@ -74,7 +74,8 @@
         "searchSpecies": "Search species...",
         "noSpeciesFound": "No species found.",
         "barChart": "Bar chart",
-        "lineChart": "Line chart"
+        "lineChart": "Line chart",
+        "noSpecimenData": "No specimen data for the selected filters."
     },
     "OperationsAIPerformance": {
         "accuracy": "Accuracy",
