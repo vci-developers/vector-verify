@@ -154,7 +154,19 @@ export default function OperationsSpecimenComposition({
                 </div>
             </div>
             {isLoading ? (
-                <SkeletonList count={3} height="xxl" width="full" />
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => (
+                        <CompositionChartPair
+                            key={specimenClassificationAxis}
+                            title={title}
+                            chartType={chartType}
+                            specimenCountsByClass={[]}
+                            specimenCountsByMonth={[]}
+                            specimenChartConfig={{}}
+                            isLoading={isLoading}
+                        />
+                    ),
+                )
             ) : validSelectedSpecies.length === 0 ? (
                 <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
             ) : (
@@ -187,6 +199,7 @@ export default function OperationsSpecimenComposition({
                                 specimenCountsByClass={specimenCountsByClass}
                                 specimenCountsByMonth={specimenCountsByMonth}
                                 specimenChartConfig={specimenChartConfig}
+                                isLoading={isLoading}
                             />
                         );
                     },
