@@ -86,7 +86,9 @@ export default function AnnotationWorkspace({
         ? getAnnotationsResult.data.total
         : undefined;
 
-    if (!isLoading && (!annotation || total === 0)) {
+    const isEmpty = !isLoading && !isError && (!annotation || total === 0);
+
+    if (isEmpty) {
         return (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                 <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />

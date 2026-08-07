@@ -211,6 +211,7 @@
         "empty": "No active-user snapshots in this window."
     },
     "Annotation": {
+        "noAnnotationTasksFound": "No annotation tasks found.",
         "couldNotRetrieve": "Could not retrieve annotation tasks. Please try again later or contact support."
     },
     "AnnotationWorkspace": {

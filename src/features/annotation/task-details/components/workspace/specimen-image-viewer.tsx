@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 import { Fragment } from 'react';
 
 interface SpecimenImageViewerProps {
-    specimen?: Specimen | undefined;
+    specimen?: Specimen;
     isLoading?: boolean;
     isError?: boolean;
 }
