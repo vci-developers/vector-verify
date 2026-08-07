@@ -108,7 +108,10 @@ export default function OperationsSpecimenComposition({
                             setFilters({ selectedSpecies: species })
                         }
                     >
-                        <MultiSelectTrigger disabled={isLoading}>
+                        <MultiSelectTrigger
+                            disabled={isLoading}
+                            className="min-w-0 flex-1"
+                        >
                             <MultiSelectValue
                                 placeholder={t('selectSpecies')}
                             />
@@ -140,6 +143,7 @@ export default function OperationsSpecimenComposition({
                             if (next) setChartType(next);
                         }}
                         disabled={isLoading}
+                        className="shrink-0"
                     >
                         <ToggleGroupItem value="bar">
                             <BarChart3 />

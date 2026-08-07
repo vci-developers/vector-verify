@@ -4,16 +4,15 @@ import { geocodeKeys } from '@/api/geocode/geocode-keys';
 import { fetchGeocode } from '@/api/geocode/hooks/use-get-geocode';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Geocode } from '@/api/geocode/validation/geocode-schema';
 import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 
-export function useSiteGeocode(
-    markers: GeocodableMarker[],
-    country: string,
-): {
+export function useSiteGeocode(markers: GeocodableMarker[]): {
     markerIdsToGeocodedPosition: Map<string, Geocode>;
     isGeocoding: boolean;
 } {
+    const country = useCountry();
     const queryClient = useQueryClient();
     const [markerIdsToGeocodedPosition, setMarkerIdsToGeocodedPosition] =
         useState<Map<string, Geocode>>(new Map());

@@ -43,8 +43,12 @@
     "OperationsGeographicalSummary": {
         "specimens": "Specimens",
         "devices": "Devices",
+        "uniqueSites": "Unique Sites",
         "noDeviceActivity": "No device activity to display.",
         "deviceActivityError": "Failed to load device activity. Check the console for details.",
+        "countryError": "Failed to load country for this program.",
+        "specimenDataError": "Failed to load session data.",
+        "noSpecimenData": "No site data found for the selected filters.",
         "active": "Active",
         "inactive": "Inactive",
         "unknownLocation": "Unknown location",
@@ -64,7 +68,13 @@
         "legendSizeSubtitle": "Scaled by active device count",
         "legendColorTitle": "Marker Color — Site Health",
         "legendActive": "Has an active device this cycle",
-        "legendInactive": "All devices inactive"
+        "legendInactive": "All devices inactive",
+        "specimenLegendMarkerTitle": "Each marker represents a collection site",
+        "specimenLegendMarkerSubtitle": "Positioned by geocoded location name. Hover for details.",
+        "specimenLegendSizeTitle": "Marker Size",
+        "specimenLegendSizeSubtitle": "Scaled by total specimen count",
+        "specimenLegendColorTitle": "Marker Color — Anopheles Count",
+        "anophelesNoData": "0 / No data"
     },
     "OperationsSpecimenComposition": {
         "monthlySpecimenCountsError": "There was a problem fetching the specimen counts. Please try again later or contact support.",
@@ -74,7 +84,8 @@
         "searchSpecies": "Search species...",
         "noSpeciesFound": "No species found.",
         "barChart": "Bar chart",
-        "lineChart": "Line chart"
+        "lineChart": "Line chart",
+        "noSpecimenData": "No specimen data for the selected filters."
     },
     "OperationsAIPerformance": {
         "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
