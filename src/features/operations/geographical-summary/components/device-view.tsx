@@ -57,33 +57,11 @@ export default function DeviceView({
         );
     }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
-    if (isPending) {
-        return (
-            <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-13 w-28" />
-                    <Skeleton className="h-13 w-28" />
-                </div>
-                <Skeleton className="h-125 w-full rounded-md" />
-            </div>
-        );
-    }
-
     if (isError) {
         return (
             <Card className="border-border/50 p-0">
                 <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
                     {t('deviceActivityError')}
-                </CardContent>
-            </Card>
-        );
-    }
-
-    if (!isPending && (!deviceMarkers || deviceMarkers.length === 0)) {
-        return (
-            <Card className="border-border/50 p-0">
-                <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
-                    {t('noDeviceActivity')}
                 </CardContent>
             </Card>
         );
