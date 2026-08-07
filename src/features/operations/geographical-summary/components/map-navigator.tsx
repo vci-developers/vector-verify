@@ -4,6 +4,7 @@ import { useGetGeocode } from '@/api/geocode/hooks/use-get-geocode';
 import { useEffect } from 'react';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useMap } from 'react-leaflet';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 
 const FLY_TO_BOUNDS_PADDING: [number, number] = [40, 40];
 const FLY_TO_BOUNDS_MAX_ZOOM = 14;
@@ -11,16 +12,15 @@ const SELECTED_LOCATION_ZOOM = 10;
 
 interface MapNavigatorProps {
     bounds: LatLngBoundsExpression | null;
-    country: string;
     selectedLocations: string[];
 }
 
 export default function MapNavigator({
     bounds,
-    country,
     selectedLocations,
 }: MapNavigatorProps) {
     const map = useMap();
+    const country = useCountry();
 
     const { data: geocodeResult } = useGetGeocode(
         { location: selectedLocations[0] ?? '', country },

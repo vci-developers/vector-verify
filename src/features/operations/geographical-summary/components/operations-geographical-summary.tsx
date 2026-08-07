@@ -1,25 +1,19 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
-import { useSiteMarkers } from '@/features/operations/geographical-summary/hooks/use-site-markers';
 import DeviceView from '@/features/operations/geographical-summary/components/device-view';
+import SpecimensView from '@/features/operations/geographical-summary/components/specimens-view';
+import { CountryProvider } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { useGeographicalView } from '@/features/operations/geographical-summary/view-state/use-geographical-view';
 import {
-    ANOPHELES_COLOR,
-    ANOPHELES_THRESHOLD,
     GEOGRAPHICAL_VIEWS,
     type GeographicalView,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
-import { Fragment, useRef } from 'react';
-
-const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
 interface OperationsGeographicalSummaryProps {
     programId: number;
@@ -41,18 +35,6 @@ export default function OperationsGeographicalSummary({
     setSelectedMarkerId,
 }: OperationsGeographicalSummaryProps) {
     const {
-        markers,
-        totalSites,
-        isPending: isMarkersPending,
-        isError: isMarkersError,
-    } = useSiteMarkers({
-        siteIds,
-        descendantsOfSelectedLocations,
-        startDate,
-        endDate,
-    });
-
-    const {
         data: getProgramsResult,
         isPending: isProgramsPending,
         isError: isProgramsError,
@@ -64,170 +46,77 @@ export default function OperationsGeographicalSummary({
           )?.country
         : undefined;
 
-    const isPending = isMarkersPending || isProgramsPending;
-    const isError = isMarkersError || isProgramsError;
-
-    const siteMapMounted = useRef(false);
-    if (!isPending && markers.length > 0 && country)
-        siteMapMounted.current = true;
-
     const t = useTranslations('OperationsGeographicalSummary');
     const [{ selectedLocations }] = useOperationsFilters();
     const [geographicalView, setGeographicalView] = useGeographicalView();
 
+    const tabs = (
+        <Tabs
+            value={geographicalView}
+            onValueChange={value =>
+                setGeographicalView(value as GeographicalView)
+            }
+        >
+            <TabsList className="bg-muted/50 rounded-full p-1">
+                {GEOGRAPHICAL_VIEWS.map(view => (
+                    <TabsTrigger
+                        key={view}
+                        value={view}
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                    >
+                        {t(view)}
+                    </TabsTrigger>
+                ))}
+            </TabsList>
+        </Tabs>
+    );
+
+    if (isProgramsPending) {
+        return (
+            <div className="mt-4 space-y-3">
+                {tabs}
+                <Skeleton className="h-125 w-full rounded-md" />
+            </div>
+        );
+    }
+
+    if (isProgramsError || !country) {
+        return (
+            <div className="mt-4 space-y-3">
+                {tabs}
+                <p className="text-destructive text-sm">{t('countryError')}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="mt-4 space-y-3">
-            <Tabs
-                value={geographicalView}
-                onValueChange={value =>
-                    setGeographicalView(value as GeographicalView)
-                }
-            >
-                <TabsList className="bg-muted/50 rounded-full p-1">
-                    {GEOGRAPHICAL_VIEWS.map(view => (
-                        <TabsTrigger
-                            key={view}
-                            value={view}
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
-                        >
-                            {t(view)}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
+            {tabs}
 
-            {geographicalView === 'devices' && country && (
-                <DeviceView
-                    programId={programId}
-                    country={country}
-                    siteIds={siteIds}
-                    selectedLocations={selectedLocations}
-                    descendantsOfSelectedLocations={
-                        descendantsOfSelectedLocations
-                    }
-                />
-            )}
-
-            {geographicalView === 'specimens' && (
-                <Fragment>
-                    <Card className="border-border/50 w-fit">
-                        <CardContent className="flex items-center gap-3 px-4">
-                            <p className="text-muted-foreground text-xs">
-                                Unique Sites
-                            </p>
-                            {isPending ? (
-                                <Skeleton className="h-5 w-8" />
-                            ) : (
-                                <p className="text-lg leading-none font-bold">
-                                    {totalSites}
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-border/50 p-0">
-                        <CardContent className="relative h-125 p-0">
-                            {siteMapMounted.current && country ? (
-                                <SiteMap
-                                    markers={markers}
-                                    country={country}
-                                    selectedLocations={selectedLocations}
-                                    selectedMarkerId={selectedMarkerId}
-                                    onMarkerSelect={setSelectedMarkerId}
-                                />
-                            ) : isError ? (
-                                <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                                    Failed to load session data. Check the
-                                    console for details.
-                                </div>
-                            ) : !isPending && markers.length === 0 ? (
-                                <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                                    No site data found for the selected filters.
-                                </div>
-                            ) : (
-                                <Skeleton className="h-full w-full rounded-md" />
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
-                        <div className="space-y-1.5">
-                            <p className="text-foreground font-medium">
-                                Each marker represents a collection site
-                            </p>
-                            <p>
-                                Positioned by geocoded location name. Hover for
-                                details.
-                            </p>
-                        </div>
-                        <div className="space-y-1.5">
-                            <p className="text-foreground font-medium">
-                                Marker Size
-                            </p>
-                            <p>Scaled by total specimen count</p>
-                        </div>
-                        <div className="space-y-1.5">
-                            <p className="text-foreground font-medium">
-                                Marker Color — Anopheles Count
-                            </p>
-                            <div className="flex flex-wrap gap-3">
-                                <span className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block h-3 w-3 rounded-full"
-                                        style={{
-                                            backgroundColor:
-                                                ANOPHELES_COLOR.none,
-                                        }}
-                                    />
-                                    0 / No data
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block h-3 w-3 rounded-full"
-                                        style={{
-                                            backgroundColor:
-                                                ANOPHELES_COLOR.low,
-                                        }}
-                                    />
-                                    1-{ANOPHELES_THRESHOLD.low - 1}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block h-3 w-3 rounded-full"
-                                        style={{
-                                            backgroundColor:
-                                                ANOPHELES_COLOR.moderate,
-                                        }}
-                                    />
-                                    {ANOPHELES_THRESHOLD.low}-
-                                    {ANOPHELES_THRESHOLD.moderate - 1}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block h-3 w-3 rounded-full"
-                                        style={{
-                                            backgroundColor:
-                                                ANOPHELES_COLOR.high,
-                                        }}
-                                    />
-                                    {ANOPHELES_THRESHOLD.moderate}-
-                                    {ANOPHELES_THRESHOLD.high - 1}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block h-3 w-3 rounded-full"
-                                        style={{
-                                            backgroundColor:
-                                                ANOPHELES_COLOR.critical,
-                                        }}
-                                    />
-                                    {ANOPHELES_THRESHOLD.high}+
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </Fragment>
-            )}
+            <CountryProvider value={country}>
+                {geographicalView === 'devices' ? (
+                    <DeviceView
+                        programId={programId}
+                        siteIds={siteIds}
+                        selectedLocations={selectedLocations}
+                        descendantsOfSelectedLocations={
+                            descendantsOfSelectedLocations
+                        }
+                    />
+                ) : (
+                    <SpecimensView
+                        siteIds={siteIds}
+                        descendantsOfSelectedLocations={
+                            descendantsOfSelectedLocations
+                        }
+                        startDate={startDate}
+                        endDate={endDate}
+                        selectedLocations={selectedLocations}
+                        selectedMarkerId={selectedMarkerId}
+                        setSelectedMarkerId={setSelectedMarkerId}
+                    />
+                )}
+            </CountryProvider>
         </div>
     );
 }

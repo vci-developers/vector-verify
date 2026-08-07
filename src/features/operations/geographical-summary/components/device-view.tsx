@@ -10,13 +10,13 @@ import {
     buildDeviceMarkers,
     DEVICE_HEALTH_COLOR,
 } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
 
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
     programId: number;
-    country: string;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
@@ -24,12 +24,12 @@ interface DeviceViewProps {
 
 export default function DeviceView({
     programId,
-    country,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
+    const country = useCountry();
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
@@ -47,6 +47,7 @@ export default function DeviceView({
         return buildDeviceMarkers(
             deviceActivity,
             descendantsOfSelectedLocations,
+            country,
         ).sort(
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
@@ -54,7 +55,7 @@ export default function DeviceView({
                 secondMarker.inactiveDeviceCount -
                     firstMarker.inactiveDeviceCount,
         );
-    }, [deviceActivity, descendantsOfSelectedLocations]);
+    }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
     if (isPending) {
         return (
@@ -122,7 +123,6 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     <DeviceMap
                         markers={deviceMarkers}
-                        country={country}
                         selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         onMarkerSelect={setSelectedMarkerId}
