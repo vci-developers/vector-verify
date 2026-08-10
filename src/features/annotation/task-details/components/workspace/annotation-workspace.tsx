@@ -8,11 +8,12 @@ import type { GetAnnotationsQueryParams } from '@/api/annotation/validation/get-
 import type { PutAnnotationByIdRequestBody } from '@/api/annotation/validation/put-annotation-by-id-schema';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PencilRuler } from 'lucide-react';
 import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
+import { useTranslations } from 'next-intl';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -27,6 +28,7 @@ export default function AnnotationWorkspace({
     page,
     onPageChange,
 }: AnnotationWorkspaceProps) {
+    const t = useTranslations('AnnotationWorkspace');
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
 
@@ -64,19 +66,24 @@ export default function AnnotationWorkspace({
         onPageChange(newPage);
     }
 
-    if (!getAnnotationsResult || isGetAnnotationsPending) {
-        return <h1>Loading annotations...</h1>;
-    }
+    const isLoading = !getAnnotationsResult || isGetAnnotationsPending;
 
-    if (!getAnnotationsResult.ok) {
+    if (getAnnotationsResult && !getAnnotationsResult.ok) {
         return <h1>Error loading annotations</h1>;
     }
 
-    const annotation = getAnnotationsResult.data.annotations[0];
-    const total = getAnnotationsResult.data.total;
+    const annotation = getAnnotationsResult?.data.annotations[0];
+    const total = getAnnotationsResult?.data.total;
 
-    if (!annotation || total === 0) {
-        return <h1>No annotations found</h1>;
+    if (!isLoading && (!annotation || total === 0)) {
+        return (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                <p className="text-muted-foreground text-sm">
+                    {t('noAnnotationsFound')}
+                </p>
+            </div>
+        );
     }
 
     const showForm = status === 'PENDING' || isEditing;
@@ -90,7 +97,9 @@ export default function AnnotationWorkspace({
             </p>
 
             <div className="grid grid-cols-2 gap-6">
-                {annotation.specimen ? (
+                {!annotation ? (
+                    <SpecimenImageViewer isLoading />
+                ) : annotation.specimen ? (
                     <SpecimenImageViewer
                         key={annotation.specimen.id}
                         specimen={annotation.specimen}
@@ -106,23 +115,28 @@ export default function AnnotationWorkspace({
                         annotation={annotation}
                         isSubmitting={isUpdateAnnotationPending}
                         onSubmit={formData =>
-                            handleSubmitAnnotation(annotation.id, formData)
+                            handleSubmitAnnotation(
+                                annotation?.id || -1,
+                                formData,
+                            )
                         }
                         onCancel={
                             status !== 'PENDING' && isEditing
                                 ? () => setIsEditing(false)
                                 : undefined
                         }
+                        isLoading={isLoading}
                     />
                 ) : (
                     <AnnotationReadonlyView
                         annotation={annotation}
                         onEdit={() => setIsEditing(true)}
+                        isLoading={isLoading}
                     />
                 )}
             </div>
 
-            {status !== 'PENDING' && !isEditing && (
+            {total !== undefined && status !== 'PENDING' && !isEditing && (
                 <div className="flex items-center justify-between border-t pt-4">
                     <p className="text-muted-foreground text-sm">
                         {page} of {total}

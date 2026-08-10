@@ -10,6 +10,7 @@ import {
     buildDeviceMarkers,
     DEVICE_HEALTH_COLOR,
 } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
 
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
@@ -28,6 +29,7 @@ export default function DeviceView({
     descendantsOfSelectedLocations,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
+    const country = useCountry();
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
@@ -45,6 +47,7 @@ export default function DeviceView({
         return buildDeviceMarkers(
             deviceActivity,
             descendantsOfSelectedLocations,
+            country,
         ).sort(
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
@@ -52,7 +55,7 @@ export default function DeviceView({
                 secondMarker.inactiveDeviceCount -
                     firstMarker.inactiveDeviceCount,
         );
-    }, [deviceActivity, descendantsOfSelectedLocations]);
+    }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
     if (isPending) {
         return (

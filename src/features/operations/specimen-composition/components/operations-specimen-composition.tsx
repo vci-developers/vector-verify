@@ -2,7 +2,7 @@
 
 import { useGetMonthlySpecimensCount } from '@/api/specimen/hooks/use-get-monthly-specimens-count';
 import type { GetMonthlySpecimensCountQueryParams } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
-import CompositionChartPair from './composition-chart-pair';
+import CompositionChartPair from '@/features/operations/specimen-composition/components/composition-chart-pair';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
@@ -19,10 +19,12 @@ import {
     MultiSelectContent,
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import { BarChart3, LineChart } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -38,6 +40,8 @@ interface OperationsSpecimenCompositionProps {
     startDate: string;
     endDate: string;
 }
+
+type ChartType = 'bar' | 'line';
 
 export default function OperationsSpecimenComposition({
     siteIds,
@@ -57,6 +61,8 @@ export default function OperationsSpecimenComposition({
         data: getMonthlySpecimensCountResult,
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
+
+    const [chartType, setChartType] = useState<ChartType>('bar');
 
     const [{ selectedSpecies }, setFilters] = useOperationsFilters();
     const speciesOptions = useMemo(() => {
@@ -93,31 +99,58 @@ export default function OperationsSpecimenComposition({
                 <Label className="text-sm font-medium">
                     {t('filterBySpecies')}
                 </Label>
-                <MultiSelect
-                    values={validSelectedSpecies}
-                    onValuesChange={species =>
-                        setFilters({ selectedSpecies: species })
-                    }
-                >
-                    <MultiSelectTrigger>
-                        <MultiSelectValue placeholder={t('selectSpecies')} />
-                    </MultiSelectTrigger>
-                    <MultiSelectContent
-                        search={{
-                            placeholder: t('searchSpecies'),
-                            emptyMessage: t('noSpeciesFound'),
-                        }}
+                <div className="flex justify-between gap-2">
+                    <MultiSelect
+                        values={validSelectedSpecies}
+                        onValuesChange={species =>
+                            setFilters({ selectedSpecies: species })
+                        }
                     >
-                        <MultiSelectGroup>
-                            {speciesOptions.map(species => (
-                                <MultiSelectItem key={species} value={species}>
-                                    {species}
-                                </MultiSelectItem>
-                            ))}
-                        </MultiSelectGroup>
-                    </MultiSelectContent>
-                </MultiSelect>
+                        <MultiSelectTrigger className="min-w-0 flex-1">
+                            <MultiSelectValue
+                                placeholder={t('selectSpecies')}
+                            />
+                        </MultiSelectTrigger>
+                        <MultiSelectContent
+                            search={{
+                                placeholder: t('searchSpecies'),
+                                emptyMessage: t('noSpeciesFound'),
+                            }}
+                        >
+                            <MultiSelectGroup>
+                                {speciesOptions.map(species => (
+                                    <MultiSelectItem
+                                        key={species}
+                                        value={species}
+                                    >
+                                        {species}
+                                    </MultiSelectItem>
+                                ))}
+                            </MultiSelectGroup>
+                        </MultiSelectContent>
+                    </MultiSelect>
+                    <ToggleGroup
+                        type="single"
+                        variant="outline"
+                        size="sm"
+                        value={chartType}
+                        onValueChange={(next: ChartType | '') => {
+                            if (next) setChartType(next);
+                        }}
+                        className="shrink-0"
+                    >
+                        <ToggleGroupItem value="bar">
+                            <BarChart3 />
+                            {t('barChart')}
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="line">
+                            <LineChart />
+                            {t('lineChart')}
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
             </div>
+
             {COMPOSITION_SECTIONS.map(
                 ({ specimenClassificationAxis, title }) => {
                     const specimenCountsByClass = sumSpecimenCountsByClass(
@@ -141,6 +174,7 @@ export default function OperationsSpecimenComposition({
                         <CompositionChartPair
                             key={specimenClassificationAxis}
                             title={title}
+                            chartType={chartType}
                             specimenCountsByClass={specimenCountsByClass}
                             specimenCountsByMonth={specimenCountsByMonth}
                             specimenChartConfig={specimenChartConfig}

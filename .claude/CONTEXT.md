@@ -76,6 +76,25 @@ batch, the selected range (as a unit)
 **Program**: The top-level organizational unit. All sites, users, sessions, and
 forms belong to a program.
 
+**Program Country**: The `country` field on a **Program** (`GET /programs`),
+resolved by matching `programId`. Consumed **only** by the Geographical Summary
+tab's map subtree — no other Operations tab, and no Review feature, reads it. It
+does two independent jobs there: (1) for **legacy** Sites (`isLegacySite`, flat
+district/village schema — see **Site**), it is appended as literal text into the
+Nominatim geocoding query string (`buildLegacyLocationQuery`); hierarchical
+Sites' query text never includes it. (2) For **every** Site regardless of
+legacy/hierarchical, it is converted to an ISO alpha-2 country code and passed
+to Nominatim as a `countrycodes` restriction (`MapNavigator`, `useSiteGeocode`),
+narrowing every geocode search. Must never be hardcoded (the bug that motivated
+this entry: the geocoding query text was hardcoded to `'Uganda'`, silently wrong
+for every other program). Threaded via a scoped `CountryContext`
+(`geographical-summary/context/country-context.tsx`) rather than props, since it
+passes through map wrapper components (`SiteMap`, `DeviceMap`,
+`GeocodedClusterMap`) that don't otherwise use it — see ADR-0007. _Avoid_:
+country (bare, ambiguous with the unrelated `country: 'Uganda'` filter param
+used elsewhere to detect legacy/Uganda programs, e.g.
+`review-sites-list-page-client.tsx`'s `isUgandaProgram` check)
+
 **Site**: A node in the program's location hierarchy (e.g. district → parish →
 village). Sites form a tree via a self-referencing parent. _Avoid_: Location,
 household
@@ -228,6 +247,15 @@ fields, surveillance-form fields, session-scoped dynamic answers) resolve with
 `sessionIds`; `SESSION_UNIT`-scoped conflicts resolve with `sessionUnitIds`, one
 call per **Unit Identity** group. _Avoid_: discrepancy, mismatch
 
+**Missing Surveillance Form**: A Surveillance-mode Session in a **Review Unit**
+that has no surveillance form while at least one sibling Session does. Such
+Sessions are **excluded from resolution** — values saved during Metadata Review
+do not apply to them — but they do **not block** the Review flow. The remedy is
+**out-of-band**: the VCO follows up with the VHT/field team to get the form
+submitted before certifying. UI treats this as a warning (amber), never an
+error, and the notice states that follow-up action. _Avoid_: error, blocked
+session
+
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
 sign-off
@@ -343,18 +371,29 @@ from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
 in the global user menu, not the Operations page. Audience: developers.
-Delivered as a temporary, expiring **Signed Export URL** (obtained via
-`POST /export/sign`) that the developer clicks to download directly from the
+Delivered as a temporary, expiring **Signed Resource URL** (obtained via
+`POST /resources/sign`) that the developer clicks to download directly from the
 backend — VectorVerify signs the request but no longer proxies the CSV stream.
 _Avoid_: Raw export (capitalise), DB dump, backup
 
-**Signed Export URL**: A short-lived, pre-signed URL returned by
-`POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
-access to an export (or report) path served directly by the backend. The browser
-downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
-only by **Raw Data Export**; the endpoint can also sign a **Report Export**
-path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
-token
+**Signed Resource URL**: A short-lived, pre-signed URL returned by
+`POST /resources/sign` (`{ url, expiresAt }`) granting temporary
+_unauthenticated_ access to a backend **resource path** — an export, a report,
+or a **specimen image** — served directly by the backend, bypassing
+VectorVerify's BFF proxy. The sign call itself is authenticated (it flows
+through the BFF with the user's bearer token), so a URL can only be _obtained_
+by a logged-in user; the signature is a short-lived capability, and the backend
+returns **401 Unauthorized** (not `404`) once it expires. TTL depends on the
+resource: **5 minutes** for export/report downloads, **1 hour** for specimen
+images. Two consumption modes: **download** (an export/report path; the browser
+saves the file directly — Raw Data Export) and **inline render** (a **specimen
+image** path rendered straight into an `<img>`, so the full image bytes travel
+browser ↔ backend and never through the Amplify size-limited BFF proxy — the fix
+for large-image `413`s). The endpoint was renamed `/export/sign` →
+`/resources/sign` (VCV-287) to reflect this generalization beyond exports. A
+**Report Export** path can also be signed, but that is not yet adopted. _Avoid_:
+Signed Export URL (too narrow — it also signs images), Presigned link, temp
+link, download token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only

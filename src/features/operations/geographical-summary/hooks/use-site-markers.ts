@@ -4,6 +4,7 @@ import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetSpecimensCount } from '@/api/specimen/hooks/use-get-specimens-count';
 import { useMemo } from 'react';
 import { buildSiteMarkers } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
 
 interface UseSiteMarkersParams {
@@ -19,6 +20,8 @@ export function useSiteMarkers({
     startDate,
     endDate,
 }: UseSiteMarkersParams) {
+    const country = useCountry();
+
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions({
             startDate,
@@ -47,11 +50,13 @@ export function useSiteMarkers({
             getSpecimensCountResult.data.data,
             getAllSessionsResult.data.sessions,
             descendantsOfSelectedLocations,
+            country,
         );
     }, [
         getAllSessionsResult,
         getSpecimensCountResult,
         descendantsOfSelectedLocations,
+        country,
     ]);
 
     return {

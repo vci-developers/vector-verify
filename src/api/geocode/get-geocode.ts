@@ -1,5 +1,7 @@
 import 'server-only';
 
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
 import { z } from 'zod';
 import type { NetworkError } from '@/lib/network/network-error';
 import { err, ok, type Result } from '@/lib/result/result';
@@ -10,6 +12,8 @@ import {
     type GetGeocodeResponseBody,
 } from './validation/get-geocode-schema';
 
+countries.registerLocale(enLocale);
+
 const nominatimResponseSchema = z.array(
     z.object({ lat: z.string(), lon: z.string() }),
 );
@@ -19,6 +23,7 @@ const RATE_LIMIT_MS = 1100;
 
 async function nominatimSearch(
     searchQuery: string,
+    countryCode?: string,
 ): Promise<Result<GetGeocodeResponseBody | null, NetworkError>> {
     const timeSinceLastRequest = Date.now() - lastRequestTimestamp;
     const rateLimitDelay = Math.max(0, RATE_LIMIT_MS - timeSinceLastRequest);
@@ -26,7 +31,10 @@ async function nominatimSearch(
         await new Promise(resolve => setTimeout(resolve, rateLimitDelay));
     lastRequestTimestamp = Date.now();
 
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
+    const countryCodeParam = countryCode
+        ? `&countrycodes=${encodeURIComponent(countryCode)}`
+        : '';
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1${countryCodeParam}`;
 
     const result = await safeApiCall(
         url,
@@ -79,9 +87,12 @@ export async function getGeocode(
     queryParams: GetGeocodeQueryParams,
 ): Promise<Result<GetGeocodeResponseBody, NetworkError>> {
     const fallbackQueries = buildFallbackQueries(queryParams.location);
+    const countryCode = queryParams.country
+        ? countries.getAlpha2Code(queryParams.country, 'en')
+        : undefined;
 
     for (const query of fallbackQueries) {
-        const result = await nominatimSearch(query);
+        const result = await nominatimSearch(query, countryCode);
         if (!result.ok) return result;
         if (result.data) return ok(result.data);
     }
