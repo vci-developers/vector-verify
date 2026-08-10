@@ -106,7 +106,7 @@ export default function CompositionChartPair({
                 <CardTitle className="text-base">{title}</CardTitle>
             </CardHeader>
             <CardContent>
-                {totalSpecimenCount === 0 ? (
+                {!isLoading && totalSpecimenCount === 0 ? (
                     <div className="text-muted-foreground flex items-center justify-center py-12 text-sm">
                         {t('noSpecimenData')}
                     </div>

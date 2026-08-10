@@ -50,7 +50,7 @@ export default function OperationsAiPerformance({
     const annotatedSpecimens = annotationsSummary?.statusCounts.ANNOTATED;
     const flaggedSpecimens = annotationsSummary?.statusCounts.FLAGGED;
     const reviewedSpecimens =
-        annotatedSpecimens && flaggedSpecimens
+        annotatedSpecimens != null && flaggedSpecimens != null
             ? annotatedSpecimens + flaggedSpecimens
             : 0;
     const totalSpecimens = annotationsSummary?.total || 0;

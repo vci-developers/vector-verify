@@ -103,8 +103,13 @@ export default function DeviceView({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    {isPending || !deviceMarkers ? (
+                    {isPending ? (
                         <Skeleton className="h-full w-full rounded-md" />
+                    ) : !deviceMarkers ||
+                      deviceCounts.active + deviceCounts.inactive === 0 ? (
+                        <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+                            {t('noDeviceActivity')}
+                        </div>
                     ) : (
                         <DeviceMap
                             markers={deviceMarkers}
