@@ -24,7 +24,6 @@ import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-use
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { clearResendCooldown } from '@/lib/hooks/use-resend-cooldown';
-import { StorageKeys } from '@/lib/storage-keys';
 
 export default function LoginForm() {
     const router = useRouter();
@@ -75,15 +74,12 @@ export default function LoginForm() {
             return;
         }
 
-        clearResendCooldown(StorageKeys.auth.verificationEmailSentTimestamp);
+        clearResendCooldown();
 
-        if (!userProfileResult.data.user.emailVerified) {
-            if (redirect) {
-                router.replace(redirect);
-                router.refresh();
-                return;
-            }
+        if (!userProfileResult.data.user.emailVerified && redirect) {
+            router.replace(redirect);
             router.refresh();
+            return;
         }
 
         router.replace('/');

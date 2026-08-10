@@ -6,15 +6,13 @@ import { Separator } from '@/components/ui/separator';
 import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import LogoutButton from '@/components/auth-session/logout-button';
-import { StorageKeys } from '@/lib/storage-keys';
 import { useResendCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function EmailVerificationPageClient() {
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const { secondsRemaining, isOnCooldown, startCooldown } = useResendCooldown(
-        StorageKeys.auth.verificationEmailSentTimestamp,
-    );
+    const { secondsRemaining, isOnCooldown, startCooldown } =
+        useResendCooldown();
     const t = useTranslations('Auth');
     const { mutate: sendVerification, isPending } = usePostSendVerification();
 
