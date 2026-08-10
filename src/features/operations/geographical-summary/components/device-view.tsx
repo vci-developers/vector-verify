@@ -57,18 +57,6 @@ export default function DeviceView({
         );
     }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
-    if (isPending) {
-        return (
-            <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-13 w-28" />
-                    <Skeleton className="h-13 w-28" />
-                </div>
-                <Skeleton className="h-125 w-full rounded-md" />
-            </div>
-        );
-    }
-
     if (isError) {
         return (
             <Card className="border-border/50 p-0">
@@ -79,23 +67,13 @@ export default function DeviceView({
         );
     }
 
-    if (!deviceMarkers || deviceMarkers.length === 0) {
-        return (
-            <Card className="border-border/50 p-0">
-                <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
-                    {t('noDeviceActivity')}
-                </CardContent>
-            </Card>
-        );
-    }
-
-    const deviceCounts = deviceMarkers.reduce(
+    const deviceCounts = deviceMarkers?.reduce(
         (counts, marker) => ({
             active: counts.active + marker.activeDeviceCount,
             inactive: counts.inactive + marker.inactiveDeviceCount,
         }),
         { active: 0, inactive: 0 },
-    );
+    ) || { active: 0, inactive: 0 };
 
     const tiers = [
         { key: 'active', count: deviceCounts.active },
@@ -111,9 +89,13 @@ export default function DeviceView({
                             <p className="text-muted-foreground text-xs">
                                 {t(tier.key)}
                             </p>
-                            <p className="text-lg leading-none font-bold">
-                                {tier.count}
-                            </p>
+                            {isPending ? (
+                                <Skeleton className="h-5 w-8" />
+                            ) : (
+                                <p className="text-lg leading-none font-bold">
+                                    {tier.count}
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 ))}
@@ -121,12 +103,21 @@ export default function DeviceView({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    <DeviceMap
-                        markers={deviceMarkers}
-                        selectedLocations={selectedLocations}
-                        selectedMarkerId={selectedMarkerId}
-                        onMarkerSelect={setSelectedMarkerId}
-                    />
+                    {isPending ? (
+                        <Skeleton className="h-full w-full rounded-md" />
+                    ) : !deviceMarkers ||
+                      deviceCounts.active + deviceCounts.inactive === 0 ? (
+                        <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+                            {t('noDeviceActivity')}
+                        </div>
+                    ) : (
+                        <DeviceMap
+                            markers={deviceMarkers}
+                            selectedLocations={selectedLocations}
+                            selectedMarkerId={selectedMarkerId}
+                            onMarkerSelect={setSelectedMarkerId}
+                        />
+                    )}
                 </CardContent>
             </Card>
 

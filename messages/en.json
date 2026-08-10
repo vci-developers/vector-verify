@@ -77,8 +77,8 @@
         "anophelesNoData": "0 / No data"
     },
     "OperationsSpecimenComposition": {
-        "monthlySpecimenCountsLoading": "LOADING...",
-        "monthlySpecimenCountsError": "ERROR: ",
+        "monthlySpecimenCountsError": "There was a problem fetching the specimen counts. Please try again later or contact support.",
+        "monthlySpecimenCountsEmpty": "No specimens found for this date range and species filter.",
         "filterBySpecies": "Filter by Species",
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
@@ -88,6 +88,11 @@
         "noSpecimenData": "No specimen data for the selected filters."
     },
     "OperationsAIPerformance": {
+        "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
+        "coverage": "Coverage",
+        "reviewedOfTotal": "{count} reviewed / {total} specimens",
+        "reviewedSpecimens": "Reviewed Specimens",
+        "annotatedAndFlagged": "{annotated} annotated and {flagged} flagged",
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
         "noConfusionMatrixData": "No verified {category} comparisons in this date range; there are no annotations to compare with VectorCam's predictions.",

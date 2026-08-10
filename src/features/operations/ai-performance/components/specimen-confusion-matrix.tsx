@@ -16,6 +16,9 @@ import {
 import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Fragment } from 'react/jsx-runtime';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonList } from '@/components/ui/skeleton-list';
 
 const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 
@@ -24,7 +27,8 @@ interface SpecimenConfusionMatrixProps {
     classificationCategory: string;
     groundTruthAxisLabel: string;
     predictionAxisLabel: string;
-    confusionMatrix: AnnotationConfusionMatrix;
+    confusionMatrix: AnnotationConfusionMatrix | undefined;
+    isLoading: boolean;
 }
 
 export default function SpecimenConfusionMatrix({
@@ -33,21 +37,24 @@ export default function SpecimenConfusionMatrix({
     groundTruthAxisLabel,
     predictionAxisLabel,
     confusionMatrix,
+    isLoading,
 }: SpecimenConfusionMatrixProps) {
     const t = useTranslations('OperationsAIPerformance');
 
-    const classLabels = Array.from(
-        new Set([
-            ...confusionMatrix.columns,
-            ...confusionMatrix.data.map(({ rowLabel }) => rowLabel),
-        ]),
-    );
+    const classLabels = confusionMatrix
+        ? Array.from(
+              new Set([
+                  ...confusionMatrix.columns,
+                  ...confusionMatrix.data.map(({ rowLabel }) => rowLabel),
+              ]),
+          )
+        : [];
 
     function getSpecimenCountForCell(
         groundTruthLabel: string,
         predictedLabel: string,
     ) {
-        const specimenCount = confusionMatrix.data.find(
+        const specimenCount = confusionMatrix?.data.find(
             row => row.rowLabel === groundTruthLabel,
         )?.values[predictedLabel];
 
@@ -89,7 +96,7 @@ export default function SpecimenConfusionMatrix({
         0,
     );
 
-    if (totalSpecimensInMatrix === 0) {
+    if (!isLoading && totalSpecimensInMatrix === 0) {
         return (
             <Card className="gap-0 lg:col-span-2">
                 <CardContent className="space-y-6">
@@ -157,27 +164,38 @@ export default function SpecimenConfusionMatrix({
                     <p className="text-muted-foreground text-sm">
                         {t('accuracy')}
                     </p>
-                    <p className="mt-1 text-4xl font-semibold tracking-tight">
-                        {formatMatrixPercentage(accuracy)}
-                    </p>
-                    <p className="text-muted-foreground mt-2 text-xs">
-                        {t('correctOf', {
-                            numCorrect: integerCountFormatter.format(
-                                totalCorrectPredictions,
-                            ),
-                            total: integerCountFormatter.format(
-                                totalSpecimensInMatrix,
-                            ),
-                            category: classificationCategory,
-                        })}
-                    </p>
+                    {isLoading ? (
+                        <div className="space-y-2 py-2">
+                            <Skeleton width="sm" height="xl" />
+                            <Skeleton width="lg" height="sm" />
+                        </div>
+                    ) : (
+                        <Fragment>
+                            <p className="mt-1 text-4xl font-semibold tracking-tight">
+                                {formatMatrixPercentage(accuracy)}
+                            </p>
+                            <p className="text-muted-foreground mt-2 text-xs">
+                                {t('correctOf', {
+                                    numCorrect: integerCountFormatter.format(
+                                        totalCorrectPredictions,
+                                    ),
+                                    total: integerCountFormatter.format(
+                                        totalSpecimensInMatrix,
+                                    ),
+                                    category: classificationCategory,
+                                })}
+                            </p>
+                        </Fragment>
+                    )}
                 </div>
 
                 <div className="max-w-full">
                     <Table className="min-w-180 table-fixed border-collapse overflow-hidden rounded-lg">
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-muted/40 h-12 w-60 border" />
+                                {!isLoading && (
+                                    <TableHead className="bg-muted/40 h-12 w-60 border" />
+                                )}
                                 <TableHead
                                     className="bg-muted/40 h-auto min-h-12 border px-3 py-3 text-center leading-snug font-semibold wrap-break-word whitespace-normal"
                                     colSpan={classLabels.length}
@@ -185,85 +203,92 @@ export default function SpecimenConfusionMatrix({
                                     {predictionAxisLabel}
                                 </TableHead>
                             </TableRow>
-                            <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold wrap-break-word whitespace-normal">
-                                    {groundTruthAxisLabel}
-                                </TableHead>
-                                {classLabels.map(predictedLabel => (
-                                    <TableHead
-                                        key={predictedLabel}
-                                        className="bg-muted/20 border px-2 text-center text-xs font-semibold"
-                                    >
-                                        <span className="line-clamp-2 whitespace-normal">
-                                            {predictedLabel}
-                                        </span>
+                            {!isLoading && (
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold wrap-break-word whitespace-normal">
+                                        {groundTruthAxisLabel}
                                     </TableHead>
-                                ))}
-                            </TableRow>
+                                    {classLabels.map(predictedLabel => (
+                                        <TableHead
+                                            key={predictedLabel}
+                                            className="bg-muted/20 border px-2 text-center text-xs font-semibold"
+                                        >
+                                            <span className="line-clamp-2 whitespace-normal">
+                                                {predictedLabel}
+                                            </span>
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            )}
                         </TableHeader>
 
-                        <TableBody>
-                            {classLabels.map(groundTruthLabel => {
-                                const groundTruthLabelTotal =
-                                    getSpecimenCountForGroundTruthLabel(
-                                        groundTruthLabel,
+                        {!isLoading && (
+                            <TableBody>
+                                {classLabels.map(groundTruthLabel => {
+                                    const groundTruthLabelTotal =
+                                        getSpecimenCountForGroundTruthLabel(
+                                            groundTruthLabel,
+                                        );
+
+                                    return (
+                                        <TableRow
+                                            key={groundTruthLabel}
+                                            className="hover:bg-transparent"
+                                        >
+                                            <TableCell className="bg-background border text-center text-xs font-medium whitespace-normal">
+                                                {groundTruthLabel}
+                                            </TableCell>
+
+                                            {classLabels.map(predictedLabel => {
+                                                const specimenCountForCell =
+                                                    getSpecimenCountForCell(
+                                                        groundTruthLabel,
+                                                        predictedLabel,
+                                                    );
+                                                const groundTruthLabelShare =
+                                                    groundTruthLabelTotal > 0
+                                                        ? specimenCountForCell /
+                                                          groundTruthLabelTotal
+                                                        : null;
+                                                const isCorrectPrediction =
+                                                    groundTruthLabel ===
+                                                    predictedLabel;
+                                                const cellPresentation =
+                                                    getMatrixCellPresentation(
+                                                        groundTruthLabelShare,
+                                                        isCorrectPrediction,
+                                                    );
+
+                                                return (
+                                                    <TableCell
+                                                        key={`${groundTruthLabel}-${predictedLabel}`}
+                                                        className={cn(
+                                                            'border p-0',
+                                                            cellPresentation.className,
+                                                        )}
+                                                        style={
+                                                            cellPresentation.style
+                                                        }
+                                                    >
+                                                        <div className="flex min-h-20 items-center justify-center px-2 py-3 text-center">
+                                                            <span className="text-base font-semibold">
+                                                                {integerCountFormatter.format(
+                                                                    specimenCountForCell,
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                );
+                                            })}
+                                        </TableRow>
                                     );
-
-                                return (
-                                    <TableRow
-                                        key={groundTruthLabel}
-                                        className="hover:bg-transparent"
-                                    >
-                                        <TableCell className="bg-background border text-center text-xs font-medium whitespace-normal">
-                                            {groundTruthLabel}
-                                        </TableCell>
-
-                                        {classLabels.map(predictedLabel => {
-                                            const specimenCountForCell =
-                                                getSpecimenCountForCell(
-                                                    groundTruthLabel,
-                                                    predictedLabel,
-                                                );
-                                            const groundTruthLabelShare =
-                                                groundTruthLabelTotal > 0
-                                                    ? specimenCountForCell /
-                                                      groundTruthLabelTotal
-                                                    : null;
-                                            const isCorrectPrediction =
-                                                groundTruthLabel ===
-                                                predictedLabel;
-                                            const cellPresentation =
-                                                getMatrixCellPresentation(
-                                                    groundTruthLabelShare,
-                                                    isCorrectPrediction,
-                                                );
-
-                                            return (
-                                                <TableCell
-                                                    key={`${groundTruthLabel}-${predictedLabel}`}
-                                                    className={cn(
-                                                        'border p-0',
-                                                        cellPresentation.className,
-                                                    )}
-                                                    style={
-                                                        cellPresentation.style
-                                                    }
-                                                >
-                                                    <div className="flex min-h-20 items-center justify-center px-2 py-3 text-center">
-                                                        <span className="text-base font-semibold">
-                                                            {integerCountFormatter.format(
-                                                                specimenCountForCell,
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
+                                })}
+                            </TableBody>
+                        )}
                     </Table>
+                    {isLoading && (
+                        <SkeletonList count={3} width="full" height="xxl" />
+                    )}
                 </div>
 
                 <div className="grid items-stretch gap-4 lg:grid-cols-[500px_minmax(0,1fr)]">
@@ -291,72 +316,80 @@ export default function SpecimenConfusionMatrix({
                             </TableHeader>
 
                             <TableBody>
-                                {filteredClassLabels.map(classLabel => {
-                                    const truePositives =
-                                        getSpecimenCountForCell(
-                                            classLabel,
-                                            classLabel,
+                                {!isLoading &&
+                                    filteredClassLabels.map(classLabel => {
+                                        const truePositives =
+                                            getSpecimenCountForCell(
+                                                classLabel,
+                                                classLabel,
+                                            );
+                                        const falseNegatives =
+                                            getSpecimenCountForGroundTruthLabel(
+                                                classLabel,
+                                                filteredClassLabels,
+                                            ) - truePositives;
+                                        const falsePositives =
+                                            getSpecimenCountForPredictedLabel(
+                                                classLabel,
+                                                filteredClassLabels,
+                                            ) - truePositives;
+                                        const trueNegatives =
+                                            filteredTotalSpecimens -
+                                            truePositives -
+                                            falseNegatives -
+                                            falsePositives;
+
+                                        const sensitivity =
+                                            truePositives + falseNegatives > 0
+                                                ? truePositives /
+                                                  (truePositives +
+                                                      falseNegatives)
+                                                : null;
+                                        const specificity =
+                                            trueNegatives + falsePositives > 0
+                                                ? trueNegatives /
+                                                  (trueNegatives +
+                                                      falsePositives)
+                                                : null;
+
+                                        return (
+                                            <TableRow
+                                                key={classLabel}
+                                                className="hover:bg-transparent"
+                                            >
+                                                <TableCell className="font-medium whitespace-nowrap">
+                                                    {classLabel}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-right">
+                                                    {formatMatrixPercentage(
+                                                        sensitivity,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-right">
+                                                    {formatMatrixPercentage(
+                                                        specificity,
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
                                         );
-                                    const falseNegatives =
-                                        getSpecimenCountForGroundTruthLabel(
-                                            classLabel,
-                                            filteredClassLabels,
-                                        ) - truePositives;
-                                    const falsePositives =
-                                        getSpecimenCountForPredictedLabel(
-                                            classLabel,
-                                            filteredClassLabels,
-                                        ) - truePositives;
-                                    const trueNegatives =
-                                        filteredTotalSpecimens -
-                                        truePositives -
-                                        falseNegatives -
-                                        falsePositives;
-
-                                    const sensitivity =
-                                        truePositives + falseNegatives > 0
-                                            ? truePositives /
-                                              (truePositives + falseNegatives)
-                                            : null;
-                                    const specificity =
-                                        trueNegatives + falsePositives > 0
-                                            ? trueNegatives /
-                                              (trueNegatives + falsePositives)
-                                            : null;
-
-                                    return (
-                                        <TableRow
-                                            key={classLabel}
-                                            className="hover:bg-transparent"
-                                        >
-                                            <TableCell className="font-medium whitespace-nowrap">
-                                                {classLabel}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-right">
-                                                {formatMatrixPercentage(
-                                                    sensitivity,
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-right">
-                                                {formatMatrixPercentage(
-                                                    specificity,
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                    })}
                             </TableBody>
                         </Table>
-                        <p className="text-muted-foreground text-sm leading-6">
-                            {excludedSpecimenCounts.map(
-                                ({ excludedLabel, count }) => {
-                                    return t('specimensLabeledAs', {
-                                        count: count,
-                                        category: excludedLabel,
-                                    });
-                                },
-                            )}
-                        </p>
+                        {isLoading && (
+                            <SkeletonList count={3} height="lg" width="full" />
+                        )}
+                        {!isLoading && (
+                            <p className="text-muted-foreground text-sm leading-6">
+                                {excludedSpecimenCounts.map(
+                                    ({ excludedLabel, count }) => {
+                                        return t('specimensLabeledAs', {
+                                            count: count,
+                                            category: excludedLabel,
+                                        });
+                                    },
+                                )}
+                            </p>
+                        )}
                     </div>
 
                     <div className="h-full space-y-3 rounded-xl border p-4">

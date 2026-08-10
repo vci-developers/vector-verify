@@ -23,6 +23,7 @@ import { useMemo, useState } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
 import { BarChart3, LineChart } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
@@ -78,11 +79,10 @@ export default function OperationsSpecimenComposition({
         return species.filter(speciesName => validOptions.has(speciesName));
     }, [selectedSpecies, speciesOptions]);
 
-    if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>{t('monthlySpecimenCountsLoading')}</h1>;
-    }
+    const isLoading =
+        isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult;
 
-    if (!getMonthlySpecimensCountResult.ok) {
+    if (!isLoading && !getMonthlySpecimensCountResult.ok) {
         return (
             <h1>
                 {t('monthlySpecimenCountsError')}
@@ -91,7 +91,9 @@ export default function OperationsSpecimenComposition({
         );
     }
 
-    const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;
+    const monthlySpecimenCounts = getMonthlySpecimensCountResult?.ok
+        ? getMonthlySpecimensCountResult.data.data
+        : undefined;
 
     return (
         <div className="space-y-6">
@@ -106,7 +108,10 @@ export default function OperationsSpecimenComposition({
                             setFilters({ selectedSpecies: species })
                         }
                     >
-                        <MultiSelectTrigger className="min-w-0 flex-1">
+                        <MultiSelectTrigger
+                            disabled={isLoading}
+                            className="min-w-0 flex-1"
+                        >
                             <MultiSelectValue
                                 placeholder={t('selectSpecies')}
                             />
@@ -137,6 +142,7 @@ export default function OperationsSpecimenComposition({
                         onValueChange={(next: ChartType | '') => {
                             if (next) setChartType(next);
                         }}
+                        disabled={isLoading}
                         className="shrink-0"
                     >
                         <ToggleGroupItem value="bar">
@@ -150,37 +156,57 @@ export default function OperationsSpecimenComposition({
                     </ToggleGroup>
                 </div>
             </div>
-
-            {COMPOSITION_SECTIONS.map(
-                ({ specimenClassificationAxis, title }) => {
-                    const specimenCountsByClass = sumSpecimenCountsByClass(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenCountsByMonth = groupSpecimenCountsByMonth(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenChartConfig = buildSpecimenChartConfig(
-                        specimenClassificationAxis,
-                        specimenCountsByClass.map(
-                            ({ specimenClass }) => specimenClass,
-                        ),
-                    );
-
-                    return (
+            {isLoading ? (
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => (
                         <CompositionChartPair
                             key={specimenClassificationAxis}
                             title={title}
                             chartType={chartType}
-                            specimenCountsByClass={specimenCountsByClass}
-                            specimenCountsByMonth={specimenCountsByMonth}
-                            specimenChartConfig={specimenChartConfig}
+                            specimenCountsByClass={[]}
+                            specimenCountsByMonth={[]}
+                            specimenChartConfig={{}}
+                            isLoading={isLoading}
                         />
-                    );
-                },
+                    ),
+                )
+            ) : validSelectedSpecies.length === 0 ? (
+                <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
+            ) : (
+                monthlySpecimenCounts &&
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => {
+                        const specimenCountsByClass = sumSpecimenCountsByClass(
+                            specimenClassificationAxis,
+                            monthlySpecimenCounts,
+                            validSelectedSpecies,
+                        );
+                        const specimenCountsByMonth =
+                            groupSpecimenCountsByMonth(
+                                specimenClassificationAxis,
+                                monthlySpecimenCounts,
+                                validSelectedSpecies,
+                            );
+                        const specimenChartConfig = buildSpecimenChartConfig(
+                            specimenClassificationAxis,
+                            specimenCountsByClass.map(
+                                ({ specimenClass }) => specimenClass,
+                            ),
+                        );
+
+                        return (
+                            <CompositionChartPair
+                                key={specimenClassificationAxis}
+                                title={title}
+                                chartType={chartType}
+                                specimenCountsByClass={specimenCountsByClass}
+                                specimenCountsByMonth={specimenCountsByMonth}
+                                specimenChartConfig={specimenChartConfig}
+                                isLoading={isLoading}
+                            />
+                        );
+                    },
+                )
             )}
         </div>
     );

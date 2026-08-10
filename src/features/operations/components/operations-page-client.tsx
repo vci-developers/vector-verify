@@ -20,6 +20,7 @@ import {
     type OperationsTab,
 } from '@/features/operations/view-state/use-operations-filters';
 import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 const OPERATIONS_TABS: {
     value: OperationsTab;
@@ -158,12 +159,9 @@ export default function OperationsPageClient() {
                     <Separator />
 
                     {!selectedSiteIdsParam ? (
-                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                        <EmptyBanner message={t('selectALocation')}>
                             <Microscope className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                            <p className="text-muted-foreground text-sm">
-                                {t('selectALocation')}
-                            </p>
-                        </div>
+                        </EmptyBanner>
                     ) : (
                         <Fragment>
                             {activeTab === 'specimen-composition' && (
