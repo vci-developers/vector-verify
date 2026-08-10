@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { Fragment } from 'react/jsx-runtime';
 import LogoutButton from '@/components/auth-session/logout-button';
+import ReturnHomeButton from '@/components/auth-session/return-home-button';
 
 const TOKEN_MISMATCH_ERROR_MESSAGE =
     'Verification token does not match the authenticated user';
@@ -48,6 +49,7 @@ export default async function VerifyEmailPage({
                             {t('resendVerificationEmailButton')}
                         </Link>
                     </Button>
+                    <ReturnHomeButton label={t('returnHome')} />
                     <LogoutButton />
                 </div>
             </AuthShell>
@@ -74,6 +76,7 @@ export default async function VerifyEmailPage({
                                 <p className="text-muted-foreground text-center text-sm">
                                     {t('accountVerificationTokenMismatch')}
                                 </p>
+                                <ReturnHomeButton label={t('returnHome')} />
                                 <LogoutButton />
                             </Fragment>
                         ) : (
@@ -87,6 +90,7 @@ export default async function VerifyEmailPage({
                                         {t('resendVerificationEmailButton')}
                                     </Link>
                                 </Button>
+                                <ReturnHomeButton label={t('returnHome')} />
                                 <LogoutButton />
                             </Fragment>
                         )}

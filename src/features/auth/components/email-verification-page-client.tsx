@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import LogoutButton from '@/components/auth-session/logout-button';
+import ReturnHomeButton from '@/components/auth-session/return-home-button';
 import { useResendCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function EmailVerificationPageClient() {
@@ -62,7 +63,10 @@ export default function EmailVerificationPageClient() {
                         : t('verifyEmailButton')}
             </Button>
             <Separator className="my-6" />
-            <LogoutButton />
+            <div className="flex flex-col items-center gap-4">
+                <ReturnHomeButton label={t('returnHome')} />
+                <LogoutButton />
+            </div>
         </Fragment>
     );
 }
