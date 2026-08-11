@@ -96,6 +96,7 @@
         "accuracy": "Accuracy",
         "correctOf": "{numCorrect} correct of {total} {category} comparisons",
         "noConfusionMatrixData": "No verified {category} comparisons in this date range; there are no annotations to compare with VectorCam's predictions.",
+        "failedToLoad": "Failed to load annotations summary. Please try again later or contact support.",
         "perLabelMetrics": "Per-Label Metrics",
         "label": "Label",
         "sensitivity": "Sensitivity",
@@ -114,6 +115,7 @@
         "activeCollectors": "Active Collectors",
         "submittedThisOrLastMonth": "Submitted this or last month",
         "noSubmissionsFound": "No submissions found for this location and date range.",
+        "failedToLoad": "Failed to load sessions. Please try again later or contact support.",
         "collector": "Collector",
         "session": "session"
     },

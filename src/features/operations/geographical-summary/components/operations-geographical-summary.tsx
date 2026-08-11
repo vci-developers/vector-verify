@@ -14,6 +14,7 @@ import {
     GEOGRAPHICAL_VIEWS,
     type GeographicalView,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
+import ErrorBanner from '@/components/ui/error-banner';
 
 interface OperationsGeographicalSummaryProps {
     programId: number;
@@ -84,7 +85,11 @@ export default function OperationsGeographicalSummary({
         return (
             <div className="mt-4 space-y-3">
                 {tabs}
-                <p className="text-destructive text-sm">{t('countryError')}</p>
+                <ErrorBanner message={t('countryError')} />
+                <Skeleton
+                    className="h-125 w-full rounded-md"
+                    variant="destructive"
+                />
             </div>
         );
     }

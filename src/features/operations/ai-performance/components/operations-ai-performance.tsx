@@ -8,6 +8,7 @@ import { Info } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
+import ErrorBanner from '@/components/ui/error-banner';
 
 interface OperationsAiPerformanceProps {
     siteIds: number[];
@@ -34,15 +35,7 @@ export default function OperationsAiPerformance({
 
     const isLoading =
         isGetAnnotationsSummaryPending || !getAnnotationsSummaryResult;
-
-    if (!isLoading && !getAnnotationsSummaryResult.ok) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAnnotationsSummaryResult.error.message ??
-                    'Failed to load annotations summary.'}
-            </p>
-        );
-    }
+    const isError = !isLoading && !getAnnotationsSummaryResult.ok;
 
     const annotationsSummary = getAnnotationsSummaryResult?.ok
         ? getAnnotationsSummaryResult.data
@@ -62,10 +55,14 @@ export default function OperationsAiPerformance({
 
     return (
         <div className="space-y-4">
-            <div className="border-accent bg-accent/40 text-accent-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-sm">
-                <Info className="h-4 w-4" />
-                <span>{t('coverageReflects')}</span>
-            </div>
+            {isError ? (
+                <ErrorBanner message={t('failedToLoad')} />
+            ) : (
+                <div className="border-accent bg-accent/40 text-accent-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-sm">
+                    <Info className="h-4 w-4" />
+                    <span>{t('coverageReflects')}</span>
+                </div>
+            )}
 
             <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
                 <Fragment>
@@ -74,10 +71,22 @@ export default function OperationsAiPerformance({
                             <p className="text-muted-foreground text-sm">
                                 {t('coverage')}
                             </p>
-                            {isLoading ? (
+                            {isLoading || isError ? (
                                 <div className="space-y-2 py-2">
-                                    <Skeleton width="sm" height="xl" />
-                                    <Skeleton width="lg" height="sm" />
+                                    <Skeleton
+                                        width="sm"
+                                        height="xl"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
+                                    <Skeleton
+                                        width="lg"
+                                        height="sm"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
                                 </div>
                             ) : (
                                 <Fragment>
@@ -103,10 +112,22 @@ export default function OperationsAiPerformance({
                             <p className="text-muted-foreground text-sm">
                                 {t('reviewedSpecimens')}
                             </p>
-                            {isLoading ? (
+                            {isLoading || isError ? (
                                 <div className="space-y-2 py-2">
-                                    <Skeleton width="sm" height="xl" />
-                                    <Skeleton width="lg" height="sm" />
+                                    <Skeleton
+                                        width="sm"
+                                        height="xl"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
+                                    <Skeleton
+                                        width="lg"
+                                        height="sm"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
                                 </div>
                             ) : (
                                 <Fragment>
@@ -139,6 +160,7 @@ export default function OperationsAiPerformance({
                         annotationsSummary?.confusionMatrices?.species
                     }
                     isLoading={isLoading}
+                    isError={isError}
                 />
 
                 <SpecimenConfusionMatrix
@@ -148,6 +170,7 @@ export default function OperationsAiPerformance({
                     predictionAxisLabel="VectorCam Sex Label"
                     confusionMatrix={annotationsSummary?.confusionMatrices?.sex}
                     isLoading={isLoading}
+                    isError={isError}
                 />
 
                 <SpecimenConfusionMatrix
@@ -159,6 +182,7 @@ export default function OperationsAiPerformance({
                         annotationsSummary?.confusionMatrices?.abdomenStatus
                     }
                     isLoading={isLoading}
+                    isError={isError}
                 />
             </div>
         </div>
