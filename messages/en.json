@@ -120,7 +120,8 @@
     "Review": {
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
-        "selectALocation": "Select a location to view data."
+        "selectALocation": "Select a location to view data.",
+        "somethingWentWrong": "Something went wrong loading this page. Please try again later or contact support."
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",

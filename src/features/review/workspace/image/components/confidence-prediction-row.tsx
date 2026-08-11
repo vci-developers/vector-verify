@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/utils/cn';
 import { AlertTriangle } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
@@ -32,7 +33,13 @@ export default function ConfidencePredictionRow({
                 )}
             >
                 <span className="w-10 shrink-0">
-                    {!isLoading && label ? `${confidencePercentage}%` : '—'}
+                    {isLoading ? (
+                        <Skeleton height="sm" width="sm" />
+                    ) : label ? (
+                        `${confidencePercentage}%`
+                    ) : (
+                        '—'
+                    )}
                 </span>
                 <span className="w-4 shrink-0">
                     {isLowConfidence && (

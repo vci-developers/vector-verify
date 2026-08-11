@@ -7,9 +7,11 @@ import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Fragment } from 'react/jsx-runtime';
 
 interface ImageReviewDetailsProps {
-    specimen: Specimen;
+    specimen: Specimen | undefined;
     currentImage: SpecimenImage | null;
     timezone: string | null;
 }
@@ -21,17 +23,20 @@ export default function ImageReviewDetails({
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
 
-    const totalImagesUploaded = specimen.images?.length ?? 0;
-    const expectedImagesCount = specimen.expectedImages;
+    const totalImagesUploaded = specimen?.images?.length;
+    const expectedImagesCount = specimen?.expectedImages;
 
     const hasReliableExpectedCount =
         expectedImagesCount != null &&
+        totalImagesUploaded != null &&
         expectedImagesCount > 0 &&
         totalImagesUploaded <= expectedImagesCount;
 
     const imagesCapturedLabel = hasReliableExpectedCount
         ? `${totalImagesUploaded} / ${expectedImagesCount}`
-        : `${totalImagesUploaded}`;
+        : !totalImagesUploaded
+          ? '—'
+          : `${totalImagesUploaded}`;
     const isMissingExpectedImages =
         hasReliableExpectedCount && totalImagesUploaded < expectedImagesCount;
 
@@ -87,14 +92,26 @@ export default function ImageReviewDetails({
                 <p className="text-muted-foreground text-sm uppercase">
                     {t('specimenId')}
                 </p>
-                <p className="text-lg font-semibold">{specimen.specimenId}</p>
+                {isLoading ? (
+                    <Skeleton height="md" width="md" />
+                ) : (
+                    <p className="text-lg font-semibold">
+                        {specimen.specimenId}
+                    </p>
+                )}
             </div>
 
             <Separator />
 
             <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                 <dt className="text-muted-foreground">{t('sessionId')}</dt>
-                <dd>{specimen.sessionId}</dd>
+                <dd>
+                    {isLoading ? (
+                        <Skeleton height="sm" width="sm" />
+                    ) : (
+                        specimen.sessionId
+                    )}
+                </dd>
 
                 <dt className="text-muted-foreground">{t('imagesCaptured')}</dt>
                 <dd
@@ -104,25 +121,37 @@ export default function ImageReviewDetails({
                             'text-destructive font-medium',
                     )}
                 >
-                    {isMissingExpectedImages && (
-                        <AlertCircle className="h-3.5 w-3.5" />
+                    {isLoading ? (
+                        <Skeleton height="sm" width="sm" />
+                    ) : (
+                        <Fragment>
+                            {isMissingExpectedImages && (
+                                <AlertCircle className="h-3.5 w-3.5" />
+                            )}
+                            {imagesCapturedLabel}
+                        </Fragment>
                     )}
-                    {imagesCapturedLabel}
                 </dd>
 
                 <dt className="text-muted-foreground">
                     {t('needsFurtherProcessing')}
                 </dt>
                 <dd>
-                    <Badge
-                        variant={
-                            specimen.shouldProcessFurther
-                                ? 'default'
-                                : 'secondary'
-                        }
-                    >
-                        {specimen.shouldProcessFurther ? t('yes') : t('no')}
-                    </Badge>
+                    {isLoading ? (
+                        <Skeleton height="sm" width="sm" />
+                    ) : (
+                        <Badge
+                            variant={
+                                specimen?.shouldProcessFurther
+                                    ? 'default'
+                                    : 'secondary'
+                            }
+                        >
+                            {specimen?.shouldProcessFurther
+                                ? t('yes')
+                                : t('no')}
+                        </Badge>
+                    )}
                 </dd>
             </dl>
 
@@ -132,12 +161,24 @@ export default function ImageReviewDetails({
                 <p className="text-sm font-semibold">{t('currentImage')}</p>
                 <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                     <dt className="text-muted-foreground">{t('capturedAt')}</dt>
-                    <dd>{capturedAtLabel}</dd>
+                    <dd>
+                        {isLoading ? (
+                            <Skeleton height="sm" width="lg" />
+                        ) : (
+                            capturedAtLabel
+                        )}
+                    </dd>
 
                     <dt className="text-muted-foreground">
                         {t('submittedAt')}
                     </dt>
-                    <dd>{submittedAtLabel}</dd>
+                    <dd>
+                        {isLoading ? (
+                            <Skeleton height="sm" width="lg" />
+                        ) : (
+                            submittedAtLabel
+                        )}
+                    </dd>
                 </dl>
             </div>
 
@@ -147,15 +188,33 @@ export default function ImageReviewDetails({
                 <p className="text-sm font-semibold">{t('modelPredictions')}</p>
                 <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                     <dt className="text-muted-foreground">{t('species')}</dt>
-                    <dd>{currentImage?.species ?? '—'}</dd>
+                    <dd>
+                        {isLoading ? (
+                            <Skeleton height="sm" width="sm" />
+                        ) : (
+                            (currentImage?.species ?? '—')
+                        )}
+                    </dd>
 
                     <dt className="text-muted-foreground">{t('sex')}</dt>
-                    <dd>{currentImage?.sex ?? '—'}</dd>
+                    <dd>
+                        {isLoading ? (
+                            <Skeleton height="sm" width="sm" />
+                        ) : (
+                            (currentImage?.sex ?? '—')
+                        )}
+                    </dd>
 
                     <dt className="text-muted-foreground">
                         {t('abdomenStatus')}
                     </dt>
-                    <dd>{currentImage?.abdomenStatus ?? '—'}</dd>
+                    <dd>
+                        {isLoading ? (
+                            <Skeleton height="sm" width="sm" />
+                        ) : (
+                            (currentImage?.abdomenStatus ?? '—')
+                        )}
+                    </dd>
                 </dl>
             </div>
 
