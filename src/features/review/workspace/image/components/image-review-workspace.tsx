@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
@@ -123,13 +123,16 @@ export default function ImageReviewWorkspace({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <p className="text-sm font-semibold">
-                        {totalSpecimens &&
-                            t('specimenCounter', {
+                    {!totalSpecimens ? (
+                        <Skeleton height="md" width="lg" />
+                    ) : (
+                        <p className="text-sm font-semibold">
+                            {t('specimenCounter', {
                                 current: specimenIndex + 1,
                                 total: totalSpecimens,
                             })}
-                    </p>
+                        </p>
+                    )}
                     {!isLoading && !isError && (
                         <MissingSpecimensTooltip
                             specimensMissing={missingSpecimenCount}
@@ -176,9 +179,12 @@ export default function ImageReviewWorkspace({
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
-                    <CardContent className="p-4">
+                    <CardContent className="space-y-4 p-4">
                         {isLoading || !currentSpecimen ? (
-                            <Skeleton className="aspect-4/3 w-full rounded-lg" />
+                            <Fragment>
+                                <Skeleton className="aspect-4/3 w-full rounded-lg" />
+                                <Skeleton height="sm" width="lg" />
+                            </Fragment>
                         ) : (
                             <SpecimenImageCarousel
                                 key={currentSpecimen.id}
