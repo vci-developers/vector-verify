@@ -116,7 +116,11 @@ export default function ReviewSitesListPageClient() {
                 <CardContent className="space-y-4 p-6">
                     {isGetUserPermissionsPending ||
                     !getUserPermissionsResult ? (
-                        <Skeleton width="full" height="xxl" />
+                        <Fragment>
+                            <Skeleton width="full" height="xxl" />
+                            <Separator />
+                            <SkeletonList count={5} height="xl" width="full" />
+                        </Fragment>
                     ) : !getUserPermissionsResult.ok ? (
                         <ErrorBanner
                             message={
