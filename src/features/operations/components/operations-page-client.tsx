@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { useIsUgandaProgram } from '@/api/program/hooks/use-is-uganda-program';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { endOfMonth, format } from 'date-fns';
@@ -13,6 +14,7 @@ import OperationsGeographicalSummary from '@/features/operations/geographical-su
 import ExportDialog from '@/features/operations/components/export/export-dialog';
 import OperationsSpecimenComposition from '@/features/operations/specimen-composition/components/operations-specimen-composition';
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
+import OperationsInterventionMetrics from '@/features/operations/intervention-metrics/components/operations-intervention-metrics';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
 import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
 import {
@@ -25,7 +27,10 @@ import EmptyBanner from '@/components/ui/empty-banner';
 const OPERATIONS_TABS: {
     value: OperationsTab;
     label: string;
-    shouldRender: (permissions: UserPermissions) => boolean;
+    shouldRender: (
+        permissions: UserPermissions,
+        isUgandaProgram: boolean,
+    ) => boolean;
 }[] = [
     {
         value: 'geographical-summary',
@@ -40,8 +45,13 @@ const OPERATIONS_TABS: {
     {
         value: 'ai-performance',
         label: 'AI PERFORMANCE',
-        shouldRender: (permissions: UserPermissions) =>
+        shouldRender: permissions =>
             permissions.annotations.viewAndWriteAnnotationTasks,
+    },
+    {
+        value: 'intervention-metrics',
+        label: 'INTERVENTION METRICS',
+        shouldRender: (_permissions, isUgandaProgram) => isUgandaProgram,
     },
     {
         value: 'field-user-compliance',
@@ -61,6 +71,12 @@ export default function OperationsPageClient() {
         data: getUserPermissionsResult,
         isPending: isGetUserPermissionsPending,
     } = useGetUserPermissions();
+
+    const programId = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.programId
+        : undefined;
+
+    const isUgandaProgram = useIsUgandaProgram(programId);
 
     const accessibleSites = getUserPermissionsResult?.ok
         ? getUserPermissionsResult.data.permissions.sites.canAccessSites
@@ -130,7 +146,10 @@ export default function OperationsPageClient() {
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
 
     const visibleTabs = OPERATIONS_TABS.filter(tab =>
-        tab.shouldRender(getUserPermissionsResult.data.permissions),
+        tab.shouldRender(
+            getUserPermissionsResult.data.permissions,
+            isUgandaProgram,
+        ),
     );
 
     return (
@@ -202,6 +221,14 @@ export default function OperationsPageClient() {
                                     siteIdToLocationLabel={
                                         siteIdToLocationLabel
                                     }
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
+                            )}
+
+                            {activeTab === 'intervention-metrics' && (
+                                <OperationsInterventionMetrics
+                                    sites={descendantsOfSelectedLocations}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

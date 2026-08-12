@@ -1,8 +1,8 @@
-import { getInterventionMetrics } from '@/api/session/get-intervention-metrics';
+import { getSessionsMetrics } from '@/api/session/get-sessions-metrics';
 import {
-    getInterventionMetricsQueryParamsSchema,
-    type GetInterventionMetricsResponseBody,
-} from '@/api/session/validation/get-intervention-metrics-schema';
+    getSessionsMetricsQueryParamsSchema,
+    type GetSessionsMetricsResponseBody,
+} from '@/api/session/validation/get-sessions-metrics-schema';
 import { err } from '@/lib/result/result';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { NextResponse } from 'next/server';
@@ -12,27 +12,27 @@ export async function GET(request: Request) {
     const queryParams = Object.fromEntries(url.searchParams.entries());
 
     const parsedQueryParams =
-        getInterventionMetricsQueryParamsSchema.safeParse(queryParams);
+        getSessionsMetricsQueryParamsSchema.safeParse(queryParams);
     if (!parsedQueryParams.success) {
         return NextResponse.json(
             err({
                 kind: 'client',
                 status: 400,
                 message:
-                    'Invalid query parameters: districts, startDate, and endDate are required',
+                    'Invalid query parameters: district, startDate, and endDate are required',
             }),
             { status: 400 },
         );
     }
 
-    const authorizedGetInterventionMetricsResult =
-        await withAuthSession<GetInterventionMetricsResponseBody>(accessToken =>
-            getInterventionMetrics(accessToken, parsedQueryParams.data),
+    const authorizedGetSessionsMetricsResult =
+        await withAuthSession<GetSessionsMetricsResponseBody>(accessToken =>
+            getSessionsMetrics(accessToken, parsedQueryParams.data),
         );
 
-    return NextResponse.json(authorizedGetInterventionMetricsResult, {
-        status: authorizedGetInterventionMetricsResult.ok
+    return NextResponse.json(authorizedGetSessionsMetricsResult, {
+        status: authorizedGetSessionsMetricsResult.ok
             ? 200
-            : (authorizedGetInterventionMetricsResult.error.status ?? 400),
+            : (authorizedGetSessionsMetricsResult.error.status ?? 400),
     });
 }
