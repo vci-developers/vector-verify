@@ -77,47 +77,33 @@ export function buildInterventionMetricsTotals(
     };
 }
 
-export type CoverageStatus = 'critical' | 'needsImprovement' | 'good';
-
 const NET_USAGE_RATE_CRITICAL_MAX_PERCENT = 30;
 const NET_USAGE_RATE_GOOD_MIN_PERCENT = 80;
 
-export function getNetUsageRateStatus(
-    netUsageRatePercent: number | null,
-): CoverageStatus | null {
-    if (netUsageRatePercent == null) return null;
-    if (netUsageRatePercent < NET_USAGE_RATE_CRITICAL_MAX_PERCENT)
-        return 'critical';
-    if (netUsageRatePercent < NET_USAGE_RATE_GOOD_MIN_PERCENT)
-        return 'needsImprovement';
-    return 'good';
-}
-
-const NEUTRAL_CARD_STYLE = {
-    card: 'border-border bg-card',
-    progressIndicator: '',
-};
-
-const COVERAGE_STATUS_STYLES: Record<
-    CoverageStatus,
-    { card: string; progressIndicator: string }
-> = {
-    critical: {
-        card: 'border-destructive/40 bg-destructive/5',
-        progressIndicator: '[&_[data-slot=progress-indicator]]:bg-destructive',
-    },
-    needsImprovement: {
-        card: 'border-warning/40 bg-warning/5',
-        progressIndicator: '[&_[data-slot=progress-indicator]]:bg-warning',
-    },
-    good: {
+export function getCoverageCardStyle(netUsageRatePercent: number | null): {
+    card: string;
+    progressIndicator: string;
+} {
+    if (netUsageRatePercent == null) {
+        return { card: 'border-border bg-card', progressIndicator: '' };
+    }
+    if (netUsageRatePercent < NET_USAGE_RATE_CRITICAL_MAX_PERCENT) {
+        return {
+            card: 'border-destructive/40 bg-destructive/5',
+            progressIndicator:
+                '[&_[data-slot=progress-indicator]]:bg-destructive',
+        };
+    }
+    if (netUsageRatePercent < NET_USAGE_RATE_GOOD_MIN_PERCENT) {
+        return {
+            card: 'border-warning/40 bg-warning/5',
+            progressIndicator: '[&_[data-slot=progress-indicator]]:bg-warning',
+        };
+    }
+    return {
         card: 'border-success/40 bg-success/5',
         progressIndicator: '[&_[data-slot=progress-indicator]]:bg-success',
-    },
-};
-
-export function getCoverageCardStyle(status: CoverageStatus | null) {
-    return status ? COVERAGE_STATUS_STYLES[status] : NEUTRAL_CARD_STYLE;
+    };
 }
 
 const UNAVAILABLE_PLACEHOLDER = '—';

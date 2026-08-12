@@ -13,7 +13,6 @@ import {
     formatInterventionPercent,
     formatInterventionRatio,
     getCoverageCardStyle,
-    getNetUsageRateStatus,
 } from '@/features/operations/intervention-metrics/utils/intervention-metrics-helpers';
 import { useTranslations } from 'next-intl';
 
@@ -55,7 +54,7 @@ export default function OperationsInterventionMetrics({
         );
     }
 
-    const totals = !isLoading
+    const interventionMetricsTotals = !isLoading
         ? buildInterventionMetricsTotals(
               sessionsMetricsQueries
                   .map(query => query.data)
@@ -63,9 +62,8 @@ export default function OperationsInterventionMetrics({
           )
         : undefined;
 
-    const netUsageRate = totals?.netUsageRatePercent ?? null;
-    const netUsageStatus = getNetUsageRateStatus(netUsageRate);
-    const netUsageStatusStyle = getCoverageCardStyle(netUsageStatus);
+    const netUsageRate = interventionMetricsTotals?.netUsageRatePercent ?? null;
+    const netUsageStatusStyle = getCoverageCardStyle(netUsageRate);
 
     return (
         <div className="space-y-3">
@@ -97,10 +95,10 @@ export default function OperationsInterventionMetrics({
                                 <p className="text-muted-foreground mt-2 text-sm">
                                     {t('netUsageSubtitle', {
                                         peopleUnderNet:
-                                            totals?.totalPeopleSleptUnderLlin ??
+                                            interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
                                             0,
                                         peopleSurveyed:
-                                            totals?.peopleInAllHousesInspected ??
+                                            interventionMetricsTotals?.peopleInAllHousesInspected ??
                                             0,
                                     })}
                                 </p>
@@ -113,12 +111,16 @@ export default function OperationsInterventionMetrics({
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     <StatBadge
                                         label={t('peopleNotUnderNet')}
-                                        value={totals?.peopleNotUnderNet ?? 0}
+                                        value={
+                                            interventionMetricsTotals?.peopleNotUnderNet ??
+                                            0
+                                        }
                                     />
                                     <StatBadge
                                         label={t('housesUsedForCollection')}
                                         value={
-                                            totals?.housesUsedForCollection ?? 0
+                                            interventionMetricsTotals?.housesUsedForCollection ??
+                                            0
                                         }
                                     />
                                 </div>
@@ -141,7 +143,8 @@ export default function OperationsInterventionMetrics({
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">
                                     {formatInterventionRatio(
-                                        totals?.peoplePerNetRatio ?? null,
+                                        interventionMetricsTotals?.peoplePerNetRatio ??
+                                            null,
                                     )}
                                 </p>
                                 <p className="text-muted-foreground mt-2 text-sm">
@@ -150,7 +153,10 @@ export default function OperationsInterventionMetrics({
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     <StatBadge
                                         label={t('netsAvailable')}
-                                        value={totals?.totalLlins ?? 0}
+                                        value={
+                                            interventionMetricsTotals?.totalLlins ??
+                                            0
+                                        }
                                     />
                                 </div>
                             </Fragment>

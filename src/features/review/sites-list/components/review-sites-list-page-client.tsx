@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { useIsUgandaProgram } from '@/api/program/hooks/use-is-uganda-program';
+import { useIsUgandaProgram } from '@/lib/hooks/use-is-uganda-program';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
