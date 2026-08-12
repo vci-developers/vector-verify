@@ -20,16 +20,19 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
-import type { GetUserProfileSuccessPayload } from '@/api/user/validation/get-user-profile-schema';
+import { useGetUserProfile } from '@/api/user/hooks/use-get-user-profile';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { clearResendCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const redirect = useSearchParams().get('redirect');
     const t = useTranslations('Auth');
+    const { refetch: refetchUserProfile } = useGetUserProfile({
+        enabled: false,
+    });
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -57,24 +60,14 @@ export default function LoginForm() {
             return;
         }
 
-        const userProfileResponse = await fetch('api/users/profile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-        });
-        const userProfileResult: Result<
-            GetUserProfileSuccessPayload,
-            NetworkError
-        > = await userProfileResponse.json();
+        const { data: userProfileResult } = await refetchUserProfile();
 
-        if (!userProfileResponse.ok || !userProfileResult.ok) {
+        if (!userProfileResult || !userProfileResult.ok) {
             console.error('Failed to Retrieve User Profile');
             return;
         }
 
-        clearResendCooldown();
+        clearVerificationEmailCooldown();
 
         if (!userProfileResult.data.user.emailVerified && redirect) {
             router.replace(redirect);
