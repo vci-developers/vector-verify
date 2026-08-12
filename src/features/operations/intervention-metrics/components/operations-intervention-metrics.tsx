@@ -78,7 +78,7 @@ export default function OperationsInterventionMetrics({
 
             <div className="grid gap-3 sm:grid-cols-2">
                 <Card className={`${netUsageStatusStyle.card} gap-0 py-0`}>
-                    <CardContent className="p-4">
+                    <CardContent className="flex h-full flex-col p-4">
                         <p className="text-muted-foreground text-sm">
                             {t('netUsageTitle')}
                         </p>
@@ -108,7 +108,7 @@ export default function OperationsInterventionMetrics({
                                         className={`mt-3 h-2 ${netUsageStatusStyle.progressIndicator}`}
                                     />
                                 )}
-                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="mt-auto flex flex-wrap gap-2 pt-4">
                                     <StatBadge
                                         label={t('peopleNotUnderNet')}
                                         value={
@@ -130,7 +130,7 @@ export default function OperationsInterventionMetrics({
                 </Card>
 
                 <Card className="border-border bg-card gap-0 py-0">
-                    <CardContent className="p-4">
+                    <CardContent className="flex h-full flex-col p-4">
                         <p className="text-muted-foreground text-sm">
                             {t('peoplePerNetTitle')}
                         </p>
@@ -150,7 +150,7 @@ export default function OperationsInterventionMetrics({
                                 <p className="text-muted-foreground mt-2 text-sm">
                                     {t('peoplePerNetDescription')}
                                 </p>
-                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="mt-auto flex flex-wrap gap-2 pt-4">
                                     <StatBadge
                                         label={t('netsAvailable')}
                                         value={
