@@ -4,15 +4,9 @@ import {
     getLocationTypeName,
     getSiteAndDescendants,
     getTopLevelSites,
+    getUniqueDistricts,
 } from '@/lib/location/site-tree';
 import { useMemo } from 'react';
-
-function getUniqueDistricts(sites: Site[]): string[] {
-    const districts = [
-        ...new Set(sites.map(site => site.district?.trim()).filter(Boolean)),
-    ] as string[];
-    return districts.sort();
-}
 
 export function useLocationMultiSelection(
     accessibleSites: Site[],
