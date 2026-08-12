@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
+import { useIsUgandaProgram } from '@/api/program/hooks/use-is-uganda-program';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,15 +47,7 @@ export default function ReviewSitesListPageClient() {
         ? getUserPermissionsResult.data.programId
         : undefined;
 
-    const { data: getUgandaProgramsResult } = useGetPrograms({
-        country: 'Uganda',
-    });
-
-    const isUgandaProgram =
-        getUgandaProgramsResult?.ok === true &&
-        getUgandaProgramsResult.data.programs.some(
-            program => program.programId === programId,
-        );
+    const isUgandaProgram = useIsUgandaProgram(programId);
 
     const visibleTabs = REVIEW_TABS.filter(
         tab => tab.value !== 'submissions' || isUgandaProgram,
