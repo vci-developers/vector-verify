@@ -61,7 +61,9 @@ export default function AnnotationWorkspace({
                         });
                         setIsEditing(false);
                     } else {
-                        toast.error(t('couldNotUpdate'));
+                        toast.error(
+                            result.error.message || t('couldNotUpdate'),
+                        );
                     }
                 },
                 onError: () => {
