@@ -132,13 +132,17 @@
     "Review": {
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
-        "selectALocation": "Select a location to view data."
+        "selectALocation": "Select a location to view data.",
+        "sitesListTab": "SITES LIST",
+        "submissionsTab": "SUBMISSIONS",
+        "sessionsTab": "SESSIONS"
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
         "inReview": "In Review",
         "certified": "Certified",
         "submitted": "Submitted",
+        "notApplicable": "Not Applicable",
         "filterByState": "Filter by state",
         "noSessions": "No sessions",
         "sitesNeedReview": "{count, plural, one {# site needs review} other {# sites need review}}",
@@ -146,6 +150,29 @@
         "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
         "noSitesForLocation": "No sites found for this location.",
         "noSitesMatchFilter": "No sites match this filter."
+    },
+    "ReviewSessionsTable": {
+        "collectionCycle": "Collection Cycle",
+        "session": "Session",
+        "site": "Site",
+        "collectionDate": "Collection Date",
+        "sessionCreated": "Session Created",
+        "state": "State",
+        "unassigned": "Unassigned",
+        "unknownSite": "Unknown Site",
+        "cycleNumber": "Cycle {cycleNumber}",
+        "noSessions": "No sessions found for this filter.",
+        "allLocations": "All locations",
+        "searchPlaceholder": "Search sessions...",
+        "reassignColumnHeader": "Reassign Cycle",
+        "reassignConfirmTitle": "Reassign to a different cycle?",
+        "reassignConfirmDescription": "This session's Review Unit has already been certified or submitted. Reassigning it will reset that unit, and every session in it, back to Needs Review.",
+        "reassignCancel": "Cancel",
+        "reassignConfirm": "Reassign",
+        "reassignConfirming": "Reassigning...",
+        "reassignSuccess": "Session reassigned.",
+        "reassignResetSuccess": "Session reassigned. The affected Review Unit was reset to Needs Review.",
+        "reassignError": "Failed to reassign the session. Please try again."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",
