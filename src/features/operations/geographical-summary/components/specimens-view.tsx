@@ -40,10 +40,6 @@ export default function SpecimensView({
         startDate,
         endDate,
     });
-    // const markers: SiteMarker[] = [];
-    // const totalSites = 0;
-    // const isPending = false;
-    // const isError = true;
 
     const siteMapMounted = useRef(false);
     if (!isPending && !isError && markers.length > 0)
@@ -56,11 +52,8 @@ export default function SpecimensView({
                     <p className="text-muted-foreground text-xs">
                         {t('uniqueSites')}
                     </p>
-                    {isPending || isError ? (
-                        <Skeleton
-                            className="h-5 w-8"
-                            variant={isError ? 'destructive' : 'default'}
-                        />
+                    {isPending ? (
+                        <Skeleton className="h-5 w-8" />
                     ) : (
                         <p className="text-lg leading-none font-bold">
                             {totalSites}
