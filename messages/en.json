@@ -117,6 +117,18 @@
         "collector": "Collector",
         "session": "session"
     },
+    "OperationsInterventionMetrics": {
+        "interventionMetricsTitle": "Intervention Coverage Metrics",
+        "interventionMetricsDescription": "Bednet coverage across surveyed households for the selected locations and date range.",
+        "netUsageTitle": "Net Usage Rate",
+        "netUsageSubtitle": "{peopleUnderNet} of {peopleSurveyed} people surveyed slept under a net",
+        "noLlinsDistributed": "No nets distributed in this district",
+        "peopleNotUnderNet": "People Not Under Net",
+        "housesUsedForCollection": "Households Inspected",
+        "peoplePerNetTitle": "People per Net",
+        "peoplePerNetDescription": "Total people who slept under a net divided by total nets available.",
+        "netsAvailable": "Nets Available"
+    },
     "Review": {
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
