@@ -122,6 +122,7 @@
         "interventionMetricsDescription": "Bednet coverage across surveyed households for the selected locations and date range.",
         "netUsageTitle": "Net Usage Rate",
         "netUsageSubtitle": "{peopleUnderNet} of {peopleSurveyed} people surveyed slept under a net",
+        "noLlinsDistributed": "No nets distributed in this district",
         "peopleNotUnderNet": "People Not Under Net",
         "housesUsedForCollection": "Households Inspected",
         "peoplePerNetTitle": "People per Net",

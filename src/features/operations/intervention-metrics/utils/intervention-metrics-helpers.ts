@@ -62,7 +62,9 @@ export function buildInterventionMetricsTotals(
             : null;
 
     const netUsageRatePercent =
-        totalPeopleSleptUnderLlin != null && peopleInAllHousesInspected
+        totalPeopleSleptUnderLlin != null &&
+        peopleInAllHousesInspected &&
+        totalLlins
             ? (totalPeopleSleptUnderLlin / peopleInAllHousesInspected) * 100
             : null;
 

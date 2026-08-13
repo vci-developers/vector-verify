@@ -64,6 +64,7 @@ export default function OperationsInterventionMetrics({
 
     const netUsageRate = interventionMetricsTotals?.netUsageRatePercent ?? null;
     const netUsageStatusStyle = getCoverageCardStyle(netUsageRate);
+    const hasNoLlinsDistributed = interventionMetricsTotals?.totalLlins === 0;
 
     return (
         <div className="space-y-3">
@@ -90,17 +91,23 @@ export default function OperationsInterventionMetrics({
                         ) : (
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">
-                                    {formatInterventionPercent(netUsageRate)}
+                                    {hasNoLlinsDistributed
+                                        ? formatInterventionPercent(null)
+                                        : formatInterventionPercent(
+                                              netUsageRate,
+                                          )}
                                 </p>
                                 <p className="text-muted-foreground mt-2 text-sm">
-                                    {t('netUsageSubtitle', {
-                                        peopleUnderNet:
-                                            interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
-                                            0,
-                                        peopleSurveyed:
-                                            interventionMetricsTotals?.peopleInAllHousesInspected ??
-                                            0,
-                                    })}
+                                    {hasNoLlinsDistributed
+                                        ? t('noLlinsDistributed')
+                                        : t('netUsageSubtitle', {
+                                              peopleUnderNet:
+                                                  interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
+                                                  0,
+                                              peopleSurveyed:
+                                                  interventionMetricsTotals?.peopleInAllHousesInspected ??
+                                                  0,
+                                          })}
                                 </p>
                                 {netUsageRate != null && (
                                     <Progress
