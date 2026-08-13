@@ -47,7 +47,7 @@ export function useResendCooldown() {
     };
 }
 
-export function clearResendCooldown() {
+export function clearVerificationEmailCooldown() {
     if (typeof window === 'undefined') return;
     window.localStorage.removeItem(VERIFICATION_EMAIL_COOLDOWN_KEY);
 }
