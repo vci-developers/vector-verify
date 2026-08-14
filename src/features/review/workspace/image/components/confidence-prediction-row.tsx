@@ -35,7 +35,7 @@ export default function ConfidencePredictionRow({
                 <span className="w-10 shrink-0">
                     {isLoading ? (
                         <Skeleton height="sm" width="sm" />
-                    ) : label ? (
+                    ) : label && confidencePercentage != null ? (
                         `${confidencePercentage}%`
                     ) : (
                         '—'

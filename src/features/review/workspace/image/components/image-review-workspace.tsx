@@ -77,16 +77,16 @@ export default function ImageReviewWorkspace({
     const specimens = getAllSpecimensResult?.ok
         ? getAllSpecimensResult.data.specimens
         : undefined;
-    const isEmpty = !isLoading && !isError && specimens?.length === 0;
+    const isEmpty =
+        !isLoading && !isError && (!specimens || specimens.length === 0);
 
     const totalSpecimens = specimens?.length;
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
     );
-    const missingSpecimenCount = totalSpecimens
-        ? expectedSpecimensCount - totalSpecimens
-        : 0;
+    const missingSpecimenCount =
+        totalSpecimens != null ? expectedSpecimensCount - totalSpecimens : 0;
 
     const siteLabel = getSiteLabelParts(site).primaryLabel;
 
