@@ -84,7 +84,9 @@ export default function ImageReviewDetails({
             : null,
     };
 
-    const isLoading = !specimen || !currentImage;
+    const hasImages = totalImagesUploaded != null && totalImagesUploaded > 0;
+    const isLoading = !specimen || (!currentImage && hasImages);
+    const isEmpty = !isLoading && !hasImages;
 
     return (
         <div className="space-y-4">
@@ -159,96 +161,118 @@ export default function ImageReviewDetails({
 
             <div className="space-y-3">
                 <p className="text-sm font-semibold">{t('currentImage')}</p>
-                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-muted-foreground">{t('capturedAt')}</dt>
-                    <dd>
-                        {isLoading ? (
-                            <Skeleton height="sm" width="lg" />
-                        ) : (
-                            capturedAtLabel
-                        )}
-                    </dd>
+                {isEmpty ? (
+                    <p className="text-muted-foreground text-sm">
+                        {t('noImagesUploaded')}
+                    </p>
+                ) : (
+                    <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                        <dt className="text-muted-foreground">
+                            {t('capturedAt')}
+                        </dt>
+                        <dd>
+                            {isLoading ? (
+                                <Skeleton height="sm" width="lg" />
+                            ) : (
+                                capturedAtLabel
+                            )}
+                        </dd>
 
-                    <dt className="text-muted-foreground">
-                        {t('submittedAt')}
-                    </dt>
-                    <dd>
-                        {isLoading ? (
-                            <Skeleton height="sm" width="lg" />
-                        ) : (
-                            submittedAtLabel
-                        )}
-                    </dd>
-                </dl>
+                        <dt className="text-muted-foreground">
+                            {t('submittedAt')}
+                        </dt>
+                        <dd>
+                            {isLoading ? (
+                                <Skeleton height="sm" width="lg" />
+                            ) : (
+                                submittedAtLabel
+                            )}
+                        </dd>
+                    </dl>
+                )}
             </div>
 
-            <Separator />
+            {!isEmpty && (
+                <Fragment>
+                    <Separator />
 
-            <div className="space-y-3">
-                <p className="text-sm font-semibold">{t('modelPredictions')}</p>
-                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-muted-foreground">{t('species')}</dt>
-                    <dd>
-                        {isLoading ? (
-                            <Skeleton height="sm" width="sm" />
-                        ) : (
-                            (currentImage?.species ?? '—')
-                        )}
-                    </dd>
+                    <div className="space-y-3">
+                        <p className="text-sm font-semibold">
+                            {t('modelPredictions')}
+                        </p>
+                        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                            <dt className="text-muted-foreground">
+                                {t('species')}
+                            </dt>
+                            <dd>
+                                {isLoading ? (
+                                    <Skeleton height="sm" width="sm" />
+                                ) : (
+                                    (currentImage?.species ?? '—')
+                                )}
+                            </dd>
 
-                    <dt className="text-muted-foreground">{t('sex')}</dt>
-                    <dd>
-                        {isLoading ? (
-                            <Skeleton height="sm" width="sm" />
-                        ) : (
-                            (currentImage?.sex ?? '—')
-                        )}
-                    </dd>
+                            <dt className="text-muted-foreground">
+                                {t('sex')}
+                            </dt>
+                            <dd>
+                                {isLoading ? (
+                                    <Skeleton height="sm" width="sm" />
+                                ) : (
+                                    (currentImage?.sex ?? '—')
+                                )}
+                            </dd>
 
-                    <dt className="text-muted-foreground">
-                        {t('abdomenStatus')}
-                    </dt>
-                    <dd>
-                        {isLoading ? (
-                            <Skeleton height="sm" width="sm" />
-                        ) : (
-                            (currentImage?.abdomenStatus ?? '—')
-                        )}
-                    </dd>
-                </dl>
-            </div>
+                            <dt className="text-muted-foreground">
+                                {t('abdomenStatus')}
+                            </dt>
+                            <dd>
+                                {isLoading ? (
+                                    <Skeleton height="sm" width="sm" />
+                                ) : (
+                                    (currentImage?.abdomenStatus ?? '—')
+                                )}
+                            </dd>
+                        </dl>
+                    </div>
 
-            <Separator />
+                    <Separator />
 
-            <div className="space-y-3">
-                <p className="text-sm font-semibold">{t('modelConfidence')}</p>
-                <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                    <ConfidencePredictionRow
-                        category={t('species')}
-                        label={currentImage?.species}
-                        confidencePercentage={
-                            modelConfidencePercentages.species
-                        }
-                        isLoading={isLoading}
-                    />
+                    <div className="space-y-3">
+                        <p className="text-sm font-semibold">
+                            {t('modelConfidence')}
+                        </p>
+                        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+                            <ConfidencePredictionRow
+                                category={t('species')}
+                                label={currentImage?.species}
+                                confidencePercentage={
+                                    modelConfidencePercentages.species
+                                }
+                                isLoading={isLoading}
+                            />
 
-                    <ConfidencePredictionRow
-                        category={t('sex')}
-                        label={currentImage?.sex}
-                        confidencePercentage={modelConfidencePercentages.sex}
-                        isLoading={isLoading}
-                    />
+                            <ConfidencePredictionRow
+                                category={t('sex')}
+                                label={currentImage?.sex}
+                                confidencePercentage={
+                                    modelConfidencePercentages.sex
+                                }
+                                isLoading={isLoading}
+                            />
 
-                    <ConfidencePredictionRow
-                        category={t('abdomenStatus')}
-                        label={currentImage?.abdomenStatus}
-                        confidencePercentage={
-                            modelConfidencePercentages.abdomenStatus
-                        }
-                        isLoading={isLoading}
-                    />
-                </dl>
-            </div>
+                            <ConfidencePredictionRow
+                                category={t('abdomenStatus')}
+                                label={currentImage?.abdomenStatus}
+                                confidencePercentage={
+                                    modelConfidencePercentages.abdomenStatus
+                                }
+                                isLoading={isLoading}
+                            />
+                        </dl>
+                    </div>
+                </Fragment>
+            )}
         </div>
     );
 }

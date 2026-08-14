@@ -181,6 +181,7 @@
         "yes": "Yes",
         "no": "No",
         "currentImage": "Current Image",
+        "noImagesUploaded": "This specimen does not have any images uploaded.",
         "capturedAt": "Captured At",
         "submittedAt": "Submitted At",
         "modelPredictions": "Model Predictions",
