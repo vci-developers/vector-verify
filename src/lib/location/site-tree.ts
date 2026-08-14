@@ -19,6 +19,13 @@ export function getLocationTypeName(site: Site): string {
     return Object.keys(site.locationHierarchy).at(-1) ?? 'Location';
 }
 
+export function getUniqueDistricts(sites: Site[]): string[] {
+    const districts = [
+        ...new Set(sites.map(site => site.district?.trim()).filter(Boolean)),
+    ] as string[];
+    return districts.sort();
+}
+
 export function getSiteAndDescendants(
     accessibleSites: Site[],
     ancestorSiteId: number,
