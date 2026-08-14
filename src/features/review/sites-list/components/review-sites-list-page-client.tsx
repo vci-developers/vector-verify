@@ -25,11 +25,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
 import ErrorBanner from '@/components/ui/error-banner';
 
-const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
-    { value: 'sites-list', label: 'SITES LIST' },
-    { value: 'submissions', label: 'SUBMISSIONS' },
-];
-
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const [filters, setFilters] = useReviewFilters();
