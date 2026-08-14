@@ -184,8 +184,10 @@
     "ReviewMetadata": {
         "intro": "Review the metadata for this unit before continuing.",
         "legendConflict": "Conflicting values must be resolved to continue",
+        "legendRequired": "Required answers must be supplied to continue",
         "legendEdit": "Edit any value to correct it (optional)",
         "conflictsRemaining": "{count, plural, one {# conflict left to resolve} other {# conflicts left to resolve}}",
+        "requiredAnswersRemaining": "{count, plural, one {# required answer left to supply} other {# required answers left to supply}}",
         "editValueLabel": "Edit value",
         "valueColumn": "Value",
         "collectionDate": "Collection Date: ",

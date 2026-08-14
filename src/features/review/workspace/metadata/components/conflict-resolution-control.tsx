@@ -19,6 +19,7 @@ import {
 interface ConflictResolutionControlProps {
     fieldType: FormQuestionType;
     options: string[];
+    questionOptions: string[] | null;
     value: string | undefined;
     onValueChange: (value: string) => void;
     disabled: boolean;
@@ -27,6 +28,7 @@ interface ConflictResolutionControlProps {
 export default function ConflictResolutionControl({
     fieldType,
     options,
+    questionOptions,
     value,
     onValueChange,
     disabled,
@@ -38,17 +40,15 @@ export default function ConflictResolutionControl({
         return /^\d+$/.test(input) ? null : t('wholeNonNegativeIntegerError');
     }
 
-    if (fieldType === 'boolean') {
-        const booleanOptions = [
-            ...new Set([
-                BOOLEAN_TRUE_DISPLAY,
-                BOOLEAN_FALSE_DISPLAY,
-                ...options,
-            ]),
-        ];
+    if (fieldType === 'boolean' || fieldType === 'select') {
+        const selectOptions =
+            fieldType === 'boolean'
+                ? [BOOLEAN_TRUE_DISPLAY, BOOLEAN_FALSE_DISPLAY]
+                : (questionOptions ?? []);
+        const selectValue = value === NOT_APPLICABLE ? undefined : value;
         return (
             <Select
-                value={value}
+                value={selectValue}
                 onValueChange={onValueChange}
                 disabled={disabled}
             >
@@ -56,7 +56,7 @@ export default function ConflictResolutionControl({
                     <SelectValue placeholder={t('selectValuePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                    {booleanOptions.map(option => (
+                    {selectOptions.map(option => (
                         <SelectItem key={option} value={option}>
                             {option}
                         </SelectItem>

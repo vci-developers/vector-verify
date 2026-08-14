@@ -5,6 +5,7 @@ import {
     buildMetadataRow,
     flattenQuestions,
     formatDisplayValue,
+    questionToMetadataField,
     type MetadataSection,
 } from './metadata-section';
 
@@ -83,10 +84,7 @@ export function buildUnitIdentitySections(
         ),
         rows: nonIdentityQuestions.map(question =>
             buildMetadataRow(
-                'formAnswer',
-                String(question.id),
-                question.label,
-                question.type,
+                questionToMetadataField(question),
                 new Map(
                     group.units.map(unit => [
                         unit.sessionId,

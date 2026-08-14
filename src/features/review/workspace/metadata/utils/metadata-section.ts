@@ -62,6 +62,30 @@ const SURVEILLANCE_FORM_FIELDS = [
     fieldType: FormQuestionType;
 }[];
 
+export const SURVEILLANCE_FIELD_DEPENDENCIES: Record<
+    string,
+    { dependentRowIds: string[]; disablingDisplayValues: string[] }
+> = {
+    'surveillanceForm.wasIrsConducted': {
+        dependentRowIds: ['surveillanceForm.monthsSinceIrs'],
+        disablingDisplayValues: ['No', NOT_APPLICABLE],
+    },
+    'surveillanceForm.numLlinsAvailable': {
+        dependentRowIds: [
+            'surveillanceForm.llinType',
+            'surveillanceForm.llinBrand',
+            'surveillanceForm.numPeopleSleptUnderLlin',
+        ],
+        disablingDisplayValues: ['0', NOT_APPLICABLE],
+    },
+};
+
+const SURVEILLANCE_REQUIRED_ROW_IDS = new Set(
+    Object.values(SURVEILLANCE_FIELD_DEPENDENCIES).flatMap(
+        dependency => dependency.dependentRowIds,
+    ),
+);
+
 export interface MetadataRow {
     id: string;
     label: string;
@@ -70,6 +94,8 @@ export interface MetadataRow {
     fieldType: FormQuestionType;
     fieldValueBySessionId: Map<number, unknown>;
     hasConflict: boolean;
+    required: boolean;
+    options: string[] | null;
 }
 
 export interface MetadataSection {
@@ -114,10 +140,15 @@ export function buildSurveillanceSection(
         } of SURVEILLANCE_FORM_FIELDS) {
             rows.push(
                 buildMetadataRow(
-                    'surveillanceForm',
-                    fieldName,
-                    label,
-                    fieldType,
+                    {
+                        entity: 'surveillanceForm',
+                        fieldName,
+                        label,
+                        fieldType,
+                        required: SURVEILLANCE_REQUIRED_ROW_IDS.has(
+                            `surveillanceForm.${fieldName}`,
+                        ),
+                    },
                     new Map(
                         sessions.map(session => [
                             session.sessionId,
@@ -146,10 +177,7 @@ export function buildDynamicSessionSection(
     )) {
         rows.push(
             buildMetadataRow(
-                'formAnswer',
-                String(question.id),
-                question.label,
-                question.type,
+                questionToMetadataField(question),
                 new Map(
                     sessions.map(session => [
                         session.sessionId,
@@ -169,10 +197,7 @@ export function buildDynamicSessionSection(
 function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
     return SESSION_FIELDS.map(({ fieldName, label, fieldType }) =>
         buildMetadataRow(
-            'session',
-            fieldName,
-            label,
-            fieldType,
+            { entity: 'session', fieldName, label, fieldType },
             new Map(
                 sessions.map(session => [
                     session.sessionId,
@@ -184,13 +209,18 @@ function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
 }
 
 export function buildMetadataRow(
-    entity: MetadataRow['entity'],
-    fieldName: string,
-    label: string,
-    fieldType: FormQuestionType,
+    field: {
+        entity: MetadataRow['entity'];
+        fieldName: string;
+        label: string;
+        fieldType: FormQuestionType;
+        required?: boolean;
+        options?: string[] | null;
+    },
     fieldValueBySessionId: Map<number, unknown>,
     groupKey?: string,
 ): MetadataRow {
+    const { entity, fieldName, label, fieldType, required, options } = field;
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(formatDisplayValue),
     );
@@ -204,5 +234,20 @@ export function buildMetadataRow(
         fieldType,
         fieldValueBySessionId,
         hasConflict: distinctDisplayValues.size > 1,
+        required: required ?? false,
+        options: options ?? null,
+    };
+}
+
+export function questionToMetadataField(
+    question: FormQuestion,
+): Parameters<typeof buildMetadataRow>[0] {
+    return {
+        entity: 'formAnswer',
+        fieldName: String(question.id),
+        label: question.label,
+        fieldType: question.type,
+        required: question.required,
+        options: question.options,
     };
 }
