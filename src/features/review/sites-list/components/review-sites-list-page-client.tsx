@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
-import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
+import { useIsUgandaProgram } from '@/lib/hooks/use-is-uganda-program';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ClipboardList } from 'lucide-react';
 import { useLocationSelection } from '@/lib/location/use-location-selection';
+import { getDefaultMonthRange } from '@/lib/view-state/month-range';
 import {
     useReviewFilters,
     type ReviewTab,
@@ -17,18 +18,20 @@ import {
 import ReviewSitesListHeader from '@/features/review/sites-list/components/layout/review-sites-list-header';
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
+import SessionsTable from '@/features/review/sessions-table/components/sessions-table';
 import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
-
-const REVIEW_TABS: { value: ReviewTab; label: string }[] = [
-    { value: 'sites-list', label: 'SITES LIST' },
-    { value: 'submissions', label: 'SUBMISSIONS' },
-];
 
 export default function ReviewSitesListPageClient() {
     const t = useTranslations('Review');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useReviewFilters();
+
+    const reviewTabs: { value: ReviewTab; label: string }[] = [
+        { value: 'sites-list', label: t('sitesListTab') },
+        { value: 'submissions', label: t('submissionsTab') },
+        { value: 'sessions', label: t('sessionsTab') },
+    ];
     const {
         activeTab,
         startMonth,
@@ -47,17 +50,9 @@ export default function ReviewSitesListPageClient() {
         ? getUserPermissionsResult.data.programId
         : undefined;
 
-    const { data: getUgandaProgramsResult } = useGetPrograms({
-        country: 'Uganda',
-    });
+    const isUgandaProgram = useIsUgandaProgram(programId);
 
-    const isUgandaProgram =
-        getUgandaProgramsResult?.ok === true &&
-        getUgandaProgramsResult.data.programs.some(
-            program => program.programId === programId,
-        );
-
-    const visibleTabs = REVIEW_TABS.filter(
+    const visibleTabs = reviewTabs.filter(
         tab => tab.value !== 'submissions' || isUgandaProgram,
     );
 
@@ -89,6 +84,20 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     function handleTabChange(tab: ReviewTab) {
+        const isSessionsTab = tab === 'sessions' || activeTab === 'sessions';
+
+        if (isSessionsTab) {
+            setFilters({
+                activeTab: tab,
+                selectedLocation: '',
+                selectedCycleIds: [],
+                ...getDefaultMonthRange(new Date()),
+                selectedReviewStates:
+                    tab === 'sessions' ? [] : ['NEEDS_REVIEW'],
+            });
+            return;
+        }
+
         setFilters({ activeTab: tab });
     }
 
@@ -173,7 +182,20 @@ export default function ReviewSitesListPageClient() {
 
                     <Separator />
 
-                    {!locationQueryParam ? (
+                    {activeTab === 'sessions' ? (
+                        programId !== undefined && (
+                            <SessionsTable
+                                programId={programId}
+                                sites={accessibleSites}
+                                collectionCycles={collectionCycles}
+                                selectedCycleIds={selectedCycleIds}
+                                selectedReviewStates={selectedReviewStates}
+                                locationQueryParam={locationQueryParam}
+                                startMonth={startMonth}
+                                endMonth={endMonth}
+                            />
+                        )
+                    ) : !locationQueryParam ? (
                         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                             <ClipboardList className="text-muted-foreground/50 mb-4 h-12 w-12" />
                             <p className="text-muted-foreground text-sm">

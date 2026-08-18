@@ -10,6 +10,7 @@ export const getAllSessionsQueryParamsSchema = z
     .object({
         district: z.string().optional(),
         siteIds: arrayQueryParamSchema.optional(),
+        programId: z.coerce.number().optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
         collectionCycleId: z.coerce.number().optional(),
@@ -19,9 +20,12 @@ export const getAllSessionsQueryParamsSchema = z
     .refine(
         queryParams =>
             queryParams.district !== undefined ||
+            queryParams.programId !== undefined ||
             (queryParams.siteIds !== undefined &&
                 queryParams.siteIds.length > 0),
-        { message: 'Either district or siteIds must be provided' },
+        {
+            message: 'Either district, siteIds, or programId must be provided',
+        },
     );
 
 export const getAllSessionsResponseSchema = z.object({

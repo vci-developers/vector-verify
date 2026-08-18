@@ -19,6 +19,7 @@ const operationsSearchParams = {
         'geographical-summary',
         'specimen-composition',
         'ai-performance',
+        'intervention-metrics',
         'field-user-compliance',
     ]).withDefault('geographical-summary'),
     startMonth: parseAsMonth.withDefault(monthDefaults.startMonth),

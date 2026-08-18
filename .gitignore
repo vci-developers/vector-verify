@@ -49,3 +49,6 @@ next-env.d.ts
 
 # Local-only Claude notes (never commit)
 .claude/docs/local/
+
+# Local Playwright MCP session output
+.playwright-mcp/
