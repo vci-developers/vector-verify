@@ -124,7 +124,11 @@ export default function MetadataReviewTable({
                             const resolutionOptions = [
                                 ...new Set(
                                     [...row.fieldValueBySessionId.values()].map(
-                                        formatDisplayValue,
+                                        value =>
+                                            formatDisplayValue(
+                                                value,
+                                                row.fieldType,
+                                            ),
                                     ),
                                 ),
                             ];
@@ -204,6 +208,7 @@ export default function MetadataReviewTable({
                                                 row.fieldValueBySessionId.get(
                                                     session.sessionId,
                                                 ),
+                                                row.fieldType,
                                             );
                                         const effectiveDisplayValue =
                                             isRowDisabled

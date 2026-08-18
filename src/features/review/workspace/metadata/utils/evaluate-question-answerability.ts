@@ -88,7 +88,9 @@ function resolveRowEffectiveValue(
     }
 
     const distinctValues = new Set(
-        [...row.fieldValueBySessionId.values()].map(formatDisplayValue),
+        [...row.fieldValueBySessionId.values()].map(value =>
+            formatDisplayValue(value, row.fieldType),
+        ),
     );
     if (distinctValues.size !== 1) return undefined;
     const [onlyValue] = distinctValues;

@@ -47,7 +47,10 @@ export function buildUnitIdentitySections(
                 unitAnswers.map(answer => [answer.questionId, answer.value]),
             );
             const identityValues = identityQuestions.map(question =>
-                formatDisplayValue(valueByQuestionId.get(question.id) ?? null),
+                formatDisplayValue(
+                    valueByQuestionId.get(question.id) ?? null,
+                    question.type,
+                ),
             );
             const key =
                 identityQuestions.length > 0

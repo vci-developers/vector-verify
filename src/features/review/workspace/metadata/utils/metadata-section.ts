@@ -105,10 +105,15 @@ export interface MetadataSection {
     sessionUnitIdBySessionId?: Map<number, number>;
 }
 
-export function formatDisplayValue(value: unknown): string {
+export function formatDisplayValue(
+    value: unknown,
+    fieldType?: FormQuestionType,
+): string {
     if (value == null) return NOT_APPLICABLE;
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
+    if (fieldType === 'boolean' && (value === 'true' || value === 'false'))
+        return value === 'true' ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     return String(value);
 }
 
@@ -222,7 +227,9 @@ export function buildMetadataRow(
 ): MetadataRow {
     const { entity, fieldName, label, fieldType, required, options } = field;
     const distinctDisplayValues = new Set(
-        [...fieldValueBySessionId.values()].map(formatDisplayValue),
+        [...fieldValueBySessionId.values()].map(value =>
+            formatDisplayValue(value, fieldType),
+        ),
     );
     return {
         id: groupKey
