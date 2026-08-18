@@ -45,7 +45,8 @@ export default function ConflictResolutionControl({
             fieldType === 'boolean'
                 ? [BOOLEAN_TRUE_DISPLAY, BOOLEAN_FALSE_DISPLAY]
                 : (questionOptions ?? []);
-        const selectValue = value === NOT_APPLICABLE ? undefined : value;
+        const selectValue =
+            value === NOT_APPLICABLE || value === undefined ? '' : value;
         return (
             <Select
                 value={selectValue}

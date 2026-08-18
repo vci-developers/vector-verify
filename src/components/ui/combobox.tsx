@@ -69,7 +69,14 @@ export function ComboBox({
                     )}
                     disabled={disabled}
                 >
-                    <span className="truncate">{value ?? placeholder}</span>
+                    <span
+                        className={cn(
+                            'truncate',
+                            !value && 'text-muted-foreground',
+                        )}
+                    >
+                        {value ?? placeholder}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
