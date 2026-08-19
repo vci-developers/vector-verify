@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { PencilRuler } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import ErrorBanner from '@/components/ui/error-banner';
 
 interface AnnotationTasksListProps {
     status: AnnotationTaskStatus;
@@ -23,7 +24,7 @@ export default function AnnotationTasksList({
     startDate,
     endDate,
 }: AnnotationTasksListProps) {
-    const t = useTranslations('AnnotationTasksList');
+    const t = useTranslations('Annotation');
     const {
         page,
         limit,
@@ -56,7 +57,7 @@ export default function AnnotationTasksList({
     }
 
     if (!getAnnotationTasksResult.ok) {
-        return <h1>ERROR: {getAnnotationTasksResult.error.message}</h1>;
+        return <ErrorBanner message={t('couldNotRetrieve')} />;
     }
 
     const annotationTasks = getAnnotationTasksResult.data.tasks;

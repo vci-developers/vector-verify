@@ -14,12 +14,14 @@ interface AnnotationReadonlyViewProps {
     annotation: Annotation | undefined;
     onEdit: () => void;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function AnnotationReadonlyView({
     annotation,
     onEdit,
     isLoading,
+    isError,
 }: AnnotationReadonlyViewProps) {
     const annotationFormArtifacts =
         deserializeAnnotationFormArtifacts(annotation?.artifacts) ?? [];
@@ -33,15 +35,16 @@ export default function AnnotationReadonlyView({
         },
     ];
 
-    const showArtifacts = isLoading || annotationFormArtifacts.length > 0;
-    const showNotes = isLoading || !!annotation?.notes;
+    const showArtifacts =
+        isLoading || isError || annotationFormArtifacts.length > 0;
+    const showNotes = isLoading || isError || !!annotation?.notes;
 
     return (
         <Card className="h-full">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Annotation</CardTitle>
-                    {!isLoading && (
+                    {!isLoading && !isError && (
                         <Button variant="outline" size="icon" onClick={onEdit}>
                             <Pencil className="h-4 w-4" />
                         </Button>
@@ -58,8 +61,13 @@ export default function AnnotationReadonlyView({
                             <p className="text-muted-foreground text-sm">
                                 {label}
                             </p>
-                            {isLoading ? (
-                                <Skeleton className="h-4 w-20" />
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-4 w-20"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <p className="text-sm font-medium">{value}</p>
                             )}
@@ -75,8 +83,13 @@ export default function AnnotationReadonlyView({
                                 Artifacts
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {isLoading ? (
-                                    <Skeleton className="h-4 w-full" />
+                                {isLoading || isError ? (
+                                    <Skeleton
+                                        className="h-4 w-full"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
                                 ) : (
                                     annotationFormArtifacts.map(artifact => (
                                         <Badge
@@ -99,8 +112,13 @@ export default function AnnotationReadonlyView({
                             <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
                                 Notes
                             </p>
-                            {isLoading ? (
-                                <Skeleton className="h-8 w-full" />
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-8 w-full"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <p className="text-sm">{annotation?.notes}</p>
                             )}

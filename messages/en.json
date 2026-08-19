@@ -279,11 +279,17 @@
         "loading": "Loading active-user metrics…",
         "empty": "No active-user snapshots in this window."
     },
-    "AnnotationTasksList": {
-        "noAnnotationTasksFound": "No annotation tasks found."
+    "Annotation": {
+        "noAnnotationTasksFound": "No annotation tasks found.",
+        "couldNotRetrieve": "Could not retrieve annotation tasks. Please try again later or contact support."
     },
     "AnnotationWorkspace": {
+        "couldNotRetrieve": "Could not retrieve the specimen information. Please try again later or contact support.",
+        "couldNotUpdate": "There was a problem updating the annotations for this specimen. Please try again later or contact support.",
         "flaggedSpecimenDefinition": "A flagged specimen is one that cannot be confidently identified due to poor specimen or image quality.",
-        "noAnnotationsFound": "No annotations found."
+        "noAnnotationsFound": "No annotations found.",
+        "noSpecimenData": "No specimen data",
+        "numRemaining": "{count} remaining",
+        "pageOfTotal": "{page} of {total}"
     }
 }

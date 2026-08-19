@@ -59,6 +59,7 @@ interface AnnotationFormProps {
     onSubmit: (data: PutAnnotationByIdRequestBody) => void;
     onCancel?: () => void;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function AnnotationForm({
@@ -67,6 +68,7 @@ export default function AnnotationForm({
     onSubmit,
     onCancel,
     isLoading,
+    isError,
 }: AnnotationFormProps) {
     const t = useTranslations('AnnotationWorkspace');
     const [genus, anophelesSpecies] =
@@ -208,6 +210,7 @@ export default function AnnotationForm({
                                                     handleGenusChange
                                                 }
                                                 value={field.value ?? ''}
+                                                disabled={isError}
                                             >
                                                 <SelectTrigger id="annotation-rhf-genus">
                                                     <SelectValue placeholder="Select..." />
@@ -252,7 +255,9 @@ export default function AnnotationForm({
                                             <Skeleton className="h-9 w-full" />
                                         ) : (
                                             <Select
-                                                disabled={!isAnopheles}
+                                                disabled={
+                                                    isError || !isAnopheles
+                                                }
                                                 onValueChange={
                                                     handleAnophelesSpeciesChange
                                                 }
@@ -308,7 +313,9 @@ export default function AnnotationForm({
                                             <Skeleton className="h-9 w-full" />
                                         ) : (
                                             <Select
-                                                disabled={isNonMosquito}
+                                                disabled={
+                                                    isError || isNonMosquito
+                                                }
                                                 onValueChange={handleSexChange}
                                                 value={field.value ?? ''}
                                             >
@@ -364,7 +371,9 @@ export default function AnnotationForm({
                                         ) : (
                                             <Select
                                                 disabled={
-                                                    isNonMosquito || isMale
+                                                    isError ||
+                                                    isNonMosquito ||
+                                                    isMale
                                                 }
                                                 onValueChange={
                                                     handleAbdomenStatusChange
@@ -427,7 +436,10 @@ export default function AnnotationForm({
                                                 handleArtifactSelected
                                             }
                                         >
-                                            <MultiSelectTrigger className="w-full">
+                                            <MultiSelectTrigger
+                                                className="w-full"
+                                                disabled={isError}
+                                            >
                                                 <MultiSelectValue placeholder="Select artifacts..." />
                                             </MultiSelectTrigger>
                                             <MultiSelectContent>
@@ -479,6 +491,7 @@ export default function AnnotationForm({
                                                     : 'Any additional observations...'
                                             }
                                             className="h-24 resize-none"
+                                            disabled={isError}
                                         />
                                     )}
                                     {fieldState.invalid && (
@@ -501,6 +514,7 @@ export default function AnnotationForm({
                                         variant="outline"
                                         pressed={field.value}
                                         onPressedChange={handleIsFlaggedChange}
+                                        disabled={isError}
                                         aria-label="Flag for review"
                                         className="data-[state=on]:border-destructive data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground w-full transition-colors duration-300 data-[state=on]:animate-pulse"
                                     >
@@ -531,7 +545,7 @@ export default function AnnotationForm({
                         )}
                         <Button
                             type="submit"
-                            disabled={isSubmitting || isLoading}
+                            disabled={isSubmitting || isLoading || isError}
                         >
                             {isSubmitting
                                 ? 'Saving...'
