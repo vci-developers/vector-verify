@@ -6,15 +6,15 @@ import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-ima
 import SpecimenImageCarousel from '@/components/specimen/specimen-image-carousel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { SkeletonList } from '@/components/ui/skeleton-list';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 import MissingSpecimensTooltip from './missing-specimens-tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ImageReviewWorkspaceProps {
     site: Site;
@@ -63,11 +63,10 @@ export default function ImageReviewWorkspace({
     const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
         useGetAllSpecimens(specimenQueryParams);
 
-    if (isGetAllSpecimensPending || !getAllSpecimensResult) {
-        return <SkeletonList count={1} height="xl" width="full" />;
-    }
+    const isLoading = isGetAllSpecimensPending || !getAllSpecimensResult;
+    const isError = !isLoading && !getAllSpecimensResult.ok;
 
-    if (!getAllSpecimensResult.ok) {
+    if (isError) {
         return (
             <p className="text-destructive text-sm">
                 {getAllSpecimensResult.error.message}
@@ -75,18 +74,23 @@ export default function ImageReviewWorkspace({
         );
     }
 
-    const specimens = getAllSpecimensResult.data.specimens;
+    const specimens = getAllSpecimensResult?.ok
+        ? getAllSpecimensResult.data.specimens
+        : undefined;
+    const isEmpty =
+        !isLoading && !isError && (!specimens || specimens.length === 0);
 
-    const totalSpecimens = specimens.length;
+    const totalSpecimens = specimens?.length;
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
     );
-    const missingSpecimenCount = expectedSpecimensCount - totalSpecimens;
+    const missingSpecimenCount =
+        totalSpecimens != null ? expectedSpecimensCount - totalSpecimens : 0;
 
     const siteLabel = getSiteLabelParts(site).primaryLabel;
 
-    if (specimens.length === 0) {
+    if (isEmpty) {
         return (
             <div className="space-y-4">
                 <MissingSpecimensTooltip
@@ -113,61 +117,81 @@ export default function ImageReviewWorkspace({
         );
     }
 
-    const currentSpecimen = specimens[specimenIndex]!;
+    const currentSpecimen = specimens ? specimens[specimenIndex] : undefined;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <p className="text-sm font-semibold">
-                        {t('specimenCounter', {
-                            current: specimenIndex + 1,
-                            total: totalSpecimens,
-                        })}
-                    </p>
-                    <MissingSpecimensTooltip
-                        specimensMissing={missingSpecimenCount}
-                        siteLabel={siteLabel}
-                    />
+                    {!totalSpecimens ? (
+                        <Skeleton height="md" width="lg" />
+                    ) : (
+                        <p className="text-sm font-semibold">
+                            {t('specimenCounter', {
+                                current: specimenIndex + 1,
+                                total: totalSpecimens,
+                            })}
+                        </p>
+                    )}
+                    {!isLoading && !isError && (
+                        <MissingSpecimensTooltip
+                            specimensMissing={missingSpecimenCount}
+                            siteLabel={siteLabel}
+                        />
+                    )}
                 </div>
-                <div className="flex gap-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            setSpecimenIndex(index => Math.max(index - 1, 0))
-                        }
-                        disabled={specimenIndex === 0}
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                        {t('previousSpecimen')}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            setSpecimenIndex(index =>
-                                Math.min(index + 1, totalSpecimens - 1),
-                            )
-                        }
-                        disabled={specimenIndex === totalSpecimens - 1}
-                    >
-                        {t('nextSpecimen')}
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                </div>
+                {!isLoading && !isError && totalSpecimens && (
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                setSpecimenIndex(index =>
+                                    Math.max(index - 1, 0),
+                                )
+                            }
+                            disabled={isLoading || specimenIndex === 0}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            {t('previousSpecimen')}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                setSpecimenIndex(index =>
+                                    Math.min(index + 1, totalSpecimens - 1),
+                                )
+                            }
+                            disabled={
+                                isLoading ||
+                                specimenIndex === totalSpecimens - 1
+                            }
+                        >
+                            {t('nextSpecimen')}
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
-                    <CardContent className="p-4">
-                        <SpecimenImageCarousel
-                            key={currentSpecimen.id}
-                            specimen={currentSpecimen}
-                            onCurrentImageChange={setCurrentImage}
-                        />
+                    <CardContent className="space-y-4 p-4">
+                        {isLoading || !currentSpecimen ? (
+                            <Fragment>
+                                <Skeleton className="aspect-4/3 w-full rounded-lg" />
+                                <Skeleton height="sm" width="lg" />
+                            </Fragment>
+                        ) : (
+                            <SpecimenImageCarousel
+                                key={currentSpecimen.id}
+                                specimen={currentSpecimen}
+                                onCurrentImageChange={setCurrentImage}
+                            />
+                        )}
                     </CardContent>
                 </Card>
                 <Card className="lg:col-span-2">
@@ -185,7 +209,10 @@ export default function ImageReviewWorkspace({
                 <Button variant="outline" onClick={onGoToPreviousStep}>
                     {tCommon('previous')}
                 </Button>
-                <Button onClick={onGoToNextStep}>
+                <Button
+                    onClick={onGoToNextStep}
+                    disabled={isLoading || isError}
+                >
                     {t('continueToCertification')}
                 </Button>
             </div>

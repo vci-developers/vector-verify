@@ -133,6 +133,7 @@
         "review": "Review",
         "reviewDescription": "Review submitted session data by location",
         "selectALocation": "Select a location to view data.",
+        "somethingWentWrong": "Something went wrong loading this page. Please try again later or contact support.",
         "sitesListTab": "SITES LIST",
         "submissionsTab": "SUBMISSIONS",
         "sessionsTab": "SESSIONS"
@@ -219,6 +220,7 @@
         "yes": "Yes",
         "no": "No",
         "currentImage": "Current Image",
+        "noImagesUploaded": "This specimen does not have any images uploaded.",
         "capturedAt": "Captured At",
         "submittedAt": "Submitted At",
         "modelPredictions": "Model Predictions",
