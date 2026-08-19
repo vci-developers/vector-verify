@@ -167,7 +167,7 @@ export default function OperationsSpecimenComposition({
                         />
                     ),
                 )
-            ) : validSelectedSpecies.length === 0 ? (
+            ) : !isError && validSelectedSpecies.length === 0 ? (
                 <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
             ) : (
                 monthlySpecimenCounts &&

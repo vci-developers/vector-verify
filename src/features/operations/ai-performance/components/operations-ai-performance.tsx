@@ -9,6 +9,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import ErrorBanner from '@/components/ui/error-banner';
+import { cn } from '@/utils/cn';
 
 interface OperationsAiPerformanceProps {
     siteIds: number[];
@@ -66,7 +67,12 @@ export default function OperationsAiPerformance({
 
             <div className="grid gap-3 lg:col-span-2 lg:grid-cols-2">
                 <Fragment>
-                    <Card className="border-success/40 bg-success/5 gap-0 py-0">
+                    <Card
+                        className={cn(
+                            !isError && 'border-success/40 bg-success/5',
+                            'gap-0 py-0',
+                        )}
+                    >
                         <CardContent className="p-4">
                             <p className="text-muted-foreground text-sm">
                                 {t('coverage')}

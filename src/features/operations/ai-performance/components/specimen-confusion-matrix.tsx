@@ -162,7 +162,12 @@ export default function SpecimenConfusionMatrix({
             </CardHeader>
 
             <CardContent className="space-y-6">
-                <div className="border-secondary/30 bg-secondary/5 rounded-lg border p-4">
+                <div
+                    className={cn(
+                        !isError && 'border-secondary/30 bg-secondary/5',
+                        'rounded-lg border p-4',
+                    )}
+                >
                     <p className="text-muted-foreground text-sm">
                         {t('accuracy')}
                     </p>
