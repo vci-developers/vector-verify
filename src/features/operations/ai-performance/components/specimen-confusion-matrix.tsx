@@ -29,6 +29,7 @@ interface SpecimenConfusionMatrixProps {
     predictionAxisLabel: string;
     confusionMatrix: AnnotationConfusionMatrix | undefined;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function SpecimenConfusionMatrix({
@@ -38,6 +39,7 @@ export default function SpecimenConfusionMatrix({
     predictionAxisLabel,
     confusionMatrix,
     isLoading,
+    isError,
 }: SpecimenConfusionMatrixProps) {
     const t = useTranslations('OperationsAIPerformance');
 
@@ -160,14 +162,27 @@ export default function SpecimenConfusionMatrix({
             </CardHeader>
 
             <CardContent className="space-y-6">
-                <div className="border-secondary/30 bg-secondary/5 rounded-lg border p-4">
+                <div
+                    className={cn(
+                        !isError && 'border-secondary/30 bg-secondary/5',
+                        'rounded-lg border p-4',
+                    )}
+                >
                     <p className="text-muted-foreground text-sm">
                         {t('accuracy')}
                     </p>
-                    {isLoading ? (
+                    {isLoading || isError ? (
                         <div className="space-y-2 py-2">
-                            <Skeleton width="sm" height="xl" />
-                            <Skeleton width="lg" height="sm" />
+                            <Skeleton
+                                width="sm"
+                                height="xl"
+                                variant={isError ? 'destructive' : 'default'}
+                            />
+                            <Skeleton
+                                width="lg"
+                                height="sm"
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         </div>
                     ) : (
                         <Fragment>
@@ -193,7 +208,7 @@ export default function SpecimenConfusionMatrix({
                     <Table className="min-w-180 table-fixed border-collapse overflow-hidden rounded-lg">
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
-                                {!isLoading && (
+                                {!isLoading && !isError && (
                                     <TableHead className="bg-muted/40 h-12 w-60 border" />
                                 )}
                                 <TableHead
@@ -203,7 +218,7 @@ export default function SpecimenConfusionMatrix({
                                     {predictionAxisLabel}
                                 </TableHead>
                             </TableRow>
-                            {!isLoading && (
+                            {!isLoading && !isError && (
                                 <TableRow className="hover:bg-transparent">
                                     <TableHead className="bg-muted/20 h-auto border px-3 py-3 text-center text-sm leading-snug font-semibold wrap-break-word whitespace-normal">
                                         {groundTruthAxisLabel}
@@ -222,7 +237,7 @@ export default function SpecimenConfusionMatrix({
                             )}
                         </TableHeader>
 
-                        {!isLoading && (
+                        {!isLoading && !isError && (
                             <TableBody>
                                 {classLabels.map(groundTruthLabel => {
                                     const groundTruthLabelTotal =
@@ -286,8 +301,13 @@ export default function SpecimenConfusionMatrix({
                             </TableBody>
                         )}
                     </Table>
-                    {isLoading && (
-                        <SkeletonList count={3} width="full" height="xxl" />
+                    {(isLoading || isError) && (
+                        <SkeletonList
+                            count={3}
+                            width="full"
+                            height="xxl"
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     )}
                 </div>
 
@@ -317,6 +337,7 @@ export default function SpecimenConfusionMatrix({
 
                             <TableBody>
                                 {!isLoading &&
+                                    !isError &&
                                     filteredClassLabels.map(classLabel => {
                                         const truePositives =
                                             getSpecimenCountForCell(
@@ -375,10 +396,15 @@ export default function SpecimenConfusionMatrix({
                                     })}
                             </TableBody>
                         </Table>
-                        {isLoading && (
-                            <SkeletonList count={3} height="lg" width="full" />
+                        {(isLoading || isError) && (
+                            <SkeletonList
+                                count={3}
+                                height="lg"
+                                width="full"
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         )}
-                        {!isLoading && (
+                        {!isLoading && !isError && (
                             <p className="text-muted-foreground text-sm leading-6">
                                 {excludedSpecimenCounts.map(
                                     ({ excludedLabel, count }) => {

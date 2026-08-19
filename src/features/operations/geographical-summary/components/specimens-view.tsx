@@ -42,7 +42,8 @@ export default function SpecimensView({
     });
 
     const siteMapMounted = useRef(false);
-    if (!isPending && markers.length > 0) siteMapMounted.current = true;
+    if (!isPending && !isError && markers.length > 0)
+        siteMapMounted.current = true;
 
     return (
         <Fragment>

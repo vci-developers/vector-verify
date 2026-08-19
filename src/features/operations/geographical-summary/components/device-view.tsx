@@ -57,16 +57,6 @@ export default function DeviceView({
         );
     }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
-    if (isError) {
-        return (
-            <Card className="border-border/50 p-0">
-                <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
-                    {t('deviceActivityError')}
-                </CardContent>
-            </Card>
-        );
-    }
-
     const deviceCounts = deviceMarkers?.reduce(
         (counts, marker) => ({
             active: counts.active + marker.activeDeviceCount,
@@ -105,6 +95,10 @@ export default function DeviceView({
                 <CardContent className="relative h-125 p-0">
                     {isPending ? (
                         <Skeleton className="h-full w-full rounded-md" />
+                    ) : isError ? (
+                        <p className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
+                            {t('deviceActivityError')}
+                        </p>
                     ) : !deviceMarkers ||
                       deviceCounts.active + deviceCounts.inactive === 0 ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
