@@ -13,7 +13,9 @@ import { useState } from 'react';
 import SpecimenImageViewer from '@/features/annotation/task-details/components/workspace/specimen-image-viewer';
 import AnnotationReadonlyView from '@/features/annotation/task-details/components/workspace/annotation-readonly-view';
 import AnnotationForm from '@/features/annotation/task-details/components/workspace/annotation-form';
+import ErrorBanner from '@/components/ui/error-banner';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -29,6 +31,7 @@ export default function AnnotationWorkspace({
     onPageChange,
 }: AnnotationWorkspaceProps) {
     const t = useTranslations('AnnotationWorkspace');
+    const tCommon = useTranslations('Common');
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
 
@@ -51,11 +54,20 @@ export default function AnnotationWorkspace({
         updateAnnotation(
             { annotationId, requestBody },
             {
-                onSuccess: () => {
-                    queryClient.invalidateQueries({
-                        queryKey: annotationKeys.root,
-                    });
-                    setIsEditing(false);
+                onSuccess: result => {
+                    if (result.ok) {
+                        queryClient.invalidateQueries({
+                            queryKey: annotationKeys.root,
+                        });
+                        setIsEditing(false);
+                    } else {
+                        toast.error(
+                            result.error.message || t('couldNotUpdate'),
+                        );
+                    }
+                },
+                onError: () => {
+                    toast.error(t('couldNotUpdate'));
                 },
             },
         );
@@ -67,15 +79,18 @@ export default function AnnotationWorkspace({
     }
 
     const isLoading = !getAnnotationsResult || isGetAnnotationsPending;
+    const isError = !isLoading && !getAnnotationsResult.ok;
 
-    if (getAnnotationsResult && !getAnnotationsResult.ok) {
-        return <h1>Error loading annotations</h1>;
-    }
+    const annotation = getAnnotationsResult?.ok
+        ? getAnnotationsResult.data.annotations[0]
+        : undefined;
+    const total = getAnnotationsResult?.ok
+        ? getAnnotationsResult.data.total
+        : undefined;
 
-    const annotation = getAnnotationsResult?.data.annotations[0];
-    const total = getAnnotationsResult?.data.total;
+    const isEmpty = !isLoading && !isError && (!annotation || total === 0);
 
-    if (!isLoading && (!annotation || total === 0)) {
+    if (isEmpty) {
         return (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
                 <PencilRuler className="text-muted-foreground/50 mb-4 h-12 w-12" />
@@ -90,24 +105,25 @@ export default function AnnotationWorkspace({
 
     return (
         <div className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-                {status === 'PENDING'
-                    ? `${total} remaining`
-                    : `${page} of ${total}`}
-            </p>
+            {isError && <ErrorBanner message={t('couldNotRetrieve')} />}
+            {total != undefined && (
+                <p className="text-muted-foreground text-sm">
+                    {status === 'PENDING'
+                        ? t('numRemaining', { count: total })
+                        : t('pageOfTotal', { page, total })}
+                </p>
+            )}
 
             <div className="grid grid-cols-2 gap-6">
-                {!annotation ? (
+                {isLoading ? (
                     <SpecimenImageViewer isLoading />
-                ) : annotation.specimen ? (
-                    <SpecimenImageViewer
-                        key={annotation.specimen.id}
-                        specimen={annotation.specimen}
-                    />
+                ) : isError ? (
+                    <SpecimenImageViewer isError />
                 ) : (
-                    <p className="text-muted-foreground text-sm">
-                        No specimen data
-                    </p>
+                    <SpecimenImageViewer
+                        key={annotation?.specimen?.id}
+                        specimen={annotation?.specimen}
+                    />
                 )}
 
                 {showForm ? (
@@ -126,12 +142,14 @@ export default function AnnotationWorkspace({
                                 : undefined
                         }
                         isLoading={isLoading}
+                        isError={isError}
                     />
                 ) : (
                     <AnnotationReadonlyView
                         annotation={annotation}
                         onEdit={() => setIsEditing(true)}
                         isLoading={isLoading}
+                        isError={isError}
                     />
                 )}
             </div>
@@ -139,7 +157,7 @@ export default function AnnotationWorkspace({
             {total !== undefined && status !== 'PENDING' && !isEditing && (
                 <div className="flex items-center justify-between border-t pt-4">
                     <p className="text-muted-foreground text-sm">
-                        {page} of {total}
+                        {t('pageOfTotal', { page, total })}
                     </p>
                     <div className="flex gap-2">
                         <Button
@@ -149,7 +167,7 @@ export default function AnnotationWorkspace({
                             disabled={page <= 1}
                         >
                             <ChevronLeft className="mr-1 h-4 w-4" />
-                            Previous
+                            {tCommon('previous')}
                         </Button>
                         <Button
                             variant="outline"
@@ -157,7 +175,7 @@ export default function AnnotationWorkspace({
                             onClick={() => handlePageChange(page + 1)}
                             disabled={page >= total}
                         >
-                            Next
+                            {tCommon('next')}
                             <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>
                     </div>
