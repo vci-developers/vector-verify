@@ -152,7 +152,8 @@
         "sitesVisited": "{visited} of {total} visited",
         "showingSitesCount": "Showing {visible} of {total, plural, one {# site} other {# sites}}",
         "noSitesForLocation": "No sites found for this location.",
-        "noSitesMatchFilter": "No sites match this filter."
+        "noSitesMatchFilter": "No sites match this filter.",
+        "sitesListError": "Failed to load sites. Please try again later or contact support."
     },
     "ReviewSessionsTable": {
         "collectionCycle": "Collection Cycle",
@@ -165,6 +166,7 @@
         "unknownSite": "Unknown Site",
         "cycleNumber": "Cycle {cycleNumber}",
         "noSessions": "No sessions found for this filter.",
+        "sessionsError": "Failed to load sessions. Please try again.",
         "allLocations": "All locations",
         "searchPlaceholder": "Search sessions...",
         "reassignColumnHeader": "Reassign Cycle",
@@ -204,6 +206,7 @@
         "resolveError": "Failed to save changes.",
         "currentFormError": "Could not determine the form type for this program.",
         "formAnswersError": "Failed to load form answers.",
+        "surveillanceFormError": "Failed to load surveillance form answers.",
         "sessionSectionTitle": "Session"
     },
     "ReviewImage": {
@@ -222,6 +225,7 @@
         "yes": "Yes",
         "no": "No",
         "currentImage": "Current Image",
+        "specimensError": "Failed to load specimens.",
         "noImagesUploaded": "This specimen does not have any images uploaded.",
         "capturedAt": "Captured At",
         "submittedAt": "Submitted At",
@@ -252,6 +256,10 @@
         "unknownCertifier": "an unknown user"
     },
     "Dhis2Submissions": {
+        "dhis2Title": "DHIS2 Submissions",
+        "dhis2Description": "Submit certified site data to DHIS2 per collection cycle.",
+        "noSites": "No sites found for this location.",
+        "sessionsError": "Could not load sessions.",
         "certifiedBy": "Certified by: {name}",
         "unknownCertifier": "an unknown user"
     },
