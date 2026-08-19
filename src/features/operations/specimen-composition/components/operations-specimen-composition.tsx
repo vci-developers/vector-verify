@@ -152,7 +152,7 @@ export default function OperationsSpecimenComposition({
                     </ToggleGroup>
                 </div>
             </div>
-            {isLoading ? (
+            {isLoading || isError ? (
                 COMPOSITION_SECTIONS.map(
                     ({ specimenClassificationAxis, title }) => (
                         <CompositionChartPair
