@@ -31,6 +31,8 @@ import {
 import { evaluateDisabledRowIds } from '../utils/evaluate-question-answerability';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import MetadataReviewTable from './metadata-review-table';
+import ErrorBanner from '@/components/ui/error-banner';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 interface MetadataReviewWorkspaceProps {
     sessions: Session[];
@@ -80,9 +82,7 @@ export default function MetadataReviewWorkspace({
         useResolveSessionConflicts();
 
     if (sessions.length === 0) {
-        return (
-            <p className="text-muted-foreground text-sm">{t('noSessions')}</p>
-        );
+        return <EmptyBanner message={t('noSessions')} />;
     }
 
     if (
@@ -97,10 +97,12 @@ export default function MetadataReviewWorkspace({
         getCurrentFormByProgramIdResult.error.kind !== 'not_found'
     ) {
         return (
-            <p className="text-destructive text-sm">
-                {getCurrentFormByProgramIdResult.error.message ??
-                    t('currentFormError')}
-            </p>
+            <ErrorBanner
+                message={
+                    getCurrentFormByProgramIdResult.error.message ??
+                    t('currentFormError')
+                }
+            />
         );
     }
 
@@ -122,10 +124,12 @@ export default function MetadataReviewWorkspace({
         );
         if (failedFormAnswerQuery?.data && !failedFormAnswerQuery.data.ok) {
             return (
-                <p className="text-destructive text-sm">
-                    {failedFormAnswerQuery.data.error.message ??
-                        t('formAnswersError')}
-                </p>
+                <ErrorBanner
+                    message={
+                        failedFormAnswerQuery.data.error.message ??
+                        t('formAnswersError')
+                    }
+                />
             );
         }
 
@@ -176,9 +180,12 @@ export default function MetadataReviewWorkspace({
             !failedSurveillanceFormQuery.data.ok
         ) {
             return (
-                <p className="text-destructive text-sm">
-                    {failedSurveillanceFormQuery.data.error.message}
-                </p>
+                <ErrorBanner
+                    message={
+                        failedSurveillanceFormQuery.data.error.message ??
+                        t('surveillanceFormError')
+                    }
+                />
             );
         }
 

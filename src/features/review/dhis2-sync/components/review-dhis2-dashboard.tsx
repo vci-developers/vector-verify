@@ -24,6 +24,9 @@ import { usePostDhis2SyncTask } from '@/api/dhis2/hooks/use-post-dhis2-sync-task
 import { dhis2SyncKeys } from '@/api/dhis2/dhis2-sync-keys';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
 import Dhis2IrsDialog from './dhis2-irs-dialog';
+import ErrorBanner from '@/components/ui/error-banner';
+import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 interface ReviewDhis2DashboardProps {
     sites: Site[];
@@ -42,6 +45,7 @@ export default function ReviewDhis2Dashboard({
     collectionCycles,
     selectedCycleIds,
 }: ReviewDhis2DashboardProps) {
+    const t = useTranslations('Dhis2Submissions');
     const queryClient = useQueryClient();
     const { mutate: createDhis2SyncTask } = usePostDhis2SyncTask();
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -171,11 +175,10 @@ export default function ReviewDhis2Dashboard({
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                        DHIS2 Submissions
+                        {t('dhis2Title')}
                     </h2>
                     <p className="text-muted-foreground text-xs">
-                        Submit certified site data to DHIS2 per collection
-                        cycle.
+                        {t('dhis2Description')}
                     </p>
                 </div>
                 <Dhis2SyncToolbar
@@ -189,15 +192,13 @@ export default function ReviewDhis2Dashboard({
             {isGetAllSessionsPending || !getAllSessionsResult ? (
                 <SkeletonList count={5} height="xl" width="full" />
             ) : !getAllSessionsResult.ok ? (
-                <p className="text-destructive text-sm">
-                    {getAllSessionsResult.error.message}
-                </p>
+                <ErrorBanner
+                    message={
+                        getAllSessionsResult.error.message ?? t('sessionsError')
+                    }
+                />
             ) : sites.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-muted-foreground text-sm">
-                        No sites found for this location.
-                    </p>
-                </div>
+                <EmptyBanner message={t('noSites')} />
             ) : (
                 <div className="space-y-2">
                     {cycleSubmissionGroups.map(group => (
