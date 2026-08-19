@@ -98,7 +98,7 @@ export default function SpecimenConfusionMatrix({
         0,
     );
 
-    if (!isLoading && totalSpecimensInMatrix === 0) {
+    if (!isLoading && !isError && totalSpecimensInMatrix === 0) {
         return (
             <Card className="gap-0 lg:col-span-2">
                 <CardContent className="space-y-6">
