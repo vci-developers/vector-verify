@@ -69,7 +69,7 @@ export default function SpecimensView({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    {siteMapMounted.current ? (
+                    {!isPending && !isError && siteMapMounted.current ? (
                         <SiteMap
                             markers={markers}
                             selectedLocations={selectedLocations}
@@ -89,74 +89,78 @@ export default function SpecimensView({
                 </CardContent>
             </Card>
 
-            <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('specimenLegendMarkerTitle')}
-                    </p>
-                    <p>{t('specimenLegendMarkerSubtitle')}</p>
-                </div>
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('specimenLegendSizeTitle')}
-                    </p>
-                    <p>{t('specimenLegendSizeSubtitle')}</p>
-                </div>
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('specimenLegendColorTitle')}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: ANOPHELES_COLOR.none,
-                                }}
-                            />
-                            {t('anophelesNoData')}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: ANOPHELES_COLOR.low,
-                                }}
-                            />
-                            1-{ANOPHELES_THRESHOLD.low - 1}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: ANOPHELES_COLOR.moderate,
-                                }}
-                            />
-                            {ANOPHELES_THRESHOLD.low}-
-                            {ANOPHELES_THRESHOLD.moderate - 1}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: ANOPHELES_COLOR.high,
-                                }}
-                            />
-                            {ANOPHELES_THRESHOLD.moderate}-
-                            {ANOPHELES_THRESHOLD.high - 1}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: ANOPHELES_COLOR.critical,
-                                }}
-                            />
-                            {ANOPHELES_THRESHOLD.high}+
-                        </span>
+            {!isPending && !isError && (
+                <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('specimenLegendMarkerTitle')}
+                        </p>
+                        <p>{t('specimenLegendMarkerSubtitle')}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('specimenLegendSizeTitle')}
+                        </p>
+                        <p>{t('specimenLegendSizeSubtitle')}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('specimenLegendColorTitle')}
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor: ANOPHELES_COLOR.none,
+                                    }}
+                                />
+                                {t('anophelesNoData')}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor: ANOPHELES_COLOR.low,
+                                    }}
+                                />
+                                1-{ANOPHELES_THRESHOLD.low - 1}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            ANOPHELES_COLOR.moderate,
+                                    }}
+                                />
+                                {ANOPHELES_THRESHOLD.low}-
+                                {ANOPHELES_THRESHOLD.moderate - 1}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor: ANOPHELES_COLOR.high,
+                                    }}
+                                />
+                                {ANOPHELES_THRESHOLD.moderate}-
+                                {ANOPHELES_THRESHOLD.high - 1}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            ANOPHELES_COLOR.critical,
+                                    }}
+                                />
+                                {ANOPHELES_THRESHOLD.high}+
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </Fragment>
     );
 }

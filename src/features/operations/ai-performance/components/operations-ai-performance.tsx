@@ -6,10 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import SpecimenConfusionMatrix from './specimen-confusion-matrix';
 import { Info } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import ErrorBanner from '@/components/ui/error-banner';
 import { cn } from '@/utils/cn';
+import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 interface OperationsAiPerformanceProps {
     siteIds: number[];
@@ -78,22 +78,11 @@ export default function OperationsAiPerformance({
                                 {t('coverage')}
                             </p>
                             {isLoading || isError ? (
-                                <div className="space-y-2 py-2">
-                                    <Skeleton
-                                        width="sm"
-                                        height="xl"
-                                        variant={
-                                            isError ? 'destructive' : 'default'
-                                        }
-                                    />
-                                    <Skeleton
-                                        width="lg"
-                                        height="sm"
-                                        variant={
-                                            isError ? 'destructive' : 'default'
-                                        }
-                                    />
-                                </div>
+                                <StatCardSkeleton
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <Fragment>
                                     <p className="mt-1 text-4xl font-semibold tracking-tight">
@@ -119,22 +108,11 @@ export default function OperationsAiPerformance({
                                 {t('reviewedSpecimens')}
                             </p>
                             {isLoading || isError ? (
-                                <div className="space-y-2 py-2">
-                                    <Skeleton
-                                        width="sm"
-                                        height="xl"
-                                        variant={
-                                            isError ? 'destructive' : 'default'
-                                        }
-                                    />
-                                    <Skeleton
-                                        width="lg"
-                                        height="sm"
-                                        variant={
-                                            isError ? 'destructive' : 'default'
-                                        }
-                                    />
-                                </div>
+                                <StatCardSkeleton
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <Fragment>
                                     <p className="mt-1 text-4xl font-semibold tracking-tight">

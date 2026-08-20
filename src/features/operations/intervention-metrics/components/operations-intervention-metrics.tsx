@@ -5,7 +5,6 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { useGetSessionsMetricsByDistricts } from '@/api/session/hooks/use-get-sessions-metrics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import StatBadge from '@/components/ui/stat-badge';
 import { getUniqueDistricts } from '@/lib/location/site-tree';
 import {
@@ -17,6 +16,7 @@ import {
 import { useTranslations } from 'next-intl';
 import ErrorBanner from '@/components/ui/error-banner';
 import { cn } from '@/utils/cn';
+import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 interface OperationsInterventionMetricsProps {
     sites: Site[];
@@ -41,21 +41,10 @@ export default function OperationsInterventionMetrics({
 
     const isLoading = sessionsMetricsQueries.some(query => query.isPending);
 
-    const failedSessionsMetricsQuery = sessionsMetricsQueries.find(
+    const failedSessionsMetricsQuery = sessionsMetricsQueries.filter(
         query => query.data && !query.data.ok,
     );
-    const isError =
-        !isLoading &&
-        failedSessionsMetricsQuery?.data &&
-        !failedSessionsMetricsQuery.data.ok;
-
-    const errorMessage =
-        !isLoading &&
-        failedSessionsMetricsQuery?.data &&
-        !failedSessionsMetricsQuery.data.ok
-            ? (failedSessionsMetricsQuery.data.error.message ??
-              t('failedToLoad'))
-            : '';
+    const isError = !isLoading && failedSessionsMetricsQuery.length > 0;
 
     const interventionMetricsTotals = !isLoading
         ? buildInterventionMetricsTotals(
@@ -80,7 +69,7 @@ export default function OperationsInterventionMetrics({
                 </p>
             </div>
 
-            {isError && <ErrorBanner message={errorMessage} />}
+            {isError && <ErrorBanner message={t('failedToLoad')} />}
 
             <div className="grid gap-3 sm:grid-cols-2">
                 <Card
@@ -94,22 +83,9 @@ export default function OperationsInterventionMetrics({
                             {t('netUsageTitle')}
                         </p>
                         {isLoading || isError ? (
-                            <div className="space-y-2 py-2">
-                                <Skeleton
-                                    width="sm"
-                                    height="xxl"
-                                    variant={
-                                        isError ? 'destructive' : 'default'
-                                    }
-                                />
-                                <Skeleton
-                                    width="lg"
-                                    height="sm"
-                                    variant={
-                                        isError ? 'destructive' : 'default'
-                                    }
-                                />
-                            </div>
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         ) : (
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">
@@ -164,22 +140,9 @@ export default function OperationsInterventionMetrics({
                             {t('peoplePerNetTitle')}
                         </p>
                         {isLoading || isError ? (
-                            <div className="space-y-2 py-2">
-                                <Skeleton
-                                    width="sm"
-                                    height="xxl"
-                                    variant={
-                                        isError ? 'destructive' : 'default'
-                                    }
-                                />
-                                <Skeleton
-                                    width="lg"
-                                    height="sm"
-                                    variant={
-                                        isError ? 'destructive' : 'default'
-                                    }
-                                />
-                            </div>
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         ) : (
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">

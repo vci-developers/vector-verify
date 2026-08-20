@@ -121,46 +121,49 @@ export default function DeviceView({
                 </CardContent>
             </Card>
 
-            <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('legendMarkerTitle')}
-                    </p>
-                    <p>{t('legendMarkerSubtitle')}</p>
-                </div>
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('legendSizeTitle')}
-                    </p>
-                    <p>{t('legendSizeSubtitle')}</p>
-                </div>
-                <div className="space-y-1.5">
-                    <p className="text-foreground font-medium">
-                        {t('legendColorTitle')}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor: DEVICE_HEALTH_COLOR.active,
-                                }}
-                            />
-                            {t('legendActive')}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor:
-                                        DEVICE_HEALTH_COLOR.inactive,
-                                }}
-                            />
-                            {t('legendInactive')}
-                        </span>
+            {!isPending && !isError && (
+                <div className="text-muted-foreground flex flex-wrap items-start gap-8 text-xs">
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('legendMarkerTitle')}
+                        </p>
+                        <p>{t('legendMarkerSubtitle')}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('legendSizeTitle')}
+                        </p>
+                        <p>{t('legendSizeSubtitle')}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                        <p className="text-foreground font-medium">
+                            {t('legendColorTitle')}
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            DEVICE_HEALTH_COLOR.active,
+                                    }}
+                                />
+                                {t('legendActive')}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-3 w-3 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            DEVICE_HEALTH_COLOR.inactive,
+                                    }}
+                                />
+                                {t('legendInactive')}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

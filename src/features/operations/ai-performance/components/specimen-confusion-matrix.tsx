@@ -17,8 +17,8 @@ import { cn } from '@/utils/cn';
 import { Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment } from 'react/jsx-runtime';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonList } from '@/components/ui/skeleton-list';
+import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 const EXCLUDED_LABELS = ['unknown', 'Cannot be Determined'] as const;
 
@@ -172,18 +172,9 @@ export default function SpecimenConfusionMatrix({
                         {t('accuracy')}
                     </p>
                     {isLoading || isError ? (
-                        <div className="space-y-2 py-2">
-                            <Skeleton
-                                width="sm"
-                                height="xl"
-                                variant={isError ? 'destructive' : 'default'}
-                            />
-                            <Skeleton
-                                width="lg"
-                                height="sm"
-                                variant={isError ? 'destructive' : 'default'}
-                            />
-                        </div>
+                        <StatCardSkeleton
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     ) : (
                         <Fragment>
                             <p className="mt-1 text-4xl font-semibold tracking-tight">
