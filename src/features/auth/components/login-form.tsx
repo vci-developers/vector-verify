@@ -20,8 +20,11 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function LoginForm() {
+    const t = useTranslations('Auth');
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -47,7 +50,7 @@ export default function LoginForm() {
             await response.json();
 
         if (!response.ok || !loginResult.ok) {
-            console.error('Login Failed');
+            toast.error(t('loginError'));
             return;
         }
 
