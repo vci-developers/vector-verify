@@ -48,20 +48,7 @@ export default function OperationsInterventionMetrics({
         !isLoading &&
         failedSessionsMetricsQuery?.data &&
         !failedSessionsMetricsQuery.data.ok;
-    // if (
-    //     !isLoading &&
-    //     failedSessionsMetricsQuery?.data &&
-    //     !failedSessionsMetricsQuery.data.ok
-    // ) {
-    //     return (
-    //         <ErrorBanner
-    //             message={
-    //                 failedSessionsMetricsQuery.data.error.message ??
-    //                 t('failedToLoad')
-    //             }
-    //         />
-    //     );
-    // }
+
     const errorMessage =
         !isLoading &&
         failedSessionsMetricsQuery?.data &&
