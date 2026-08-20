@@ -122,6 +122,7 @@
     "OperationsInterventionMetrics": {
         "interventionMetricsTitle": "Intervention Coverage Metrics",
         "interventionMetricsDescription": "Bednet coverage across surveyed households for the selected locations and date range.",
+        "failedToLoad": "Failed to load intervention metrics. Please try again later or contact support.",
         "netUsageTitle": "Net Usage Rate",
         "netUsageSubtitle": "{peopleUnderNet} of {peopleSurveyed} people surveyed slept under a net",
         "noLlinsDistributed": "No nets distributed in this district",

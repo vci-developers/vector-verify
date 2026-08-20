@@ -24,6 +24,7 @@ import {
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 type ChartType = 'bar' | 'line';
 
@@ -109,9 +110,7 @@ export default function CompositionChartPair({
             </CardHeader>
             <CardContent>
                 {!isLoading && !isError && totalSpecimenCount === 0 ? (
-                    <div className="text-muted-foreground flex items-center justify-center py-12 text-sm">
-                        {t('noSpecimenData')}
-                    </div>
+                    <EmptyBanner message={t('noSpecimenData')} />
                 ) : (
                     <div className="flex flex-col items-center gap-6 lg:flex-row">
                         <div className="h-62.5 w-62.5 shrink-0">

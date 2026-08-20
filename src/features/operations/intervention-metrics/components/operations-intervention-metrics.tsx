@@ -15,6 +15,7 @@ import {
     getCoverageCardStyle,
 } from '@/features/operations/intervention-metrics/utils/intervention-metrics-helpers';
 import { useTranslations } from 'next-intl';
+import ErrorBanner from '@/components/ui/error-banner';
 
 interface OperationsInterventionMetricsProps {
     sites: Site[];
@@ -48,9 +49,12 @@ export default function OperationsInterventionMetrics({
         !failedSessionsMetricsQuery.data.ok
     ) {
         return (
-            <p className="text-destructive text-sm">
-                {failedSessionsMetricsQuery.data.error.message}
-            </p>
+            <ErrorBanner
+                message={
+                    failedSessionsMetricsQuery.data.error.message ??
+                    t('failedToLoad')
+                }
+            />
         );
     }
 
