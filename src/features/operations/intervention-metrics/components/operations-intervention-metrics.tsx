@@ -16,6 +16,7 @@ import {
 } from '@/features/operations/intervention-metrics/utils/intervention-metrics-helpers';
 import { useTranslations } from 'next-intl';
 import ErrorBanner from '@/components/ui/error-banner';
+import { cn } from '@/utils/cn';
 
 interface OperationsInterventionMetricsProps {
     sites: Site[];
@@ -43,20 +44,31 @@ export default function OperationsInterventionMetrics({
     const failedSessionsMetricsQuery = sessionsMetricsQueries.find(
         query => query.data && !query.data.ok,
     );
-    if (
+    const isError =
+        !isLoading &&
+        failedSessionsMetricsQuery?.data &&
+        !failedSessionsMetricsQuery.data.ok;
+    // if (
+    //     !isLoading &&
+    //     failedSessionsMetricsQuery?.data &&
+    //     !failedSessionsMetricsQuery.data.ok
+    // ) {
+    //     return (
+    //         <ErrorBanner
+    //             message={
+    //                 failedSessionsMetricsQuery.data.error.message ??
+    //                 t('failedToLoad')
+    //             }
+    //         />
+    //     );
+    // }
+    const errorMessage =
         !isLoading &&
         failedSessionsMetricsQuery?.data &&
         !failedSessionsMetricsQuery.data.ok
-    ) {
-        return (
-            <ErrorBanner
-                message={
-                    failedSessionsMetricsQuery.data.error.message ??
-                    t('failedToLoad')
-                }
-            />
-        );
-    }
+            ? (failedSessionsMetricsQuery.data.error.message ??
+              t('failedToLoad'))
+            : '';
 
     const interventionMetricsTotals = !isLoading
         ? buildInterventionMetricsTotals(
@@ -81,16 +93,35 @@ export default function OperationsInterventionMetrics({
                 </p>
             </div>
 
+            {isError && <ErrorBanner message={errorMessage} />}
+
             <div className="grid gap-3 sm:grid-cols-2">
-                <Card className={`${netUsageStatusStyle.card} gap-0 py-0`}>
+                <Card
+                    className={cn(
+                        !isError && `${netUsageStatusStyle.card}`,
+                        'gap-0 py-0',
+                    )}
+                >
                     <CardContent className="flex h-full flex-col p-4">
                         <p className="text-muted-foreground text-sm">
                             {t('netUsageTitle')}
                         </p>
-                        {isLoading ? (
+                        {isLoading || isError ? (
                             <div className="space-y-2 py-2">
-                                <Skeleton width="sm" height="xxl" />
-                                <Skeleton width="lg" height="sm" />
+                                <Skeleton
+                                    width="sm"
+                                    height="xxl"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
+                                <Skeleton
+                                    width="lg"
+                                    height="sm"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             </div>
                         ) : (
                             <Fragment>
@@ -145,10 +176,22 @@ export default function OperationsInterventionMetrics({
                         <p className="text-muted-foreground text-sm">
                             {t('peoplePerNetTitle')}
                         </p>
-                        {isLoading ? (
+                        {isLoading || isError ? (
                             <div className="space-y-2 py-2">
-                                <Skeleton width="sm" height="xxl" />
-                                <Skeleton width="lg" height="sm" />
+                                <Skeleton
+                                    width="sm"
+                                    height="xxl"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
+                                <Skeleton
+                                    width="lg"
+                                    height="sm"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             </div>
                         ) : (
                             <Fragment>

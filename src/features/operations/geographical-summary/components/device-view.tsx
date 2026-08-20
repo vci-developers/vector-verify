@@ -12,6 +12,7 @@ import {
 } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
 import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
+import ErrorBanner from '@/components/ui/error-banner';
 
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
@@ -72,6 +73,7 @@ export default function DeviceView({
 
     return (
         <div className="space-y-3">
+            {isError && <ErrorBanner message={t('deviceActivityError')} />}
             <div className="flex flex-wrap gap-3">
                 {tiers.map(tier => (
                     <Card key={tier.key} className="border-border/50 w-fit">
@@ -79,8 +81,13 @@ export default function DeviceView({
                             <p className="text-muted-foreground text-xs">
                                 {t(tier.key)}
                             </p>
-                            {isPending ? (
-                                <Skeleton className="h-5 w-8" />
+                            {isPending || isError ? (
+                                <Skeleton
+                                    className="h-5 w-8"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <p className="text-lg leading-none font-bold">
                                     {tier.count}
@@ -93,12 +100,11 @@ export default function DeviceView({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    {isPending ? (
-                        <Skeleton className="h-full w-full rounded-md" />
-                    ) : isError ? (
-                        <p className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
-                            {t('deviceActivityError')}
-                        </p>
+                    {isPending || isError ? (
+                        <Skeleton
+                            className="h-full w-full rounded-md"
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     ) : !deviceMarkers ||
                       deviceCounts.active + deviceCounts.inactive === 0 ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">

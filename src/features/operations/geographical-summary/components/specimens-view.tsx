@@ -11,6 +11,7 @@ import {
     ANOPHELES_COLOR,
     ANOPHELES_THRESHOLD,
 } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
+import ErrorBanner from '@/components/ui/error-banner';
 
 const SiteMap = dynamic(() => import('./site-map'), { ssr: false });
 
@@ -47,13 +48,17 @@ export default function SpecimensView({
 
     return (
         <Fragment>
+            {isError && <ErrorBanner message={t('specimenDataError')} />}
             <Card className="border-border/50 w-fit">
                 <CardContent className="flex items-center gap-3 px-4">
                     <p className="text-muted-foreground text-xs">
                         {t('uniqueSites')}
                     </p>
-                    {isPending ? (
-                        <Skeleton className="h-5 w-8" />
+                    {isPending || isError ? (
+                        <Skeleton
+                            className="h-5 w-8"
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     ) : (
                         <p className="text-lg leading-none font-bold">
                             {totalSites}
@@ -71,16 +76,15 @@ export default function SpecimensView({
                             selectedMarkerId={selectedMarkerId}
                             onMarkerSelect={setSelectedMarkerId}
                         />
-                    ) : isError ? (
-                        <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                            {t('specimenDataError')}
-                        </div>
-                    ) : !isPending && markers.length === 0 ? (
+                    ) : !isPending && !isError && markers.length === 0 ? (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                             {t('noSpecimenData')}
                         </div>
                     ) : (
-                        <Skeleton className="h-full w-full rounded-md" />
+                        <Skeleton
+                            className="h-full w-full rounded-md"
+                            variant={isError ? 'destructive' : 'default'}
+                        />
                     )}
                 </CardContent>
             </Card>
