@@ -182,7 +182,8 @@
         "metadataStep": "Metadata Review",
         "imageStep": "Image Review",
         "certificationStep": "Certification",
-        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode."
+        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode.",
+        "currentFormError": "Could not determine the form type for this program."
     },
     "ReviewMetadata": {
         "intro": "Review the metadata for this unit before continuing.",
@@ -202,7 +203,6 @@
         "continueToImageReview": "Continue to Image Review",
         "resolveSuccess": "Changes saved.",
         "resolveError": "Failed to save changes.",
-        "currentFormError": "Could not determine the form type for this program.",
         "formAnswersError": "Failed to load form answers.",
         "surveillanceFormError": "Failed to load surveillance form answers.",
         "sessionSectionTitle": "Session"

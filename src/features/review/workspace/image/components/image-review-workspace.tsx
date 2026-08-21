@@ -88,6 +88,9 @@ export default function ImageReviewWorkspace({
 
     const siteLabel = getSiteLabelParts(site).primaryLabel;
 
+    const skeletonVariant =
+        specimensState.status === 'error' ? 'destructive' : 'default';
+
     if (
         specimensState.status === 'success' &&
         specimensState.specimens.length === 0
@@ -134,9 +137,11 @@ export default function ImageReviewWorkspace({
                             })}
                         </p>
                     ) : (
-                        specimensState.status === 'loading' && (
-                            <Skeleton height="md" width="lg" />
-                        )
+                        <Skeleton
+                            height="md"
+                            width="lg"
+                            variant={skeletonVariant}
+                        />
                     )}
                     {specimensState.status === 'success' && (
                         <MissingSpecimensTooltip
@@ -190,7 +195,7 @@ export default function ImageReviewWorkspace({
             {specimensState.status === 'error' && (
                 <ErrorBanner
                     message={
-                        specimensState.error.message ?? t('specimensError')
+                        specimensState.error.message || t('specimensError')
                     }
                 />
             )}
@@ -208,20 +213,12 @@ export default function ImageReviewWorkspace({
                             <Fragment>
                                 <Skeleton
                                     className="aspect-4/3 w-full rounded-lg"
-                                    variant={
-                                        specimensState.status === 'error'
-                                            ? 'destructive'
-                                            : 'default'
-                                    }
+                                    variant={skeletonVariant}
                                 />
                                 <Skeleton
                                     height="sm"
                                     width="lg"
-                                    variant={
-                                        specimensState.status === 'error'
-                                            ? 'destructive'
-                                            : 'default'
-                                    }
+                                    variant={skeletonVariant}
                                 />
                             </Fragment>
                         )}
@@ -235,7 +232,7 @@ export default function ImageReviewWorkspace({
                             state={
                                 specimensState.status !== 'success'
                                     ? { status: specimensState.status }
-                                    : currentSpecimen
+                                    : currentSpecimen && currentImage
                                       ? {
                                             status: 'success',
                                             specimen: currentSpecimen,

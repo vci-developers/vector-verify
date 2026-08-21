@@ -95,6 +95,9 @@ export default function ImageReviewDetails({
         state.status === 'success' &&
         (totalImagesUploaded == null || totalImagesUploaded <= 0);
 
+    const skeletonVariant =
+        state.status === 'error' ? 'destructive' : 'default';
+
     return (
         <div className="space-y-4">
             <div>
@@ -109,9 +112,7 @@ export default function ImageReviewDetails({
                     <Skeleton
                         height="md"
                         width="md"
-                        variant={
-                            state.status === 'error' ? 'destructive' : 'default'
-                        }
+                        variant={skeletonVariant}
                     />
                 )}
             </div>
@@ -127,11 +128,7 @@ export default function ImageReviewDetails({
                         <Skeleton
                             height="sm"
                             width="sm"
-                            variant={
-                                state.status === 'error'
-                                    ? 'destructive'
-                                    : 'default'
-                            }
+                            variant={skeletonVariant}
                         />
                     )}
                 </dd>
@@ -155,11 +152,7 @@ export default function ImageReviewDetails({
                         <Skeleton
                             height="sm"
                             width="sm"
-                            variant={
-                                state.status === 'error'
-                                    ? 'destructive'
-                                    : 'default'
-                            }
+                            variant={skeletonVariant}
                         />
                     )}
                 </dd>
@@ -184,11 +177,7 @@ export default function ImageReviewDetails({
                         <Skeleton
                             height="sm"
                             width="sm"
-                            variant={
-                                state.status === 'error'
-                                    ? 'destructive'
-                                    : 'default'
-                            }
+                            variant={skeletonVariant}
                         />
                     )}
                 </dd>
@@ -214,11 +203,7 @@ export default function ImageReviewDetails({
                                 <Skeleton
                                     height="sm"
                                     width="lg"
-                                    variant={
-                                        state.status === 'error'
-                                            ? 'destructive'
-                                            : 'default'
-                                    }
+                                    variant={skeletonVariant}
                                 />
                             )}
                         </dd>
@@ -233,11 +218,7 @@ export default function ImageReviewDetails({
                                 <Skeleton
                                     height="sm"
                                     width="lg"
-                                    variant={
-                                        state.status === 'error'
-                                            ? 'destructive'
-                                            : 'default'
-                                    }
+                                    variant={skeletonVariant}
                                 />
                             )}
                         </dd>
@@ -264,11 +245,7 @@ export default function ImageReviewDetails({
                                     <Skeleton
                                         height="sm"
                                         width="sm"
-                                        variant={
-                                            state.status === 'error'
-                                                ? 'destructive'
-                                                : 'default'
-                                        }
+                                        variant={skeletonVariant}
                                     />
                                 )}
                             </dd>
@@ -283,11 +260,7 @@ export default function ImageReviewDetails({
                                     <Skeleton
                                         height="sm"
                                         width="sm"
-                                        variant={
-                                            state.status === 'error'
-                                                ? 'destructive'
-                                                : 'default'
-                                        }
+                                        variant={skeletonVariant}
                                     />
                                 )}
                             </dd>
@@ -302,11 +275,7 @@ export default function ImageReviewDetails({
                                     <Skeleton
                                         height="sm"
                                         width="sm"
-                                        variant={
-                                            state.status === 'error'
-                                                ? 'destructive'
-                                                : 'default'
-                                        }
+                                        variant={skeletonVariant}
                                     />
                                 )}
                             </dd>
