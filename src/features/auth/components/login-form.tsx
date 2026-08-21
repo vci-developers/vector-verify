@@ -66,9 +66,7 @@ export default function LoginForm() {
         const { data: userProfileResult } = await refetchUserProfile();
 
         if (!userProfileResult || !userProfileResult.ok) {
-            toast.error(
-                'Something went wrong. Please refresh the page or try again.',
-            );
+            toast.error(t('fetchProfileError'));
             return;
         }
 

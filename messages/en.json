@@ -25,6 +25,7 @@
         "emailPlaceholder": "name@example.com",
         "password": "Password",
         "loginError": "Login failed. The email or password may be incorrect.",
+        "fetchProfileError": "Something went wrong. Please refresh the page or try again.",
         "loginButton": "Login",
         "noAccountQuestion": "Don't have an account?",
         "createAccountLinkText": "Create one",
