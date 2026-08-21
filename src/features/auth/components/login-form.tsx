@@ -34,6 +34,7 @@ export default function LoginForm() {
     const { refetch: refetchUserProfile } = useGetUserProfile({
         enabled: false,
     });
+    const [loginError, setLoginError] = useState(false);
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -44,6 +45,7 @@ export default function LoginForm() {
     });
 
     async function onSubmit(data: LoginFormInput) {
+        setLoginError(false);
         const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
@@ -57,14 +59,16 @@ export default function LoginForm() {
             await response.json();
 
         if (!response.ok || !loginResult.ok) {
-            toast.error(t('loginError'));
+            setLoginError(true);
             return;
         }
 
         const { data: userProfileResult } = await refetchUserProfile();
 
         if (!userProfileResult || !userProfileResult.ok) {
-            console.error('Failed to Retrieve User Profile');
+            toast.error(
+                'Something went wrong. Please refresh the page or try again.',
+            );
             return;
         }
 
@@ -100,10 +104,18 @@ export default function LoginForm() {
                                 <Input
                                     {...field}
                                     id="login-rhf-email"
-                                    aria-invalid={fieldState.invalid}
+                                    aria-invalid={
+                                        fieldState.invalid || loginError
+                                    }
                                     placeholder={t('emailPlaceholder')}
                                     autoComplete="off"
                                     className="pl-10"
+                                    onChange={e => {
+                                        field.onChange(e);
+                                        if (loginError) {
+                                            setLoginError(false);
+                                        }
+                                    }}
                                 />
                             </div>
                             {fieldState.invalid && (
@@ -126,10 +138,18 @@ export default function LoginForm() {
                                     {...field}
                                     id="login-rhf-password"
                                     type={showPassword ? 'text' : 'password'}
-                                    aria-invalid={fieldState.invalid}
+                                    aria-invalid={
+                                        fieldState.invalid || loginError
+                                    }
                                     placeholder="••••••••"
                                     autoComplete="off"
                                     className="pl-10"
+                                    onChange={e => {
+                                        field.onChange(e);
+                                        if (loginError) {
+                                            setLoginError(false);
+                                        }
+                                    }}
                                 />
                                 <Button
                                     type="button"
@@ -144,6 +164,11 @@ export default function LoginForm() {
                             </div>
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
+                            )}
+                            {loginError && (
+                                <FieldError
+                                    errors={[{ message: t('loginError') }]}
+                                />
                             )}
                         </Field>
                     )}

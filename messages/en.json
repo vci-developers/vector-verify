@@ -38,6 +38,7 @@
         "programsPlaceholder": "Select a program",
         "confirmPassword": "Confirm Password",
         "createAccountButton": "Create Account",
+        "signupError": "Email invalid.",
         "existingAccountQuestion": "Already have an account?",
         "loginLinkText": "Login instead",
         "verificationEmailFailedMessage": "Couldn't send verification email. Please try again or contact support.",

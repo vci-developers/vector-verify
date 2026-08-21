@@ -38,6 +38,7 @@ export default function SignupForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [signupError, setSignupError] = useState(false);
     const t = useTranslations('Auth');
 
     const { data: getProgramsResult, isPending: isGetsProgramsPending } =
@@ -60,6 +61,7 @@ export default function SignupForm() {
     });
 
     async function onSubmit(data: SignupFormInput) {
+        setSignupError(false);
         const response = await fetch('/api/auth/signup', {
             method: 'POST',
             headers: {
@@ -73,7 +75,7 @@ export default function SignupForm() {
             await response.json();
 
         if (!response.ok || !signupResult.ok) {
-            console.error('Signup failed', signupResult);
+            setSignupError(true);
             return;
         }
         clearVerificationEmailCooldown();
@@ -91,7 +93,7 @@ export default function SignupForm() {
                     name="email"
                     control={signupForm.control}
                     render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
+                        <Field data-invalid={fieldState.invalid || signupError}>
                             <FieldLabel htmlFor="signup-email">
                                 {t('email')}
                             </FieldLabel>
@@ -104,10 +106,21 @@ export default function SignupForm() {
                                     placeholder={t('emailPlaceholder')}
                                     autoComplete="off"
                                     className="pl-10"
+                                    onChange={e => {
+                                        field.onChange(e);
+                                        if (signupError) {
+                                            setSignupError(false);
+                                        }
+                                    }}
                                 />
                             </div>
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
+                            )}
+                            {signupError && (
+                                <FieldError
+                                    errors={[{ message: t('signupError') }]}
+                                />
                             )}
                         </Field>
                     )}
