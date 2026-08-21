@@ -99,7 +99,7 @@ export default function MetadataReviewWorkspace({
         return (
             <ErrorBanner
                 message={
-                    getCurrentFormByProgramIdResult.error.message ??
+                    getCurrentFormByProgramIdResult.error.message ||
                     t('currentFormError')
                 }
             />
@@ -126,7 +126,7 @@ export default function MetadataReviewWorkspace({
             return (
                 <ErrorBanner
                     message={
-                        failedFormAnswerQuery.data.error.message ??
+                        failedFormAnswerQuery.data.error.message ||
                         t('formAnswersError')
                     }
                 />
@@ -182,7 +182,7 @@ export default function MetadataReviewWorkspace({
             return (
                 <ErrorBanner
                     message={
-                        failedSurveillanceFormQuery.data.error.message ??
+                        failedSurveillanceFormQuery.data.error.message ||
                         t('surveillanceFormError')
                     }
                 />

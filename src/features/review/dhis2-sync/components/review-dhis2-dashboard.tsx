@@ -194,7 +194,7 @@ export default function ReviewDhis2Dashboard({
             ) : !getAllSessionsResult.ok ? (
                 <ErrorBanner
                     message={
-                        getAllSessionsResult.error.message ?? t('sessionsError')
+                        getAllSessionsResult.error.message || t('sessionsError')
                     }
                 />
             ) : sites.length === 0 ? (

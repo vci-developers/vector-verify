@@ -214,7 +214,7 @@ export default function SessionsTable({
                 {searchInput}
                 <ErrorBanner
                     message={
-                        getAllSessionsResult.error.message ?? t('sessionsError')
+                        getAllSessionsResult.error.message || t('sessionsError')
                     }
                 />
             </div>
