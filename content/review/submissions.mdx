@@ -7,12 +7,21 @@ Review page.
 ## The submission list
 
 Sites are grouped by collection cycle, with a count of how many have been
-submitted. Each site shows its current state:
+submitted. Each site shows one of the following statuses:
 
-- **Ready** — the site is certified and can be submitted. Select it and use
-  **Submit selected**, or use the per-row **Submit** button.
-- **Submitted** — the site has already been sent to DHIS2. You can **Re-submit**
-  if needed.
+- **Ready** — the site is certified and can be submitted
+- **Queued** — the submission is waiting to run
+- **Running** — the submission is currently processing
+- **Submitted** — the site has been successfully sent to DHIS2
+- **Failed** — the submission did not complete successfully
+- **Timed out** — the submission did not finish in time
+- **Skipped** — the submission was skipped
+- **New data to submit** — the site was already submitted, but has new
+  certified sessions since then and is eligible to submit again
+
+The submit button's label changes to match: **Submit** for a Ready site,
+**Re-submit** for Submitted or New data to submit, and **Retry** for Failed,
+Timed out, or Skipped.
 
 ![Sites grouped by cycle, each ready or already submitted](/docs/review-submissions/submissions-sites.png)
 
@@ -43,8 +52,8 @@ guarantee the final submission will complete.
 
 ## Submitting
 
-When you submit, the site moves to a **Running** state while the submission is
-processed, and a confirmation appears that the submission has been queued.
+After you submit, the site's status updates to reflect progress — see the
+statuses above.
 
 ![A submission running, with the queued confirmation](/docs/review-submissions/submissions-running.png)
 
