@@ -100,8 +100,7 @@ export default function ReviewWorkspacePageClient({
             ) : !getAllSessionsResult.ok ? (
                 <ErrorBanner
                     message={
-                        getAllSessionsResult.error.message ??
-                        t('currentFormError')
+                        getAllSessionsResult.error.message ?? t('sessionsError')
                     }
                 />
             ) : (
