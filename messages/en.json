@@ -24,6 +24,7 @@
         "email": "Email",
         "emailPlaceholder": "name@example.com",
         "password": "Password",
+        "loginError": "Login failed. The email or password may be incorrect.",
         "loginButton": "Login",
         "noAccountQuestion": "Don't have an account?",
         "createAccountLinkText": "Create one",

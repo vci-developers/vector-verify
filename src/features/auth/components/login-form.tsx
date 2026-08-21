@@ -24,6 +24,7 @@ import { useGetUserProfile } from '@/api/user/hooks/use-get-user-profile';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
     const router = useRouter();
@@ -56,7 +57,7 @@ export default function LoginForm() {
             await response.json();
 
         if (!response.ok || !loginResult.ok) {
-            console.error('Login Failed');
+            toast.error(t('loginError'));
             return;
         }
 
