@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { logout } from '@/lib/auth-session/logout';
 import { LogOut } from 'lucide-react';
+import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function LogoutButton() {
     const queryClient = useQueryClient();
 
     async function handleLogout() {
         queryClient.clear();
+        clearVerificationEmailCooldown();
         await logout();
     }
 
