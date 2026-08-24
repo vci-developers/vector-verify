@@ -66,9 +66,9 @@ Review's per-site state is a non-trivial client-side derivation via
 `getSiteOverallReviewState`/`buildReviewSegments`; Operations has no single
 unscoped number at all) — each is a candidate for its own follow-up ticket
 rather than being bundled into the v1 launcher. Supersedes the "operational
-command center" framing in `.claude/docs/web-app.md` §8 (older, aspirational
-PRD language — summary metrics, trend views, flagged-record visibility — none
-of which is in v1 scope). _Avoid_: command center, home page (say Dashboard)
+command center" framing in `.claude/docs/web-app.md` §8 (older, aspirational PRD
+language — summary metrics, trend views, flagged-record visibility — none of
+which is in v1 scope). _Avoid_: command center, home page (say Dashboard)
 
 ### Workflows
 
