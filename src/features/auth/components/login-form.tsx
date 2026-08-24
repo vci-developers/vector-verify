@@ -72,13 +72,13 @@ export default function LoginForm() {
 
         clearVerificationEmailCooldown();
 
-        if (!userProfileResult.data.user.emailVerified && redirect) {
-            router.replace(redirect);
-            router.refresh();
-            return;
-        }
-
-        router.replace('/');
+        router.replace(
+            redirect?.startsWith('/') &&
+                !redirect.startsWith('//') &&
+                !redirect.includes('\\')
+                ? redirect
+                : '/',
+        );
         router.refresh();
     }
 
