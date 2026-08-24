@@ -9,7 +9,7 @@ import {
     MultiSelectValue,
 } from '@/components/ui/multi-select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { OperationsTab } from '@/features/operations/components/operations-page-client';
+import type { OperationsTab } from '@/features/operations/view-state/use-operations-filters';
 import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/carousel';
 import { cn } from '@/utils/cn';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import Image from 'next/image';
+import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 
 interface SpecimenImageCarouselProps {
@@ -151,11 +151,10 @@ export default function SpecimenImageCarousel({
                         {allImagesForSpecimen.map(image => (
                             <CarouselItem key={image.id}>
                                 <div className="bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border">
-                                    <Image
-                                        src={`/api${image.url}`}
+                                    <SignedSpecimenImage
+                                        path={image.url}
                                         alt={`Specimen ${specimen.specimenId}`}
                                         fill
-                                        unoptimized
                                         sizes="(min-width: 1024px) 60vw, 100vw"
                                         className="object-contain"
                                     />
@@ -249,11 +248,10 @@ export default function SpecimenImageCarousel({
                                                     : undefined
                                             }
                                         >
-                                            <Image
-                                                src={`/api${image.url}`}
+                                            <SignedSpecimenImage
+                                                path={image.url}
                                                 alt=""
                                                 fill
-                                                unoptimized
                                                 sizes="112px"
                                                 className="object-cover"
                                             />

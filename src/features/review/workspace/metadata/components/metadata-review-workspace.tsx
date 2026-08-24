@@ -4,6 +4,7 @@ import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
 import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
 import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
+import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { sessionKeys } from '@/api/session/session-keys';
 import type { Session } from '@/api/session/validation/session-schema';
@@ -15,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { useQueryClient } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react';
+import { CircleAlert, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -28,8 +29,10 @@ import {
     flattenQuestions,
     type MetadataSection,
 } from '../utils/metadata-section';
-import { evaluateDisabledRowIds } from '../utils/evaluate-question-answerability';
-import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
+import {
+    evaluateDisabledRowIds,
+    evaluateUnmetRequiredRowIds,
+} from '../utils/evaluate-question-answerability';
 import MetadataReviewTable from './metadata-review-table';
 
 interface MetadataReviewWorkspaceProps {
@@ -231,17 +234,35 @@ export default function MetadataReviewWorkspace({
         questionsById,
     );
 
-    const hasConflicts = sections.some(section =>
-        section.rows.some(row => row.hasConflict),
+    const unmetRequiredRowIds = evaluateUnmetRequiredRowIds(
+        sections,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
     );
+
     const areAllConflictsResolved = sections.every(section =>
         section.rows.every(
             row =>
-                !row.hasConflict ||
-                resolutionsByMetadataRowId.has(row.id) ||
-                disabledRowIds.has(row.id),
+                (!row.hasConflict ||
+                    resolutionsByMetadataRowId.has(row.id) ||
+                    disabledRowIds.has(row.id)) &&
+                !unmetRequiredRowIds.has(row.id),
         ),
     );
+
+    const unresolvedConflictCount = sections.reduce(
+        (count, section) =>
+            count +
+            section.rows.filter(
+                row =>
+                    row.hasConflict &&
+                    !resolutionsByMetadataRowId.has(row.id) &&
+                    !disabledRowIds.has(row.id),
+            ).length,
+        0,
+    );
+
+    const unmetRequiredCount = unmetRequiredRowIds.size;
 
     async function resolveConflictsAndContinue() {
         const resolvableSessionIds = resolvableSessions.map(
@@ -250,6 +271,11 @@ export default function MetadataReviewWorkspace({
         const sectionsToResolve = sections.filter(section =>
             section.rows.some(row => resolutionsByMetadataRowId.has(row.id)),
         );
+
+        if (sectionsToResolve.length === 0) {
+            onGoToNextStep();
+            return;
+        }
 
         setIsResolving(true);
         const outcomes = await Promise.allSettled(
@@ -308,30 +334,52 @@ export default function MetadataReviewWorkspace({
         onGoToNextStep();
     }
 
-    const showResolveAction = !readOnly && hasConflicts;
-
     return (
         <div className="space-y-4">
             {!readOnly && (
-                <p className="text-muted-foreground text-sm">{t('intro')}</p>
+                <div className="text-muted-foreground space-y-2 text-sm">
+                    <p>{t('intro')}</p>
+                    <div className="flex flex-col gap-y-2">
+                        <span className="flex items-center gap-1.5">
+                            <Pencil className="h-3.5 w-3.5 shrink-0" />
+                            {t('legendEdit')}
+                        </span>
+                        {unresolvedConflictCount > 0 && (
+                            <span className="text-destructive flex items-center gap-1.5">
+                                <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
+                                {t('legendConflict')}
+                            </span>
+                        )}
+                        {unmetRequiredCount > 0 && (
+                            <span className="text-destructive flex items-center gap-1.5">
+                                <CircleAlert className="h-3.5 w-3.5 shrink-0" />
+                                {t('legendRequired')}
+                            </span>
+                        )}
+                    </div>
+                </div>
             )}
 
             {sessionsMissingSurveillanceForm.length > 0 && (
-                <p className="text-destructive flex items-start gap-2 text-sm">
-                    <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                    {t('missingSurveillanceFormNotice', {
-                        count: sessionsMissingSurveillanceForm.length,
-                        dates: sessionsMissingSurveillanceForm
-                            .map(session =>
-                                formatDateInTimezone(
-                                    session.collectionDate,
-                                    timezone ?? null,
-                                    'MMM d, yyyy',
-                                ),
-                            )
-                            .join(', '),
-                    })}
-                </p>
+                <div className="border-warning/40 bg-warning/5 rounded-lg border p-4">
+                    <div className="flex items-center gap-3">
+                        <TriangleAlert className="text-warning h-5 w-5 shrink-0" />
+                        <p className="text-sm">
+                            {t('missingSurveillanceFormNotice', {
+                                count: sessionsMissingSurveillanceForm.length,
+                                dates: sessionsMissingSurveillanceForm
+                                    .map(session =>
+                                        formatDateInTimezone(
+                                            session.collectionDate,
+                                            timezone ?? null,
+                                            'MMM d, yyyy',
+                                        ),
+                                    )
+                                    .join(', '),
+                            })}
+                        </p>
+                    </div>
+                </div>
             )}
 
             <MetadataReviewTable
@@ -341,16 +389,33 @@ export default function MetadataReviewWorkspace({
                 resolutionsByMetadataRowId={resolutionsByMetadataRowId}
                 onConflictResolutionChange={handleConflictResolutionChange}
                 disabledRowIds={disabledRowIds}
+                unmetRequiredRowIds={unmetRequiredRowIds}
                 readOnly={readOnly}
             />
 
-            <div className="flex justify-end">
-                {showResolveAction ? (
+            <div className="flex items-center justify-end gap-3">
+                {!readOnly && unresolvedConflictCount > 0 && (
+                    <p className="text-destructive flex items-center gap-1.5 text-sm">
+                        <TriangleAlert className="h-4 w-4 shrink-0" />
+                        {t('conflictsRemaining', {
+                            count: unresolvedConflictCount,
+                        })}
+                    </p>
+                )}
+                {!readOnly && unmetRequiredCount > 0 && (
+                    <p className="text-destructive flex items-center gap-1.5 text-sm">
+                        <CircleAlert className="h-4 w-4 shrink-0" />
+                        {t('requiredAnswersRemaining', {
+                            count: unmetRequiredCount,
+                        })}
+                    </p>
+                )}
+                {!readOnly ? (
                     <Button
                         onClick={() => void resolveConflictsAndContinue()}
                         disabled={!areAllConflictsResolved || isResolving}
                     >
-                        {isResolving ? t('resolving') : t('resolveAndContinue')}
+                        {isResolving ? t('saving') : t('saveAndContinue')}
                     </Button>
                 ) : (
                     <Button onClick={onGoToNextStep}>

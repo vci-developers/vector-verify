@@ -136,7 +136,8 @@ export default function ReviewWorkspacePageClient({
                             )
                         ) : currentStepIndex === 1 ? (
                             <ImageReviewWorkspace
-                                siteId={siteId}
+                                site={site!}
+                                sessions={sessions}
                                 startDate={startDate}
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}

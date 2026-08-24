@@ -41,7 +41,6 @@ export default function OperationsFieldUserCompliance({
     if (isPending || !getAllSessionsResult) {
         return (
             <div className="space-y-4">
-                <Skeleton className="h-5 w-64" />
                 <Skeleton className="h-64 w-full" />
             </div>
         );

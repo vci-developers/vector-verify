@@ -1,8 +1,8 @@
 import { Download, Link2, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/button';
-import { usePostExportSign } from '@/api/export/hooks/use-post-export-sign';
+import { useSignResourceForDownload } from '@/api/resources/hooks/use-sign-resource-for-download';
 import { useState } from 'react';
-import type { PostExportSignSuccessPayload } from '@/api/export/validation/post-export-sign-schema';
+import type { PostResourcesSignSuccessPayload } from '@/api/resources/validation/post-resources-sign-schema';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import ExpiryCountdown from './expiry-countdown';
 
@@ -17,10 +17,10 @@ export default function RawDataExportRow({
     description,
     path,
 }: RawDataExportRowProps) {
-    const { mutateAsync: signExport, isPending: isPostSignExportPending } =
-        usePostExportSign();
+    const { mutateAsync: signResource, isPending: isSignResourcePending } =
+        useSignResourceForDownload();
     const [signedLink, setSignedLink] =
-        useState<PostExportSignSuccessPayload | null>(null);
+        useState<PostResourcesSignSuccessPayload | null>(null);
     const [hasExpired, setHasExpired] = useState(false);
     const [linkError, setLinkError] = useState<string | null>(null);
 
@@ -28,7 +28,7 @@ export default function RawDataExportRow({
         setLinkError(null);
         setHasExpired(false);
 
-        const [outcome] = await Promise.allSettled([signExport({ path })]);
+        const [outcome] = await Promise.allSettled([signResource({ path })]);
 
         if (outcome.status === 'rejected') {
             setSignedLink(null);
@@ -71,16 +71,16 @@ export default function RawDataExportRow({
                         variant="outline"
                         size="sm"
                         onClick={handleGenerateLink}
-                        disabled={isPostSignExportPending}
+                        disabled={isSignResourcePending}
                     >
-                        {isPostSignExportPending ? (
+                        {isSignResourcePending ? (
                             <Loader2 className="animate-spin" />
                         ) : hasExpired ? (
                             <RefreshCw />
                         ) : (
                             <Link2 />
                         )}
-                        {isPostSignExportPending
+                        {isSignResourcePending
                             ? 'Generating…'
                             : hasExpired
                               ? 'Regenerate'

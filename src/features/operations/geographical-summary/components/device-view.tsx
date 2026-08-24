@@ -10,57 +10,52 @@ import {
     buildDeviceMarkers,
     DEVICE_HEALTH_COLOR,
 } from '@/features/operations/geographical-summary/utils/device-marker-helpers';
+import { useCountry } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
 
 const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 
 interface DeviceViewProps {
+    programId: number;
     siteIds: number[];
     selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
 }
 
 export default function DeviceView({
+    programId,
     siteIds,
     selectedLocations,
     descendantsOfSelectedLocations,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
+    const country = useCountry();
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
     );
-    const { deviceActivity, isPending, isError } = useDeviceActivity(siteIds);
+    const { deviceActivity, isPending, isError } = useDeviceActivity(
+        programId,
+        siteIds,
+    );
 
     useEffect(() => {
         setSelectedMarkerId(null);
     }, [siteIds]);
 
     const deviceMarkers = useMemo(() => {
-        if (!deviceActivity) return [];
+        if (!deviceActivity) return null;
         return buildDeviceMarkers(
-            deviceActivity.sites,
+            deviceActivity,
             descendantsOfSelectedLocations,
+            country,
         ).sort(
             (firstMarker, secondMarker) =>
                 secondMarker.activeDeviceCount -
                     firstMarker.activeDeviceCount ||
-                secondMarker.lapsingDeviceCount -
-                    firstMarker.lapsingDeviceCount,
+                secondMarker.inactiveDeviceCount -
+                    firstMarker.inactiveDeviceCount,
         );
-    }, [deviceActivity, descendantsOfSelectedLocations]);
-
-    if (isPending) {
-        return (
-            <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                    <Skeleton className="h-13 w-28" />
-                    <Skeleton className="h-13 w-28" />
-                    <Skeleton className="h-13 w-28" />
-                </div>
-                <Skeleton className="h-125 w-full rounded-md" />
-            </div>
-        );
-    }
+    }, [deviceActivity, descendantsOfSelectedLocations, country]);
 
     if (isError) {
         return (
@@ -72,20 +67,17 @@ export default function DeviceView({
         );
     }
 
-    if (!deviceActivity || deviceActivity.totalDeviceCount === 0) {
-        return (
-            <Card className="border-border/50 p-0">
-                <CardContent className="text-muted-foreground flex h-125 items-center justify-center p-0 text-sm">
-                    {t('noDeviceActivity')}
-                </CardContent>
-            </Card>
-        );
-    }
+    const deviceCounts = deviceMarkers?.reduce(
+        (counts, marker) => ({
+            active: counts.active + marker.activeDeviceCount,
+            inactive: counts.inactive + marker.inactiveDeviceCount,
+        }),
+        { active: 0, inactive: 0 },
+    ) || { active: 0, inactive: 0 };
 
     const tiers = [
-        { key: 'active', count: deviceActivity.activeDeviceCount },
-        { key: 'lapsing', count: deviceActivity.lapsingDeviceCount },
-        { key: 'inactive', count: deviceActivity.inactiveDeviceCount },
+        { key: 'active', count: deviceCounts.active },
+        { key: 'inactive', count: deviceCounts.inactive },
     ] as const;
 
     return (
@@ -97,9 +89,13 @@ export default function DeviceView({
                             <p className="text-muted-foreground text-xs">
                                 {t(tier.key)}
                             </p>
-                            <p className="text-lg leading-none font-bold">
-                                {tier.count}
-                            </p>
+                            {isPending ? (
+                                <Skeleton className="h-5 w-8" />
+                            ) : (
+                                <p className="text-lg leading-none font-bold">
+                                    {tier.count}
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 ))}
@@ -107,12 +103,21 @@ export default function DeviceView({
 
             <Card className="border-border/50 p-0">
                 <CardContent className="relative h-125 p-0">
-                    <DeviceMap
-                        markers={deviceMarkers}
-                        selectedLocations={selectedLocations}
-                        selectedMarkerId={selectedMarkerId}
-                        onMarkerSelect={setSelectedMarkerId}
-                    />
+                    {isPending ? (
+                        <Skeleton className="h-full w-full rounded-md" />
+                    ) : !deviceMarkers ||
+                      deviceCounts.active + deviceCounts.inactive === 0 ? (
+                        <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+                            {t('noDeviceActivity')}
+                        </div>
+                    ) : (
+                        <DeviceMap
+                            markers={deviceMarkers}
+                            selectedLocations={selectedLocations}
+                            selectedMarkerId={selectedMarkerId}
+                            onMarkerSelect={setSelectedMarkerId}
+                        />
+                    )}
                 </CardContent>
             </Card>
 
@@ -142,16 +147,6 @@ export default function DeviceView({
                                 }}
                             />
                             {t('legendActive')}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-3 w-3 rounded-full"
-                                style={{
-                                    backgroundColor:
-                                        DEVICE_HEALTH_COLOR.lapsing,
-                                }}
-                            />
-                            {t('legendLapsing')}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span

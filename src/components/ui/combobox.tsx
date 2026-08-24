@@ -16,6 +16,7 @@ import {
     CommandList,
 } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/utils/cn';
 
 interface ComboBoxProps {
     options: string[];
@@ -24,6 +25,7 @@ interface ComboBoxProps {
     placeholder?: string;
     validate?: (value: string) => string | null;
     disabled?: boolean;
+    className?: string;
 }
 
 export function ComboBox({
@@ -33,6 +35,7 @@ export function ComboBox({
     placeholder = 'Select value...',
     validate,
     disabled,
+    className,
 }: ComboBoxProps) {
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
@@ -60,14 +63,24 @@ export function ComboBox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-40 justify-between font-normal"
+                    className={cn(
+                        'w-40 justify-between font-normal',
+                        className,
+                    )}
                     disabled={disabled}
                 >
-                    <span className="truncate">{value ?? placeholder}</span>
+                    <span
+                        className={cn(
+                            'truncate',
+                            !value && 'text-muted-foreground',
+                        )}
+                    >
+                        {value ?? placeholder}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-40 p-0">
+            <PopoverContent className={cn('w-40 p-0', className)}>
                 <Command>
                     <CommandInput
                         placeholder="Search..."
