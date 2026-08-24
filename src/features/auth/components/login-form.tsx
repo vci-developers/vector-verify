@@ -80,6 +80,8 @@ export default function LoginForm() {
                 : '/',
         );
         router.refresh();
+
+        // remove me please :)
     }
 
     return (
