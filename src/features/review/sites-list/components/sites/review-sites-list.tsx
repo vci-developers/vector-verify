@@ -26,6 +26,8 @@ import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import ErrorBanner from '@/components/ui/error-banner';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 function buildReviewWorkspaceHref(
     siteId: number,
@@ -126,18 +128,17 @@ export default function ReviewSitesList({
 
     if (!getAllSessionsResult.ok) {
         return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
+            <ErrorBanner
+                message={
+                    getAllSessionsResult.error.message ||
+                    tSitesList('sitesListError')
+                }
+            />
         );
     }
 
     if (sites.length === 0) {
-        return (
-            <p className="text-muted-foreground py-12 text-center text-sm">
-                {tSitesList('noSitesForLocation')}
-            </p>
-        );
+        return <EmptyBanner message={tSitesList('noSitesForLocation')} />;
     }
 
     return (

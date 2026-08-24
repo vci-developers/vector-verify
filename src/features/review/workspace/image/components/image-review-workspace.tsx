@@ -15,6 +15,9 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 import MissingSpecimensTooltip from './missing-specimens-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorBanner from '@/components/ui/error-banner';
+import type { Specimen } from '@/api/specimen/validation/specimen-schema';
+import type { NetworkError } from '@/lib/network/network-error';
 
 interface ImageReviewWorkspaceProps {
     site: Site;
@@ -26,6 +29,11 @@ interface ImageReviewWorkspaceProps {
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }
+
+type SpecimensState =
+    | { status: 'loading' }
+    | { status: 'error'; error: NetworkError }
+    | { status: 'success'; specimens: Specimen[] };
 
 export default function ImageReviewWorkspace({
     site,
@@ -63,38 +71,34 @@ export default function ImageReviewWorkspace({
     const { data: getAllSpecimensResult, isPending: isGetAllSpecimensPending } =
         useGetAllSpecimens(specimenQueryParams);
 
-    const isLoading = isGetAllSpecimensPending || !getAllSpecimensResult;
-    const isError = !isLoading && !getAllSpecimensResult.ok;
+    const specimensState: SpecimensState =
+        isGetAllSpecimensPending || !getAllSpecimensResult
+            ? { status: 'loading' }
+            : !getAllSpecimensResult.ok
+              ? { status: 'error', error: getAllSpecimensResult.error }
+              : {
+                    status: 'success',
+                    specimens: getAllSpecimensResult.data.specimens,
+                };
 
-    if (isError) {
-        return (
-            <p className="text-destructive text-sm">
-                {getAllSpecimensResult.error.message}
-            </p>
-        );
-    }
-
-    const specimens = getAllSpecimensResult?.ok
-        ? getAllSpecimensResult.data.specimens
-        : undefined;
-    const isEmpty =
-        !isLoading && !isError && (!specimens || specimens.length === 0);
-
-    const totalSpecimens = specimens?.length;
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
     );
-    const missingSpecimenCount =
-        totalSpecimens != null ? expectedSpecimensCount - totalSpecimens : 0;
 
     const siteLabel = getSiteLabelParts(site).primaryLabel;
 
-    if (isEmpty) {
+    const skeletonVariant =
+        specimensState.status === 'error' ? 'destructive' : 'default';
+
+    if (
+        specimensState.status === 'success' &&
+        specimensState.specimens.length === 0
+    ) {
         return (
             <div className="space-y-4">
                 <MissingSpecimensTooltip
-                    specimensMissing={missingSpecimenCount}
+                    specimensMissing={expectedSpecimensCount}
                     siteLabel={siteLabel}
                 />
                 <div className="bg-muted/30 flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
@@ -116,31 +120,40 @@ export default function ImageReviewWorkspace({
             </div>
         );
     }
-
-    const currentSpecimen = specimens ? specimens[specimenIndex] : undefined;
+    const currentSpecimen =
+        specimensState.status === 'success'
+            ? specimensState.specimens[specimenIndex]
+            : undefined;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    {!totalSpecimens ? (
-                        <Skeleton height="md" width="lg" />
-                    ) : (
+                    {specimensState.status === 'success' ? (
                         <p className="text-sm font-semibold">
                             {t('specimenCounter', {
                                 current: specimenIndex + 1,
-                                total: totalSpecimens,
+                                total: specimensState.specimens.length,
                             })}
                         </p>
+                    ) : (
+                        <Skeleton
+                            height="md"
+                            width="lg"
+                            variant={skeletonVariant}
+                        />
                     )}
-                    {!isLoading && !isError && (
+                    {specimensState.status === 'success' && (
                         <MissingSpecimensTooltip
-                            specimensMissing={missingSpecimenCount}
+                            specimensMissing={
+                                expectedSpecimensCount -
+                                specimensState.specimens.length
+                            }
                             siteLabel={siteLabel}
                         />
                     )}
                 </div>
-                {!isLoading && !isError && totalSpecimens && (
+                {specimensState.status === 'success' && (
                     <div className="flex gap-2">
                         <Button
                             type="button"
@@ -151,7 +164,7 @@ export default function ImageReviewWorkspace({
                                     Math.max(index - 1, 0),
                                 )
                             }
-                            disabled={isLoading || specimenIndex === 0}
+                            disabled={specimenIndex === 0}
                         >
                             <ChevronLeft className="h-4 w-4" />
                             {t('previousSpecimen')}
@@ -162,12 +175,15 @@ export default function ImageReviewWorkspace({
                             size="sm"
                             onClick={() =>
                                 setSpecimenIndex(index =>
-                                    Math.min(index + 1, totalSpecimens - 1),
+                                    Math.min(
+                                        index + 1,
+                                        specimensState.specimens.length - 1,
+                                    ),
                                 )
                             }
                             disabled={
-                                isLoading ||
-                                specimenIndex === totalSpecimens - 1
+                                specimenIndex ===
+                                specimensState.specimens.length - 1
                             }
                         >
                             {t('nextSpecimen')}
@@ -176,30 +192,53 @@ export default function ImageReviewWorkspace({
                     </div>
                 )}
             </div>
-
+            {specimensState.status === 'error' && (
+                <ErrorBanner
+                    message={
+                        specimensState.error.message || t('specimensError')
+                    }
+                />
+            )}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardContent className="space-y-4 p-4">
-                        {isLoading || !currentSpecimen ? (
-                            <Fragment>
-                                <Skeleton className="aspect-4/3 w-full rounded-lg" />
-                                <Skeleton height="sm" width="lg" />
-                            </Fragment>
-                        ) : (
+                        {specimensState.status === 'success' &&
+                        currentSpecimen ? (
                             <SpecimenImageCarousel
                                 key={currentSpecimen.id}
                                 specimen={currentSpecimen}
                                 onCurrentImageChange={setCurrentImage}
                             />
+                        ) : (
+                            <Fragment>
+                                <Skeleton
+                                    className="aspect-4/3 w-full rounded-lg"
+                                    variant={skeletonVariant}
+                                />
+                                <Skeleton
+                                    height="sm"
+                                    width="lg"
+                                    variant={skeletonVariant}
+                                />
+                            </Fragment>
                         )}
                     </CardContent>
                 </Card>
                 <Card className="lg:col-span-2">
                     <CardContent className="p-4">
                         <ImageReviewDetails
-                            specimen={currentSpecimen}
                             currentImage={currentImage}
                             timezone={timezone ?? null}
+                            state={
+                                specimensState.status !== 'success'
+                                    ? { status: specimensState.status }
+                                    : currentSpecimen && currentImage
+                                      ? {
+                                            status: 'success',
+                                            specimen: currentSpecimen,
+                                        }
+                                      : { status: 'loading' }
+                            }
                         />
                     </CardContent>
                 </Card>
@@ -211,7 +250,7 @@ export default function ImageReviewWorkspace({
                 </Button>
                 <Button
                     onClick={onGoToNextStep}
-                    disabled={isLoading || isError}
+                    disabled={specimensState.status !== 'success'}
                 >
                     {t('continueToCertification')}
                 </Button>

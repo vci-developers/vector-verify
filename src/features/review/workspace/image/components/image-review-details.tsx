@@ -10,21 +10,28 @@ import ConfidencePredictionRow from '@/features/review/workspace/image/component
 import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
 
+type DetailsState =
+    | { status: 'loading' }
+    | { status: 'error' }
+    | { status: 'success'; specimen: Specimen };
+
 interface ImageReviewDetailsProps {
-    specimen: Specimen | undefined;
     currentImage: SpecimenImage | null;
     timezone: string | null;
+    state: DetailsState;
 }
 
 export default function ImageReviewDetails({
-    specimen,
     currentImage,
     timezone,
+    state,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
 
-    const totalImagesUploaded = specimen?.images?.length;
-    const expectedImagesCount = specimen?.expectedImages;
+    const totalImagesUploaded =
+        state.status === 'success' ? state.specimen.images?.length : undefined;
+    const expectedImagesCount =
+        state.status === 'success' ? state.specimen.expectedImages : undefined;
 
     const hasReliableExpectedCount =
         expectedImagesCount != null &&
@@ -84,9 +91,12 @@ export default function ImageReviewDetails({
             : null,
     };
 
-    const hasImages = totalImagesUploaded != null && totalImagesUploaded > 0;
-    const isLoading = !specimen || (!currentImage && hasImages);
-    const isEmpty = !isLoading && !hasImages;
+    const isEmpty =
+        state.status === 'success' &&
+        (totalImagesUploaded == null || totalImagesUploaded <= 0);
+
+    const skeletonVariant =
+        state.status === 'error' ? 'destructive' : 'default';
 
     return (
         <div className="space-y-4">
@@ -94,12 +104,16 @@ export default function ImageReviewDetails({
                 <p className="text-muted-foreground text-sm uppercase">
                     {t('specimenId')}
                 </p>
-                {isLoading ? (
-                    <Skeleton height="md" width="md" />
-                ) : (
+                {state.status === 'success' ? (
                     <p className="text-lg font-semibold">
-                        {specimen.specimenId}
+                        {state.specimen.specimenId}
                     </p>
+                ) : (
+                    <Skeleton
+                        height="md"
+                        width="md"
+                        variant={skeletonVariant}
+                    />
                 )}
             </div>
 
@@ -108,10 +122,14 @@ export default function ImageReviewDetails({
             <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                 <dt className="text-muted-foreground">{t('sessionId')}</dt>
                 <dd>
-                    {isLoading ? (
-                        <Skeleton height="sm" width="sm" />
+                    {state.status === 'success' ? (
+                        state.specimen.sessionId
                     ) : (
-                        specimen.sessionId
+                        <Skeleton
+                            height="sm"
+                            width="sm"
+                            variant={skeletonVariant}
+                        />
                     )}
                 </dd>
 
@@ -123,15 +141,19 @@ export default function ImageReviewDetails({
                             'text-destructive font-medium',
                     )}
                 >
-                    {isLoading ? (
-                        <Skeleton height="sm" width="sm" />
-                    ) : (
+                    {state.status === 'success' ? (
                         <Fragment>
                             {isMissingExpectedImages && (
                                 <AlertCircle className="h-3.5 w-3.5" />
                             )}
                             {imagesCapturedLabel}
                         </Fragment>
+                    ) : (
+                        <Skeleton
+                            height="sm"
+                            width="sm"
+                            variant={skeletonVariant}
+                        />
                     )}
                 </dd>
 
@@ -139,20 +161,24 @@ export default function ImageReviewDetails({
                     {t('needsFurtherProcessing')}
                 </dt>
                 <dd>
-                    {isLoading ? (
-                        <Skeleton height="sm" width="sm" />
-                    ) : (
+                    {state.status === 'success' ? (
                         <Badge
                             variant={
-                                specimen?.shouldProcessFurther
+                                state.specimen.shouldProcessFurther
                                     ? 'default'
                                     : 'secondary'
                             }
                         >
-                            {specimen?.shouldProcessFurther
+                            {state.specimen.shouldProcessFurther
                                 ? t('yes')
                                 : t('no')}
                         </Badge>
+                    ) : (
+                        <Skeleton
+                            height="sm"
+                            width="sm"
+                            variant={skeletonVariant}
+                        />
                     )}
                 </dd>
             </dl>
@@ -171,10 +197,14 @@ export default function ImageReviewDetails({
                             {t('capturedAt')}
                         </dt>
                         <dd>
-                            {isLoading ? (
-                                <Skeleton height="sm" width="lg" />
-                            ) : (
+                            {state.status === 'success' ? (
                                 capturedAtLabel
+                            ) : (
+                                <Skeleton
+                                    height="sm"
+                                    width="lg"
+                                    variant={skeletonVariant}
+                                />
                             )}
                         </dd>
 
@@ -182,10 +212,14 @@ export default function ImageReviewDetails({
                             {t('submittedAt')}
                         </dt>
                         <dd>
-                            {isLoading ? (
-                                <Skeleton height="sm" width="lg" />
-                            ) : (
+                            {state.status === 'success' ? (
                                 submittedAtLabel
+                            ) : (
+                                <Skeleton
+                                    height="sm"
+                                    width="lg"
+                                    variant={skeletonVariant}
+                                />
                             )}
                         </dd>
                     </dl>
@@ -205,10 +239,14 @@ export default function ImageReviewDetails({
                                 {t('species')}
                             </dt>
                             <dd>
-                                {isLoading ? (
-                                    <Skeleton height="sm" width="sm" />
-                                ) : (
+                                {state.status === 'success' ? (
                                     (currentImage?.species ?? '—')
+                                ) : (
+                                    <Skeleton
+                                        height="sm"
+                                        width="sm"
+                                        variant={skeletonVariant}
+                                    />
                                 )}
                             </dd>
 
@@ -216,10 +254,14 @@ export default function ImageReviewDetails({
                                 {t('sex')}
                             </dt>
                             <dd>
-                                {isLoading ? (
-                                    <Skeleton height="sm" width="sm" />
-                                ) : (
+                                {state.status === 'success' ? (
                                     (currentImage?.sex ?? '—')
+                                ) : (
+                                    <Skeleton
+                                        height="sm"
+                                        width="sm"
+                                        variant={skeletonVariant}
+                                    />
                                 )}
                             </dd>
 
@@ -227,10 +269,14 @@ export default function ImageReviewDetails({
                                 {t('abdomenStatus')}
                             </dt>
                             <dd>
-                                {isLoading ? (
-                                    <Skeleton height="sm" width="sm" />
-                                ) : (
+                                {state.status === 'success' ? (
                                     (currentImage?.abdomenStatus ?? '—')
+                                ) : (
+                                    <Skeleton
+                                        height="sm"
+                                        width="sm"
+                                        variant={skeletonVariant}
+                                    />
                                 )}
                             </dd>
                         </dl>
@@ -249,7 +295,7 @@ export default function ImageReviewDetails({
                                 confidencePercentage={
                                     modelConfidencePercentages.species
                                 }
-                                isLoading={isLoading}
+                                status={state.status}
                             />
 
                             <ConfidencePredictionRow
@@ -258,7 +304,7 @@ export default function ImageReviewDetails({
                                 confidencePercentage={
                                     modelConfidencePercentages.sex
                                 }
-                                isLoading={isLoading}
+                                status={state.status}
                             />
 
                             <ConfidencePredictionRow
@@ -267,7 +313,7 @@ export default function ImageReviewDetails({
                                 confidencePercentage={
                                     modelConfidencePercentages.abdomenStatus
                                 }
-                                isLoading={isLoading}
+                                status={state.status}
                             />
                         </dl>
                     </div>

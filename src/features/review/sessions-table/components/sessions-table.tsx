@@ -32,6 +32,8 @@ import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
+import ErrorBanner from '@/components/ui/error-banner';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 interface SessionsTableProps {
     programId: number;
@@ -210,9 +212,11 @@ export default function SessionsTable({
         return (
             <div className="flex flex-col space-y-4">
                 {searchInput}
-                <p className="text-destructive text-sm">
-                    {getAllSessionsResult.error.message}
-                </p>
+                <ErrorBanner
+                    message={
+                        getAllSessionsResult.error.message || t('sessionsError')
+                    }
+                />
             </div>
         );
     }
@@ -221,9 +225,7 @@ export default function SessionsTable({
         return (
             <div className="flex flex-col space-y-4">
                 {searchInput}
-                <p className="text-muted-foreground py-12 text-center text-sm">
-                    {t('noSessions')}
-                </p>
+                <EmptyBanner message={t('noSessions')} />
             </div>
         );
     }
