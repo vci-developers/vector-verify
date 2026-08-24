@@ -24,6 +24,7 @@ import {
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
 
 type ChartType = 'bar' | 'line';
 
@@ -37,6 +38,7 @@ interface CompositionChartPairProps {
     specimenCountsByMonth: Record<string, string | number>[];
     specimenChartConfig: ChartConfig;
     isLoading: boolean;
+    isError: boolean;
 }
 
 export default function CompositionChartPair({
@@ -46,6 +48,7 @@ export default function CompositionChartPair({
     specimenCountsByMonth,
     specimenChartConfig,
     isLoading,
+    isError,
 }: CompositionChartPairProps) {
     const t = useTranslations('OperationsSpecimenComposition');
     const specimenClasses = Object.keys(specimenChartConfig);
@@ -106,15 +109,18 @@ export default function CompositionChartPair({
                 <CardTitle className="text-base">{title}</CardTitle>
             </CardHeader>
             <CardContent>
-                {!isLoading && totalSpecimenCount === 0 ? (
-                    <div className="text-muted-foreground flex items-center justify-center py-12 text-sm">
-                        {t('noSpecimenData')}
-                    </div>
+                {!isLoading && !isError && totalSpecimenCount === 0 ? (
+                    <EmptyBanner message={t('noSpecimenData')} />
                 ) : (
                     <div className="flex flex-col items-center gap-6 lg:flex-row">
                         <div className="h-62.5 w-62.5 shrink-0">
-                            {isLoading ? (
-                                <Skeleton className="h-full w-full rounded-full" />
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-full w-full rounded-full"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <ChartContainer
                                     config={specimenChartConfig}
@@ -198,8 +204,13 @@ export default function CompositionChartPair({
                             )}
                         </div>
                         <div className="h-72 w-full min-w-0 flex-1">
-                            {isLoading ? (
-                                <Skeleton className="h-64 w-full" />
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-64 w-full"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
                             ) : (
                                 <ChartContainer
                                     config={specimenChartConfig}

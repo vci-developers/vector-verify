@@ -26,6 +26,7 @@ import { useTranslations } from 'next-intl';
 import EmptyBanner from '@/components/ui/empty-banner';
 import { BarChart3, LineChart } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import ErrorBanner from '@/components/ui/error-banner';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -81,15 +82,7 @@ export default function OperationsSpecimenComposition({
 
     const isLoading =
         isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult;
-
-    if (!isLoading && !getMonthlySpecimensCountResult.ok) {
-        return (
-            <h1>
-                {t('monthlySpecimenCountsError')}
-                {getMonthlySpecimensCountResult.error.message}
-            </h1>
-        );
-    }
+    const isError = !isLoading && !getMonthlySpecimensCountResult.ok;
 
     const monthlySpecimenCounts = getMonthlySpecimensCountResult?.ok
         ? getMonthlySpecimensCountResult.data.data
@@ -97,6 +90,9 @@ export default function OperationsSpecimenComposition({
 
     return (
         <div className="space-y-6">
+            {isError && (
+                <ErrorBanner message={t('monthlySpecimenCountsError')} />
+            )}
             <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium">
                     {t('filterBySpecies')}
@@ -109,7 +105,7 @@ export default function OperationsSpecimenComposition({
                         }
                     >
                         <MultiSelectTrigger
-                            disabled={isLoading}
+                            disabled={isLoading || isError}
                             className="min-w-0 flex-1"
                         >
                             <MultiSelectValue
@@ -142,7 +138,7 @@ export default function OperationsSpecimenComposition({
                         onValueChange={(next: ChartType | '') => {
                             if (next) setChartType(next);
                         }}
-                        disabled={isLoading}
+                        disabled={isLoading || isError}
                         className="shrink-0"
                     >
                         <ToggleGroupItem value="bar">
@@ -156,7 +152,7 @@ export default function OperationsSpecimenComposition({
                     </ToggleGroup>
                 </div>
             </div>
-            {isLoading ? (
+            {isLoading || isError ? (
                 COMPOSITION_SECTIONS.map(
                     ({ specimenClassificationAxis, title }) => (
                         <CompositionChartPair
@@ -167,6 +163,7 @@ export default function OperationsSpecimenComposition({
                             specimenCountsByMonth={[]}
                             specimenChartConfig={{}}
                             isLoading={isLoading}
+                            isError={isError}
                         />
                     ),
                 )
@@ -203,6 +200,7 @@ export default function OperationsSpecimenComposition({
                                 specimenCountsByMonth={specimenCountsByMonth}
                                 specimenChartConfig={specimenChartConfig}
                                 isLoading={isLoading}
+                                isError={isError}
                             />
                         );
                     },
