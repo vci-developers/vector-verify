@@ -3,7 +3,7 @@
 import { useSignedResourceUrl } from '@/api/resources/hooks/use-signed-resource-url';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface SignedSpecimenImageProps {
     path: string;
@@ -11,6 +11,7 @@ interface SignedSpecimenImageProps {
     sizes?: string;
     className?: string;
     fill?: boolean;
+    style?: React.CSSProperties;
 }
 
 export default function SignedSpecimenImage({
@@ -19,6 +20,7 @@ export default function SignedSpecimenImage({
     sizes,
     className,
     fill,
+    style,
 }: SignedSpecimenImageProps) {
     const {
         data: signedResourceUrlResult,
@@ -66,7 +68,9 @@ export default function SignedSpecimenImage({
             fill={fill}
             sizes={sizes}
             className={className}
+            style={style}
             onError={handleLoadError}
+            draggable={false}
         />
     );
 }
