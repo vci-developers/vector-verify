@@ -18,6 +18,18 @@
         "returnToDashboard": "Return to Dashboard",
         "toggleSidebar": "Toggle Sidebar"
     },
+    "Dashboard": {
+        "title": "Dashboard",
+        "description": "Welcome to VectorVerify! Use the navigation links to access different sections.",
+        "reviewDescription": "Validate and certify surveillance data.",
+        "operationsDescription": "Monitor surveillance activity and program performance.",
+        "annotateDescription": "Label specimens to evaluate model performance.",
+        "noAccess": "Nothing available yet. Contact your administrator if you believe this is a mistake.",
+        "couldNotLoad": "We couldn't load your dashboard. Please try again later.",
+        "docsTitle": "Documentation",
+        "docsDescription": "Learn how to use VectorVerify.",
+        "resources": "Resources"
+    },
     "Auth": {
         "welcomeBack": "Welcome back",
         "createAccount": "Create your account",
