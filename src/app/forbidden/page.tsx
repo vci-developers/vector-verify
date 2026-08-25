@@ -24,6 +24,7 @@ export default async function ForbiddenPage({
         ? 'notWhitelistedDescription'
         : 'noAccessDescription';
     const t = await getTranslations('Auth');
+    const tNavigation = await getTranslations('Navigation');
 
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-6">
@@ -47,10 +48,11 @@ export default async function ForbiddenPage({
                 </p>
             </div>
             <div className="flex flex-col items-center gap-4">
-                <Button asChild variant="outline" className="w-full">
-                    {/* TODO: Revert to "/" / Return to Dashboard once the dashboard is restored. */}
-                    <Link href="/operations">Return to Operations</Link>
-                </Button>
+                {!isPendingApproval && (
+                    <Button asChild variant="outline" className="w-full">
+                        <Link href="/">{tNavigation('returnToDashboard')}</Link>
+                    </Button>
+                )}
 
                 <LogoutButton />
             </div>

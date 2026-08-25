@@ -51,6 +51,25 @@ the next login on a shared device. Distinct from **ephemeral interaction state**
 refresh or filter change. _Avoid_: persisted UI state (obsolete — view state is
 no longer persisted client-side), saved filters, preferences
 
+### Landing Page
+
+**Dashboard**: The `/` route, personalized per-user: renders one entry card per
+feature the user's `UserPermissions` unlock (Review, Operations, Annotate — the
+same three gates the sidebar nav uses), linking into that feature. A whitelisted
+user with none of the three permissions sees an explicit empty state, not an
+empty grid. v1 carries **no live stats** — cards are entry points only (icon,
+title, one-line description); a per-feature stat (e.g. sites needing review,
+pending annotation count) was considered and deliberately deferred because the
+cheap-vs-derived cost differs per feature (Annotation's `annotationCounts` is
+near-free but isn't user-scoped since the endpoint has no `annotatorId` filter;
+Review's per-site state is a non-trivial client-side derivation via
+`getSiteOverallReviewState`/`buildReviewSegments`; Operations has no single
+unscoped number at all) — each is a candidate for its own follow-up ticket
+rather than being bundled into the v1 launcher. Supersedes the "operational
+command center" framing in `.claude/docs/web-app.md` §8 (older, aspirational PRD
+language — summary metrics, trend views, flagged-record visibility — none of
+which is in v1 scope). _Avoid_: command center, home page (say Dashboard)
+
 ### Workflows
 
 **Annotation**: A task-based workflow in which a VCO labels mosquito specimens
