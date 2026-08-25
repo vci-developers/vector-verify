@@ -5,7 +5,6 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { useGetSessionsMetricsByDistricts } from '@/api/session/hooks/use-get-sessions-metrics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import StatBadge from '@/components/ui/stat-badge';
 import { getUniqueDistricts } from '@/lib/location/site-tree';
 import {
@@ -15,6 +14,9 @@ import {
     getCoverageCardStyle,
 } from '@/features/operations/intervention-metrics/utils/intervention-metrics-helpers';
 import { useTranslations } from 'next-intl';
+import ErrorBanner from '@/components/ui/error-banner';
+import { cn } from '@/utils/cn';
+import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 interface OperationsInterventionMetricsProps {
     sites: Site[];
@@ -39,20 +41,10 @@ export default function OperationsInterventionMetrics({
 
     const isLoading = sessionsMetricsQueries.some(query => query.isPending);
 
-    const failedSessionsMetricsQuery = sessionsMetricsQueries.find(
+    const failedSessionsMetricsQuery = sessionsMetricsQueries.filter(
         query => query.data && !query.data.ok,
     );
-    if (
-        !isLoading &&
-        failedSessionsMetricsQuery?.data &&
-        !failedSessionsMetricsQuery.data.ok
-    ) {
-        return (
-            <p className="text-destructive text-sm">
-                {failedSessionsMetricsQuery.data.error.message}
-            </p>
-        );
-    }
+    const isError = !isLoading && failedSessionsMetricsQuery.length > 0;
 
     const interventionMetricsTotals = !isLoading
         ? buildInterventionMetricsTotals(
@@ -77,17 +69,23 @@ export default function OperationsInterventionMetrics({
                 </p>
             </div>
 
+            {isError && <ErrorBanner message={t('failedToLoad')} />}
+
             <div className="grid gap-3 sm:grid-cols-2">
-                <Card className={`${netUsageStatusStyle.card} gap-0 py-0`}>
+                <Card
+                    className={cn(
+                        !isError && `${netUsageStatusStyle.card}`,
+                        'gap-0 py-0',
+                    )}
+                >
                     <CardContent className="flex h-full flex-col p-4">
                         <p className="text-muted-foreground text-sm">
                             {t('netUsageTitle')}
                         </p>
-                        {isLoading ? (
-                            <div className="space-y-2 py-2">
-                                <Skeleton width="sm" height="xxl" />
-                                <Skeleton width="lg" height="sm" />
-                            </div>
+                        {isLoading || isError ? (
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         ) : (
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">
@@ -141,11 +139,10 @@ export default function OperationsInterventionMetrics({
                         <p className="text-muted-foreground text-sm">
                             {t('peoplePerNetTitle')}
                         </p>
-                        {isLoading ? (
-                            <div className="space-y-2 py-2">
-                                <Skeleton width="sm" height="xxl" />
-                                <Skeleton width="lg" height="sm" />
-                            </div>
+                        {isLoading || isError ? (
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
                         ) : (
                             <Fragment>
                                 <p className="mt-1 text-5xl font-semibold tracking-tight">

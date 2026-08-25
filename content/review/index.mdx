@@ -1,49 +1,56 @@
-import { Steps } from 'nextra/components';
+import { Callout } from 'nextra/components';
 
 # Review
 
 The Review workflow is how program staff validate surveillance data collected at
 a sentinel site before it is submitted to national surveillance systems. Review
-is done one site at a time during the selected collection cycle.
+is organized into three tabs.
+
+![The Review page with the Sites List, Submissions, and Sessions tab switcher](/docs/review/review-tabs-overview.png)
+
+## Tabs
+
+| Tab                                   | What it's for                                                                    |
+| ------------------------------------- | -------------------------------------------------------------------------------- |
+| **Sites List**                        | Browse sites for a selected location and collection cycle, and see review status |
+| **Submissions**                       | Submit certified site data to DHIS2                                              |
+| **[Sessions](/docs/review/sessions)** | Browse individual sessions across sites and collection cycles                    |
+
+<Callout type="info">
+    The **Submissions** tab is only available for Uganda programs.
+</Callout>
+
+Continue to [Site & Collection Cycle Selection](/docs/review/site-selection) for
+how to use the Sites List tab, or see
+[DHIS2 Submissions](/docs/review/submissions) for the Submissions tab.
 
 ## The review workflow
 
-<Steps>
-### Select a site and collection cycle
+For a given site and collection cycle:
 
-Select a site and collection cycle. The site list shows the current review
-status for each site so you can quickly see where work is needed.
+1. **Review surveillance questions** — go through the surveillance form
+   responses submitted across all sessions for the site and cycle. Conflicts
+   between sessions are highlighted so you can identify and resolve them. See
+   [Surveillance Questions](/docs/review/surveillance-questions).
+2. **Review specimens** — inspect the specimens collected during the cycle.
+   Approve specimens where the machine learning prediction looks correct,
+   correct obvious errors, and flag images with quality issues. See
+   [Specimen Review](/docs/review/specimen-review).
+3. **Certify the dataset** — once surveillance questions and specimens have been
+   reviewed, certify the site's dataset for the cycle. See
+   [Certification](/docs/review/certification).
 
-### Review surveillance questions
+## Session states
 
-Go through the surveillance form responses submitted across all sessions for the
-selected site and collection cycle. The platform highlights conflicts between
-sessions so you can identify and resolve them.
+Each session has one of the following states:
 
-### Review specimens
+| State              | Meaning                                        |
+| ------------------ | ---------------------------------------------- |
+| **Needs Review**   | Review work has not started for this session   |
+| **In Review**      | Review is in progress                          |
+| **Certified**      | The session has been certified                 |
+| **Submitted**      | The certified data has been submitted to DHIS2 |
+| **Not Applicable** | The session is excluded from review            |
 
-Inspect the specimens collected during the collection cycle. Approve specimens
-where the machine learning prediction looks correct, correct obvious errors, and
-flag images with quality issues.
-
-### Certify the dataset
-
-Once surveillance questions and specimens have been reviewed, certify the site's
-dataset for the collection cycle. Certification records who approved the data
-and when, and marks it as ready for national reporting.
-
-</Steps>
-
-## Review status indicators
-
-Each site shows one of the following statuses:
-
-| Status                 | Meaning                                                    |
-| ---------------------- | ---------------------------------------------------------- |
-| **No Sessions**        | The site has no available sessions                         |
-| **Needs Review**       | No review work has started for this site/collection cycle  |
-| **Certified**          | The dataset has been certified and is ready for submission |
-| **Submitted to DHIS2** | The dataset has been submitted to DHIS2                    |
-
-Continue to [Site & Collection Cycle Selection](/docs/review/site-selection) to
-get started.
+See [Sessions](/docs/review/sessions) for the sessions table and how to reassign
+a session to a different collection cycle.

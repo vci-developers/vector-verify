@@ -5,6 +5,7 @@ const meta: MetaRecord = {
     'geographical-summary': 'Geographical Summary',
     'specimen-composition': 'Specimen Composition',
     'ai-performance': 'AI Performance',
+    'intervention-metrics': 'Intervention Metrics',
     'field-team-performance': 'Field Team Performance',
 };
 

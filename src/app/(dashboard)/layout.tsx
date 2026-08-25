@@ -9,6 +9,7 @@ import {
     networkErrorMessage,
     type NetworkError,
 } from '@/lib/network/network-error';
+import EmailVerificationBanner from '@/components/email-verification-banner/email-verification-banner';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -62,6 +63,9 @@ export default async function DashboardLayout({
             <AppSidebar userProfile={authorizedUserProfile} />
             <SidebarInset className="flex min-h-screen flex-col">
                 <main className="flex-1 p-6">{children}</main>
+                {!authorizedUserProfile.emailVerified && (
+                    <EmailVerificationBanner />
+                )}
             </SidebarInset>
         </SidebarProvider>
     );

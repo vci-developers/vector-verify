@@ -7,7 +7,7 @@ interface ConfidencePredictionRowProps {
     category: string;
     label: string | null | undefined;
     confidencePercentage: number | null;
-    isLoading: boolean;
+    status: 'loading' | 'error' | 'success';
 }
 
 const MODEL_CONFIDENCE_THRESHOLD = 75;
@@ -16,10 +16,10 @@ export default function ConfidencePredictionRow({
     category,
     label,
     confidencePercentage,
-    isLoading,
+    status,
 }: ConfidencePredictionRowProps) {
     const isLowConfidence =
-        !isLoading &&
+        status === 'success' &&
         confidencePercentage != null &&
         confidencePercentage < MODEL_CONFIDENCE_THRESHOLD;
 
@@ -33,8 +33,14 @@ export default function ConfidencePredictionRow({
                 )}
             >
                 <span className="w-10 shrink-0">
-                    {isLoading ? (
-                        <Skeleton height="sm" width="sm" />
+                    {status !== 'success' ? (
+                        <Skeleton
+                            height="sm"
+                            width="sm"
+                            variant={
+                                status === 'error' ? 'destructive' : 'default'
+                            }
+                        />
                     ) : label && confidencePercentage != null ? (
                         `${confidencePercentage}%`
                     ) : (

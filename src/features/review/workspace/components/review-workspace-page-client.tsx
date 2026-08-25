@@ -20,6 +20,7 @@ import { useState } from 'react';
 import ReviewWorkspaceHeader from './layout/review-workspace-header';
 import ImageReviewWorkspace from '../image/components/image-review-workspace';
 import CertificationWorkspace from '../certification/components/certification-workspace';
+import ErrorBanner from '@/components/ui/error-banner';
 
 const REVIEW_STEP_LABEL_KEYS = [
     'metadataStep',
@@ -97,9 +98,11 @@ export default function ReviewWorkspacePageClient({
             {isGetAllSessionsPending || !getAllSessionsResult ? (
                 <SkeletonList count={4} height="xl" width="full" />
             ) : !getAllSessionsResult.ok ? (
-                <p className="text-destructive text-sm">
-                    {getAllSessionsResult.error.message}
-                </p>
+                <ErrorBanner
+                    message={
+                        getAllSessionsResult.error.message || t('sessionsError')
+                    }
+                />
             ) : (
                 <Card className="border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
                     <CardContent className="space-y-6 p-6">
