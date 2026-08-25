@@ -257,7 +257,7 @@ export default function SpecimenImageCarousel({
                                                 : undefined
                                         }
                                         className={cn(
-                                            'bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border',
+                                            'bg-muted user-select:none relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border',
                                             zoomLevel > MIN_ZOOM &&
                                                 'touch-none',
                                         )}
@@ -358,7 +358,7 @@ export default function SpecimenImageCarousel({
                         variant="outline"
                         onClick={handleZoomIn}
                         disabled={zoomLevel >= MAX_ZOOM}
-                        aria-label="Zoom out"
+                        aria-label="Zoom in"
                     >
                         <Plus className="h-4 w-4" />
                     </Button>
