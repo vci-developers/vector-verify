@@ -257,7 +257,7 @@ export default function SpecimenImageCarousel({
                                                 : undefined
                                         }
                                         className={cn(
-                                            'bg-muted user-select:none relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border',
+                                            'bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border select-none',
                                             zoomLevel > MIN_ZOOM &&
                                                 'touch-none',
                                         )}
