@@ -1,8 +1,16 @@
+import { ArrowLeft } from 'lucide-react';
 import type { MetaRecord } from 'nextra';
 
 const meta: MetaRecord = {
     dashboard_app: {
-        title: 'VectorVerify Dashboard',
+        title: (
+            <span
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+                <ArrowLeft size={16} />
+                VectorVerify Dashboard
+            </span>
+        ),
         href: '/',
     },
     index: 'Introduction',

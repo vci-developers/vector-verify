@@ -10,6 +10,8 @@ export interface InterventionMetricsTotals {
     peopleNotUnderNet: number | null;
     peoplePerNetRatio: number | null;
     netUsageRatePercent: number | null;
+    totalFedAnopheles: number | null;
+    fedAnophelesToPeopleSleptRatio: number | null;
 }
 
 function sumDistrictValues(
@@ -50,6 +52,11 @@ export function buildInterventionMetricsTotals(
     const totalLlins = sumDistrictValues(
         districtMetrics.map(metrics => metrics.entomologicalSummary.totalLlins),
     );
+    const totalFedAnopheles = sumDistrictValues(
+        districtMetrics.map(
+            metrics => metrics.entomologicalSummary.totalFedAnopheles,
+        ),
+    );
 
     const peopleNotUnderNet =
         peopleInAllHousesInspected != null && totalPeopleSleptUnderLlin != null
@@ -68,6 +75,11 @@ export function buildInterventionMetricsTotals(
             ? (totalPeopleSleptUnderLlin / peopleInAllHousesInspected) * 100
             : null;
 
+    const fedAnophelesToPeopleSleptRatio =
+        totalFedAnopheles != null && totalPeopleSleptUnderLlin
+            ? totalFedAnopheles / totalPeopleSleptUnderLlin
+            : null;
+
     return {
         peopleInAllHousesInspected,
         housesUsedForCollection,
@@ -76,6 +88,8 @@ export function buildInterventionMetricsTotals(
         peopleNotUnderNet,
         peoplePerNetRatio,
         netUsageRatePercent,
+        totalFedAnopheles,
+        fedAnophelesToPeopleSleptRatio,
     };
 }
 

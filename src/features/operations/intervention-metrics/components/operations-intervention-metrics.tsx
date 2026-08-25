@@ -71,7 +71,7 @@ export default function OperationsInterventionMetrics({
 
             {isError && <ErrorBanner message={t('failedToLoad')} />}
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-3">
                 <Card
                     className={cn(
                         !isError && `${netUsageStatusStyle.card}`,
@@ -159,6 +159,47 @@ export default function OperationsInterventionMetrics({
                                         label={t('netsAvailable')}
                                         value={
                                             interventionMetricsTotals?.totalLlins ??
+                                            0
+                                        }
+                                    />
+                                </div>
+                            </Fragment>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border bg-card gap-0 py-0">
+                    <CardContent className="flex h-full flex-col p-4">
+                        <p className="text-muted-foreground text-sm">
+                            {t('fedAnophelesRatioTitle')}
+                        </p>
+                        {isLoading || isError ? (
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
+                        ) : (
+                            <Fragment>
+                                <p className="mt-1 text-5xl font-semibold tracking-tight">
+                                    {formatInterventionRatio(
+                                        interventionMetricsTotals?.fedAnophelesToPeopleSleptRatio ??
+                                            null,
+                                    )}
+                                </p>
+                                <p className="text-muted-foreground mt-2 text-sm">
+                                    {t('fedAnophelesRatioDescription')}
+                                </p>
+                                <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                                    <StatBadge
+                                        label={t('totalFedAnopheles')}
+                                        value={
+                                            interventionMetricsTotals?.totalFedAnopheles ??
+                                            0
+                                        }
+                                    />
+                                    <StatBadge
+                                        label={t('peopleSleptUnderNet')}
+                                        value={
+                                            interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
                                             0
                                         }
                                     />

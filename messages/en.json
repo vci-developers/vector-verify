@@ -179,7 +179,11 @@
         "housesUsedForCollection": "Households Inspected",
         "peoplePerNetTitle": "People per Net",
         "peoplePerNetDescription": "Total people who slept under a net divided by total nets available.",
-        "netsAvailable": "Nets Available"
+        "netsAvailable": "Nets Available",
+        "fedAnophelesRatioTitle": "Fed Anopheles / People Slept Under Net",
+        "fedAnophelesRatioDescription": "Fully fed Anopheles mosquitoes collected divided by total people who slept under a net.",
+        "totalFedAnopheles": "Fed Anopheles",
+        "peopleSleptUnderNet": "People Slept Under Net"
     },
     "Review": {
         "review": "Review",
