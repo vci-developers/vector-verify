@@ -2,8 +2,11 @@ import { Separator } from '@/components/ui/separator';
 import AuthShell from '@/features/auth/components/auth-shell';
 import SignupForm from '@/features/auth/components/signup-form';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-export default function SignupPage() {
+export default async function SignupPage() {
+    const t = await getTranslations('Auth');
+
     return (
         <AuthShell
             title="Create your account"
@@ -13,12 +16,12 @@ export default function SignupPage() {
             <SignupForm />
             <Separator className="my-6" />
             <p className="text-muted-foreground text-center text-sm">
-                Already have an account?{' '}
+                {t('existingAccountQuestion')}{' '}
                 <Link
                     href="/login"
                     className="text-primary font-medium hover:underline"
                 >
-                    Login instead
+                    {t('loginLinkText')}
                 </Link>
             </p>
         </AuthShell>

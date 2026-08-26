@@ -8,60 +8,74 @@ import { Pencil } from 'lucide-react';
 import { Fragment } from 'react';
 import { deserializeAnnotationFormArtifacts } from '@/features/annotation/task-details/lib/annotation-form-artifacts-serializer';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnnotationReadonlyViewProps {
-    annotation: Annotation;
+    annotation: Annotation | undefined;
     onEdit: () => void;
+    isLoading: boolean;
+    isError: boolean;
 }
 
 export default function AnnotationReadonlyView({
     annotation,
     onEdit,
+    isLoading,
+    isError,
 }: AnnotationReadonlyViewProps) {
-    const annotationFormArtifacts = deserializeAnnotationFormArtifacts(
-        annotation.artifacts,
-    );
+    const annotationFormArtifacts =
+        deserializeAnnotationFormArtifacts(annotation?.artifacts) ?? [];
+
+    const visualAnnotations = [
+        { label: 'Species', value: annotation?.visualSpecies ?? '---' },
+        { label: 'Sex', value: annotation?.visualSex ?? '---' },
+        {
+            label: 'Abdomen Status',
+            value: annotation?.visualAbdomenStatus ?? '---',
+        },
+    ];
+
+    const showArtifacts =
+        isLoading || isError || annotationFormArtifacts.length > 0;
+    const showNotes = isLoading || isError || !!annotation?.notes;
+
     return (
         <Card className="h-full">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Annotation</CardTitle>
-                    <Button variant="outline" size="icon" onClick={onEdit}>
-                        <Pencil className="h-4 w-4" />
-                    </Button>
+                    {!isLoading && !isError && (
+                        <Button variant="outline" size="icon" onClick={onEdit}>
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <p className="text-muted-foreground text-sm">Species</p>
-                        <p className="text-sm font-medium">
-                            {annotation.visualSpecies
-                                ? annotation.visualSpecies
-                                : '---'}
-                        </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <p className="text-muted-foreground text-sm">Sex</p>
-                        <p className="text-sm font-medium">
-                            {annotation.visualSex
-                                ? annotation.visualSex
-                                : '---'}
-                        </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <p className="text-muted-foreground text-sm">
-                            Abdomen Status
-                        </p>
-                        <p className="text-sm font-medium">
-                            {annotation.visualAbdomenStatus
-                                ? annotation.visualAbdomenStatus
-                                : '---'}
-                        </p>
-                    </div>
+                    {visualAnnotations.map(({ label, value }) => (
+                        <div
+                            key={label}
+                            className="flex items-center justify-between"
+                        >
+                            <p className="text-muted-foreground text-sm">
+                                {label}
+                            </p>
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-4 w-20"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
+                            ) : (
+                                <p className="text-sm font-medium">{value}</p>
+                            )}
+                        </div>
+                    ))}
                 </div>
 
-                {annotationFormArtifacts.length > 0 && (
+                {showArtifacts && (
                     <Fragment>
                         <Separator />
                         <div>
@@ -69,24 +83,45 @@ export default function AnnotationReadonlyView({
                                 Artifacts
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {annotationFormArtifacts.map(artifact => (
-                                    <Badge key={artifact} variant="secondary">
-                                        {artifact}
-                                    </Badge>
-                                ))}
+                                {isLoading || isError ? (
+                                    <Skeleton
+                                        className="h-4 w-full"
+                                        variant={
+                                            isError ? 'destructive' : 'default'
+                                        }
+                                    />
+                                ) : (
+                                    annotationFormArtifacts.map(artifact => (
+                                        <Badge
+                                            key={artifact}
+                                            variant="secondary"
+                                        >
+                                            {artifact}
+                                        </Badge>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </Fragment>
                 )}
 
-                {annotation.notes && (
+                {showNotes && (
                     <Fragment>
                         <Separator />
                         <div>
                             <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
                                 Notes
                             </p>
-                            <p className="text-sm">{annotation.notes}</p>
+                            {isLoading || isError ? (
+                                <Skeleton
+                                    className="h-8 w-full"
+                                    variant={
+                                        isError ? 'destructive' : 'default'
+                                    }
+                                />
+                            ) : (
+                                <p className="text-sm">{annotation?.notes}</p>
+                            )}
                         </div>
                     </Fragment>
                 )}

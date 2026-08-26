@@ -3,6 +3,7 @@ import { geocodeSchema } from './geocode-schema';
 
 export const getGeocodeQueryParamsSchema = z.object({
     location: z.string(),
+    country: z.string().optional(),
 });
 
 export const getGeocodeResponseSchema = geocodeSchema;

@@ -22,13 +22,14 @@ export async function safeApiCall<T>(
     options?: RequestInit,
     validationSchema?: z.ZodType<T>,
 ): Promise<Result<T, NetworkError>> {
+    const hasBody = options?.body !== undefined;
     let response: Response;
     try {
         response = await fetch(constructUrl(path), {
             ...options,
             cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/json',
+                ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
                 ...(options?.headers || {}),
             },
         });

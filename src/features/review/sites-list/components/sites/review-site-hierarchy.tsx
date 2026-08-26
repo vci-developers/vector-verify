@@ -19,14 +19,26 @@ const LEGACY_HIERARCHY_LEVELS = [
     { key: 'houseNumber', label: 'House' },
 ] as const;
 
+function hasVisibleSite(
+    groupSites: Site[],
+    visibleSiteIds: Set<number> | undefined,
+): boolean {
+    return (
+        visibleSiteIds === undefined ||
+        groupSites.some(site => visibleSiteIds.has(site.siteId))
+    );
+}
+
 interface ReviewSiteHierarchyProps {
     sites: Site[];
+    visibleSiteIds?: Set<number>;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
 }
 
 export default function ReviewSiteHierarchy({
     sites,
+    visibleSiteIds,
     summaryBySiteId,
     buildSiteHref,
 }: ReviewSiteHierarchyProps) {
@@ -35,6 +47,7 @@ export default function ReviewSiteHierarchy({
     return isLegacySite(sites[0]!) ? (
         <LegacySiteLevel
             sites={sites}
+            visibleSiteIds={visibleSiteIds}
             depth={0}
             summaryBySiteId={summaryBySiteId}
             buildSiteHref={buildSiteHref}
@@ -43,6 +56,7 @@ export default function ReviewSiteHierarchy({
         <HierarchicalSiteLevel
             allSites={sites}
             sitesAtLevel={getTopLevelSites(sites)}
+            visibleSiteIds={visibleSiteIds}
             depth={0}
             summaryBySiteId={summaryBySiteId}
             buildSiteHref={buildSiteHref}
@@ -52,11 +66,13 @@ export default function ReviewSiteHierarchy({
 
 function LegacySiteLevel({
     sites,
+    visibleSiteIds,
     depth,
     summaryBySiteId,
     buildSiteHref,
 }: {
     sites: Site[];
+    visibleSiteIds?: Set<number>;
     depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
@@ -67,6 +83,7 @@ function LegacySiteLevel({
         return (
             <ReviewSiteLeafRows
                 sites={sites}
+                visibleSiteIds={visibleSiteIds}
                 getDisplayName={site => site[level.key] ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
                 buildSiteHref={buildSiteHref}
@@ -79,9 +96,9 @@ function LegacySiteLevel({
         const name = site[level.key] ?? 'Unknown';
         (sitesByName[name] ??= []).push(site);
     }
-    const groups = Object.entries(sitesByName).sort(([a], [b]) =>
-        a.localeCompare(b),
-    );
+    const groups = Object.entries(sitesByName)
+        .filter(entry => hasVisibleSite(entry[1], visibleSiteIds))
+        .sort(([a], [b]) => a.localeCompare(b));
 
     return (
         <div className="space-y-1">
@@ -91,11 +108,13 @@ function LegacySiteLevel({
                     locationName={name}
                     locationTypeName={level.label}
                     siteIds={groupSites.map(site => site.siteId)}
+                    visibleSiteIds={visibleSiteIds}
                     sessionSummaryBySiteId={summaryBySiteId}
                     defaultOpen={depth > 0}
                 >
                     <LegacySiteLevel
                         sites={groupSites}
+                        visibleSiteIds={visibleSiteIds}
                         depth={depth + 1}
                         summaryBySiteId={summaryBySiteId}
                         buildSiteHref={buildSiteHref}
@@ -109,12 +128,14 @@ function LegacySiteLevel({
 function HierarchicalSiteLevel({
     allSites,
     sitesAtLevel,
+    visibleSiteIds,
     depth,
     summaryBySiteId,
     buildSiteHref,
 }: {
     allSites: Site[];
     sitesAtLevel: Site[];
+    visibleSiteIds?: Set<number>;
     depth: number;
     summaryBySiteId: Map<number, ReviewSiteSessionSummary>;
     buildSiteHref?: (siteId: number) => string;
@@ -129,6 +150,7 @@ function HierarchicalSiteLevel({
         return (
             <ReviewSiteLeafRows
                 sites={sitesAtLevel}
+                visibleSiteIds={visibleSiteIds}
                 getDisplayName={site => site.name ?? 'Unknown'}
                 summaryBySiteId={summaryBySiteId}
                 buildSiteHref={buildSiteHref}
@@ -157,18 +179,26 @@ function HierarchicalSiteLevel({
                             ),
                     )
                     .map(descendant => descendant.siteId);
+                if (
+                    visibleSiteIds !== undefined &&
+                    !sentinelSiteIds.some(siteId => visibleSiteIds.has(siteId))
+                ) {
+                    return null;
+                }
                 return (
                     <ReviewCollapsibleLocationGroup
                         key={site.siteId}
                         locationName={site.name ?? 'Unknown'}
                         locationTypeName={locationTypeName}
                         siteIds={sentinelSiteIds}
+                        visibleSiteIds={visibleSiteIds}
                         sessionSummaryBySiteId={summaryBySiteId}
                         defaultOpen={depth > 0}
                     >
                         <HierarchicalSiteLevel
                             allSites={allSites}
                             sitesAtLevel={childSites}
+                            visibleSiteIds={visibleSiteIds}
                             depth={depth + 1}
                             summaryBySiteId={summaryBySiteId}
                             buildSiteHref={buildSiteHref}

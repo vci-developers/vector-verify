@@ -1,9 +1,12 @@
+import { getUserProfile } from '@/api/user/get-user-profile';
 import LogoutButton from '@/components/auth-session/logout-button';
 import { Button } from '@/components/ui/button';
+import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { cn } from '@/utils/cn';
 import { Hourglass, ShieldX } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 interface ForbiddenPageProps {
     searchParams: Promise<{
@@ -16,6 +19,17 @@ export default async function ForbiddenPage({
 }: ForbiddenPageProps) {
     const { reason: accessDenialReason } = await searchParams;
     const isPendingApproval = accessDenialReason === 'not-whitelisted';
+
+    if (isPendingApproval) {
+        const getUserProfileResult = await withAuthSession(getUserProfile);
+        if (
+            getUserProfileResult.ok &&
+            getUserProfileResult.data.user.isWhitelisted
+        ) {
+            redirect('/');
+        }
+    }
+
     const VariantIcon = isPendingApproval ? Hourglass : ShieldX;
     const titleKey = isPendingApproval
         ? 'notWhitelistedTitle'
@@ -24,6 +38,7 @@ export default async function ForbiddenPage({
         ? 'notWhitelistedDescription'
         : 'noAccessDescription';
     const t = await getTranslations('Auth');
+    const tNavigation = await getTranslations('Navigation');
 
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-6">
@@ -47,10 +62,11 @@ export default async function ForbiddenPage({
                 </p>
             </div>
             <div className="flex flex-col items-center gap-4">
-                <Button asChild variant="outline" className="w-full">
-                    {/* TODO: Revert to "/" / Return to Dashboard once the dashboard is restored. */}
-                    <Link href="/operations">Return to Operations</Link>
-                </Button>
+                {!isPendingApproval && (
+                    <Button asChild variant="outline" className="w-full">
+                        <Link href="/">{tNavigation('returnToDashboard')}</Link>
+                    </Button>
+                )}
 
                 <LogoutButton />
             </div>

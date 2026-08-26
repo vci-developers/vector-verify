@@ -3,6 +3,10 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { GetSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-specimens-count-schema';
 import { isLegacySite } from '@/lib/location/location-query';
 
+export const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
+
+export type GeographicalView = (typeof GEOGRAPHICAL_VIEWS)[number];
+
 export const ANOPHELES_THRESHOLD = {
     low: 10,
     moderate: 50,
@@ -32,10 +36,12 @@ export interface SiteMarker extends GeocodableMarker {
     lastCollectionDate?: number;
 }
 
-function buildLegacyLocationQuery(site: Site): string {
+function buildLegacyLocationQuery(site: Site, country: string): string {
     const { villageName, parish, subCounty, district } = site;
     const cleanDistrict = district?.replace(/ District$/i, '').trim();
-    const countryPart = cleanDistrict ? `${cleanDistrict}, Uganda` : 'Uganda';
+    const countryPart = cleanDistrict
+        ? `${cleanDistrict}, ${country}`
+        : country;
 
     let cleanVillage = villageName?.split('+')[0]?.trim() ?? null;
 
@@ -52,7 +58,7 @@ function buildLegacyLocationQuery(site: Site): string {
 
     if (cleanVillage) return `${cleanVillage}, ${countryPart}`;
     if (cleanDistrict) return countryPart;
-    return 'Uganda';
+    return country;
 }
 
 function buildHierarchicalLocationQuery(site: Site): string {
@@ -63,13 +69,13 @@ function buildHierarchicalLocationQuery(site: Site): string {
     return [site.name, topLevelRegion].filter(Boolean).join(', ');
 }
 
-export function buildSiteLocationQuery(site: Site): string {
+export function buildSiteLocationQuery(site: Site, country: string): string {
     return isLegacySite(site)
-        ? buildLegacyLocationQuery(site)
+        ? buildLegacyLocationQuery(site, country)
         : buildHierarchicalLocationQuery(site);
 }
 
-function buildParentLocationName(site: Site): string {
+export function buildParentLocationName(site: Site): string {
     if (isLegacySite(site)) {
         return [site.district, site.subCounty, site.parish]
             .filter(Boolean)
@@ -80,7 +86,7 @@ function buildParentLocationName(site: Site): string {
         .join(' · ');
 }
 
-function getMarkerName(
+export function getMarkerName(
     site: Site,
     sitesById: Map<number, Site>,
 ): string | null {
@@ -92,7 +98,7 @@ function getMarkerName(
     return parentSite?.name ?? site.name ?? null;
 }
 
-function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
+export function getMarkerSite(site: Site, sitesById: Map<number, Site>): Site {
     if (isLegacySite(site)) return site;
     if (site.parentId != null) {
         return sitesById.get(site.parentId) ?? site;
@@ -104,6 +110,7 @@ export function buildSiteMarkers(
     siteSpecimenCounts: GetSpecimensCountSuccessPayload['data'],
     allSessions: GetAllSessionsSuccessPayload['sessions'],
     descendantsOfSelectedLocation: Site[],
+    country: string,
 ): SiteMarker[] {
     const sitesById = new Map(
         descendantsOfSelectedLocation.map(site => [site.siteId, site]),
@@ -196,7 +203,7 @@ export function buildSiteMarkers(
                 .map(([species, count]) => ({ species, count }))
                 .sort((a, b) => b.count - a.count);
 
-            const locationQuery = buildSiteLocationQuery(markerSite);
+            const locationQuery = buildSiteLocationQuery(markerSite, country);
 
             return {
                 id: markerName,

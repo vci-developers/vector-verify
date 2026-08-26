@@ -4,39 +4,39 @@ This is the first validation step after selecting a site and collection cycle.
 You review the surveillance form responses submitted across all sessions to
 check for inconsistencies.
 
-![The surveillance questions review table with conflicting values highlighted](/docs/review-detail/01-metadata-review.png)
+![The surveillance questions review table, with conflicting rows flagged and one row's value being edited](/docs/review-detail/surveillance-edit-any-row.png)
 
 ## What this page shows
 
-The page displays a table with surveillance questions as rows and session
-responses as columns. This layout lets you compare answers side-by-side across
-every session submitted for the collection cycle.
+The table has one row per surveillance question and one column per session
+submitted for the site and collection cycle, plus a **Value** column where you
+record the reviewed answer.
 
-For example:
+If a site has more than one review unit (for example, more than one household or
+structure surveyed), the table is split into sections — one for session-level
+questions, and one per unit — so you can review each unit's questions
+separately.
 
-| Question          | Session 1      | Session 2      | Session 3       |
-| ----------------- | -------------- | -------------- | --------------- |
-| Collection method | CDC light trap | CDC light trap | Pyrethrum spray |
-| Indoor/outdoor    | Indoor         | Indoor         | Indoor          |
+## Row highlighting
 
-## Conflict detection
+Rows are flagged when:
 
-The platform automatically highlights:
+- **Conflicting** — sessions give different answers to the same question
+- **Required and unanswered** — a required question has no recorded answer
 
-- **Conflicting responses** — where different sessions give different answers to
-  the same question
-- **Missing responses** — questions with no answer recorded for a session
+Rows can also be **disabled** (shown as N/A) when a question doesn't apply given
+another answer — for example, "Months Since IRS" is disabled if "Was IRS
+Conducted" is "No".
 
-Highlighted cells indicate where you should focus your attention.
+## Editing a value
 
-## Resolving conflicts
-
-For each conflict you find, you can:
-
-- Use the dropwdown to select how you would like to resolve the conflict.
+Any non-disabled row can be edited. Click the pencil icon next to a row to make
+its value editable, and select or enter the value you want recorded. Editing a
+non-conflicting row is optional; resolving every conflicting or
+required-unanswered row is necessary before you can continue.
 
 ## Completing this step
 
-Once you are satisfied that surveillance questions are consistent and any
-conflicts are resolved, confirm the step to proceed to
+Once every conflicting and required-unanswered row has a value selected, **Save
+& Continue** becomes enabled, taking you to
 [Specimen Review](/docs/review/specimen-review).

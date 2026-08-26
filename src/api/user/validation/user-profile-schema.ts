@@ -8,6 +8,7 @@ export const userProfileSchema = z.object({
     programId: z.number().nullable().optional(),
     isActive: z.boolean(),
     isWhitelisted: z.boolean().optional(),
+    emailVerified: z.boolean().optional(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;
