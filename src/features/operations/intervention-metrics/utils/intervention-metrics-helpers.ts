@@ -60,7 +60,10 @@ export function buildInterventionMetricsTotals(
 
     const peopleNotUnderNet =
         peopleInAllHousesInspected != null && totalPeopleSleptUnderLlin != null
-            ? peopleInAllHousesInspected - totalPeopleSleptUnderLlin
+            ? Math.max(
+                  0,
+                  peopleInAllHousesInspected - totalPeopleSleptUnderLlin,
+              )
             : null;
 
     const peoplePerNetRatio =
@@ -72,7 +75,11 @@ export function buildInterventionMetricsTotals(
         totalPeopleSleptUnderLlin != null &&
         peopleInAllHousesInspected &&
         totalLlins
-            ? (totalPeopleSleptUnderLlin / peopleInAllHousesInspected) * 100
+            ? Math.min(
+                  100,
+                  (totalPeopleSleptUnderLlin / peopleInAllHousesInspected) *
+                      100,
+              )
             : null;
 
     const fedAnophelesToPeopleSleptRatio =
