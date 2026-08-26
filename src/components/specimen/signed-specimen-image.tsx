@@ -2,6 +2,7 @@
 
 import { useSignedResourceUrl } from '@/api/resources/hooks/use-signed-resource-url';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
@@ -29,6 +30,7 @@ export default function SignedSpecimenImage({
     } = useSignedResourceUrl(path);
     const [hasRetried, setHasRetried] = useState(false);
     const [loadFailed, setLoadFailed] = useState(false);
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
 
     const signedResource = signedResourceUrlResult?.ok
         ? signedResourceUrlResult.data
@@ -62,15 +64,23 @@ export default function SignedSpecimenImage({
     }
 
     return (
-        <Image
-            src={signedResource.url}
-            alt={alt}
-            fill={fill}
-            sizes={sizes}
-            className={className}
-            style={style}
-            onError={handleLoadError}
-            draggable={false}
-        />
+        <React.Fragment>
+            {!isImageLoaded && (
+                <div className="bg-accent absolute inset-0 flex items-center justify-center">
+                    <Spinner className="size-10" />
+                </div>
+            )}
+            <Image
+                src={signedResource.url}
+                alt={alt}
+                fill={fill}
+                sizes={sizes}
+                className={className}
+                style={style}
+                onError={handleLoadError}
+                onLoad={() => setIsImageLoaded(true)}
+                draggable={false}
+            />
+        </React.Fragment>
     );
 }
