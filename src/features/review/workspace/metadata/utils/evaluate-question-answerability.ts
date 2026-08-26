@@ -1,24 +1,12 @@
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
-import { NOT_APPLICABLE, type MetadataSection } from './metadata-section';
-
-const SURVEILLANCE_FIELD_DEPENDENCIES: Record<
-    string,
-    { dependentRowIds: string[]; disablingDisplayValues: string[] }
-> = {
-    'surveillanceForm.wasIrsConducted': {
-        dependentRowIds: ['surveillanceForm.monthsSinceIrs'],
-        disablingDisplayValues: ['No', NOT_APPLICABLE],
-    },
-    'surveillanceForm.numLlinsAvailable': {
-        dependentRowIds: [
-            'surveillanceForm.llinType',
-            'surveillanceForm.llinBrand',
-            'surveillanceForm.numPeopleSleptUnderLlin',
-        ],
-        disablingDisplayValues: ['0', NOT_APPLICABLE],
-    },
-};
+import {
+    NOT_APPLICABLE,
+    SURVEILLANCE_FIELD_DEPENDENCIES,
+    formatDisplayValue,
+    type MetadataRow,
+    type MetadataSection,
+} from './metadata-section';
 
 export function evaluateDisabledRowIds(
     sections: MetadataSection[],
@@ -26,13 +14,22 @@ export function evaluateDisabledRowIds(
     questionsById: Map<number, FormQuestion>,
 ): Set<string> {
     const disabledRowIds = new Set<string>();
+    const allRows = sections.flatMap(section => section.rows);
 
     for (const [parentRowId, dependency] of Object.entries(
         SURVEILLANCE_FIELD_DEPENDENCIES,
     )) {
-        const parentResolution =
-            resolutionsByMetadataRowId.get(parentRowId) ?? '';
-        if (dependency.disablingDisplayValues.includes(parentResolution)) {
+        const parentRow = allRows.find(row => row.id === parentRowId);
+        const parentValue = parentRow
+            ? resolveRowEffectiveValue(
+                  parentRow,
+                  resolutionsByMetadataRowId,
+                  disabledRowIds,
+              )
+            : null;
+        if (parentValue === undefined) continue;
+        const parentDisplayValue = parentValue ?? NOT_APPLICABLE;
+        if (dependency.disablingDisplayValues.includes(parentDisplayValue)) {
             for (const dependentRowId of dependency.dependentRowIds) {
                 disabledRowIds.add(dependentRowId);
             }
@@ -51,15 +48,23 @@ export function evaluateDisabledRowIds(
                     Number(row.fieldName),
                 )?.prerequisite;
                 if (!prerequisite) continue;
-                const met = isPrerequisiteMet(prerequisite, questionId =>
-                    resolveEffectiveValue(
-                        questionId,
-                        section,
-                        resolutionsByMetadataRowId,
-                        disabledRowIds,
-                    ),
+                const prerequisiteMet = isPrerequisiteMet(
+                    prerequisite,
+                    questionId => {
+                        const dependencyRow = section.rows.find(
+                            candidate =>
+                                Number(candidate.fieldName) === questionId,
+                        );
+                        return dependencyRow
+                            ? resolveRowEffectiveValue(
+                                  dependencyRow,
+                                  resolutionsByMetadataRowId,
+                                  disabledRowIds,
+                              )
+                            : undefined;
+                    },
                 );
-                if (!met) {
+                if (!prerequisiteMet) {
                     disabledRowIds.add(row.id);
                     disabledAnyRow = true;
                 }
@@ -70,16 +75,11 @@ export function evaluateDisabledRowIds(
     return disabledRowIds;
 }
 
-function resolveEffectiveValue(
-    questionId: number,
-    section: MetadataSection,
+function resolveRowEffectiveValue(
+    row: MetadataRow,
     resolutionsByMetadataRowId: Map<string, string>,
     disabledRowIds: Set<string>,
 ): string | null | undefined {
-    const row = section.rows.find(
-        candidate => Number(candidate.fieldName) === questionId,
-    );
-    if (!row) return undefined;
     if (disabledRowIds.has(row.id)) return null;
 
     const resolution = resolutionsByMetadataRowId.get(row.id);
@@ -89,10 +89,35 @@ function resolveEffectiveValue(
 
     const distinctValues = new Set(
         [...row.fieldValueBySessionId.values()].map(value =>
-            value == null ? null : String(value),
+            formatDisplayValue(value, row.fieldType),
         ),
     );
     if (distinctValues.size !== 1) return undefined;
     const [onlyValue] = distinctValues;
-    return onlyValue ?? null;
+    return onlyValue === NOT_APPLICABLE ? null : onlyValue;
+}
+
+export function evaluateUnmetRequiredRowIds(
+    sections: MetadataSection[],
+    resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
+): Set<string> {
+    const unmetRequiredRowIds = new Set<string>();
+
+    for (const section of sections) {
+        for (const row of section.rows) {
+            if (!row.required || disabledRowIds.has(row.id)) continue;
+
+            const effectiveValue = resolveRowEffectiveValue(
+                row,
+                resolutionsByMetadataRowId,
+                disabledRowIds,
+            );
+            if (effectiveValue === null) {
+                unmetRequiredRowIds.add(row.id);
+            }
+        }
+    }
+
+    return unmetRequiredRowIds;
 }

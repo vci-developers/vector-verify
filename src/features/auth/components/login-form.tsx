@@ -20,10 +20,21 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Eye, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { useGetUserProfile } from '@/api/user/hooks/use-get-user-profile';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const redirect = useSearchParams().get('redirect');
+    const t = useTranslations('Auth');
+    const { refetch: refetchUserProfile } = useGetUserProfile({
+        enabled: false,
+    });
+    const [loginError, setLoginError] = useState(false);
 
     const loginForm = useForm<LoginFormInput>({
         resolver: zodResolver(loginFormSchema),
@@ -34,6 +45,7 @@ export default function LoginForm() {
     });
 
     async function onSubmit(data: LoginFormInput) {
+        setLoginError(false);
         const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
@@ -47,11 +59,26 @@ export default function LoginForm() {
             await response.json();
 
         if (!response.ok || !loginResult.ok) {
-            console.error('Login Failed');
+            setLoginError(true);
             return;
         }
 
-        router.replace('/');
+        const { data: userProfileResult } = await refetchUserProfile();
+
+        if (!userProfileResult || !userProfileResult.ok) {
+            toast.error(t('fetchProfileError'));
+            return;
+        }
+
+        clearVerificationEmailCooldown();
+
+        router.replace(
+            redirect?.startsWith('/') &&
+                !redirect.startsWith('//') &&
+                !redirect.includes('\\')
+                ? redirect
+                : '/',
+        );
         router.refresh();
     }
 
@@ -68,17 +95,25 @@ export default function LoginForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="login-rhf-email">
-                                Email
+                                {t('email')}
                             </FieldLabel>
                             <div className="relative">
                                 <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                                 <Input
                                     {...field}
                                     id="login-rhf-email"
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder="name@example.com"
+                                    aria-invalid={
+                                        fieldState.invalid || loginError
+                                    }
+                                    placeholder={t('emailPlaceholder')}
                                     autoComplete="off"
                                     className="pl-10"
+                                    onChange={e => {
+                                        field.onChange(e);
+                                        if (loginError) {
+                                            setLoginError(false);
+                                        }
+                                    }}
                                 />
                             </div>
                             {fieldState.invalid && (
@@ -93,7 +128,7 @@ export default function LoginForm() {
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="login-rhf-password">
-                                Password
+                                {t('password')}
                             </FieldLabel>
                             <div className="relative">
                                 <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -101,10 +136,18 @@ export default function LoginForm() {
                                     {...field}
                                     id="login-rhf-password"
                                     type={showPassword ? 'text' : 'password'}
-                                    aria-invalid={fieldState.invalid}
+                                    aria-invalid={
+                                        fieldState.invalid || loginError
+                                    }
                                     placeholder="••••••••"
                                     autoComplete="off"
                                     className="pl-10"
+                                    onChange={e => {
+                                        field.onChange(e);
+                                        if (loginError) {
+                                            setLoginError(false);
+                                        }
+                                    }}
                                 />
                                 <Button
                                     type="button"
@@ -120,6 +163,11 @@ export default function LoginForm() {
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
+                            {loginError && (
+                                <FieldError
+                                    errors={[{ message: t('loginError') }]}
+                                />
+                            )}
                         </Field>
                     )}
                 />
@@ -131,7 +179,7 @@ export default function LoginForm() {
                     className="w-full"
                     disabled={loginForm.formState.isSubmitting}
                 >
-                    Login
+                    {t('loginButton')}
                 </Button>
             </Field>
         </form>

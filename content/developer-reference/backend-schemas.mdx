@@ -6,20 +6,20 @@ import { Callout } from 'nextra/components';
 
 One collection event submitted from the field.
 
-| Field                              | Description                                  |
-| ---------------------------------- | -------------------------------------------- |
-| `frontendId`                       | Client-generated identifier for the session  |
-| `siteId`                           | The site where collection took place         |
-| `collectionCycleId`                | The collection cycle the session belongs to  |
-| `collectorName` / `collectorTitle` | Who collected, and their role (e.g. VHT)     |
-| `collectionDate`                   | When the specimens were collected            |
-| `collectionMethod`                 | How they were collected (trap/method)        |
-| `latitude` / `longitude`           | GPS location of the collection               |
-| `type`                             | Session type (e.g. surveillance)             |
-| `state`                            | Review state (e.g. pending, certified)       |
-| `certifiedBy`                      | The user who certified the session, if any   |
-| `expectedSpecimens`                | Number of specimens expected for the session |
-| `submittedAt` / `completedAt`      | When the session was submitted and completed |
+| Field                              | Description                                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------------------------- |
+| `frontendId`                       | Client-generated identifier for the session                                              |
+| `siteId`                           | The site where collection took place                                                     |
+| `collectionCycleId`                | The collection cycle the session belongs to                                              |
+| `collectorName` / `collectorTitle` | Who collected, and their role (e.g. VHT)                                                 |
+| `collectionDate`                   | When the specimens were collected                                                        |
+| `collectionMethod`                 | How they were collected (trap/method)                                                    |
+| `latitude` / `longitude`           | GPS location of the collection                                                           |
+| `type`                             | Session type (e.g. surveillance)                                                         |
+| `state`                            | Review state: `NEEDS_REVIEW`, `IN_REVIEW`, `CERTIFIED`, `SUBMITTED`, or `NOT_APPLICABLE` |
+| `certifiedBy`                      | The user who certified the session, if any                                               |
+| `expectedSpecimens`                | Number of specimens expected for the session                                             |
+| `submittedAt` / `completedAt`      | When the session was submitted and completed                                             |
 
 ## Specimen
 
@@ -67,6 +67,41 @@ The household survey submitted alongside a session.
 | `wasIrsConducted` / `monthsSinceIrs`           | Indoor residual spraying status and recency |
 | `numLlinsAvailable` / `llinType` / `llinBrand` | Bed nets available, and their type/brand    |
 | `numPeopleSleptUnderLlin`                      | People who slept under a bed net            |
+
+## Dynamic Form
+
+A newer, program-configurable form system that coexists alongside the legacy
+Surveillance Form above — both are consumed together, side by side, in the
+metadata review table.
+
+**Form**
+
+| Field              | Description                     |
+| ------------------ | ------------------------------- |
+| `programId`        | The program the form belongs to |
+| `name` / `version` | The form's name and version     |
+| `questions`        | The form's questions            |
+
+**Form Question**
+
+| Field                     | Description                                                              |
+| ------------------------- | ------------------------------------------------------------------------ |
+| `formId` / `parentId`     | The form the question belongs to, and its parent (for sub-questions)     |
+| `label`                   | The question text                                                        |
+| `type`                    | `text`, `number`, `boolean`, `select`, or `date`                         |
+| `answerScope`             | `SESSION` or `SESSION_UNIT`                                              |
+| `required`                | Whether an answer is required                                            |
+| `options`                 | For `select` and `boolean` questions, the closed list of allowed answers |
+| `isUnitIdentityComponent` | Whether this question's answer helps identify a distinct review unit     |
+| `subQuestions`            | Nested follow-up questions                                               |
+
+**Form Answer**
+
+| Field           | Description                                   |
+| --------------- | --------------------------------------------- |
+| `questionId`    | The question being answered                   |
+| `sessionUnitId` | The review unit the answer applies to, if any |
+| `value`         | The recorded answer                           |
 
 ## Annotation
 

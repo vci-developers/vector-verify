@@ -37,6 +37,39 @@ enforced server-side in each route's layout, never by this param):
 
 _Avoid_: Forbidden (alone, ambiguous between the two reasons)
 
+**View State**: The parameters that define what a dashboard page (Review,
+Operations) is currently showing — active tab, date range, selected location,
+species filter, geographical view. Carried in the URL as search params, so a
+view is shareable, bookmarkable, and survives reload; a fresh navigation starts
+from defaults. A param at its default value is omitted, so a bare `/review` or
+`/operations` URL always means "the current defaults" — a bookmark taken without
+touching a filter never freezes the month range that happened to be default the
+day it was saved. Never stored in browser storage — view state carries no user
+identity, and keeping it in `localStorage` is what let one user's view leak into
+the next login on a shared device. Distinct from **ephemeral interaction state**
+(expanded tree rows, a selected map marker), which lives in memory and resets on
+refresh or filter change. _Avoid_: persisted UI state (obsolete — view state is
+no longer persisted client-side), saved filters, preferences
+
+### Landing Page
+
+**Dashboard**: The `/` route, personalized per-user: renders one entry card per
+feature the user's `UserPermissions` unlock (Review, Operations, Annotate — the
+same three gates the sidebar nav uses), linking into that feature. A whitelisted
+user with none of the three permissions sees an explicit empty state, not an
+empty grid. v1 carries **no live stats** — cards are entry points only (icon,
+title, one-line description); a per-feature stat (e.g. sites needing review,
+pending annotation count) was considered and deliberately deferred because the
+cheap-vs-derived cost differs per feature (Annotation's `annotationCounts` is
+near-free but isn't user-scoped since the endpoint has no `annotatorId` filter;
+Review's per-site state is a non-trivial client-side derivation via
+`getSiteOverallReviewState`/`buildReviewSegments`; Operations has no single
+unscoped number at all) — each is a candidate for its own follow-up ticket
+rather than being bundled into the v1 launcher. Supersedes the "operational
+command center" framing in `.claude/docs/web-app.md` §8 (older, aspirational PRD
+language — summary metrics, trend views, flagged-record visibility — none of
+which is in v1 scope). _Avoid_: command center, home page (say Dashboard)
+
 ### Workflows
 
 **Annotation**: A task-based workflow in which a VCO labels mosquito specimens
@@ -61,6 +94,25 @@ batch, the selected range (as a unit)
 
 **Program**: The top-level organizational unit. All sites, users, sessions, and
 forms belong to a program.
+
+**Program Country**: The `country` field on a **Program** (`GET /programs`),
+resolved by matching `programId`. Consumed **only** by the Geographical Summary
+tab's map subtree — no other Operations tab, and no Review feature, reads it. It
+does two independent jobs there: (1) for **legacy** Sites (`isLegacySite`, flat
+district/village schema — see **Site**), it is appended as literal text into the
+Nominatim geocoding query string (`buildLegacyLocationQuery`); hierarchical
+Sites' query text never includes it. (2) For **every** Site regardless of
+legacy/hierarchical, it is converted to an ISO alpha-2 country code and passed
+to Nominatim as a `countrycodes` restriction (`MapNavigator`, `useSiteGeocode`),
+narrowing every geocode search. Must never be hardcoded (the bug that motivated
+this entry: the geocoding query text was hardcoded to `'Uganda'`, silently wrong
+for every other program). Threaded via a scoped `CountryContext`
+(`geographical-summary/context/country-context.tsx`) rather than props, since it
+passes through map wrapper components (`SiteMap`, `DeviceMap`,
+`GeocodedClusterMap`) that don't otherwise use it — see ADR-0007. _Avoid_:
+country (bare, ambiguous with the unrelated `country: 'Uganda'` filter param
+used elsewhere to detect legacy/Uganda programs, e.g.
+`review-sites-list-page-client.tsx`'s `isUgandaProgram` check)
 
 **Site**: A node in the program's location hierarchy (e.g. district → parish →
 village). Sites form a tree via a self-referencing parent. _Avoid_: Location,
@@ -114,7 +166,67 @@ have no cycle. _Avoid_: Submission, collection event
 **Session State**: The lifecycle stage of a Session. In order: `NEEDS_REVIEW` →
 `IN_REVIEW` → `CERTIFIED` → `SUBMITTED`. `NOT_APPLICABLE` is set on
 non-surveillance sessions (type `CALIBRATION`, `PRACTICE`, `DATA_COLLECTION`)
-that never enter the Review workflow.
+that never enter the Review workflow. _Avoid_: `IN_PROGRESS` (used loosely in
+tickets to mean `IN_REVIEW` — there is no `IN_PROGRESS` state).
+
+**Site Review State**: The single state badge shown on a Sentinel Site row in
+the Review sites list, derived per Review Segment by `getSiteOverallReviewState`
+as the **most severe unresolved** state across that site's sessions in the
+segment — the first non-zero count walking
+`NEEDS_REVIEW → IN_REVIEW → CERTIFIED → SUBMITTED`. So one un-reviewed session
+drags a mostly-certified site back to **Needs Review**; **Certified** means
+"nothing left to review here, not yet fully in DHIS2"; **Submitted** means fully
+shipped. A site with no sessions in the segment has no Site Review State (shows
+"No Sessions"). This derived value — not the individual session counts — is what
+the **State filter** matches against. _Avoid_: site status, badge state.
+
+**State Filter**: A Review sites-list filter (multi-select, empty = show all,
+mirroring the Collection Cycle picker) over the four **Site Review State**
+values. It **defaults to `NEEDS_REVIEW` selected** — the filter is active on
+first paint and re-seeds to `NEEDS_REVIEW` on every
+location/start-month/end-month change (`resetFilters`), because surfacing what
+needs a VCO's attention is the resting state of Review, not a one-time greeting.
+Empty (show all) stays reachable by deselecting, but it is an escape hatch that
+never survives a location/month change. A Sentinel Site row is shown when its
+Site Review State is in the selected set; no-session rows are hidden whenever
+any state is selected. Because the default is non-empty, a clean location
+(nothing needs review) lands directly on "No sites match filter" / "Showing 0 of
+N" rather than the full list — that is the intended signal, not a regression.
+Filtering hides non-matching leaf rows and prunes location groups that end up
+with zero matching leaves; it never hides a **Collection Cycle** segment (an
+emptied cycle still renders, so its count badge can report a zero). Group
+coverage stats (visited/ total and the %/tint) stay **filter-blind** — they
+measure collection coverage of the location, a fixed property, not the filtered
+subset. To keep coverage filter-blind, the site hierarchy always receives the
+**full** `sites` array (coverage denominators walk the full tree) and a separate
+`visibleSiteIds` set threaded to the leaf rows decides which rows render — the
+hierarchy must never be handed a pre-filtered `sites` array, because its group
+coverage counts are derived from whatever array it is given. _Avoid_: status
+filter; pre-filtering `sites` before the hierarchy (collapses coverage
+denominators to the visible subset, e.g. 2-of-2-100% instead of 2-of-20-25%).
+
+**Filtered-Sites Count Badge**: The "Showing X of \<total\> sites" badge on a
+segment header in the Review sites list. Renders on **any** segment header —
+Collection Cycle **or** calendar month — because both segment kinds share one
+header component. Shown **only while the State Filter is active** — which, since
+the filter **defaults to `NEEDS_REVIEW`**, means it is present on first paint; a
+badge on landing is expected, not the "no filter active" case the _Avoid_ note
+below warns against. `X` = Sentinel Site rows currently visible in that segment
+under the filter (filter-aware numerator); `total` = every Sentinel Site (leaf
+site) in the selected location, counted **structurally** — the same leaf
+definition the group coverage badge uses, so the header `total` and the group
+`total`s reconcile. Legacy/Uganda: the `sites` array is already leaf-level (each
+row is a full house), so `total` = `sites.length`. Hierarchical/non-Uganda:
+`sites` flattens every tree level together, so the leaves are the rows nobody
+points to as a `parentId` — `sites.filter(s => !parentIds.has(s.siteId))`. This
+is a **wider, location-spanning** denominator than the group "of Y" (which
+counts leaves under one group), independent of the segment, never shrinks with
+the filter. Per-segment display, never aggregated across segments. Follows the
+Gmail/GOV.UK "X of Y" convention: numerator moves, denominator holds still.
+_Avoid_: showing it at 25-of-25 when no filter is active; a filter-relative
+denominator; using `hasData` for `total` (that counts only ever-visited leaves,
+so it undercounts the never-visited "No sessions" rows the list still renders,
+and disagrees with the structural group totals).
 
 **Session Unit**: A repeated collection sub-unit within a single Session (e.g. a
 trap or room visited within one household visit), fetched via
@@ -153,6 +265,15 @@ resolve to a single agreed value before Certification, via
 fields, surveillance-form fields, session-scoped dynamic answers) resolve with
 `sessionIds`; `SESSION_UNIT`-scoped conflicts resolve with `sessionUnitIds`, one
 call per **Unit Identity** group. _Avoid_: discrepancy, mismatch
+
+**Missing Surveillance Form**: A Surveillance-mode Session in a **Review Unit**
+that has no surveillance form while at least one sibling Session does. Such
+Sessions are **excluded from resolution** — values saved during Metadata Review
+do not apply to them — but they do **not block** the Review flow. The remedy is
+**out-of-band**: the VCO follows up with the VHT/field team to get the form
+submitted before certifying. UI treats this as a warning (amber), never an
+error, and the notice states that follow-up action. _Avoid_: error, blocked
+session
 
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
@@ -217,42 +338,112 @@ produced — **never** from the device registry (`GET /devices/`), which has no
 location. A device "belongs" to a location only through its sessions' `siteId`s,
 so activity is computed from `/sessions/` grouped by `deviceId` and scoped to
 the selected location's sites, exactly like Unique Sites. Activity is measured
-by **rolling calendar months**, not collection cycles — the same model for every
-program, so the device view is consistent whether or not a program has a
-Collection Schedule. The location's device **universe** = devices with ≥1
-session at a site in the selected location over the last **6 calendar months**.
-Three location-scoped tiers, which reconcile to that universe: **Active**
-(submitted in the location in the current month), **Lapsing** (submitted in the
-location within the last 3 months, not the current month), **Inactive** (in the
-6-month universe but no session in the last 3 months — "used to collect here,
-went quiet"). Shown as headline cards for the selected location; in the map's
-Devices view, markers are keyed by `siteId` and encode size = active device
-count, color = site health (active vs lapsing). Activity is always evaluated
-**as-of-today**, independent of the page's month filter. _Avoid_:
-Online/offline, connected
+by **Collection Cycles**: the **current cycle** is the cycle whose window
+contains today (`startDate <= now < endDate`), falling back to the most recent
+cycle that has already started when today lands in a gap or past the last cycle
+(comparison is raw-instant/epoch, so timezone-independent). Membership of a
+session in a cycle is **never recomputed on the frontend** — it is read from the
+backend-assigned `session.collectionCycleId` (id equality), so there is no
+boundary-day timezone bug. The session fetch uses a plain `collectionDate`
+window (`startDate`/`endDate` on `/sessions/`) spanning the 3-cycle range, then
+classifies in memory by `collectionCycleId` id-equality — mirroring
+`buildReviewSegments` (the app-wide "fetch wide by collectionDate, bucket
+precise by cycle id" pattern), not a bespoke assigned-cycle fetch. Under the
+**adjacent-only** reassignment rule this yields the same Active count as an
+assigned-cycle fetch would. The **one exception** is the calendar-month fallback
+for programs with no Collection Schedule: those sessions have
+`collectionCycleId: null`, so membership there is computed from `collectionDate`
+in **UTC** — a temporary path that disappears with the fallback. The location's
+device **universe** = devices with ≥1 session at a site in the selected location
+over the **current cycle + the 2 previous cycles** (a bounded 3-cycle window —
+wide enough that inactive devices still have a session in it and are therefore
+mappable). Programs with **no Collection Schedule** fall back to the equivalent
+**calendar-month** model (current month + 2 previous months), mirroring
+`buildReviewSegments` (`collectionCycles.length > 0 ? cycles : months`); this
+fallback clause is temporary and to be removed once all programs have cycles.
+Two location-scoped tiers, which reconcile to that universe: **Active** (≥1
+session in the **current cycle**) and **Inactive** (in the 3-cycle universe but
+no session in the current cycle — "used to collect here, went quiet"). **Lapsing
+no longer exists.** Shown as headline cards for the selected location; in the
+map's Devices view, markers **aggregate leaf Sentinel Sites into one marker per
+parent** (keyed by the parent marker name via `getMarkerName`/`getMarkerSite`,
+exactly like the Specimens view) — answering "how many devices are active in
+this area", not per-household — and encode **size = active device count**,
+**color = binary health** (green if the marker has ≥1 active device, else grey).
+**All** markers are drawn, active and inactive: an all-inactive area renders as
+a small grey dot (active count 0 → minimum radius), so active areas dominate
+visually while silent areas remain visible. The map and the info-panel list
+**share one marker array** (the map applies no active-only filter), so the panel
+is a complete ledger of the universe. **Every device is counted exactly once**
+(dedup by `deviceId`): counted at the site of its **latest** session in the
+window, with its single status. The map markers are therefore just those unique
+devices grouped by site — each tier sums back to its headline card and both
+tiers sum to the total (reconciliation holds across both the cards and the
+panel) — so a device is **never** counted at two sites, even if its sessions
+span several. _Avoid_: per-site classification (double-counts roaming devices —
+the original bug). Activity is always evaluated **as-of-today** (the current
+cycle), independent of the page's date filter. _Avoid_: Online/offline,
+connected, Lapsing (removed), rolling calendar months (replaced by cycles)
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
 surveillance-only, with inference results), for engineers, not a report. Lives
 in the global user menu, not the Operations page. Audience: developers.
-Delivered as a temporary, expiring **Signed Export URL** (obtained via
-`POST /export/sign`) that the developer clicks to download directly from the
+Delivered as a temporary, expiring **Signed Resource URL** (obtained via
+`POST /resources/sign`) that the developer clicks to download directly from the
 backend — VectorVerify signs the request but no longer proxies the CSV stream.
 _Avoid_: Raw export (capitalise), DB dump, backup
 
-**Signed Export URL**: A short-lived, pre-signed URL returned by
-`POST /export/sign` (`{ url, expiresAt }`) granting temporary _unauthenticated_
-access to an export (or report) path served directly by the backend. The browser
-downloads from it directly, bypassing VectorVerify's BFF proxy. Currently used
-only by **Raw Data Export**; the endpoint can also sign a **Report Export**
-path, which is not yet adopted. _Avoid_: Presigned link, temp link, download
-token
+**Signed Resource URL**: A short-lived, pre-signed URL returned by
+`POST /resources/sign` (`{ url, expiresAt }`) granting temporary
+_unauthenticated_ access to a backend **resource path** — an export, a report,
+or a **specimen image** — served directly by the backend, bypassing
+VectorVerify's BFF proxy. The sign call itself is authenticated (it flows
+through the BFF with the user's bearer token), so a URL can only be _obtained_
+by a logged-in user; the signature is a short-lived capability, and the backend
+returns **401 Unauthorized** (not `404`) once it expires. TTL depends on the
+resource: **5 minutes** for export/report downloads, **1 hour** for specimen
+images. Two consumption modes: **download** (an export/report path; the browser
+saves the file directly — Raw Data Export) and **inline render** (a **specimen
+image** path rendered straight into an `<img>`, so the full image bytes travel
+browser ↔ backend and never through the Amplify size-limited BFF proxy — the fix
+for large-image `413`s). The endpoint was renamed `/export/sign` →
+`/resources/sign` (VCV-287) to reflect this generalization beyond exports. A
+**Report Export** path can also be signed, but that is not yet adopted. _Avoid_:
+Signed Export URL (too narrow — it also signs images), Presigned link, temp
+link, download token
 
 **Developer Mode**: An elevated client capability carried as
 `permissions.devMode` on the user permissions payload, unlocking developer-only
 features (currently just the Raw Data Export). When on, a "Developer Mode" badge
 shows in the user menu. _Avoid_: Debug mode, admin mode, dev flag
+
+**User Analytics**: A `devMode`-gated trend chart of **VectorVerify user (VCO)**
+activity over time, opened from a dialog directly under **Raw Data Export** in
+the sidebar user menu. Measures _web-app users_ (people logging in and
+certifying), **not** field collectors — it is categorically distinct from
+**Device Activity**, which tracks VHTs via their devices. v1 sources
+`GET /users/active-metrics` only, plotting the daily **Active User** A1/A7/A30
+snapshots as three overlaid lines over a preset window (30d / 90d / 1y, default
+90d). Scope is **always the viewer's own program** (`profile.programId`) — there
+is no program selector, and the cross-program (`programId` free choice) and
+combined (`globalOnly=true`) backend views are not exposed in the web app
+(decided in PR #163 review, July 2026, superseding the original "program-less
+developer" audience). A devMode user whose `programId` is `null` gets an
+explanatory "no program" empty state instead of a chart. Certification and
+submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
+(collides with `isActive`/Whitelisted), Device Activity (different population),
+User Activity (ambiguous with Device Activity)
+
+**Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
+`GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
+the trailing 1 day (≈ DAU), **A7** = trailing 7 days (≈ WAU), **A30** = trailing
+30 days (≈ MAU). Rows are either program-scoped (`programId` set) or global
+(`programId: null`, returned via `globalOnly=true`). "Active" here means
+authenticated web-app usage — a login-driven metric, unrelated to the `isActive`
+account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as an
+explanatory gloss, but the field names are a1Count/a7Count/a30Count)
 
 ## Relationships
 

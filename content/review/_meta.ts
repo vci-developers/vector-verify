@@ -7,6 +7,7 @@ const meta: MetaRecord = {
     'specimen-review': 'Specimen Review',
     certification: 'Certification',
     submissions: 'DHIS2 Submissions',
+    sessions: 'Sessions',
 };
 
 export default meta;

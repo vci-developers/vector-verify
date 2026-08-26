@@ -2,7 +2,7 @@
 
 import { useGetMonthlySpecimensCount } from '@/api/specimen/hooks/use-get-monthly-specimens-count';
 import type { GetMonthlySpecimensCountQueryParams } from '@/api/specimen/validation/get-monthly-specimens-count-schema';
-import CompositionChartPair from './composition-chart-pair';
+import CompositionChartPair from '@/features/operations/specimen-composition/components/composition-chart-pair';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 import {
     buildSpecimenChartConfig,
@@ -19,11 +19,14 @@ import {
     MultiSelectContent,
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
-import { useMemo } from 'react';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
-import { StorageKeys } from '@/lib/storage-keys';
+import { useMemo, useState } from 'react';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
+import EmptyBanner from '@/components/ui/empty-banner';
+import { BarChart3, LineChart } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import ErrorBanner from '@/components/ui/error-banner';
 
 const COMPOSITION_SECTIONS: {
     specimenClassificationAxis: SpecimenClassificationAxis;
@@ -39,6 +42,8 @@ interface OperationsSpecimenCompositionProps {
     startDate: string;
     endDate: string;
 }
+
+type ChartType = 'bar' | 'line';
 
 export default function OperationsSpecimenComposition({
     siteIds,
@@ -59,10 +64,9 @@ export default function OperationsSpecimenComposition({
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
 
-    const [storedSpecies, setStoredSpecies] = useLocalStorage<string[] | null>(
-        StorageKeys.operations.selectedSpecies,
-        null,
-    );
+    const [chartType, setChartType] = useState<ChartType>('bar');
+
+    const [{ selectedSpecies }, setFilters] = useOperationsFilters();
     const speciesOptions = useMemo(() => {
         if (!getMonthlySpecimensCountResult?.ok) return [];
         return getSpeciesOptions(getMonthlySpecimensCountResult.data.data);
@@ -71,84 +75,136 @@ export default function OperationsSpecimenComposition({
     const validSelectedSpecies = useMemo(() => {
         const validOptions = new Set(speciesOptions);
         const species =
-            storedSpecies ??
+            selectedSpecies ??
             speciesOptions.filter(species => !isNonMosquito(species));
-        return species.filter(s => validOptions.has(s));
-    }, [storedSpecies, speciesOptions]);
+        return species.filter(speciesName => validOptions.has(speciesName));
+    }, [selectedSpecies, speciesOptions]);
 
-    if (isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult) {
-        return <h1>{t('monthlySpecimenCountsLoading')}</h1>;
-    }
+    const isLoading =
+        isGetMonthlySpecimensCountPending || !getMonthlySpecimensCountResult;
+    const isError = !isLoading && !getMonthlySpecimensCountResult.ok;
 
-    if (!getMonthlySpecimensCountResult.ok) {
-        return (
-            <h1>
-                {t('monthlySpecimenCountsError')}
-                {getMonthlySpecimensCountResult.error.message}
-            </h1>
-        );
-    }
-
-    const monthlySpecimenCounts = getMonthlySpecimensCountResult.data.data;
+    const monthlySpecimenCounts = getMonthlySpecimensCountResult?.ok
+        ? getMonthlySpecimensCountResult.data.data
+        : undefined;
 
     return (
         <div className="space-y-6">
+            {isError && (
+                <ErrorBanner message={t('monthlySpecimenCountsError')} />
+            )}
             <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium">
                     {t('filterBySpecies')}
                 </Label>
-                <MultiSelect
-                    values={validSelectedSpecies}
-                    onValuesChange={setStoredSpecies}
-                >
-                    <MultiSelectTrigger>
-                        <MultiSelectValue placeholder={t('selectSpecies')} />
-                    </MultiSelectTrigger>
-                    <MultiSelectContent
-                        search={{
-                            placeholder: t('searchSpecies'),
-                            emptyMessage: t('noSpeciesFound'),
-                        }}
+                <div className="flex justify-between gap-2">
+                    <MultiSelect
+                        values={validSelectedSpecies}
+                        onValuesChange={species =>
+                            setFilters({ selectedSpecies: species })
+                        }
                     >
-                        <MultiSelectGroup>
-                            {speciesOptions.map(species => (
-                                <MultiSelectItem key={species} value={species}>
-                                    {species}
-                                </MultiSelectItem>
-                            ))}
-                        </MultiSelectGroup>
-                    </MultiSelectContent>
-                </MultiSelect>
+                        <MultiSelectTrigger
+                            disabled={isLoading || isError}
+                            className="min-w-0 flex-1"
+                        >
+                            <MultiSelectValue
+                                placeholder={t('selectSpecies')}
+                            />
+                        </MultiSelectTrigger>
+                        <MultiSelectContent
+                            search={{
+                                placeholder: t('searchSpecies'),
+                                emptyMessage: t('noSpeciesFound'),
+                            }}
+                        >
+                            <MultiSelectGroup>
+                                {speciesOptions.map(species => (
+                                    <MultiSelectItem
+                                        key={species}
+                                        value={species}
+                                    >
+                                        {species}
+                                    </MultiSelectItem>
+                                ))}
+                            </MultiSelectGroup>
+                        </MultiSelectContent>
+                    </MultiSelect>
+                    <ToggleGroup
+                        type="single"
+                        variant="outline"
+                        size="sm"
+                        value={chartType}
+                        onValueChange={(next: ChartType | '') => {
+                            if (next) setChartType(next);
+                        }}
+                        disabled={isLoading || isError}
+                        className="shrink-0"
+                    >
+                        <ToggleGroupItem value="bar">
+                            <BarChart3 />
+                            {t('barChart')}
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="line">
+                            <LineChart />
+                            {t('lineChart')}
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
             </div>
-            {COMPOSITION_SECTIONS.map(
-                ({ specimenClassificationAxis, title }) => {
-                    const specimenCountsByClass = sumSpecimenCountsByClass(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenCountsByMonth = groupSpecimenCountsByMonth(
-                        specimenClassificationAxis,
-                        monthlySpecimenCounts,
-                        validSelectedSpecies,
-                    );
-                    const specimenChartConfig = buildSpecimenChartConfig(
-                        specimenClassificationAxis,
-                        specimenCountsByClass.map(
-                            ({ specimenClass }) => specimenClass,
-                        ),
-                    );
-
-                    return (
+            {isLoading || isError ? (
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => (
                         <CompositionChartPair
                             key={specimenClassificationAxis}
                             title={title}
-                            specimenCountsByClass={specimenCountsByClass}
-                            specimenCountsByMonth={specimenCountsByMonth}
-                            specimenChartConfig={specimenChartConfig}
+                            chartType={chartType}
+                            specimenCountsByClass={[]}
+                            specimenCountsByMonth={[]}
+                            specimenChartConfig={{}}
+                            isLoading={isLoading}
+                            isError={isError}
                         />
-                    );
-                },
+                    ),
+                )
+            ) : validSelectedSpecies.length === 0 ? (
+                <EmptyBanner message={t('monthlySpecimenCountsEmpty')} />
+            ) : (
+                monthlySpecimenCounts &&
+                COMPOSITION_SECTIONS.map(
+                    ({ specimenClassificationAxis, title }) => {
+                        const specimenCountsByClass = sumSpecimenCountsByClass(
+                            specimenClassificationAxis,
+                            monthlySpecimenCounts,
+                            validSelectedSpecies,
+                        );
+                        const specimenCountsByMonth =
+                            groupSpecimenCountsByMonth(
+                                specimenClassificationAxis,
+                                monthlySpecimenCounts,
+                                validSelectedSpecies,
+                            );
+                        const specimenChartConfig = buildSpecimenChartConfig(
+                            specimenClassificationAxis,
+                            specimenCountsByClass.map(
+                                ({ specimenClass }) => specimenClass,
+                            ),
+                        );
+
+                        return (
+                            <CompositionChartPair
+                                key={specimenClassificationAxis}
+                                title={title}
+                                chartType={chartType}
+                                specimenCountsByClass={specimenCountsByClass}
+                                specimenCountsByMonth={specimenCountsByMonth}
+                                specimenChartConfig={specimenChartConfig}
+                                isLoading={isLoading}
+                                isError={isError}
+                            />
+                        );
+                    },
+                )
             )}
         </div>
     );

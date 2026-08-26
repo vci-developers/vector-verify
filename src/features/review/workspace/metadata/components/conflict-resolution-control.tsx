@@ -10,11 +10,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslations } from 'next-intl';
-import { NOT_APPLICABLE } from '../utils/metadata-section';
+import {
+    BOOLEAN_FALSE_DISPLAY,
+    BOOLEAN_TRUE_DISPLAY,
+    NOT_APPLICABLE,
+} from '../utils/metadata-section';
 
 interface ConflictResolutionControlProps {
     fieldType: FormQuestionType;
     options: string[];
+    questionOptions: string[] | null;
     value: string | undefined;
     onValueChange: (value: string) => void;
     disabled: boolean;
@@ -23,6 +28,7 @@ interface ConflictResolutionControlProps {
 export default function ConflictResolutionControl({
     fieldType,
     options,
+    questionOptions,
     value,
     onValueChange,
     disabled,
@@ -34,18 +40,24 @@ export default function ConflictResolutionControl({
         return /^\d+$/.test(input) ? null : t('wholeNonNegativeIntegerError');
     }
 
-    if (fieldType === 'boolean') {
+    if (fieldType === 'boolean' || fieldType === 'select') {
+        const selectOptions =
+            fieldType === 'boolean'
+                ? [BOOLEAN_TRUE_DISPLAY, BOOLEAN_FALSE_DISPLAY]
+                : (questionOptions ?? []);
+        const selectValue =
+            value === NOT_APPLICABLE || value === undefined ? '' : value;
         return (
             <Select
-                value={value}
+                value={selectValue}
                 onValueChange={onValueChange}
                 disabled={disabled}
             >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-72">
                     <SelectValue placeholder={t('selectValuePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                    {options.map(option => (
+                    {selectOptions.map(option => (
                         <SelectItem key={option} value={option}>
                             {option}
                         </SelectItem>
@@ -67,6 +79,7 @@ export default function ConflictResolutionControl({
                     : undefined
             }
             disabled={disabled}
+            className="w-72"
         />
     );
 }

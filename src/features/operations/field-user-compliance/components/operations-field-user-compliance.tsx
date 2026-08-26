@@ -6,6 +6,8 @@ import { buildFieldUserComplianceData } from '@/features/operations/field-user-c
 import { eachMonthOfInterval, format, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import FieldUserComplianceChart from '@/features/operations/field-user-compliance/components/field-user-compliance-chart';
+import { useTranslations } from 'next-intl';
+import ErrorBanner from '@/components/ui/error-banner';
 
 interface OperationsFieldUserComplianceProps {
     siteIds: number[];
@@ -20,6 +22,7 @@ export default function OperationsFieldUserCompliance({
     startDate,
     endDate,
 }: OperationsFieldUserComplianceProps) {
+    const t = useTranslations('OperationsFieldTeamPerformance');
     const { data: getAllSessionsResult, isPending } = useGetAllSessions({
         siteIds,
         startDate,
@@ -41,7 +44,6 @@ export default function OperationsFieldUserCompliance({
     if (isPending || !getAllSessionsResult) {
         return (
             <div className="space-y-4">
-                <Skeleton className="h-5 w-64" />
                 <Skeleton className="h-64 w-full" />
             </div>
         );
@@ -49,9 +51,10 @@ export default function OperationsFieldUserCompliance({
 
     if (!getAllSessionsResult.ok) {
         return (
-            <p className="text-destructive text-sm">
-                {getAllSessionsResult.error.message}
-            </p>
+            <div className="space-y-4">
+                <ErrorBanner message={t('failedToLoad')} />
+                <Skeleton className="h-64 w-full" variant="destructive" />
+            </div>
         );
     }
 

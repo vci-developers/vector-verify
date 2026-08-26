@@ -8,7 +8,6 @@ const MARKER_RADIUS_PER_ACTIVE_DEVICE = 4;
 
 export function createDeviceMarkerIcon(
     activeDeviceCount: number,
-    lapsingDeviceCount: number,
     isSelected = false,
 ): DivIcon {
     const radius = Math.max(
@@ -22,9 +21,7 @@ export function createDeviceMarkerIcon(
     const color =
         activeDeviceCount > 0
             ? DEVICE_HEALTH_COLOR.active
-            : lapsingDeviceCount > 0
-              ? DEVICE_HEALTH_COLOR.lapsing
-              : DEVICE_HEALTH_COLOR.inactive;
+            : DEVICE_HEALTH_COLOR.inactive;
 
     return buildCircleMarkerIcon({ radius, color, isSelected });
 }

@@ -1,54 +1,47 @@
+import { Callout } from 'nextra/components';
+
 # User Roles
 
-VectorVerify uses role-based access control. Every user is assigned one of four
-access levels by a program administrator. Your level determines which pages you
-can visit and which actions you can perform.
+<Callout type="warning">
+    This page is not linked from the docsite navigation or from any other page.
+    It documents VectorVerify's internal permission model for maintainers, not
+    end users.
+</Callout>
 
-## Access levels
+VectorVerify does not use a tiered access-level system. Each user is granted a
+set of independent capability flags by a program administrator. Which flags a
+user has determines which sections of the app they can open and which extra
+tools appear in their account menu.
 
-### Level 0 — Site Viewer
+## Capability flags
 
-Read-only access to a single sentinel site.
+| Flag                                      | What it controls                                               |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| `sites.viewSiteMetadata`                  | Access to Operations                                           |
+| `sites.writeSiteMetadata`                 | Access to Review                                               |
+| `annotations.viewAndWriteAnnotationTasks` | Access to Annotation, and to the Operations User Analytics tab |
+| `devMode`                                 | Developer-only tools — see below                               |
 
-- View household surveillance records for your assigned site
-- View mosquito specimen images
-- View dashboard metrics for your site
+A user can hold any combination of these flags. Someone with only
+`sites.viewSiteMetadata` can open Operations but not Review or Annotation.
+Someone with both `sites.viewSiteMetadata` and `sites.writeSiteMetadata` can
+open both.
 
-Cannot modify data or submit annotations.
+Two additional `sites`-scoped fields exist on the permissions schema but do not
+currently gate access to anything: `pushSiteMetadata` is declared but unused
+anywhere in the app today, and `canAccessSites` (a list of sites) scopes _which
+sites' data_ a user sees within a page they already have access to — it does not
+control _whether_ they can open that page.
 
----
+## Developer mode
 
-### Level 1 — Program Viewer
+Accounts with `devMode` enabled see additional tools in the account menu:
 
-Read-only access across all sites in a program.
+- A **Developer Status** badge
+- **Raw Data Export**
+- **User Analytics** — an account-menu dialog showing user activity data
 
-- View household surveillance records for all sites
-- View specimen data and images across the program
-- Access program-level dashboards and analytics
-
-Cannot modify data or submit annotations.
-
----
-
-### Level 2 — Site Editor
-
-Read and write access to a single sentinel site.
-
-- View and edit household survey submissions for your site
-- Correct site-level surveillance records
-- Manage data associated with your assigned site
-
-Cannot perform specimen annotation.
-
----
-
-### Level 3 — Program Editor and Annotator
-
-Full read and write access across all sites, plus annotation privileges.
-
-- View and modify surveillance data across all sites
-- Perform expert annotation of mosquito specimens
-- Review and correct machine learning classification outputs
-- Participate in model evaluation workflows
-
-Typically assigned to expert reviewers, program supervisors, and researchers.
+This account-menu **User Analytics** dialog is unrelated to the **User Analytics
+tab** inside Operations. The Operations tab is gated by
+`annotations.viewAndWriteAnnotationTasks`, not `devMode` — any user with that
+flag sees the tab regardless of developer status.

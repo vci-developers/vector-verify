@@ -13,9 +13,20 @@ import {
     type CarouselApi,
 } from '@/components/ui/carousel';
 import { cn } from '@/utils/cn';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import Image from 'next/image';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    Minus,
+    Plus,
+    RotateCcw,
+    Star,
+} from 'lucide-react';
+import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+
+const ZOOM_STEP = 0.5;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 5;
 
 interface SpecimenImageCarouselProps {
     specimen: Specimen;
@@ -41,6 +52,81 @@ export default function SpecimenImageCarousel({
         useState(false);
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
         useState(false);
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const dragStateRef = useRef<{
+        startX: number;
+        startY: number;
+        startPanX: number;
+        startPanY: number;
+    }>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const clampPanOffset = (offset: { x: number; y: number }, zoom: number) => {
+        if (!containerRef.current || zoom <= MIN_ZOOM) {
+            return { x: 0, y: 0 };
+        }
+
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        const maxX = ((width * (zoom - 1)) / 2) * 0.75;
+        const maxY = ((height * (zoom - 1)) / 2) * 0.75;
+        return {
+            x: Math.min(maxX, Math.max(-maxX, offset.x)),
+            y: Math.min(maxY, Math.max(-maxY, offset.y)),
+        };
+    };
+
+    const handleZoomIn = () => {
+        setZoomLevel(current => Math.min(MAX_ZOOM, current + ZOOM_STEP));
+    };
+
+    const handleZoomOut = () => {
+        setZoomLevel(current => {
+            const next = Math.max(MIN_ZOOM, current - ZOOM_STEP);
+            setPanOffset(previous => clampPanOffset(previous, next));
+            return next;
+        });
+    };
+
+    const handleZoomReset = () => {
+        setZoomLevel(MIN_ZOOM);
+        setPanOffset({ x: 0, y: 0 });
+    };
+
+    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (zoomLevel <= MIN_ZOOM) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragStateRef.current = {
+            startX: event.clientX,
+            startY: event.clientY,
+            startPanX: panOffset.x,
+            startPanY: panOffset.y,
+        };
+        setIsDragging(true);
+    };
+
+    const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!dragStateRef.current) return;
+        const dx = event.clientX - dragStateRef.current.startX;
+        const dy = event.clientY - dragStateRef.current.startY;
+        setPanOffset(
+            clampPanOffset(
+                {
+                    x: dragStateRef.current.startPanX + dx,
+                    y: dragStateRef.current.startPanY + dy,
+                },
+                zoomLevel,
+            ),
+        );
+    };
+
+    const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!dragStateRef.current) return;
+        event.currentTarget.releasePointerCapture(event.pointerId);
+        dragStateRef.current = null;
+        setIsDragging(false);
+    };
 
     const allImagesForSpecimen = useMemo(() => {
         const allImages = specimen.images ?? [];
@@ -96,6 +182,8 @@ export default function SpecimenImageCarousel({
             setCurrentImageIndex(newImageIndex);
             onCurrentImageChange?.(allImagesForSpecimen[newImageIndex] ?? null);
             thumbnailStripApi?.scrollTo(newImageIndex);
+            setZoomLevel(1);
+            setPanOffset({ x: 0, y: 0 });
         };
 
         imageViewerApi.on('select', handleImageViewerSelect);
@@ -129,6 +217,15 @@ export default function SpecimenImageCarousel({
         };
     }, [thumbnailStripApi]);
 
+    useEffect(() => {
+        if (!imageViewerApi) return;
+
+        imageViewerApi.reInit({
+            loop: hasMultipleImages,
+            watchDrag: zoomLevel === 1,
+        });
+    }, [imageViewerApi, hasMultipleImages, zoomLevel]);
+
     if (!hasAnyImages) {
         return (
             <div className="bg-muted flex aspect-4/3 items-center justify-center rounded-lg border">
@@ -148,20 +245,66 @@ export default function SpecimenImageCarousel({
                     aria-label="Specimen image carousel"
                 >
                     <CarouselContent>
-                        {allImagesForSpecimen.map(image => (
-                            <CarouselItem key={image.id}>
-                                <div className="bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border">
-                                    <Image
-                                        src={`/api${image.url}`}
-                                        alt={`Specimen ${specimen.specimenId}`}
-                                        fill
-                                        unoptimized
-                                        sizes="(min-width: 1024px) 60vw, 100vw"
-                                        className="object-contain"
-                                    />
-                                </div>
-                            </CarouselItem>
-                        ))}
+                        {allImagesForSpecimen.map((image, imageIndex) => {
+                            const isCurrentSlide =
+                                imageIndex === currentImageIndex;
+                            return (
+                                <CarouselItem key={image.id}>
+                                    <div
+                                        ref={
+                                            isCurrentSlide
+                                                ? containerRef
+                                                : undefined
+                                        }
+                                        className={cn(
+                                            'bg-muted relative flex aspect-4/3 items-center justify-center overflow-hidden rounded-lg border select-none',
+                                            zoomLevel > MIN_ZOOM &&
+                                                'touch-none',
+                                        )}
+                                        onPointerDown={
+                                            isCurrentSlide
+                                                ? handlePointerDown
+                                                : undefined
+                                        }
+                                        onPointerMove={
+                                            isCurrentSlide
+                                                ? handlePointerMove
+                                                : undefined
+                                        }
+                                        onPointerUp={
+                                            isCurrentSlide
+                                                ? handlePointerUp
+                                                : undefined
+                                        }
+                                    >
+                                        <SignedSpecimenImage
+                                            path={image.url}
+                                            alt={`Specimen ${specimen.specimenId}`}
+                                            fill
+                                            sizes="(min-width: 1024px) 60vw, 100vw"
+                                            className={cn(
+                                                'object-contain',
+                                                isCurrentSlide &&
+                                                    zoomLevel > MIN_ZOOM &&
+                                                    (isDragging
+                                                        ? 'cursor-grabbing'
+                                                        : 'cursor-grab'),
+                                            )}
+                                            style={
+                                                isCurrentSlide
+                                                    ? {
+                                                          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
+                                                          transition: isDragging
+                                                              ? 'none'
+                                                              : 'transform 0.15s ease-out',
+                                                      }
+                                                    : undefined
+                                            }
+                                        />
+                                    </div>
+                                </CarouselItem>
+                            );
+                        })}
                     </CarouselContent>
 
                     {hasMultipleImages && (
@@ -188,6 +331,38 @@ export default function SpecimenImageCarousel({
                     Image {currentImageIndex + 1} of{' '}
                     {allImagesForSpecimen.length}
                 </p>
+                <div className="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleZoomOut}
+                        disabled={zoomLevel <= MIN_ZOOM}
+                        aria-label="Zoom out"
+                    >
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleZoomReset}
+                        disabled={zoomLevel === MIN_ZOOM}
+                        aria-label="Reset zoom"
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        <span className="leading-none">Reset</span>
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleZoomIn}
+                        disabled={zoomLevel >= MAX_ZOOM}
+                        aria-label="Zoom in"
+                    >
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
             {hasMultipleImages && (
@@ -249,11 +424,10 @@ export default function SpecimenImageCarousel({
                                                     : undefined
                                             }
                                         >
-                                            <Image
-                                                src={`/api${image.url}`}
+                                            <SignedSpecimenImage
+                                                path={image.url}
                                                 alt=""
                                                 fill
-                                                unoptimized
                                                 sizes="112px"
                                                 className="object-cover"
                                             />
