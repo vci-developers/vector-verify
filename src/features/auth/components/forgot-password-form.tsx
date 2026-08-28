@@ -18,10 +18,13 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { usePostForgotPassword } from '@/api/auth/hooks/use-post-forgot-password';
 import { useTranslations } from 'next-intl';
+import { useResendCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function ForgotPasswordForm() {
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
+    const { secondsRemaining, isOnCooldown, startCooldown } =
+        useResendCooldown('forgotPassword');
     const { mutate: postForgotPassword, isPending } = usePostForgotPassword();
     const t = useTranslations('Auth');
 
@@ -39,6 +42,7 @@ export default function ForgotPasswordForm() {
             onSuccess: result => {
                 if (result.ok) {
                     setSubmitted(true);
+                    startCooldown();
                 } else {
                     setHasError(true);
                 }
@@ -85,14 +89,22 @@ export default function ForgotPasswordForm() {
                     type="submit"
                     form="forgot-password-rhf"
                     className="w-full"
-                    disabled={isPending}
+                    disabled={isPending || isOnCooldown}
                 >
-                    {t('sendResetLink')}
+                    {isPending
+                        ? t('forgotPasswordLoadingMessage')
+                        : isOnCooldown
+                          ? t('forgotPasswordCooldownMessage', {
+                                time: secondsRemaining,
+                            })
+                          : hasError || submitted
+                            ? t('forgotPasswordResendMessage')
+                            : t('sendResetLink')}
                 </Button>
             </Field>
             {submitted && (
                 <p className="text-muted-foreground text-center text-sm">
-                    {t('passwordResetLinkSent')}
+                    {t('forgotPasswordSuccessMessage')}
                 </p>
             )}
             {hasError && (

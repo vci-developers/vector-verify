@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { useGetUserProfile } from '@/api/user/hooks/use-get-user-profile';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { clearSendEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -71,7 +71,7 @@ export default function LoginForm() {
             return;
         }
 
-        clearVerificationEmailCooldown();
+        clearSendEmailCooldown();
 
         router.replace(
             redirect?.startsWith('/') &&
@@ -177,7 +177,7 @@ export default function LoginForm() {
                         href="/forgot-password"
                         className="text-primary font-medium hover:underline"
                     >
-                        Forgot password?
+                        {t('forgotPasswordPrompt')}
                     </Link>
                 </p>
             </FieldGroup>

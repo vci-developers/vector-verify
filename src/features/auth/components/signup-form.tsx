@@ -32,7 +32,7 @@ import {
 import { useGetPrograms } from '@/api/program/hooks/use-get-programs';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { clearVerificationEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
+import { clearSendEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function SignupForm() {
     const router = useRouter();
@@ -78,7 +78,7 @@ export default function SignupForm() {
             setSignupError(true);
             return;
         }
-        clearVerificationEmailCooldown();
+        clearSendEmailCooldown();
         router.refresh();
     }
 

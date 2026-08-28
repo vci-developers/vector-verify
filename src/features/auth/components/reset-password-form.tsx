@@ -56,7 +56,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
                                 ? t('invalidResetPasswordLink')
                                 : result.error.status === 404
                                   ? t('userNotFoundOrEmailNotVerified')
-                                  : t('somethingWentWrong'),
+                                  : '',
                         );
                     }
                 },
@@ -185,7 +185,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
             </FieldGroup>
             {hasError && (
                 <p className="text-muted-foreground text-center text-sm">
-                    {t('somethingWentWrong')}
+                    {t('resetPasswordError')}
                 </p>
             )}
             <Field orientation="horizontal">

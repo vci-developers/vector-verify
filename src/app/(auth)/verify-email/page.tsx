@@ -83,7 +83,7 @@ export default async function VerifyEmailPage({
                             <Fragment>
                                 <p className="text-muted-foreground text-center text-sm">
                                     {response.error.message ??
-                                        t('somethingWentWrong')}
+                                        t('verifyEmailError')}
                                 </p>
                                 <Button asChild className="w-full">
                                     <Link href="/email-verification">
