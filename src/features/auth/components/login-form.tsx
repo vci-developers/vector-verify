@@ -134,9 +134,7 @@ export default function LoginForm() {
                             <PasswordInput
                                 {...field}
                                 id="login-rhf-password"
-                                aria-invalid={
-                                    fieldState.invalid || loginError
-                                }
+                                aria-invalid={fieldState.invalid || loginError}
                                 placeholder="••••••••"
                                 autoComplete="off"
                                 onChange={e => {
