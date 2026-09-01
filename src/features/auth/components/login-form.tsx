@@ -16,9 +16,10 @@ import {
     FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Eye, Lock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useGetUserProfile } from '@/api/user/hooks/use-get-user-profile';
 import { useSearchParams } from 'next/navigation';
@@ -29,7 +30,6 @@ import Link from 'next/link';
 
 export default function LoginForm() {
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
     const redirect = useSearchParams().get('redirect');
     const t = useTranslations('Auth');
     const { refetch: refetchUserProfile } = useGetUserProfile({
@@ -131,36 +131,21 @@ export default function LoginForm() {
                             <FieldLabel htmlFor="login-rhf-password">
                                 {t('password')}
                             </FieldLabel>
-                            <div className="relative">
-                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                <Input
-                                    {...field}
-                                    id="login-rhf-password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    aria-invalid={
-                                        fieldState.invalid || loginError
+                            <PasswordInput
+                                {...field}
+                                id="login-rhf-password"
+                                aria-invalid={
+                                    fieldState.invalid || loginError
+                                }
+                                placeholder="••••••••"
+                                autoComplete="off"
+                                onChange={e => {
+                                    field.onChange(e);
+                                    if (loginError) {
+                                        setLoginError(false);
                                     }
-                                    placeholder="••••••••"
-                                    autoComplete="off"
-                                    className="pl-10"
-                                    onChange={e => {
-                                        field.onChange(e);
-                                        if (loginError) {
-                                            setLoginError(false);
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onMouseEnter={() => setShowPassword(true)}
-                                    onMouseLeave={() => setShowPassword(false)}
-                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
-                                >
-                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
-                                </Button>
-                            </div>
+                                }}
+                            />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}

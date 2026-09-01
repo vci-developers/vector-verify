@@ -13,8 +13,7 @@ import {
     FieldGroup,
     FieldLabel,
 } from '@/components/ui/field';
-import { Eye, Lock } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePostResetPassword } from '@/api/auth/hooks/use-post-reset-password';
@@ -25,8 +24,6 @@ interface ResetPasswordProps {
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordProps) {
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -56,7 +53,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
                                 ? t('invalidResetPasswordLink')
                                 : result.error.status === 404
                                   ? t('userNotFoundOrEmailNotVerified')
-                                  : '',
+                                  : t('resetPasswordError'),
                         );
                     }
                 },
@@ -89,7 +86,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
                     {errorMessage}
                 </p>
                 <Link className="w-full" href="/forgot-password">
-                    <Button className="w-full"> {t('forgotPassword')}</Button>
+                    <Button className="w-full">{t('forgotPassword')}</Button>
                 </Link>
             </div>
         );
@@ -110,28 +107,13 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
                             <FieldLabel htmlFor="reset-password-password">
                                 {t('newPassword')}
                             </FieldLabel>
-                            <div className="relative">
-                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                <Input
-                                    {...field}
-                                    id="reset-password-password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder="••••••••"
-                                    autoComplete="new-password"
-                                    className="pl-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onMouseEnter={() => setShowPassword(true)}
-                                    onMouseLeave={() => setShowPassword(false)}
-                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
-                                >
-                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
-                                </Button>
-                            </div>
+                            <PasswordInput
+                                {...field}
+                                id="reset-password-password"
+                                aria-invalid={fieldState.invalid}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                            />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -146,36 +128,13 @@ export default function ResetPasswordForm({ token }: ResetPasswordProps) {
                             <FieldLabel htmlFor="reset-password-confirm-password">
                                 {t('confirmPassword')}
                             </FieldLabel>
-                            <div className="relative">
-                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                <Input
-                                    {...field}
-                                    id="signup-confirm-password"
-                                    type={
-                                        showConfirmPassword
-                                            ? 'text'
-                                            : 'password'
-                                    }
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder="••••••••"
-                                    autoComplete="new-password"
-                                    className="pl-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onMouseEnter={() =>
-                                        setShowConfirmPassword(true)
-                                    }
-                                    onMouseLeave={() =>
-                                        setShowConfirmPassword(false)
-                                    }
-                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
-                                >
-                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
-                                </Button>
-                            </div>
+                            <PasswordInput
+                                {...field}
+                                id="reset-password-confirm-password"
+                                aria-invalid={fieldState.invalid}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                            />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}

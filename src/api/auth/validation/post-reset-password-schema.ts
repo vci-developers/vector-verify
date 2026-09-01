@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const postResetPasswordRequestSchema = z.object({
     token: z.string(),
-    newPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(8).max(128),
 });
 
 export const postResetPasswordResponseSchema = z.object({

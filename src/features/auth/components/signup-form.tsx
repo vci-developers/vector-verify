@@ -10,6 +10,7 @@ import {
     FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import type { SignupSuccessPayload } from '@/api/auth/validation/signup-schema';
 import {
     signupFormSchema,
@@ -20,7 +21,7 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import type { Result } from '@/lib/result/result';
-import { Eye, Lock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useState } from 'react';
 import {
     Select,
@@ -36,8 +37,6 @@ import { clearSendEmailCooldown } from '@/lib/hooks/use-resend-cooldown';
 
 export default function SignupForm() {
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [signupError, setSignupError] = useState(false);
     const t = useTranslations('Auth');
 
@@ -242,28 +241,13 @@ export default function SignupForm() {
                             <FieldLabel htmlFor="signup-password">
                                 {t('password')}
                             </FieldLabel>
-                            <div className="relative">
-                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                <Input
-                                    {...field}
-                                    id="signup-password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder="••••••••"
-                                    autoComplete="new-password"
-                                    className="pl-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onMouseEnter={() => setShowPassword(true)}
-                                    onMouseLeave={() => setShowPassword(false)}
-                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
-                                >
-                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
-                                </Button>
-                            </div>
+                            <PasswordInput
+                                {...field}
+                                id="signup-password"
+                                aria-invalid={fieldState.invalid}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                            />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -278,36 +262,13 @@ export default function SignupForm() {
                             <FieldLabel htmlFor="signup-confirm-password">
                                 {t('confirmPassword')}
                             </FieldLabel>
-                            <div className="relative">
-                                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                <Input
-                                    {...field}
-                                    id="signup-confirm-password"
-                                    type={
-                                        showConfirmPassword
-                                            ? 'text'
-                                            : 'password'
-                                    }
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder="••••••••"
-                                    autoComplete="new-password"
-                                    className="pl-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onMouseEnter={() =>
-                                        setShowConfirmPassword(true)
-                                    }
-                                    onMouseLeave={() =>
-                                        setShowConfirmPassword(false)
-                                    }
-                                    className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
-                                >
-                                    <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
-                                </Button>
-                            </div>
+                            <PasswordInput
+                                {...field}
+                                id="signup-confirm-password"
+                                aria-invalid={fieldState.invalid}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                            />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
                             )}

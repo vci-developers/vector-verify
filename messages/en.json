@@ -286,7 +286,7 @@
         "noImagesUploaded": "This specimen does not have any images uploaded.",
         "capturedAt": "Captured At",
         "submittedAt": "Submitted At",
-        "modelPredictionsAndConfidence": "Model Predictions and Confidence",
+        "modelPredictions": "Model Predictions",
         "species": "Species",
         "sex": "Sex",
         "abdomenStatus": "Abdomen Status",
