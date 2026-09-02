@@ -334,7 +334,9 @@
         "axisDateLabel": "Date",
         "axisActiveUsersLabel": "Active users",
         "loading": "Loading active-user metrics…",
-        "empty": "No active-user snapshots in this window."
+        "empty": "No active-user snapshots in this window.",
+        "trendTab": "Trend",
+        "activeUsersTab": "Active Users"
     },
     "Annotation": {
         "noAnnotationTasksFound": "No annotation tasks found.",
