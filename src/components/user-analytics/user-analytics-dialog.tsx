@@ -16,7 +16,7 @@ import {
     buildActiveMetricsRange,
     DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
     type ActiveMetricsRangePreset,
-} from '@/components/user-analytics/build-active-metrics-range';
+} from '@/components/user-analytics/utils/build-active-metrics-range';
 import ActiveUserTrendChart from '@/components/user-analytics/active-user-trend-chart';
 import UserAnalyticsRangeTabs from '@/components/user-analytics/user-analytics-range-tabs';
 

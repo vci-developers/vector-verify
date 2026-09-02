@@ -1,7 +1,7 @@
 'use client';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ActiveMetricsRangePreset } from '@/components/user-analytics/build-active-metrics-range';
+import type { ActiveMetricsRangePreset } from '@/components/user-analytics/utils/build-active-metrics-range';
 import { useTranslations } from 'next-intl';
 
 interface UserAnalyticsRangeTabsProps {
