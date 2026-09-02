@@ -18,6 +18,8 @@ import {
     DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
     type ActiveMetricsRangePreset,
 } from '@/components/user-analytics/utils/build-active-metrics-range';
+import { buildActiveUserTrendChanges } from '@/components/user-analytics/utils/build-active-user-trend-changes';
+import ActiveUserStatTileRow from '@/components/user-analytics/active-user-stat-tile-row';
 import ActiveUserTrendChart from '@/components/user-analytics/active-user-trend-chart';
 import UserAnalyticsRangeTabs from '@/components/user-analytics/user-analytics-range-tabs';
 
@@ -61,6 +63,7 @@ export default function UserAnalyticsDialog({
         : undefined;
 
     const metrics = getMetricsResult?.ok ? getMetricsResult.data.metrics : [];
+    const trendChanges = buildActiveUserTrendChanges(metrics);
     const stateMessage = isMetricsPending
         ? t('loading')
         : getMetricsResult && !getMetricsResult.ok
@@ -107,7 +110,15 @@ export default function UserAnalyticsDialog({
                         )}
                     </TabsContent>
 
-                    <TabsContent value="active-users" />
+                    <TabsContent
+                        value="active-users"
+                        className="flex flex-col gap-4"
+                    >
+                        <ActiveUserStatTileRow
+                            trendChanges={trendChanges}
+                            isLoading={isMetricsPending}
+                        />
+                    </TabsContent>
                 </Tabs>
             </DialogContent>
         </Dialog>

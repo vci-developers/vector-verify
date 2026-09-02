@@ -1,9 +1,10 @@
-import { subDays, format } from 'date-fns';
+import { subDays, format, parseISO } from 'date-fns';
 import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-snapshot-schema';
 
 export interface ActiveUserTrendChange {
     count: number;
     percentChange: number | null;
+    isNewFromZero: boolean;
 }
 
 export interface ActiveUserTrendChanges {
@@ -12,13 +13,27 @@ export interface ActiveUserTrendChanges {
     monthly: ActiveUserTrendChange;
 }
 
-function percentChange(
+function trendChange(
     currentCount: number,
     priorCount: number | undefined,
-): number | null {
-    if (priorCount == null || priorCount === 0) return null;
-    return ((currentCount - priorCount) / priorCount) * 100;
+): Omit<ActiveUserTrendChange, 'count'> {
+    if (priorCount == null) {
+        return { percentChange: null, isNewFromZero: false };
+    }
+    if (priorCount === 0) {
+        return {
+            percentChange: null,
+            isNewFromZero: currentCount > 0,
+        };
+    }
+    return {
+        percentChange: ((currentCount - priorCount) / priorCount) * 100,
+        isNewFromZero: false,
+    };
 }
+
+const dateKey = (date: string | Date): string =>
+    format(typeof date === 'string' ? parseISO(date) : date, 'yyyy-MM-dd');
 
 export function buildActiveUserTrendChanges(
     snapshots: ActiveMetricSnapshot[],
@@ -26,44 +41,38 @@ export function buildActiveUserTrendChanges(
     if (snapshots.length === 0) return null;
 
     const snapshotsByDate = new Map(
-        snapshots.map(snapshot => [snapshot.snapshotDate, snapshot]),
+        snapshots.map(snapshot => [dateKey(snapshot.snapshotDate), snapshot]),
     );
 
     const latestSnapshot = snapshots.reduce((latest, snapshot) =>
-        snapshot.snapshotDate.localeCompare(latest.snapshotDate) > 0
+        parseISO(snapshot.snapshotDate) > parseISO(latest.snapshotDate)
             ? snapshot
             : latest,
     );
-    const latestDate = new Date(latestSnapshot.snapshotDate);
+    const latestDate = parseISO(latestSnapshot.snapshotDate);
 
     const priorDaySnapshot = snapshotsByDate.get(
-        format(subDays(latestDate, 1), 'yyyy-MM-dd'),
+        dateKey(subDays(latestDate, 1)),
     );
     const priorWeekSnapshot = snapshotsByDate.get(
-        format(subDays(latestDate, 7), 'yyyy-MM-dd'),
+        dateKey(subDays(latestDate, 7)),
     );
     const priorMonthSnapshot = snapshotsByDate.get(
-        format(subDays(latestDate, 30), 'yyyy-MM-dd'),
+        dateKey(subDays(latestDate, 30)),
     );
 
     return {
         daily: {
             count: latestSnapshot.a1Count,
-            percentChange: percentChange(
-                latestSnapshot.a1Count,
-                priorDaySnapshot?.a1Count,
-            ),
+            ...trendChange(latestSnapshot.a1Count, priorDaySnapshot?.a1Count),
         },
         weekly: {
             count: latestSnapshot.a7Count,
-            percentChange: percentChange(
-                latestSnapshot.a7Count,
-                priorWeekSnapshot?.a7Count,
-            ),
+            ...trendChange(latestSnapshot.a7Count, priorWeekSnapshot?.a7Count),
         },
         monthly: {
             count: latestSnapshot.a30Count,
-            percentChange: percentChange(
+            ...trendChange(
                 latestSnapshot.a30Count,
                 priorMonthSnapshot?.a30Count,
             ),

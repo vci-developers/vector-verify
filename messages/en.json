@@ -336,7 +336,8 @@
         "loading": "Loading active-user metrics…",
         "empty": "No active-user snapshots in this window.",
         "trendTab": "Trend",
-        "activeUsersTab": "Active Users"
+        "activeUsersTab": "Active Users",
+        "newTrend": "New"
     },
     "Annotation": {
         "noAnnotationTasksFound": "No annotation tasks found.",
