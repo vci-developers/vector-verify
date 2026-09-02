@@ -432,9 +432,26 @@ combined (`globalOnly=true`) backend views are not exposed in the web app
 (decided in PR #163 review, July 2026, superseding the original "program-less
 developer" audience). A devMode user whose `programId` is `null` gets an
 explanatory "no program" empty state instead of a chart. Certification and
-submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
-(collides with `isActive`/Whitelisted), Device Activity (different population),
-User Activity (ambiguous with Device Activity)
+submission series are deferred to a fast-follow, not v1. v1.1 (VCV-303) adds an
+**Active Users** tab alongside Trend — see that entry below; "Active Users" is
+fine as a tab/UI label *within User Analytics context* (it's exactly what the
+tab enumerates), but bare "Active Users" outside that context still risks
+colliding with `isActive`/Whitelisted. _Avoid_: Device Activity (different
+population), User Activity (ambiguous with Device Activity)
+
+**TrendIndicator**: A generic, shared UI primitive (`src/components/ui/`) — an
+arrow (▲/▼) plus a percent-change value, colored via the app's `success`/
+`destructive` tokens. Carries no dependency on `StatBadge` or any specific
+feature; introduced for VCV-303's Active Users stat tiles (Daily/Weekly/Monthly
+count vs. prior period) but written to be droppable anywhere a signed
+percent-change needs display. Composed alongside an unmodified `StatBadge`
+inside a feature-scoped `Card` wrapper, rather than added as a new prop on
+`StatBadge` itself — `StatBadge` was deliberately left unchanged to avoid
+config-prop creep (see PR #109 precedent, where Aryaman pushed `StatBadge`
+toward a more generic/composable shape rather than growing its prop surface).
+_Avoid_: baking a `trend` prop into `StatBadge`; a `size` variant on `StatBadge`
+to make it look like a standalone tile (structurally different from the `Card`-
+based tile shape already used elsewhere, e.g. intervention-metrics).
 
 **Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
 `GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
