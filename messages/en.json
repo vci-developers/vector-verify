@@ -73,6 +73,7 @@
         "forgotPasswordLoadingMessage": "Sending...",
         "forgotPasswordCooldownMessage": "You can resend in {time, plural, one {# second} other {# seconds}}.",
         "forgotPasswordResendMessage": "Resend password reset email",
+        "forgotPasswordError": "Something went wrong when sending the password reset email. Please try again or contact support.",
         "resetPassword": "Reset password",
         "resetPasswordDescription": "Enter your new password and re-enter it to confirm the change.",
         "invalidResetPasswordLink": "This link is invalid or expired. Please go to the Forgot Password page to send a valid link to your email.",

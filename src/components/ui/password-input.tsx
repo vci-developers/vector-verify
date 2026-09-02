@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Eye, Lock } from 'lucide-react';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
@@ -10,7 +10,10 @@ function PasswordInput({
     className,
     ...props
 }: Omit<React.ComponentProps<'input'>, 'type'>) {
-    const [visible, setVisible] = React.useState(false);
+    const [pinned, setPinned] = React.useState(false);
+    const [isVisible, setIsVisible] = React.useState(false);
+    const visible = pinned || isVisible;
+    const EyeIcon = visible ? EyeOff : Eye;
 
     return (
         <div className="relative">
@@ -24,11 +27,21 @@ function PasswordInput({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onMouseEnter={() => setVisible(true)}
-                onMouseLeave={() => setVisible(false)}
-                className="hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
+                aria-pressed={pinned}
+                onClick={() => setPinned(pinned => !pinned)}
+                onMouseEnter={() => setIsVisible(true)}
+                onMouseLeave={() => setIsVisible(false)}
+                className={cn(
+                    'hover:bg-accent absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2 transition-transform active:scale-90',
+                    pinned && 'bg-accent',
+                )}
             >
-                <Eye className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
+                <EyeIcon
+                    className={cn(
+                        'text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors',
+                        pinned && 'text-primary',
+                    )}
+                />
             </Button>
         </div>
     );

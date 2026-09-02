@@ -109,7 +109,7 @@ export default function ForgotPasswordForm() {
             )}
             {hasError && (
                 <p className="text-muted-foreground text-center text-sm">
-                    {t('somethingWentWrong')}
+                    {t('forgotPasswordError')}
                 </p>
             )}
         </form>
