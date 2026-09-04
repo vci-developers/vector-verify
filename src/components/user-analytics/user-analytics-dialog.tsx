@@ -9,7 +9,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -21,11 +20,17 @@ import {
 import { buildActiveUserTrendChanges } from '@/components/user-analytics/utils/build-active-user-trend-changes';
 import ActiveUserStatTileRow from '@/components/user-analytics/active-user-stat-tile-row';
 import ActiveUserTrendChart from '@/components/user-analytics/active-user-trend-chart';
-import UserAnalyticsRangeTabs from '@/components/user-analytics/user-analytics-range-tabs';
+import ActiveUsersTable from '@/components/user-analytics/active-users-table';
+import UserAnalyticsLabeledTabs from '@/components/user-analytics/user-analytics-labeled-tabs';
 
-type UserAnalyticsView = 'trend' | 'active-users';
-
-const DEFAULT_USER_ANALYTICS_VIEW: UserAnalyticsView = 'trend';
+const RANGE_PRESET_TABS: {
+    value: ActiveMetricsRangePreset;
+    labelKey: string;
+}[] = [
+    { value: '30d', labelKey: 'range30d' },
+    { value: '90d', labelKey: 'range90d' },
+    { value: '1y', labelKey: 'range1y' },
+];
 
 interface UserAnalyticsDialogProps {
     open: boolean;
@@ -39,9 +44,6 @@ export default function UserAnalyticsDialog({
     programId,
 }: UserAnalyticsDialogProps) {
     const t = useTranslations('UserAnalytics');
-    const [view, setView] = useState<UserAnalyticsView>(
-        DEFAULT_USER_ANALYTICS_VIEW,
-    );
     const [rangePreset, setRangePreset] = useState<ActiveMetricsRangePreset>(
         DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
     );
@@ -74,7 +76,7 @@ export default function UserAnalyticsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-6xl">
                 <DialogHeader>
                     <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>
@@ -84,21 +86,12 @@ export default function UserAnalyticsDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs
-                    value={view}
-                    onValueChange={value => setView(value as UserAnalyticsView)}
-                >
-                    <TabsList>
-                        <TabsTrigger value="trend">{t('trendTab')}</TabsTrigger>
-                        <TabsTrigger value="active-users">
-                            {t('activeUsersTab')}
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="trend" className="flex flex-col gap-4">
-                        <UserAnalyticsRangeTabs
+                <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 p-1 sm:grid-cols-2">
+                    <div className="flex flex-col gap-4">
+                        <UserAnalyticsLabeledTabs
                             value={rangePreset}
                             onValueChange={setRangePreset}
+                            tabs={RANGE_PRESET_TABS}
                         />
 
                         {stateMessage ? (
@@ -108,18 +101,15 @@ export default function UserAnalyticsDialog({
                         ) : (
                             <ActiveUserTrendChart metrics={metrics} />
                         )}
-                    </TabsContent>
 
-                    <TabsContent
-                        value="active-users"
-                        className="flex flex-col gap-4"
-                    >
                         <ActiveUserStatTileRow
                             trendChanges={trendChanges}
                             isLoading={isMetricsPending}
                         />
-                    </TabsContent>
-                </Tabs>
+                    </div>
+
+                    <ActiveUsersTable open={open} programId={programId} />
+                </div>
             </DialogContent>
         </Dialog>
     );

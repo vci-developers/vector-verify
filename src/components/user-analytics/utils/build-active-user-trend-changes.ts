@@ -3,6 +3,7 @@ import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-s
 
 export interface ActiveUserTrendChange {
     count: number;
+    priorCount: number | null;
     percentChange: number | null;
     isNewFromZero: boolean;
 }
@@ -18,15 +19,17 @@ function trendChange(
     priorCount: number | undefined,
 ): Omit<ActiveUserTrendChange, 'count'> {
     if (priorCount == null) {
-        return { percentChange: null, isNewFromZero: false };
+        return { priorCount: null, percentChange: null, isNewFromZero: false };
     }
     if (priorCount === 0) {
         return {
+            priorCount,
             percentChange: null,
             isNewFromZero: currentCount > 0,
         };
     }
     return {
+        priorCount,
         percentChange: ((currentCount - priorCount) / priorCount) * 100,
         isNewFromZero: false,
     };

@@ -8,5 +8,5 @@ export const userKeys = {
         ['user', 'active-metrics', 'all', queryParams] as const,
     allAuthEvents: (queryParams: GetAllUserAuthEventsQueryParams) =>
         ['user', 'auth-events', 'all', queryParams] as const,
-    all: () => ['user', 'all'] as const,
+    users: () => ['user', 'list'] as const,
 };

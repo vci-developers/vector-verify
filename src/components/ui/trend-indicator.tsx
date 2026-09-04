@@ -1,35 +1,32 @@
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface TrendIndicatorProps {
     percentChange: number | 'new';
     newLabel?: string;
+    description?: string;
     className?: string;
 }
 
 export default function TrendIndicator({
     percentChange,
     newLabel,
+    description,
     className,
 }: TrendIndicatorProps) {
-    if (percentChange === 'new') {
-        return (
-            <span
-                className={cn(
-                    'text-success inline-flex items-center gap-1 text-sm font-medium',
-                    className,
-                )}
-            >
-                <TrendingUp className="size-4" />
-                {newLabel}
-            </span>
-        );
-    }
-
-    const isPositive = percentChange >= 0;
+    const isPositive = percentChange === 'new' || percentChange >= 0;
     const Icon = isPositive ? TrendingUp : TrendingDown;
+    const content =
+        percentChange === 'new'
+            ? newLabel
+            : `${Math.abs(percentChange).toFixed(1)}%`;
 
-    return (
+    const indicator = (
         <span
             className={cn(
                 'inline-flex items-center gap-1 text-sm font-medium',
@@ -38,7 +35,20 @@ export default function TrendIndicator({
             )}
         >
             <Icon className="size-4" />
-            {Math.abs(percentChange).toFixed(1)}%
+            {content}
         </span>
+    );
+
+    if (!description) return indicator;
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button type="button" className="cursor-default">
+                    {indicator}
+                </button>
+            </TooltipTrigger>
+            <TooltipContent>{description}</TooltipContent>
+        </Tooltip>
     );
 }

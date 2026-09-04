@@ -1,4 +1,4 @@
-import { compareAsc, isAfter, parseISO } from 'date-fns';
+import { isAfter, isBefore, parseISO } from 'date-fns';
 import type { AuthEvent } from '@/api/user/validation/auth-event-schema';
 import type { UserSummary } from '@/api/user/validation/user-summary-schema';
 
@@ -6,32 +6,40 @@ export interface ActiveUser {
     userId: number;
     name: string | null;
     email: string;
-    lastActiveAt: string;
+    lastLoginAt: string;
     isNew: boolean;
 }
 
+const LAST_ACTIVE_EVENT_TYPES: ReadonlySet<AuthEvent['eventType']> = new Set([
+    'login',
+    'signup',
+    'token_refresh',
+]);
+
 export function buildActiveUsersFromAuthEvents(
-    loginEvents: AuthEvent[],
+    authEvents: AuthEvent[],
     users: UserSummary[],
     viewerProgramId: number,
-    windowStartDate: string,
+    windowStart: Date,
 ): ActiveUser[] {
-    const windowStart = parseISO(windowStartDate);
     const usersById = new Map(users.map(user => [user.id, user]));
 
-    const lastActiveAtByUserId = new Map<number, string>();
-    for (const event of loginEvents) {
-        const currentLastActiveAt = lastActiveAtByUserId.get(event.userId);
+    const lastLoginAtByUserId = new Map<number, string>();
+    for (const event of authEvents) {
+        if (!LAST_ACTIVE_EVENT_TYPES.has(event.eventType)) continue;
+        if (isBefore(parseISO(event.createdAt), windowStart)) continue;
+
+        const currentLastLoginAt = lastLoginAtByUserId.get(event.userId);
         if (
-            !currentLastActiveAt ||
-            isAfter(parseISO(event.createdAt), parseISO(currentLastActiveAt))
+            !currentLastLoginAt ||
+            isAfter(parseISO(event.createdAt), parseISO(currentLastLoginAt))
         ) {
-            lastActiveAtByUserId.set(event.userId, event.createdAt);
+            lastLoginAtByUserId.set(event.userId, event.createdAt);
         }
     }
 
     const activeUsers: ActiveUser[] = [];
-    for (const [userId, lastActiveAt] of lastActiveAtByUserId) {
+    for (const [userId, lastLoginAt] of lastLoginAtByUserId) {
         const user = usersById.get(userId);
         if (!user || user.programId !== viewerProgramId) continue;
 
@@ -39,8 +47,8 @@ export function buildActiveUsersFromAuthEvents(
             userId,
             name: user.name,
             email: user.email,
-            lastActiveAt,
-            isNew: compareAsc(parseISO(user.createdAt), windowStart) >= 0,
+            lastLoginAt,
+            isNew: !isBefore(parseISO(user.createdAt), windowStart),
         });
     }
 

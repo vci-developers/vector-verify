@@ -5,7 +5,7 @@ export const userSummarySchema = z.object({
     email: z.string(),
     name: z.string().nullable(),
     privilege: z.number(),
-    isDeveloper: z.boolean(),
+    isDeveloper: z.boolean().optional(),
     programId: z.number().nullable(),
     isActive: z.boolean(),
     emailVerified: z.boolean(),
