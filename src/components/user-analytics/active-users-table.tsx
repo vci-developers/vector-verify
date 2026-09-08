@@ -57,9 +57,10 @@ export default function ActiveUsersTable({
             },
             { enabled: open },
         );
-    const { data: getUsersResult, isPending: isUsersPending } = useGetUsers({
-        enabled: open,
-    });
+    const { data: getUsersResult, isPending: isUsersPending } = useGetUsers(
+        { programId },
+        { enabled: open },
+    );
 
     const isLoading = isAuthEventsPending || isUsersPending;
     const isError = Boolean(

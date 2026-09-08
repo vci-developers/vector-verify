@@ -1,8 +1,13 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { userKeys } from '@/api/user/user-keys';
-import type { GetUsersSuccessPayload } from '@/api/user/validation/get-users-schema';
+import {
+    getUsersQueryParamsSchema,
+    type GetUsersQueryParams,
+    type GetUsersSuccessPayload,
+} from '@/api/user/validation/get-users-schema';
 import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
+import { constructQueryString } from '@/lib/network/construct-query-string';
 
 type GetUsersQueryResult = Result<GetUsersSuccessPayload, NetworkError>;
 
@@ -11,8 +16,15 @@ type GetUsersQueryOptions = Omit<
     'queryKey' | 'queryFn'
 >;
 
-async function fetchUsers(): Promise<GetUsersQueryResult> {
-    const response = await fetch('/api/users', {
+async function fetchUsers(
+    queryParams: GetUsersQueryParams,
+): Promise<GetUsersQueryResult> {
+    const queryString = constructQueryString(
+        queryParams,
+        getUsersQueryParamsSchema,
+    );
+
+    const response = await fetch(`/api/users${queryString}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -24,10 +36,13 @@ async function fetchUsers(): Promise<GetUsersQueryResult> {
     return getUsersResult;
 }
 
-export function useGetUsers(options?: GetUsersQueryOptions) {
+export function useGetUsers(
+    queryParams: GetUsersQueryParams,
+    options?: GetUsersQueryOptions,
+) {
     return useQuery({
-        queryKey: userKeys.users(),
-        queryFn: () => fetchUsers(),
+        queryKey: userKeys.users(queryParams),
+        queryFn: () => fetchUsers(queryParams),
         ...options,
     });
 }
