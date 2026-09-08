@@ -5,7 +5,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { ActiveUser } from '@/components/user-analytics/utils/build-active-users-from-auth-events';
+import type { ActiveUser } from '@/components/user-analytics/utils/build-active-users';
 import {
     ACTIVE_USERS_WINDOW_LABEL_KEYS,
     type ActiveUsersWindow,
@@ -63,7 +63,7 @@ export default function ActiveUsersTableRow({
                 </span>
             </TableCell>
             <TableCell className="text-muted-foreground whitespace-nowrap">
-                {formatDistanceToNow(parseISO(activeUser.lastLoginAt), {
+                {formatDistanceToNow(parseISO(activeUser.lastActiveAt), {
                     addSuffix: true,
                 })}
             </TableCell>

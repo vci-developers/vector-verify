@@ -1,4 +1,4 @@
-import type { ActiveUser } from '@/components/user-analytics/utils/build-active-users-from-auth-events';
+import type { ActiveUser } from '@/components/user-analytics/utils/build-active-users';
 
 export function matchesActiveUserSearch(
     activeUser: ActiveUser,

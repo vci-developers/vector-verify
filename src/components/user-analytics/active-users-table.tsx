@@ -1,6 +1,5 @@
 'use client';
 
-import { useGetAllUserAuthEvents } from '@/api/user/hooks/use-get-all-user-auth-events';
 import { useGetUsers } from '@/api/user/hooks/use-get-users';
 import EmptyBanner from '@/components/ui/empty-banner';
 import ErrorBanner from '@/components/ui/error-banner';
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import ActiveUsersTableRow from '@/components/user-analytics/active-users-table-row';
 import UserAnalyticsLabeledTabs from '@/components/user-analytics/user-analytics-labeled-tabs';
-import { buildActiveUsersFromAuthEvents } from '@/components/user-analytics/utils/build-active-users-from-auth-events';
+import { buildActiveUsers } from '@/components/user-analytics/utils/build-active-users';
 import {
     ACTIVE_USERS_WINDOW_LABEL_KEYS,
     buildActiveUsersWindow,
@@ -49,33 +48,18 @@ export default function ActiveUsersTable({
         useState<ActiveUsersWindow>(DEFAULT_ACTIVE_USERS_WINDOW);
 
     const activeUsersWindowRange = buildActiveUsersWindow(activeUsersWindow);
-    const { data: getAuthEventsResult, isPending: isAuthEventsPending } =
-        useGetAllUserAuthEvents(
-            {
-                startDate: activeUsersWindowRange.startDate,
-                endDate: activeUsersWindowRange.endDate,
-            },
-            { enabled: open },
-        );
-    const { data: getUsersResult, isPending: isUsersPending } = useGetUsers(
+    const { data: getUsersResult, isPending: isLoading } = useGetUsers(
         { programId },
         { enabled: open },
     );
 
-    const isLoading = isAuthEventsPending || isUsersPending;
-    const isError = Boolean(
-        (getAuthEventsResult && !getAuthEventsResult.ok) ||
-        (getUsersResult && !getUsersResult.ok),
-    );
-    const activeUsers =
-        getAuthEventsResult?.ok && getUsersResult?.ok
-            ? buildActiveUsersFromAuthEvents(
-                  getAuthEventsResult.data.events,
-                  getUsersResult.data.users,
-                  programId,
-                  activeUsersWindowRange.startDateCutoff,
-              )
-            : null;
+    const isError = Boolean(getUsersResult && !getUsersResult.ok);
+    const activeUsers = getUsersResult?.ok
+        ? buildActiveUsers(
+              getUsersResult.data.users,
+              activeUsersWindowRange.startDateCutoff,
+          )
+        : null;
 
     const filteredActiveUsers = useMemo(
         () =>

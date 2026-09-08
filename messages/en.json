@@ -345,7 +345,7 @@
         "window30d": "30 days",
         "nameColumn": "Name",
         "emailColumn": "Email",
-        "lastActiveColumn": "Last Login",
+        "lastActiveColumn": "Last Active",
         "newUserBadge": "New",
         "newUserBadgeDescription": "Account created within the last {window}.",
         "activeUsersSearchPlaceholder": "Search by name or email…",
