@@ -1,46 +1,76 @@
 import { subDays, format, parseISO } from 'date-fns';
 import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-snapshot-schema';
 
-export interface ActiveUserTrendChange {
+export interface ActiveUserPeriodTrend {
     count: number;
     priorCount: number | null;
-    percentChange: number | null;
-    isNewFromZero: boolean;
+    windowStartDate: string;
+    windowEndDate: string;
+    priorWindowStartDate: string | null;
+    priorWindowEndDate: string | null;
+    sparklineValues: number[];
 }
 
-export interface ActiveUserTrendChanges {
-    daily: ActiveUserTrendChange;
-    weekly: ActiveUserTrendChange;
-    monthly: ActiveUserTrendChange;
-}
-
-function trendChange(
-    currentCount: number,
-    priorCount: number | undefined,
-): Omit<ActiveUserTrendChange, 'count'> {
-    if (priorCount == null) {
-        return { priorCount: null, percentChange: null, isNewFromZero: false };
-    }
-    if (priorCount === 0) {
-        return {
-            priorCount,
-            percentChange: null,
-            isNewFromZero: currentCount > 0,
-        };
-    }
-    return {
-        priorCount,
-        percentChange: ((currentCount - priorCount) / priorCount) * 100,
-        isNewFromZero: false,
-    };
+export interface ActiveUserTrendSummary {
+    daily: ActiveUserPeriodTrend;
+    weekly: ActiveUserPeriodTrend;
+    monthly: ActiveUserPeriodTrend;
+    snapshotUpdatedAt: string;
 }
 
 const dateKey = (date: string | Date): string =>
     format(typeof date === 'string' ? parseISO(date) : date, 'yyyy-MM-dd');
 
+function windowDateRange(
+    windowEnd: Date,
+    windowLengthDays: number,
+): Pick<ActiveUserPeriodTrend, 'windowStartDate' | 'windowEndDate'> {
+    return {
+        windowStartDate: format(
+            subDays(windowEnd, windowLengthDays - 1),
+            'MMM d',
+        ),
+        windowEndDate: format(windowEnd, 'MMM d'),
+    };
+}
+
+const SPARKLINE_TRAILING_DAYS = 14;
+
+function sparklineValues(
+    snapshotsByDate: Map<string, ActiveMetricSnapshot>,
+    windowEnd: Date,
+    metricKey: 'a1Count' | 'a7Count' | 'a30Count',
+): number[] {
+    const values: number[] = [];
+    for (let daysAgo = SPARKLINE_TRAILING_DAYS - 1; daysAgo >= 0; daysAgo--) {
+        const snapshot = snapshotsByDate.get(
+            dateKey(subDays(windowEnd, daysAgo)),
+        );
+        if (snapshot) values.push(snapshot[metricKey]);
+    }
+    return values;
+}
+
+function priorWindowDateRange(
+    priorSnapshot: ActiveMetricSnapshot | undefined,
+    windowLengthDays: number,
+): Pick<ActiveUserPeriodTrend, 'priorWindowStartDate' | 'priorWindowEndDate'> {
+    if (!priorSnapshot) {
+        return { priorWindowStartDate: null, priorWindowEndDate: null };
+    }
+    const { windowStartDate, windowEndDate } = windowDateRange(
+        parseISO(priorSnapshot.snapshotDate),
+        windowLengthDays,
+    );
+    return {
+        priorWindowStartDate: windowStartDate,
+        priorWindowEndDate: windowEndDate,
+    };
+}
+
 export function buildActiveUserTrendChanges(
     snapshots: ActiveMetricSnapshot[],
-): ActiveUserTrendChanges | null {
+): ActiveUserTrendSummary | null {
     if (snapshots.length === 0) return null;
 
     const snapshotsByDate = new Map(
@@ -67,18 +97,37 @@ export function buildActiveUserTrendChanges(
     return {
         daily: {
             count: latestSnapshot.a1Count,
-            ...trendChange(latestSnapshot.a1Count, priorDaySnapshot?.a1Count),
+            priorCount: priorDaySnapshot?.a1Count ?? null,
+            ...windowDateRange(latestDate, 1),
+            ...priorWindowDateRange(priorDaySnapshot, 1),
+            sparklineValues: sparklineValues(
+                snapshotsByDate,
+                latestDate,
+                'a1Count',
+            ),
         },
         weekly: {
             count: latestSnapshot.a7Count,
-            ...trendChange(latestSnapshot.a7Count, priorWeekSnapshot?.a7Count),
+            priorCount: priorWeekSnapshot?.a7Count ?? null,
+            ...windowDateRange(latestDate, 7),
+            ...priorWindowDateRange(priorWeekSnapshot, 7),
+            sparklineValues: sparklineValues(
+                snapshotsByDate,
+                latestDate,
+                'a7Count',
+            ),
         },
         monthly: {
             count: latestSnapshot.a30Count,
-            ...trendChange(
-                latestSnapshot.a30Count,
-                priorMonthSnapshot?.a30Count,
+            priorCount: priorMonthSnapshot?.a30Count ?? null,
+            ...windowDateRange(latestDate, 30),
+            ...priorWindowDateRange(priorMonthSnapshot, 30),
+            sparklineValues: sparklineValues(
+                snapshotsByDate,
+                latestDate,
+                'a30Count',
             ),
         },
+        snapshotUpdatedAt: latestSnapshot.updatedAt,
     };
 }
