@@ -40,9 +40,12 @@ export default function ActiveUserStatTile({
     }
 
     const isFirstActivity = change.priorCount === 0 && change.count > 0;
-    const percentChange = change.priorCount
-        ? ((change.count - change.priorCount) / change.priorCount) * 100
-        : null;
+    const percentChange =
+        change.priorCount != null && change.priorCount !== 0
+            ? ((change.count - change.priorCount) / change.priorCount) * 100
+            : change.priorCount === 0 && change.count === 0
+              ? 0
+              : null;
     const isPositive = isFirstActivity || (percentChange ?? 0) >= 0;
     const TrendIcon = isPositive ? TrendingUp : TrendingDown;
     const percentChangeLabel = isFirstActivity

@@ -432,97 +432,28 @@ combined (`globalOnly=true`) backend views are not exposed in the web app
 (decided in PR #163 review, July 2026, superseding the original "program-less
 developer" audience). A devMode user whose `programId` is `null` gets an
 explanatory "no program" empty state instead of a chart. Certification and
-submission series are deferred to a fast-follow, not v1. v1.1 (VCV-303) adds an
-**Active Users** stat tile row and searchable table beneath the Trend chart, on
-the same scrollable page (not a separate tab — the two views are small enough,
-and related enough, that splitting them added a boundary without adding
-clarity). "Active Users" is fine as a section/UI label _within User Analytics
-context_ (it's exactly what the section enumerates), but bare "Active Users"
-outside that context still risks colliding with `isActive`/Whitelisted. _Avoid_:
-Device Activity (different population), User Activity (ambiguous with Device
-Activity)
-
-**TrendIndicator**: A generic, shared UI primitive (`src/components/ui/`) — an
-arrow (▲/▼) plus a percent-change value, colored via the app's `success`/
-`destructive` tokens. Carries no dependency on `StatBadge` or any specific
-feature; introduced for VCV-303's Active Users stat tiles (Daily/Weekly/Monthly
-count vs. prior period) but written to be droppable anywhere a signed
-percent-change needs display. Composed alongside an unmodified `StatBadge`
-inside a feature-scoped `Card` wrapper, rather than added as a new prop on
-`StatBadge` itself — `StatBadge` was deliberately left unchanged to avoid
-config-prop creep (see PR #109 precedent, where Aryaman pushed `StatBadge`
-toward a more generic/composable shape rather than growing its prop surface).
-_Avoid_: baking a `trend` prop into `StatBadge`; a `size` variant on `StatBadge`
-to make it look like a standalone tile (structurally different from the `Card`-
-based tile shape already used elsewhere, e.g. intervention-metrics).
+submission series are deferred to a fast-follow, not v1. v1.1 (VCV-303) adds a
+second tab alongside the original chart view: **Analytics** (the v1 Trend chart,
+plus a stat tile row showing A1/A7/A30 vs. the prior period with a small
+sparkline and percent-change indicator) and **Report** (a per-month view of
+login activity, sourced from `GET /users/auth-events`: a Monthly Users table
+listing each user's total logins for the selected month, and a Daily Logins
+table breaking that total out by day). The two tabs use different data sources —
+Analytics from `GET /users/active-metrics`, Report from `GET /users/auth-events`
+— and are not unified, since they answer different questions (aggregate trend
+vs. per-user login detail for a specific month). "Active Users" is fine as a
+stat-tile label _within User Analytics context_, but bare "Active Users" outside
+that context still risks colliding with `isActive`/Whitelisted. _Avoid_: Device
+Activity (different population), User Activity (ambiguous with Device Activity)
 
 **Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
 `GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
 the trailing 1 day (≈ DAU), **A7** = trailing 7 days (≈ WAU), **A30** = trailing
 30 days (≈ MAU). Rows are either program-scoped (`programId` set) or global
 (`programId: null`, returned via `globalOnly=true`). "Active" here means
-`User.lastActiveAt` fell inside the window — verified in `vectorcam-api`
-(`userActivity.service.ts`): `lastActiveAt` is touched by `auth.middleware.ts`
-on **every** authenticated API request (any bearer-token call, not specifically
-login), throttled to once per 15 minutes per user via an in-memory `Map`. So
-A1/A7/A30 measure "used the app at all recently," not logins specifically — the
-same definition the **Active Users table** below now uses. Unrelated to the
-`isActive` account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as
-an explanatory gloss, but the field names are a1Count/a7Count/a30Count);
-"login-driven metric" (wrong — corrected here after reading the backend source,
-VCV-303 follow-up)
-
-**Active Users table** (VCV-303): The row-level companion to A1/A7/A30 — who,
-not just how many. As of the `vectorcam-api` backend change adding `programId`
-filtering and a `lastActiveAt` field to `GET /users` (commit `a248277`, "add
-filters for get users and get auth events endpoint"), the table is sourced
-entirely from `GET /users?programId=<viewer's own>` — a single, already
-program-scoped call. `auth-events` is no longer used anywhere in this feature;
-the two gaps described in the original VCV-303 implementation (below) are both
-closed by this backend change, so the frontend was reworked to match rather than
-kept on the old auth-events-derived path. "Active" now means exactly what
-**Active User (A1/A7/A30)** means: `lastActiveAt` fell inside the window — the
-two are now the same definition, not two structurally different signals that
-merely "reconcile in practice." A user with `lastActiveAt: null` (never been
-active) is excluded from every window.
-
-Each row also carries **`isNew`**, shown as a "New" badge: true when the user's
-`createdAt` falls on or after the table's window start cutoff — i.e. "account
-created within the selected window" (1d/7d/30d), independent of activity
-recency. Distinct from **Active** (has `lastActiveAt` inside the window): a user
-can be New without being listed at all (created but never active — the table
-only lists Active users), or Active without being New (an existing account that
-was recently active). _Avoid_: new user (bare, ambiguous with a never-active
-signup)
-
-**Historical note (resolved, kept for context)**: v1.1's first implementation
-built this table client-side by fetching all `GET /users/auth-events` in the
-window and joining against `GET /users/` on `userId`, filtered client-side to
-the viewer's `programId` — because at the time neither endpoint accepted a
-`programId` param, and `GET /users/` didn't expose `lastActiveAt` at all. That
-version counted a user "active" via a `login`/`signup`/`token_refresh` auth
-event, which undercounted relative to the chart: `lastActiveAt` is touched by
-literally _any_ authenticated request (`auth.middleware.ts`), not just those
-three logged event types, so a user active only through page loads/background
-queries was invisible to the auth-events join. Confirmed live (2026-09-03,
-aryaman05@gmail.com / programId 7): chart's A7 tile showed 5, table showed 4,
-with no 5th user findable in auth-events at all. Both root causes (no
-`programId` filter, no exposed `lastActiveAt`) are now fixed server-side, which
-is why the table was migrated off auth-events entirely rather than patched
-further on the old path.
-
-**Future idea**: clicking a point on the Trend chart to see that historical
-date's active-users list in the table (currently the table is always anchored to
-"now," with no way to inspect an earlier day). No longer blocked on a
-lastActiveAt gap, but `GET /users` returns each user's _current_ `lastActiveAt`
-only, not a point-in-time history — a historical view would need either a
-snapshot-style endpoint (like `active-metrics`) or a different backend shape,
-not just a query param change.
-
-The table's window (1d/7d/30d, default 7d) is an independent control from the
-Trend chart's range preset (30d/90d/1y) — the two aren't unified because
-A1/A7/A30 are three fixed rolling windows shown together, not a single
-adjustable metric the table's window could drive.
+authenticated web-app usage — a login-driven metric, unrelated to the `isActive`
+account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as an
+explanatory gloss, but the field names are a1Count/a7Count/a30Count)
 
 ## Relationships
 

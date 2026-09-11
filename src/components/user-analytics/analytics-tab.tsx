@@ -4,6 +4,7 @@ import { useGetAllUserActiveMetrics } from '@/api/user/hooks/use-get-all-user-ac
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     buildActiveMetricsRange,
     DEFAULT_ACTIVE_METRICS_RANGE_PRESET,
@@ -12,7 +13,6 @@ import {
 import { buildActiveUserTrendChanges } from '@/components/user-analytics/utils/build-active-user-trend-changes';
 import ActiveUserStatTileRow from '@/components/user-analytics/active-user-stat-tile-row';
 import ActiveUserTrendChart from '@/components/user-analytics/active-user-trend-chart';
-import UserAnalyticsLabeledTabs from '@/components/user-analytics/user-analytics-labeled-tabs';
 
 const RANGE_PRESET_TABS: {
     value: ActiveMetricsRangePreset;
@@ -55,11 +55,24 @@ export default function AnalyticsTab({ open, programId }: AnalyticsTabProps) {
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-1">
-            <UserAnalyticsLabeledTabs
+            <Tabs
                 value={rangePreset}
-                onValueChange={setRangePreset}
-                tabs={RANGE_PRESET_TABS}
-            />
+                onValueChange={value =>
+                    setRangePreset(value as ActiveMetricsRangePreset)
+                }
+            >
+                <TabsList className="bg-muted/50 rounded-full p-1">
+                    {RANGE_PRESET_TABS.map(({ value, labelKey }) => (
+                        <TabsTrigger
+                            key={value}
+                            value={value}
+                            className="rounded-full"
+                        >
+                            {t(labelKey)}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </Tabs>
 
             {stateMessage ? (
                 <div className="text-muted-foreground flex h-72 w-full items-center justify-center text-sm">
