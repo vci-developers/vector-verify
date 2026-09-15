@@ -87,6 +87,7 @@
         "selectALocation": "Select a location to view data.",
         "selectDropdownPlaceholder": "Select {locationType}(s)",
         "searchLocationPlaceholder": "Search {locationType}s",
+        "allLocations": "All locations",
         "exportData": "Export Data"
     },
     "OperationsGeographicalSummary": {
