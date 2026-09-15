@@ -9,7 +9,7 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import MonthPicker from '@/components/ui/month-picker';
 import DailyLoginTable from '@/components/user-analytics/daily-login-table';
 import MonthlyUsersTable from '@/components/user-analytics/monthly-users-table';
-import { triggerFileDownload } from '@/lib/download/trigger-file-download';
+import { useFileExport } from '@/lib/export/use-file-export';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { Download, Loader2 } from 'lucide-react';
@@ -27,8 +27,7 @@ export default function ReportTab({ open, programId }: ReportTabProps) {
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
     );
-    const [isExporting, setIsExporting] = useState(false);
-    const [exportError, setExportError] = useState<string | null>(null);
+    const { isExporting, error: exportError, exportFile } = useFileExport();
 
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
@@ -52,35 +51,16 @@ export default function ReportTab({ open, programId }: ReportTabProps) {
         ? getAuthEventsResult.data.distinctUserCount
         : 0;
 
-    async function handleExport() {
-        setIsExporting(true);
-        setExportError(null);
+    function handleExport() {
+        const queryString = constructQueryString(
+            { startDate, endDate, programId },
+            getUserAuthEventsReportQueryParamsSchema,
+        );
 
-        try {
-            const queryString = constructQueryString(
-                { startDate, endDate, programId },
-                getUserAuthEventsReportQueryParamsSchema,
-            );
-
-            const response = await fetch(
-                `/api/users/auth-events/report${queryString}`,
-                { method: 'GET', credentials: 'include' },
-            );
-
-            if (!response.ok) {
-                setExportError(t('exportError'));
-                return;
-            }
-
-            await triggerFileDownload(
-                response,
-                `user-auth-events-report-${startDate}-to-${endDate}.xlsx`,
-            );
-        } catch {
-            setExportError(t('exportError'));
-        } finally {
-            setIsExporting(false);
-        }
+        exportFile(
+            `/api/users/auth-events/report${queryString}`,
+            `user-auth-events-report-${startDate}-to-${endDate}.xlsx`,
+        );
     }
 
     return (
