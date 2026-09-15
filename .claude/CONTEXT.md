@@ -432,9 +432,19 @@ combined (`globalOnly=true`) backend views are not exposed in the web app
 (decided in PR #163 review, July 2026, superseding the original "program-less
 developer" audience). A devMode user whose `programId` is `null` gets an
 explanatory "no program" empty state instead of a chart. Certification and
-submission series are deferred to a fast-follow, not v1. _Avoid_: Active Users
-(collides with `isActive`/Whitelisted), Device Activity (different population),
-User Activity (ambiguous with Device Activity)
+submission series are deferred to a fast-follow, not v1. v1.1 (VCV-303) adds a
+second tab alongside the original chart view: **Analytics** (the v1 Trend chart,
+plus a stat tile row showing A1/A7/A30 vs. the prior period with a small
+sparkline and percent-change indicator) and **Report** (a per-month view of
+login activity, sourced from `GET /users/auth-events`: a Monthly Users table
+listing each user's total logins for the selected month, and a Daily Logins
+table breaking that total out by day). The two tabs use different data sources —
+Analytics from `GET /users/active-metrics`, Report from `GET /users/auth-events`
+— and are not unified, since they answer different questions (aggregate trend
+vs. per-user login detail for a specific month). "Active Users" is fine as a
+stat-tile label _within User Analytics context_, but bare "Active Users" outside
+that context still risks colliding with `isActive`/Whitelisted. _Avoid_: Device
+Activity (different population), User Activity (ambiguous with Device Activity)
 
 **Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
 `GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
