@@ -348,7 +348,10 @@
         "monthlyUsersTitle": "Monthly Users",
         "dailyLoginsTitle": "Daily Logins",
         "totalLoginsColumn": "Total Logins",
-        "distinctUserCountLabel": "Total monthly users"
+        "distinctUserCountLabel": "Total monthly users",
+        "exportButton": "Export",
+        "exportingButton": "Exporting…",
+        "exportError": "Failed to export the report. Please try again."
     },
     "Annotation": {
         "noAnnotationTasksFound": "No annotation tasks found.",
