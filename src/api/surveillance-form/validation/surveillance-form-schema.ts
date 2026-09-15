@@ -1,5 +1,37 @@
 import { z } from 'zod';
 
+export const llinTypeSchema = z.enum([
+    'Pyrethroid-only',
+    'Pyrethroid + PBO',
+    'Pyrethroid + chlorfenapyr',
+    'Pyrethroid + pyriproxyfen',
+    'Other',
+]);
+
+export const llinBrandSchema = z.enum([
+    'OLYSET Net',
+    'OLYSET PLUS',
+    'Interceptor',
+    'Interceptor G2',
+    'Royal Sentry',
+    'Royal Sentry 2.0',
+    'Royal Guard',
+    'PermaNet 2.0',
+    'PermaNet 3.0',
+    'Duranet LLIN',
+    'MiraNet',
+    'MAGNet',
+    'VEERALIN',
+    'Yahe LN',
+    'SafeNet',
+    'Yorkool LN',
+    'Panda Net 2.0',
+    'Tsara Boost',
+    'Tsara Soft',
+    'Tsara Plus',
+    'Other',
+]);
+
 export const surveillanceFormSchema = z.object({
     formId: z.number(),
     sessionId: z.number(),
@@ -14,3 +46,5 @@ export const surveillanceFormSchema = z.object({
 });
 
 export type SurveillanceForm = z.infer<typeof surveillanceFormSchema>;
+export type LlinType = z.infer<typeof llinTypeSchema>;
+export type LlinBrand = z.infer<typeof llinBrandSchema>;
