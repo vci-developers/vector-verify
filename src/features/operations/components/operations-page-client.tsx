@@ -16,7 +16,10 @@ import OperationsSpecimenComposition from '@/features/operations/specimen-compos
 import OperationsFieldUserCompliance from '@/features/operations/field-user-compliance/components/operations-field-user-compliance';
 import OperationsInterventionMetrics from '@/features/operations/intervention-metrics/components/operations-intervention-metrics';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
-import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
+import {
+    ALL_LOCATIONS_OPTION,
+    useLocationMultiSelection,
+} from '@/lib/location/use-location-multiselection';
 import {
     useOperationsFilters,
     type OperationsTab,
@@ -103,6 +106,23 @@ export default function OperationsPageClient() {
     }
 
     function handleLocationsChange(locations: string[]) {
+        if (
+            locations.includes(ALL_LOCATIONS_OPTION) &&
+            !selectedLocations.includes(ALL_LOCATIONS_OPTION)
+        ) {
+            setFilters({ selectedLocations: [ALL_LOCATIONS_OPTION] });
+            return;
+        }
+
+        if (locations.length > 1 && locations.includes(ALL_LOCATIONS_OPTION)) {
+            setFilters({
+                selectedLocations: locations.filter(
+                    location => location !== ALL_LOCATIONS_OPTION,
+                ),
+            });
+            return;
+        }
+
         setFilters({ selectedLocations: locations });
     }
 
