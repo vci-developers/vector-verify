@@ -54,16 +54,14 @@ export default function ActiveUserStatTile({
           ? `${Math.abs(percentChange).toFixed(1)}%`
           : null;
     const trendDescription =
-        change.priorCount != null &&
-        change.priorWindowStartDate &&
-        change.priorWindowEndDate
+        change.priorCount != null && change.priorWindow
             ? t('trendComparison', {
                   currentCount: change.count,
-                  currentStartDate: change.windowStartDate,
-                  currentEndDate: change.windowEndDate,
+                  currentStartDate: change.window.start,
+                  currentEndDate: change.window.end,
                   priorCount: change.priorCount,
-                  priorStartDate: change.priorWindowStartDate,
-                  priorEndDate: change.priorWindowEndDate,
+                  priorStartDate: change.priorWindow.start,
+                  priorEndDate: change.priorWindow.end,
               })
             : t('trendComparisonNoPriorData');
 
@@ -76,8 +74,8 @@ export default function ActiveUserStatTile({
                     </p>
                     <p className="text-muted-foreground/70 truncate text-[11px] tabular-nums">
                         {t('windowDateRange', {
-                            startDate: change.windowStartDate,
-                            endDate: change.windowEndDate,
+                            startDate: change.window.start,
+                            endDate: change.window.end,
                         })}
                     </p>
                     <p className="mt-1 text-lg leading-tight font-bold tabular-nums">

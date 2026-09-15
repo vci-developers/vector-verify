@@ -4,10 +4,8 @@ import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-s
 export interface ActiveUserPeriodTrend {
     count: number;
     priorCount: number | null;
-    windowStartDate: string;
-    windowEndDate: string;
-    priorWindowStartDate: string | null;
-    priorWindowEndDate: string | null;
+    window: { start: string; end: string };
+    priorWindow: { start: string; end: string } | null;
     sparklineValues: number[];
 }
 
@@ -24,13 +22,10 @@ const dateKey = (date: string | Date): string =>
 function windowDateRange(
     windowEnd: Date,
     windowLengthDays: number,
-): Pick<ActiveUserPeriodTrend, 'windowStartDate' | 'windowEndDate'> {
+): { start: string; end: string } {
     return {
-        windowStartDate: format(
-            subDays(windowEnd, windowLengthDays - 1),
-            'MMM d',
-        ),
-        windowEndDate: format(windowEnd, 'MMM d'),
+        start: format(subDays(windowEnd, windowLengthDays - 1), 'MMM d'),
+        end: format(windowEnd, 'MMM d'),
     };
 }
 
@@ -54,18 +49,12 @@ function sparklineValues(
 function priorWindowDateRange(
     priorSnapshot: ActiveMetricSnapshot | undefined,
     windowLengthDays: number,
-): Pick<ActiveUserPeriodTrend, 'priorWindowStartDate' | 'priorWindowEndDate'> {
-    if (!priorSnapshot) {
-        return { priorWindowStartDate: null, priorWindowEndDate: null };
-    }
-    const { windowStartDate, windowEndDate } = windowDateRange(
+): { start: string; end: string } | null {
+    if (!priorSnapshot) return null;
+    return windowDateRange(
         parseISO(priorSnapshot.snapshotDate),
         windowLengthDays,
     );
-    return {
-        priorWindowStartDate: windowStartDate,
-        priorWindowEndDate: windowEndDate,
-    };
 }
 
 export function buildActiveUserTrendChanges(
@@ -98,8 +87,8 @@ export function buildActiveUserTrendChanges(
         daily: {
             count: latestSnapshot.a1Count,
             priorCount: priorDaySnapshot?.a1Count ?? null,
-            ...windowDateRange(latestDate, 1),
-            ...priorWindowDateRange(priorDaySnapshot, 1),
+            window: windowDateRange(latestDate, 1),
+            priorWindow: priorWindowDateRange(priorDaySnapshot, 1),
             sparklineValues: sparklineValues(
                 snapshotsByDate,
                 latestDate,
@@ -109,8 +98,8 @@ export function buildActiveUserTrendChanges(
         weekly: {
             count: latestSnapshot.a7Count,
             priorCount: priorWeekSnapshot?.a7Count ?? null,
-            ...windowDateRange(latestDate, 7),
-            ...priorWindowDateRange(priorWeekSnapshot, 7),
+            window: windowDateRange(latestDate, 7),
+            priorWindow: priorWindowDateRange(priorWeekSnapshot, 7),
             sparklineValues: sparklineValues(
                 snapshotsByDate,
                 latestDate,
@@ -120,8 +109,8 @@ export function buildActiveUserTrendChanges(
         monthly: {
             count: latestSnapshot.a30Count,
             priorCount: priorMonthSnapshot?.a30Count ?? null,
-            ...windowDateRange(latestDate, 30),
-            ...priorWindowDateRange(priorMonthSnapshot, 30),
+            window: windowDateRange(latestDate, 30),
+            priorWindow: priorWindowDateRange(priorMonthSnapshot, 30),
             sparklineValues: sparklineValues(
                 snapshotsByDate,
                 latestDate,
