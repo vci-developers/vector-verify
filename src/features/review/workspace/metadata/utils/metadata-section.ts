@@ -108,6 +108,9 @@ const SURVEILLANCE_REQUIRED_ROW_IDS = new Set(
     ),
 );
 
+export const LLIN_TYPE_ROW_ID = 'surveillanceForm.llinType';
+export const LLIN_BRAND_ROW_ID = 'surveillanceForm.llinBrand';
+
 export interface MetadataRow {
     id: string;
     label: string;
