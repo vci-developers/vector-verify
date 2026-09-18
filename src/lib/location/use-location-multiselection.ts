@@ -39,9 +39,12 @@ export function useLocationMultiSelection(
     );
 
     const descendantsOfSelectedLocations = useMemo(() => {
-        if (selectedLocations.includes(ALL_LOCATIONS_OPTION))
-            return accessibleSites;
         if (selectedLocations.length === 0) return [];
+        if (selectedLocations.includes(ALL_LOCATIONS_OPTION)) {
+            return usesLegacyStructure
+                ? accessibleSites.filter(site => site.district?.trim())
+                : accessibleSites;
+        }
         if (usesLegacyStructure) {
             return accessibleSites.filter(site =>
                 selectedLocations.includes(site.district?.trim() ?? ''),
