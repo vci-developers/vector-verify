@@ -19,13 +19,11 @@ import {
     MultiSelectContent,
     MultiSelectGroup,
 } from '@/components/ui/multi-select';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import EmptyBanner from '@/components/ui/empty-banner';
-import { BarChart3, LineChart } from 'lucide-react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import ErrorBanner from '@/components/ui/error-banner';
 
 const COMPOSITION_SECTIONS: {
@@ -42,8 +40,6 @@ interface OperationsSpecimenCompositionProps {
     startDate: string;
     endDate: string;
 }
-
-type ChartType = 'bar' | 'line';
 
 export default function OperationsSpecimenComposition({
     siteIds,
@@ -63,8 +59,6 @@ export default function OperationsSpecimenComposition({
         data: getMonthlySpecimensCountResult,
         isPending: isGetMonthlySpecimensCountPending,
     } = useGetMonthlySpecimensCount(getMonthlySpecimensCountQueryParams);
-
-    const [chartType, setChartType] = useState<ChartType>('bar');
 
     const [{ selectedSpecies }, setFilters] = useOperationsFilters();
     const speciesOptions = useMemo(() => {
@@ -130,26 +124,6 @@ export default function OperationsSpecimenComposition({
                             </MultiSelectGroup>
                         </MultiSelectContent>
                     </MultiSelect>
-                    <ToggleGroup
-                        type="single"
-                        variant="outline"
-                        size="sm"
-                        value={chartType}
-                        onValueChange={(next: ChartType | '') => {
-                            if (next) setChartType(next);
-                        }}
-                        disabled={isLoading || isError}
-                        className="shrink-0"
-                    >
-                        <ToggleGroupItem value="bar">
-                            <BarChart3 />
-                            {t('barChart')}
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="line">
-                            <LineChart />
-                            {t('lineChart')}
-                        </ToggleGroupItem>
-                    </ToggleGroup>
                 </div>
             </div>
             {isLoading || isError ? (
@@ -158,7 +132,6 @@ export default function OperationsSpecimenComposition({
                         <CompositionChartPair
                             key={specimenClassificationAxis}
                             title={title}
-                            chartType={chartType}
                             specimenCountsByClass={[]}
                             specimenCountsByMonth={[]}
                             specimenChartConfig={{}}
@@ -195,7 +168,6 @@ export default function OperationsSpecimenComposition({
                             <CompositionChartPair
                                 key={specimenClassificationAxis}
                                 title={title}
-                                chartType={chartType}
                                 specimenCountsByClass={specimenCountsByClass}
                                 specimenCountsByMonth={specimenCountsByMonth}
                                 specimenChartConfig={specimenChartConfig}

@@ -10,8 +10,6 @@ import {
     type ChartConfig,
 } from '@/components/ui/chart';
 import {
-    Area,
-    AreaChart,
     Bar,
     BarChart,
     CartesianGrid,
@@ -26,11 +24,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import EmptyBanner from '@/components/ui/empty-banner';
 
-type ChartType = 'bar' | 'line';
-
 interface CompositionChartPairProps {
     title: string;
-    chartType: ChartType;
     specimenCountsByClass: {
         specimenClass: string;
         specimenCount: number;
@@ -43,7 +38,6 @@ interface CompositionChartPairProps {
 
 export default function CompositionChartPair({
     title,
-    chartType,
     specimenCountsByClass,
     specimenCountsByMonth,
     specimenChartConfig,
@@ -216,69 +210,32 @@ export default function CompositionChartPair({
                                     config={specimenChartConfig}
                                     className="h-full w-full"
                                 >
-                                    {chartType === 'bar' ? (
-                                        <BarChart
-                                            data={specimenCountsByMonth}
-                                            margin={chartMargins}
-                                        >
-                                            {chartAxes}
-                                            {specimenClasses.map(
-                                                specimenClass => (
-                                                    <Bar
-                                                        key={specimenClass}
-                                                        dataKey={specimenClass}
-                                                        stackId="specimens"
-                                                        fill={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        stroke={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        fillOpacity={0.75}
-                                                        strokeWidth={1}
-                                                    />
-                                                ),
-                                            )}
-                                            {chartLegend}
-                                        </BarChart>
-                                    ) : (
-                                        <AreaChart
-                                            data={specimenCountsByMonth}
-                                            margin={chartMargins}
-                                        >
-                                            {chartAxes}
-                                            {specimenClasses.map(
-                                                specimenClass => (
-                                                    <Area
-                                                        key={specimenClass}
-                                                        type="monotone"
-                                                        dataKey={specimenClass}
-                                                        fill={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        stroke={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        fillOpacity={0.2}
-                                                        strokeWidth={3}
-                                                        dot={{
-                                                            r: 2,
-                                                            fillOpacity: 1,
-                                                        }}
-                                                    />
-                                                ),
-                                            )}
-                                            {chartLegend}
-                                        </AreaChart>
-                                    )}
+                                    <BarChart
+                                        data={specimenCountsByMonth}
+                                        margin={chartMargins}
+                                    >
+                                        {chartAxes}
+                                        {specimenClasses.map(specimenClass => (
+                                            <Bar
+                                                key={specimenClass}
+                                                dataKey={specimenClass}
+                                                stackId="specimens"
+                                                fill={
+                                                    specimenChartConfig[
+                                                        specimenClass
+                                                    ]?.color
+                                                }
+                                                stroke={
+                                                    specimenChartConfig[
+                                                        specimenClass
+                                                    ]?.color
+                                                }
+                                                fillOpacity={0.75}
+                                                strokeWidth={1}
+                                            />
+                                        ))}
+                                        {chartLegend}
+                                    </BarChart>
                                 </ChartContainer>
                             )}
                         </div>
