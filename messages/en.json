@@ -133,7 +133,8 @@
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
         "noSpeciesFound": "No species found.",
-        "noSpecimenData": "No specimen data for the selected filters."
+        "noSpecimenData": "No specimen data for the selected filters.",
+        "total": "Total"
     },
     "OperationsAIPerformance": {
         "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
