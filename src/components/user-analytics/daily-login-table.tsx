@@ -36,6 +36,17 @@ export default function DailyLoginTable({
         date,
         label: format(parseISO(date), 'd'),
     }));
+    const dailyLoginsByUser = new Map(
+        users.map(user => [
+            user.userId,
+            new Map(
+                user.dailyLogins.map(dailyLogin => [
+                    dailyLogin.date,
+                    dailyLogin.count,
+                ]),
+            ),
+        ]),
+    );
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -75,9 +86,9 @@ export default function DailyLoginTable({
                             </TableCell>
                             {monthDays.map(date => (
                                 <TableCell key={date} className="text-center">
-                                    {user.dailyLogins.find(
-                                        dailyLogin => dailyLogin.date === date,
-                                    )?.count ?? 0}
+                                    {dailyLoginsByUser
+                                        .get(user.userId)
+                                        ?.get(date) ?? 0}
                                 </TableCell>
                             ))}
                             <TableCell className="bg-background sticky right-0 z-10 text-right font-medium">

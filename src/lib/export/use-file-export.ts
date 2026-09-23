@@ -6,7 +6,7 @@ import {
 import type { Result } from '@/lib/result/result';
 import { useState } from 'react';
 
-export function useFileExport() {
+export function useFileExport(fallbackErrorMessage: string) {
     const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -14,31 +14,27 @@ export function useFileExport() {
         setIsExporting(true);
         setError(null);
 
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                credentials: 'include',
-            });
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include',
+        }).catch((): null => null);
 
-            if (!response.ok) {
-                const result: Result<never, NetworkError> =
-                    await response.json();
-                setError(
-                    result.ok
-                        ? 'An unexpected error occurred. Please try again.'
-                        : networkErrorMessage(result.error),
-                );
-                return false;
-            }
-
-            await triggerFileDownload(response, filename);
-            return true;
-        } catch {
-            setError('An unexpected error occurred. Please try again.');
-            return false;
-        } finally {
+        if (response === null || !response.ok) {
+            const errorResult: Result<never, NetworkError> | null = response
+                ? await response.json()
+                : null;
+            setError(
+                errorResult && !errorResult.ok
+                    ? networkErrorMessage(errorResult.error)
+                    : fallbackErrorMessage,
+            );
             setIsExporting(false);
+            return false;
         }
+
+        await triggerFileDownload(response, filename);
+        setIsExporting(false);
+        return true;
     }
 
     return { isExporting, error, exportFile };

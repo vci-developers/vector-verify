@@ -27,7 +27,11 @@ export default function ReportTab({ open, programId }: ReportTabProps) {
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
     );
-    const { isExporting, error: exportError, exportFile } = useFileExport();
+    const {
+        isExporting,
+        error: exportError,
+        exportFile,
+    } = useFileExport(t('exportError'));
 
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
