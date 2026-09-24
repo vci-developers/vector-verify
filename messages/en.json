@@ -331,7 +331,7 @@
         "axisCountLabel": "Count",
         "nameColumn": "Name",
         "emailColumn": "Email",
-        "reportEmpty": "No one logged in during this month.",
+        "noLoginsInMonth": "No one logged in during this month.",
         "monthlyUsersTitle": "Monthly Users",
         "dailyLoginsTitle": "Daily Logins",
         "totalLoginsColumn": "Total Logins",

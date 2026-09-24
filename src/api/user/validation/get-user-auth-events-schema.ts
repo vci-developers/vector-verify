@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { authEventSchema } from '@/api/user/validation/auth-event-schema';
 
-export const dailyLoginCountSchema = z.object({
+const dailyLoginCountSchema = z.object({
     date: z.string(),
     count: z.number(),
 });
 
-export const userLoginActivitySchema = z.object({
+const userLoginActivitySchema = z.object({
     userId: z.number(),
     email: z.email(),
     name: z.string().nullable(),
@@ -32,7 +32,6 @@ export const getUserAuthEventsResponseSchema = z.object({
     users: z.array(userLoginActivitySchema),
 });
 
-export type DailyLoginCount = z.infer<typeof dailyLoginCountSchema>;
 export type UserLoginActivity = z.infer<typeof userLoginActivitySchema>;
 export type GetUserAuthEventsQueryParams = z.infer<
     typeof getUserAuthEventsQueryParamsSchema

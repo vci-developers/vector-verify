@@ -15,7 +15,7 @@ import { constructQueryString } from '@/lib/network/construct-query-string';
 import { networkErrorMessage } from '@/lib/network/network-error';
 import { Download, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 interface UserAnalyticsPanelProps {
@@ -38,7 +38,10 @@ export default function UserAnalyticsPanel({
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
-    const { data: getAuthEventsResult, isPending } = useGetUserAuthEvents({
+    const {
+        data: getUserAuthEventsResult,
+        isPending: isGetUserAuthEventsPending,
+    } = useGetUserAuthEvents({
         eventType: 'login',
         programId,
         startDate,
@@ -46,12 +49,14 @@ export default function UserAnalyticsPanel({
     });
 
     const errorMessage =
-        getAuthEventsResult && !getAuthEventsResult.ok
-            ? networkErrorMessage(getAuthEventsResult.error)
+        getUserAuthEventsResult && !getUserAuthEventsResult.ok
+            ? networkErrorMessage(getUserAuthEventsResult.error)
             : null;
-    const users = getAuthEventsResult?.ok ? getAuthEventsResult.data.users : [];
-    const distinctUserCount = getAuthEventsResult?.ok
-        ? getAuthEventsResult.data.distinctUserCount
+    const users = getUserAuthEventsResult?.ok
+        ? getUserAuthEventsResult.data.users
+        : [];
+    const distinctUserCount = getUserAuthEventsResult?.ok
+        ? getUserAuthEventsResult.data.distinctUserCount
         : 0;
 
     function handleExport() {
@@ -94,14 +99,14 @@ export default function UserAnalyticsPanel({
                 <p className="text-destructive text-sm">{exportError}</p>
             )}
 
-            {isPending ? (
+            {isGetUserAuthEventsPending ? (
                 <SkeletonList count={5} height="lg" width="full" />
             ) : errorMessage ? (
                 <ErrorBanner message={errorMessage} />
             ) : users.length === 0 ? (
-                <EmptyBanner message={t('reportEmpty')} />
+                <EmptyBanner message={t('noLoginsInMonth')} />
             ) : (
-                <>
+                <Fragment>
                     <DailyLoginChart
                         users={users}
                         selectedMonth={selectedMonth}
@@ -117,7 +122,7 @@ export default function UserAnalyticsPanel({
                             selectedMonth={selectedMonth}
                         />
                     </div>
-                </>
+                </Fragment>
             )}
         </div>
     );

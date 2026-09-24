@@ -9,13 +9,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import type { UserLoginActivity } from '@/api/user/validation/get-user-auth-events-schema';
-import {
-    eachDayOfInterval,
-    endOfMonth,
-    format,
-    parseISO,
-    startOfMonth,
-} from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
 import { useTranslations } from 'next-intl';
 
 interface DailyLoginTableProps {
@@ -31,22 +25,10 @@ export default function DailyLoginTable({
     const monthDays = eachDayOfInterval({
         start: startOfMonth(selectedMonth),
         end: endOfMonth(selectedMonth),
-    }).map(day => format(day, 'yyyy-MM-dd'));
-    const monthDayLabels = monthDays.map(date => ({
-        date,
-        label: format(parseISO(date), 'd'),
+    }).map(day => ({
+        date: format(day, 'yyyy-MM-dd'),
+        label: format(day, 'd'),
     }));
-    const dailyLoginsByUser = new Map(
-        users.map(user => [
-            user.userId,
-            new Map(
-                user.dailyLogins.map(dailyLogin => [
-                    dailyLogin.date,
-                    dailyLogin.count,
-                ]),
-            ),
-        ]),
-    );
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -59,7 +41,7 @@ export default function DailyLoginTable({
                             {t('nameColumn')}
                         </TableHead>
                         <TableHead>{t('emailColumn')}</TableHead>
-                        {monthDayLabels.map(({ date, label }) => (
+                        {monthDays.map(({ date, label }) => (
                             <TableHead key={date} className="text-center">
                                 {label}
                             </TableHead>
@@ -84,11 +66,11 @@ export default function DailyLoginTable({
                             >
                                 {user.email}
                             </TableCell>
-                            {monthDays.map(date => (
+                            {monthDays.map(({ date }) => (
                                 <TableCell key={date} className="text-center">
-                                    {dailyLoginsByUser
-                                        .get(user.userId)
-                                        ?.get(date) ?? 0}
+                                    {user.dailyLogins.find(
+                                        dailyLogin => dailyLogin.date === date,
+                                    )?.count ?? 0}
                                 </TableCell>
                             ))}
                             <TableCell className="bg-background sticky right-0 z-10 font-medium">
