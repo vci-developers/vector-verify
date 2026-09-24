@@ -427,11 +427,11 @@ certifying), **not** field collectors — it is categorically distinct from
 viewer's own program** (`profile.programId`) — there is no program selector
 (decided in PR #163 review, July 2026). A devMode user whose `programId` is
 `null` gets an explanatory "no program" empty state. As of VCV-303 it is a
-single per-month page sourced only from `GET /users/auth-events` (login
-events): a month picker and report export, a Daily Login chart (unique users
-and total logins per day), and below it a Monthly Users table (each user's
-total logins) and a Daily Logins table (that total broken out by day). The
-earlier `GET /users/active-metrics` A1/A7/A30 trend chart, stat tiles and
+single per-month page sourced only from `GET /users/auth-events` (login events):
+a month picker and report export, a Daily Login chart (unique users and total
+logins per day), and below it a Monthly Users table (each user's total logins)
+and a Daily Logins table (that total broken out by day). The earlier
+`GET /users/active-metrics` A1/A7/A30 trend chart, stat tiles and
 Analytics/Report tabs were removed so the chart and tables always agree.
 _Avoid_: Device Activity (different population), User Activity (ambiguous with
 Device Activity), bare "Active Users" (collides with `isActive`/Whitelisted)
