@@ -64,7 +64,7 @@ export default function DailyLoginTable({
                                 {label}
                             </TableHead>
                         ))}
-                        <TableHead className="bg-background sticky right-0 z-10 text-right">
+                        <TableHead className="bg-background sticky right-0 z-10">
                             {t('totalLoginsColumn')}
                         </TableHead>
                     </TableRow>
@@ -91,7 +91,7 @@ export default function DailyLoginTable({
                                         ?.get(date) ?? 0}
                                 </TableCell>
                             ))}
-                            <TableCell className="bg-background sticky right-0 z-10 text-right font-medium">
+                            <TableCell className="bg-background sticky right-0 z-10 font-medium">
                                 {user.totalLogins}
                             </TableCell>
                         </TableRow>

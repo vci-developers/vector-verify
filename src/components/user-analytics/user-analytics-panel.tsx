@@ -7,6 +7,7 @@ import EmptyBanner from '@/components/ui/empty-banner';
 import ErrorBanner from '@/components/ui/error-banner';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import MonthPicker from '@/components/ui/month-picker';
+import DailyLoginChart from '@/components/user-analytics/daily-login-chart';
 import DailyLoginTable from '@/components/user-analytics/daily-login-table';
 import MonthlyUsersTable from '@/components/user-analytics/monthly-users-table';
 import { useFileExport } from '@/lib/export/use-file-export';
@@ -17,12 +18,13 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 
-interface ReportTabProps {
-    open: boolean;
+interface UserAnalyticsPanelProps {
     programId: number;
 }
 
-export default function ReportTab({ open, programId }: ReportTabProps) {
+export default function UserAnalyticsPanel({
+    programId,
+}: UserAnalyticsPanelProps) {
     const t = useTranslations('UserAnalytics');
     const [selectedMonth, setSelectedMonth] = useState(() =>
         startOfMonth(new Date()),
@@ -36,15 +38,12 @@ export default function ReportTab({ open, programId }: ReportTabProps) {
     const startDate = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 
-    const { data: getAuthEventsResult, isPending } = useGetUserAuthEvents(
-        {
-            eventType: 'login',
-            programId,
-            startDate,
-            endDate,
-        },
-        { enabled: open },
-    );
+    const { data: getAuthEventsResult, isPending } = useGetUserAuthEvents({
+        eventType: 'login',
+        programId,
+        startDate,
+        endDate,
+    });
 
     const errorMessage =
         getAuthEventsResult && !getAuthEventsResult.ok
@@ -102,16 +101,23 @@ export default function ReportTab({ open, programId }: ReportTabProps) {
             ) : users.length === 0 ? (
                 <EmptyBanner message={t('reportEmpty')} />
             ) : (
-                <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 sm:grid-cols-2">
-                    <MonthlyUsersTable
-                        users={users}
-                        distinctUserCount={distinctUserCount}
-                    />
-                    <DailyLoginTable
+                <>
+                    <DailyLoginChart
                         users={users}
                         selectedMonth={selectedMonth}
                     />
-                </div>
+
+                    <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 sm:grid-cols-2">
+                        <MonthlyUsersTable
+                            users={users}
+                            distinctUserCount={distinctUserCount}
+                        />
+                        <DailyLoginTable
+                            users={users}
+                            selectedMonth={selectedMonth}
+                        />
+                    </div>
+                </>
             )}
         </div>
     );

@@ -423,37 +423,18 @@ shows in the user menu. _Avoid_: Debug mode, admin mode, dev flag
 activity over time, opened from a dialog directly under **Raw Data Export** in
 the sidebar user menu. Measures _web-app users_ (people logging in and
 certifying), **not** field collectors — it is categorically distinct from
-**Device Activity**, which tracks VHTs via their devices. v1 sources
-`GET /users/active-metrics` only, plotting the daily **Active User** A1/A7/A30
-snapshots as three overlaid lines over a preset window (30d / 90d / 1y, default
-90d). Scope is **always the viewer's own program** (`profile.programId`) — there
-is no program selector, and the cross-program (`programId` free choice) and
-combined (`globalOnly=true`) backend views are not exposed in the web app
-(decided in PR #163 review, July 2026, superseding the original "program-less
-developer" audience). A devMode user whose `programId` is `null` gets an
-explanatory "no program" empty state instead of a chart. Certification and
-submission series are deferred to a fast-follow, not v1. v1.1 (VCV-303) adds a
-second tab alongside the original chart view: **Analytics** (the v1 Trend chart,
-plus a stat tile row showing A1/A7/A30 vs. the prior period with a small
-sparkline and percent-change indicator) and **Report** (a per-month view of
-login activity, sourced from `GET /users/auth-events`: a Monthly Users table
-listing each user's total logins for the selected month, and a Daily Logins
-table breaking that total out by day). The two tabs use different data sources —
-Analytics from `GET /users/active-metrics`, Report from `GET /users/auth-events`
-— and are not unified, since they answer different questions (aggregate trend
-vs. per-user login detail for a specific month). "Active Users" is fine as a
-stat-tile label _within User Analytics context_, but bare "Active Users" outside
-that context still risks colliding with `isActive`/Whitelisted. _Avoid_: Device
-Activity (different population), User Activity (ambiguous with Device Activity)
-
-**Active User (A1 / A7 / A30)**: The backend's rolling active-user counts from
-`GET /users/active-metrics`, one snapshot row per day. **A1** = users active in
-the trailing 1 day (≈ DAU), **A7** = trailing 7 days (≈ WAU), **A30** = trailing
-30 days (≈ MAU). Rows are either program-scoped (`programId` set) or global
-(`programId: null`, returned via `globalOnly=true`). "Active" here means
-authenticated web-app usage — a login-driven metric, unrelated to the `isActive`
-account flag or the Whitelisted state. _Avoid_: DAU/WAU/MAU (fine as an
-explanatory gloss, but the field names are a1Count/a7Count/a30Count)
+**Device Activity**, which tracks VHTs via their devices. Scope is **always the
+viewer's own program** (`profile.programId`) — there is no program selector
+(decided in PR #163 review, July 2026). A devMode user whose `programId` is
+`null` gets an explanatory "no program" empty state. As of VCV-303 it is a
+single per-month page sourced only from `GET /users/auth-events` (login
+events): a month picker and report export, a Daily Login chart (unique users
+and total logins per day), and below it a Monthly Users table (each user's
+total logins) and a Daily Logins table (that total broken out by day). The
+earlier `GET /users/active-metrics` A1/A7/A30 trend chart, stat tiles and
+Analytics/Report tabs were removed so the chart and tables always agree.
+_Avoid_: Device Activity (different population), User Activity (ambiguous with
+Device Activity), bare "Active Users" (collides with `isActive`/Whitelisted)
 
 ## Relationships
 
