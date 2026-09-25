@@ -1,53 +1,76 @@
 'use client';
 
-import type { ActiveMetricSnapshot } from '@/api/user/validation/active-metric-snapshot-schema';
+import type { UserLoginActivity } from '@/api/user/validation/get-user-auth-events-schema';
 import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
 } from '@/components/ui/chart';
-import { format, parseISO } from 'date-fns';
+import {
+    eachDayOfInterval,
+    endOfMonth,
+    format,
+    parseISO,
+    startOfMonth,
+} from 'date-fns';
 import { useTranslations } from 'next-intl';
 import { CartesianGrid, Label, Line, LineChart, XAxis, YAxis } from 'recharts';
 
-interface ActiveUserTrendChartProps {
-    metrics: ActiveMetricSnapshot[];
+interface DailyLoginChartProps {
+    users: UserLoginActivity[];
+    selectedMonth: Date;
 }
 
-export default function ActiveUserTrendChart({
-    metrics,
-}: ActiveUserTrendChartProps) {
+export default function DailyLoginChart({
+    users,
+    selectedMonth,
+}: DailyLoginChartProps) {
     const t = useTranslations('UserAnalytics');
 
-    const config: ChartConfig = {
-        a1Count: { label: t('a1Label'), color: 'var(--chart-1)' },
-        a7Count: { label: t('a7Label'), color: 'var(--chart-2)' },
-        a30Count: { label: t('a30Label'), color: 'var(--chart-3)' },
+    const loginChartConfig: ChartConfig = {
+        distinctUserCount: {
+            label: t('distinctUserCountSeriesLabel'),
+            color: 'var(--chart-1)',
+        },
+        totalLogins: {
+            label: t('totalLoginsSeriesLabel'),
+            color: 'var(--chart-2)',
+        },
     };
-    const metricsBySnapshotDate = [...metrics].sort(
-        (firstSnapshot, secondSnapshot) =>
-            firstSnapshot.snapshotDate.localeCompare(
-                secondSnapshot.snapshotDate,
+    const userDailyLogins = users.flatMap(user => user.dailyLogins);
+    const monthDailyLoginTotals = eachDayOfInterval({
+        start: startOfMonth(selectedMonth),
+        end: endOfMonth(selectedMonth),
+    }).map(day => {
+        const date = format(day, 'yyyy-MM-dd');
+        const userLoginsOnDate = userDailyLogins.filter(
+            userDailyLogin => userDailyLogin.date === date,
+        );
+        return {
+            date,
+            distinctUserCount: userLoginsOnDate.length,
+            totalLogins: userLoginsOnDate.reduce(
+                (total, userDailyLogin) => total + userDailyLogin.count,
+                0,
             ),
-    );
-    const seriesKeys = Object.keys(config);
+        };
+    });
+    const seriesKeys = Object.keys(loginChartConfig);
 
     return (
-        <ChartContainer config={config} className="h-72 w-full">
+        <ChartContainer config={loginChartConfig} className="h-72 w-full">
             <LineChart
-                data={metricsBySnapshotDate}
+                data={monthDailyLoginTotals}
                 margin={{ top: 8, right: 12, bottom: 32, left: 12 }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
-                    dataKey="snapshotDate"
+                    dataKey="date"
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
-                    tickFormatter={snapshotDate =>
-                        format(parseISO(snapshotDate), 'MMM d')
-                    }
+                    tickFormatter={date => format(parseISO(date), 'MMM d')}
                 >
                     <Label
                         value={t('axisDateLabel')}
@@ -62,7 +85,7 @@ export default function ActiveUserTrendChart({
                     allowDecimals={false}
                 >
                     <Label
-                        value={t('axisActiveUsersLabel')}
+                        value={t('axisCountLabel')}
                         angle={-90}
                         position="left"
                         className="fill-muted-foreground text-sm font-bold"
@@ -74,8 +97,8 @@ export default function ActiveUserTrendChart({
                         <ChartTooltipContent
                             className="min-w-45"
                             indicator="line"
-                            labelFormatter={snapshotDate =>
-                                format(parseISO(snapshotDate), 'MMM d, yyyy')
+                            labelFormatter={date =>
+                                format(parseISO(date), 'MMM d, yyyy')
                             }
                         />
                     }
@@ -85,7 +108,7 @@ export default function ActiveUserTrendChart({
                         key={seriesKey}
                         type="monotone"
                         dataKey={seriesKey}
-                        stroke={config[seriesKey]?.color}
+                        stroke={loginChartConfig[seriesKey]?.color}
                         strokeWidth={2}
                         dot={false}
                     />
