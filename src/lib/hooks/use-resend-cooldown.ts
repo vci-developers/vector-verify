@@ -1,20 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 
 const COOLDOWN_SECONDS = 60;
-const VERIFICATION_EMAIL_COOLDOWN_KEY = 'auth.verificationEmaillastSent';
+const EMAIL_TYPES = ['emailVerification', 'forgotPassword'] as const;
+type EmailCooldownType = (typeof EMAIL_TYPES)[number];
 
-export function useResendCooldown() {
+function getCooldownKey(cooldownType: EmailCooldownType) {
+    return `auth.${cooldownType}LastSent`;
+}
+
+export function useResendCooldown(cooldownType: EmailCooldownType) {
+    const key = getCooldownKey(cooldownType);
     const [secondsRemaining, setSecondsRemaining] = useState(0);
 
     const getStoredTimestamp = useCallback((): number | null => {
         if (typeof window === 'undefined') return null;
-        const rawTime = window.localStorage.getItem(
-            VERIFICATION_EMAIL_COOLDOWN_KEY,
-        );
+        const rawTime = window.localStorage.getItem(key);
         if (!rawTime) return null;
         const parsed = Number(rawTime);
         return Number.isFinite(parsed) ? parsed : null;
-    }, []);
+    }, [key]);
 
     useEffect(() => {
         function tick() {
@@ -33,12 +37,9 @@ export function useResendCooldown() {
     }, [getStoredTimestamp]);
 
     const startCooldown = useCallback(() => {
-        window.localStorage.setItem(
-            VERIFICATION_EMAIL_COOLDOWN_KEY,
-            String(Date.now()),
-        );
+        window.localStorage.setItem(key, String(Date.now()));
         setSecondsRemaining(COOLDOWN_SECONDS);
-    }, []);
+    }, [key]);
 
     return {
         secondsRemaining,
@@ -47,7 +48,9 @@ export function useResendCooldown() {
     };
 }
 
-export function clearVerificationEmailCooldown() {
+export function clearSendEmailCooldown() {
     if (typeof window === 'undefined') return;
-    window.localStorage.removeItem(VERIFICATION_EMAIL_COOLDOWN_KEY);
+    EMAIL_TYPES.forEach(type => {
+        window.localStorage.removeItem(getCooldownKey(type));
+    });
 }
