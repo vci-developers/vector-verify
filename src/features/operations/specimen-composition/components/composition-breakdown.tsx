@@ -12,6 +12,7 @@ interface CompositionBreakdownProps {
     }[];
     totalSpecimenCount: number;
     specimenChartConfig: ChartConfig;
+    highlightedSpecimenClass?: string;
     className?: string;
 }
 
@@ -20,6 +21,7 @@ export default function CompositionBreakdown({
     specimenCountsByClass,
     totalSpecimenCount,
     specimenChartConfig,
+    highlightedSpecimenClass,
     className,
 }: CompositionBreakdownProps) {
     const t = useTranslations('OperationsSpecimenComposition');
@@ -29,7 +31,14 @@ export default function CompositionBreakdown({
         <div className={cn('grid min-w-45 gap-1.5 text-xs', className)}>
             {heading && <div className="font-medium">{heading}</div>}
             {specimenCountsByClass.map(({ specimenClass, specimenCount }) => (
-                <div key={specimenClass} className="flex items-center gap-2">
+                <div
+                    key={specimenClass}
+                    className={cn(
+                        '-mx-1 flex items-center gap-2 rounded-sm px-1 transition-colors',
+                        specimenClass === highlightedSpecimenClass &&
+                            'bg-muted',
+                    )}
+                >
                     <div
                         className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
                         style={{

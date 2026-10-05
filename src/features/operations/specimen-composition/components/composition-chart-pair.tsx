@@ -9,16 +9,8 @@ import {
     type ChartConfig,
 } from '@/components/ui/chart';
 import CompositionBreakdown from '@/features/operations/specimen-composition/components/composition-breakdown';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Label,
-    Pie,
-    PieChart,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import CompositionDonut from '@/features/operations/specimen-composition/components/composition-donut';
+import { Bar, BarChart, CartesianGrid, Label, XAxis, YAxis } from 'recharts';
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
@@ -103,6 +95,7 @@ export default function CompositionChartPair({
     const chartLegend = (
         <ChartLegend
             wrapperStyle={{ paddingTop: '1rem' }}
+            itemSorter={null}
             content={
                 <ChartLegendContent className="text-muted-foreground flex-wrap" />
             }
@@ -119,103 +112,13 @@ export default function CompositionChartPair({
                     <EmptyBanner message={t('noSpecimenData')} />
                 ) : (
                     <div className="flex flex-col items-center gap-6 lg:flex-row">
-                        <div className="flex w-62.5 shrink-0 flex-col gap-4">
-                            <div className="h-62.5 w-62.5">
-                                {isLoading || isError ? (
-                                    <Skeleton
-                                        className="h-full w-full rounded-full"
-                                        variant={
-                                            isError ? 'destructive' : 'default'
-                                        }
-                                    />
-                                ) : (
-                                    <ChartContainer
-                                        config={specimenChartConfig}
-                                        className="h-full w-full"
-                                    >
-                                        <PieChart>
-                                            <Pie
-                                                data={specimenCountsByClass.map(
-                                                    ({
-                                                        specimenClass,
-                                                        specimenCount,
-                                                    }) => ({
-                                                        specimenClass,
-                                                        specimenCount,
-                                                        fill: specimenChartConfig[
-                                                            specimenClass
-                                                        ]?.color,
-                                                    }),
-                                                )}
-                                                nameKey="specimenClass"
-                                                dataKey="specimenCount"
-                                                innerRadius={60}
-                                                outerRadius={80}
-                                                strokeWidth={5}
-                                            >
-                                                <Label
-                                                    content={({ viewBox }) => {
-                                                        if (
-                                                            viewBox &&
-                                                            'cx' in viewBox &&
-                                                            'cy' in viewBox
-                                                        ) {
-                                                            return (
-                                                                <text
-                                                                    x={
-                                                                        viewBox.cx
-                                                                    }
-                                                                    y={
-                                                                        viewBox.cy
-                                                                    }
-                                                                    textAnchor="middle"
-                                                                    dominantBaseline="middle"
-                                                                >
-                                                                    <tspan
-                                                                        x={
-                                                                            viewBox.cx
-                                                                        }
-                                                                        y={
-                                                                            viewBox.cy
-                                                                        }
-                                                                        className="fill-foreground text-3xl font-bold"
-                                                                    >
-                                                                        {totalSpecimenCount.toLocaleString()}
-                                                                    </tspan>
-                                                                    <tspan
-                                                                        x={
-                                                                            viewBox.cx
-                                                                        }
-                                                                        y={
-                                                                            (viewBox.cy ||
-                                                                                0) +
-                                                                            24
-                                                                        }
-                                                                        className="fill-muted-foreground"
-                                                                    >
-                                                                        Specimens
-                                                                    </tspan>
-                                                                </text>
-                                                            );
-                                                        }
-                                                    }}
-                                                />
-                                            </Pie>
-                                        </PieChart>
-                                    </ChartContainer>
-                                )}
-                            </div>
-                            {!isLoading && !isError && (
-                                <CompositionBreakdown
-                                    specimenCountsByClass={
-                                        specimenCountsByClass
-                                    }
-                                    totalSpecimenCount={totalSpecimenCount}
-                                    specimenChartConfig={specimenChartConfig}
-                                    className="text-sm"
-                                />
-                            )}
-                        </div>
+                        <CompositionDonut
+                            specimenCountsByClass={specimenCountsByClass}
+                            totalSpecimenCount={totalSpecimenCount}
+                            specimenChartConfig={specimenChartConfig}
+                            isLoading={isLoading}
+                            isError={isError}
+                        />
                         <div className="h-72 w-full min-w-0 flex-1">
                             {isLoading || isError ? (
                                 <Skeleton

@@ -134,6 +134,8 @@
         "searchSpecies": "Search species...",
         "noSpeciesFound": "No species found.",
         "noSpecimenData": "No specimen data for the selected filters.",
+        "specimens": "Specimens",
+        "specimenCountOfTotal": "{count} of {total}",
         "total": "Total"
     },
     "OperationsAIPerformance": {
