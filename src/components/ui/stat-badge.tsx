@@ -1,7 +1,6 @@
 import {
     Tooltip,
     TooltipContent,
-    TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
@@ -22,14 +21,12 @@ export default function StatBadge({
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
                 {label}
                 {description && (
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Info className="h-3 w-3 cursor-default" />
-                            </TooltipTrigger>
-                            <TooltipContent>{description}</TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 cursor-default" />
+                        </TooltipTrigger>
+                        <TooltipContent>{description}</TooltipContent>
+                    </Tooltip>
                 )}
             </div>
             <p className="text-lg leading-tight font-bold">{value}</p>
