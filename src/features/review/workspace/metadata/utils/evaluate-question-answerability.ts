@@ -1,6 +1,9 @@
+import { LLIN_BRAND_OPTIONS } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
 import {
+    LLIN_BRAND_ROW_ID,
+    LLIN_TYPE_ROW_ID,
     NOT_APPLICABLE,
     SURVEILLANCE_FIELD_DEPENDENCIES,
     formatDisplayValue,
@@ -73,6 +76,35 @@ export function evaluateDisabledRowIds(
     }
 
     return disabledRowIds;
+}
+
+export function evaluateRowOptionsById(
+    sections: MetadataSection[],
+    resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
+): Map<string, string[]> {
+    const optionsByRowId = new Map<string, string[]>();
+    const allRows = sections.flatMap(section => section.rows);
+
+    const llinTypeRow = allRows.find(row => row.id === LLIN_TYPE_ROW_ID);
+    const llinTypeValue = llinTypeRow
+        ? resolveRowEffectiveValue(
+              llinTypeRow,
+              resolutionsByMetadataRowId,
+              disabledRowIds,
+          )
+        : null;
+
+    if (llinTypeValue) {
+        const llinBrandOptions = LLIN_BRAND_OPTIONS.filter(
+            brand => brand.type === llinTypeValue,
+        ).map(brand => brand.label);
+        if (llinBrandOptions.length > 0) {
+            optionsByRowId.set(LLIN_BRAND_ROW_ID, llinBrandOptions);
+        }
+    }
+
+    return optionsByRowId;
 }
 
 function resolveRowEffectiveValue(

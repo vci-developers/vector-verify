@@ -3,8 +3,16 @@ import type {
     FormQuestion,
     FormQuestionType,
 } from '@/api/form-question/validation/form-question-schema';
-import type { Session } from '@/api/session/validation/session-schema';
-import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import {
+    collectionMethodSchema,
+    collectorTitleSchema,
+    type Session,
+} from '@/api/session/validation/session-schema';
+import {
+    llinBrandSchema,
+    llinTypeSchema,
+    type SurveillanceForm,
+} from '@/api/surveillance-form/validation/surveillance-form-schema';
 
 export const NOT_APPLICABLE = 'N/A';
 export const BOOLEAN_TRUE_DISPLAY = 'Yes';
@@ -15,17 +23,20 @@ const SESSION_FIELDS = [
     {
         fieldName: 'collectorTitle',
         label: 'Collector Title',
-        fieldType: 'text',
+        fieldType: 'select',
+        options: collectorTitleSchema.options,
     },
     {
         fieldName: 'collectionMethod',
         label: 'Collection Method',
-        fieldType: 'text',
+        fieldType: 'select',
+        options: collectionMethodSchema.options,
     },
 ] as const satisfies readonly {
     fieldName: keyof Session;
     label: string;
     fieldType: FormQuestionType;
+    options?: readonly string[];
 }[];
 
 const SURVEILLANCE_FORM_FIELDS = [
@@ -49,8 +60,18 @@ const SURVEILLANCE_FORM_FIELDS = [
         label: 'LLINs Available',
         fieldType: 'number',
     },
-    { fieldName: 'llinType', label: 'LLIN Type', fieldType: 'text' },
-    { fieldName: 'llinBrand', label: 'LLIN Brand', fieldType: 'text' },
+    {
+        fieldName: 'llinType',
+        label: 'LLIN Type',
+        fieldType: 'select',
+        options: llinTypeSchema.options,
+    },
+    {
+        fieldName: 'llinBrand',
+        label: 'LLIN Brand',
+        fieldType: 'select',
+        options: llinBrandSchema.options,
+    },
     {
         fieldName: 'numPeopleSleptUnderLlin',
         label: 'People Under LLIN',
@@ -60,6 +81,7 @@ const SURVEILLANCE_FORM_FIELDS = [
     fieldName: keyof SurveillanceForm;
     label: string;
     fieldType: FormQuestionType;
+    options?: readonly string[];
 }[];
 
 export const SURVEILLANCE_FIELD_DEPENDENCIES: Record<
@@ -85,6 +107,9 @@ const SURVEILLANCE_REQUIRED_ROW_IDS = new Set(
         dependency => dependency.dependentRowIds,
     ),
 );
+
+export const LLIN_TYPE_ROW_ID = 'surveillanceForm.llinType';
+export const LLIN_BRAND_ROW_ID = 'surveillanceForm.llinBrand';
 
 export interface MetadataRow {
     id: string;
@@ -138,11 +163,9 @@ export function buildSurveillanceSection(
         ...surveillanceFormBySessionId.values(),
     ].some(surveillanceForm => surveillanceForm !== null);
     if (hasAnySurveillanceForm) {
-        for (const {
-            fieldName,
-            label,
-            fieldType,
-        } of SURVEILLANCE_FORM_FIELDS) {
+        for (const field of SURVEILLANCE_FORM_FIELDS) {
+            const { fieldName, label, fieldType } = field;
+            const options = 'options' in field ? [...field.options] : null;
             rows.push(
                 buildMetadataRow(
                     {
@@ -150,6 +173,7 @@ export function buildSurveillanceSection(
                         fieldName,
                         label,
                         fieldType,
+                        options,
                         required: SURVEILLANCE_REQUIRED_ROW_IDS.has(
                             `surveillanceForm.${fieldName}`,
                         ),
@@ -200,17 +224,19 @@ export function buildDynamicSessionSection(
 }
 
 function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
-    return SESSION_FIELDS.map(({ fieldName, label, fieldType }) =>
-        buildMetadataRow(
-            { entity: 'session', fieldName, label, fieldType },
+    return SESSION_FIELDS.map(field => {
+        const { fieldName, label, fieldType } = field;
+        const options = 'options' in field ? [...field.options] : null;
+        return buildMetadataRow(
+            { entity: 'session', fieldName, label, fieldType, options },
             new Map(
                 sessions.map(session => [
                     session.sessionId,
                     session[fieldName],
                 ]),
             ),
-        ),
-    );
+        );
+    });
 }
 
 export function buildMetadataRow(

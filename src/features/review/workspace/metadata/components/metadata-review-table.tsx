@@ -14,7 +14,8 @@ import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { CircleAlert, CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
+import { evaluateRowOptionsById } from '../utils/evaluate-question-answerability';
 import {
     formatDisplayValue,
     NOT_APPLICABLE,
@@ -49,6 +50,16 @@ export default function MetadataReviewTable({
     const t = useTranslations('ReviewMetadata');
 
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
+
+    const filteredOptionsByRowId = useMemo(
+        () =>
+            evaluateRowOptionsById(
+                sections,
+                resolutionsByMetadataRowId,
+                disabledRowIds,
+            ),
+        [sections, resolutionsByMetadataRowId, disabledRowIds],
+    );
 
     const showSectionHeaders = sections.length > 1;
     const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
@@ -240,7 +251,9 @@ export default function MetadataReviewTable({
                                                     fieldType={row.fieldType}
                                                     options={resolutionOptions}
                                                     questionOptions={
-                                                        row.options
+                                                        filteredOptionsByRowId.get(
+                                                            row.id,
+                                                        ) ?? row.options
                                                     }
                                                     value={controlValue}
                                                     onValueChange={value =>

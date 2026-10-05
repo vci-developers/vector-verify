@@ -275,6 +275,40 @@ submitted before certifying. UI treats this as a warning (amber), never an
 error, and the notice states that follow-up action. _Avoid_: error, blocked
 session
 
+**Metadata Review Field Options**: The fixed value list a **Metadata Conflict**
+row's resolution control is constrained to, for the four Session/Surveillance
+Form fields whose real-world values form a small, closed set even though their
+API/DB type is unconstrained free text (`z.string()`/`varchar`): **Collector
+Title** and **Collection Method** (`SESSION_FIELDS`, every program — these live
+on the `Session` object itself, not inside either form system, so they are not
+Form-Mode-dependent) and **LLIN Type** and **LLIN Brand**
+(`SURVEILLANCE_FORM_FIELDS`, Surveillance Form programs only — Uganda today, but
+gated implicitly by Form Mode rather than an explicit country check, since these
+fields only exist inside the Surveillance Form at all). Each list is a hardcoded
+`z.enum([...])` living beside its field's own schema (`session-schema.ts`,
+`surveillance-form-schema.ts`) — mirroring `irsInsecticideSchema`/`genusSchema`
+— **not** wired into `sessionSchema`/`surveillanceFormSchema` themselves, since
+those must keep accepting whatever free-text a session actually stored (legacy
+or malformed values like a bare `"fgh"` are real, observed data). LLIN Type's 5
+values and LLIN Brand's 21 values come from the backend's own
+`dhis2-mapping.service.ts`, which mirrors Uganda's official DHIS2 "MAL 001"
+malaria surveillance form field-by-field (`MAL 001-ER17`/`ER28`) — the backend
+already silently fails to map any stored value outside this list, so
+constraining the dropdown to it is a correctness fix, not just a UI change.
+Collector Title's 3 values and Collection Method's 3 values have no such backend
+mapping to anchor them; they were confirmed instead by inspecting distinct
+values across live test-program sessions. Unlike LLIN Type/Brand (which include
+`Other` as an escape hatch, matching the MAL 001 form), Collector
+Title/Collection Method have no `Other` value: a row whose current value isn't
+one of the 3 valid options is a resolvable conflict a VCO must correct to a
+valid value, not a case to be preserved. When a row's current/conflicting value
+doesn't match any option, the resolution control (a `Select`) simply shows its
+placeholder rather than the stale value — the per-session table cells above it
+still show the actual stored value, so nothing is hidden, only unselectable.
+_Avoid_: making these fields free text again to "preserve" out-of-list legacy
+values (defeats the point); adding a backend-configurable options list for these
+four fields (rejected — see ADR-0008).
+
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
 sign-off
