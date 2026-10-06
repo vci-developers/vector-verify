@@ -146,6 +146,9 @@ export default function SpecimenImageCarousel({
                       species: null,
                       sex: null,
                       abdomenStatus: null,
+                      appSpecies: null,
+                      appSex: null,
+                      appAbdomenStatus: null,
                   }
                 : null);
 
