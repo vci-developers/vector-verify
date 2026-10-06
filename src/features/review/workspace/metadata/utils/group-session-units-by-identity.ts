@@ -14,10 +14,14 @@ export function buildUnitIdentitySections(
     currentFormQuestions: FormQuestion[],
     formAnswersBySessionId: Map<number, FormAnswer[]>,
 ): MetadataSection[] {
-    const nonIdentityQuestions = flattenQuestions(currentFormQuestions).filter(
-        question =>
-            question.answerScope === 'SESSION_UNIT' &&
-            !question.isUnitIdentityComponent,
+    const unitScopedQuestions = flattenQuestions(currentFormQuestions).filter(
+        question => question.answerScope === 'SESSION_UNIT',
+    );
+    const identityQuestions = unitScopedQuestions.filter(
+        question => question.isUnitIdentityComponent,
+    );
+    const nonIdentityQuestions = unitScopedQuestions.filter(
+        question => !question.isUnitIdentityComponent,
     );
     if (nonIdentityQuestions.length === 0) return [];
 
@@ -42,24 +46,16 @@ export function buildUnitIdentitySections(
             const valueByQuestionId = new Map<number, unknown>(
                 unitAnswers.map(answer => [answer.questionId, answer.value]),
             );
-            const identityAnswers = unitAnswers.filter(
-                answer =>
-                    answer.answerScope === 'SESSION_UNIT' &&
-                    answer.isUnitIdentityComponent,
-            );
-            const sortedIdentityAnswers = [...identityAnswers].sort((a, b) =>
-                (a.label ?? '').localeCompare(b.label ?? ''),
-            );
-            const identityValues = sortedIdentityAnswers.map(answer =>
+            const identityValues = identityQuestions.map(question =>
                 formatDisplayValue(
-                    answer.value,
-                    answer.type === 'boolean' ? 'boolean' : undefined,
+                    valueByQuestionId.get(question.id) ?? null,
+                    question.type,
                 ),
             );
             const key =
-                sortedIdentityAnswers.length > 0
+                identityQuestions.length > 0
                     ? JSON.stringify([
-                          ...sortedIdentityAnswers.map(answer => answer.label),
+                          ...identityQuestions.map(question => question.id),
                           ...identityValues,
                       ])
                     : `unit:${session.sessionId}:${sessionUnitId}`;

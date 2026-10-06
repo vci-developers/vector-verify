@@ -1,4 +1,3 @@
-import { formQuestionScopeSchema } from '@/api/form-question/validation/form-question-schema';
 import { sessionUnitSchema } from '@/api/session-unit/validation/session-unit-schema';
 import { z } from 'zod';
 
@@ -13,8 +12,6 @@ export const formAnswerSchema = z.object({
     label: z.string().nullable(),
     type: z.string().nullable(),
     required: z.boolean().nullable(),
-    answerScope: formQuestionScopeSchema.nullable(),
-    isUnitIdentityComponent: z.boolean().nullable(),
     options: z.array(z.unknown()).nullable(),
     value: z.string().nullable(),
     dataType: z.string(),
