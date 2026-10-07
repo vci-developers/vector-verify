@@ -2,6 +2,7 @@
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
+import { networkErrorMessage } from '@/lib/network/network-error';
 import {
     BookOpen,
     ChevronUp,
@@ -100,7 +101,10 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const { resolvedTheme, setTheme } = useTheme();
     const {
         data: getUserPermissionsResult,
-        isPending: isGetUserPermissionsPending,
+        error: getUserPermissionsError,
+        isError: isGetUserPermissionsError,
+        isFetching: isGetUserPermissionsFetching,
+        refetch: refetchUserPermissions,
     } = useGetUserPermissions();
 
     const [isRawDataExportOpen, setIsRawDataExportOpen] = useState(false);
@@ -115,7 +119,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     }
 
     // Loading
-    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
+    if (!getUserPermissionsResult && !isGetUserPermissionsError) {
         return (
             <Sidebar collapsible="icon">
                 <SidebarContent>
@@ -157,8 +161,60 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         );
     }
 
-    if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
+    // Error
+    if (!getUserPermissionsResult || !getUserPermissionsResult.ok) {
+        const permissionsError =
+            getUserPermissionsResult && !getUserPermissionsResult.ok
+                ? getUserPermissionsResult.error
+                : getUserPermissionsError;
+        const errorMessage = permissionsError
+            ? networkErrorMessage(permissionsError)
+            : 'Unable to load navigation. Please try again.';
+
+        return (
+            <Sidebar collapsible="icon">
+                <SidebarContent>
+                    <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
+                        <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
+                            <AvatarImage
+                                src="/assets/auth/images/logo.png"
+                                alt="VectorVerify logo"
+                                className="h-full w-full object-contain"
+                            />
+                        </Avatar>
+                        <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
+                            VectorVerify
+                        </span>
+                    </div>
+                    <SidebarGroup>
+                        <div
+                            role="alert"
+                            className="border-destructive/30 bg-destructive/5 mx-2 rounded-md border p-3 text-sm"
+                        >
+                            <p className="font-medium">
+                                Couldn’t load navigation
+                            </p>
+                            <p className="text-muted-foreground mt-1">
+                                {errorMessage}
+                            </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-3 w-full"
+                                onClick={() => void refetchUserPermissions()}
+                                disabled={isGetUserPermissionsFetching}
+                            >
+                                {isGetUserPermissionsFetching
+                                    ? 'Retrying…'
+                                    : 'Try again'}
+                            </Button>
+                        </div>
+                    </SidebarGroup>
+                </SidebarContent>
+                <SidebarRail />
+            </Sidebar>
+        );
     }
 
     const userPermissions: UserPermissions =
