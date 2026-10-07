@@ -96,6 +96,23 @@ interface AppSidebarProps {
     userProfile: UserProfile;
 }
 
+function AppSidebarBrand() {
+    return (
+        <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
+            <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
+                <AvatarImage
+                    src="/assets/auth/images/logo.png"
+                    alt="VectorVerify logo"
+                    className="h-full w-full object-contain"
+                />
+            </Avatar>
+            <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
+                VectorVerify
+            </span>
+        </div>
+    );
+}
+
 export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
@@ -123,18 +140,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         return (
             <Sidebar collapsible="icon">
                 <SidebarContent>
-                    <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
-                        <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
-                            <AvatarImage
-                                src="/assets/auth/images/logo.png"
-                                alt="VectorVerify logo"
-                                className="h-full w-full object-contain"
-                            />
-                        </Avatar>
-                        <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
-                            VectorVerify
-                        </span>
-                    </div>
+                    <AppSidebarBrand />
                     <SidebarGroup>
                         <SidebarMenu>
                             {Array.from(
@@ -174,18 +180,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         return (
             <Sidebar collapsible="icon">
                 <SidebarContent>
-                    <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
-                        <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
-                            <AvatarImage
-                                src="/assets/auth/images/logo.png"
-                                alt="VectorVerify logo"
-                                className="h-full w-full object-contain"
-                            />
-                        </Avatar>
-                        <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
-                            VectorVerify
-                        </span>
-                    </div>
+                    <AppSidebarBrand />
                     <SidebarGroup>
                         <div
                             role="alert"
@@ -223,18 +218,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     return (
         <Sidebar collapsible="icon">
             <SidebarContent>
-                <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
-                    <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
-                        <AvatarImage
-                            src="/assets/auth/images/logo.png"
-                            alt="VectorVerify logo"
-                            className="h-full w-full object-contain"
-                        />
-                    </Avatar>
-                    <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
-                        VectorVerify
-                    </span>
-                </div>
+                <AppSidebarBrand />
                 <SidebarGroup>
                     <SidebarMenu>
                         {navigation
