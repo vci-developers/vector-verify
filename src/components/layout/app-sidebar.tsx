@@ -89,6 +89,8 @@ const navigation: NavigationItem[] = [
     },
 ];
 
+const SKELETON_TEXT_WIDTHS = ['68%', '82%', '58%', '76%', '91%'] as const;
+
 interface AppSidebarProps {
     userProfile: UserProfile;
 }
@@ -135,7 +137,15 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 { length: navigation.length },
                                 (_, index) => (
                                     <SidebarMenuItem key={index}>
-                                        <SidebarMenuSkeleton showIcon />
+                                        <SidebarMenuSkeleton
+                                            showIcon
+                                            textWidth={
+                                                SKELETON_TEXT_WIDTHS[
+                                                    index %
+                                                        SKELETON_TEXT_WIDTHS.length
+                                                ]
+                                            }
+                                        />
                                     </SidebarMenuItem>
                                 ),
                             )}
