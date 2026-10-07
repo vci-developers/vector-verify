@@ -25,6 +25,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSkeleton,
     SidebarRail,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -111,8 +112,39 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
         setTheme(isDark ? 'light' : 'dark');
     }
 
+    // Loading
     if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
+        return (
+            <Sidebar collapsible="icon">
+                <SidebarContent>
+                    <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
+                        <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
+                            <AvatarImage
+                                src="/assets/auth/images/logo.png"
+                                alt="VectorVerify logo"
+                                className="h-full w-full object-contain"
+                            />
+                        </Avatar>
+                        <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
+                            VectorVerify
+                        </span>
+                    </div>
+                    <SidebarGroup>
+                        <SidebarMenu>
+                            {Array.from(
+                                { length: navigation.length },
+                                (_, index) => (
+                                    <SidebarMenuItem key={index}>
+                                        <SidebarMenuSkeleton showIcon />
+                                    </SidebarMenuItem>
+                                ),
+                            )}
+                        </SidebarMenu>
+                    </SidebarGroup>
+                </SidebarContent>
+                <SidebarRail />
+            </Sidebar>
+        );
     }
 
     if (!getUserPermissionsResult.ok) {
