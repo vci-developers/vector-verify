@@ -26,7 +26,6 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarMenuSkeleton,
     SidebarRail,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -41,6 +40,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
 import LogoutButton from '../auth-session/logout-button';
 import LocaleSwitcher from './locale-switcher';
@@ -96,29 +96,11 @@ interface AppSidebarProps {
     userProfile: UserProfile;
 }
 
-function AppSidebarBrand() {
-    return (
-        <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
-            <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
-                <AvatarImage
-                    src="/assets/auth/images/logo.png"
-                    alt="VectorVerify logo"
-                    className="h-full w-full object-contain"
-                />
-            </Avatar>
-            <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
-                VectorVerify
-            </span>
-        </div>
-    );
-}
-
 export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
     const {
         data: getUserPermissionsResult,
-        error: getUserPermissionsError,
         isError: isGetUserPermissionsError,
         isFetching: isGetUserPermissionsFetching,
         refetch: refetchUserPermissions,
@@ -127,155 +109,126 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const [isRawDataExportOpen, setIsRawDataExportOpen] = useState(false);
     const [isUserAnalyticsOpen, setIsUserAnalyticsOpen] = useState(false);
     const t = useTranslations('UserAnalytics');
+    const tSidebar = useTranslations('Sidebar');
 
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
+    const isPermissionsLoading =
+        !getUserPermissionsResult && !isGetUserPermissionsError;
+    const isPermissionsError =
+        !isPermissionsLoading && !getUserPermissionsResult?.ok;
+    const permissionsErrorMessage =
+        getUserPermissionsResult && !getUserPermissionsResult.ok
+            ? networkErrorMessage(getUserPermissionsResult.error)
+            : tSidebar('loadErrorFallback');
 
     function handleThemeToggle() {
         setTheme(isDark ? 'light' : 'dark');
     }
 
-    // Loading
-    if (!getUserPermissionsResult && !isGetUserPermissionsError) {
-        return (
-            <Sidebar collapsible="icon">
-                <SidebarContent>
-                    <AppSidebarBrand />
-                    <SidebarGroup>
+    return (
+        <Sidebar collapsible="icon">
+            <SidebarContent>
+                <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2">
+                    <Avatar className="bg-muted h-14 w-14 transition-[width,height] duration-300 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-8">
+                        <AvatarImage
+                            src="/assets/auth/images/logo.png"
+                            alt="VectorVerify logo"
+                            className="h-full w-full object-contain"
+                        />
+                    </Avatar>
+                    <span className="text-muted-foreground text-lg font-semibold group-data-[state=collapsed]:hidden">
+                        VectorVerify
+                    </span>
+                </div>
+                <SidebarGroup>
+                    {isPermissionsLoading ? (
                         <SidebarMenu>
                             {Array.from(
                                 { length: navigation.length },
                                 (_, index) => (
                                     <SidebarMenuItem key={index}>
-                                        <SidebarMenuSkeleton
-                                            showIcon
-                                            textWidth={
-                                                SKELETON_TEXT_WIDTHS[
-                                                    index %
-                                                        SKELETON_TEXT_WIDTHS.length
-                                                ]
-                                            }
-                                        />
+                                        <div className="flex h-8 items-center gap-2 rounded-md px-2">
+                                            <Skeleton className="size-4 rounded-md" />
+                                            <Skeleton
+                                                className="h-4"
+                                                style={{
+                                                    width: SKELETON_TEXT_WIDTHS[
+                                                        index
+                                                    ],
+                                                }}
+                                            />
+                                        </div>
                                     </SidebarMenuItem>
                                 ),
                             )}
                         </SidebarMenu>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
-        );
-    }
-
-    // Error
-    if (!getUserPermissionsResult || !getUserPermissionsResult.ok) {
-        const permissionsError =
-            getUserPermissionsResult && !getUserPermissionsResult.ok
-                ? getUserPermissionsResult.error
-                : getUserPermissionsError;
-        const errorMessage = permissionsError
-            ? networkErrorMessage(permissionsError)
-            : 'Unable to load navigation. Please try again.';
-
-        return (
-            <Sidebar collapsible="icon">
-                <SidebarContent>
-                    <AppSidebarBrand />
-                    <SidebarGroup>
+                    ) : isPermissionsError ? (
                         <div
                             role="alert"
                             className="border-destructive/30 bg-destructive/5 mx-2 rounded-md border p-3 text-sm"
                         >
                             <p className="font-medium">
-                                Couldn’t load navigation
+                                {tSidebar('loadErrorTitle')}
                             </p>
                             <p className="text-muted-foreground mt-1">
-                                {errorMessage}
+                                {permissionsErrorMessage}
                             </p>
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
                                 className="mt-3 w-full"
-                                onClick={() => void refetchUserPermissions()}
+                                onClick={() => refetchUserPermissions()}
                                 disabled={isGetUserPermissionsFetching}
                             >
                                 {isGetUserPermissionsFetching
-                                    ? 'Retrying…'
-                                    : 'Try again'}
+                                    ? tSidebar('retrying')
+                                    : tSidebar('tryAgain')}
                             </Button>
                         </div>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
-        );
-    }
-
-    const userPermissions: UserPermissions =
-        getUserPermissionsResult.data.permissions;
-
-    return (
-        <Sidebar collapsible="icon">
-            <SidebarContent>
-                <AppSidebarBrand />
-                <SidebarGroup>
-                    <SidebarMenu>
-                        {navigation
-                            .filter(item =>
-                                item.canAccess
-                                    ? item.canAccess(userPermissions)
-                                    : true,
-                            )
-                            .map(item => (
-                                <SidebarMenuItem key={item.href}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={
-                                            item.href === '/'
-                                                ? pathname === '/'
-                                                : pathname.startsWith(item.href)
-                                        }
-                                    >
-                                        <Link href={item.href}>
-                                            <item.icon />
-                                            <span>{item.name}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                    </SidebarMenu>
+                    ) : (
+                        getUserPermissionsResult?.ok && (
+                            <SidebarMenu>
+                                {navigation
+                                    .filter(item =>
+                                        item.canAccess(
+                                            getUserPermissionsResult.data
+                                                .permissions,
+                                        ),
+                                    )
+                                    .map(item => (
+                                        <SidebarMenuItem key={item.href}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                isActive={
+                                                    item.href === '/'
+                                                        ? pathname === '/'
+                                                        : pathname.startsWith(
+                                                              item.href,
+                                                          )
+                                                }
+                                            >
+                                                <Link href={item.href}>
+                                                    <item.icon />
+                                                    <span>{item.name}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                            </SidebarMenu>
+                        )
+                    )}
                 </SidebarGroup>
 
-                <div className="mt-auto p-3">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                className="hover:bg-accent/60 h-auto w-full justify-start gap-3 px-2 py-2 group-data-[state=collapsed]:justify-center"
-                            >
-                                <Avatar className="border-primary/40 h-9 w-9 border">
-                                    <AvatarFallback className="font-semibold">
-                                        {userProfile.email
-                                            .charAt(0)
-                                            .toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-
-                                <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
-                                    <div className="truncate text-sm font-medium">
-                                        {userProfile.name ??
-                                            userProfile.email.split('@')[0]}
-                                    </div>
-                                </div>
-
-                                <ChevronUp className="text-muted-foreground h-4 w-4 group-data-[state=collapsed]:hidden" />
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent align="end" className="w-64">
-                            <DropdownMenuLabel className="p-0 font-normal">
-                                <div className="flex items-start gap-2 px-2 py-2">
+                {getUserPermissionsResult?.ok && (
+                    <div className="mt-auto p-3">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="hover:bg-accent/60 h-auto w-full justify-start gap-3 px-2 py-2 group-data-[state=collapsed]:justify-center"
+                                >
                                     <Avatar className="border-primary/40 h-9 w-9 border">
                                         <AvatarFallback className="font-semibold">
                                             {userProfile.email
@@ -283,89 +236,118 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                                 .toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="flex min-w-0 flex-col gap-1">
-                                        <span className="truncate text-sm leading-none font-medium">
+
+                                    <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
+                                        <div className="truncate text-sm font-medium">
                                             {userProfile.name ??
                                                 userProfile.email.split('@')[0]}
-                                        </span>
-                                        <span className="text-muted-foreground truncate text-xs leading-none">
-                                            {userProfile.email}
-                                        </span>
-                                        {userPermissions.devMode && (
-                                            <Badge
-                                                variant="secondary"
-                                                className="mt-1"
-                                            >
-                                                <Code2 />
-                                                Developer Status
-                                            </Badge>
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
-                            </DropdownMenuLabel>
 
-                            <DropdownMenuSeparator />
+                                    <ChevronUp className="text-muted-foreground h-4 w-4 group-data-[state=collapsed]:hidden" />
+                                </Button>
+                            </DropdownMenuTrigger>
 
-                            <DropdownMenuGroup>
-                                <DropdownMenuLabel className="text-muted-foreground py-1 text-xs font-normal">
-                                    Preferences
+                            <DropdownMenuContent align="end" className="w-64">
+                                <DropdownMenuLabel className="p-0 font-normal">
+                                    <div className="flex items-start gap-2 px-2 py-2">
+                                        <Avatar className="border-primary/40 h-9 w-9 border">
+                                            <AvatarFallback className="font-semibold">
+                                                {userProfile.email
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex min-w-0 flex-col gap-1">
+                                            <span className="truncate text-sm leading-none font-medium">
+                                                {userProfile.name ??
+                                                    userProfile.email.split(
+                                                        '@',
+                                                    )[0]}
+                                            </span>
+                                            <span className="text-muted-foreground truncate text-xs leading-none">
+                                                {userProfile.email}
+                                            </span>
+                                            {getUserPermissionsResult.data
+                                                .permissions.devMode && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="mt-1"
+                                                >
+                                                    <Code2 />
+                                                    Developer Status
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuItem onClick={handleThemeToggle}>
-                                    <ThemeIcon className="h-4 w-4" />
-                                    {isDark ? 'Light mode' : 'Dark mode'}
+
+                                <DropdownMenuSeparator />
+
+                                <DropdownMenuGroup>
+                                    <DropdownMenuLabel className="text-muted-foreground py-1 text-xs font-normal">
+                                        Preferences
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                        onClick={handleThemeToggle}
+                                    >
+                                        <ThemeIcon className="h-4 w-4" />
+                                        {isDark ? 'Light mode' : 'Dark mode'}
+                                    </DropdownMenuItem>
+                                    <LocaleSwitcher />
+                                </DropdownMenuGroup>
+
+                                {getUserPermissionsResult.data.permissions
+                                    .devMode && (
+                                    <Fragment>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onSelect={() =>
+                                                setIsRawDataExportOpen(true)
+                                            }
+                                        >
+                                            <Code2 className="h-4 w-4" />
+                                            Raw Data Export
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onSelect={() =>
+                                                setIsUserAnalyticsOpen(true)
+                                            }
+                                        >
+                                            <LineChart className="h-4 w-4" />
+                                            {t('menuItem')}
+                                        </DropdownMenuItem>
+                                    </Fragment>
+                                )}
+
+                                <DropdownMenuSeparator />
+
+                                <DropdownMenuItem asChild>
+                                    <LogoutButton />
                                 </DropdownMenuItem>
-                                <LocaleSwitcher />
-                            </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                            {userPermissions.devMode && (
-                                <Fragment>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onSelect={() =>
-                                            setIsRawDataExportOpen(true)
-                                        }
-                                    >
-                                        <Code2 className="h-4 w-4" />
-                                        Raw Data Export
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onSelect={() =>
-                                            setIsUserAnalyticsOpen(true)
-                                        }
-                                    >
-                                        <LineChart className="h-4 w-4" />
-                                        {t('menuItem')}
-                                    </DropdownMenuItem>
-                                </Fragment>
-                            )}
-
-                            <DropdownMenuSeparator />
-
-                            <DropdownMenuItem asChild>
-                                <LogoutButton />
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {userPermissions.devMode && (
-                        <Fragment>
-                            <RawDataExportDialog
-                                open={isRawDataExportOpen}
-                                onOpenChange={setIsRawDataExportOpen}
-                                programId={
-                                    getUserPermissionsResult.data.programId
-                                }
-                            />
-                            <UserAnalyticsDialog
-                                open={isUserAnalyticsOpen}
-                                onOpenChange={setIsUserAnalyticsOpen}
-                                programId={
-                                    getUserPermissionsResult.data.programId
-                                }
-                            />
-                        </Fragment>
-                    )}
-                </div>
+                        {getUserPermissionsResult.data.permissions.devMode && (
+                            <Fragment>
+                                <RawDataExportDialog
+                                    open={isRawDataExportOpen}
+                                    onOpenChange={setIsRawDataExportOpen}
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
+                                />
+                                <UserAnalyticsDialog
+                                    open={isUserAnalyticsOpen}
+                                    onOpenChange={setIsUserAnalyticsOpen}
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
+                                />
+                            </Fragment>
+                        )}
+                    </div>
+                )}
             </SidebarContent>
 
             <SidebarRail />

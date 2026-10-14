@@ -10,6 +10,12 @@
         "noResults": "No results.",
         "language": "Language"
     },
+    "Sidebar": {
+        "loadErrorTitle": "Couldn't load navigation",
+        "loadErrorFallback": "Unable to load navigation. Please try again.",
+        "retrying": "Retrying…",
+        "tryAgain": "Try again"
+    },
     "Navigation": {
         "dashboard": "Dashboard",
         "review": "Review",

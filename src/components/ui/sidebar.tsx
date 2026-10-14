@@ -621,13 +621,11 @@ function SidebarMenuBadge({
 function SidebarMenuSkeleton({
     className,
     showIcon = false,
-    textWidth = '70%',
     ...props
 }: React.ComponentProps<'div'> & {
     showIcon?: boolean;
-    textWidth?: string;
 }) {
-    const width = textWidth;
+    const width = '70%';
 
     return (
         <div
