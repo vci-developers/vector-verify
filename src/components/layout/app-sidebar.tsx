@@ -154,7 +154,8 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                                 className="h-4"
                                                 style={{
                                                     width: SKELETON_TEXT_WIDTHS[
-                                                        index
+                                                        index %
+                                                            SKELETON_TEXT_WIDTHS.length
                                                     ],
                                                 }}
                                             />
