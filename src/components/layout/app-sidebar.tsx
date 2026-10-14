@@ -111,6 +111,10 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const t = useTranslations('UserAnalytics');
     const tSidebar = useTranslations('Sidebar');
 
+    const permissionsData = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data
+        : undefined;
+    const userPermissions = permissionsData?.permissions;
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
     const isPermissionsLoading =
@@ -189,14 +193,11 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                             </Button>
                         </div>
                     ) : (
-                        getUserPermissionsResult?.ok && (
+                        userPermissions && (
                             <SidebarMenu>
                                 {navigation
                                     .filter(item =>
-                                        item.canAccess(
-                                            getUserPermissionsResult.data
-                                                .permissions,
-                                        ),
+                                        item.canAccess(userPermissions),
                                     )
                                     .map(item => (
                                         <SidebarMenuItem key={item.href}>
@@ -266,17 +267,15 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                         <span className="text-muted-foreground truncate text-xs leading-none">
                                             {userProfile.email}
                                         </span>
-                                        {getUserPermissionsResult?.ok &&
-                                            getUserPermissionsResult.data
-                                                .permissions.devMode && (
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="mt-1"
-                                                >
-                                                    <Code2 />
-                                                    Developer Status
-                                                </Badge>
-                                            )}
+                                        {userPermissions?.devMode && (
+                                            <Badge
+                                                variant="secondary"
+                                                className="mt-1"
+                                            >
+                                                <Code2 />
+                                                Developer Status
+                                            </Badge>
+                                        )}
                                     </div>
                                 </div>
                             </DropdownMenuLabel>
@@ -294,29 +293,27 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 <LocaleSwitcher />
                             </DropdownMenuGroup>
 
-                            {getUserPermissionsResult?.ok &&
-                                getUserPermissionsResult.data.permissions
-                                    .devMode && (
-                                    <Fragment>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            onSelect={() =>
-                                                setIsRawDataExportOpen(true)
-                                            }
-                                        >
-                                            <Code2 className="h-4 w-4" />
-                                            Raw Data Export
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onSelect={() =>
-                                                setIsUserAnalyticsOpen(true)
-                                            }
-                                        >
-                                            <LineChart className="h-4 w-4" />
-                                            {t('menuItem')}
-                                        </DropdownMenuItem>
-                                    </Fragment>
-                                )}
+                            {userPermissions?.devMode && (
+                                <Fragment>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onSelect={() =>
+                                            setIsRawDataExportOpen(true)
+                                        }
+                                    >
+                                        <Code2 className="h-4 w-4" />
+                                        Raw Data Export
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onSelect={() =>
+                                            setIsUserAnalyticsOpen(true)
+                                        }
+                                    >
+                                        <LineChart className="h-4 w-4" />
+                                        {t('menuItem')}
+                                    </DropdownMenuItem>
+                                </Fragment>
+                            )}
 
                             <DropdownMenuSeparator />
 
@@ -326,25 +323,20 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {getUserPermissionsResult?.ok &&
-                        getUserPermissionsResult.data.permissions.devMode && (
-                            <Fragment>
-                                <RawDataExportDialog
-                                    open={isRawDataExportOpen}
-                                    onOpenChange={setIsRawDataExportOpen}
-                                    programId={
-                                        getUserPermissionsResult.data.programId
-                                    }
-                                />
-                                <UserAnalyticsDialog
-                                    open={isUserAnalyticsOpen}
-                                    onOpenChange={setIsUserAnalyticsOpen}
-                                    programId={
-                                        getUserPermissionsResult.data.programId
-                                    }
-                                />
-                            </Fragment>
-                        )}
+                    {permissionsData?.permissions.devMode && (
+                        <Fragment>
+                            <RawDataExportDialog
+                                open={isRawDataExportOpen}
+                                onOpenChange={setIsRawDataExportOpen}
+                                programId={permissionsData.programId}
+                            />
+                            <UserAnalyticsDialog
+                                open={isUserAnalyticsOpen}
+                                onOpenChange={setIsUserAnalyticsOpen}
+                                programId={permissionsData.programId}
+                            />
+                        </Fragment>
+                    )}
                 </div>
             </SidebarContent>
 
