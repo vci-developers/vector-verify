@@ -221,14 +221,35 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                     )}
                 </SidebarGroup>
 
-                {getUserPermissionsResult?.ok && (
-                    <div className="mt-auto p-3">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="hover:bg-accent/60 h-auto w-full justify-start gap-3 px-2 py-2 group-data-[state=collapsed]:justify-center"
-                                >
+                <div className="mt-auto p-3">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="hover:bg-accent/60 h-auto w-full justify-start gap-3 px-2 py-2 group-data-[state=collapsed]:justify-center"
+                            >
+                                <Avatar className="border-primary/40 h-9 w-9 border">
+                                    <AvatarFallback className="font-semibold">
+                                        {userProfile.email
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+
+                                <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
+                                    <div className="truncate text-sm font-medium">
+                                        {userProfile.name ??
+                                            userProfile.email.split('@')[0]}
+                                    </div>
+                                </div>
+
+                                <ChevronUp className="text-muted-foreground h-4 w-4 group-data-[state=collapsed]:hidden" />
+                            </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-64">
+                            <DropdownMenuLabel className="p-0 font-normal">
+                                <div className="flex items-start gap-2 px-2 py-2">
                                     <Avatar className="border-primary/40 h-9 w-9 border">
                                         <AvatarFallback className="font-semibold">
                                             {userProfile.email
@@ -236,39 +257,16 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                                 .toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
-
-                                    <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
-                                        <div className="truncate text-sm font-medium">
+                                    <div className="flex min-w-0 flex-col gap-1">
+                                        <span className="truncate text-sm leading-none font-medium">
                                             {userProfile.name ??
                                                 userProfile.email.split('@')[0]}
-                                        </div>
-                                    </div>
-
-                                    <ChevronUp className="text-muted-foreground h-4 w-4 group-data-[state=collapsed]:hidden" />
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent align="end" className="w-64">
-                                <DropdownMenuLabel className="p-0 font-normal">
-                                    <div className="flex items-start gap-2 px-2 py-2">
-                                        <Avatar className="border-primary/40 h-9 w-9 border">
-                                            <AvatarFallback className="font-semibold">
-                                                {userProfile.email
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex min-w-0 flex-col gap-1">
-                                            <span className="truncate text-sm leading-none font-medium">
-                                                {userProfile.name ??
-                                                    userProfile.email.split(
-                                                        '@',
-                                                    )[0]}
-                                            </span>
-                                            <span className="text-muted-foreground truncate text-xs leading-none">
-                                                {userProfile.email}
-                                            </span>
-                                            {getUserPermissionsResult.data
+                                        </span>
+                                        <span className="text-muted-foreground truncate text-xs leading-none">
+                                            {userProfile.email}
+                                        </span>
+                                        {getUserPermissionsResult?.ok &&
+                                            getUserPermissionsResult.data
                                                 .permissions.devMode && (
                                                 <Badge
                                                     variant="secondary"
@@ -278,26 +276,25 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                                     Developer Status
                                                 </Badge>
                                             )}
-                                        </div>
                                     </div>
+                                </div>
+                            </DropdownMenuLabel>
+
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuGroup>
+                                <DropdownMenuLabel className="text-muted-foreground py-1 text-xs font-normal">
+                                    Preferences
                                 </DropdownMenuLabel>
+                                <DropdownMenuItem onClick={handleThemeToggle}>
+                                    <ThemeIcon className="h-4 w-4" />
+                                    {isDark ? 'Light mode' : 'Dark mode'}
+                                </DropdownMenuItem>
+                                <LocaleSwitcher />
+                            </DropdownMenuGroup>
 
-                                <DropdownMenuSeparator />
-
-                                <DropdownMenuGroup>
-                                    <DropdownMenuLabel className="text-muted-foreground py-1 text-xs font-normal">
-                                        Preferences
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuItem
-                                        onClick={handleThemeToggle}
-                                    >
-                                        <ThemeIcon className="h-4 w-4" />
-                                        {isDark ? 'Light mode' : 'Dark mode'}
-                                    </DropdownMenuItem>
-                                    <LocaleSwitcher />
-                                </DropdownMenuGroup>
-
-                                {getUserPermissionsResult.data.permissions
+                            {getUserPermissionsResult?.ok &&
+                                getUserPermissionsResult.data.permissions
                                     .devMode && (
                                     <Fragment>
                                         <DropdownMenuSeparator />
@@ -320,15 +317,16 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                     </Fragment>
                                 )}
 
-                                <DropdownMenuSeparator />
+                            <DropdownMenuSeparator />
 
-                                <DropdownMenuItem asChild>
-                                    <LogoutButton />
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            <DropdownMenuItem asChild>
+                                <LogoutButton />
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                        {getUserPermissionsResult.data.permissions.devMode && (
+                    {getUserPermissionsResult?.ok &&
+                        getUserPermissionsResult.data.permissions.devMode && (
                             <Fragment>
                                 <RawDataExportDialog
                                     open={isRawDataExportOpen}
@@ -346,8 +344,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 />
                             </Fragment>
                         )}
-                    </div>
-                )}
+                </div>
             </SidebarContent>
 
             <SidebarRail />
