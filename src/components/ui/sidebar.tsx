@@ -625,6 +625,7 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<'div'> & {
     showIcon?: boolean;
 }) {
+    // Keep deterministic: random widths can mismatch between SSR and hydration.
     const width = '70%';
 
     return (
