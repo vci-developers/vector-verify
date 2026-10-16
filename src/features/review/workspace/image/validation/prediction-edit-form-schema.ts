@@ -6,14 +6,21 @@ import {
 } from '@/api/specimen-image/validation/specimen-image-schema';
 import { z } from 'zod';
 
+export const editableGenusSchema = genusSchema.exclude(['Unknown']);
+export const editableAnophelesSpeciesSchema = anophelesSpeciesSchema.exclude([
+    'unknown',
+]);
+export const editableSexSchema = sexSchema.exclude(['Unknown']);
+export const editableAbdomenStatusSchema = abdomenStatusSchema.exclude([
+    'Unknown',
+]);
+
 export const predictionEditFormSchema = z
     .object({
-        genus: genusSchema.exclude(['Unknown']).optional(),
-        anophelesSpecies: anophelesSpeciesSchema
-            .exclude(['unknown'])
-            .optional(),
-        sex: sexSchema.exclude(['Unknown']).optional(),
-        abdomenStatus: abdomenStatusSchema.exclude(['Unknown']).optional(),
+        genus: editableGenusSchema.optional(),
+        anophelesSpecies: editableAnophelesSpeciesSchema.optional(),
+        sex: editableSexSchema.optional(),
+        abdomenStatus: editableAbdomenStatusSchema.optional(),
     })
     .superRefine((data, context) => {
         const { genus, anophelesSpecies, sex, abdomenStatus } = data;

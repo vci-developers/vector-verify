@@ -3,8 +3,8 @@ import { specimenImageSchema } from '@/api/specimen-image/validation/specimen-im
 
 export const putSpecimenImageDataByIdRequestSchema = z.object({
     species: z.string(),
-    sex: z.string(),
-    abdomenStatus: z.string(),
+    sex: z.string().nullable(),
+    abdomenStatus: z.string().nullable(),
 });
 
 export const putSpecimenImageDataByIdResponseSchema = z.object({

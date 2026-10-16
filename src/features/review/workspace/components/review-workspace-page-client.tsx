@@ -145,6 +145,7 @@ export default function ReviewWorkspacePageClient({
                                 endDate={endDate}
                                 collectionCycleId={collectionCycleId}
                                 timezone={timezone}
+                                readOnly={readOnly}
                                 onGoToPreviousStep={goToPreviousStep}
                                 onGoToNextStep={goToNextStep}
                             />
