@@ -22,6 +22,7 @@ import {
     Star,
 } from 'lucide-react';
 import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
+import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 const ZOOM_STEP = 0.5;
@@ -31,14 +32,6 @@ const MAX_ZOOM = 5;
 interface SpecimenImageCarouselProps {
     specimen: Specimen;
     onCurrentImageChange?: (image: SpecimenImage | null) => void;
-}
-
-function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
-    return (
-        image.id === specimen.thumbnailImageId ||
-        image.id === specimen.thumbnailImage?.id ||
-        image.url === specimen.thumbnailUrl
-    );
 }
 
 export default function SpecimenImageCarousel({
@@ -146,6 +139,9 @@ export default function SpecimenImageCarousel({
                       species: null,
                       sex: null,
                       abdomenStatus: null,
+                      appSpecies: null,
+                      appSex: null,
+                      appAbdomenStatus: null,
                   }
                 : null);
 

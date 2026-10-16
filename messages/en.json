@@ -8,7 +8,10 @@
         "previous": "Previous",
         "search": "Search...",
         "noResults": "No results.",
-        "language": "Language"
+        "language": "Language",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving…"
     },
     "Navigation": {
         "dashboard": "Dashboard",
@@ -292,7 +295,22 @@
         "species": "Species",
         "sex": "Sex",
         "abdomenStatus": "Abdomen Status",
-        "modelConfidence": "Model Confidence"
+        "modelConfidence": "Model Confidence",
+        "edited": "Edited",
+        "editedPredictions": "Edited Predictions",
+        "editedTooltip": "This prediction has been edited.",
+        "editedBy": "Edited by {name}",
+        "unknownUser": "Unknown user (#{userId})",
+        "original": "Original",
+        "reviewLogsError": "Failed to load prediction edits.",
+        "edit": "Edit",
+        "thumbnailOnlyEditable": "Only the thumbnail image can be edited.",
+        "genus": "Genus",
+        "required": "(Required)",
+        "selectPlaceholder": "Select...",
+        "notApplicable": "N/A",
+        "editSuccess": "Prediction updated.",
+        "editError": "Failed to update prediction."
     },
     "ReviewCertification": {
         "title": "Certify Site",
