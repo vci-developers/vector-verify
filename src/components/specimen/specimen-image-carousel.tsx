@@ -382,7 +382,7 @@ export default function SpecimenImageCarousel({
                             containScroll: 'keepSnaps',
                             dragFree: true,
                         }}
-                        className="flex-1"
+                        className="min-w-0 flex-1"
                         aria-label="Image thumbnails"
                     >
                         <CarouselContent className="-ml-2">
@@ -404,7 +404,7 @@ export default function SpecimenImageCarousel({
                                                 );
                                             }}
                                             className={cn(
-                                                'relative h-20 w-28 shrink-0 overflow-hidden rounded-md border p-0 hover:bg-transparent',
+                                                'relative h-20 w-28 shrink-0 overflow-hidden rounded-md border p-0 whitespace-normal hover:bg-transparent',
                                                 imageIndex === currentImageIndex
                                                     ? 'border-primary ring-primary/30 ring-2'
                                                     : 'border-border hover:border-foreground/40',
@@ -430,6 +430,9 @@ export default function SpecimenImageCarousel({
                                             {isCurrentThumbnailImage && (
                                                 <Star className="bg-background/90 absolute top-1 left-1 size-5 rounded-full fill-current p-1 shadow-md" />
                                             )}
+                                            <span className="bg-background/90 absolute right-1 bottom-1 rounded-full px-1.5 text-xs font-medium shadow-md">
+                                                {imageIndex + 1}
+                                            </span>
                                         </Button>
                                     </CarouselItem>
                                 );
