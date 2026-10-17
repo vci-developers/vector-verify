@@ -110,6 +110,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const [isUserAnalyticsOpen, setIsUserAnalyticsOpen] = useState(false);
     const t = useTranslations('UserAnalytics');
     const tSidebar = useTranslations('Sidebar');
+    const tCommon = useTranslations('Common');
 
     const permissionsData = getUserPermissionsResult?.ok
         ? getUserPermissionsResult.data
@@ -189,7 +190,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                             >
                                 {isGetUserPermissionsFetching
                                     ? tSidebar('retrying')
-                                    : tSidebar('tryAgain')}
+                                    : tCommon('tryAgain')}
                             </Button>
                         </div>
                     ) : (

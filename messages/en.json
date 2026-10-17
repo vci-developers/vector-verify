@@ -8,13 +8,13 @@
         "previous": "Previous",
         "search": "Search...",
         "noResults": "No results.",
-        "language": "Language"
+        "language": "Language",
+        "tryAgain": "Try again"
     },
     "Sidebar": {
         "loadErrorTitle": "Couldn't load navigation",
         "loadErrorFallback": "Unable to load navigation. Please try again.",
-        "retrying": "Retrying…",
-        "tryAgain": "Try again"
+        "retrying": "Retrying…"
     },
     "Navigation": {
         "dashboard": "Dashboard",
