@@ -2,6 +2,7 @@
 
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import type { UserPermissions } from '@/api/user/validation/user-permissions-schema';
+import { networkErrorMessage } from '@/lib/network/network-error';
 import {
     BookOpen,
     ChevronUp,
@@ -39,6 +40,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/api/user/validation/user-profile-schema';
 import LogoutButton from '../auth-session/logout-button';
 import LocaleSwitcher from './locale-switcher';
@@ -88,6 +90,8 @@ const navigation: NavigationItem[] = [
     },
 ];
 
+const SKELETON_TEXT_WIDTHS = ['68%', '82%', '58%', '76%', '91%'] as const;
+
 interface AppSidebarProps {
     userProfile: UserProfile;
 }
@@ -97,30 +101,35 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
     const { resolvedTheme, setTheme } = useTheme();
     const {
         data: getUserPermissionsResult,
-        isPending: isGetUserPermissionsPending,
+        isError: isGetUserPermissionsError,
+        isFetching: isGetUserPermissionsFetching,
+        refetch: refetchUserPermissions,
     } = useGetUserPermissions();
 
     const [isRawDataExportOpen, setIsRawDataExportOpen] = useState(false);
     const [isUserAnalyticsOpen, setIsUserAnalyticsOpen] = useState(false);
     const t = useTranslations('UserAnalytics');
+    const tSidebar = useTranslations('Sidebar');
+    const tCommon = useTranslations('Common');
 
+    const permissionsData = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data
+        : undefined;
+    const userPermissions = permissionsData?.permissions;
     const isDark = resolvedTheme === 'dark';
     const ThemeIcon = isDark ? Sun : Moon;
+    const isPermissionsLoading =
+        !getUserPermissionsResult && !isGetUserPermissionsError;
+    const isPermissionsError =
+        !isPermissionsLoading && !getUserPermissionsResult?.ok;
+    const permissionsErrorMessage =
+        getUserPermissionsResult && !getUserPermissionsResult.ok
+            ? networkErrorMessage(getUserPermissionsResult.error)
+            : tSidebar('loadErrorFallback');
 
     function handleThemeToggle() {
         setTheme(isDark ? 'light' : 'dark');
     }
-
-    if (isGetUserPermissionsPending || !getUserPermissionsResult) {
-        return <h1>LOADING...</h1>;
-    }
-
-    if (!getUserPermissionsResult.ok) {
-        return <h1>ERROR: {getUserPermissionsResult.error.message}</h1>;
-    }
-
-    const userPermissions: UserPermissions =
-        getUserPermissionsResult.data.permissions;
 
     return (
         <Sidebar collapsible="icon">
@@ -138,31 +147,81 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                     </span>
                 </div>
                 <SidebarGroup>
-                    <SidebarMenu>
-                        {navigation
-                            .filter(item =>
-                                item.canAccess
-                                    ? item.canAccess(userPermissions)
-                                    : true,
-                            )
-                            .map(item => (
-                                <SidebarMenuItem key={item.href}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={
-                                            item.href === '/'
-                                                ? pathname === '/'
-                                                : pathname.startsWith(item.href)
-                                        }
-                                    >
-                                        <Link href={item.href}>
-                                            <item.icon />
-                                            <span>{item.name}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                    </SidebarMenu>
+                    {isPermissionsLoading ? (
+                        <SidebarMenu>
+                            {Array.from(
+                                { length: navigation.length },
+                                (_, index) => (
+                                    <SidebarMenuItem key={index}>
+                                        <div className="flex h-8 items-center gap-2 rounded-md px-2">
+                                            <Skeleton className="size-4 rounded-md" />
+                                            <Skeleton
+                                                className="h-4"
+                                                style={{
+                                                    width: SKELETON_TEXT_WIDTHS[
+                                                        index %
+                                                            SKELETON_TEXT_WIDTHS.length
+                                                    ],
+                                                }}
+                                            />
+                                        </div>
+                                    </SidebarMenuItem>
+                                ),
+                            )}
+                        </SidebarMenu>
+                    ) : isPermissionsError ? (
+                        <div
+                            role="alert"
+                            className="border-destructive/30 bg-destructive/5 mx-2 rounded-md border p-3 text-sm"
+                        >
+                            <p className="font-medium">
+                                {tSidebar('loadErrorTitle')}
+                            </p>
+                            <p className="text-muted-foreground mt-1">
+                                {permissionsErrorMessage}
+                            </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-3 w-full"
+                                onClick={() => refetchUserPermissions()}
+                                disabled={isGetUserPermissionsFetching}
+                            >
+                                {isGetUserPermissionsFetching
+                                    ? tSidebar('retrying')
+                                    : tCommon('tryAgain')}
+                            </Button>
+                        </div>
+                    ) : (
+                        userPermissions && (
+                            <SidebarMenu>
+                                {navigation
+                                    .filter(item =>
+                                        item.canAccess(userPermissions),
+                                    )
+                                    .map(item => (
+                                        <SidebarMenuItem key={item.href}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                isActive={
+                                                    item.href === '/'
+                                                        ? pathname === '/'
+                                                        : pathname.startsWith(
+                                                              item.href,
+                                                          )
+                                                }
+                                            >
+                                                <Link href={item.href}>
+                                                    <item.icon />
+                                                    <span>{item.name}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                            </SidebarMenu>
+                        )
+                    )}
                 </SidebarGroup>
 
                 <div className="mt-auto p-3">
@@ -209,7 +268,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                         <span className="text-muted-foreground truncate text-xs leading-none">
                                             {userProfile.email}
                                         </span>
-                                        {userPermissions.devMode && (
+                                        {userPermissions?.devMode && (
                                             <Badge
                                                 variant="secondary"
                                                 className="mt-1"
@@ -235,7 +294,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                 <LocaleSwitcher />
                             </DropdownMenuGroup>
 
-                            {userPermissions.devMode && (
+                            {userPermissions?.devMode && (
                                 <Fragment>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
@@ -265,21 +324,17 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {userPermissions.devMode && (
+                    {permissionsData?.permissions.devMode && (
                         <Fragment>
                             <RawDataExportDialog
                                 open={isRawDataExportOpen}
                                 onOpenChange={setIsRawDataExportOpen}
-                                programId={
-                                    getUserPermissionsResult.data.programId
-                                }
+                                programId={permissionsData.programId}
                             />
                             <UserAnalyticsDialog
                                 open={isUserAnalyticsOpen}
                                 onOpenChange={setIsUserAnalyticsOpen}
-                                programId={
-                                    getUserPermissionsResult.data.programId
-                                }
+                                programId={permissionsData.programId}
                             />
                         </Fragment>
                     )}
