@@ -316,18 +316,9 @@ export default function MetadataReviewWorkspace({
         const resolvableSessionIds = resolvableSessions.map(
             session => session.sessionId,
         );
-        const sectionsToResolve = sections.filter(section =>
-            section.rows.some(row => resolutionsByMetadataRowId.has(row.id)),
-        );
-
-        if (sectionsToResolve.length === 0) {
-            onGoToNextStep();
-            return;
-        }
-
         setIsResolving(true);
         const outcomes = await Promise.allSettled(
-            sectionsToResolve.map(section => {
+            sections.map(section => {
                 const {
                     resolvedData,
                     resolvedSurveillanceForm,

@@ -106,7 +106,12 @@ export function evaluateUnmetRequiredRowIds(
 
     for (const section of sections) {
         for (const row of section.rows) {
-            if (!row.required || disabledRowIds.has(row.id)) continue;
+            if (
+                !row.required ||
+                row.isUnitIdentityComponent ||
+                disabledRowIds.has(row.id)
+            )
+                continue;
 
             const effectiveValue = resolveRowEffectiveValue(
                 row,
