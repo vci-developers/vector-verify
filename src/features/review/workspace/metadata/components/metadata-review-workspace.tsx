@@ -158,6 +158,10 @@ export default function MetadataReviewWorkspace({
             );
         }
 
+        if (olderFormQueries.some(query => !query.data?.ok)) {
+            return <ErrorBanner message={t('olderFormError')} />;
+        }
+
         const currentFormQuestions =
             getCurrentFormByProgramIdResult.data.questions ?? [];
         const formQuestionsByVersion = new Map<string, FormQuestion[]>(

@@ -261,6 +261,7 @@
         "resolveSuccess": "Changes saved.",
         "resolveError": "Failed to save changes.",
         "formAnswersError": "Failed to load form answers.",
+        "olderFormError": "Failed to load an older version of this program's form.",
         "currentFormError": "Could not determine the form type for this program.",
         "surveillanceFormError": "Failed to load surveillance form answers.",
         "sessionSectionTitle": "Session"
