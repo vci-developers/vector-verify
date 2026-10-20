@@ -28,6 +28,7 @@ function PasswordInput({
                 variant="ghost"
                 size="icon"
                 aria-pressed={pinned}
+                aria-label={'Show password'}
                 onClick={() => setPinned(pinned => !pinned)}
                 onMouseEnter={() => setIsVisible(true)}
                 onMouseLeave={() => setIsVisible(false)}

@@ -63,7 +63,7 @@ export default function ForgotPasswordForm() {
                     control={forgotPasswordForm.control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="reset-password-rhf-email">
+                            <FieldLabel htmlFor="forgot-password-rhf-email">
                                 {t('email')}
                             </FieldLabel>
                             <div className="relative">
