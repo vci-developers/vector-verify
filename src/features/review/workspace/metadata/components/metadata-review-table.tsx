@@ -10,12 +10,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { evaluateRowOptionsById } from '@/features/review/workspace/metadata/utils/evaluate-question-answerability';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { CircleAlert, CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment, useMemo, useState } from 'react';
-import { evaluateRowOptionsById } from '../utils/evaluate-question-answerability';
+import { Fragment, useState } from 'react';
 import {
     formatDisplayValue,
     NOT_APPLICABLE,
@@ -51,14 +51,10 @@ export default function MetadataReviewTable({
 
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
 
-    const filteredOptionsByRowId = useMemo(
-        () =>
-            evaluateRowOptionsById(
-                sections,
-                resolutionsByMetadataRowId,
-                disabledRowIds,
-            ),
-        [sections, resolutionsByMetadataRowId, disabledRowIds],
+    const filteredOptionsByRowId = evaluateRowOptionsById(
+        sections,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
     );
 
     const showSectionHeaders = sections.length > 1;
