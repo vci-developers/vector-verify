@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { ACCESS_COOKIE_NAME } from '@/lib/auth-session/cookies';
 
-const PUBLIC_ROUTES = new Set(['/login', '/signup', '/forbidden']);
+const PUBLIC_ROUTES = new Set([
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/forbidden',
+]);
 const PUBLIC_PREFIXES = ['/docs'];
 
 export async function proxy(request: NextRequest) {
