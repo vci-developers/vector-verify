@@ -95,13 +95,14 @@ export function evaluateRowOptionsById(
           )
         : null;
 
-    if (llinTypeValue) {
+    const hasTypedLlinBrandMatch = LLIN_BRAND_OPTIONS.some(
+        brand => brand.type === llinTypeValue,
+    );
+    if (llinTypeValue && hasTypedLlinBrandMatch) {
         const llinBrandOptions = LLIN_BRAND_OPTIONS.filter(
-            brand => brand.type === llinTypeValue,
+            brand => brand.type === llinTypeValue || brand.type === null,
         ).map(brand => brand.label);
-        if (llinBrandOptions.length > 0) {
-            optionsByRowId.set(LLIN_BRAND_ROW_ID, llinBrandOptions);
-        }
+        optionsByRowId.set(LLIN_BRAND_ROW_ID, llinBrandOptions);
     }
 
     return optionsByRowId;
@@ -135,6 +136,11 @@ export function evaluateUnmetRequiredRowIds(
     disabledRowIds: Set<string>,
 ): Set<string> {
     const unmetRequiredRowIds = new Set<string>();
+    const optionsByRowId = evaluateRowOptionsById(
+        sections,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
 
     for (const section of sections) {
         for (const row of section.rows) {
@@ -145,7 +151,12 @@ export function evaluateUnmetRequiredRowIds(
                 resolutionsByMetadataRowId,
                 disabledRowIds,
             );
-            if (effectiveValue === null) {
+            const allowedOptions = optionsByRowId.get(row.id);
+            const isEffectiveValueDisallowed =
+                !!effectiveValue &&
+                !!allowedOptions &&
+                !allowedOptions.includes(effectiveValue);
+            if (effectiveValue === null || isEffectiveValueDisallowed) {
                 unmetRequiredRowIds.add(row.id);
             }
         }
