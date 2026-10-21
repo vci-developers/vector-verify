@@ -96,6 +96,7 @@ export interface MetadataRow {
     hasConflict: boolean;
     required: boolean;
     options: string[] | null;
+    isUnitIdentityComponent: boolean;
 }
 
 export interface MetadataSection {
@@ -109,7 +110,7 @@ export function formatDisplayValue(
     value: unknown,
     fieldType?: FormQuestionType,
 ): string {
-    if (value == null) return NOT_APPLICABLE;
+    if (value == null || value === '') return NOT_APPLICABLE;
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     if (fieldType === 'boolean' && (value === 'true' || value === 'false'))
@@ -221,11 +222,20 @@ export function buildMetadataRow(
         fieldType: FormQuestionType;
         required?: boolean;
         options?: string[] | null;
+        isUnitIdentityComponent?: boolean;
     },
     fieldValueBySessionId: Map<number, unknown>,
     groupKey?: string,
 ): MetadataRow {
-    const { entity, fieldName, label, fieldType, required, options } = field;
+    const {
+        entity,
+        fieldName,
+        label,
+        fieldType,
+        required,
+        options,
+        isUnitIdentityComponent,
+    } = field;
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(value =>
             formatDisplayValue(value, fieldType),
@@ -243,6 +253,7 @@ export function buildMetadataRow(
         hasConflict: distinctDisplayValues.size > 1,
         required: required ?? false,
         options: options ?? null,
+        isUnitIdentityComponent: isUnitIdentityComponent ?? false,
     };
 }
 
@@ -256,5 +267,6 @@ export function questionToMetadataField(
         fieldType: question.type,
         required: question.required,
         options: question.options,
+        isUnitIdentityComponent: question.isUnitIdentityComponent,
     };
 }

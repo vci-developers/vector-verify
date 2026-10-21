@@ -85,7 +85,7 @@ export function buildUnitIdentitySections(
         sessionUnitIdBySessionId: new Map(
             group.units.map(unit => [unit.sessionId, unit.sessionUnitId]),
         ),
-        rows: nonIdentityQuestions.map(question =>
+        rows: unitScopedQuestions.map(question =>
             buildMetadataRow(
                 questionToMetadataField(question),
                 new Map(

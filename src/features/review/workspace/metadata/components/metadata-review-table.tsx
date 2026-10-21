@@ -111,6 +111,7 @@ export default function MetadataReviewTable({
                             </TableRow>
                         )}
                         {section.rows.map(row => {
+                            if (row.isUnitIdentityComponent) return null;
                             const isRowDisabled = disabledRowIds.has(row.id);
                             const isUnmetRowRequired = unmetRequiredRowIds.has(
                                 row.id,
