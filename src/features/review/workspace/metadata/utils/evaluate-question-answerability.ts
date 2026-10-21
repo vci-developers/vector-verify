@@ -1,6 +1,7 @@
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
 import {
+    BOOLEAN_TRUE_DISPLAY,
     NOT_APPLICABLE,
     SURVEILLANCE_FIELD_DEPENDENCIES,
     formatDisplayValue,
@@ -50,19 +51,13 @@ export function evaluateDisabledRowIds(
                 if (!prerequisite) continue;
                 const prerequisiteMet = isPrerequisiteMet(
                     prerequisite,
-                    questionId => {
-                        const dependencyRow = section.rows.find(
-                            candidate =>
-                                Number(candidate.fieldName) === questionId,
-                        );
-                        return dependencyRow
-                            ? resolveRowEffectiveValue(
-                                  dependencyRow,
-                                  resolutionsByMetadataRowId,
-                                  disabledRowIds,
-                              )
-                            : undefined;
-                    },
+                    questionId =>
+                        resolvePrerequisiteValue(
+                            questionId,
+                            section,
+                            resolutionsByMetadataRowId,
+                            disabledRowIds,
+                        ),
                 );
                 if (!prerequisiteMet) {
                     disabledRowIds.add(row.id);
@@ -73,6 +68,27 @@ export function evaluateDisabledRowIds(
     }
 
     return disabledRowIds;
+}
+
+function resolvePrerequisiteValue(
+    questionId: number,
+    section: MetadataSection,
+    resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
+): string | null | undefined {
+    const row = section.rows.find(
+        candidate => Number(candidate.fieldName) === questionId,
+    );
+    if (!row) return undefined;
+    const effectiveValue = resolveRowEffectiveValue(
+        row,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
+    if (row.fieldType !== 'boolean' || effectiveValue == null) {
+        return effectiveValue;
+    }
+    return String(effectiveValue === BOOLEAN_TRUE_DISPLAY);
 }
 
 function resolveRowEffectiveValue(
