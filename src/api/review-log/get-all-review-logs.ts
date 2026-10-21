@@ -21,9 +21,9 @@ export async function getAllReviewLogs(
 ): Promise<Result<GetAllReviewLogsResponseBody, NetworkError>> {
     const allReviewLogs: ReviewLog[] = [];
     let page = 1;
-    let totalPages = 1;
+    let hasMore = true;
 
-    while (page <= totalPages) {
+    while (hasMore) {
         const queryString = constructQueryString(
             { ...queryParams, size: SIZE, page },
             getReviewLogsQueryParamsSchema,
@@ -43,7 +43,7 @@ export async function getAllReviewLogs(
         if (!result.ok) return result;
 
         allReviewLogs.push(...result.data.logs);
-        totalPages = result.data.pagination.totalPages;
+        hasMore = page < result.data.pagination.totalPages;
         page += 1;
     }
 

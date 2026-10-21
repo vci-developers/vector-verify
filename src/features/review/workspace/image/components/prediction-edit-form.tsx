@@ -38,13 +38,18 @@ export default function PredictionEditForm({
     const { mutateAsync: putSpecimenImageDataAsync, isPending } =
         usePutSpecimenImageDataById();
 
-    const [genus, anophelesSpecies] = image.species?.split(' ') ?? [];
+    const genus = editableGenusSchema.options.find(genusOption =>
+        image.species?.startsWith(genusOption),
+    );
+    const anophelesSpecies = editableAnophelesSpeciesSchema.options.find(
+        anophelesSpeciesOption =>
+            image.species?.endsWith(anophelesSpeciesOption),
+    );
     const predictionEditForm = useForm<PredictionEditFormInput>({
         resolver: zodResolver(predictionEditFormSchema),
         defaultValues: {
-            genus: editableGenusSchema.safeParse(genus).data,
-            anophelesSpecies:
-                editableAnophelesSpeciesSchema.safeParse(anophelesSpecies).data,
+            genus,
+            anophelesSpecies,
             sex: editableSexSchema.safeParse(image.sex).data,
             abdomenStatus: editableAbdomenStatusSchema.safeParse(
                 image.abdomenStatus,
