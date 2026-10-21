@@ -27,10 +27,7 @@ import {
     buildSurveillanceSection,
     type MetadataSection,
 } from '../utils/metadata-section';
-import {
-    evaluateDisabledRowIds,
-    evaluateUnmetRequiredRowIds,
-} from '../utils/evaluate-question-answerability';
+import { getMetadataReviewBlockers } from '../utils/get-metadata-review-blockers';
 import MetadataReviewTable from './metadata-review-table';
 import ErrorBanner from '@/components/ui/error-banner';
 import EmptyBanner from '@/components/ui/empty-banner';
@@ -225,40 +222,16 @@ export default function MetadataReviewWorkspace({
         ];
     }
 
-    const disabledRowIds = evaluateDisabledRowIds(
-        sections,
-        resolutionsByMetadataRowId,
-        questionsById,
-    );
-
-    const unmetRequiredRowIds = evaluateUnmetRequiredRowIds(
-        sections,
-        resolutionsByMetadataRowId,
+    const {
         disabledRowIds,
+        unmetRequiredRowIds,
+        unresolvedConflictCount,
+        areAllConflictsResolved,
+    } = getMetadataReviewBlockers(
+        sections,
+        resolutionsByMetadataRowId,
         questionsById,
         currentFormSessionIds,
-    );
-
-    const areAllConflictsResolved = sections.every(section =>
-        section.rows.every(
-            row =>
-                (!row.hasConflict ||
-                    resolutionsByMetadataRowId.has(row.id) ||
-                    disabledRowIds.has(row.id)) &&
-                !unmetRequiredRowIds.has(row.id),
-        ),
-    );
-
-    const unresolvedConflictCount = sections.reduce(
-        (count, section) =>
-            count +
-            section.rows.filter(
-                row =>
-                    row.hasConflict &&
-                    !resolutionsByMetadataRowId.has(row.id) &&
-                    !disabledRowIds.has(row.id),
-            ).length,
-        0,
     );
 
     const unmetRequiredCount = unmetRequiredRowIds.size;
