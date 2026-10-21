@@ -1,34 +1,34 @@
 import { z } from 'zod';
 
 export const llinTypeSchema = z.enum([
-    'Pyrethroid-only',
+    'Pyrethroid Only',
     'Pyrethroid + PBO',
-    'Pyrethroid + chlorfenapyr',
-    'Pyrethroid + pyriproxyfen',
+    'Pyrethroid + Chlorfenapyr',
+    'Pyrethroid + Pyriproxyfen',
     'Other',
 ]);
 
 export const LLIN_BRAND_OPTIONS = [
-    { label: 'OLYSET Net', type: 'Pyrethroid-only' },
-    { label: 'Interceptor', type: 'Pyrethroid-only' },
-    { label: 'Royal Sentry', type: 'Pyrethroid-only' },
-    { label: 'Royal Sentry 2.0', type: 'Pyrethroid-only' },
-    { label: 'PermaNet 2.0', type: 'Pyrethroid-only' },
-    { label: 'Duranet LLIN', type: 'Pyrethroid-only' },
-    { label: 'MiraNet', type: 'Pyrethroid-only' },
-    { label: 'MAGNet', type: 'Pyrethroid-only' },
-    { label: 'Yahe LN', type: 'Pyrethroid-only' },
-    { label: 'SafeNet', type: 'Pyrethroid-only' },
-    { label: 'Yorkool LN', type: 'Pyrethroid-only' },
-    { label: 'Panda Net 2.0', type: 'Pyrethroid-only' },
-    { label: 'Tsara Soft', type: 'Pyrethroid-only' },
-    { label: 'OLYSET PLUS', type: 'Pyrethroid + PBO' },
+    { label: 'OLYSET Net', type: 'Pyrethroid Only' },
+    { label: 'Interceptor', type: 'Pyrethroid Only' },
+    { label: 'Royal Sentry', type: 'Pyrethroid Only' },
+    { label: 'Royal Sentry 2.0', type: 'Pyrethroid Only' },
+    { label: 'PermaNet 2.0', type: 'Pyrethroid Only' },
+    { label: 'Duranet LLIN', type: 'Pyrethroid Only' },
+    { label: 'MiraNet', type: 'Pyrethroid Only' },
+    { label: 'MAGNet', type: 'Pyrethroid Only' },
+    { label: 'Yahe LN', type: 'Pyrethroid Only' },
+    { label: 'SafeNet', type: 'Pyrethroid Only' },
+    { label: 'Yorkool LN', type: 'Pyrethroid Only' },
+    { label: 'Panda Net 2.0', type: 'Pyrethroid Only' },
+    { label: 'Tsara Soft', type: 'Pyrethroid Only' },
+    { label: 'OLYSET Plus', type: 'Pyrethroid + PBO' },
     { label: 'PermaNet 3.0', type: 'Pyrethroid + PBO' },
     { label: 'VEERALIN', type: 'Pyrethroid + PBO' },
     { label: 'Tsara Boost', type: 'Pyrethroid + PBO' },
     { label: 'Tsara Plus', type: 'Pyrethroid + PBO' },
-    { label: 'Interceptor G2', type: 'Pyrethroid + chlorfenapyr' },
-    { label: 'Royal Guard', type: 'Pyrethroid + pyriproxyfen' },
+    { label: 'Interceptor G2', type: 'Pyrethroid + Chlorfenapyr' },
+    { label: 'Royal Guard', type: 'Pyrethroid + Pyriproxyfen' },
     { label: 'Other', type: null },
 ] as const satisfies readonly {
     label: string;
@@ -36,7 +36,7 @@ export const LLIN_BRAND_OPTIONS = [
 }[];
 
 export const llinBrandSchema = z.enum(
-    LLIN_BRAND_OPTIONS.map(brand => brand.label) as [string, ...string[]],
+    LLIN_BRAND_OPTIONS.map(brand => brand.label),
 );
 
 export const surveillanceFormSchema = z.object({

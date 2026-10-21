@@ -290,11 +290,13 @@ fields only exist inside the Surveillance Form at all). Each list is a hardcoded
 — **not** wired into `sessionSchema`/`surveillanceFormSchema` themselves, since
 those must keep accepting whatever free-text a session actually stored (legacy
 or malformed values like a bare `"fgh"` are real, observed data). LLIN Type's 5
-values and LLIN Brand's 21 values come from the backend's own
-`dhis2-mapping.service.ts`, which mirrors Uganda's official DHIS2 "MAL 001"
-malaria surveillance form field-by-field (`MAL 001-ER17`/`ER28`) — the backend
-already silently fails to map any stored value outside this list, so
-constraining the dropdown to it is a correctness fix, not just a UI change.
+values and LLIN Brand's 21 values match the mobile app's own option lists
+spelling-for-spelling (e.g. `Pyrethroid Only`, `OLYSET Plus`), since those are
+the exact strings stored on prod. They mirror Uganda's official DHIS2 "MAL 001"
+malaria surveillance form (`MAL 001-ER17`/`ER28`); the backend's
+`dhis2-mapping.service.ts` matches them case-insensitively and silently fails
+to map any stored value outside this list, so constraining the dropdown to it
+is a correctness fix, not just a UI change.
 Collector Title's 3 values and Collection Method's 3 values have no such backend
 mapping to anchor them; they were confirmed instead by inspecting distinct
 values across live test-program sessions. Unlike LLIN Type/Brand (which include
@@ -307,7 +309,7 @@ placeholder rather than the stale value — the per-session table cells above it
 still show the actual stored value, so nothing is hidden, only unselectable.
 _Avoid_: making these fields free text again to "preserve" out-of-list legacy
 values (defeats the point); adding a backend-configurable options list for these
-four fields (rejected — see ADR-0008).
+four fields.
 
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
