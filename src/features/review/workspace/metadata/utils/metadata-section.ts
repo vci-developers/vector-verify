@@ -110,7 +110,7 @@ export function formatDisplayValue(
     value: unknown,
     fieldType?: FormQuestionType,
 ): string {
-    if (value == null) return NOT_APPLICABLE;
+    if (value == null || value === '') return NOT_APPLICABLE;
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     if (fieldType === 'boolean' && (value === 'true' || value === 'false'))
