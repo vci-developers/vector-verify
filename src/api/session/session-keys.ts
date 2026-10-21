@@ -1,9 +1,12 @@
+import type { GetReviewLogsQueryParams } from '@/api/session/validation/get-review-logs-schema';
 import type { GetSessionsQueryParams } from '@/api/session/validation/get-sessions-schema';
 import type { GetAllSessionsQueryParams } from '@/api/session/validation/get-all-sessions-schema';
 import type { GetSessionsMetricsQueryParams } from '@/api/session/validation/get-sessions-metrics-schema';
 
 export const sessionKeys = {
     root: ['sessions'] as const,
+    allReviewLogs: (queryParams: GetReviewLogsQueryParams) =>
+        ['sessions', 'review-logs', 'all', queryParams] as const,
     sessionById: (sessionId: number) => ['sessions', sessionId] as const,
     sessions: (queryParams?: GetSessionsQueryParams) =>
         ['sessions', queryParams] as const,

@@ -19,6 +19,7 @@ import ReviewSitesListHeader from '@/features/review/sites-list/components/layou
 import ReviewSitesList from '@/features/review/sites-list/components/sites/review-sites-list';
 import ReviewDhis2Dashboard from '../../dhis2-sync/components/review-dhis2-dashboard';
 import SessionsTable from '@/features/review/sessions-table/components/sessions-table';
+import SpecimensTable from '@/features/review/specimens-table/components/specimens-table';
 import { REVIEW_STATE_SEVERITY_ORDER } from '@/features/review/utils/review-site-session-summary';
 import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,6 +34,7 @@ export default function ReviewSitesListPageClient() {
         { value: 'sites-list', label: t('sitesListTab') },
         { value: 'submissions', label: t('submissionsTab') },
         { value: 'sessions', label: t('sessionsTab') },
+        { value: 'specimens', label: t('specimensTab') },
     ];
     const {
         activeTab,
@@ -86,16 +88,17 @@ export default function ReviewSitesListPageClient() {
         : [];
 
     function handleTabChange(tab: ReviewTab) {
-        const isSessionsTab = tab === 'sessions' || activeTab === 'sessions';
+        const isTableTab = tab === 'sessions' || tab === 'specimens';
+        const wasTableTab =
+            activeTab === 'sessions' || activeTab === 'specimens';
 
-        if (isSessionsTab) {
+        if (isTableTab !== wasTableTab) {
             setFilters({
                 activeTab: tab,
                 selectedLocation: '',
                 selectedCycleIds: [],
                 ...getDefaultMonthRange(new Date()),
-                selectedReviewStates:
-                    tab === 'sessions' ? [] : ['NEEDS_REVIEW'],
+                selectedReviewStates: isTableTab ? [] : ['NEEDS_REVIEW'],
             });
             return;
         }
@@ -152,7 +155,12 @@ export default function ReviewSitesListPageClient() {
                                 collectionCycles={collectionCycles}
                                 selectedCycleIds={selectedCycleIds}
                                 onSelectedCycleIdsChange={selectedCycleIds =>
-                                    setFilters({ selectedCycleIds })
+                                    setFilters({
+                                        selectedCycleIds:
+                                            activeTab === 'specimens'
+                                                ? selectedCycleIds.slice(-1)
+                                                : selectedCycleIds,
+                                    })
                                 }
                                 selectedReviewStates={selectedReviewStates}
                                 onSelectedReviewStatesChange={selectedReviewStates =>
@@ -184,6 +192,22 @@ export default function ReviewSitesListPageClient() {
                                         selectedReviewStates={
                                             selectedReviewStates
                                         }
+                                        locationQueryParam={locationQueryParam}
+                                        startMonth={startMonth}
+                                        endMonth={endMonth}
+                                    />
+                                )
+                            ) : activeTab === 'specimens' ? (
+                                programId !== undefined && (
+                                    <SpecimensTable
+                                        programId={programId}
+                                        sites={
+                                            locationQueryParam
+                                                ? descendantsOfSelectedLocation
+                                                : accessibleSites
+                                        }
+                                        collectionCycles={collectionCycles}
+                                        selectedCycleIds={selectedCycleIds}
                                         locationQueryParam={locationQueryParam}
                                         startMonth={startMonth}
                                         endMonth={endMonth}
