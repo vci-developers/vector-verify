@@ -46,7 +46,7 @@ export default function ConflictResolutionControl({
                 ? [BOOLEAN_TRUE_DISPLAY, BOOLEAN_FALSE_DISPLAY]
                 : (questionOptions ?? []);
         const selectValue =
-            value === NOT_APPLICABLE || value === undefined ? '' : value;
+            value !== undefined && selectOptions.includes(value) ? value : '';
         return (
             <Select
                 value={selectValue}

@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { evaluateRowOptionsById } from '@/features/review/workspace/metadata/utils/evaluate-question-answerability';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { CircleAlert, CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
@@ -49,6 +50,12 @@ export default function MetadataReviewTable({
     const t = useTranslations('ReviewMetadata');
 
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
+
+    const filteredOptionsByRowId = evaluateRowOptionsById(
+        sections,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
 
     const showSectionHeaders = sections.length > 1;
     const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
@@ -240,7 +247,9 @@ export default function MetadataReviewTable({
                                                     fieldType={row.fieldType}
                                                     options={resolutionOptions}
                                                     questionOptions={
-                                                        row.options
+                                                        filteredOptionsByRowId.get(
+                                                            row.id,
+                                                        ) ?? row.options
                                                     }
                                                     value={controlValue}
                                                     onValueChange={value =>

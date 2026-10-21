@@ -1,6 +1,9 @@
+import { LLIN_BRAND_OPTIONS } from '@/api/surveillance-form/validation/surveillance-form-schema';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
 import {
+    LLIN_BRAND_ROW_ID,
+    LLIN_TYPE_ROW_ID,
     NOT_APPLICABLE,
     SURVEILLANCE_FIELD_DEPENDENCIES,
     formatDisplayValue,
@@ -75,6 +78,36 @@ export function evaluateDisabledRowIds(
     return disabledRowIds;
 }
 
+export function evaluateRowOptionsById(
+    sections: MetadataSection[],
+    resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
+): Map<string, string[]> {
+    const optionsByRowId = new Map<string, string[]>();
+    const allRows = sections.flatMap(section => section.rows);
+
+    const llinTypeRow = allRows.find(row => row.id === LLIN_TYPE_ROW_ID);
+    const llinTypeValue = llinTypeRow
+        ? resolveRowEffectiveValue(
+              llinTypeRow,
+              resolutionsByMetadataRowId,
+              disabledRowIds,
+          )
+        : null;
+
+    const hasTypedLlinBrandMatch = LLIN_BRAND_OPTIONS.some(
+        brand => brand.type === llinTypeValue,
+    );
+    if (llinTypeValue && hasTypedLlinBrandMatch) {
+        const llinBrandOptions = LLIN_BRAND_OPTIONS.filter(
+            brand => brand.type === llinTypeValue || brand.type === null,
+        ).map(brand => brand.label);
+        optionsByRowId.set(LLIN_BRAND_ROW_ID, llinBrandOptions);
+    }
+
+    return optionsByRowId;
+}
+
 function resolveRowEffectiveValue(
     row: MetadataRow,
     resolutionsByMetadataRowId: Map<string, string>,
@@ -103,6 +136,11 @@ export function evaluateUnmetRequiredRowIds(
     disabledRowIds: Set<string>,
 ): Set<string> {
     const unmetRequiredRowIds = new Set<string>();
+    const optionsByRowId = evaluateRowOptionsById(
+        sections,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
 
     for (const section of sections) {
         for (const row of section.rows) {
@@ -113,7 +151,12 @@ export function evaluateUnmetRequiredRowIds(
                 resolutionsByMetadataRowId,
                 disabledRowIds,
             );
-            if (effectiveValue === null) {
+            const allowedOptions = optionsByRowId.get(row.id);
+            const isEffectiveValueDisallowed =
+                !!effectiveValue &&
+                !!allowedOptions &&
+                !allowedOptions.includes(effectiveValue);
+            if (effectiveValue === null || isEffectiveValueDisallowed) {
                 unmetRequiredRowIds.add(row.id);
             }
         }
