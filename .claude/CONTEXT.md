@@ -294,22 +294,21 @@ values and LLIN Brand's 21 values match the mobile app's own option lists
 spelling-for-spelling (e.g. `Pyrethroid Only`, `OLYSET Plus`), since those are
 the exact strings stored on prod. They mirror Uganda's official DHIS2 "MAL 001"
 malaria surveillance form (`MAL 001-ER17`/`ER28`); the backend's
-`dhis2-mapping.service.ts` matches them case-insensitively and silently fails
-to map any stored value outside this list, so constraining the dropdown to it
-is a correctness fix, not just a UI change.
-Collector Title's 3 values and Collection Method's 3 values have no such backend
-mapping to anchor them; they were confirmed instead by inspecting distinct
-values across live test-program sessions. Unlike LLIN Type/Brand (which include
-`Other` as an escape hatch, matching the MAL 001 form), Collector
-Title/Collection Method have no `Other` value: a row whose current value isn't
-one of the 3 valid options is a resolvable conflict a VCO must correct to a
-valid value, not a case to be preserved. When a row's current/conflicting value
-doesn't match any option, the resolution control (a `Select`) simply shows its
-placeholder rather than the stale value — the per-session table cells above it
-still show the actual stored value, so nothing is hidden, only unselectable.
-_Avoid_: making these fields free text again to "preserve" out-of-list legacy
-values (defeats the point); adding a backend-configurable options list for these
-four fields.
+`dhis2-mapping.service.ts` matches them case-insensitively and silently fails to
+map any stored value outside this list, so constraining the dropdown to it is a
+correctness fix, not just a UI change. Collector Title's 3 values and Collection
+Method's 3 values have no such backend mapping to anchor them; they were
+confirmed instead by inspecting distinct values across live test-program
+sessions. Unlike LLIN Type/Brand (which include `Other` as an escape hatch,
+matching the MAL 001 form), Collector Title/Collection Method have no `Other`
+value: a row whose current value isn't one of the 3 valid options is a
+resolvable conflict a VCO must correct to a valid value, not a case to be
+preserved. When a row's current/conflicting value doesn't match any option, the
+resolution control (a `Select`) simply shows its placeholder rather than the
+stale value — the per-session table cells above it still show the actual stored
+value, so nothing is hidden, only unselectable. _Avoid_: making these fields
+free text again to "preserve" out-of-list legacy values (defeats the point);
+adding a backend-configurable options list for these four fields.
 
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
