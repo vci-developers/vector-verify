@@ -30,6 +30,7 @@ const MAX_ZOOM = 5;
 
 interface SpecimenImageCarouselProps {
     specimen: Specimen;
+    enableKeyboardNavigation?: boolean;
     onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
@@ -43,6 +44,7 @@ function isThumbnailImage(specimen: Specimen, image: SpecimenImage) {
 
 export default function SpecimenImageCarousel({
     specimen,
+    enableKeyboardNavigation = false,
     onCurrentImageChange,
 }: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
@@ -162,6 +164,23 @@ export default function SpecimenImageCarousel({
             ),
         ];
     }, [specimen]);
+
+    useEffect(() => {
+        if (!enableKeyboardNavigation || !imageViewerApi) return;
+        const navigate = (event: KeyboardEvent) => {
+            if (event.defaultPrevented) return;
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.key === 'ArrowLeft') {
+                imageViewerApi.scrollPrev();
+            } else {
+                imageViewerApi.scrollNext();
+            }
+        };
+        window.addEventListener('keydown', navigate, true);
+        return () => window.removeEventListener('keydown', navigate, true);
+    }, [enableKeyboardNavigation, imageViewerApi]);
 
     const hasAnyImages = allImagesForSpecimen.length > 0;
     const hasMultipleImages = allImagesForSpecimen.length > 1;
