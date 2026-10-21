@@ -200,7 +200,8 @@
         "somethingWentWrong": "Something went wrong loading this page. Please try again later or contact support.",
         "sitesListTab": "SITES LIST",
         "submissionsTab": "SUBMISSIONS",
-        "sessionsTab": "SESSIONS"
+        "sessionsTab": "SESSIONS",
+        "specimensTab": "SPECIMENS"
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
@@ -240,6 +241,23 @@
         "reassignSuccess": "Session reassigned.",
         "reassignResetSuccess": "Session reassigned. The affected Review Unit was reset to Needs Review.",
         "reassignError": "Failed to reassign the session. Please try again."
+    },
+    "SpecimenChangelog": {
+        "openChanges": "View {count, plural, one {# prediction change} other {# prediction changes}} for specimen {specimenId}",
+        "title": "Specimen {specimenId}",
+        "context": "Session {sessionId} · Site {siteId}",
+        "predictionChanges": "Prediction changes ({count})",
+        "timezone": "Times shown in {timezone}",
+        "image": "Image {number}",
+        "species": "Species",
+        "sex": "Sex",
+        "abdomenStatus": "Abdomen",
+        "changedTo": "changed to",
+        "unknownReviewer": "Unknown reviewer",
+        "noChanges": "No prediction changes",
+        "imageId": "Image ID {id}",
+        "unknownImage": "Image unavailable",
+        "unavailableChanges": "Changed-field details are unavailable for this log entry."
     },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",
@@ -356,5 +374,35 @@
         "noSpecimenData": "No specimen data",
         "numRemaining": "{count} remaining",
         "pageOfTotal": "{page} of {total}"
+    },
+    "ReviewSpecimens": {
+        "cycle": "Cycle",
+        "specimen": "Specimen",
+        "session": "Session",
+        "site": "Site",
+        "species": "Species",
+        "sex": "Sex",
+        "abdomenStatus": "Abdomen status",
+        "images": "Images",
+        "changes": "Changes",
+        "review": "Review",
+        "search": "Search by specimen ID...",
+        "allSites": "All sites",
+        "all": "All: {field}",
+        "preview": "Preview images for specimen {specimenId}",
+        "previewDescription": "Read-only image preview. Use the left and right arrow keys to navigate.",
+        "error": "Unable to load specimens or their sessions.",
+        "imagesError": "Unable to load specimen images.",
+        "logsError": "Unable to load changes.",
+        "empty": "No specimens match these filters.",
+        "conflicts": "Resolve metadata conflicts and required fields in step 1 before reviewing images.",
+        "accessError": "Unable to verify review access.",
+        "missingCycle": "This specimen has no assigned collection cycle.",
+        "checking": "Checking metadata conflicts...",
+        "loading": "Loading...",
+        "total": "{count} specimens",
+        "previous": "Previous",
+        "next": "Next",
+        "allCycles": "All cycles"
     }
 }

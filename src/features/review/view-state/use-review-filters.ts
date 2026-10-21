@@ -21,6 +21,7 @@ const reviewSearchParams = {
         'sites-list',
         'submissions',
         'sessions',
+        'specimens',
     ]).withDefault('sites-list'),
     startMonth: parseAsMonth.withDefault(monthDefaults.startMonth),
     endMonth: parseAsMonth.withDefault(monthDefaults.endMonth),
