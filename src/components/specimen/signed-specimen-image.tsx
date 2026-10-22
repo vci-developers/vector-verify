@@ -54,7 +54,7 @@ export default function SignedSpecimenImage({
     if (!signedResourceUrlResult.ok || loadFailed) {
         return (
             <div className="bg-muted text-muted-foreground absolute inset-0 flex items-center justify-center">
-                <p className="text-sm">Image unavailable</p>
+                <p className="px-2 text-center text-sm">Image unavailable</p>
             </div>
         );
     }
