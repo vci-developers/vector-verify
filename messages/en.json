@@ -11,7 +11,13 @@
         "language": "Language",
         "cancel": "Cancel",
         "save": "Save",
-        "saving": "Saving…"
+        "saving": "Saving…",
+        "tryAgain": "Try again"
+    },
+    "Sidebar": {
+        "loadErrorTitle": "Couldn't load navigation",
+        "loadErrorFallback": "Unable to load navigation. Please try again.",
+        "retrying": "Retrying…"
     },
     "Navigation": {
         "dashboard": "Dashboard",
