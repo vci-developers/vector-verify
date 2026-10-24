@@ -79,7 +79,7 @@ function getReviewUrl() {
     );
 }
 
-test('preserves the cycle, specimen and timezone when linking to step 2', () => {
+test('preserves the cycle, specimen and timezone when linking to image review', () => {
     renderReviewLink(
         {
             session,
@@ -98,7 +98,7 @@ test('preserves the cycle, specimen and timezone when linking to step 2', () => 
     expect(reviewUrl.pathname).toBe('/review/89');
     expect(reviewUrl.searchParams.get('collectionCycleId')).toBe('7');
     expect(reviewUrl.searchParams.get('specimenId')).toBe('42');
-    expect(reviewUrl.searchParams.get('step')).toBe('2');
+    expect(reviewUrl.searchParams.get('step')).toBe('images');
     expect(reviewUrl.searchParams.get('timezone')).toBe('Africa/Kampala');
     expect(reviewUrl.searchParams.has('startDate')).toBe(false);
     expect(reviewUrl.searchParams.has('endDate')).toBe(false);
@@ -125,7 +125,7 @@ test('scopes cycle-less sessions to their UTC calendar month, including leap yea
     expect(reviewUrl.searchParams.has('collectionCycleId')).toBe(false);
     expect(reviewUrl.searchParams.has('timezone')).toBe(false);
     expect(reviewUrl.searchParams.get('specimenId')).toBe('42');
-    expect(reviewUrl.searchParams.get('step')).toBe('2');
+    expect(reviewUrl.searchParams.get('step')).toBe('images');
 });
 
 test('keeps unassigned sessions disabled and explains why on keyboard focus', async () => {
