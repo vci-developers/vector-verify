@@ -81,7 +81,7 @@ export default function SpecimenReviewLink({
             </Tooltip>
         );
     const queryParams = new URLSearchParams({
-        step: '2',
+        step: 'images',
         specimenId: String(specimenId),
     });
     if (session.collectionCycleId !== null) {

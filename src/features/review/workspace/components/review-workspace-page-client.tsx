@@ -48,7 +48,7 @@ export default function ReviewWorkspacePageClient({
     const t = useTranslations('ReviewWorkspace');
     const searchParams = useSearchParams();
     const [requestedStepIndex, setCurrentStepIndex] = useState(
-        searchParams.get('step') === '2' ? 1 : 0,
+        searchParams.get('step') === 'images' ? 1 : 0,
     );
 
     const sessionQueryParams: GetAllSessionsQueryParams =
