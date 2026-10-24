@@ -3,39 +3,13 @@ import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema'
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { SpecimenChangelog } from '../validation/specimen-changelog-schema';
 
-const changeValueSchema = z.union([
-    z
-        .object({ before: z.string().nullable(), after: z.string().nullable() })
-        .transform(change => ({
-            previousValue: change.before,
-            value: change.after,
-        })),
-    z
-        .object({
-            oldValue: z.string().nullable(),
-            newValue: z.string().nullable(),
-        })
-        .transform(change => ({
-            previousValue: change.oldValue,
-            value: change.newValue,
-        })),
-    z.object({
-        previousValue: z.string().nullable(),
-        value: z.string().nullable(),
-    }),
-    z
-        .object({ from: z.string().nullable(), to: z.string().nullable() })
-        .transform(change => ({
-            previousValue: change.from,
-            value: change.to,
-        })),
-    z
-        .object({ old: z.string().nullable(), new: z.string().nullable() })
-        .transform(change => ({
-            previousValue: change.old,
-            value: change.new,
-        })),
-]);
+const changeValueSchema = z
+    .object({ before: z.string().nullable(), after: z.string().nullable() })
+    .transform(change => ({
+        previousValue: change.before,
+        value: change.after,
+    }));
+const imageChangesSchema = z.record(z.string(), z.unknown());
 const predictionFields = ['species', 'sex', 'abdomenStatus'] as const;
 
 export function buildSpecimenChangelog(
@@ -62,6 +36,9 @@ export function buildSpecimenChangelog(
                     (log.specimenId ?? log.fields?.specimenId) === specimen.id,
             )
             .map(log => {
+                const imageChanges = imageChangesSchema.safeParse(
+                    log.changes?.image,
+                );
                 const imageId = log.fields?.imageId ?? log.metadata?.imageId;
                 const imageIndex = orderedImages.findIndex(
                     image => image.id === imageId,
@@ -72,14 +49,16 @@ export function buildSpecimenChangelog(
                     createdAt: log.createdAt,
                     imageNumber: imageIndex >= 0 ? imageIndex + 1 : null,
                     imageId: typeof imageId === 'number' ? imageId : undefined,
-                    changes: predictionFields.flatMap(field => {
-                        const parsed = changeValueSchema.safeParse(
-                            log.changes?.[field],
-                        );
-                        return parsed.success
-                            ? [{ field, ...parsed.data }]
-                            : [];
-                    }),
+                    changes: imageChanges.success
+                        ? predictionFields.flatMap(field => {
+                              const parsedChange = changeValueSchema.safeParse(
+                                  imageChanges.data[field],
+                              );
+                              return parsedChange.success
+                                  ? [{ field, ...parsedChange.data }]
+                                  : [];
+                          })
+                        : [],
                 };
             }),
     };

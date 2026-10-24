@@ -27,8 +27,11 @@ const log = reviewLogSchema.parse({
     performedBy: { userId: 2, name: 'Reviewer' },
     createdAt: 1000,
     changes: {
-        species: { from: 'Aedes', to: 'Culex' },
-        sex: { from: 'Male', to: 'Female' },
+        image: {
+            species: { before: 'Culex', after: 'Aedes' },
+            sex: { before: 'Female', after: 'Male' },
+            abdomenStatus: { before: 'Gravid', after: '' },
+        },
     },
 });
 
@@ -42,12 +45,13 @@ test('keeps numeric specimen matches, not display specimen IDs', () => {
     expect(result.specimenId).toBe('CMS007');
 });
 
-test('groups changed fields into one entry per log row', () => {
+test('groups nested image changes into one entry and preserves empty strings', () => {
     const result = buildSpecimenChangelog(specimen, 89, 'UTC', [log]);
     expect(result.edits).toHaveLength(1);
-    expect(result.edits[0]?.changes.map(change => change.field)).toEqual([
-        'species',
-        'sex',
+    expect(result.edits[0]?.changes).toEqual([
+        { field: 'species', previousValue: 'Culex', value: 'Aedes' },
+        { field: 'sex', previousValue: 'Female', value: 'Male' },
+        { field: 'abdomenStatus', previousValue: 'Gravid', value: '' },
     ]);
     expect(result.edits[0]).toMatchObject({
         imageNumber: 1,
@@ -68,7 +72,9 @@ test('preserves null values and does not invent an image number', () => {
             ...log,
             performedBy: null,
             fields: { imageId: 123 },
-            changes: { abdomenStatus: { previousValue: null, value: 'Unfed' } },
+            changes: {
+                image: { abdomenStatus: { before: null, after: 'Unfed' } },
+            },
         },
     ]);
     expect(result.edits[0]).toMatchObject({
@@ -81,9 +87,41 @@ test('preserves null values and does not invent an image number', () => {
     });
 });
 
-test('retains edits with unrecognized change details instead of claiming zero edits', () => {
+test.each([null, {}, { image: null }, { image: [] }])(
+    'retains edits with missing or invalid image changes: %j',
+    changes => {
+        const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
+            { ...log, changes },
+        ]);
+        expect(result.edits).toHaveLength(1);
+        expect(result.edits[0]?.changes).toEqual([]);
+    },
+);
+
+test('keeps valid fields when other image changes are malformed or unsupported', () => {
     const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
-        { ...log, changes: null },
+        {
+            ...log,
+            changes: {
+                image: {
+                    species: { before: 'Culex', after: 'Aedes' },
+                    sex: { from: 'Female', to: 'Male' },
+                    abdomenStatus: { before: 'Gravid' },
+                },
+            },
+        },
+    ]);
+    expect(result.edits[0]?.changes).toEqual([
+        { field: 'species', previousValue: 'Culex', value: 'Aedes' },
+    ]);
+});
+
+test('does not interpret top-level changes as image prediction changes', () => {
+    const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
+        {
+            ...log,
+            changes: { species: { before: 'Culex', after: 'Aedes' } },
+        },
     ]);
     expect(result.edits).toHaveLength(1);
     expect(result.edits[0]?.changes).toEqual([]);
