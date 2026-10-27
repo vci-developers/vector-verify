@@ -318,6 +318,22 @@ classification types recorded per annotation. _Avoid_: Morphological
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
 
+**Original Prediction**: The species, sex, and abdomen status the model assigned
+to a specimen image at upload, before any VCO edit. Never changes. Anything that
+measures the model (AI Performance, model confidence) uses the Original
+Prediction; everything that counts specimens (DHIS2, reports, Operations) uses
+the current, possibly edited, value. _Avoid_: App prediction, initial value
+
+**Edited Image**: A specimen image whose prediction a VCO has changed at least
+once during Review. Sticky — it stays edited even if the value is later set back
+to the Original Prediction. Only a specimen's thumbnail image is editable — it
+is the image DHIS2 counts. Every edit is recorded in the **Prediction
+Changelog**. _Avoid_: Corrected, overridden
+
+**Prediction Changelog**: The ordered record of every edit to an image's
+prediction — who, when, which field, before and after. _Avoid_: History, audit
+trail
+
 ### Exports & Developer Tooling
 
 **Report Export**: The polished, cleaned `.xlsx` a VCO downloads from the
