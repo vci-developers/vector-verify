@@ -4,12 +4,7 @@ import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-f
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
 import { useGetSurveillanceFormsBySessionIds } from '@/api/surveillance-form/hooks/use-get-surveillance-form-by-session-id';
 import type { Session } from '@/api/session/validation/session-schema';
-import {
-    buildDynamicSessionSection,
-    buildSurveillanceSection,
-    flattenQuestions,
-} from '../metadata/utils/metadata-section';
-import { buildUnitIdentitySections } from '../metadata/utils/group-session-units-by-identity';
+import { buildMetadataReviewSections } from '../metadata/utils/build-metadata-review-sections';
 import { getMetadataReviewBlockers } from '../metadata/utils/get-metadata-review-blockers';
 import { accumulateSessionSummary } from '@/features/review/utils/accumulate-session-summary';
 import {
@@ -67,42 +62,24 @@ export function useReviewImageAccess(sessions: Session[], programId: number) {
             return [session.sessionId, result?.ok ? result.data : null];
         }),
     );
-    const hasAnySurvey = [...surveysBySessionId.values()].some(Boolean);
-    const sections = isDynamic
-        ? [
-              buildDynamicSessionSection(
-                  sessions,
+    const { sections, questionsById } = buildMetadataReviewSections(
+        sessions,
+        isDynamic
+            ? {
+                  mode: 'dynamic',
                   questions,
-                  answersBySessionId,
-              ),
-              ...buildUnitIdentitySections(
-                  sessions,
-                  questions,
-                  answersBySessionId,
-              ),
-          ]
-        : [
-              buildSurveillanceSection(
-                  hasAnySurvey
-                      ? sessions.filter(
-                            session =>
-                                surveysBySessionId.get(session.sessionId) !=
-                                null,
-                        )
-                      : sessions,
-                  surveysBySessionId,
-              ),
-          ];
+                  formAnswersBySessionId: answersBySessionId,
+              }
+            : {
+                  mode: 'surveillance',
+                  surveillanceFormBySessionId: surveysBySessionId,
+              },
+    );
     const resolutions = new Map<string, string>();
     const { areAllConflictsResolved } = getMetadataReviewBlockers(
         sections,
         resolutions,
-        new Map(
-            flattenQuestions(questions).map(question => [
-                question.id,
-                question,
-            ]),
-        ),
+        questionsById,
     );
     return areAllConflictsResolved ? 'allowed' : 'blocked';
 }
