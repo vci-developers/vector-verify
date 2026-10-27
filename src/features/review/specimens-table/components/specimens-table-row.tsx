@@ -17,7 +17,6 @@ interface SpecimensTableRowProps {
     session?: Session;
     site?: Site;
     cycleLabel?: string;
-    programId: number;
     hasCollectionCycles: boolean;
     timezone?: string;
 }
@@ -26,7 +25,6 @@ export default function SpecimensTableRow({
     session,
     site,
     cycleLabel,
-    programId,
     hasCollectionCycles,
     timezone,
 }: SpecimensTableRowProps) {
@@ -79,7 +77,6 @@ export default function SpecimensTableRow({
                 {session ? (
                     <SpecimenReviewLink
                         session={session}
-                        programId={programId}
                         specimenId={specimen.id}
                         hasCollectionCycles={hasCollectionCycles}
                         timezone={timezone}
