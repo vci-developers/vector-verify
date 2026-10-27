@@ -3,7 +3,7 @@
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
-import { useGetAllReviewLogs } from '@/api/session/hooks/use-get-all-review-logs';
+import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
 import { TableCell, TableRow } from '@/components/ui/table';
 import SpecimenImagePreview from './specimen-image-preview';
 import SpecimenReviewLink from './specimen-review-link';
@@ -14,6 +14,8 @@ import { useTranslations } from 'next-intl';
 
 interface SpecimensTableRowProps {
     specimen: Specimen;
+    reviewLogs?: ReviewLog[];
+    reviewLogsError: boolean;
     session?: Session;
     site?: Site;
     cycleLabel?: string;
@@ -22,6 +24,8 @@ interface SpecimensTableRowProps {
 }
 export default function SpecimensTableRow({
     specimen,
+    reviewLogs,
+    reviewLogsError,
     session,
     site,
     cycleLabel,
@@ -29,11 +33,6 @@ export default function SpecimensTableRow({
     timezone,
 }: SpecimensTableRowProps) {
     const t = useTranslations('ReviewSpecimens');
-    const { data: logs, isError } = useGetAllReviewLogs({
-        specimenId: specimen.id,
-        action: 'update_specimen_image_prediction',
-        hasChanges: 'true',
-    });
     const imageCount = specimen.images?.length ?? 0;
     const prediction = specimen.thumbnailImage;
     return (
@@ -58,9 +57,9 @@ export default function SpecimensTableRow({
             <TableCell>
                 {!session ? (
                     t('accessError')
-                ) : isError || (logs && !logs.ok) ? (
+                ) : reviewLogsError ? (
                     <span role="alert">{t('logsError')}</span>
-                ) : !logs ? (
+                ) : !reviewLogs ? (
                     t('loading')
                 ) : (
                     <SpecimenChangelogDrawer
@@ -68,7 +67,7 @@ export default function SpecimensTableRow({
                             specimen,
                             session.siteId,
                             timezone ?? 'UTC',
-                            logs.data.logs,
+                            reviewLogs,
                         )}
                     />
                 )}

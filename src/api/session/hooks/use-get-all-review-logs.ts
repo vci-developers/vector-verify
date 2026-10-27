@@ -10,8 +10,12 @@ import type { Result } from '@/lib/result/result';
 import type { NetworkError } from '@/lib/network/network-error';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 
-export function useGetAllReviewLogs(queryParams: GetReviewLogsQueryParams) {
+export function useGetAllReviewLogs(
+    queryParams: GetReviewLogsQueryParams,
+    { enabled = true }: { enabled?: boolean } = {},
+) {
     return useQuery({
+        enabled,
         queryKey: sessionKeys.allReviewLogs(queryParams),
         queryFn: async (): Promise<
             Result<GetAllReviewLogsResponse, NetworkError>

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useGetSpecimens } from '@/api/specimen/hooks/use-get-specimens';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import { useGetAllReviewLogs } from '@/api/session/hooks/use-get-all-review-logs';
+import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import {
@@ -81,6 +83,12 @@ function SpecimensTableContent({
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
     const collectionCycleId = selectedCycleIds[0];
+    const selectedSiteId =
+        siteId !== 'all'
+            ? Number(siteId)
+            : locationQueryParam && 'siteId' in locationQueryParam
+              ? locationQueryParam.siteId
+              : undefined;
     const {
         data: sessionsResult,
         isPending: sessionsPending,
@@ -103,12 +111,7 @@ function SpecimensTableContent({
         endDate,
         sessionType: 'SURVEILLANCE',
         ...locationQueryParam,
-        siteId:
-            siteId !== 'all'
-                ? Number(siteId)
-                : locationQueryParam && 'siteId' in locationQueryParam
-                  ? locationQueryParam.siteId
-                  : undefined,
+        siteId: selectedSiteId,
         collectionCycleId,
         specimenId: search || undefined,
         species: species === 'all' ? undefined : species,
@@ -118,6 +121,30 @@ function SpecimensTableContent({
         limit: PAGE_SIZE,
         offset,
     });
+    const { data: reviewLogsResult, isError: isReviewLogsError } =
+        useGetAllReviewLogs(
+            {
+                siteId: selectedSiteId,
+                collectionCycleId,
+                action: 'update_specimen_image_prediction',
+                hasChanges: 'true',
+            },
+            {
+                enabled:
+                    result?.ok === true && result.data.specimens.length > 0,
+            },
+        );
+    const reviewLogsError = isReviewLogsError || reviewLogsResult?.ok === false;
+    const reviewLogsBySpecimenId = new Map<number, ReviewLog[]>();
+    if (reviewLogsResult?.ok) {
+        for (const log of reviewLogsResult.data.logs) {
+            const specimenId = log.specimenId ?? log.fields?.specimenId;
+            if (typeof specimenId !== 'number') continue;
+            const specimenLogs = reviewLogsBySpecimenId.get(specimenId) ?? [];
+            specimenLogs.push(log);
+            reviewLogsBySpecimenId.set(specimenId, specimenLogs);
+        }
+    }
     const sessions = sessionsResult?.ok ? sessionsResult.data.sessions : [];
     const columns = [
         'cycle',
@@ -253,6 +280,14 @@ function SpecimensTableContent({
                                         <SpecimensTableRow
                                             key={specimen.id}
                                             specimen={specimen}
+                                            reviewLogs={
+                                                reviewLogsResult?.ok
+                                                    ? (reviewLogsBySpecimenId.get(
+                                                          specimen.id,
+                                                      ) ?? [])
+                                                    : undefined
+                                            }
+                                            reviewLogsError={reviewLogsError}
                                             session={session}
                                             site={sites.find(
                                                 site =>
