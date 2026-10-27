@@ -68,9 +68,9 @@ export default function PredictionEditForm({
         value: NonNullable<PredictionEditFormInput['genus']>,
     ) {
         predictionEditForm.setValue('genus', value);
-        predictionEditForm.setValue('anophelesSpecies', undefined);
-        predictionEditForm.setValue('sex', undefined);
-        predictionEditForm.setValue('abdomenStatus', undefined);
+        predictionEditForm.setValue('anophelesSpecies', null);
+        predictionEditForm.setValue('sex', null);
+        predictionEditForm.setValue('abdomenStatus', null);
         predictionEditForm.clearErrors();
     }
 
@@ -78,7 +78,7 @@ export default function PredictionEditForm({
         value: NonNullable<PredictionEditFormInput['sex']>,
     ) {
         predictionEditForm.setValue('sex', value);
-        predictionEditForm.setValue('abdomenStatus', undefined);
+        predictionEditForm.setValue('abdomenStatus', null);
         predictionEditForm.clearErrors(['sex', 'abdomenStatus']);
     }
 

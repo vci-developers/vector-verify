@@ -18,9 +18,9 @@ export const editableAbdomenStatusSchema = abdomenStatusSchema.exclude([
 export const predictionEditFormSchema = z
     .object({
         genus: editableGenusSchema.optional(),
-        anophelesSpecies: editableAnophelesSpeciesSchema.optional(),
-        sex: editableSexSchema.optional(),
-        abdomenStatus: editableAbdomenStatusSchema.optional(),
+        anophelesSpecies: editableAnophelesSpeciesSchema.nullable().optional(),
+        sex: editableSexSchema.nullable().optional(),
+        abdomenStatus: editableAbdomenStatusSchema.nullable().optional(),
     })
     .superRefine((data, context) => {
         const { genus, anophelesSpecies, sex, abdomenStatus } = data;

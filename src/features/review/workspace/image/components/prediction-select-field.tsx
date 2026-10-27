@@ -13,7 +13,7 @@ interface PredictionSelectFieldProps<Option extends string> {
     id: string;
     label: string;
     options: readonly Option[];
-    value: Option | undefined;
+    value: Option | null | undefined;
     onValueChange: (value: Option) => void;
     isApplicable: boolean;
     error: ControllerFieldState['error'];
