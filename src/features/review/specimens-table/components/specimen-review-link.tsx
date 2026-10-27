@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import type { Session } from '@/api/session/validation/session-schema';
-import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { useReviewImageAccess } from '@/features/review/workspace/hooks/use-review-image-access';
 import { Button } from '@/components/ui/button';
 import {
     Tooltip,
@@ -16,14 +14,12 @@ import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 interface SpecimenReviewLinkProps {
     session: Session;
-    programId: number;
     specimenId: number;
     hasCollectionCycles: boolean;
     timezone?: string;
 }
 export default function SpecimenReviewLink({
     session,
-    programId,
     specimenId,
     hasCollectionCycles,
     timezone,
@@ -34,30 +30,7 @@ export default function SpecimenReviewLink({
     const endDate = format(endOfMonth(collectionMonth), 'yyyy-MM-dd');
     const isUnassigned =
         hasCollectionCycles && session.collectionCycleId === null;
-    const {
-        data: sessionsResult,
-        isPending,
-        isError,
-    } = useGetAllSessions(
-        {
-            siteIds: [session.siteId],
-            ...(session.collectionCycleId !== null
-                ? { collectionCycleId: session.collectionCycleId }
-                : { startDate, endDate }),
-            type: 'SURVEILLANCE',
-        },
-        { enabled: !isUnassigned },
-    );
-    const metadataAccess = useReviewImageAccess(
-        sessionsResult?.ok ? sessionsResult.data.sessions : [],
-        programId,
-    );
-    const access = isPending
-        ? 'loading'
-        : isError || (sessionsResult && !sessionsResult.ok)
-          ? 'error'
-          : metadataAccess;
-    if (access !== 'allowed' || isUnassigned)
+    if (isUnassigned)
         return (
             <Tooltip>
                 <TooltipTrigger asChild>
@@ -68,15 +41,7 @@ export default function SpecimenReviewLink({
                     </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                    {t(
-                        isUnassigned
-                            ? 'missingCycle'
-                            : access === 'blocked'
-                              ? 'conflicts'
-                              : access === 'error'
-                                ? 'accessError'
-                                : 'checking',
-                    )}
+                    {t('missingCycle')}
                 </TooltipContent>
             </Tooltip>
         );

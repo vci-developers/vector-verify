@@ -269,7 +269,6 @@ function SpecimensTableContent({
                                                       )
                                                     : undefined
                                             }
-                                            programId={programId}
                                             hasCollectionCycles={
                                                 collectionCycles.length > 0
                                             }
