@@ -5,6 +5,7 @@ export const formAnswerSchema = z.object({
     id: z.number(),
     frontendId: z.string().nullable(),
     questionId: z.number(),
+    questionKey: z.string().nullable(),
     parentId: z.number().nullable(),
     sessionUnitId: z.number().nullable(),
     sessionUnit: sessionUnitSchema.nullable(),
