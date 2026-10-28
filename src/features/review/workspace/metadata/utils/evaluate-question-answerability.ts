@@ -79,14 +79,13 @@ export function evaluateDisabledRowIds(
 }
 
 export function evaluateRowOptionsById(
-    sections: MetadataSection[],
+    rows: MetadataRow[],
     resolutionsByMetadataRowId: Map<string, string>,
     disabledRowIds: Set<string>,
 ): Map<string, string[]> {
     const optionsByRowId = new Map<string, string[]>();
-    const allRows = sections.flatMap(section => section.rows);
 
-    const llinTypeRow = allRows.find(row => row.id === LLIN_TYPE_ROW_ID);
+    const llinTypeRow = rows.find(row => row.id === LLIN_TYPE_ROW_ID);
     const llinTypeValue = llinTypeRow
         ? resolveRowEffectiveValue(
               llinTypeRow,
@@ -137,7 +136,7 @@ export function evaluateUnmetRequiredRowIds(
 ): Set<string> {
     const unmetRequiredRowIds = new Set<string>();
     const optionsByRowId = evaluateRowOptionsById(
-        sections,
+        sections.flatMap(section => section.rows),
         resolutionsByMetadataRowId,
         disabledRowIds,
     );

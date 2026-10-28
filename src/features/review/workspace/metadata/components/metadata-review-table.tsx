@@ -52,7 +52,7 @@ export default function MetadataReviewTable({
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
 
     const filteredOptionsByRowId = evaluateRowOptionsById(
-        sections,
+        sections.flatMap(section => section.rows),
         resolutionsByMetadataRowId,
         disabledRowIds,
     );
