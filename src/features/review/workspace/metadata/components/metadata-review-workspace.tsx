@@ -4,7 +4,6 @@ import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
 import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
 import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
-import { useGetFormsByVersions } from '@/api/form/hooks/use-get-forms-by-versions';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { sessionKeys } from '@/api/session/session-keys';
@@ -82,23 +81,6 @@ export default function MetadataReviewWorkspace({
     const formAnswerQueries = useGetFormAnswersBySessionIds(
         isDynamicFormMode ? sessionIds : [],
     );
-    const currentFormVersion = getCurrentFormByProgramIdResult?.ok
-        ? getCurrentFormByProgramIdResult.data.version
-        : undefined;
-    const olderFormVersions = [
-        ...new Set(
-            formAnswerQueries.flatMap(query =>
-                query.data?.ok &&
-                query.data.data.formVersion !== currentFormVersion
-                    ? [query.data.data.formVersion]
-                    : [],
-            ),
-        ),
-    ];
-    const olderFormQueries = useGetFormsByVersions(
-        programId,
-        olderFormVersions,
-    );
 
     const { mutateAsync: resolveSessionConflictsAsync } =
         useResolveSessionConflicts();
@@ -134,10 +116,7 @@ export default function MetadataReviewWorkspace({
     let questionsById = new Map<number, FormQuestion>();
 
     if (isDynamicFormMode) {
-        if (
-            formAnswerQueries.some(query => query.isPending) ||
-            olderFormQueries.some(query => query.isPending)
-        ) {
+        if (formAnswerQueries.some(query => query.isPending)) {
             return <SkeletonList count={6} height="lg" width="full" />;
         }
 
@@ -158,41 +137,19 @@ export default function MetadataReviewWorkspace({
             );
         }
 
-        if (olderFormQueries.some(query => !query.data?.ok)) {
-            return <ErrorBanner message={t('olderFormError')} />;
-        }
-
         const currentFormQuestions =
             getCurrentFormByProgramIdResult.data.questions ?? [];
-        const formQuestionsByVersion = new Map<string, FormQuestion[]>(
-            olderFormQueries.flatMap(query =>
-                query.data?.ok
-                    ? [
-                          [
-                              query.data.data.version,
-                              query.data.data.questions ?? [],
-                          ],
-                      ]
-                    : [],
-            ),
-        );
 
         const formAnswersBySessionId = new Map<number, FormAnswer[]>(
             sessions.map((session, index) => {
                 const formAnswersResult = formAnswerQueries[index]?.data;
                 if (!formAnswersResult?.ok) return [session.sessionId, []];
-                const { answers, formVersion } = formAnswersResult.data;
-                const answeredFormQuestions =
-                    formQuestionsByVersion.get(formVersion);
                 return [
                     session.sessionId,
-                    answeredFormQuestions
-                        ? remapFormAnswersToCurrentForm(
-                              answers,
-                              answeredFormQuestions,
-                              currentFormQuestions,
-                          )
-                        : answers,
+                    remapFormAnswersToCurrentForm(
+                        formAnswersResult.data.answers,
+                        currentFormQuestions,
+                    ),
                 ];
             }),
         );
