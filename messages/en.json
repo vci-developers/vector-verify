@@ -410,7 +410,6 @@
         "preview": "Preview images for specimen {specimenId}",
         "previewDescription": "Read-only image preview. Use the left and right arrow keys to navigate.",
         "error": "Unable to load specimens or their sessions.",
-        "imagesError": "Unable to load specimen images.",
         "logsError": "Unable to load changes.",
         "empty": "No specimens match these filters.",
         "conflicts": "Resolve metadata conflicts and required fields in step 1 before reviewing images.",
