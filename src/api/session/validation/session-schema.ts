@@ -27,6 +27,7 @@ export const collectionMethodSchema = z.enum([
     'Pyrethrum Spray Catch (PSC)',
     'Human Landing Catch (HLC)',
     'CDC Light Trap (LTC)',
+    'Other',
 ]);
 
 export const sessionSchema = z.object({

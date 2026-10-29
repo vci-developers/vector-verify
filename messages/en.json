@@ -253,6 +253,7 @@
         "collectionDate": "Collection Date: ",
         "sessionCreated": "Session Created: ",
         "selectValuePlaceholder": "Select value",
+        "otherValuePlaceholder": "Specify other",
         "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
         "missingSurveillanceFormNotice": "{count, plural, one {# session is missing a surveillance form} other {# sessions are missing surveillance forms}} and won't receive the values saved here: {dates}. Follow up with the field team to submit the missing {count, plural, one {form} other {forms}} before certifying.",
         "noSessions": "No sessions found for this Sentinel Site.",

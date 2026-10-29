@@ -17,10 +17,11 @@ import { CircleAlert, CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
 import {
+    COLLECTION_METHOD_ROW_ID,
     formatDisplayValue,
     NOT_APPLICABLE,
     type MetadataSection,
-} from '../utils/metadata-section';
+} from '@/features/review/workspace/metadata/utils/metadata-section';
 import ConflictResolutionControl from './conflict-resolution-control';
 
 interface MetadataReviewTableProps {
@@ -250,6 +251,10 @@ export default function MetadataReviewTable({
                                                         filteredOptionsByRowId.get(
                                                             row.id,
                                                         ) ?? row.options
+                                                    }
+                                                    isOtherTextEnabled={
+                                                        row.id ===
+                                                        COLLECTION_METHOD_ROW_ID
                                                     }
                                                     value={controlValue}
                                                     onValueChange={value =>

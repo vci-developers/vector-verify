@@ -1,7 +1,9 @@
 import { LLIN_BRAND_OPTIONS } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import { collectionMethodSchema } from '@/api/session/validation/session-schema';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
 import {
+    COLLECTION_METHOD_ROW_ID,
     LLIN_BRAND_ROW_ID,
     LLIN_TYPE_ROW_ID,
     NOT_APPLICABLE,
@@ -143,7 +145,7 @@ export function evaluateUnmetRequiredRowIds(
 
     for (const section of sections) {
         for (const row of section.rows) {
-            if (!row.required || disabledRowIds.has(row.id)) continue;
+            if (disabledRowIds.has(row.id)) continue;
 
             const effectiveValue = resolveRowEffectiveValue(
                 row,
@@ -155,7 +157,13 @@ export function evaluateUnmetRequiredRowIds(
                 !!effectiveValue &&
                 !!allowedOptions &&
                 !allowedOptions.includes(effectiveValue);
-            if (effectiveValue === null || isEffectiveValueDisallowed) {
+            const isRequiredValueMissing =
+                row.required &&
+                (effectiveValue === null || isEffectiveValueDisallowed);
+            const isOtherTextMissing =
+                row.id === COLLECTION_METHOD_ROW_ID &&
+                effectiveValue?.trim() === collectionMethodSchema.enum.Other;
+            if (isRequiredValueMissing || isOtherTextMissing) {
                 unmetRequiredRowIds.add(row.id);
             }
         }
