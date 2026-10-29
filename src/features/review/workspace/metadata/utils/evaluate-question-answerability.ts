@@ -13,7 +13,6 @@ export function evaluateDisabledRowIds(
     sections: MetadataSection[],
     resolutionsByMetadataRowId: Map<string, string>,
     questionsById: Map<number, FormQuestion>,
-    currentFormSessionIds: Set<number>,
 ): Set<string> {
     const disabledRowIds = new Set<string>();
     const allRows = sections.flatMap(section => section.rows);
@@ -49,13 +48,7 @@ export function evaluateDisabledRowIds(
                 const prerequisite = questionsById.get(
                     Number(row.fieldName),
                 )?.prerequisite;
-                if (
-                    !prerequisite ||
-                    ![...row.fieldValueBySessionId.keys()].some(sessionId =>
-                        currentFormSessionIds.has(sessionId),
-                    )
-                )
-                    continue;
+                if (!prerequisite) continue;
                 const prerequisiteMet = isPrerequisiteMet(
                     prerequisite,
                     questionId =>
@@ -124,6 +117,7 @@ export function evaluateUnmetRequiredRowIds(
     sections: MetadataSection[],
     resolutionsByMetadataRowId: Map<string, string>,
     disabledRowIds: Set<string>,
+    questionsById: Map<number, FormQuestion>,
     currentFormSessionIds: Set<number>,
 ): Set<string> {
     const unmetRequiredRowIds = new Set<string>();
@@ -132,6 +126,7 @@ export function evaluateUnmetRequiredRowIds(
         for (const row of section.rows) {
             const isAskedOfAnySession =
                 row.entity !== 'formAnswer' ||
+                !!questionsById.get(Number(row.fieldName))?.prerequisite ||
                 [...row.fieldValueBySessionId].some(
                     ([sessionId, fieldValue]) =>
                         currentFormSessionIds.has(sessionId) ||

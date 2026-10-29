@@ -229,13 +229,13 @@ export default function MetadataReviewWorkspace({
         sections,
         resolutionsByMetadataRowId,
         questionsById,
-        currentFormSessionIds,
     );
 
     const unmetRequiredRowIds = evaluateUnmetRequiredRowIds(
         sections,
         resolutionsByMetadataRowId,
         disabledRowIds,
+        questionsById,
         currentFormSessionIds,
     );
 
