@@ -33,7 +33,7 @@ export default function SpecimenImagePreview({
                     <Search className="size-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+            <DialogContent className="max-h-[90vh] grid-cols-1 overflow-y-auto sm:max-w-3xl">
                 <DialogHeader>
                     <DialogTitle>
                         {t('preview', { specimenId: specimen.specimenId })}
