@@ -21,6 +21,7 @@ export function applyConflictResolutions(
     const resolvedFormAnswers: Partial<FormAnswer>[] = [];
 
     for (const metadataRow of metadataRows) {
+        if (metadataRow.isOutdated) continue;
         const chosenDisplayValue = disabledRowIds.has(metadataRow.id)
             ? NOT_APPLICABLE
             : resolutionsByMetadataRowId.get(metadataRow.id);

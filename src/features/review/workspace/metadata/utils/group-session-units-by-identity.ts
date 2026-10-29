@@ -3,6 +3,7 @@ import type { FormQuestion } from '@/api/form-question/validation/form-question-
 import type { Session } from '@/api/session/validation/session-schema';
 import {
     buildMetadataRow,
+    buildOutdatedRows,
     flattenQuestions,
     formatDisplayValue,
     questionToMetadataField,
@@ -20,10 +21,10 @@ export function buildUnitIdentitySections(
     const identityQuestions = unitScopedQuestions.filter(
         question => question.isUnitIdentityComponent,
     );
-    const nonIdentityQuestions = unitScopedQuestions.filter(
-        question => !question.isUnitIdentityComponent,
-    );
-    if (nonIdentityQuestions.length === 0) return [];
+    if (
+        !unitScopedQuestions.some(question => !question.isUnitIdentityComponent)
+    )
+        return [];
 
     const groupsByKey = new Map<
         string,
@@ -32,6 +33,7 @@ export function buildUnitIdentitySections(
             units: {
                 sessionId: number;
                 sessionUnitId: number;
+                unitAnswers: FormAnswer[];
                 valueByQuestionId: Map<number, unknown>;
             }[];
         }
@@ -74,6 +76,7 @@ export function buildUnitIdentitySections(
             group.units.push({
                 sessionId: session.sessionId,
                 sessionUnitId,
+                unitAnswers,
                 valueByQuestionId,
             });
         }
@@ -85,18 +88,27 @@ export function buildUnitIdentitySections(
         sessionUnitIdBySessionId: new Map(
             group.units.map(unit => [unit.sessionId, unit.sessionUnitId]),
         ),
-        rows: unitScopedQuestions.map(question =>
-            buildMetadataRow(
-                questionToMetadataField(question),
-                new Map(
-                    group.units.map(unit => [
-                        unit.sessionId,
-                        unit.valueByQuestionId.get(question.id) ?? null,
-                    ]),
+        rows: [
+            ...unitScopedQuestions.map(question =>
+                buildMetadataRow(
+                    questionToMetadataField(question),
+                    new Map(
+                        group.units.map(unit => [
+                            unit.sessionId,
+                            unit.valueByQuestionId.get(question.id) ?? null,
+                        ]),
+                    ),
+                    key,
                 ),
+            ),
+            ...buildOutdatedRows(
+                new Map(
+                    group.units.map(unit => [unit.sessionId, unit.unitAnswers]),
+                ),
+                unitScopedQuestions,
                 key,
             ),
-        ),
+        ],
     }));
 }
 

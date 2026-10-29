@@ -1,7 +1,9 @@
 import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
-import type {
-    FormQuestion,
-    FormQuestionType,
+import {
+    formQuestionTypeSchema,
+    type FormQuestion,
+    type FormQuestionScope,
+    type FormQuestionType,
 } from '@/api/form-question/validation/form-question-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
@@ -97,6 +99,7 @@ export interface MetadataRow {
     required: boolean;
     options: string[] | null;
     isUnitIdentityComponent: boolean;
+    isOutdated: boolean;
 }
 
 export interface MetadataSection {
@@ -127,6 +130,30 @@ export function flattenQuestions(questions: FormQuestion[]): FormQuestion[] {
         }
     }
     return flattenedQuestions;
+}
+
+function buildQuestionMatchKey(
+    questionKey: string,
+    answerScope: FormQuestionScope,
+    type: string | null,
+): string {
+    return JSON.stringify([questionKey, answerScope, type]);
+}
+
+export function toQuestionMatchKey(question: FormQuestion): string {
+    return buildQuestionMatchKey(
+        question.questionKey,
+        question.answerScope,
+        question.type,
+    );
+}
+
+export function toAnswerMatchKey(formAnswer: FormAnswer): string {
+    return buildQuestionMatchKey(
+        formAnswer.questionKey ?? `questionId:${formAnswer.questionId}`,
+        formAnswer.sessionUnitId === null ? 'SESSION' : 'SESSION_UNIT',
+        formAnswer.type,
+    );
 }
 
 export function buildSurveillanceSection(
@@ -177,10 +204,11 @@ export function buildDynamicSessionSection(
     formAnswersBySessionId: Map<number, FormAnswer[]>,
 ): MetadataSection {
     const rows = buildSessionCoreRows(sessions);
+    const sessionScopedQuestions = flattenQuestions(
+        currentFormQuestions,
+    ).filter(question => question.answerScope === 'SESSION');
 
-    for (const question of flattenQuestions(currentFormQuestions).filter(
-        question => question.answerScope === 'SESSION',
-    )) {
+    for (const question of sessionScopedQuestions) {
         rows.push(
             buildMetadataRow(
                 questionToMetadataField(question),
@@ -196,6 +224,20 @@ export function buildDynamicSessionSection(
             ),
         );
     }
+
+    rows.push(
+        ...buildOutdatedRows(
+            new Map(
+                sessions.map(session => [
+                    session.sessionId,
+                    formAnswersBySessionId
+                        .get(session.sessionId)
+                        ?.filter(answer => answer.sessionUnitId === null) ?? [],
+                ]),
+            ),
+            sessionScopedQuestions,
+        ),
+    );
 
     return { key: 'session', title: null, rows };
 }
@@ -223,6 +265,7 @@ export function buildMetadataRow(
         required?: boolean;
         options?: string[] | null;
         isUnitIdentityComponent?: boolean;
+        isOutdated?: boolean;
     },
     fieldValueBySessionId: Map<number, unknown>,
     groupKey?: string,
@@ -235,6 +278,7 @@ export function buildMetadataRow(
         required,
         options,
         isUnitIdentityComponent,
+        isOutdated,
     } = field;
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(value =>
@@ -250,10 +294,11 @@ export function buildMetadataRow(
         fieldName,
         fieldType,
         fieldValueBySessionId,
-        hasConflict: distinctDisplayValues.size > 1,
+        hasConflict: !isOutdated && distinctDisplayValues.size > 1,
         required: required ?? false,
         options: options ?? null,
         isUnitIdentityComponent: isUnitIdentityComponent ?? false,
+        isOutdated: isOutdated ?? false,
     };
 }
 
@@ -269,4 +314,65 @@ export function questionToMetadataField(
         options: question.options,
         isUnitIdentityComponent: question.isUnitIdentityComponent,
     };
+}
+
+export function buildOutdatedRows(
+    formAnswersBySessionId: Map<number, FormAnswer[]>,
+    currentFormQuestions: FormQuestion[],
+    groupKey?: string,
+): MetadataRow[] {
+    const currentQuestionIds = new Set(
+        currentFormQuestions.map(question => question.id),
+    );
+    const outdatedAnswersBySessionId = new Map(
+        [...formAnswersBySessionId].map(([sessionId, formAnswers]) => [
+            sessionId,
+            formAnswers.filter(
+                formAnswer =>
+                    !currentQuestionIds.has(formAnswer.questionId) &&
+                    formatDisplayValue(formAnswer.value) !== NOT_APPLICABLE,
+            ),
+        ]),
+    );
+    const firstOutdatedAnswerByMatchKey = new Map<string, FormAnswer>();
+    for (const outdatedAnswers of outdatedAnswersBySessionId.values()) {
+        for (const outdatedAnswer of outdatedAnswers) {
+            const matchKey = toAnswerMatchKey(outdatedAnswer);
+            if (!firstOutdatedAnswerByMatchKey.has(matchKey)) {
+                firstOutdatedAnswerByMatchKey.set(matchKey, outdatedAnswer);
+            }
+        }
+    }
+
+    return [...firstOutdatedAnswerByMatchKey].map(
+        ([matchKey, firstOutdatedAnswer]) => {
+            const parsedFieldType = formQuestionTypeSchema.safeParse(
+                firstOutdatedAnswer.type,
+            );
+            return buildMetadataRow(
+                {
+                    entity: 'formAnswer',
+                    fieldName: String(firstOutdatedAnswer.questionId),
+                    label: firstOutdatedAnswer.label ?? '',
+                    fieldType: parsedFieldType.success
+                        ? parsedFieldType.data
+                        : 'text',
+                    isOutdated: true,
+                },
+                new Map(
+                    [...outdatedAnswersBySessionId].map(
+                        ([sessionId, outdatedAnswers]) => [
+                            sessionId,
+                            outdatedAnswers.find(
+                                outdatedAnswer =>
+                                    toAnswerMatchKey(outdatedAnswer) ===
+                                    matchKey,
+                            )?.value ?? null,
+                        ],
+                    ),
+                ),
+                groupKey,
+            );
+        },
+    );
 }
