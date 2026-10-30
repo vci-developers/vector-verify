@@ -35,14 +35,17 @@ export default function SpecimenReviewLink({
             <Tooltip>
                 <TooltipTrigger asChild>
                     <span tabIndex={0}>
-                        <Button variant="ghost" size="sm" disabled>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            disabled
+                        >
                             {t('review')}
                         </Button>
                     </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                    {t('missingCycle')}
-                </TooltipContent>
+                <TooltipContent>{t('missingCycle')}</TooltipContent>
             </Tooltip>
         );
     const queryParams = new URLSearchParams({
@@ -58,10 +61,11 @@ export default function SpecimenReviewLink({
     if (timezone) queryParams.set('timezone', timezone);
 
     return (
-        <Button asChild variant="ghost" size="sm">
-            <Link href={`/review/${session.siteId}?${queryParams.toString()}`}>
-                {t('review')}
-            </Link>
-        </Button>
+        <Link
+            href={`/review/${session.siteId}?${queryParams.toString()}`}
+            className="text-primary hover:underline"
+        >
+            {t('review')}
+        </Link>
     );
 }

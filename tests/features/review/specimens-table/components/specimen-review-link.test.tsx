@@ -44,6 +44,8 @@ function getReviewUrl() {
         name: messages.ReviewSpecimens.review,
     });
     expect(reviewLink).toHaveAttribute('href');
+    expect(reviewLink).toHaveClass('text-primary', 'hover:underline');
+    expect(reviewLink).not.toHaveAttribute('data-slot', 'button');
     return new URL(
         reviewLink.getAttribute('href') ?? '',
         'https://example.test',
@@ -92,6 +94,9 @@ test('keeps unassigned sessions disabled and explains why on keyboard focus', as
     expect(
         screen.getByRole('button', { name: messages.ReviewSpecimens.review }),
     ).toBeDisabled();
+    expect(
+        screen.getByRole('button', { name: messages.ReviewSpecimens.review }),
+    ).toHaveClass('text-muted-foreground');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
 
     await user.tab();
