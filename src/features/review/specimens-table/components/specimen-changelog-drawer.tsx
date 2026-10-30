@@ -140,7 +140,7 @@ export default function SpecimenChangelogDrawer({
                                             </dt>
                                             <dd className="flex flex-wrap items-center gap-2">
                                                 <span className="break-words">
-                                                    {change.previousValue ??
+                                                    {change.previousValue ||
                                                         '—'}
                                                 </span>
                                                 <ArrowRight
@@ -151,7 +151,7 @@ export default function SpecimenChangelogDrawer({
                                                     {t('changedTo')}
                                                 </span>
                                                 <span className="font-medium break-words">
-                                                    {change.value ?? '—'}
+                                                    {change.value || '—'}
                                                 </span>
                                             </dd>
                                         </div>

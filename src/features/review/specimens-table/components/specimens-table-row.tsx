@@ -37,7 +37,7 @@ export default function SpecimensTableRow({
     const prediction = specimen.thumbnailImage;
     return (
         <TableRow>
-            <TableCell>{cycleLabel ?? '-'}</TableCell>
+            <TableCell>{cycleLabel || '—'}</TableCell>
             <TableCell>
                 <span className="inline-flex items-center gap-1">
                     {specimen.specimenId}
@@ -48,11 +48,13 @@ export default function SpecimensTableRow({
             </TableCell>
             <TableCell>{specimen.sessionId}</TableCell>
             <TableCell>
-                {site ? getSiteDisplayName(site) : (session?.siteId ?? '-')}
+                {site
+                    ? getSiteDisplayName(site) || '—'
+                    : (session?.siteId ?? '—')}
             </TableCell>
-            <TableCell>{prediction?.species ?? '-'}</TableCell>
-            <TableCell>{prediction?.sex ?? '-'}</TableCell>
-            <TableCell>{prediction?.abdomenStatus ?? '-'}</TableCell>
+            <TableCell>{prediction?.species || '—'}</TableCell>
+            <TableCell>{prediction?.sex || '—'}</TableCell>
+            <TableCell>{prediction?.abdomenStatus || '—'}</TableCell>
             <TableCell>{imageCount}</TableCell>
             <TableCell>
                 {!session ? (
