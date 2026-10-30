@@ -3,6 +3,7 @@ import { collectionMethodSchema } from '@/api/session/validation/session-schema'
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { isPrerequisiteMet } from './evaluate-prerequisite';
 import {
+    BOOLEAN_TRUE_DISPLAY,
     COLLECTION_METHOD_ROW_ID,
     LLIN_BRAND_ROW_ID,
     LLIN_TYPE_ROW_ID,
@@ -55,19 +56,13 @@ export function evaluateDisabledRowIds(
                 if (!prerequisite) continue;
                 const prerequisiteMet = isPrerequisiteMet(
                     prerequisite,
-                    questionId => {
-                        const dependencyRow = section.rows.find(
-                            candidate =>
-                                Number(candidate.fieldName) === questionId,
-                        );
-                        return dependencyRow
-                            ? resolveRowEffectiveValue(
-                                  dependencyRow,
-                                  resolutionsByMetadataRowId,
-                                  disabledRowIds,
-                              )
-                            : undefined;
-                    },
+                    questionId =>
+                        resolvePrerequisiteValue(
+                            questionId,
+                            section,
+                            resolutionsByMetadataRowId,
+                            disabledRowIds,
+                        ),
                 );
                 if (!prerequisiteMet) {
                     disabledRowIds.add(row.id);
@@ -78,6 +73,27 @@ export function evaluateDisabledRowIds(
     }
 
     return disabledRowIds;
+}
+
+function resolvePrerequisiteValue(
+    questionId: number,
+    section: MetadataSection,
+    resolutionsByMetadataRowId: Map<string, string>,
+    disabledRowIds: Set<string>,
+): string | null | undefined {
+    const row = section.rows.find(
+        candidate => Number(candidate.fieldName) === questionId,
+    );
+    if (!row) return undefined;
+    const effectiveValue = resolveRowEffectiveValue(
+        row,
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
+    if (row.fieldType !== 'boolean' || effectiveValue == null) {
+        return effectiveValue;
+    }
+    return String(effectiveValue === BOOLEAN_TRUE_DISPLAY);
 }
 
 export function evaluateRowOptionsById(
@@ -135,6 +151,8 @@ export function evaluateUnmetRequiredRowIds(
     sections: MetadataSection[],
     resolutionsByMetadataRowId: Map<string, string>,
     disabledRowIds: Set<string>,
+    questionsById: Map<number, FormQuestion>,
+    currentFormSessionIds: Set<number>,
 ): Set<string> {
     const unmetRequiredRowIds = new Set<string>();
     const optionsByRowId = evaluateRowOptionsById(
@@ -144,8 +162,29 @@ export function evaluateUnmetRequiredRowIds(
     );
 
     for (const section of sections) {
+        const outdatedQuestionKeys = new Set(
+            section.rows
+                .filter(row => row.isOutdated)
+                .map(row => row.questionKey),
+        );
         for (const row of section.rows) {
-            if (disabledRowIds.has(row.id)) continue;
+            const isAskedOfAnySession =
+                row.entity !== 'formAnswer' ||
+                !!questionsById.get(Number(row.fieldName))?.prerequisite ||
+                (row.questionKey !== null &&
+                    outdatedQuestionKeys.has(row.questionKey)) ||
+                [...row.fieldValueBySessionId].some(
+                    ([sessionId, fieldValue]) =>
+                        currentFormSessionIds.has(sessionId) ||
+                        formatDisplayValue(fieldValue, row.fieldType) !==
+                            NOT_APPLICABLE,
+                );
+            if (
+                row.isUnitIdentityComponent ||
+                disabledRowIds.has(row.id) ||
+                !isAskedOfAnySession
+            )
+                continue;
 
             const effectiveValue = resolveRowEffectiveValue(
                 row,

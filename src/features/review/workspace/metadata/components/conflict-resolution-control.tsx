@@ -2,8 +2,15 @@
 
 import type { FormQuestionType } from '@/api/form-question/validation/form-question-schema';
 import { collectionMethodSchema } from '@/api/session/validation/session-schema';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { ComboBox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import {
     Select,
     SelectContent,
@@ -11,7 +18,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { parseDateAnswerInTimezone } from '@/features/review/workspace/metadata/utils/format-date-answer';
+import { getValidTimezone } from '@/utils/format-date-in-timezone';
+import { format } from 'date-fns';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import {
     BOOLEAN_FALSE_DISPLAY,
     BOOLEAN_TRUE_DISPLAY,
@@ -24,6 +35,7 @@ interface ConflictResolutionControlProps {
     questionOptions: string[] | null;
     isOtherTextEnabled: boolean;
     value: string | undefined;
+    timezone: string | null;
     onValueChange: (value: string) => void;
     disabled: boolean;
 }
@@ -34,14 +46,50 @@ export default function ConflictResolutionControl({
     questionOptions,
     isOtherTextEnabled,
     value,
+    timezone,
     onValueChange,
     disabled,
 }: ConflictResolutionControlProps) {
     const t = useTranslations('ReviewMetadata');
+    const [calendarOpen, setCalendarOpen] = useState(false);
 
     function validateWholeNonNegativeInteger(input: string): string | null {
         if (input === NOT_APPLICABLE) return null;
         return /^\d+$/.test(input) ? null : t('wholeNonNegativeIntegerError');
+    }
+
+    if (fieldType === 'date') {
+        const selectedDate = parseDateAnswerInTimezone(value, timezone);
+        return (
+            <Popover modal open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        className="w-72 justify-between font-normal"
+                        disabled={disabled}
+                    >
+                        {selectedDate
+                            ? format(selectedDate, 'MMM d, yyyy')
+                            : t('selectValuePlaceholder')}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                        mode="single"
+                        timeZone={getValidTimezone(timezone)}
+                        selected={selectedDate}
+                        defaultMonth={selectedDate}
+                        onSelect={date => {
+                            if (!date) return;
+                            onValueChange(String(date.getTime()));
+                            setCalendarOpen(false);
+                        }}
+                        disabled={{ after: new Date() }}
+                        autoFocus
+                    />
+                </PopoverContent>
+            </Popover>
+        );
     }
 
     if (fieldType === 'boolean' || fieldType === 'select') {
