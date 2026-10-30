@@ -9,8 +9,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
-import { TZDate } from '@date-fns/tz';
-import { endOfMonth, format, startOfMonth } from 'date-fns';
+import { buildReviewUnitHref } from '../utils/build-review-unit-href';
 
 interface SpecimenReviewLinkProps {
     session: Session;
@@ -25,9 +24,6 @@ export default function SpecimenReviewLink({
     timezone,
 }: SpecimenReviewLinkProps) {
     const t = useTranslations('ReviewSpecimens');
-    const collectionMonth = new TZDate(session.collectionDate, 'UTC');
-    const startDate = format(startOfMonth(collectionMonth), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(collectionMonth), 'yyyy-MM-dd');
     const isUnassigned =
         hasCollectionCycles && session.collectionCycleId === null;
     if (isUnassigned)
@@ -48,21 +44,9 @@ export default function SpecimenReviewLink({
                 <TooltipContent>{t('missingCycle')}</TooltipContent>
             </Tooltip>
         );
-    const queryParams = new URLSearchParams({
-        step: 'images',
-        specimenId: String(specimenId),
-    });
-    if (session.collectionCycleId !== null) {
-        queryParams.set('collectionCycleId', String(session.collectionCycleId));
-    } else {
-        queryParams.set('startDate', startDate);
-        queryParams.set('endDate', endDate);
-    }
-    if (timezone) queryParams.set('timezone', timezone);
-
     return (
         <Link
-            href={`/review/${session.siteId}?${queryParams.toString()}`}
+            href={buildReviewUnitHref(session, { timezone, specimenId })}
             className="text-primary hover:underline"
         >
             {t('review')}
