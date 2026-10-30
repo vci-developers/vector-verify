@@ -21,27 +21,30 @@ export function applyConflictResolutions(
     const resolvedFormAnswers: Partial<FormAnswer>[] = [];
 
     for (const metadataRow of metadataRows) {
+        if (metadataRow.isOutdated) continue;
         const chosenDisplayValue = disabledRowIds.has(metadataRow.id)
             ? NOT_APPLICABLE
             : resolutionsByMetadataRowId.get(metadataRow.id);
-        if (chosenDisplayValue === undefined) continue;
+        const resolvedFieldValue =
+            chosenDisplayValue === undefined
+                ? ([...metadataRow.fieldValueBySessionId.values()][0] ?? null)
+                : toResolvedFieldValue(
+                      chosenDisplayValue,
+                      metadataRow.fieldType,
+                  );
 
         if (metadataRow.entity === 'formAnswer') {
             resolvedFormAnswers.push({
                 questionId: Number(metadataRow.fieldName),
                 value:
-                    chosenDisplayValue === NOT_APPLICABLE
+                    resolvedFieldValue === null
                         ? null
-                        : chosenDisplayValue,
+                        : String(resolvedFieldValue),
                 dataType: metadataRow.fieldType,
             });
             continue;
         }
 
-        const resolvedFieldValue = toResolvedFieldValue(
-            chosenDisplayValue,
-            metadataRow.fieldType,
-        );
         if (metadataRow.entity === 'session') {
             Object.assign(resolvedData, {
                 [metadataRow.fieldName]: resolvedFieldValue,

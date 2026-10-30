@@ -275,6 +275,42 @@ submitted before certifying. UI treats this as a warning (amber), never an
 error, and the notice states that follow-up action. _Avoid_: error, blocked
 session
 
+**Metadata Review Field Options**: The fixed value list a **Metadata Conflict**
+row's resolution control is constrained to, for the four Session/Surveillance
+Form fields whose real-world values form a small, closed set even though their
+API/DB type is unconstrained free text (`z.string()`/`varchar`): **Collector
+Title** and **Collection Method** (`SESSION_FIELDS`, every program — these live
+on the `Session` object itself, not inside either form system, so they are not
+Form-Mode-dependent) and **LLIN Type** and **LLIN Brand**
+(`SURVEILLANCE_FORM_FIELDS`, Surveillance Form programs only — Uganda today, but
+gated implicitly by Form Mode rather than an explicit country check, since these
+fields only exist inside the Surveillance Form at all). Each list is a hardcoded
+`z.enum([...])` living beside its field's own schema (`session-schema.ts`,
+`surveillance-form-schema.ts`) — mirroring `irsInsecticideSchema`/`genusSchema`
+— **not** wired into `sessionSchema`/`surveillanceFormSchema` themselves, since
+those must keep accepting whatever free-text a session actually stored (legacy
+or malformed values like a bare `"fgh"` are real, observed data). LLIN Type's 5
+values and LLIN Brand's 21 values match the mobile app's own option lists
+spelling-for-spelling (e.g. `Pyrethroid Only`, `OLYSET Plus`), since those are
+the exact strings stored on prod. They mirror Uganda's official DHIS2 "MAL 001"
+malaria surveillance form (`MAL 001-ER17`/`ER28`); the backend's
+`dhis2-mapping.service.ts` matches them case-insensitively and silently fails to
+map any stored value outside this list, so constraining the dropdown to it is a
+correctness fix, not just a UI change. Collector Title's 3 values and Collection
+Method's 4 values have no such backend mapping to anchor them; they match the
+mobile app's `CollectorTitleOption`/`CollectionMethodOption` lists. Collection
+Method's `Other` is typeable, as in the app: choosing it reveals a text box, the
+value is stored as `Other <text>` (e.g. `Other VC`), and a blank `Other` blocks
+saving. LLIN Type/Brand's `Other` is a plain value (matching the MAL 001 form),
+and Collector Title has no `Other`: a row whose current value isn't one of its 3
+options is a resolvable conflict a VCO must correct to a valid value, not a case
+to be preserved. When a row's current/conflicting value doesn't match any
+option, the resolution control (a `Select`) simply shows its placeholder rather
+than the stale value — the per-session table cells above it still show the
+actual stored value, so nothing is hidden, only unselectable. _Avoid_: making
+these fields free text again to "preserve" out-of-list legacy values (defeats
+the point); adding a backend-configurable options list for these four fields.
+
 **Certification**: The act of a VCO marking a reviewed session as complete and
 ready for DHIS2 submission. Sets state to `CERTIFIED`. _Avoid_: Approval,
 sign-off
@@ -317,6 +353,22 @@ classification types recorded per annotation. _Avoid_: Morphological
 **Visual Classification**: The label a VCO assigns based on direct visual
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
+
+**Original Prediction**: The species, sex, and abdomen status the model assigned
+to a specimen image at upload, before any VCO edit. Never changes. Anything that
+measures the model (AI Performance, model confidence) uses the Original
+Prediction; everything that counts specimens (DHIS2, reports, Operations) uses
+the current, possibly edited, value. _Avoid_: App prediction, initial value
+
+**Edited Image**: A specimen image whose prediction a VCO has changed at least
+once during Review. Sticky — it stays edited even if the value is later set back
+to the Original Prediction. Only a specimen's thumbnail image is editable — it
+is the image DHIS2 counts. Every edit is recorded in the **Prediction
+Changelog**. _Avoid_: Corrected, overridden
+
+**Prediction Changelog**: The ordered record of every edit to an image's
+prediction — who, when, which field, before and after. _Avoid_: History, audit
+trail
 
 ### Exports & Developer Tooling
 

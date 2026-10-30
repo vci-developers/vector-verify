@@ -12,6 +12,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AnnotationTaskStatusCount from '@/features/annotation/tasks-list/components/layout/annotation-task-status-count';
 import { format } from 'date-fns';
 import { X } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
@@ -49,6 +50,10 @@ export default function AnnotationTasksListHeader({
                             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
                         >
                             {statusOption.replaceAll('_', ' ')}
+                            <AnnotationTaskStatusCount
+                                status={statusOption}
+                                dateRange={dateRange}
+                            />
                         </TabsTrigger>
                     ))}
                 </TabsList>

@@ -6,31 +6,18 @@ import {
     ChartLegend,
     ChartLegendContent,
     ChartTooltip,
-    ChartTooltipContent,
     type ChartConfig,
 } from '@/components/ui/chart';
-import {
-    Area,
-    AreaChart,
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Label,
-    Pie,
-    PieChart,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import CompositionBreakdown from '@/features/operations/specimen-composition/components/composition-breakdown';
+import CompositionDonut from '@/features/operations/specimen-composition/components/composition-donut';
+import { Bar, BarChart, CartesianGrid, Label, XAxis, YAxis } from 'recharts';
 import { Fragment } from 'react/jsx-runtime';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import EmptyBanner from '@/components/ui/empty-banner';
 
-type ChartType = 'bar' | 'line';
-
 interface CompositionChartPairProps {
     title: string;
-    chartType: ChartType;
     specimenCountsByClass: {
         specimenClass: string;
         specimenCount: number;
@@ -43,7 +30,6 @@ interface CompositionChartPairProps {
 
 export default function CompositionChartPair({
     title,
-    chartType,
     specimenCountsByClass,
     specimenCountsByMonth,
     specimenChartConfig,
@@ -84,11 +70,23 @@ export default function CompositionChartPair({
                 />
             </YAxis>
             <ChartTooltip
-                content={
-                    <ChartTooltipContent
-                        className="min-w-45"
-                        indicator="line"
-                    />
+                content={({ active, payload, label }) =>
+                    active && payload?.length ? (
+                        <div className="border-border/50 bg-background rounded-lg border px-2.5 py-1.5 shadow-xl">
+                            <CompositionBreakdown
+                                heading={String(label)}
+                                specimenCountsByClass={payload.map(item => ({
+                                    specimenClass: String(item.dataKey),
+                                    specimenCount: Number(item.value),
+                                }))}
+                                totalSpecimenCount={payload.reduce(
+                                    (sum, item) => sum + Number(item.value),
+                                    0,
+                                )}
+                                specimenChartConfig={specimenChartConfig}
+                            />
+                        </div>
+                    ) : null
                 }
             />
         </Fragment>
@@ -97,6 +95,7 @@ export default function CompositionChartPair({
     const chartLegend = (
         <ChartLegend
             wrapperStyle={{ paddingTop: '1rem' }}
+            itemSorter={null}
             content={
                 <ChartLegendContent className="text-muted-foreground flex-wrap" />
             }
@@ -113,96 +112,13 @@ export default function CompositionChartPair({
                     <EmptyBanner message={t('noSpecimenData')} />
                 ) : (
                     <div className="flex flex-col items-center gap-6 lg:flex-row">
-                        <div className="h-62.5 w-62.5 shrink-0">
-                            {isLoading || isError ? (
-                                <Skeleton
-                                    className="h-full w-full rounded-full"
-                                    variant={
-                                        isError ? 'destructive' : 'default'
-                                    }
-                                />
-                            ) : (
-                                <ChartContainer
-                                    config={specimenChartConfig}
-                                    className="h-full w-full"
-                                >
-                                    <PieChart>
-                                        <ChartTooltip
-                                            cursor={false}
-                                            content={
-                                                <ChartTooltipContent
-                                                    className="min-w-45"
-                                                    indicator="line"
-                                                />
-                                            }
-                                        />
-                                        <Pie
-                                            data={specimenCountsByClass.map(
-                                                ({
-                                                    specimenClass,
-                                                    specimenCount,
-                                                }) => ({
-                                                    specimenClass,
-                                                    specimenCount,
-                                                    fill: specimenChartConfig[
-                                                        specimenClass
-                                                    ]?.color,
-                                                }),
-                                            )}
-                                            nameKey="specimenClass"
-                                            dataKey="specimenCount"
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            strokeWidth={5}
-                                        >
-                                            <Label
-                                                content={({ viewBox }) => {
-                                                    if (
-                                                        viewBox &&
-                                                        'cx' in viewBox &&
-                                                        'cy' in viewBox
-                                                    ) {
-                                                        return (
-                                                            <text
-                                                                x={viewBox.cx}
-                                                                y={viewBox.cy}
-                                                                textAnchor="middle"
-                                                                dominantBaseline="middle"
-                                                            >
-                                                                <tspan
-                                                                    x={
-                                                                        viewBox.cx
-                                                                    }
-                                                                    y={
-                                                                        viewBox.cy
-                                                                    }
-                                                                    className="fill-foreground text-3xl font-bold"
-                                                                >
-                                                                    {totalSpecimenCount.toLocaleString()}
-                                                                </tspan>
-                                                                <tspan
-                                                                    x={
-                                                                        viewBox.cx
-                                                                    }
-                                                                    y={
-                                                                        (viewBox.cy ||
-                                                                            0) +
-                                                                        24
-                                                                    }
-                                                                    className="fill-muted-foreground"
-                                                                >
-                                                                    Specimens
-                                                                </tspan>
-                                                            </text>
-                                                        );
-                                                    }
-                                                }}
-                                            />
-                                        </Pie>
-                                    </PieChart>
-                                </ChartContainer>
-                            )}
-                        </div>
+                        <CompositionDonut
+                            specimenCountsByClass={specimenCountsByClass}
+                            totalSpecimenCount={totalSpecimenCount}
+                            specimenChartConfig={specimenChartConfig}
+                            isLoading={isLoading}
+                            isError={isError}
+                        />
                         <div className="h-72 w-full min-w-0 flex-1">
                             {isLoading || isError ? (
                                 <Skeleton
@@ -216,69 +132,32 @@ export default function CompositionChartPair({
                                     config={specimenChartConfig}
                                     className="h-full w-full"
                                 >
-                                    {chartType === 'bar' ? (
-                                        <BarChart
-                                            data={specimenCountsByMonth}
-                                            margin={chartMargins}
-                                        >
-                                            {chartAxes}
-                                            {specimenClasses.map(
-                                                specimenClass => (
-                                                    <Bar
-                                                        key={specimenClass}
-                                                        dataKey={specimenClass}
-                                                        stackId="specimens"
-                                                        fill={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        stroke={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        fillOpacity={0.75}
-                                                        strokeWidth={1}
-                                                    />
-                                                ),
-                                            )}
-                                            {chartLegend}
-                                        </BarChart>
-                                    ) : (
-                                        <AreaChart
-                                            data={specimenCountsByMonth}
-                                            margin={chartMargins}
-                                        >
-                                            {chartAxes}
-                                            {specimenClasses.map(
-                                                specimenClass => (
-                                                    <Area
-                                                        key={specimenClass}
-                                                        type="monotone"
-                                                        dataKey={specimenClass}
-                                                        fill={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        stroke={
-                                                            specimenChartConfig[
-                                                                specimenClass
-                                                            ]?.color
-                                                        }
-                                                        fillOpacity={0.2}
-                                                        strokeWidth={3}
-                                                        dot={{
-                                                            r: 2,
-                                                            fillOpacity: 1,
-                                                        }}
-                                                    />
-                                                ),
-                                            )}
-                                            {chartLegend}
-                                        </AreaChart>
-                                    )}
+                                    <BarChart
+                                        data={specimenCountsByMonth}
+                                        margin={chartMargins}
+                                    >
+                                        {chartAxes}
+                                        {specimenClasses.map(specimenClass => (
+                                            <Bar
+                                                key={specimenClass}
+                                                dataKey={specimenClass}
+                                                stackId="specimens"
+                                                fill={
+                                                    specimenChartConfig[
+                                                        specimenClass
+                                                    ]?.color
+                                                }
+                                                stroke={
+                                                    specimenChartConfig[
+                                                        specimenClass
+                                                    ]?.color
+                                                }
+                                                fillOpacity={0.75}
+                                                strokeWidth={1}
+                                            />
+                                        ))}
+                                        {chartLegend}
+                                    </BarChart>
                                 </ChartContainer>
                             )}
                         </div>

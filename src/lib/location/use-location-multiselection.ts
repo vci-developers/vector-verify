@@ -8,6 +8,8 @@ import {
 } from '@/lib/location/site-tree';
 import { useMemo } from 'react';
 
+export const ALL_LOCATIONS_OPTION = 'All locations';
+
 export function useLocationMultiSelection(
     accessibleSites: Site[],
     selectedLocations: string[],
@@ -27,15 +29,22 @@ export function useLocationMultiSelection(
           : 'Location';
 
     const locationDropdownOptions = useMemo(
-        () =>
-            usesLegacyStructure
+        () => [
+            ALL_LOCATIONS_OPTION,
+            ...(usesLegacyStructure
                 ? getUniqueDistricts(accessibleSites)
-                : topLevelSites.map(site => site.name ?? 'Unknown'),
+                : topLevelSites.map(site => site.name ?? 'Unknown')),
+        ],
         [usesLegacyStructure, accessibleSites, topLevelSites],
     );
 
     const descendantsOfSelectedLocations = useMemo(() => {
         if (selectedLocations.length === 0) return [];
+        if (selectedLocations.includes(ALL_LOCATIONS_OPTION)) {
+            return usesLegacyStructure
+                ? accessibleSites.filter(site => site.district?.trim())
+                : accessibleSites;
+        }
         if (usesLegacyStructure) {
             return accessibleSites.filter(site =>
                 selectedLocations.includes(site.district?.trim() ?? ''),
@@ -67,7 +76,11 @@ export function useLocationMultiSelection(
             }
         } else {
             for (const topSite of topLevelSites) {
-                if (!selectedLocations.includes(topSite.name ?? '')) continue;
+                if (
+                    !selectedLocations.includes(ALL_LOCATIONS_OPTION) &&
+                    !selectedLocations.includes(topSite.name ?? '')
+                )
+                    continue;
                 for (const descendant of getSiteAndDescendants(
                     accessibleSites,
                     topSite.siteId,
