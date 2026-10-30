@@ -17,10 +17,12 @@ import { useTranslations } from 'next-intl';
 
 interface SpecimenChangelogDrawerProps {
     changelog: SpecimenChangelog;
+    siteDisplayName: string;
 }
 
 export default function SpecimenChangelogDrawer({
     changelog,
+    siteDisplayName,
 }: SpecimenChangelogDrawerProps) {
     const t = useTranslations('SpecimenChangelog');
     const tCommon = useTranslations('Common');
@@ -65,7 +67,7 @@ export default function SpecimenChangelogDrawer({
                     <SheetDescription>
                         {t('context', {
                             sessionId: changelog.sessionId,
-                            siteId: changelog.siteId,
+                            siteDisplayName,
                         })}
                     </SheetDescription>
                 </SheetHeader>
