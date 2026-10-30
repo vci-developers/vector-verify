@@ -60,7 +60,8 @@ export default function ReviewSitesListHeader({
     maxDate,
 }: ReviewSitesListHeaderProps) {
     const t = useTranslations('ReviewSessionsTable');
-    const showAllLocationsOption = activeTab === 'sessions';
+    const showAllLocationsOption =
+        activeTab === 'sessions' || activeTab === 'specimens';
 
     return (
         <div className="space-y-4">
@@ -98,18 +99,21 @@ export default function ReviewSitesListHeader({
                 </Select>
 
                 <div className="flex items-center gap-3">
-                    <ReviewStatePicker
-                        selectedReviewStates={selectedReviewStates}
-                        onSelectedReviewStatesChange={
-                            onSelectedReviewStatesChange
-                        }
-                        disabled={disabled}
-                    />
+                    {activeTab !== 'specimens' && (
+                        <ReviewStatePicker
+                            selectedReviewStates={selectedReviewStates}
+                            onSelectedReviewStatesChange={
+                                onSelectedReviewStatesChange
+                            }
+                            disabled={disabled}
+                        />
+                    )}
                     <CollectionCyclePicker
                         collectionCycles={collectionCycles}
                         selectedCycleIds={selectedCycleIds}
                         onSelectedCycleIdsChange={onSelectedCycleIdsChange}
                         disabled={disabled}
+                        single={activeTab === 'specimens'}
                     />
                     <MonthRangePicker
                         startMonth={startMonth}

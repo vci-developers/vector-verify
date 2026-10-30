@@ -17,6 +17,7 @@ interface CollectionCyclePickerProps {
     selectedCycleIds: number[];
     onSelectedCycleIdsChange: (cycleIds: number[]) => void;
     disabled: boolean;
+    single?: boolean;
 }
 
 export default function CollectionCyclePicker({
@@ -24,23 +25,41 @@ export default function CollectionCyclePicker({
     selectedCycleIds,
     onSelectedCycleIdsChange,
     disabled,
+    single = false,
 }: CollectionCyclePickerProps) {
     const t = useTranslations('CollectionCycle');
 
     return (
         <MultiSelect
-            values={selectedCycleIds.map(String)}
+            single={single}
+            values={(single
+                ? selectedCycleIds.slice(0, 1)
+                : selectedCycleIds
+            ).map(String)}
             onValuesChange={values =>
                 onSelectedCycleIdsChange(values.map(Number))
             }
         >
-            <MultiSelectTrigger className="w-52" disabled={disabled}>
+            <MultiSelectTrigger
+                aria-label={t('filterByCycle')}
+                className="w-52"
+                disabled={disabled}
+            >
                 <MultiSelectValue
                     placeholder={t('allCycles')}
                     overflowBehavior="cutoff"
                 />
             </MultiSelectTrigger>
-            <MultiSelectContent search={false}>
+            <MultiSelectContent
+                search={
+                    single
+                        ? {
+                              placeholder: t('searchCycles'),
+                              emptyMessage: t('noCyclesFound'),
+                          }
+                        : false
+                }
+            >
                 <MultiSelectGroup>
                     {collectionCycles.map(cycle => (
                         <MultiSelectItem
