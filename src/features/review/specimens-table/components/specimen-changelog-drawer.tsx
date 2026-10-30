@@ -14,6 +14,7 @@ import type { SpecimenChangelog } from '@/features/review/specimens-table/valida
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { ArrowRight, Pencil, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
 
 interface SpecimenChangelogDrawerProps {
     changelog: SpecimenChangelog;
@@ -26,6 +27,7 @@ export default function SpecimenChangelogDrawer({
 }: SpecimenChangelogDrawerProps) {
     const t = useTranslations('SpecimenChangelog');
     const tCommon = useTranslations('Common');
+    const getPredictionLabel = useSpecimenPredictionLabel();
     const editsNewestFirst = [...changelog.edits].sort(
         (first, second) =>
             second.createdAt - first.createdAt || second.id - first.id,
@@ -142,8 +144,10 @@ export default function SpecimenChangelogDrawer({
                                             </dt>
                                             <dd className="flex flex-wrap items-center gap-2">
                                                 <span className="break-words">
-                                                    {change.previousValue ||
-                                                        '—'}
+                                                    {getPredictionLabel(
+                                                        change.field,
+                                                        change.previousValue,
+                                                    )}
                                                 </span>
                                                 <ArrowRight
                                                     className="text-muted-foreground size-3.5 shrink-0"
@@ -153,7 +157,10 @@ export default function SpecimenChangelogDrawer({
                                                     {t('changedTo')}
                                                 </span>
                                                 <span className="font-medium break-words">
-                                                    {change.value || '—'}
+                                                    {getPredictionLabel(
+                                                        change.field,
+                                                        change.value,
+                                                    )}
                                                 </span>
                                             </dd>
                                         </div>

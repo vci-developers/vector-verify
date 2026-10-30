@@ -11,6 +11,7 @@ import SpecimenChangelogDrawer from './specimen-changelog-drawer';
 import { buildSpecimenChangelog } from '../utils/build-specimen-changelog';
 import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
 import { useTranslations } from 'next-intl';
+import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
 
 interface SpecimensTableRowProps {
     specimen: Specimen;
@@ -33,6 +34,7 @@ export default function SpecimensTableRow({
     timezone,
 }: SpecimensTableRowProps) {
     const t = useTranslations('ReviewSpecimens');
+    const getPredictionLabel = useSpecimenPredictionLabel();
     const imageCount = specimen.images?.length ?? 0;
     const prediction = specimen.thumbnailImage;
     const siteDisplayName = site
@@ -52,8 +54,10 @@ export default function SpecimensTableRow({
             <TableCell>{specimen.sessionId}</TableCell>
             <TableCell>{siteDisplayName}</TableCell>
             <TableCell>{prediction?.species || '—'}</TableCell>
-            <TableCell>{prediction?.sex || '—'}</TableCell>
-            <TableCell>{prediction?.abdomenStatus || '—'}</TableCell>
+            <TableCell>{getPredictionLabel('sex', prediction?.sex)}</TableCell>
+            <TableCell>
+                {getPredictionLabel('abdomenStatus', prediction?.abdomenStatus)}
+            </TableCell>
             <TableCell>{imageCount}</TableCell>
             <TableCell>
                 {!session ? (

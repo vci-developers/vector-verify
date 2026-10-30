@@ -7,7 +7,22 @@ import { NextIntlClientProvider } from 'next-intl';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { Table, TableBody } from '@/components/ui/table';
 import SpecimensTableRow from '@/features/review/specimens-table/components/specimens-table-row';
-import messages from '../../../../../messages/en.json';
+import defaultMessages from '../../../../../messages/en.json';
+
+const messages = {
+    ...defaultMessages,
+    ReviewSpecimens: {
+        ...defaultMessages.ReviewSpecimens,
+        sexValues: {
+            ...defaultMessages.ReviewSpecimens.sexValues,
+            Male: 'Translated male',
+        },
+        abdomenStatusValues: {
+            ...defaultMessages.ReviewSpecimens.abdomenStatusValues,
+            Unfed: 'Translated unfed',
+        },
+    },
+};
 
 test.each(['', null, undefined, 'populated'] as const)(
     'renders consistent placeholders without hiding populated values: %s',
@@ -57,8 +72,10 @@ test.each(['', null, undefined, 'populated'] as const)(
         expect(cells[0]).toHaveTextContent('—');
         expect(cells[3]).toHaveTextContent('—');
         expect(cells[4]).toHaveTextContent(populated ? 'Aedes' : '—');
-        expect(cells[5]).toHaveTextContent(populated ? 'Male' : '—');
-        expect(cells[6]).toHaveTextContent(populated ? 'Unfed' : '—');
+        expect(cells[5]).toHaveTextContent(populated ? 'Translated male' : '—');
+        expect(cells[6]).toHaveTextContent(
+            populated ? 'Translated unfed' : '—',
+        );
         expect(cells[7]).toHaveTextContent('0');
     },
 );

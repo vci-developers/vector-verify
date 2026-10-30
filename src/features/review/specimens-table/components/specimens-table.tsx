@@ -35,6 +35,7 @@ import { SkeletonList } from '@/components/ui/skeleton-list';
 import ErrorBanner from '@/components/ui/error-banner';
 import EmptyBanner from '@/components/ui/empty-banner';
 import SpecimensTableRow from './specimens-table-row';
+import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
 import { useTranslations } from 'next-intl';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
@@ -74,6 +75,7 @@ function SpecimensTableContent({
     endMonth,
 }: SpecimensTableProps) {
     const t = useTranslations('ReviewSpecimens');
+    const getPredictionLabel = useSpecimenPredictionLabel();
     const [search, setSearch] = useState('');
     const [species, setSpecies] = useState('all');
     const [sex, setSex] = useState('all');
@@ -233,7 +235,7 @@ function SpecimensTableContent({
                             </SelectItem>
                             {filter.options.map(option => (
                                 <SelectItem key={option} value={option}>
-                                    {option}
+                                    {getPredictionLabel(filter.field, option)}
                                 </SelectItem>
                             ))}
                         </SelectContent>
