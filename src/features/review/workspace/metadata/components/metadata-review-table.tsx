@@ -27,6 +27,7 @@ import {
     NOT_APPLICABLE,
     type MetadataSection,
 } from '../utils/metadata-section';
+import { formatDateAnswer } from '@/features/review/workspace/metadata/utils/format-date-answer';
 import ConflictResolutionControl from './conflict-resolution-control';
 
 interface MetadataReviewTableProps {
@@ -238,7 +239,11 @@ export default function MetadataReviewTable({
                                                         'bg-primary/10',
                                                 )}
                                             >
-                                                {effectiveDisplayValue}
+                                                {formatDateAnswer(
+                                                    effectiveDisplayValue,
+                                                    row.fieldType,
+                                                    timezone,
+                                                )}
                                             </TableCell>
                                         );
                                     })}
@@ -261,6 +266,7 @@ export default function MetadataReviewTable({
                                                             row.options
                                                         }
                                                         value={controlValue}
+                                                        timezone={timezone}
                                                         onValueChange={value =>
                                                             onConflictResolutionChange(
                                                                 row.id,
@@ -283,8 +289,12 @@ export default function MetadataReviewTable({
                                                         className="h-auto w-72 justify-between px-3 py-1.5 font-normal"
                                                     >
                                                         <span className="truncate">
-                                                            {controlValue ??
-                                                                NOT_APPLICABLE}
+                                                            {formatDateAnswer(
+                                                                controlValue ??
+                                                                    NOT_APPLICABLE,
+                                                                row.fieldType,
+                                                                timezone,
+                                                            )}
                                                         </span>
                                                         <Pencil className="text-muted-foreground ml-2 h-3.5 w-3.5 shrink-0" />
                                                     </Button>
