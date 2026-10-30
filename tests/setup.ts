@@ -1,16 +1,19 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
-// jsdom has no layout observer, but Radix tooltips need the API to mount.
-vi.stubGlobal(
-    'ResizeObserver',
-    class {
-        observe = vi.fn();
-        unobserve = vi.fn();
-        disconnect = vi.fn();
-    },
-);
+// jsdom lacks layout APIs used by Radix and cmdk.
+beforeEach(() => {
+    vi.stubGlobal(
+        'ResizeObserver',
+        class {
+            observe = vi.fn();
+            unobserve = vi.fn();
+            disconnect = vi.fn();
+        },
+    );
+    HTMLElement.prototype.scrollIntoView = vi.fn();
+});
 
 afterEach(() => {
     cleanup();

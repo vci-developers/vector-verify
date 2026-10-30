@@ -406,6 +406,13 @@
         "review": "Review",
         "search": "Search by specimen ID...",
         "allSites": "All sites",
+        "filterSearch": {
+            "site": "Search sites...",
+            "species": "Search species...",
+            "sex": "Search sex...",
+            "abdomenStatus": "Search abdomen status..."
+        },
+        "noFilterResults": "No matching options.",
         "all": "All: {field}",
         "preview": "Preview images for specimen {specimenId}",
         "previewDescription": "Read-only image preview. Use the left and right arrow keys to navigate.",

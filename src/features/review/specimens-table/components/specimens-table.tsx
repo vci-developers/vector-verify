@@ -17,13 +17,7 @@ import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildSiteFilter } from '@/lib/location/location-query';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import SpecimenTableFilter from './specimen-table-filter';
 import {
     Table,
     TableBody,
@@ -173,29 +167,19 @@ function SpecimensTableContent({
                     }}
                     className="max-w-sm"
                 />
-                <Select
+                <SpecimenTableFilter
+                    field="site"
                     value={siteId}
+                    allLabel={t('allSites')}
+                    options={sites.map(site => ({
+                        value: String(site.siteId),
+                        label: getSiteDisplayName(site) ?? String(site.siteId),
+                    }))}
                     onValueChange={value => {
                         setSiteId(value);
                         setOffset(0);
                     }}
-                >
-                    <SelectTrigger aria-label={t('site')}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">{t('allSites')}</SelectItem>
-                        {sites.map(site => (
-                            <SelectItem
-                                key={site.siteId}
-                                value={String(site.siteId)}
-                            >
-                                {getSiteDisplayName(site) ??
-                                    String(site.siteId)}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                />
                 {(
                     [
                         {
@@ -218,28 +202,20 @@ function SpecimensTableContent({
                         },
                     ] as const
                 ).map(filter => (
-                    <Select
+                    <SpecimenTableFilter
                         key={filter.field}
+                        field={filter.field}
                         value={filter.value}
+                        allLabel={t('all', { field: t(filter.field) })}
+                        options={filter.options.map(option => ({
+                            value: option,
+                            label: getPredictionLabel(filter.field, option),
+                        }))}
                         onValueChange={value => {
                             filter.set(value);
                             setOffset(0);
                         }}
-                    >
-                        <SelectTrigger aria-label={t(filter.field)}>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">
-                                {t('all', { field: t(filter.field) })}
-                            </SelectItem>
-                            {filter.options.map(option => (
-                                <SelectItem key={option} value={option}>
-                                    {getPredictionLabel(filter.field, option)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    />
                 ))}
             </div>
             {isError ||

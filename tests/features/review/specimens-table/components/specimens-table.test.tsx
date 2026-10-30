@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { sessionSchema } from '@/api/session/validation/session-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
+import { siteSchema } from '@/api/site/validation/site-schema';
 import { reviewLogSchema } from '@/api/session/validation/get-review-logs-schema';
 import { ok, err } from '@/lib/result/result';
 import SpecimensTable from '@/features/review/specimens-table/components/specimens-table';
@@ -102,7 +103,15 @@ function renderTable({ empty = false, failed = false, pending = false } = {}) {
             >
                 <SpecimensTable
                     programId={1}
-                    sites={[]}
+                    sites={[
+                        siteSchema.parse({
+                            siteId: 90,
+                            programId: 1,
+                            locationHierarchy: { District: 'East' },
+                            name: 'AD 70',
+                            isActive: true,
+                        }),
+                    ]}
                     collectionCycles={[]}
                     selectedCycleIds={[7]}
                     locationQueryParam={{ siteId: 89 }}
@@ -157,6 +166,83 @@ test('fetches logs once for the table scope and groups numeric specimen IDs incl
         ),
     ).toHaveLength(1);
 });
+
+test.each([
+    {
+        field: 'site',
+        term: 'AD 70',
+        label: 'AD 70',
+        queryParam: 'siteId',
+        value: '90',
+    },
+    {
+        field: 'species',
+        term: 'gambiae',
+        label: 'Anopheles gambiae',
+        queryParam: 'species',
+        value: 'Anopheles gambiae',
+    },
+    {
+        field: 'sex',
+        term: 'Female',
+        label: 'Female',
+        queryParam: 'sex',
+        value: 'Female',
+    },
+    {
+        field: 'abdomenStatus',
+        term: 'Gravid',
+        label: 'Gravid',
+        queryParam: 'abdomenStatus',
+        value: 'Gravid',
+    },
+] as const)(
+    'searching and selecting $field sends its backend value and resets pagination',
+    async ({ field, term, label, queryParam, value }) => {
+        const fetchMock = renderTable();
+        const user = userEvent.setup();
+        await screen.findByText('CMS007');
+        await user.click(
+            screen.getByRole('button', { name: messages.ReviewSpecimens.next }),
+        );
+        await waitFor(() =>
+            expect(
+                fetchMock.mock.calls.some(([url]) =>
+                    String(url).includes('offset=20'),
+                ),
+            ).toBe(true),
+        );
+        await user.click(
+            screen.getByRole('combobox', {
+                name: messages.ReviewSpecimens[field],
+            }),
+        );
+        await user.type(
+            screen.getByPlaceholderText(
+                messages.ReviewSpecimens.filterSearch[field],
+            ),
+            term,
+        );
+        await user.click(screen.getByRole('option', { name: label }));
+        await waitFor(() =>
+            expect(
+                fetchMock.mock.calls.some(([input]) => {
+                    const url = new URL(String(input), 'https://example.test');
+                    return (
+                        url.pathname === '/api/specimens' &&
+                        url.searchParams.get(queryParam) === value &&
+                        url.searchParams.get('offset') === '0'
+                    );
+                }),
+            ).toBe(true),
+        );
+        expect(
+            screen.getByRole('button', {
+                name: messages.ReviewSpecimens.previous,
+            }),
+        ).toBeDisabled();
+    },
+);
 
 test('does not fetch logs for an empty specimen list', async () => {
     const fetchMock = renderTable({ empty: true });
