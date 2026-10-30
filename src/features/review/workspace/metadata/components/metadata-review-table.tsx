@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { evaluateRowOptionsById } from '@/features/review/workspace/metadata/utils/evaluate-question-answerability';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import {
@@ -23,10 +24,11 @@ import {
 import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
 import {
+    COLLECTION_METHOD_ROW_ID,
     formatDisplayValue,
     NOT_APPLICABLE,
     type MetadataSection,
-} from '../utils/metadata-section';
+} from '@/features/review/workspace/metadata/utils/metadata-section';
 import { formatDateAnswer } from '@/features/review/workspace/metadata/utils/format-date-answer';
 import ConflictResolutionControl from './conflict-resolution-control';
 
@@ -57,6 +59,12 @@ export default function MetadataReviewTable({
     const t = useTranslations('ReviewMetadata');
 
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
+
+    const filteredOptionsByRowId = evaluateRowOptionsById(
+        sections.flatMap(section => section.rows),
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
 
     const showSectionHeaders = sections.length > 1;
     const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
@@ -263,7 +271,13 @@ export default function MetadataReviewTable({
                                                             resolutionOptions
                                                         }
                                                         questionOptions={
-                                                            row.options
+                                                            filteredOptionsByRowId.get(
+                                                                row.id,
+                                                            ) ?? row.options
+                                                        }
+                                                        isOtherTextEnabled={
+                                                            row.id ===
+                                                            COLLECTION_METHOD_ROW_ID
                                                         }
                                                         value={controlValue}
                                                         timezone={timezone}

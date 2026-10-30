@@ -18,6 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBanner from '@/components/ui/error-banner';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { NetworkError } from '@/lib/network/network-error';
+import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
+import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
 
 interface ImageReviewWorkspaceProps {
     site: Site;
@@ -26,6 +28,7 @@ interface ImageReviewWorkspaceProps {
     endDate?: string;
     collectionCycleId?: number;
     timezone?: string;
+    readOnly: boolean;
     onGoToPreviousStep: () => void;
     onGoToNextStep: () => void;
 }
@@ -42,6 +45,7 @@ export default function ImageReviewWorkspace({
     endDate,
     collectionCycleId,
     timezone,
+    readOnly,
     onGoToPreviousStep,
     onGoToNextStep,
 }: ImageReviewWorkspaceProps) {
@@ -80,6 +84,19 @@ export default function ImageReviewWorkspace({
                     status: 'success',
                     specimens: getAllSpecimensResult.data.specimens,
                 };
+
+    const { data: getAllReviewLogsResult } = useGetAllReviewLogs({
+        siteId: site.siteId,
+        action: 'update_specimen_image_prediction',
+    });
+
+    const latestEditLog =
+        currentImage && getAllReviewLogsResult?.ok
+            ? getLatestPredictionEditLog(
+                  getAllReviewLogsResult.data.logs,
+                  currentImage.id,
+              )
+            : undefined;
 
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
@@ -199,6 +216,14 @@ export default function ImageReviewWorkspace({
                     }
                 />
             )}
+            {getAllReviewLogsResult && !getAllReviewLogsResult.ok && (
+                <ErrorBanner
+                    message={
+                        getAllReviewLogsResult.error.message ||
+                        t('reviewLogsError')
+                    }
+                />
+            )}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardContent className="space-y-4 p-4">
@@ -227,8 +252,11 @@ export default function ImageReviewWorkspace({
                 <Card className="lg:col-span-2">
                     <CardContent className="p-4">
                         <ImageReviewDetails
+                            key={currentImage?.id}
                             currentImage={currentImage}
+                            latestEditLog={latestEditLog}
                             timezone={timezone ?? null}
+                            readOnly={readOnly}
                             state={
                                 specimensState.status !== 'success'
                                     ? { status: specimensState.status }
