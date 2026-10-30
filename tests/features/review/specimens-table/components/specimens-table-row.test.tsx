@@ -6,6 +6,7 @@ import { sessionSchema } from '@/api/session/validation/session-schema';
 import { NextIntlClientProvider } from 'next-intl';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { Table, TableBody } from '@/components/ui/table';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import SpecimensTableRow from '@/features/review/specimens-table/components/specimens-table-row';
 import defaultMessages from '../../../../../messages/en.json';
 
@@ -77,6 +78,9 @@ test.each(['', null, undefined, 'populated'] as const)(
             populated ? 'Translated unfed' : '—',
         );
         expect(cells[7]).toHaveTextContent('0');
+        expect(
+            screen.queryByRole('link', { name: '1401' }),
+        ).not.toBeInTheDocument();
     },
 );
 
@@ -163,5 +167,91 @@ test.each(['modern', 'legacy', 'missing', 'unnamed'] as const)(
         expect(screen.getByRole('dialog')).toHaveAccessibleDescription(
             `Session 1401 · ${expectedSiteLabel}`,
         );
+    },
+);
+
+test.each(['assigned', 'month-based', 'unassigned'] as const)(
+    'scopes the session ID link correctly for %s review',
+    kind => {
+        const session = sessionSchema.parse({
+            sessionId: 1401,
+            frontendId: 'session-1401',
+            collectorName: 'Collector',
+            collectorTitle: 'Officer',
+            collectionDate: Date.parse('2024-02-29T23:30:00Z'),
+            collectionMethod: 'Trap',
+            specimenCondition: '',
+            createdAt: 0,
+            completedAt: null,
+            submittedAt: 0,
+            notes: '',
+            siteId: 90,
+            deviceId: 1,
+            type: 'SURVEILLANCE',
+            state: 'NEEDS_REVIEW',
+            latitude: null,
+            longitude: null,
+            collectionCycleId: kind === 'assigned' ? 7 : null,
+        });
+        const specimen = specimenSchema.parse({
+            id: 7,
+            specimenId: 'CMS007',
+            sessionId: session.sessionId,
+            thumbnailUrl: null,
+            thumbnailImageId: null,
+            thumbnailImage: null,
+            images: [],
+        });
+        render(
+            <NextIntlClientProvider
+                locale="en"
+                timeZone="UTC"
+                messages={messages}
+            >
+                <TooltipProvider>
+                    <Table>
+                        <TableBody>
+                            <SpecimensTableRow
+                                specimen={specimen}
+                                session={session}
+                                reviewLogs={[]}
+                                reviewLogsError={false}
+                                hasCollectionCycles={kind !== 'month-based'}
+                                timezone="Africa/Kampala"
+                            />
+                        </TableBody>
+                    </Table>
+                </TooltipProvider>
+            </NextIntlClientProvider>,
+        );
+        if (kind === 'unassigned') {
+            expect(screen.getAllByRole('cell')[2]).toHaveTextContent('1401');
+            expect(screen.queryByRole('link')).not.toBeInTheDocument();
+            expect(
+                screen.getByRole('button', {
+                    name: messages.ReviewSpecimens.review,
+                }),
+            ).toBeDisabled();
+            return;
+        }
+        const link = screen.getByRole('link', { name: '1401' });
+        expect(link).toHaveClass('text-primary', 'hover:underline');
+        const url = new URL(
+            link.getAttribute('href') ?? '',
+            'https://example.test',
+        );
+        expect(url.pathname).toBe('/review/90');
+        expect(url.searchParams.get('timezone')).toBe('Africa/Kampala');
+        expect(url.searchParams.has('step')).toBe(false);
+        expect(url.searchParams.has('specimenId')).toBe(false);
+        if (kind === 'assigned') {
+            expect(url.searchParams.get('collectionCycleId')).toBe('7');
+            expect(url.searchParams.has('startDate')).toBe(false);
+            expect(url.searchParams.has('endDate')).toBe(false);
+        } else {
+            expect(url.searchParams.has('collectionCycleId')).toBe(false);
+            expect(url.searchParams.get('startDate')).toBe('2024-02-01');
+            expect(url.searchParams.get('endDate')).toBe('2024-02-29');
+        }
     },
 );

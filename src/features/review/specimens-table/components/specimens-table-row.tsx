@@ -5,6 +5,8 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
 import { TableCell, TableRow } from '@/components/ui/table';
+import Link from 'next/link';
+import { buildReviewUnitHref } from '../utils/build-review-unit-href';
 import SpecimenImagePreview from './specimen-image-preview';
 import SpecimenReviewLink from './specimen-review-link';
 import SpecimenChangelogDrawer from './specimen-changelog-drawer';
@@ -37,6 +39,10 @@ export default function SpecimensTableRow({
     const getPredictionLabel = useSpecimenPredictionLabel();
     const imageCount = specimen.images?.length ?? 0;
     const prediction = specimen.thumbnailImage;
+    const reviewUnitHref =
+        session && (!hasCollectionCycles || session.collectionCycleId !== null)
+            ? buildReviewUnitHref(session, { timezone })
+            : undefined;
     const siteDisplayName = site
         ? getSiteDisplayName(site) || '—'
         : String(session?.siteId ?? '—');
@@ -51,7 +57,18 @@ export default function SpecimensTableRow({
                     )}
                 </span>
             </TableCell>
-            <TableCell>{specimen.sessionId}</TableCell>
+            <TableCell>
+                {reviewUnitHref ? (
+                    <Link
+                        href={reviewUnitHref}
+                        className="text-primary hover:underline"
+                    >
+                        {specimen.sessionId}
+                    </Link>
+                ) : (
+                    specimen.sessionId
+                )}
+            </TableCell>
             <TableCell>{siteDisplayName}</TableCell>
             <TableCell>{prediction?.species || '—'}</TableCell>
             <TableCell>{getPredictionLabel('sex', prediction?.sex)}</TableCell>
