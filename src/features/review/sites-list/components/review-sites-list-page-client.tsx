@@ -155,12 +155,7 @@ export default function ReviewSitesListPageClient() {
                                 collectionCycles={collectionCycles}
                                 selectedCycleIds={selectedCycleIds}
                                 onSelectedCycleIdsChange={selectedCycleIds =>
-                                    setFilters({
-                                        selectedCycleIds:
-                                            activeTab === 'specimens'
-                                                ? selectedCycleIds.slice(-1)
-                                                : selectedCycleIds,
-                                    })
+                                    setFilters({ selectedCycleIds })
                                 }
                                 selectedReviewStates={selectedReviewStates}
                                 onSelectedReviewStatesChange={selectedReviewStates =>
