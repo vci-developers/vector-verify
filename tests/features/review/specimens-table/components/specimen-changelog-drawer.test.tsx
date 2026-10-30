@@ -36,10 +36,16 @@ test.each([
                 timeZone="UTC"
                 messages={messages}
             >
-                <SpecimenChangelogDrawer changelog={changelog} />
+                <SpecimenChangelogDrawer
+                    changelog={changelog}
+                    siteDisplayName="AD 70"
+                />
             </NextIntlClientProvider>,
         );
         await userEvent.setup().click(screen.getByRole('button'));
+        expect(screen.getByRole('dialog')).toHaveAccessibleDescription(
+            'Session 1401 · AD 70',
+        );
         const definition = within(screen.getByRole('dialog')).getByRole(
             'definition',
         );

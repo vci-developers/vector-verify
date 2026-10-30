@@ -248,7 +248,7 @@
     "SpecimenChangelog": {
         "openChanges": "View {count, plural, one {# prediction change} other {# prediction changes}} for specimen {specimenId}",
         "title": "Specimen {specimenId}",
-        "context": "Session {sessionId} · Site {siteId}",
+        "context": "Session {sessionId} · {siteDisplayName}",
         "predictionChanges": "Prediction changes ({count})",
         "timezone": "Times shown in {timezone}",
         "image": "Image {number}",

@@ -35,6 +35,9 @@ export default function SpecimensTableRow({
     const t = useTranslations('ReviewSpecimens');
     const imageCount = specimen.images?.length ?? 0;
     const prediction = specimen.thumbnailImage;
+    const siteDisplayName = site
+        ? getSiteDisplayName(site) || '—'
+        : String(session?.siteId ?? '—');
     return (
         <TableRow>
             <TableCell>{cycleLabel || '—'}</TableCell>
@@ -47,11 +50,7 @@ export default function SpecimensTableRow({
                 </span>
             </TableCell>
             <TableCell>{specimen.sessionId}</TableCell>
-            <TableCell>
-                {site
-                    ? getSiteDisplayName(site) || '—'
-                    : (session?.siteId ?? '—')}
-            </TableCell>
+            <TableCell>{siteDisplayName}</TableCell>
             <TableCell>{prediction?.species || '—'}</TableCell>
             <TableCell>{prediction?.sex || '—'}</TableCell>
             <TableCell>{prediction?.abdomenStatus || '—'}</TableCell>
@@ -65,6 +64,7 @@ export default function SpecimensTableRow({
                     t('loading')
                 ) : (
                     <SpecimenChangelogDrawer
+                        siteDisplayName={siteDisplayName}
                         changelog={buildSpecimenChangelog(
                             specimen,
                             session.siteId,
