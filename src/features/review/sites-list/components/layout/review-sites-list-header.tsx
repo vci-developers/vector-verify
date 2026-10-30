@@ -1,4 +1,3 @@
-import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import CollectionCyclePicker from '@/features/review/sites-list/components/layout/collection-cycle-picker';
 import ReviewStatePicker from '@/features/review/sites-list/components/layout/review-state-picker';
@@ -61,7 +60,6 @@ export default function ReviewSitesListHeader({
     maxDate,
 }: ReviewSitesListHeaderProps) {
     const t = useTranslations('ReviewSessionsTable');
-    const tSpecimens = useTranslations('ReviewSpecimens');
     const showAllLocationsOption =
         activeTab === 'sessions' || activeTab === 'specimens';
 
@@ -110,40 +108,13 @@ export default function ReviewSitesListHeader({
                             disabled={disabled}
                         />
                     )}
-                    {activeTab === 'specimens' ? (
-                        <Select
-                            value={selectedCycleIds[0]?.toString() ?? 'all'}
-                            onValueChange={value =>
-                                onSelectedCycleIdsChange(
-                                    value === 'all' ? [] : [Number(value)],
-                                )
-                            }
-                        >
-                            <SelectTrigger aria-label={tSpecimens('cycle')}>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">
-                                    {tSpecimens('allCycles')}
-                                </SelectItem>
-                                {collectionCycles.map(cycle => (
-                                    <SelectItem
-                                        key={cycle.id}
-                                        value={String(cycle.id)}
-                                    >
-                                        {formatCollectionCycleLabel(cycle)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    ) : (
-                        <CollectionCyclePicker
-                            collectionCycles={collectionCycles}
-                            selectedCycleIds={selectedCycleIds}
-                            onSelectedCycleIdsChange={onSelectedCycleIdsChange}
-                            disabled={disabled}
-                        />
-                    )}
+                    <CollectionCyclePicker
+                        collectionCycles={collectionCycles}
+                        selectedCycleIds={selectedCycleIds}
+                        onSelectedCycleIdsChange={onSelectedCycleIdsChange}
+                        disabled={disabled}
+                        single={activeTab === 'specimens'}
+                    />
                     <MonthRangePicker
                         startMonth={startMonth}
                         endMonth={endMonth}

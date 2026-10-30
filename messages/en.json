@@ -88,7 +88,10 @@
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
-        "badgeLabel": "Cycle {cycleNumber}"
+        "badgeLabel": "Cycle {cycleNumber}",
+        "filterByCycle": "Filter by collection cycle",
+        "searchCycles": "Search collection cycles...",
+        "noCyclesFound": "No matching collection cycles."
     },
     "Operations": {
         "operations": "Operations",
