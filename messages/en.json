@@ -420,6 +420,17 @@
         "total": "{count} specimens",
         "previous": "Previous",
         "next": "Next",
-        "allCycles": "All cycles"
+        "allCycles": "All cycles",
+        "sexValues": {
+            "Female": "Female",
+            "Male": "Male",
+            "Unknown": "Unknown"
+        },
+        "abdomenStatusValues": {
+            "Unfed": "Unfed",
+            "Fully Fed": "Fully Fed",
+            "Gravid": "Gravid",
+            "Unknown": "Unknown"
+        }
     }
 }

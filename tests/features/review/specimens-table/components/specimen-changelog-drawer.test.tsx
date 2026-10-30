@@ -4,17 +4,29 @@ import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { specimenChangelogSchema } from '@/features/review/specimens-table/validation/specimen-changelog-schema';
 import SpecimenChangelogDrawer from '@/features/review/specimens-table/components/specimen-changelog-drawer';
-import messages from '../../../../../messages/en.json';
+import defaultMessages from '../../../../../messages/en.json';
+
+const messages = {
+    ...defaultMessages,
+    ReviewSpecimens: {
+        ...defaultMessages.ReviewSpecimens,
+        abdomenStatusValues: {
+            ...defaultMessages.ReviewSpecimens.abdomenStatusValues,
+            Gravid: 'Translated gravid',
+            Unfed: 'Translated unfed',
+        },
+    },
+};
 
 test.each([
-    ['Gravid', ''],
-    ['', 'Unfed'],
-    ['', ''],
-    [null, null],
-    ['Unfed', 'Gravid'],
-])(
+    ['Gravid', '', 'Translated gravid', '—'],
+    ['', 'Unfed', '—', 'Translated unfed'],
+    ['', '', '—', '—'],
+    [null, null, '—', '—'],
+    ['Unfed', 'Gravid', 'Translated unfed', 'Translated gravid'],
+] as const)(
     'displays empty and populated change values: %s to %s',
-    async (previousValue, value) => {
+    async (previousValue, value, expectedPreviousValue, expectedValue) => {
         const changelog = specimenChangelogSchema.parse({
             specimenId: 'CMS007',
             sessionId: 1401,
@@ -50,8 +62,8 @@ test.each([
             'definition',
         );
         expect(definition.firstElementChild).toHaveTextContent(
-            previousValue || '—',
+            expectedPreviousValue,
         );
-        expect(definition.lastElementChild).toHaveTextContent(value || '—');
+        expect(definition.lastElementChild).toHaveTextContent(expectedValue);
     },
 );
