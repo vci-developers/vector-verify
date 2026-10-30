@@ -18,6 +18,7 @@ import {
     History,
     Pencil,
     TriangleAlert,
+    type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
@@ -155,7 +156,7 @@ export default function MetadataReviewTable({
                                 editingRowIds.has(row.id) ||
                                 resolutionsByMetadataRowId.has(row.id);
 
-                            let RowIcon: typeof CircleAlert | null = null;
+                            let RowIcon: LucideIcon | null = null;
                             let rowIconClassName = 'text-destructive';
                             if (row.isOutdated) {
                                 RowIcon = History;

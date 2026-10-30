@@ -1,5 +1,5 @@
 import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
-import type { GetFormAnswersBySessionIdResponseBody } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
+import type { GetFormAnswersBySessionIdSuccessPayload } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
 import type { Form } from '@/api/form/validation/form-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import { buildUnitIdentitySections } from './group-session-units-by-identity';
@@ -14,7 +14,7 @@ export function buildDynamicFormMetadata(
     sessions: Session[],
     formAnswersResponseBySessionId: Map<
         number,
-        GetFormAnswersBySessionIdResponseBody | null
+        GetFormAnswersBySessionIdSuccessPayload | null
     >,
     currentForm: Form,
 ) {

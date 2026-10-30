@@ -123,10 +123,17 @@ export function evaluateUnmetRequiredRowIds(
     const unmetRequiredRowIds = new Set<string>();
 
     for (const section of sections) {
+        const outdatedQuestionKeys = new Set(
+            section.rows
+                .filter(row => row.isOutdated)
+                .map(row => row.questionKey),
+        );
         for (const row of section.rows) {
             const isAskedOfAnySession =
                 row.entity !== 'formAnswer' ||
                 !!questionsById.get(Number(row.fieldName))?.prerequisite ||
+                (row.questionKey !== null &&
+                    outdatedQuestionKeys.has(row.questionKey)) ||
                 [...row.fieldValueBySessionId].some(
                     ([sessionId, fieldValue]) =>
                         currentFormSessionIds.has(sessionId) ||

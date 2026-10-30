@@ -2,7 +2,7 @@
 
 import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
-import type { GetFormAnswersBySessionIdResponseBody } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
+import type { GetFormAnswersBySessionIdSuccessPayload } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
 import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
@@ -137,7 +137,7 @@ export default function MetadataReviewWorkspace({
 
         const formAnswersResponseBySessionId = new Map<
             number,
-            GetFormAnswersBySessionIdResponseBody | null
+            GetFormAnswersBySessionIdSuccessPayload | null
         >(
             sessions.map((session, index) => {
                 const formAnswersResult = formAnswerQueries[index]?.data;

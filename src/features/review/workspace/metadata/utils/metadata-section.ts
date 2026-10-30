@@ -100,6 +100,7 @@ export interface MetadataRow {
     options: string[] | null;
     isUnitIdentityComponent: boolean;
     isOutdated: boolean;
+    questionKey: string | null;
 }
 
 export interface MetadataSection {
@@ -266,6 +267,7 @@ export function buildMetadataRow(
         options?: string[] | null;
         isUnitIdentityComponent?: boolean;
         isOutdated?: boolean;
+        questionKey?: string | null;
     },
     fieldValueBySessionId: Map<number, unknown>,
     groupKey?: string,
@@ -279,6 +281,7 @@ export function buildMetadataRow(
         options,
         isUnitIdentityComponent,
         isOutdated,
+        questionKey,
     } = field;
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(value =>
@@ -299,6 +302,7 @@ export function buildMetadataRow(
         options: options ?? null,
         isUnitIdentityComponent: isUnitIdentityComponent ?? false,
         isOutdated: isOutdated ?? false,
+        questionKey: questionKey ?? null,
     };
 }
 
@@ -313,6 +317,7 @@ export function questionToMetadataField(
         required: question.required,
         options: question.options,
         isUnitIdentityComponent: question.isUnitIdentityComponent,
+        questionKey: question.questionKey,
     };
 }
 
@@ -358,6 +363,7 @@ export function buildOutdatedRows(
                         ? parsedFieldType.data
                         : 'text',
                     isOutdated: true,
+                    questionKey: firstOutdatedAnswer.questionKey,
                 },
                 new Map(
                     [...outdatedAnswersBySessionId].map(
