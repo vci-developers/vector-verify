@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { toDateAnswerDate } from '@/features/review/workspace/metadata/utils/format-date-answer';
+import { parseDateAnswerInTimezone } from '@/features/review/workspace/metadata/utils/format-date-answer';
 import { getValidTimezone } from '@/utils/format-date-in-timezone';
 import { format } from 'date-fns';
 import { useTranslations } from 'next-intl';
@@ -55,7 +55,7 @@ export default function ConflictResolutionControl({
     }
 
     if (fieldType === 'date') {
-        const selectedDate = toDateAnswerDate(value, timezone);
+        const selectedDate = parseDateAnswerInTimezone(value, timezone);
         return (
             <Popover modal open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>

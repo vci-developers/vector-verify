@@ -22,7 +22,7 @@ export function formatDateAnswer(
     );
 }
 
-export function toDateAnswerDate(
+export function parseDateAnswerInTimezone(
     value: string | undefined,
     timezone: string | null,
 ): TZDate | undefined {
