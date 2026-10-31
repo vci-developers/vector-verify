@@ -35,7 +35,7 @@ import SpecimensTableRow from './specimens-table-row';
 import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
 import { useTranslations } from 'next-intl';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 
 const PAGE_SIZE = 20;
 const speciesOptions = [

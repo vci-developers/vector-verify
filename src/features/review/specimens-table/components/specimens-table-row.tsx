@@ -11,7 +11,7 @@ import SpecimenImagePreview from './specimen-image-preview';
 import SpecimenReviewLink from './specimen-review-link';
 import SpecimenChangelogDrawer from './specimen-changelog-drawer';
 import { buildSpecimenChangelog } from '../utils/build-specimen-changelog';
-import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 import { useTranslations } from 'next-intl';
 import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
 
