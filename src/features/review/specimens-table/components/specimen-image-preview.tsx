@@ -11,7 +11,7 @@ import {
     DialogDescription,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { Search } from 'lucide-react';
+import { Images } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function SpecimenImagePreview({
@@ -30,7 +30,7 @@ export default function SpecimenImagePreview({
                         specimenId: specimen.specimenId,
                     })}
                 >
-                    <Search className="size-4" />
+                    <Images className="size-4" aria-hidden="true" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] grid-cols-1 overflow-y-auto sm:max-w-3xl">
