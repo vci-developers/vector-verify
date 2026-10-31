@@ -191,18 +191,18 @@ function SpecimensTableContent({
         'review',
     ] as const;
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col space-y-4">
+            <Input
+                aria-label={t('search')}
+                placeholder={t('search')}
+                value={search}
+                onChange={event => {
+                    setSearch(event.target.value);
+                    resetPage();
+                }}
+                className="w-full"
+            />
             <div className="flex flex-wrap gap-2">
-                <Input
-                    aria-label={t('search')}
-                    placeholder={t('search')}
-                    value={search}
-                    onChange={event => {
-                        setSearch(event.target.value);
-                        resetPage();
-                    }}
-                    className="max-w-sm"
-                />
                 <SpecimenTableFilter
                     field="site"
                     value={siteId}
@@ -266,8 +266,11 @@ function SpecimensTableContent({
                     {result.data.specimens.length === 0 ? (
                         <EmptyBanner message={t('empty')} />
                     ) : (
-                        <Table>
-                            <TableHeader>
+                        <Table
+                            className="border-border rounded-md border [&_td]:text-center [&_th]:text-center"
+                            containerClassName="max-h-[calc(100vh-24rem)] overflow-y-auto"
+                        >
+                            <TableHeader className="bg-background sticky top-0 z-10">
                                 <TableRow>
                                     {columns.map(column => (
                                         <TableHead
@@ -282,7 +285,7 @@ function SpecimensTableContent({
                                                 <button
                                                     type="button"
                                                     onClick={toggleSpecimenSort}
-                                                    className="flex items-center gap-1"
+                                                    className="mx-auto flex items-center gap-1"
                                                 >
                                                     {t(column)}
                                                     <SortIcon
