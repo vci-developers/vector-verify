@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -72,7 +72,11 @@ function renderTable({ empty = false, failed = false, pending = false } = {}) {
         if (url.pathname === '/api/specimens') {
             return Response.json(
                 ok({
-                    specimens: empty ? [] : specimens,
+                    specimens: empty
+                        ? []
+                        : url.searchParams.get('sortOrder') === 'desc'
+                          ? [...specimens].reverse()
+                          : specimens,
                     total: 6,
                     limit: 20,
                     offset: 0,
@@ -243,6 +247,161 @@ test.each([
         ).toBeDisabled();
     },
 );
+
+test('sorts the specimen column through the backend and supports ascending, descending, and off', async () => {
+    const fetchMock = renderTable();
+    const user = userEvent.setup();
+    await screen.findByText('CMS007');
+    expect(
+        screen.getByRole('columnheader', { name: 'Specimen' }),
+    ).toHaveAttribute('aria-sort', 'none');
+    for (const header of screen.getAllByRole('columnheader')) {
+        if (header.textContent !== 'Specimen')
+            expect(
+                within(header).queryByRole('button'),
+            ).not.toBeInTheDocument();
+    }
+    const initialRequest = fetchMock.mock.calls.find(
+        ([input]) =>
+            new URL(String(input), 'https://example.test').pathname ===
+            '/api/specimens',
+    );
+    const initialUrl = new URL(
+        String(initialRequest?.[0]),
+        'https://example.test',
+    );
+    expect(initialUrl.searchParams.has('sortBy')).toBe(false);
+    expect(initialUrl.searchParams.has('sortOrder')).toBe(false);
+
+    screen.getByRole('button', { name: 'Specimen' }).focus();
+    await user.keyboard('{Enter}');
+    await waitFor(() =>
+        expect(
+            fetchMock.mock.calls.some(([input]) => {
+                const url = new URL(String(input), 'https://example.test');
+                return (
+                    url.searchParams.get('sortBy') === 'specimenId' &&
+                    url.searchParams.get('sortOrder') === 'asc'
+                );
+            }),
+        ).toBe(true),
+    );
+    expect(
+        await screen.findByRole('columnheader', { name: 'Specimen' }),
+    ).toHaveAttribute('aria-sort', 'ascending');
+
+    await user.click(screen.getByRole('button', { name: 'Specimen' }));
+    await waitFor(() =>
+        expect(
+            screen.getByRole('columnheader', { name: 'Specimen' }),
+        ).toHaveAttribute('aria-sort', 'descending'),
+    );
+    expect(
+        screen
+            .getAllByRole('row')
+            .slice(1)
+            .map(row => within(row).getAllByRole('cell')[1]?.textContent),
+    ).toEqual(['CMS009', 'CMS008', 'CMS007']);
+    expect(
+        fetchMock.mock.calls.some(([input]) => {
+            const url = new URL(String(input), 'https://example.test');
+            return (
+                url.searchParams.get('sortBy') === 'specimenId' &&
+                url.searchParams.get('sortOrder') === 'desc'
+            );
+        }),
+    ).toBe(true);
+
+    await user.click(screen.getByRole('button', { name: 'Specimen' }));
+    expect(
+        await screen.findByRole('columnheader', { name: 'Specimen' }),
+    ).toHaveAttribute('aria-sort', 'none');
+    expect(
+        screen
+            .getAllByRole('row')
+            .slice(1)
+            .map(row => within(row).getAllByRole('cell')[1]?.textContent),
+    ).toEqual(['CMS007', 'CMS008', 'CMS009']);
+});
+
+test('resets pagination on sorting and preserves the server sort across pages and filters', async () => {
+    const fetchMock = renderTable();
+    const user = userEvent.setup();
+    await screen.findByText('CMS007');
+    await user.click(
+        screen.getByRole('button', { name: messages.ReviewSpecimens.next }),
+    );
+    await waitFor(() =>
+        expect(
+            screen.getByRole('button', {
+                name: messages.ReviewSpecimens.previous,
+            }),
+        ).toBeEnabled(),
+    );
+    await user.click(screen.getByRole('button', { name: 'Specimen' }));
+    await waitFor(() =>
+        expect(
+            fetchMock.mock.calls.some(([input]) => {
+                const url = new URL(String(input), 'https://example.test');
+                return (
+                    url.searchParams.get('sortBy') === 'specimenId' &&
+                    url.searchParams.get('sortOrder') === 'asc' &&
+                    url.searchParams.get('offset') === '0'
+                );
+            }),
+        ).toBe(true),
+    );
+    expect(
+        await screen.findByRole('button', {
+            name: messages.ReviewSpecimens.previous,
+        }),
+    ).toBeDisabled();
+    await user.click(
+        screen.getByRole('button', { name: messages.ReviewSpecimens.next }),
+    );
+    await waitFor(() =>
+        expect(
+            fetchMock.mock.calls.some(([input]) => {
+                const url = new URL(String(input), 'https://example.test');
+                return (
+                    url.searchParams.get('sortBy') === 'specimenId' &&
+                    url.searchParams.get('sortOrder') === 'asc' &&
+                    url.searchParams.get('offset') === '20'
+                );
+            }),
+        ).toBe(true),
+    );
+    await user.click(
+        screen.getByRole('combobox', { name: messages.ReviewSpecimens.sex }),
+    );
+    await user.type(
+        screen.getByPlaceholderText(messages.ReviewSpecimens.filterSearch.sex),
+        'Female',
+    );
+    await user.click(screen.getByRole('option', { name: 'Female' }));
+    await waitFor(() =>
+        expect(
+            fetchMock.mock.calls.some(([input]) => {
+                const url = new URL(String(input), 'https://example.test');
+                return (
+                    url.pathname === '/api/specimens' &&
+                    url.searchParams.get('sex') === 'Female' &&
+                    url.searchParams.get('sortBy') === 'specimenId' &&
+                    url.searchParams.get('sortOrder') === 'asc' &&
+                    url.searchParams.get('offset') === '0'
+                );
+            }),
+        ).toBe(true),
+    );
+    expect(
+        await screen.findByRole('columnheader', { name: 'Specimen' }),
+    ).toHaveAttribute('aria-sort', 'ascending');
+    expect(
+        fetchMock.mock.calls.filter(([url]) =>
+            String(url).includes('/review/logs/all'),
+        ),
+    ).toHaveLength(1);
+});
 
 test('does not fetch logs for an empty specimen list', async () => {
     const fetchMock = renderTable({ empty: true });

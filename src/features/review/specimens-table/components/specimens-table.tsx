@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useGetSpecimens } from '@/api/specimen/hooks/use-get-specimens';
+import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetAllReviewLogs } from '@/api/session/hooks/use-get-all-review-logs';
 import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
@@ -76,6 +78,31 @@ function SpecimensTableContent({
     const [abdomenStatus, setAbdomenStatus] = useState('all');
     const [siteId, setSiteId] = useState('all');
     const [offset, setOffset] = useState(0);
+    const [sortOrder, setSortOrder] =
+        useState<GetSpecimensQueryParams['sortOrder']>();
+    const SortIcon =
+        sortOrder === 'asc'
+            ? ArrowUp
+            : sortOrder === 'desc'
+              ? ArrowDown
+              : ArrowUpDown;
+    const specimenAriaSort =
+        sortOrder === 'asc'
+            ? 'ascending'
+            : sortOrder === 'desc'
+              ? 'descending'
+              : 'none';
+
+    function toggleSpecimenSort() {
+        setSortOrder(previous =>
+            previous === undefined
+                ? 'asc'
+                : previous === 'asc'
+                  ? 'desc'
+                  : undefined,
+        );
+        setOffset(0);
+    }
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
     const collectionCycleId = selectedCycleIds[0];
@@ -114,6 +141,8 @@ function SpecimensTableContent({
         sex: sex === 'all' ? undefined : sex,
         abdomenStatus: abdomenStatus === 'all' ? undefined : abdomenStatus,
         includeAllImages: true,
+        sortBy: sortOrder ? 'specimenId' : undefined,
+        sortOrder,
         limit: PAGE_SIZE,
         offset,
     });
@@ -234,8 +263,33 @@ function SpecimensTableContent({
                             <TableHeader>
                                 <TableRow>
                                     {columns.map(column => (
-                                        <TableHead key={column}>
-                                            {t(column)}
+                                        <TableHead
+                                            key={column}
+                                            aria-sort={
+                                                column === 'specimen'
+                                                    ? specimenAriaSort
+                                                    : undefined
+                                            }
+                                        >
+                                            {column === 'specimen' ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={toggleSpecimenSort}
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    {t(column)}
+                                                    <SortIcon
+                                                        className={
+                                                            sortOrder
+                                                                ? 'size-3.5'
+                                                                : 'size-3.5 opacity-40'
+                                                        }
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
+                                            ) : (
+                                                t(column)
+                                            )}
                                         </TableHead>
                                     ))}
                                 </TableRow>
