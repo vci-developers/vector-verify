@@ -3,7 +3,7 @@
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
-import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
+import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import { TableCell, TableRow } from '@/components/ui/table';
 import Link from 'next/link';
 import { buildReviewUnitHref } from '../utils/build-review-unit-href';

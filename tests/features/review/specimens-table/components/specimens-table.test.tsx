@@ -1,5 +1,11 @@
 import { afterEach, expect, test, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+    cleanup,
+    render,
+    screen,
+    waitFor,
+    within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -7,7 +13,8 @@ import { sessionSchema } from '@/api/session/validation/session-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { collectionCycleSchema } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
-import { reviewLogSchema } from '@/api/session/validation/get-review-logs-schema';
+import { reviewLogKeys } from '@/api/review-log/review-log-keys';
+import { createReviewLog } from '../../../../helpers/create-review-log';
 import { ok, err } from '@/lib/result/result';
 import SpecimensTable from '@/features/review/specimens-table/components/specimens-table';
 import messages from '../../../../../messages/en.json';
@@ -45,20 +52,16 @@ const specimens = [7, 8, 9].map(id =>
     }),
 );
 const logs = [
-    reviewLogSchema.parse({ id: 1, specimenId: 7, createdAt: 1000 }),
-    reviewLogSchema.parse({
-        id: 2,
-        fields: { specimenId: 7 },
-        createdAt: 2000,
-    }),
-    reviewLogSchema.parse({
+    createReviewLog({ id: 1, specimenId: 7, createdAt: 1000 }),
+    createReviewLog({ id: 2, fields: { specimenId: 7 }, createdAt: 2000 }),
+    createReviewLog({
         id: 3,
         specimenId: 8,
         fields: { specimenId: 7 },
         createdAt: 3000,
     }),
-    reviewLogSchema.parse({ id: 4, specimenId: 100, createdAt: 4000 }),
-    reviewLogSchema.parse({
+    createReviewLog({ id: 4, specimenId: 100, createdAt: 4000 }),
+    createReviewLog({
         id: 5,
         fields: { specimenId: 'CMS007' },
         createdAt: 5000,
@@ -72,6 +75,7 @@ function renderTable({
     failed = false,
     pending = false,
     total = 60,
+    queryClient = createTestQueryClient(),
 } = {}) {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const url = new URL(String(input), 'https://example.test');
@@ -101,14 +105,14 @@ function renderTable({
             return Response.json(
                 failed
                     ? err({ kind: 'server', message: 'Failed' })
-                    : ok({ logs }),
+                    : ok({ message: '', logs }),
             );
         }
         throw new Error(`Unexpected request: ${url.pathname}`);
     });
     vi.stubGlobal('fetch', fetchMock);
     render(
-        <QueryClientProvider client={createTestQueryClient()}>
+        <QueryClientProvider client={queryClient}>
             <NextIntlClientProvider
                 locale="en"
                 timeZone="UTC"
@@ -148,6 +152,43 @@ function renderTable({
     );
     return fetchMock;
 }
+
+test('refreshes the shared log cache after a prediction edit when returning within its fresh-cache window', async () => {
+    const queryClient = createTestQueryClient();
+    const logQueryKey = reviewLogKeys.allReviewLogs({
+        siteId: 89,
+        collectionCycleId: 7,
+        action: 'update_specimen_image_prediction',
+        hasChanges: 'true',
+    });
+    queryClient.setQueryDefaults(logQueryKey, { staleTime: 60_000 });
+    queryClient.setQueryData(logQueryKey, ok({ message: '', logs: [] }));
+    const initialFetch = renderTable({ queryClient });
+    expect(
+        await screen.findAllByText(messages.SpecimenChangelog.noChanges),
+    ).toHaveLength(3);
+    expect(
+        initialFetch.mock.calls.filter(([url]) =>
+            String(url).includes('/review/logs/all'),
+        ),
+    ).toHaveLength(0);
+
+    cleanup();
+    await queryClient.invalidateQueries({ queryKey: reviewLogKeys.root });
+    expect(queryClient.getQueryState(logQueryKey)?.isInvalidated).toBe(true);
+    const returnFetch = renderTable({ queryClient });
+    expect(
+        await screen.findByRole('button', { name: /CMS007.*2|2.*CMS007/ }),
+    ).toBeInTheDocument();
+    expect(
+        returnFetch.mock.calls.filter(([url]) =>
+            String(url).includes('/review/logs/all'),
+        ),
+    ).toHaveLength(1);
+    expect(queryClient.getQueryData(logQueryKey)).toEqual(
+        ok({ message: '', logs }),
+    );
+});
 
 test('matches the Sessions table structure with local centered alignment', async () => {
     renderTable();

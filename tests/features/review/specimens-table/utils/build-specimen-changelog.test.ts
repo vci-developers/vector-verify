@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
-import { reviewLogSchema } from '@/api/session/validation/get-review-logs-schema';
+import { createReviewLog } from '../../../../helpers/create-review-log';
 import { getSpecimensQueryParamsSchema } from '@/api/specimen/validation/get-specimens-schema';
 import { buildSpecimenChangelog } from '@/features/review/specimens-table/utils/build-specimen-changelog';
 
@@ -23,7 +23,7 @@ const specimen = specimenSchema.parse({
     thumbnailImage: null,
     images: [firstImage],
 });
-const log = reviewLogSchema.parse({
+const log = createReviewLog({
     id: 1,
     specimenId: 7,
     fields: { specimenId: 7, imageId: 99 },

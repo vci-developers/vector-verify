@@ -5,8 +5,8 @@ import { useGetSpecimens } from '@/api/specimen/hooks/use-get-specimens';
 import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
-import { useGetAllReviewLogs } from '@/api/session/hooks/use-get-all-review-logs';
-import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
+import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
+import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import {

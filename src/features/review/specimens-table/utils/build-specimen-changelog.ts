@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ReviewLog } from '@/api/session/validation/get-review-logs-schema';
+import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { SpecimenChangelog } from '../validation/specimen-changelog-schema';
 

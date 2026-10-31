@@ -9,6 +9,7 @@ import { Table, TableBody } from '@/components/ui/table';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import SpecimensTableRow from '@/features/review/specimens-table/components/specimens-table-row';
 import defaultMessages from '../../../../../messages/en.json';
+import { createReviewLog } from '../../../../helpers/create-review-log';
 
 const messages = {
     ...defaultMessages,
@@ -150,7 +151,11 @@ test.each(['modern', 'legacy', 'missing', 'unnamed'] as const)(
                             session={session}
                             site={site}
                             reviewLogs={[
-                                { id: 1, specimenId: 7, createdAt: 0 },
+                                createReviewLog({
+                                    specimenId: 7,
+                                    siteId: 90,
+                                    createdAt: 0,
+                                }),
                             ]}
                             reviewLogsError={false}
                             hasCollectionCycles
