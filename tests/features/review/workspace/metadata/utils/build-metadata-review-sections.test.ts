@@ -45,6 +45,7 @@ const surveillanceForm = surveillanceFormSchema.parse({
 
 const question = formQuestionSchema.parse({
     id: 1,
+    questionKey: 'required-question',
     formId: 1,
     parentId: null,
     label: 'Required question',
@@ -60,11 +61,36 @@ const question = formQuestionSchema.parse({
 });
 
 test('builds dynamic sections and indexes nested questions for required-field checks', () => {
-    const childQuestion = { ...question, id: 2, parentId: 1 };
+    const childQuestion = {
+        ...question,
+        id: 2,
+        questionKey: 'child-question',
+        parentId: 1,
+    };
     const result = buildMetadataReviewSections([session], {
         mode: 'dynamic',
-        questions: [{ ...question, subQuestions: [childQuestion] }],
-        formAnswersBySessionId: new Map(),
+        currentForm: {
+            id: 1,
+            programId: 1,
+            name: 'Current form',
+            version: '2',
+            createdAt: 0,
+            updatedAt: 0,
+            questions: [{ ...question, subQuestions: [childQuestion] }],
+        },
+        formAnswersResponseBySessionId: new Map([
+            [
+                1,
+                {
+                    formId: 1,
+                    formName: 'Current form',
+                    formVersion: '2',
+                    programId: 1,
+                    sessionId: 1,
+                    answers: [],
+                },
+            ],
+        ]),
     });
     expect(result.questionsById.get(2)).toEqual(childQuestion);
     expect(result.resolvableSessions).toEqual([session]);
@@ -75,6 +101,7 @@ test('builds dynamic sections and indexes nested questions for required-field ch
             result.sections,
             new Map(),
             result.questionsById,
+            result.currentFormSessionIds,
         ).areAllConflictsResolved,
     ).toBe(false);
 });

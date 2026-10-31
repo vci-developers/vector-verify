@@ -46,6 +46,7 @@ function createRequiredFormQueryClient() {
         questions: [
             {
                 id: 1,
+                questionKey: 'required-question',
                 formId: 1,
                 parentId: null,
                 label: 'New required question',
@@ -64,7 +65,7 @@ function createRequiredFormQueryClient() {
     queryClient.setQueryData(formKeys.currentFormByProgramId(1), ok(form));
     queryClient.setQueryData(
         formAnswerKeys.formAnswersBySessionId(session.sessionId),
-        ok({ answers: [] }),
+        ok({ formVersion: '2', answers: [] }),
     );
     return queryClient;
 }
@@ -119,11 +120,21 @@ test('still blocks editable units with missing required answers', () => {
     expect(result.current).toBe('blocked');
 });
 
+test('does not block an older form version for a newly added required question', () => {
+    const queryClient = createRequiredFormQueryClient();
+    queryClient.setQueryData(
+        formAnswerKeys.formAnswersBySessionId(session.sessionId),
+        ok({ formVersion: '1', answers: [] }),
+    );
+    const { result } = renderImageAccess([session], queryClient);
+    expect(result.current).toBe('allowed');
+});
+
 test('does not bypass metadata validation for partially reviewed units', () => {
     const queryClient = createRequiredFormQueryClient();
     queryClient.setQueryData(
         formAnswerKeys.formAnswersBySessionId(2),
-        ok({ answers: [] }),
+        ok({ formVersion: '2', answers: [] }),
     );
     const { result } = renderImageAccess(
         [
