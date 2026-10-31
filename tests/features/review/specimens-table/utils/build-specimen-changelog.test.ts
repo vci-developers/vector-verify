@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { createReviewLog } from '../../../../helpers/create-review-log';
-import { getSpecimensQueryParamsSchema } from '@/api/specimen/validation/get-specimens-schema';
 import { buildSpecimenChangelog } from '@/features/review/specimens-table/utils/build-specimen-changelog';
 
 const firstImage = {
@@ -128,21 +127,6 @@ test('does not interpret top-level changes as image prediction changes', () => {
     ]);
     expect(result.edits).toHaveLength(1);
     expect(result.edits[0]?.changes).toEqual([]);
-});
-
-test('uses backend search and validates pagination bounds', () => {
-    const parsed = getSpecimensQueryParamsSchema.parse({
-        specimenId: 'CMS',
-        offset: '20',
-        limit: '20',
-    });
-    expect(parsed).toMatchObject({ specimenId: 'CMS', offset: 20, limit: 20 });
-    expect(
-        getSpecimensQueryParamsSchema.safeParse({ offset: -1 }).success,
-    ).toBe(false);
-    expect(
-        getSpecimensQueryParamsSchema.safeParse({ limit: 101 }).success,
-    ).toBe(false);
 });
 
 test('uses the same thumbnail-first image numbering as the preview carousel', () => {

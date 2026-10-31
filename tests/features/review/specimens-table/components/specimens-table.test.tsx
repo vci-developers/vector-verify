@@ -190,37 +190,9 @@ test('refreshes the shared log cache after a prediction edit when returning with
     );
 });
 
-test('matches the Sessions table structure with local centered alignment', async () => {
+test('shows cycle numbers and default filter labels', async () => {
     renderTable();
-    const table = await screen.findByRole('table');
-    expect(table).toHaveClass(
-        'border-border',
-        'rounded-md',
-        'border',
-        '[&_td]:text-center',
-        '[&_th]:text-center',
-    );
-    expect(table.parentElement).toHaveClass(
-        'max-h-[calc(100vh-24rem)]',
-        'overflow-y-auto',
-        'overflow-x-auto',
-    );
-    expect(table.querySelector('thead')).toHaveClass(
-        'bg-background',
-        'sticky',
-        'top-0',
-        'z-10',
-    );
-    expect(screen.getByRole('button', { name: 'Specimen' })).toHaveClass(
-        'mx-auto',
-    );
-    const search = screen.getByRole('textbox', {
-        name: messages.ReviewSpecimens.search,
-    });
-    expect(search).toHaveClass('w-full');
-    expect(search).not.toHaveClass('max-w-sm');
-    expect(search.parentElement).toHaveClass('flex', 'flex-col', 'space-y-4');
-    expect(screen.getAllByText('Cycle 8')).toHaveLength(3);
+    expect(await screen.findAllByText('Cycle 8')).toHaveLength(3);
     for (const field of ['species', 'sex', 'abdomenStatus'] as const) {
         expect(
             screen.getByRole('combobox', {

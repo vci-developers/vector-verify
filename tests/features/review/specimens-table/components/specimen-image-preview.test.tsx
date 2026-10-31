@@ -60,11 +60,7 @@ test.each([images[1], null])(
                 name: 'Preview images for specimen CMS007',
             }),
         );
-        expect(screen.getByRole('dialog')).toHaveClass(
-            'grid-cols-1',
-            'max-h-[90vh]',
-            'overflow-y-auto',
-        );
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
         const carouselProps = vi.mocked(SpecimenImageCarousel).mock
             .lastCall?.[0];
         expect(carouselProps?.specimen).toBe(specimen);

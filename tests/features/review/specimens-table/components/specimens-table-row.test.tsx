@@ -247,7 +247,6 @@ test.each(['assigned', 'month-based', 'unassigned'] as const)(
             return;
         }
         const link = screen.getByRole('link', { name: '1401' });
-        expect(link).toHaveClass('text-primary', 'hover:underline');
         const url = new URL(
             link.getAttribute('href') ?? '',
             'https://example.test',

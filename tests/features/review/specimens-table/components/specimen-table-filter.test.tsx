@@ -55,7 +55,7 @@ const filterCases = [
 ] as const;
 
 test.each(filterCases)(
-    'searches $field labels, selects one backend value, and clears the filter',
+    'searches $field labels and selects the backend value',
     async ({ field, option, other, term }) => {
         const onValueChange = vi.fn();
         const user = userEvent.setup();
@@ -83,19 +83,37 @@ test.each(filterCases)(
         expect(onValueChange).toHaveBeenLastCalledWith(option.value);
         expect(trigger).toHaveTextContent(option.label);
         expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
-        await user.click(trigger);
-        await user.click(screen.getByRole('option', { name: other.label }));
-        expect(onValueChange).toHaveBeenLastCalledWith(other.value);
-        expect(trigger).toHaveTextContent(other.label);
-        expect(trigger).not.toHaveTextContent(option.label);
-
-        await user.click(trigger);
-        await user.click(screen.getByRole('option', { name: 'All options' }));
-        expect(onValueChange).toHaveBeenLastCalledWith('all');
-        expect(trigger).toHaveTextContent('All options');
     },
 );
+
+test('replaces a selection and clears it with the All option', async () => {
+    const onValueChange = vi.fn();
+    const user = userEvent.setup();
+    renderFilter({
+        field: 'site',
+        value: 'all',
+        allLabel: 'All sites',
+        options: [
+            { value: '90', label: 'AD 70' },
+            { value: '91', label: 'Other site' },
+        ],
+        onValueChange,
+    });
+    const trigger = screen.getByRole('combobox', {
+        name: messages.ReviewSpecimens.site,
+    });
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', { name: 'AD 70' }));
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', { name: 'Other site' }));
+    expect(onValueChange).toHaveBeenLastCalledWith('91');
+    expect(trigger).toHaveTextContent('Other site');
+    expect(trigger).not.toHaveTextContent('AD 70');
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', { name: 'All sites' }));
+    expect(onValueChange).toHaveBeenLastCalledWith('all');
+    expect(trigger).toHaveTextContent('All sites');
+});
 
 test('shows translated empty-search feedback without offering custom filter values', async () => {
     const user = userEvent.setup();
