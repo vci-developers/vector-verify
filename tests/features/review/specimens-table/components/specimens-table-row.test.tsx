@@ -60,7 +60,6 @@ test.each(['', null, undefined, 'populated'] as const)(
                     <TableBody>
                         <SpecimensTableRow
                             specimen={specimen}
-                            cycleLabel=""
                             reviewLogs={[]}
                             reviewLogsError={false}
                             hasCollectionCycles={false}
@@ -70,7 +69,9 @@ test.each(['', null, undefined, 'populated'] as const)(
             </NextIntlClientProvider>,
         );
         const cells = screen.getAllByRole('cell');
-        expect(cells[0]).toHaveTextContent('—');
+        expect(cells[0]).toHaveTextContent(
+            messages.ReviewSessionsTable.unassigned,
+        );
         expect(cells[3]).toHaveTextContent('—');
         expect(cells[4]).toHaveTextContent(populated ? 'Aedes' : '—');
         expect(cells[5]).toHaveTextContent(populated ? 'Translated male' : '—');
@@ -171,7 +172,7 @@ test.each(['modern', 'legacy', 'missing', 'unnamed'] as const)(
 );
 
 test.each(['assigned', 'month-based', 'unassigned'] as const)(
-    'scopes the session ID link correctly for %s review',
+    'uses Sessions cycle labels and scoped session links for %s review',
     kind => {
         const session = sessionSchema.parse({
             sessionId: 1401,
@@ -217,12 +218,18 @@ test.each(['assigned', 'month-based', 'unassigned'] as const)(
                                 reviewLogs={[]}
                                 reviewLogsError={false}
                                 hasCollectionCycles={kind !== 'month-based'}
+                                cycleNumber={
+                                    kind === 'assigned' ? 8 : undefined
+                                }
                                 timezone="Africa/Kampala"
                             />
                         </TableBody>
                     </Table>
                 </TooltipProvider>
             </NextIntlClientProvider>,
+        );
+        expect(screen.getAllByRole('cell')[0]).toHaveTextContent(
+            kind === 'assigned' ? /^Cycle 8$/ : /^Unassigned$/,
         );
         if (kind === 'unassigned') {
             expect(screen.getAllByRole('cell')[2]).toHaveTextContent('1401');

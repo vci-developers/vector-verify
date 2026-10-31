@@ -418,7 +418,11 @@
             "abdomenStatus": "Search abdomen status..."
         },
         "noFilterResults": "No matching options.",
-        "all": "All: {field}",
+        "allFilters": {
+            "species": "All species",
+            "sex": "All sexes",
+            "abdomenStatus": "All abdomen statuses"
+        },
         "preview": "Preview images for specimen {specimenId}",
         "previewDescription": "Read-only image preview. Use the left and right arrow keys to navigate.",
         "error": "Unable to load specimens or their sessions.",

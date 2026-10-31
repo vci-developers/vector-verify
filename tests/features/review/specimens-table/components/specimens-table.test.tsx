@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { sessionSchema } from '@/api/session/validation/session-schema';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
+import { collectionCycleSchema } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
 import { reviewLogSchema } from '@/api/session/validation/get-review-logs-schema';
 import { ok, err } from '@/lib/result/result';
@@ -124,7 +125,19 @@ function renderTable({
                             isActive: true,
                         }),
                     ]}
-                    collectionCycles={[]}
+                    collectionCycles={[
+                        collectionCycleSchema.parse({
+                            id: 7,
+                            programId: 1,
+                            collectionScheduleId: 1,
+                            cycleNumber: 8,
+                            startDate: Date.parse('2026-10-01T00:00:00Z'),
+                            endDate: Date.parse('2026-10-31T00:00:00Z'),
+                            timezone: 'UTC',
+                            createdAt: 0,
+                            updatedAt: 0,
+                        }),
+                    ]}
                     selectedCycleIds={[7]}
                     locationQueryParam={{ siteId: 89 }}
                     startMonth={new Date('2026-10-01T00:00:00Z')}
@@ -166,6 +179,14 @@ test('matches the Sessions table structure with local centered alignment', async
     expect(search).toHaveClass('w-full');
     expect(search).not.toHaveClass('max-w-sm');
     expect(search.parentElement).toHaveClass('flex', 'flex-col', 'space-y-4');
+    expect(screen.getAllByText('Cycle 8')).toHaveLength(3);
+    for (const field of ['species', 'sex', 'abdomenStatus'] as const) {
+        expect(
+            screen.getByRole('combobox', {
+                name: messages.ReviewSpecimens[field],
+            }),
+        ).toHaveTextContent(messages.ReviewSpecimens.allFilters[field]);
+    }
 });
 
 test('fetches logs once for the table scope and groups numeric specimen IDs including legacy fields', async () => {

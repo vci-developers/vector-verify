@@ -21,7 +21,7 @@ interface SpecimensTableRowProps {
     reviewLogsError: boolean;
     session?: Session;
     site?: Site;
-    cycleLabel?: string;
+    cycleNumber?: number;
     hasCollectionCycles: boolean;
     timezone?: string;
 }
@@ -31,11 +31,12 @@ export default function SpecimensTableRow({
     reviewLogsError,
     session,
     site,
-    cycleLabel,
+    cycleNumber,
     hasCollectionCycles,
     timezone,
 }: SpecimensTableRowProps) {
     const t = useTranslations('ReviewSpecimens');
+    const tSessions = useTranslations('ReviewSessionsTable');
     const getPredictionLabel = useSpecimenPredictionLabel();
     const imageCount = specimen.images?.length ?? 0;
     const prediction = specimen.thumbnailImage;
@@ -48,7 +49,11 @@ export default function SpecimensTableRow({
         : String(session?.siteId ?? '—');
     return (
         <TableRow>
-            <TableCell>{cycleLabel || '—'}</TableCell>
+            <TableCell>
+                {cycleNumber !== undefined
+                    ? tSessions('cycleNumber', { cycleNumber })
+                    : tSessions('unassigned')}
+            </TableCell>
             <TableCell>
                 <span className="inline-flex items-center gap-1">
                     {specimen.specimenId}

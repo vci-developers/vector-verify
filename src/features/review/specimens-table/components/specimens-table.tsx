@@ -36,7 +36,6 @@ import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-lab
 import { useTranslations } from 'next-intl';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
-import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 
 const PAGE_SIZE = 20;
 const speciesOptions = [
@@ -242,7 +241,7 @@ function SpecimensTableContent({
                         key={filter.field}
                         field={filter.field}
                         value={filter.value}
-                        allLabel={t('all', { field: t(filter.field) })}
+                        allLabel={t(`allFilters.${filter.field}`)}
                         options={filter.options.map(option => ({
                             value: option,
                             label: getPredictionLabel(filter.field, option),
@@ -339,13 +338,7 @@ function SpecimensTableContent({
                                             timezone={
                                                 cycle?.timezone ?? undefined
                                             }
-                                            cycleLabel={
-                                                cycle
-                                                    ? formatCollectionCycleLabel(
-                                                          cycle,
-                                                      )
-                                                    : undefined
-                                            }
+                                            cycleNumber={cycle?.cycleNumber}
                                             hasCollectionCycles={
                                                 collectionCycles.length > 0
                                             }
