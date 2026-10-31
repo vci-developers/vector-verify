@@ -10,6 +10,9 @@ const firstImage = {
     species: null,
     sex: null,
     abdomenStatus: null,
+    appSpecies: null,
+    appSex: null,
+    appAbdomenStatus: null,
 };
 const specimen = specimenSchema.parse({
     id: 7,
