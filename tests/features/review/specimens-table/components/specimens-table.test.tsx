@@ -66,7 +66,12 @@ const logs = [
 
 afterEach(() => vi.unstubAllGlobals());
 
-function renderTable({ empty = false, failed = false, pending = false } = {}) {
+function renderTable({
+    empty = false,
+    failed = false,
+    pending = false,
+    total = 60,
+} = {}) {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const url = new URL(String(input), 'https://example.test');
         if (url.pathname === '/api/specimens') {
@@ -77,10 +82,13 @@ function renderTable({ empty = false, failed = false, pending = false } = {}) {
                         : url.searchParams.get('sortOrder') === 'desc'
                           ? [...specimens].reverse()
                           : specimens,
-                    total: 6,
+                    total: empty ? 0 : total,
                     limit: 20,
-                    offset: 0,
-                    hasMore: true,
+                    offset: Number(url.searchParams.get('offset') ?? 0),
+                    hasMore:
+                        !empty &&
+                        Number(url.searchParams.get('offset') ?? 0) + 20 <
+                            total,
                 }),
             );
         }
@@ -402,6 +410,110 @@ test('resets pagination on sorting and preserves the server sort across pages an
         ),
     ).toHaveLength(1);
 });
+
+test('supports direct page links, keyboard navigation, and disabled first/last controls', async () => {
+    const fetchMock = renderTable();
+    const user = userEvent.setup();
+    expect(await screen.findByText('Page 1 of 3')).toBeInTheDocument();
+    expect(
+        screen.getByRole('button', { name: messages.ReviewSpecimens.previous }),
+    ).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'Go to page 1' })).toHaveAttribute(
+        'aria-current',
+        'page',
+    );
+    await user.click(screen.getByRole('link', { name: 'Go to page 3' }));
+    expect(await screen.findByText('Page 3 of 3')).toBeInTheDocument();
+    expect(
+        fetchMock.mock.calls.some(
+            ([input]) =>
+                new URL(String(input), 'https://example.test').searchParams.get(
+                    'offset',
+                ) === '40',
+        ),
+    ).toBe(true);
+    const next = screen.getByRole('button', {
+        name: messages.ReviewSpecimens.next,
+    });
+    expect(next).toBeDisabled();
+    const requestCount = fetchMock.mock.calls.length;
+    await user.click(next);
+    expect(fetchMock).toHaveBeenCalledTimes(requestCount);
+    screen.getByRole('link', { name: 'Go to page 2' }).focus();
+    await user.keyboard('{Enter}');
+    expect(await screen.findByText('Page 2 of 3')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
+        'aria-current',
+        'page',
+    );
+    expect(
+        fetchMock.mock.calls.some(
+            ([input]) =>
+                new URL(String(input), 'https://example.test').searchParams.get(
+                    'offset',
+                ) === '20',
+        ),
+    ).toBe(true);
+    await user.click(
+        screen.getByRole('button', { name: messages.ReviewSpecimens.previous }),
+    );
+    expect(await screen.findByText('Page 1 of 3')).toBeInTheDocument();
+    expect(
+        fetchMock.mock.calls.filter(([url]) =>
+            String(url).includes('/review/logs/all'),
+        ),
+    ).toHaveLength(1);
+});
+
+test('uses ellipses for large page counts and updates neighboring page links', async () => {
+    const fetchMock = renderTable({ total: 400 });
+    const user = userEvent.setup();
+    expect(await screen.findByText('Page 1 of 20')).toBeInTheDocument();
+    const pagination = screen.getByRole('navigation', {
+        name: messages.ReviewSpecimens.paginationLabel,
+    });
+    expect(
+        pagination.querySelector('[data-slot="pagination-ellipsis"]'),
+    ).toBeInTheDocument();
+    expect(within(pagination).getAllByRole('link').length).toBeLessThanOrEqual(
+        7,
+    );
+    await user.click(screen.getByRole('link', { name: 'Go to page 20' }));
+    expect(await screen.findByText('Page 20 of 20')).toBeInTheDocument();
+    expect(
+        screen.getByRole('link', { name: 'Go to page 19' }),
+    ).toBeInTheDocument();
+    expect(
+        fetchMock.mock.calls.some(
+            ([input]) =>
+                new URL(String(input), 'https://example.test').searchParams.get(
+                    'offset',
+                ) === '380',
+        ),
+    ).toBe(true);
+});
+
+test.each([false, true])(
+    'handles single-page and empty results without invalid page navigation: empty=%s',
+    async empty => {
+        renderTable({ empty, total: 3 });
+        expect(await screen.findByText('Page 1 of 1')).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', {
+                name: messages.ReviewSpecimens.previous,
+            }),
+        ).toBeDisabled();
+        expect(
+            screen.getByRole('button', { name: messages.ReviewSpecimens.next }),
+        ).toBeDisabled();
+        expect(
+            screen.getByRole('link', { name: 'Go to page 1' }),
+        ).toHaveAttribute('aria-current', 'page');
+        expect(
+            screen.queryByRole('link', { name: 'Go to page 2' }),
+        ).not.toBeInTheDocument();
+    },
+);
 
 test('does not fetch logs for an empty specimen list', async () => {
     const fetchMock = renderTable({ empty: true });

@@ -18,7 +18,8 @@ import {
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildSiteFilter } from '@/lib/location/location-query';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { usePagination } from '@/lib/hooks/use-pagination';
+import SpecimensTablePagination from './specimens-table-pagination';
 import SpecimenTableFilter from './specimen-table-filter';
 import {
     Table,
@@ -77,7 +78,10 @@ function SpecimensTableContent({
     const [sex, setSex] = useState('all');
     const [abdomenStatus, setAbdomenStatus] = useState('all');
     const [siteId, setSiteId] = useState('all');
-    const [offset, setOffset] = useState(0);
+    const { page, resetPage, goToPage, createPageRange } = usePagination({
+        limit: PAGE_SIZE,
+    });
+    const offset = (page - 1) * PAGE_SIZE;
     const [sortOrder, setSortOrder] =
         useState<GetSpecimensQueryParams['sortOrder']>();
     const SortIcon =
@@ -101,7 +105,7 @@ function SpecimensTableContent({
                   ? 'desc'
                   : undefined,
         );
-        setOffset(0);
+        resetPage();
     }
     const startDate = format(startOfMonth(startMonth), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(endMonth), 'yyyy-MM-dd');
@@ -170,6 +174,9 @@ function SpecimensTableContent({
             reviewLogsBySpecimenId.set(specimenId, specimenLogs);
         }
     }
+    const totalPages = result?.ok
+        ? Math.max(1, Math.ceil(result.data.total / PAGE_SIZE))
+        : 1;
     const sessions = sessionsResult?.ok ? sessionsResult.data.sessions : [];
     const columns = [
         'cycle',
@@ -192,7 +199,7 @@ function SpecimensTableContent({
                     value={search}
                     onChange={event => {
                         setSearch(event.target.value);
-                        setOffset(0);
+                        resetPage();
                     }}
                     className="max-w-sm"
                 />
@@ -206,7 +213,7 @@ function SpecimensTableContent({
                     }))}
                     onValueChange={value => {
                         setSiteId(value);
-                        setOffset(0);
+                        resetPage();
                     }}
                 />
                 {(
@@ -242,7 +249,7 @@ function SpecimensTableContent({
                         }))}
                         onValueChange={value => {
                             filter.set(value);
-                            setOffset(0);
+                            resetPage();
                         }}
                     />
                 ))}
@@ -345,25 +352,15 @@ function SpecimensTableContent({
                             </TableBody>
                         </Table>
                     )}
-                    <div className="flex items-center justify-end gap-3">
-                        <span>{t('total', { count: result.data.total })}</span>
-                        <Button
-                            variant="outline"
-                            disabled={offset === 0}
-                            onClick={() =>
-                                setOffset(Math.max(0, offset - PAGE_SIZE))
-                            }
-                        >
-                            {t('previous')}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            disabled={!result.data.hasMore}
-                            onClick={() => setOffset(offset + PAGE_SIZE)}
-                        >
-                            {t('next')}
-                        </Button>
-                    </div>
+                    <SpecimensTablePagination
+                        total={result.data.total}
+                        page={page}
+                        totalPages={totalPages}
+                        pageRange={createPageRange(totalPages)}
+                        onPageChange={nextPage =>
+                            goToPage(nextPage, totalPages)
+                        }
+                    />
                 </>
             )}
         </div>
