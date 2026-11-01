@@ -12,7 +12,10 @@ export function buildMetadataReviewSections(
         | {
               mode: 'dynamic';
               currentForm: Form;
-              formAnswersResponseBySessionId: Map<number, GetFormAnswersBySessionIdSuccessPayload | null>;
+              formAnswersResponseBySessionId: Map<
+                  number,
+                  GetFormAnswersBySessionIdSuccessPayload | null
+              >;
           }
         | {
               mode: 'surveillance';
@@ -21,7 +24,11 @@ export function buildMetadataReviewSections(
 ) {
     if (formData.mode === 'dynamic') {
         return {
-            ...buildDynamicFormMetadata(sessions, formData.formAnswersResponseBySessionId, formData.currentForm),
+            ...buildDynamicFormMetadata(
+                sessions,
+                formData.formAnswersResponseBySessionId,
+                formData.currentForm,
+            ),
             resolvableSessions: sessions,
             sessionsMissingSurveillanceForm: [],
         };

@@ -61,19 +61,20 @@ export function useReviewImageAccess(sessions: Session[], programId: number) {
             return [session.sessionId, result?.ok ? result.data : null];
         }),
     );
-    const { sections, questionsById, currentFormSessionIds } = buildMetadataReviewSections(
-        sessions,
-        isDynamic
-            ? {
-                  mode: 'dynamic',
-                  currentForm: form.data,
-                  formAnswersResponseBySessionId: answersBySessionId,
-              }
-            : {
-                  mode: 'surveillance',
-                  surveillanceFormBySessionId: surveysBySessionId,
-              },
-    );
+    const { sections, questionsById, currentFormSessionIds } =
+        buildMetadataReviewSections(
+            sessions,
+            isDynamic
+                ? {
+                      mode: 'dynamic',
+                      currentForm: form.data,
+                      formAnswersResponseBySessionId: answersBySessionId,
+                  }
+                : {
+                      mode: 'surveillance',
+                      surveillanceFormBySessionId: surveysBySessionId,
+                  },
+        );
     const resolutions = new Map<string, string>();
     const { areAllConflictsResolved } = getMetadataReviewBlockers(
         sections,
