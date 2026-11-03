@@ -2,13 +2,24 @@ import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-ima
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
+import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
+import PredictionRow from '@/features/review/workspace/image/components/prediction-row';
+import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
+import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 type DetailsState =
     | { status: 'loading' }
@@ -17,16 +28,26 @@ type DetailsState =
 
 interface ImageReviewDetailsProps {
     currentImage: SpecimenImage | null;
+    latestEditLog: ReviewLog | undefined;
     timezone: string | null;
+    readOnly: boolean;
     state: DetailsState;
 }
 
 export default function ImageReviewDetails({
     currentImage,
+    latestEditLog,
     timezone,
+    readOnly,
     state,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
+    const [isEditing, setIsEditing] = useState(false);
+
+    const isCurrentImageThumbnail =
+        state.status === 'success' &&
+        currentImage !== null &&
+        isThumbnailImage(state.specimen, currentImage);
 
     const totalImagesUploaded =
         state.status === 'success' ? state.specimen.images?.length : undefined;
@@ -73,22 +94,45 @@ export default function ImageReviewDetails({
         return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
     }
 
-    const modelConfidencePercentages = {
-        species: currentImage?.species
-            ? getMaxConfidencePercentage(
-                  currentImage?.inferenceResult?.speciesLogits,
-              )
-            : null,
-        sex: currentImage?.sex
-            ? getMaxConfidencePercentage(
-                  currentImage?.inferenceResult?.sexLogits,
-              )
-            : null,
-        abdomenStatus: currentImage?.abdomenStatus
-            ? getMaxConfidencePercentage(
-                  currentImage?.inferenceResult?.abdomenStatusLogits,
-              )
-            : null,
+    const isEdited = latestEditLog !== undefined;
+    const editorName = latestEditLog?.performedBy
+        ? (latestEditLog.performedBy.name ??
+          t('unknownUser', { userId: latestEditLog.performedBy.userId }))
+        : null;
+    const canEdit = !readOnly && state.status === 'success';
+
+    function getPrediction(
+        value: string | null | undefined,
+        originalValue: string | null | undefined,
+        logits: number[] | undefined,
+    ) {
+        const modelValue = originalValue || value || null;
+        return {
+            value: value || null,
+            originalValue: originalValue || null,
+            modelValue,
+            confidencePercentage: modelValue
+                ? getMaxConfidencePercentage(logits)
+                : null,
+        };
+    }
+
+    const predictions = {
+        species: getPrediction(
+            currentImage?.species,
+            currentImage?.appSpecies,
+            currentImage?.inferenceResult?.speciesLogits,
+        ),
+        sex: getPrediction(
+            currentImage?.sex,
+            currentImage?.appSex,
+            currentImage?.inferenceResult?.sexLogits,
+        ),
+        abdomenStatus: getPrediction(
+            currentImage?.abdomenStatus,
+            currentImage?.appAbdomenStatus,
+            currentImage?.inferenceResult?.abdomenStatusLogits,
+        ),
     };
 
     const isEmpty =
@@ -231,55 +275,107 @@ export default function ImageReviewDetails({
                     <Separator />
 
                     <div className="space-y-3">
-                        <p className="text-sm font-semibold">
-                            {t('modelPredictions')}
-                        </p>
-                        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-                            <dt className="text-muted-foreground">
-                                {t('species')}
-                            </dt>
-                            <dd>
-                                {state.status === 'success' ? (
-                                    (currentImage?.species ?? '—')
-                                ) : (
-                                    <Skeleton
-                                        height="sm"
-                                        width="sm"
-                                        variant={skeletonVariant}
-                                    />
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold">
+                                    {isEdited
+                                        ? t('editedPredictions')
+                                        : t('modelPredictions')}
+                                </p>
+                                {isEdited && (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertCircle className="text-warning h-4 w-4" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {t('editedTooltip')}
+                                        </TooltipContent>
+                                    </Tooltip>
                                 )}
-                            </dd>
+                                {canEdit && !isEditing && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="ml-auto"
+                                        disabled={!isCurrentImageThumbnail}
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                        {t('edit')}
+                                    </Button>
+                                )}
+                            </div>
+                            {canEdit && !isCurrentImageThumbnail && (
+                                <p className="text-muted-foreground text-xs">
+                                    {t('thumbnailOnlyEditable')}
+                                </p>
+                            )}
+                            {editorName && (
+                                <p className="text-muted-foreground text-xs">
+                                    {t('editedBy', { name: editorName })}
+                                </p>
+                            )}
+                        </div>
+                        {isEditing &&
+                        state.status === 'success' &&
+                        currentImage ? (
+                            <PredictionEditForm
+                                specimenId={state.specimen.id}
+                                image={currentImage}
+                                onClose={() => setIsEditing(false)}
+                            />
+                        ) : (
+                            <dl
+                                className={cn(
+                                    'grid gap-x-4 gap-y-2 text-sm',
+                                    isEdited
+                                        ? 'grid-cols-[max-content_max-content_1fr]'
+                                        : 'grid-cols-[max-content_1fr]',
+                                )}
+                            >
+                                {isEdited && (
+                                    <Fragment>
+                                        <dt />
+                                        <dt className="text-muted-foreground text-xs">
+                                            {t('original')}
+                                        </dt>
+                                        <dt className="text-muted-foreground text-xs">
+                                            {t('edited')}
+                                        </dt>
+                                    </Fragment>
+                                )}
+                                <PredictionRow
+                                    category={t('species')}
+                                    value={predictions.species.value}
+                                    originalValue={
+                                        predictions.species.originalValue
+                                    }
+                                    isEdited={isEdited}
+                                    status={state.status}
+                                />
 
-                            <dt className="text-muted-foreground">
-                                {t('sex')}
-                            </dt>
-                            <dd>
-                                {state.status === 'success' ? (
-                                    (currentImage?.sex ?? '—')
-                                ) : (
-                                    <Skeleton
-                                        height="sm"
-                                        width="sm"
-                                        variant={skeletonVariant}
-                                    />
-                                )}
-                            </dd>
+                                <PredictionRow
+                                    category={t('sex')}
+                                    value={predictions.sex.value}
+                                    originalValue={
+                                        predictions.sex.originalValue
+                                    }
+                                    isEdited={isEdited}
+                                    status={state.status}
+                                />
 
-                            <dt className="text-muted-foreground">
-                                {t('abdomenStatus')}
-                            </dt>
-                            <dd>
-                                {state.status === 'success' ? (
-                                    (currentImage?.abdomenStatus ?? '—')
-                                ) : (
-                                    <Skeleton
-                                        height="sm"
-                                        width="sm"
-                                        variant={skeletonVariant}
-                                    />
-                                )}
-                            </dd>
-                        </dl>
+                                <PredictionRow
+                                    category={t('abdomenStatus')}
+                                    value={predictions.abdomenStatus.value}
+                                    originalValue={
+                                        predictions.abdomenStatus.originalValue
+                                    }
+                                    isEdited={isEdited}
+                                    status={state.status}
+                                />
+                            </dl>
+                        )}
                     </div>
 
                     <Separator />
@@ -291,27 +387,28 @@ export default function ImageReviewDetails({
                         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
                             <ConfidencePredictionRow
                                 category={t('species')}
-                                label={currentImage?.species}
+                                label={predictions.species.modelValue}
                                 confidencePercentage={
-                                    modelConfidencePercentages.species
+                                    predictions.species.confidencePercentage
                                 }
                                 status={state.status}
                             />
 
                             <ConfidencePredictionRow
                                 category={t('sex')}
-                                label={currentImage?.sex}
+                                label={predictions.sex.modelValue}
                                 confidencePercentage={
-                                    modelConfidencePercentages.sex
+                                    predictions.sex.confidencePercentage
                                 }
                                 status={state.status}
                             />
 
                             <ConfidencePredictionRow
                                 category={t('abdomenStatus')}
-                                label={currentImage?.abdomenStatus}
+                                label={predictions.abdomenStatus.modelValue}
                                 confidencePercentage={
-                                    modelConfidencePercentages.abdomenStatus
+                                    predictions.abdomenStatus
+                                        .confidencePercentage
                                 }
                                 status={state.status}
                             />

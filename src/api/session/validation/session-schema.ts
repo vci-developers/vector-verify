@@ -17,6 +17,19 @@ export const sessionTypeSchema = z.enum([
     'CALIBRATION',
 ]);
 
+export const collectorTitleSchema = z.enum([
+    'Village Health Team (VHT)',
+    'Vector Control Officer (VCO)',
+    'Field Operations Team (FOT)',
+]);
+
+export const collectionMethodSchema = z.enum([
+    'Pyrethrum Spray Catch (PSC)',
+    'Human Landing Catch (HLC)',
+    'CDC Light Trap (LTC)',
+    'Other',
+]);
+
 export const sessionSchema = z.object({
     sessionId: z.number(),
     frontendId: z.string(),
@@ -53,3 +66,5 @@ export const sessionSchema = z.object({
 
 export type Session = z.infer<typeof sessionSchema>;
 export type SessionState = z.infer<typeof sessionStateSchema>;
+export type CollectorTitle = z.infer<typeof collectorTitleSchema>;
+export type CollectionMethod = z.infer<typeof collectionMethodSchema>;

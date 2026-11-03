@@ -70,7 +70,8 @@ Dynamic form questions in this mode must have `answerScope: "SESSION_UNIT"`.
 ## Validation Rules
 
 - Provide exactly one of `sessionIds` or `sessionUnitIds`.
-- Provide at least two IDs for the selected target type.
+- Provide at least one ID for the selected target type.
+- A `resolvedFormAnswers` entry with `value: null` deletes the stored answer.
 - Dynamic form answers must belong to published forms for the target site
   program.
 - All dynamic answers in one request must belong to the same form.

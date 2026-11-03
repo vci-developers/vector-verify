@@ -15,6 +15,7 @@ export const formQuestionSchema = z.object({
     id: z.number(),
     formId: z.number(),
     parentId: z.number().nullable(),
+    questionKey: z.string(),
     label: z.string(),
     type: formQuestionTypeSchema,
     required: z.boolean(),

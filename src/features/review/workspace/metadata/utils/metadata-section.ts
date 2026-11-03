@@ -1,10 +1,20 @@
 import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
-import type {
-    FormQuestion,
-    FormQuestionType,
+import {
+    formQuestionTypeSchema,
+    type FormQuestion,
+    type FormQuestionScope,
+    type FormQuestionType,
 } from '@/api/form-question/validation/form-question-schema';
-import type { Session } from '@/api/session/validation/session-schema';
-import type { SurveillanceForm } from '@/api/surveillance-form/validation/surveillance-form-schema';
+import {
+    collectionMethodSchema,
+    collectorTitleSchema,
+    type Session,
+} from '@/api/session/validation/session-schema';
+import {
+    llinBrandSchema,
+    llinTypeSchema,
+    type SurveillanceForm,
+} from '@/api/surveillance-form/validation/surveillance-form-schema';
 
 export const NOT_APPLICABLE = 'N/A';
 export const BOOLEAN_TRUE_DISPLAY = 'Yes';
@@ -15,17 +25,20 @@ const SESSION_FIELDS = [
     {
         fieldName: 'collectorTitle',
         label: 'Collector Title',
-        fieldType: 'text',
+        fieldType: 'select',
+        options: collectorTitleSchema.options,
     },
     {
         fieldName: 'collectionMethod',
         label: 'Collection Method',
-        fieldType: 'text',
+        fieldType: 'select',
+        options: collectionMethodSchema.options,
     },
 ] as const satisfies readonly {
     fieldName: keyof Session;
     label: string;
     fieldType: FormQuestionType;
+    options?: readonly string[];
 }[];
 
 const SURVEILLANCE_FORM_FIELDS = [
@@ -49,8 +62,18 @@ const SURVEILLANCE_FORM_FIELDS = [
         label: 'LLINs Available',
         fieldType: 'number',
     },
-    { fieldName: 'llinType', label: 'LLIN Type', fieldType: 'text' },
-    { fieldName: 'llinBrand', label: 'LLIN Brand', fieldType: 'text' },
+    {
+        fieldName: 'llinType',
+        label: 'LLIN Type',
+        fieldType: 'select',
+        options: llinTypeSchema.options,
+    },
+    {
+        fieldName: 'llinBrand',
+        label: 'LLIN Brand',
+        fieldType: 'select',
+        options: llinBrandSchema.options,
+    },
     {
         fieldName: 'numPeopleSleptUnderLlin',
         label: 'People Under LLIN',
@@ -60,6 +83,7 @@ const SURVEILLANCE_FORM_FIELDS = [
     fieldName: keyof SurveillanceForm;
     label: string;
     fieldType: FormQuestionType;
+    options?: readonly string[];
 }[];
 
 export const SURVEILLANCE_FIELD_DEPENDENCIES: Record<
@@ -86,6 +110,10 @@ const SURVEILLANCE_REQUIRED_ROW_IDS = new Set(
     ),
 );
 
+export const LLIN_TYPE_ROW_ID = 'surveillanceForm.llinType';
+export const LLIN_BRAND_ROW_ID = 'surveillanceForm.llinBrand';
+export const COLLECTION_METHOD_ROW_ID = 'session.collectionMethod';
+
 export interface MetadataRow {
     id: string;
     label: string;
@@ -96,6 +124,9 @@ export interface MetadataRow {
     hasConflict: boolean;
     required: boolean;
     options: string[] | null;
+    isUnitIdentityComponent: boolean;
+    isOutdated: boolean;
+    questionKey: string | null;
 }
 
 export interface MetadataSection {
@@ -109,7 +140,7 @@ export function formatDisplayValue(
     value: unknown,
     fieldType?: FormQuestionType,
 ): string {
-    if (value == null) return NOT_APPLICABLE;
+    if (value == null || value === '') return NOT_APPLICABLE;
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     if (fieldType === 'boolean' && (value === 'true' || value === 'false'))
@@ -128,6 +159,30 @@ export function flattenQuestions(questions: FormQuestion[]): FormQuestion[] {
     return flattenedQuestions;
 }
 
+function buildQuestionMatchKey(
+    questionKey: string,
+    answerScope: FormQuestionScope,
+    type: string | null,
+): string {
+    return JSON.stringify([questionKey, answerScope, type]);
+}
+
+export function toQuestionMatchKey(question: FormQuestion): string {
+    return buildQuestionMatchKey(
+        question.questionKey,
+        question.answerScope,
+        question.type,
+    );
+}
+
+export function toAnswerMatchKey(formAnswer: FormAnswer): string {
+    return buildQuestionMatchKey(
+        formAnswer.questionKey ?? `questionId:${formAnswer.questionId}`,
+        formAnswer.sessionUnitId === null ? 'SESSION' : 'SESSION_UNIT',
+        formAnswer.type,
+    );
+}
+
 export function buildSurveillanceSection(
     sessions: Session[],
     surveillanceFormBySessionId: Map<number, SurveillanceForm | null>,
@@ -138,11 +193,9 @@ export function buildSurveillanceSection(
         ...surveillanceFormBySessionId.values(),
     ].some(surveillanceForm => surveillanceForm !== null);
     if (hasAnySurveillanceForm) {
-        for (const {
-            fieldName,
-            label,
-            fieldType,
-        } of SURVEILLANCE_FORM_FIELDS) {
+        for (const field of SURVEILLANCE_FORM_FIELDS) {
+            const { fieldName, label, fieldType } = field;
+            const options = 'options' in field ? [...field.options] : null;
             rows.push(
                 buildMetadataRow(
                     {
@@ -150,6 +203,7 @@ export function buildSurveillanceSection(
                         fieldName,
                         label,
                         fieldType,
+                        options,
                         required: SURVEILLANCE_REQUIRED_ROW_IDS.has(
                             `surveillanceForm.${fieldName}`,
                         ),
@@ -176,10 +230,11 @@ export function buildDynamicSessionSection(
     formAnswersBySessionId: Map<number, FormAnswer[]>,
 ): MetadataSection {
     const rows = buildSessionCoreRows(sessions);
+    const sessionScopedQuestions = flattenQuestions(
+        currentFormQuestions,
+    ).filter(question => question.answerScope === 'SESSION');
 
-    for (const question of flattenQuestions(currentFormQuestions).filter(
-        question => question.answerScope === 'SESSION',
-    )) {
+    for (const question of sessionScopedQuestions) {
         rows.push(
             buildMetadataRow(
                 questionToMetadataField(question),
@@ -196,21 +251,37 @@ export function buildDynamicSessionSection(
         );
     }
 
+    rows.push(
+        ...buildOutdatedRows(
+            new Map(
+                sessions.map(session => [
+                    session.sessionId,
+                    formAnswersBySessionId
+                        .get(session.sessionId)
+                        ?.filter(answer => answer.sessionUnitId === null) ?? [],
+                ]),
+            ),
+            sessionScopedQuestions,
+        ),
+    );
+
     return { key: 'session', title: null, rows };
 }
 
 function buildSessionCoreRows(sessions: Session[]): MetadataRow[] {
-    return SESSION_FIELDS.map(({ fieldName, label, fieldType }) =>
-        buildMetadataRow(
-            { entity: 'session', fieldName, label, fieldType },
+    return SESSION_FIELDS.map(field => {
+        const { fieldName, label, fieldType } = field;
+        const options = 'options' in field ? [...field.options] : null;
+        return buildMetadataRow(
+            { entity: 'session', fieldName, label, fieldType, options },
             new Map(
                 sessions.map(session => [
                     session.sessionId,
                     session[fieldName],
                 ]),
             ),
-        ),
-    );
+        );
+    });
 }
 
 export function buildMetadataRow(
@@ -221,11 +292,24 @@ export function buildMetadataRow(
         fieldType: FormQuestionType;
         required?: boolean;
         options?: string[] | null;
+        isUnitIdentityComponent?: boolean;
+        isOutdated?: boolean;
+        questionKey?: string | null;
     },
     fieldValueBySessionId: Map<number, unknown>,
     groupKey?: string,
 ): MetadataRow {
-    const { entity, fieldName, label, fieldType, required, options } = field;
+    const {
+        entity,
+        fieldName,
+        label,
+        fieldType,
+        required,
+        options,
+        isUnitIdentityComponent,
+        isOutdated,
+        questionKey,
+    } = field;
     const distinctDisplayValues = new Set(
         [...fieldValueBySessionId.values()].map(value =>
             formatDisplayValue(value, fieldType),
@@ -240,9 +324,12 @@ export function buildMetadataRow(
         fieldName,
         fieldType,
         fieldValueBySessionId,
-        hasConflict: distinctDisplayValues.size > 1,
+        hasConflict: !isOutdated && distinctDisplayValues.size > 1,
         required: required ?? false,
         options: options ?? null,
+        isUnitIdentityComponent: isUnitIdentityComponent ?? false,
+        isOutdated: isOutdated ?? false,
+        questionKey: questionKey ?? null,
     };
 }
 
@@ -256,5 +343,69 @@ export function questionToMetadataField(
         fieldType: question.type,
         required: question.required,
         options: question.options,
+        isUnitIdentityComponent: question.isUnitIdentityComponent,
+        questionKey: question.questionKey,
     };
+}
+
+export function buildOutdatedRows(
+    formAnswersBySessionId: Map<number, FormAnswer[]>,
+    currentFormQuestions: FormQuestion[],
+    groupKey?: string,
+): MetadataRow[] {
+    const currentQuestionIds = new Set(
+        currentFormQuestions.map(question => question.id),
+    );
+    const outdatedAnswersBySessionId = new Map(
+        [...formAnswersBySessionId].map(([sessionId, formAnswers]) => [
+            sessionId,
+            formAnswers.filter(
+                formAnswer =>
+                    !currentQuestionIds.has(formAnswer.questionId) &&
+                    formatDisplayValue(formAnswer.value) !== NOT_APPLICABLE,
+            ),
+        ]),
+    );
+    const firstOutdatedAnswerByMatchKey = new Map<string, FormAnswer>();
+    for (const outdatedAnswers of outdatedAnswersBySessionId.values()) {
+        for (const outdatedAnswer of outdatedAnswers) {
+            const matchKey = toAnswerMatchKey(outdatedAnswer);
+            if (!firstOutdatedAnswerByMatchKey.has(matchKey)) {
+                firstOutdatedAnswerByMatchKey.set(matchKey, outdatedAnswer);
+            }
+        }
+    }
+
+    return [...firstOutdatedAnswerByMatchKey].map(
+        ([matchKey, firstOutdatedAnswer]) => {
+            const parsedFieldType = formQuestionTypeSchema.safeParse(
+                firstOutdatedAnswer.type,
+            );
+            return buildMetadataRow(
+                {
+                    entity: 'formAnswer',
+                    fieldName: String(firstOutdatedAnswer.questionId),
+                    label: firstOutdatedAnswer.label ?? '',
+                    fieldType: parsedFieldType.success
+                        ? parsedFieldType.data
+                        : 'text',
+                    isOutdated: true,
+                    questionKey: firstOutdatedAnswer.questionKey,
+                },
+                new Map(
+                    [...outdatedAnswersBySessionId].map(
+                        ([sessionId, outdatedAnswers]) => [
+                            sessionId,
+                            outdatedAnswers.find(
+                                outdatedAnswer =>
+                                    toAnswerMatchKey(outdatedAnswer) ===
+                                    matchKey,
+                            )?.value ?? null,
+                        ],
+                    ),
+                ),
+                groupKey,
+            );
+        },
+    );
 }

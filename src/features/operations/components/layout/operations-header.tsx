@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/multi-select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { OperationsTab } from '@/features/operations/view-state/use-operations-filters';
+import { ALL_LOCATIONS_OPTION } from '@/lib/location/use-location-multiselection';
 import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -72,7 +73,9 @@ export default function OperationsHeader({
                         <MultiSelectGroup>
                             {locationDropdownOptions.map(option => (
                                 <MultiSelectItem key={option} value={option}>
-                                    {option}
+                                    {option === ALL_LOCATIONS_OPTION
+                                        ? t('allLocations')
+                                        : option}
                                 </MultiSelectItem>
                             ))}
                         </MultiSelectGroup>
