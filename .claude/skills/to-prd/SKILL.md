@@ -13,6 +13,25 @@ know.
 The issue tracker and triage label vocabulary should have been provided to you —
 run `/setup-matt-pocock-skills` if not.
 
+## Voice
+
+Write as a burned-out senior developer who has to build and maintain this:
+energy for decisions, none for filler. Tired, not careless.
+
+- Every section earns its place. Short sentences, normal grammar, no preamble,
+  no marketing adjectives (robust, seamless, powerful), no restating the section
+  heading.
+- Specific over vague: name the module, the ADR, the CONTEXT.md term, the count.
+  Never "various" or "some".
+- Scope to the smallest thing that solves the problem. Check each module against
+  the ladder: does it need to exist, already in the codebase, platform feature,
+  installed dependency, minimum that works. No speculative abstractions,
+  single-use helpers, or one-case config.
+- When you check modules and tests with the user, ask once, with the default
+  you'll take if unanswered.
+- In chat, reply with the PRD path and at most one next step. Don't summarize
+  the PRD.
+
 ## Output location
 
 PRDs are always written to **`.claude/prds/<branch-name>/<prd-name>.md`**.
@@ -68,7 +87,7 @@ of:
 </user-story-example>
 
 This list of user stories should be extremely extensive and cover all aspects of
-the feature.
+the feature. Keep each story to one line, with no padding.
 
 ## Implementation Decisions
 

@@ -2,7 +2,7 @@
 
 import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
-import type { FormAnswer } from '@/api/form-answer/validation/form-answer-schema';
+import type { GetFormAnswersBySessionIdSuccessPayload } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
 import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
 import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
@@ -16,17 +16,15 @@ import { Button } from '@/components/ui/button';
 import { SkeletonList } from '@/components/ui/skeleton-list';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { useQueryClient } from '@tanstack/react-query';
-import { CircleAlert, Pencil, TriangleAlert } from 'lucide-react';
+import { CircleAlert, History, Pencil, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMetadataReviewState } from '../hooks/use-metadata-review-state';
 import { applyConflictResolutions } from '../utils/apply-conflict-resolutions';
-import { buildUnitIdentitySections } from '../utils/group-session-units-by-identity';
+import { buildDynamicFormMetadata } from '@/features/review/workspace/metadata/utils/build-dynamic-form-metadata';
 import {
-    buildDynamicSessionSection,
     buildSurveillanceSection,
-    flattenQuestions,
     type MetadataSection,
 } from '../utils/metadata-section';
 import {
@@ -113,6 +111,7 @@ export default function MetadataReviewWorkspace({
     let resolvableSessions: Session[];
     let sessionsMissingSurveillanceForm: Session[] = [];
     let questionsById = new Map<number, FormQuestion>();
+    let currentFormSessionIds = new Set<number>();
 
     if (isDynamicFormMode) {
         if (formAnswerQueries.some(query => query.isPending)) {
@@ -136,37 +135,28 @@ export default function MetadataReviewWorkspace({
             );
         }
 
-        const formAnswersBySessionId = new Map<number, FormAnswer[]>(
+        const formAnswersResponseBySessionId = new Map<
+            number,
+            GetFormAnswersBySessionIdSuccessPayload | null
+        >(
             sessions.map((session, index) => {
                 const formAnswersResult = formAnswerQueries[index]?.data;
                 return [
                     session.sessionId,
-                    formAnswersResult?.ok ? formAnswersResult.data.answers : [],
+                    formAnswersResult?.ok ? formAnswersResult.data : null,
                 ];
             }),
         );
+        const dynamicFormMetadata = buildDynamicFormMetadata(
+            sessions,
+            formAnswersResponseBySessionId,
+            getCurrentFormByProgramIdResult.data,
+        );
 
         resolvableSessions = sessions;
-        const currentFormQuestions =
-            getCurrentFormByProgramIdResult.data.questions ?? [];
-        questionsById = new Map(
-            flattenQuestions(currentFormQuestions).map(question => [
-                question.id,
-                question,
-            ]),
-        );
-        sections = [
-            buildDynamicSessionSection(
-                resolvableSessions,
-                currentFormQuestions,
-                formAnswersBySessionId,
-            ),
-            ...buildUnitIdentitySections(
-                resolvableSessions,
-                currentFormQuestions,
-                formAnswersBySessionId,
-            ),
-        ];
+        sections = dynamicFormMetadata.sections;
+        questionsById = dynamicFormMetadata.questionsById;
+        currentFormSessionIds = dynamicFormMetadata.currentFormSessionIds;
     } else {
         if (surveillanceFormQueries.some(query => query.isPending)) {
             return <SkeletonList count={6} height="lg" width="full" />;
@@ -245,6 +235,8 @@ export default function MetadataReviewWorkspace({
         sections,
         resolutionsByMetadataRowId,
         disabledRowIds,
+        questionsById,
+        currentFormSessionIds,
     );
 
     const areAllConflictsResolved = sections.every(section =>
@@ -271,22 +263,17 @@ export default function MetadataReviewWorkspace({
 
     const unmetRequiredCount = unmetRequiredRowIds.size;
 
+    const hasOutdatedRows = sections.some(section =>
+        section.rows.some(row => row.isOutdated),
+    );
+
     async function resolveConflictsAndContinue() {
         const resolvableSessionIds = resolvableSessions.map(
             session => session.sessionId,
         );
-        const sectionsToResolve = sections.filter(section =>
-            section.rows.some(row => resolutionsByMetadataRowId.has(row.id)),
-        );
-
-        if (sectionsToResolve.length === 0) {
-            onGoToNextStep();
-            return;
-        }
-
         setIsResolving(true);
         const outcomes = await Promise.allSettled(
-            sectionsToResolve.map(section => {
+            sections.map(section => {
                 const {
                     resolvedData,
                     resolvedSurveillanceForm,
@@ -361,6 +348,12 @@ export default function MetadataReviewWorkspace({
                             <span className="text-destructive flex items-center gap-1.5">
                                 <CircleAlert className="h-3.5 w-3.5 shrink-0" />
                                 {t('legendRequired')}
+                            </span>
+                        )}
+                        {hasOutdatedRows && (
+                            <span className="flex items-center gap-1.5">
+                                <History className="text-warning h-3.5 w-3.5 shrink-0" />
+                                {t('legendOutdated')}
                             </span>
                         )}
                     </div>

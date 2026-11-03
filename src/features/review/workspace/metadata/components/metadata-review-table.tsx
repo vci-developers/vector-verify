@@ -10,16 +10,26 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { evaluateRowOptionsById } from '@/features/review/workspace/metadata/utils/evaluate-question-answerability';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
-import { CircleAlert, CircleCheck, Pencil, TriangleAlert } from 'lucide-react';
+import {
+    CircleAlert,
+    CircleCheck,
+    History,
+    Pencil,
+    TriangleAlert,
+    type LucideIcon,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
 import {
+    COLLECTION_METHOD_ROW_ID,
     formatDisplayValue,
     NOT_APPLICABLE,
     type MetadataSection,
-} from '../utils/metadata-section';
+} from '@/features/review/workspace/metadata/utils/metadata-section';
+import { formatDateAnswer } from '@/features/review/workspace/metadata/utils/format-date-answer';
 import ConflictResolutionControl from './conflict-resolution-control';
 
 interface MetadataReviewTableProps {
@@ -49,6 +59,12 @@ export default function MetadataReviewTable({
     const t = useTranslations('ReviewMetadata');
 
     const [editingRowIds, setEditingRowIds] = useState<Set<string>>(new Set());
+
+    const filteredOptionsByRowId = evaluateRowOptionsById(
+        sections.flatMap(section => section.rows),
+        resolutionsByMetadataRowId,
+        disabledRowIds,
+    );
 
     const showSectionHeaders = sections.length > 1;
     const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
@@ -111,6 +127,7 @@ export default function MetadataReviewTable({
                             </TableRow>
                         )}
                         {section.rows.map(row => {
+                            if (row.isUnitIdentityComponent) return null;
                             const isRowDisabled = disabledRowIds.has(row.id);
                             const isUnmetRowRequired = unmetRequiredRowIds.has(
                                 row.id,
@@ -148,14 +165,19 @@ export default function MetadataReviewTable({
                                 editingRowIds.has(row.id) ||
                                 resolutionsByMetadataRowId.has(row.id);
 
-                            let RowIcon: typeof CircleAlert | null = null;
-                            if (!readOnly) {
+                            let RowIcon: LucideIcon | null = null;
+                            let rowIconClassName = 'text-destructive';
+                            if (row.isOutdated) {
+                                RowIcon = History;
+                                rowIconClassName = 'text-warning';
+                            } else if (!readOnly) {
                                 if (isUnmetRowRequired) {
                                     RowIcon = CircleAlert;
+                                } else if (row.hasConflict && isResolved) {
+                                    RowIcon = CircleCheck;
+                                    rowIconClassName = 'text-green-600';
                                 } else if (row.hasConflict) {
-                                    RowIcon = isResolved
-                                        ? CircleCheck
-                                        : TriangleAlert;
+                                    RowIcon = TriangleAlert;
                                 }
                             }
 
@@ -168,6 +190,8 @@ export default function MetadataReviewTable({
                                             ((row.hasConflict && !isResolved) ||
                                                 isUnmetRowRequired) &&
                                             'bg-destructive/10 hover:bg-destructive/15',
+                                        row.isOutdated &&
+                                            'bg-warning/5 hover:bg-warning/10 text-muted-foreground',
                                     )}
                                 >
                                     <TableCell
@@ -181,9 +205,7 @@ export default function MetadataReviewTable({
                                                 <RowIcon
                                                     className={cn(
                                                         'h-4 w-4 shrink-0',
-                                                        RowIcon === CircleCheck
-                                                            ? 'text-green-600'
-                                                            : 'text-destructive',
+                                                        rowIconClassName,
                                                     )}
                                                 />
                                             )}
@@ -225,50 +247,72 @@ export default function MetadataReviewTable({
                                                         'bg-primary/10',
                                                 )}
                                             >
-                                                {effectiveDisplayValue}
+                                                {formatDateAnswer(
+                                                    effectiveDisplayValue,
+                                                    row.fieldType,
+                                                    timezone,
+                                                )}
                                             </TableCell>
                                         );
                                     })}
                                     {!readOnly && (
                                         <TableCell className="border-border bg-background sticky right-0 z-20 w-72 border">
-                                            {isRowDisabled ? (
-                                                <span className="text-muted-foreground pl-3 text-sm">
-                                                    {NOT_APPLICABLE}
-                                                </span>
-                                            ) : showControl ? (
-                                                <ConflictResolutionControl
-                                                    fieldType={row.fieldType}
-                                                    options={resolutionOptions}
-                                                    questionOptions={
-                                                        row.options
-                                                    }
-                                                    value={controlValue}
-                                                    onValueChange={value =>
-                                                        onConflictResolutionChange(
-                                                            row.id,
-                                                            value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                />
-                                            ) : (
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        startEditingRow(row.id)
-                                                    }
-                                                    aria-label={t(
-                                                        'editValueLabel',
-                                                    )}
-                                                    className="h-auto w-72 justify-between px-3 py-1.5 font-normal"
-                                                >
-                                                    <span className="truncate">
-                                                        {controlValue ??
-                                                            NOT_APPLICABLE}
+                                            {!row.isOutdated &&
+                                                (isRowDisabled ? (
+                                                    <span className="text-muted-foreground pl-3 text-sm">
+                                                        {NOT_APPLICABLE}
                                                     </span>
-                                                    <Pencil className="text-muted-foreground ml-2 h-3.5 w-3.5 shrink-0" />
-                                                </Button>
-                                            )}
+                                                ) : showControl ? (
+                                                    <ConflictResolutionControl
+                                                        fieldType={
+                                                            row.fieldType
+                                                        }
+                                                        options={
+                                                            resolutionOptions
+                                                        }
+                                                        questionOptions={
+                                                            filteredOptionsByRowId.get(
+                                                                row.id,
+                                                            ) ?? row.options
+                                                        }
+                                                        isOtherTextEnabled={
+                                                            row.id ===
+                                                            COLLECTION_METHOD_ROW_ID
+                                                        }
+                                                        value={controlValue}
+                                                        timezone={timezone}
+                                                        onValueChange={value =>
+                                                            onConflictResolutionChange(
+                                                                row.id,
+                                                                value,
+                                                            )
+                                                        }
+                                                        disabled={false}
+                                                    />
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        onClick={() =>
+                                                            startEditingRow(
+                                                                row.id,
+                                                            )
+                                                        }
+                                                        aria-label={t(
+                                                            'editValueLabel',
+                                                        )}
+                                                        className="h-auto w-72 justify-between px-3 py-1.5 font-normal"
+                                                    >
+                                                        <span className="truncate">
+                                                            {formatDateAnswer(
+                                                                controlValue ??
+                                                                    NOT_APPLICABLE,
+                                                                row.fieldType,
+                                                                timezone,
+                                                            )}
+                                                        </span>
+                                                        <Pencil className="text-muted-foreground ml-2 h-3.5 w-3.5 shrink-0" />
+                                                    </Button>
+                                                ))}
                                         </TableCell>
                                     )}
                                 </TableRow>

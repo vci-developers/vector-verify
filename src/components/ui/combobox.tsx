@@ -57,7 +57,7 @@ export function ComboBox({
     }
 
     return (
-        <Popover open={open} onOpenChange={handleOpenChange}>
+        <Popover modal open={open} onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"

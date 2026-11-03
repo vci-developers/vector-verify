@@ -16,6 +16,7 @@ import AnnotationForm from '@/features/annotation/task-details/components/worksp
 import ErrorBanner from '@/components/ui/error-banner';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { annotationTaskKeys } from '@/api/annotation-task/annotation-task-keys';
 
 interface AnnotationWorkspaceProps {
     taskId: number;
@@ -58,6 +59,9 @@ export default function AnnotationWorkspace({
                     if (result.ok) {
                         queryClient.invalidateQueries({
                             queryKey: annotationKeys.root,
+                        });
+                        queryClient.invalidateQueries({
+                            queryKey: annotationTaskKeys.root,
                         });
                         setIsEditing(false);
                     } else {

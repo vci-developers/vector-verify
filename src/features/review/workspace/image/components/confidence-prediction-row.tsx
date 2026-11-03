@@ -22,6 +22,8 @@ export default function ConfidencePredictionRow({
         status === 'success' &&
         confidencePercentage != null &&
         confidencePercentage < MODEL_CONFIDENCE_THRESHOLD;
+    const hasConfidence =
+        status === 'success' && !!label && confidencePercentage != null;
 
     return (
         <Fragment>
@@ -41,7 +43,7 @@ export default function ConfidencePredictionRow({
                                 status === 'error' ? 'destructive' : 'default'
                             }
                         />
-                    ) : label && confidencePercentage != null ? (
+                    ) : hasConfidence ? (
                         `${confidencePercentage}%`
                     ) : (
                         '—'
@@ -52,6 +54,9 @@ export default function ConfidencePredictionRow({
                         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     )}
                 </span>
+                {hasConfidence && (
+                    <span className="text-muted-foreground">{label}</span>
+                )}
             </dd>
         </Fragment>
     );

@@ -8,7 +8,16 @@
         "previous": "Previous",
         "search": "Search...",
         "noResults": "No results.",
-        "language": "Language"
+        "language": "Language",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving…",
+        "tryAgain": "Try again"
+    },
+    "Sidebar": {
+        "loadErrorTitle": "Couldn't load navigation",
+        "loadErrorFallback": "Unable to load navigation. Please try again.",
+        "retrying": "Retrying…"
     },
     "Navigation": {
         "dashboard": "Dashboard",
@@ -87,6 +96,7 @@
         "selectALocation": "Select a location to view data.",
         "selectDropdownPlaceholder": "Select {locationType}(s)",
         "searchLocationPlaceholder": "Search {locationType}s",
+        "allLocations": "All locations",
         "exportData": "Export Data"
     },
     "OperationsGeographicalSummary": {
@@ -132,9 +142,10 @@
         "selectSpecies": "Select species...",
         "searchSpecies": "Search species...",
         "noSpeciesFound": "No species found.",
-        "barChart": "Bar chart",
-        "lineChart": "Line chart",
-        "noSpecimenData": "No specimen data for the selected filters."
+        "noSpecimenData": "No specimen data for the selected filters.",
+        "specimens": "Specimens",
+        "specimenCountOfTotal": "{count} of {total}",
+        "total": "Total"
     },
     "OperationsAIPerformance": {
         "coverageReflects": "Coverage reflects reviewed specimens for the selected location(s) where review means annotated or flagged.",
@@ -245,6 +256,7 @@
         "intro": "Review the metadata for this unit before continuing.",
         "legendConflict": "Conflicting values must be resolved to continue",
         "legendRequired": "Required answers must be supplied to continue",
+        "legendOutdated": "Outdated questions are not on the current form and are shown read-only",
         "legendEdit": "Edit any value to correct it (optional)",
         "conflictsRemaining": "{count, plural, one {# conflict left to resolve} other {# conflicts left to resolve}}",
         "requiredAnswersRemaining": "{count, plural, one {# required answer left to supply} other {# required answers left to supply}}",
@@ -253,6 +265,7 @@
         "collectionDate": "Collection Date: ",
         "sessionCreated": "Session Created: ",
         "selectValuePlaceholder": "Select value",
+        "otherValuePlaceholder": "Specify other",
         "wholeNonNegativeIntegerError": "Must be a whole non-negative integer",
         "missingSurveillanceFormNotice": "{count, plural, one {# session is missing a surveillance form} other {# sessions are missing surveillance forms}} and won't receive the values saved here: {dates}. Follow up with the field team to submit the missing {count, plural, one {form} other {forms}} before certifying.",
         "noSessions": "No sessions found for this Sentinel Site.",
@@ -290,7 +303,22 @@
         "species": "Species",
         "sex": "Sex",
         "abdomenStatus": "Abdomen Status",
-        "modelConfidence": "Model Confidence"
+        "modelConfidence": "Model Confidence",
+        "edited": "Edited",
+        "editedPredictions": "Edited Predictions",
+        "editedTooltip": "This prediction has been edited.",
+        "editedBy": "Edited by {name}",
+        "unknownUser": "Unknown user (#{userId})",
+        "original": "Original",
+        "reviewLogsError": "Failed to load prediction edits.",
+        "edit": "Edit",
+        "thumbnailOnlyEditable": "Only the thumbnail image can be edited.",
+        "genus": "Genus",
+        "required": "(Required)",
+        "selectPlaceholder": "Select...",
+        "notApplicable": "N/A",
+        "editSuccess": "Prediction updated.",
+        "editError": "Failed to update prediction."
     },
     "ReviewCertification": {
         "title": "Certify Site",
