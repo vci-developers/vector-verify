@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
-import type { SpecimenChangelog } from '../validation/specimen-changelog-schema';
+import type { SpecimenChangelog } from '../types/specimen-changelog';
 
 const changeValueSchema = z
     .object({ before: z.string().nullable(), after: z.string().nullable() })

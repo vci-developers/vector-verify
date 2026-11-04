@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
-import { specimenChangelogSchema } from '@/features/review/specimens-table/validation/specimen-changelog-schema';
+import type { SpecimenChangelog } from '@/features/review/specimens-table/types/specimen-changelog';
 import SpecimenChangelogDrawer from '@/features/review/specimens-table/components/specimen-changelog-drawer';
 import defaultMessages from '../../../../../messages/en.json';
 
@@ -27,7 +27,7 @@ test.each([
 ] as const)(
     'displays empty and populated change values: %s to %s',
     async (previousValue, value, expectedPreviousValue, expectedValue) => {
-        const changelog = specimenChangelogSchema.parse({
+        const changelog: SpecimenChangelog = {
             specimenId: 'CMS007',
             sessionId: 1401,
             siteId: 89,
@@ -41,7 +41,7 @@ test.each([
                     changes: [{ field: 'abdomenStatus', previousValue, value }],
                 },
             ],
-        });
+        };
         render(
             <NextIntlClientProvider
                 locale="en"

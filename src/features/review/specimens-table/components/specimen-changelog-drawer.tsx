@@ -10,7 +10,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import type { SpecimenChangelog } from '@/features/review/specimens-table/validation/specimen-changelog-schema';
+import type { SpecimenChangelog } from '@/features/review/specimens-table/types/specimen-changelog';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { ArrowRight, Pencil, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
