@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetSpecimens } from '@/api/specimen/hooks/use-get-specimens';
 import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
@@ -38,6 +38,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 
 const PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 const speciesOptions = [
     ...genusSchema.options.filter(genus => genus !== 'Anopheles'),
     ...anophelesSpeciesSchema.options.map(species => `Anopheles ${species}`),
@@ -73,6 +74,7 @@ function SpecimensTableContent({
     const t = useTranslations('ReviewSpecimens');
     const getPredictionLabel = useSpecimenPredictionLabel();
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [species, setSpecies] = useState('all');
     const [sex, setSex] = useState('all');
     const [abdomenStatus, setAbdomenStatus] = useState('all');
@@ -80,6 +82,14 @@ function SpecimensTableContent({
     const { page, resetPage, goToPage, createPageRange } = usePagination({
         limit: PAGE_SIZE,
     });
+    useEffect(() => {
+        if (search === debouncedSearch) return;
+        const timeout = setTimeout(() => {
+            setDebouncedSearch(search);
+            resetPage();
+        }, SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(timeout);
+    }, [search, debouncedSearch, resetPage]);
     const offset = (page - 1) * PAGE_SIZE;
     const [sortOrder, setSortOrder] =
         useState<GetSpecimensQueryParams['sortOrder']>();
@@ -139,7 +149,7 @@ function SpecimensTableContent({
         ...locationQueryParam,
         siteId: selectedSiteId,
         collectionCycleId,
-        specimenId: search || undefined,
+        specimenId: debouncedSearch || undefined,
         species: species === 'all' ? undefined : species,
         sex: sex === 'all' ? undefined : sex,
         abdomenStatus: abdomenStatus === 'all' ? undefined : abdomenStatus,
@@ -188,10 +198,7 @@ function SpecimensTableContent({
                 aria-label={t('search')}
                 placeholder={t('search')}
                 value={search}
-                onChange={event => {
-                    setSearch(event.target.value);
-                    resetPage();
-                }}
+                onChange={event => setSearch(event.target.value)}
                 className="w-full"
             />
             <div className="flex flex-wrap gap-2">

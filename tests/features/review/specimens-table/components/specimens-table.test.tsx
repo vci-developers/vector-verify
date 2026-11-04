@@ -1,6 +1,8 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import {
+    act,
     cleanup,
+    fireEvent,
     render,
     screen,
     waitFor,
@@ -14,6 +16,7 @@ import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { collectionCycleSchema } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
 import { reviewLogKeys } from '@/api/review-log/review-log-keys';
+import { specimenKeys } from '@/api/specimen/specimen-keys';
 import { createReviewLog } from '../../../../helpers/create-review-log';
 import { ok, err } from '@/lib/result/result';
 import SpecimensTable from '@/features/review/specimens-table/components/specimens-table';
@@ -68,7 +71,10 @@ const logs = [
     }),
 ];
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+});
 
 function renderTable({
     empty = false,
@@ -155,6 +161,68 @@ function renderTable({
     );
     return fetchMock;
 }
+
+test('debounces typing and clearing while resetting pagination with the search query', async () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryDefaults(specimenKeys.root, { staleTime: 0 });
+    const fetchMock = renderTable({ queryClient });
+    await screen.findByText('CMS007');
+    await userEvent.setup().click(
+        screen.getByRole('link', { name: 'Go to page 2' }),
+    );
+    await screen.findByText('Page 2 of 3');
+    vi.useFakeTimers();
+    const search = screen.getByRole('textbox', {
+        name: messages.ReviewSpecimens.search,
+    });
+    fetchMock.mockClear();
+    fireEvent.change(search, { target: { value: 'CMS' } });
+    await act(() => vi.advanceTimersByTimeAsync(200));
+    fireEvent.change(search, { target: { value: 'CMS007' } });
+    expect(search).toHaveValue('CMS007');
+    await act(() => vi.advanceTimersByTimeAsync(299));
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(1));
+    const searchRequests = fetchMock.mock.calls.map(([input]) =>
+        new URL(String(input), 'https://example.test'),
+    );
+    expect(searchRequests).toHaveLength(1);
+    expect(searchRequests[0]?.searchParams.get('specimenId')).toBe('CMS007');
+    expect(searchRequests[0]?.searchParams.get('offset')).toBe('0');
+
+    fetchMock.mockClear();
+    fireEvent.change(
+        screen.getByRole('textbox', { name: messages.ReviewSpecimens.search }),
+        { target: { value: '' } },
+    );
+    expect(
+        screen.getByRole('textbox', { name: messages.ReviewSpecimens.search }),
+    ).toHaveValue('');
+    await act(() => vi.advanceTimersByTimeAsync(299));
+    expect(fetchMock).not.toHaveBeenCalled();
+    await act(() => vi.advanceTimersByTimeAsync(1));
+    const clearedRequests = fetchMock.mock.calls.map(([input]) =>
+        new URL(String(input), 'https://example.test'),
+    );
+    expect(clearedRequests).toHaveLength(1);
+    expect(clearedRequests[0]?.searchParams.has('specimenId')).toBe(false);
+    expect(clearedRequests[0]?.searchParams.get('offset')).toBe('0');
+});
+
+test('cancels a pending search when the table unmounts', async () => {
+    const fetchMock = renderTable();
+    await screen.findByText('CMS007');
+    vi.useFakeTimers();
+    fireEvent.change(
+        screen.getByRole('textbox', { name: messages.ReviewSpecimens.search }),
+        { target: { value: 'CMS007' } },
+    );
+    cleanup();
+    fetchMock.mockClear();
+    await act(() => vi.advanceTimersByTimeAsync(300));
+    expect(fetchMock).not.toHaveBeenCalled();
+});
 
 test('refreshes the shared log cache after a prediction edit when returning within its fresh-cache window', async () => {
     const queryClient = createTestQueryClient();
