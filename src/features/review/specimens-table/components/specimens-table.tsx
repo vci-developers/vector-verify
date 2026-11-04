@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGetSpecimens } from '@/api/specimen/hooks/use-get-specimens';
 import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
@@ -173,8 +173,12 @@ function SpecimensTableContent({
             },
         );
     const reviewLogsError = isReviewLogsError || reviewLogsResult?.ok === false;
-    const reviewLogsBySpecimenId = groupReviewLogsBySpecimenId(
-        reviewLogsResult?.ok ? reviewLogsResult.data.logs : [],
+    const reviewLogsBySpecimenId = useMemo(
+        () =>
+            groupReviewLogsBySpecimenId(
+                reviewLogsResult?.ok ? reviewLogsResult.data.logs : [],
+            ),
+        [reviewLogsResult],
     );
     const totalPages = result?.ok
         ? Math.max(1, Math.ceil(result.data.total / PAGE_SIZE))

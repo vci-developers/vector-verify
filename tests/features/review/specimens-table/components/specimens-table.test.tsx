@@ -20,6 +20,7 @@ import { specimenKeys } from '@/api/specimen/specimen-keys';
 import { createReviewLog } from '../../../../helpers/create-review-log';
 import { ok, err } from '@/lib/result/result';
 import SpecimensTable from '@/features/review/specimens-table/components/specimens-table';
+import * as reviewLogGrouping from '@/features/review/specimens-table/utils/group-review-logs-by-specimen-id';
 import messages from '../../../../../messages/en.json';
 import { createTestQueryClient } from '../../../../helpers/create-query-client';
 
@@ -74,6 +75,7 @@ const logs = [
 afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
 });
 
 function renderTable({
@@ -167,9 +169,9 @@ test('debounces typing and clearing while resetting pagination with the search q
     queryClient.setQueryDefaults(specimenKeys.root, { staleTime: 0 });
     const fetchMock = renderTable({ queryClient });
     await screen.findByText('CMS007');
-    await userEvent.setup().click(
-        screen.getByRole('link', { name: 'Go to page 2' }),
-    );
+    await userEvent
+        .setup()
+        .click(screen.getByRole('link', { name: 'Go to page 2' }));
     await screen.findByText('Page 2 of 3');
     vi.useFakeTimers();
     const search = screen.getByRole('textbox', {
@@ -184,8 +186,8 @@ test('debounces typing and clearing while resetting pagination with the search q
     expect(fetchMock).not.toHaveBeenCalled();
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
     await act(() => vi.advanceTimersByTimeAsync(1));
-    const searchRequests = fetchMock.mock.calls.map(([input]) =>
-        new URL(String(input), 'https://example.test'),
+    const searchRequests = fetchMock.mock.calls.map(
+        ([input]) => new URL(String(input), 'https://example.test'),
     );
     expect(searchRequests).toHaveLength(1);
     expect(searchRequests[0]?.searchParams.get('specimenId')).toBe('CMS007');
@@ -202,12 +204,40 @@ test('debounces typing and clearing while resetting pagination with the search q
     await act(() => vi.advanceTimersByTimeAsync(299));
     expect(fetchMock).not.toHaveBeenCalled();
     await act(() => vi.advanceTimersByTimeAsync(1));
-    const clearedRequests = fetchMock.mock.calls.map(([input]) =>
-        new URL(String(input), 'https://example.test'),
+    const clearedRequests = fetchMock.mock.calls.map(
+        ([input]) => new URL(String(input), 'https://example.test'),
     );
     expect(clearedRequests).toHaveLength(1);
     expect(clearedRequests[0]?.searchParams.has('specimenId')).toBe(false);
     expect(clearedRequests[0]?.searchParams.get('offset')).toBe('0');
+});
+
+test('reuses grouped logs while typing and regroups when log data changes', async () => {
+    const groupLogs = vi.spyOn(
+        reviewLogGrouping,
+        'groupReviewLogsBySpecimenId',
+    );
+    const queryClient = createTestQueryClient();
+    renderTable({ queryClient });
+    await screen.findByRole('button', { name: /CMS007.*2|2.*CMS007/ });
+    groupLogs.mockClear();
+    fireEvent.change(
+        screen.getByRole('textbox', { name: messages.ReviewSpecimens.search }),
+        { target: { value: 'CMS' } },
+    );
+    expect(groupLogs).not.toHaveBeenCalled();
+
+    act(() => {
+        queryClient.setQueriesData(
+            { queryKey: reviewLogKeys.root },
+            ok({
+                message: '',
+                logs: [...logs, createReviewLog({ id: 6, specimenId: 7 })],
+            }),
+        );
+    });
+    await screen.findByRole('button', { name: /CMS007.*3|3.*CMS007/ });
+    expect(groupLogs).toHaveBeenCalledTimes(1);
 });
 
 test('cancels a pending search when the table unmounts', async () => {
