@@ -74,6 +74,7 @@ function renderTable({
     empty = false,
     failed = false,
     pending = false,
+    missingSession = false,
     total = 60,
     queryClient = createTestQueryClient(),
 } = {}) {
@@ -98,7 +99,9 @@ function renderTable({
             );
         }
         if (url.pathname === '/api/sessions/all') {
-            return Response.json(ok({ message: '', sessions: [session] }));
+            return Response.json(
+                ok({ message: '', sessions: missingSession ? [] : [session] }),
+            );
         }
         if (url.pathname === '/api/sessions/review/logs/all') {
             if (pending) return new Promise<Response>(() => {});
@@ -190,9 +193,24 @@ test('refreshes the shared log cache after a prediction edit when returning with
     );
 });
 
+test('keeps rows visible without review links when the session lookup has no match', async () => {
+    renderTable({ missingSession: true });
+    await screen.findByText('CMS007');
+    const rows = screen.getAllByRole('row').slice(1);
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+        expect(within(row).getByText('1401')).toBeInTheDocument();
+        expect(within(row).queryByRole('link')).not.toBeInTheDocument();
+        expect(
+            within(row).getAllByText(messages.ReviewSpecimens.accessError),
+        ).toHaveLength(2);
+    }
+});
+
 test('shows cycle numbers and default filter labels', async () => {
     renderTable();
     expect(await screen.findAllByText('Cycle 8')).toHaveLength(3);
+    expect(screen.getAllByRole('link', { name: '1401' })).toHaveLength(3);
     for (const field of ['species', 'sex', 'abdomenStatus'] as const) {
         expect(
             screen.getByRole('combobox', {

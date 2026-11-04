@@ -305,13 +305,11 @@ function SpecimensTableContent({
                             </TableHeader>
                             <TableBody>
                                 {result.data.specimens.map(specimen => {
-                                    const session =
-                                        specimen.session ??
-                                        sessions.find(
-                                            session =>
-                                                session.sessionId ===
-                                                specimen.sessionId,
-                                        );
+                                    const session = sessions.find(
+                                        session =>
+                                            session.sessionId ===
+                                            specimen.sessionId,
+                                    );
                                     const cycle = collectionCycles.find(
                                         cycle =>
                                             cycle.id ===
