@@ -37,13 +37,12 @@ const log = createReviewLog({
     },
 });
 
-test('keeps numeric specimen matches, not display specimen IDs', () => {
+test('preserves the supplied specimen log order and display specimen ID', () => {
     const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
+        { ...log, id: 2 },
         log,
-        { ...log, id: 2, specimenId: null, fields: { specimenId: 'CMS007' } },
-        { ...log, id: 3, specimenId: 8 },
     ]);
-    expect(result.edits).toHaveLength(1);
+    expect(result.edits.map(edit => edit.id)).toEqual([2, 1]);
     expect(result.specimenId).toBe('CMS007');
 });
 
@@ -61,11 +60,9 @@ test('groups nested image changes into one entry and preserves empty strings', (
     });
 });
 
-test('falls back to fields.specimenId when top-level ID is absent', () => {
-    const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
-        { ...log, specimenId: undefined },
-    ]);
-    expect(result.edits).toHaveLength(1);
+test('returns no edits when the specimen has no logs', () => {
+    const result = buildSpecimenChangelog(specimen, 89, 'UTC', []);
+    expect(result.edits).toEqual([]);
 });
 
 test('preserves null values and does not invent an image number', () => {

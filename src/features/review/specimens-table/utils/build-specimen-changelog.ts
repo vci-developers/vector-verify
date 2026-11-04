@@ -16,7 +16,7 @@ export function buildSpecimenChangelog(
     specimen: Specimen,
     siteId: number,
     timezone: string,
-    logs: ReviewLog[],
+    specimenLogs: ReviewLog[],
 ): SpecimenChangelog {
     const thumbnailImageId =
         specimen.thumbnailImageId ?? specimen.thumbnailImage?.id;
@@ -30,36 +30,31 @@ export function buildSpecimenChangelog(
         sessionId: specimen.sessionId,
         siteId,
         timezone,
-        edits: logs
-            .filter(
-                log =>
-                    (log.specimenId ?? log.fields?.specimenId) === specimen.id,
-            )
-            .map(log => {
-                const imageChanges = imageChangesSchema.safeParse(
-                    log.changes?.image,
-                );
-                const imageId = log.fields?.imageId ?? log.metadata?.imageId;
-                const imageIndex = orderedImages.findIndex(
-                    image => image.id === imageId,
-                );
-                return {
-                    id: log.id,
-                    reviewerName: log.performedBy?.name ?? null,
-                    createdAt: log.createdAt,
-                    imageNumber: imageIndex >= 0 ? imageIndex + 1 : null,
-                    imageId: typeof imageId === 'number' ? imageId : undefined,
-                    changes: imageChanges.success
-                        ? predictionFields.flatMap(field => {
-                              const parsedChange = changeValueSchema.safeParse(
-                                  imageChanges.data[field],
-                              );
-                              return parsedChange.success
-                                  ? [{ field, ...parsedChange.data }]
-                                  : [];
-                          })
-                        : [],
-                };
-            }),
+        edits: specimenLogs.map(log => {
+            const imageChanges = imageChangesSchema.safeParse(
+                log.changes?.image,
+            );
+            const imageId = log.fields?.imageId ?? log.metadata?.imageId;
+            const imageIndex = orderedImages.findIndex(
+                image => image.id === imageId,
+            );
+            return {
+                id: log.id,
+                reviewerName: log.performedBy?.name ?? null,
+                createdAt: log.createdAt,
+                imageNumber: imageIndex >= 0 ? imageIndex + 1 : null,
+                imageId: typeof imageId === 'number' ? imageId : undefined,
+                changes: imageChanges.success
+                    ? predictionFields.flatMap(field => {
+                          const parsedChange = changeValueSchema.safeParse(
+                              imageChanges.data[field],
+                          );
+                          return parsedChange.success
+                              ? [{ field, ...parsedChange.data }]
+                              : [];
+                      })
+                    : [],
+            };
+        }),
     };
 }

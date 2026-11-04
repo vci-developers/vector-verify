@@ -6,7 +6,7 @@ import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-spec
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
 import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
-import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
+import { groupReviewLogsBySpecimenId } from '../utils/group-review-logs-by-specimen-id';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import {
@@ -163,16 +163,9 @@ function SpecimensTableContent({
             },
         );
     const reviewLogsError = isReviewLogsError || reviewLogsResult?.ok === false;
-    const reviewLogsBySpecimenId = new Map<number, ReviewLog[]>();
-    if (reviewLogsResult?.ok) {
-        for (const log of reviewLogsResult.data.logs) {
-            const specimenId = log.specimenId ?? log.fields?.specimenId;
-            if (typeof specimenId !== 'number') continue;
-            const specimenLogs = reviewLogsBySpecimenId.get(specimenId) ?? [];
-            specimenLogs.push(log);
-            reviewLogsBySpecimenId.set(specimenId, specimenLogs);
-        }
-    }
+    const reviewLogsBySpecimenId = groupReviewLogsBySpecimenId(
+        reviewLogsResult?.ok ? reviewLogsResult.data.logs : [],
+    );
     const totalPages = result?.ok
         ? Math.max(1, Math.ceil(result.data.total / PAGE_SIZE))
         : 1;
