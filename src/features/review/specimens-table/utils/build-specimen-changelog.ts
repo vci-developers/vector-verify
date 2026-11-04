@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { SpecimenChangelog } from '../types/specimen-changelog';
+import { getOrderedSpecimenImages } from '@/lib/specimen/get-ordered-specimen-images';
 
 const changeValueSchema = z
     .object({ before: z.string().nullable(), after: z.string().nullable() })
@@ -18,13 +19,7 @@ export function buildSpecimenChangelog(
     timezone: string,
     specimenLogs: ReviewLog[],
 ): SpecimenChangelog {
-    const thumbnailImageId =
-        specimen.thumbnailImageId ?? specimen.thumbnailImage?.id;
-    const orderedImages = [...(specimen.images ?? [])].sort(
-        (first, second) =>
-            Number(second.id === thumbnailImageId) -
-            Number(first.id === thumbnailImageId),
-    );
+    const orderedImages = getOrderedSpecimenImages(specimen);
     return {
         specimenId: specimen.specimenId,
         sessionId: specimen.sessionId,

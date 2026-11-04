@@ -131,7 +131,64 @@ test('uses the same thumbnail-first image numbering as the preview carousel', ()
         {
             ...specimen,
             thumbnailImageId: 100,
-            images: [firstImage, { ...firstImage, id: 100 }],
+            images: [
+                firstImage,
+                { ...firstImage, id: 100, url: 'thumbnail.jpg' },
+            ],
+        },
+        89,
+        'UTC',
+        [log],
+    );
+    expect(result.edits[0]?.imageNumber).toBe(2);
+});
+
+test.each([
+    {
+        name: 'embedded thumbnail missing from images',
+        thumbnailImage: { ...firstImage, id: 100, url: 'thumbnail.jpg' },
+        thumbnailImageId: 100,
+        thumbnailUrl: null,
+    },
+    {
+        name: 'URL-only thumbnail with a known ID',
+        thumbnailImage: null,
+        thumbnailImageId: 100,
+        thumbnailUrl: 'thumbnail.jpg',
+    },
+    {
+        name: 'URL-only thumbnail without an ID',
+        thumbnailImage: null,
+        thumbnailImageId: null,
+        thumbnailUrl: 'thumbnail.jpg',
+    },
+])('accounts for $name in image numbering', thumbnail => {
+    const { thumbnailImage, thumbnailImageId, thumbnailUrl } = thumbnail;
+    const result = buildSpecimenChangelog(
+        { ...specimen, thumbnailImage, thumbnailImageId, thumbnailUrl },
+        89,
+        'UTC',
+        [log],
+    );
+    expect(result.edits[0]?.imageNumber).toBe(2);
+});
+
+test('removes thumbnail duplicates by ID or URL before numbering other images', () => {
+    const thumbnailImage = {
+        ...firstImage,
+        id: 100,
+        url: 'thumbnail.jpg',
+    };
+    const result = buildSpecimenChangelog(
+        {
+            ...specimen,
+            thumbnailImageId: 100,
+            images: [
+                thumbnailImage,
+                { ...thumbnailImage },
+                { ...thumbnailImage, id: 101 },
+                firstImage,
+            ],
         },
         89,
         'UTC',
