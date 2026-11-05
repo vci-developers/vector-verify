@@ -1,7 +1,8 @@
+import { arrayQueryParamSchema } from '@/lib/network/validation/array-query-param-schema';
 import { z } from 'zod';
 
 export const getSessionsMetricsQueryParamsSchema = z.object({
-    district: z.string(),
+    siteIds: arrayQueryParamSchema.optional(),
     startDate: z.string(),
     endDate: z.string(),
 });
@@ -29,3 +30,4 @@ export type GetSessionsMetricsQueryParams = z.infer<
 export type GetSessionsMetricsResponseBody = z.infer<
     typeof getSessionsMetricsResponseSchema
 >;
+export type GetSessionsMetricsSuccessPayload = GetSessionsMetricsResponseBody;

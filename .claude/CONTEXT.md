@@ -343,6 +343,11 @@ UX/efficiency measure, not a correctness boundary.
 **Specimen**: A single captured mosquito associated with a session. _Avoid_:
 Sample, mosquito
 
+**Specimen ID**: The field-assigned string identifying a specimen (e.g.
+`URJ206`), distinct from its internal record id. Editable in Review; an edited
+Specimen ID stays marked and keeps its original value visible. _Avoid_: Label,
+tag
+
 **Annotation Task**: A curated set of specimens assigned to a VCO for
 Annotation. _Avoid_: Task (alone, ambiguous)
 
