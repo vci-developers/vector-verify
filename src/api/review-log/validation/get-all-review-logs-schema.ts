@@ -5,8 +5,11 @@ import {
 } from '@/api/review-log/validation/review-log-schema';
 
 export const getAllReviewLogsQueryParamsSchema = z.object({
-    siteId: z.coerce.number(),
+    siteId: z.coerce.number().optional(),
+    collectionCycleId: z.coerce.number().optional(),
+    specimenId: z.coerce.number().optional(),
     action: reviewLogActionSchema.optional(),
+    hasChanges: z.enum(['true', 'false']).optional(),
 });
 
 export const getAllReviewLogsResponseSchema = z.object({
