@@ -246,6 +246,10 @@ endpoint — `not_found` ⇒ Surveillance/legacy — **never by hardcoding count
 A program is in exactly one mode at a time. _Avoid_: custom form, legacy vs new
 (when precision matters)
 
+**Multi-select Answer**: A Dynamic Form answer holding a list of chosen options
+(e.g. `['Indoors', 'Outdoors']`), stored as a list, never as joined text.
+Prerequisites test membership with `contains`. _Avoid_: comma-separated value
+
 **Form Answer Scope**: A Dynamic Form question's `answerScope`, either `SESSION`
 (one answer per Session) or `SESSION_UNIT` (one answer per Session Unit).
 Determines which target ids a **Metadata Conflict** resolves against —

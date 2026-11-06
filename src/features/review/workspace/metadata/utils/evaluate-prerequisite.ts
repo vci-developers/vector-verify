@@ -6,7 +6,9 @@ import type {
 
 export function isPrerequisiteMet(
     expression: PrerequisiteExpression,
-    resolveReference: (questionId: number) => string | null | undefined,
+    resolveReference: (
+        questionId: number,
+    ) => string | string[] | null | undefined,
 ): boolean {
     if ('all' in expression) {
         return expression.all.every(branch =>
@@ -24,11 +26,11 @@ export function isPrerequisiteMet(
 }
 
 function evaluatePredicate(
-    value: string | null,
+    value: string | string[] | null,
     operator: PrerequisiteOperator,
     target: PrerequisiteValue | undefined,
 ): boolean {
-    const isEmpty = value === null || value === '';
+    const isEmpty = value === null || value.length === 0;
     if (operator === 'empty') return isEmpty;
     if (operator === 'not_empty') return !isEmpty;
     if (isEmpty) {
@@ -52,10 +54,14 @@ function evaluatePredicate(
         case 'lte':
             return Number(value) <= Number(target);
         case 'in':
-            return Array.isArray(target) && target.map(String).includes(value);
+            return (
+                Array.isArray(target) &&
+                target.map(String).includes(String(value))
+            );
         case 'not_in':
             return (
-                !Array.isArray(target) || !target.map(String).includes(value)
+                !Array.isArray(target) ||
+                !target.map(String).includes(String(value))
             );
         case 'contains':
             return value.includes(String(target));

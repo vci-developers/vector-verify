@@ -4,11 +4,11 @@ import { useState } from 'react';
 
 export function useMetadataReviewState() {
     const [resolutionsByMetadataRowId, setResolutionsByMetadataRowId] =
-        useState<Map<string, string>>(new Map());
+        useState<Map<string, string | string[]>>(new Map());
 
     function handleConflictResolutionChange(
         metadataRowId: string,
-        chosenDisplayValue: string,
+        chosenDisplayValue: string | string[],
     ) {
         setResolutionsByMetadataRowId(previous =>
             new Map(previous).set(metadataRowId, chosenDisplayValue),

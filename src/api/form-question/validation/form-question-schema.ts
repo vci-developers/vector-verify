@@ -6,7 +6,9 @@ export const formQuestionTypeSchema = z.enum([
     'number',
     'boolean',
     'select',
+    'multi-select',
     'date',
+    'qr',
 ]);
 
 export const formQuestionScopeSchema = z.enum(['SESSION', 'SESSION_UNIT']);
