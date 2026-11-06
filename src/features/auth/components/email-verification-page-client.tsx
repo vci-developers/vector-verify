@@ -13,7 +13,7 @@ export default function EmailVerificationPageClient() {
     const [submitted, setSubmitted] = useState(false);
     const [hasError, setHasError] = useState(false);
     const { secondsRemaining, isOnCooldown, startCooldown } =
-        useResendCooldown();
+        useResendCooldown('emailVerification');
     const t = useTranslations('Auth');
     const { mutate: sendVerification, isPending } = usePostSendVerification();
 
