@@ -433,7 +433,7 @@
         "missingCycle": "This specimen has no assigned collection cycle.",
         "checking": "Checking metadata conflicts...",
         "loading": "Loading...",
-        "total": "{count} specimens",
+        "total": "{count, plural, one {# specimen} other {# specimens}}",
         "pageOfTotal": "Page {page} of {total}",
         "paginationLabel": "Specimens pagination",
         "goToPage": "Go to page {page}",

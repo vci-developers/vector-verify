@@ -32,7 +32,7 @@ test.each(['', null, undefined, 'populated'] as const)(
         const populated = value === 'populated';
         const specimen = specimenSchema.parse({
             id: 7,
-            specimenId: 'CMS007',
+            specimenId: populated ? 'CMS007' : value === '' ? '   ' : '',
             sessionId: 1401,
             thumbnailUrl: null,
             thumbnailImageId: null,
@@ -73,6 +73,7 @@ test.each(['', null, undefined, 'populated'] as const)(
         expect(cells[0]).toHaveTextContent(
             messages.ReviewSessionsTable.unassigned,
         );
+        expect(cells[1]).toHaveTextContent(populated ? 'CMS007' : '\u2014');
         expect(cells[3]).toHaveTextContent('—');
         expect(cells[4]).toHaveTextContent(populated ? 'Aedes' : '—');
         expect(cells[5]).toHaveTextContent(populated ? 'Translated male' : '—');

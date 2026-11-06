@@ -56,7 +56,7 @@ export default function SpecimensTableRow({
             </TableCell>
             <TableCell>
                 <span className="inline-flex items-center gap-1">
-                    {specimen.specimenId}
+                    {specimen.specimenId.trim() || '—'}
                     {imageCount > 0 && (
                         <SpecimenImagePreview specimen={specimen} />
                     )}

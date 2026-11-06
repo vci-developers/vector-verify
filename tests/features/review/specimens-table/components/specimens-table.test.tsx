@@ -164,6 +164,18 @@ function renderTable({
     return fetchMock;
 }
 
+test.each([
+    [0, '0 specimens'],
+    [1, '1 specimen'],
+    [2, '2 specimens'],
+] as const)(
+    'pluralizes the footer total for %i specimens',
+    async (total, label) => {
+        renderTable({ empty: total === 0, total });
+        expect(await screen.findByText(label)).toBeInTheDocument();
+    },
+);
+
 test('debounces typing and clearing while resetting pagination with the search query', async () => {
     const queryClient = createTestQueryClient();
     queryClient.setQueryDefaults(specimenKeys.root, { staleTime: 0 });
