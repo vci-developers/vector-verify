@@ -9,7 +9,7 @@ import {
 
 export function applyConflictResolutions(
     metadataRows: MetadataRow[],
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     disabledRowIds: Set<string>,
 ): {
     resolvedData: Partial<Session>;
@@ -37,8 +37,9 @@ export function applyConflictResolutions(
             resolvedFormAnswers.push({
                 questionId: Number(metadataRow.fieldName),
                 value:
-                    resolvedFieldValue === null
-                        ? null
+                    resolvedFieldValue === null ||
+                    Array.isArray(resolvedFieldValue)
+                        ? resolvedFieldValue
                         : String(resolvedFieldValue),
                 dataType: metadataRow.fieldType,
             });
@@ -60,9 +61,9 @@ export function applyConflictResolutions(
 }
 
 function toResolvedFieldValue(
-    chosenDisplayValue: string,
+    chosenDisplayValue: string | string[],
     fieldType: MetadataRow['fieldType'],
-): string | number | boolean | null {
+): string | string[] | number | boolean | null {
     if (chosenDisplayValue === NOT_APPLICABLE) return null;
     if (fieldType === 'number') return Number(chosenDisplayValue);
     if (fieldType === 'boolean')
