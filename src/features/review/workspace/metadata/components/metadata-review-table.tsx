@@ -36,10 +36,10 @@ interface MetadataReviewTableProps {
     sessions: Session[];
     timezone: string | null;
     sections: MetadataSection[];
-    resolutionsByMetadataRowId: Map<string, string>;
+    resolutionsByMetadataRowId: Map<string, string | string[]>;
     onConflictResolutionChange: (
         metadataRowId: string,
-        chosenDisplayValue: string,
+        chosenDisplayValue: string | string[],
     ) => void;
     disabledRowIds: Set<string>;
     unmetRequiredRowIds: Set<string>;
@@ -153,7 +153,9 @@ export default function MetadataReviewTable({
 
                             const fallbackValue = row.hasConflict
                                 ? undefined
-                                : resolutionOptions[0];
+                                : ([...row.fieldValueBySessionId.values()].find(
+                                      Array.isArray,
+                                  ) ?? resolutionOptions[0]);
                             const controlValue =
                                 chosenResolution ??
                                 (fallbackValue === NOT_APPLICABLE
@@ -235,8 +237,10 @@ export default function MetadataReviewTable({
                                         const effectiveDisplayValue =
                                             isRowDisabled
                                                 ? NOT_APPLICABLE
-                                                : (chosenResolution ??
-                                                  originalDisplayValue);
+                                                : formatDisplayValue(
+                                                      chosenResolution ??
+                                                          originalDisplayValue,
+                                                  );
                                         return (
                                             <TableCell
                                                 key={session.sessionId}
@@ -304,8 +308,10 @@ export default function MetadataReviewTable({
                                                     >
                                                         <span className="truncate">
                                                             {formatDateAnswer(
-                                                                controlValue ??
-                                                                    NOT_APPLICABLE,
+                                                                formatDisplayValue(
+                                                                    controlValue ??
+                                                                        NOT_APPLICABLE,
+                                                                ),
                                                                 row.fieldType,
                                                                 timezone,
                                                             )}

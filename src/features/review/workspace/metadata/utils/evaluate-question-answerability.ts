@@ -16,7 +16,7 @@ import {
 
 export function evaluateDisabledRowIds(
     sections: MetadataSection[],
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     questionsById: Map<number, FormQuestion>,
 ): Set<string> {
     const disabledRowIds = new Set<string>();
@@ -78,9 +78,9 @@ export function evaluateDisabledRowIds(
 function resolvePrerequisiteValue(
     questionId: number,
     section: MetadataSection,
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     disabledRowIds: Set<string>,
-): string | null | undefined {
+): string | string[] | null | undefined {
     const row = section.rows.find(
         candidate => Number(candidate.fieldName) === questionId,
     );
@@ -90,6 +90,14 @@ function resolvePrerequisiteValue(
         resolutionsByMetadataRowId,
         disabledRowIds,
     );
+    if (row.fieldType === 'multi-select' && effectiveValue != null) {
+        return (
+            [
+                resolutionsByMetadataRowId.get(row.id),
+                ...row.fieldValueBySessionId.values(),
+            ].find(Array.isArray) ?? effectiveValue
+        );
+    }
     if (row.fieldType !== 'boolean' || effectiveValue == null) {
         return effectiveValue;
     }
@@ -98,7 +106,7 @@ function resolvePrerequisiteValue(
 
 export function evaluateRowOptionsById(
     rows: MetadataRow[],
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     disabledRowIds: Set<string>,
 ): Map<string, string[]> {
     const optionsByRowId = new Map<string, string[]>();
@@ -127,14 +135,16 @@ export function evaluateRowOptionsById(
 
 function resolveRowEffectiveValue(
     row: MetadataRow,
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     disabledRowIds: Set<string>,
 ): string | null | undefined {
     if (disabledRowIds.has(row.id)) return null;
 
     const resolution = resolutionsByMetadataRowId.get(row.id);
     if (resolution !== undefined) {
-        return resolution === NOT_APPLICABLE ? null : resolution;
+        return resolution === NOT_APPLICABLE
+            ? null
+            : formatDisplayValue(resolution);
     }
 
     const distinctValues = new Set(
@@ -149,7 +159,7 @@ function resolveRowEffectiveValue(
 
 export function evaluateUnmetRequiredRowIds(
     sections: MetadataSection[],
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     disabledRowIds: Set<string>,
     questionsById: Map<number, FormQuestion>,
     currentFormSessionIds: Set<number>,

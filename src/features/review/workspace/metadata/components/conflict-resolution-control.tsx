@@ -7,6 +7,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { ComboBox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import {
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from '@/components/ui/multi-select';
+import {
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -34,9 +41,9 @@ interface ConflictResolutionControlProps {
     options: string[];
     questionOptions: string[] | null;
     isOtherTextEnabled: boolean;
-    value: string | undefined;
+    value: string | string[] | undefined;
     timezone: string | null;
-    onValueChange: (value: string) => void;
+    onValueChange: (value: string | string[]) => void;
     disabled: boolean;
 }
 
@@ -56,6 +63,40 @@ export default function ConflictResolutionControl({
     function validateWholeNonNegativeInteger(input: string): string | null {
         if (input === NOT_APPLICABLE) return null;
         return /^\d+$/.test(input) ? null : t('wholeNonNegativeIntegerError');
+    }
+
+    if (fieldType === 'multi-select' || Array.isArray(value)) {
+        const selectedOptions = Array.isArray(value) ? value : [];
+        return (
+            <MultiSelect
+                values={selectedOptions}
+                onValuesChange={nextSelectedOptions =>
+                    onValueChange(
+                        nextSelectedOptions.length > 0
+                            ? nextSelectedOptions
+                            : NOT_APPLICABLE,
+                    )
+                }
+            >
+                <MultiSelectTrigger className="w-72" disabled={disabled}>
+                    <MultiSelectValue
+                        placeholder={t('selectValuePlaceholder')}
+                    />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    {[
+                        ...new Set([
+                            ...(questionOptions ?? []),
+                            ...selectedOptions,
+                        ]),
+                    ].map(option => (
+                        <MultiSelectItem key={option} value={option}>
+                            {option}
+                        </MultiSelectItem>
+                    ))}
+                </MultiSelectContent>
+            </MultiSelect>
+        );
     }
 
     if (fieldType === 'date') {

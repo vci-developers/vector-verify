@@ -141,6 +141,9 @@ export function formatDisplayValue(
     fieldType?: FormQuestionType,
 ): string {
     if (value == null || value === '') return NOT_APPLICABLE;
+    if (Array.isArray(value)) {
+        return value.length > 0 ? [...value].sort().join(', ') : NOT_APPLICABLE;
+    }
     if (typeof value === 'boolean')
         return value ? BOOLEAN_TRUE_DISPLAY : BOOLEAN_FALSE_DISPLAY;
     if (fieldType === 'boolean' && (value === 'true' || value === 'false'))
