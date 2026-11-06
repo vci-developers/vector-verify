@@ -1,0 +1,3330 @@
+{
+    "program": "kenya",
+    "form": {
+        "id": 51,
+        "programId": 10,
+        "programFormId": 3,
+        "name": "Default Surveillance Form",
+        "version": "1.0.4",
+        "createdAt": 1792711831000,
+        "updatedAt": 1792711831000,
+        "questions": [
+            {
+                "id": 2037,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": null,
+                "label": "Enter the name of the village",
+                "questionKey": "enter_the_name_of_the_village",
+                "type": "text",
+                "required": true,
+                "options": null,
+                "order": 1,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2038,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": null,
+                "label": "Assign this household a number",
+                "questionKey": "assign_this_household_a_number",
+                "type": "text",
+                "required": true,
+                "options": null,
+                "order": 2,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2039,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": null,
+                "label": "Did the household head or an adult grant the consent to collect mosquitoes?",
+                "questionKey": "did_the_household_head_or_an_adult_grant_the_con",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 3,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2040,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Enter the name of the household head",
+                "questionKey": "enter_the_name_of_the_household_head",
+                "type": "text",
+                "required": true,
+                "options": null,
+                "order": 4,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2041,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "What type of roof was used for the construction of this house?",
+                "questionKey": "what_type_of_roof_was_used_for_the_construction",
+                "type": "select",
+                "required": true,
+                "options": [
+                    "Corrugated Iron Sheets",
+                    "Grass Thatch",
+                    "Tiles",
+                    "Canvas",
+                    "Polythene",
+                    "Other"
+                ],
+                "order": 5,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2042,
+                        "formId": 51,
+                        "parentId": 2041,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": "Other",
+                                    "operator": "eq",
+                                    "questionId": 2041
+                                }
+                            ]
+                        },
+                        "label": "Other roof type",
+                        "questionKey": "other_roof_type",
+                        "type": "text",
+                        "required": true,
+                        "options": null,
+                        "order": 6,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    }
+                ]
+            },
+            {
+                "id": 2043,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "What type of wall was used for the indoor construction of this house?",
+                "questionKey": "what_type_of_wall_was_used_for_the_indoor_constr",
+                "type": "select",
+                "required": true,
+                "options": [
+                    "Cement Blocks",
+                    "Painted Cement",
+                    "Mud",
+                    "Plastered Mud",
+                    "Bricks",
+                    "Iron Sheet",
+                    "Sticks",
+                    "Grass",
+                    "Other"
+                ],
+                "order": 7,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2044,
+                        "formId": 51,
+                        "parentId": 2043,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": "Other",
+                                    "operator": "eq",
+                                    "questionId": 2043
+                                }
+                            ]
+                        },
+                        "label": "Other indoor wall type",
+                        "questionKey": "other_indoor_wall_type",
+                        "type": "text",
+                        "required": true,
+                        "options": null,
+                        "order": 8,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    }
+                ]
+            },
+            {
+                "id": 2045,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "What type of wall was used for the outdoor construction of this house?",
+                "questionKey": "what_type_of_wall_was_used_for_the_outdoor_const",
+                "type": "select",
+                "required": true,
+                "options": [
+                    "Cement Blocks",
+                    "Painted Cement",
+                    "Mud",
+                    "Plastered Mud",
+                    "Bricks",
+                    "Iron Sheet",
+                    "Sticks",
+                    "Grass",
+                    "Other"
+                ],
+                "order": 9,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2046,
+                        "formId": 51,
+                        "parentId": 2045,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": "Other",
+                                    "operator": "eq",
+                                    "questionId": 2045
+                                }
+                            ]
+                        },
+                        "label": "Other outdoor wall type",
+                        "questionKey": "other_outdoor_wall_type",
+                        "type": "text",
+                        "required": true,
+                        "options": null,
+                        "order": 10,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    }
+                ]
+            },
+            {
+                "id": 2047,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Are the eaves open or closed?",
+                "questionKey": "are_the_eaves_open_or_closed",
+                "type": "select",
+                "required": true,
+                "options": [
+                    "Open on all sides",
+                    "Closed on all sides",
+                    "Partially open"
+                ],
+                "order": 11,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2048,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "How many LLINs are in use in this household?",
+                "questionKey": "how_many_llins_are_in_use_in_this_household",
+                "type": "number",
+                "required": true,
+                "options": null,
+                "order": 12,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2049,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "How many conventional nets are in use in this household?",
+                "questionKey": "how_many_conventional_nets_are_in_use_in_this_ho",
+                "type": "number",
+                "required": true,
+                "options": null,
+                "order": 13,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2050,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "How many people slept in this house last night?",
+                "questionKey": "how_many_people_slept_in_this_house_last_night",
+                "type": "number",
+                "required": true,
+                "options": null,
+                "order": 14,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2051,
+                        "formId": 51,
+                        "parentId": 2050,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": 0,
+                                    "operator": "gt",
+                                    "questionId": 2050
+                                }
+                            ]
+                        },
+                        "label": "How many of the people above slept under LLIN?",
+                        "questionKey": "how_many_of_the_people_above_slept_under_llin",
+                        "type": "number",
+                        "required": true,
+                        "options": null,
+                        "order": 15,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    },
+                    {
+                        "id": 2052,
+                        "formId": 51,
+                        "parentId": 2050,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": 0,
+                                    "operator": "gt",
+                                    "questionId": 2050
+                                }
+                            ]
+                        },
+                        "label": "How many of the people above did NOT sleep under LLIN?",
+                        "questionKey": "how_many_of_the_people_above_did_not_sleep_under",
+                        "type": "number",
+                        "required": true,
+                        "options": null,
+                        "order": 16,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    }
+                ]
+            },
+            {
+                "id": 2053,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "How many people of this house slept outdoors last night?",
+                "questionKey": "how_many_people_of_this_house_slept_outdoors_las",
+                "type": "number",
+                "required": true,
+                "options": null,
+                "order": 17,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2054,
+                        "formId": 51,
+                        "parentId": 2053,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": 0,
+                                    "operator": "gt",
+                                    "questionId": 2053
+                                }
+                            ]
+                        },
+                        "label": "How many of the people above slept under LLIN?",
+                        "questionKey": "how_many_of_the_people_above_slept_under_llin_2",
+                        "type": "number",
+                        "required": true,
+                        "options": null,
+                        "order": 18,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    },
+                    {
+                        "id": 2055,
+                        "formId": 51,
+                        "parentId": 2053,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": 0,
+                                    "operator": "gt",
+                                    "questionId": 2053
+                                }
+                            ]
+                        },
+                        "label": "How many of the people above did NOT sleep under LLIN?",
+                        "questionKey": "how_many_of_the_people_above_did_not_sleep_under_2",
+                        "type": "number",
+                        "required": true,
+                        "options": null,
+                        "order": 19,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000
+                    }
+                ]
+            },
+            {
+                "id": 2056,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Were mosquito coils burned in this house last night?",
+                "questionKey": "were_mosquito_coils_burned_in_this_house_last_ni",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 20,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2057,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Were insecticide spray cans, e.g. doom, used in this house last night?",
+                "questionKey": "were_insecticide_spray_cans_e_g_doom_used_in_thi",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 21,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2058,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Was there an indoor fire burning/smoldering at any time last night?",
+                "questionKey": "was_there_an_indoor_fire_burning_smoldering_at_a",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 22,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2059,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Was there an outdoor fire burning/smoldering within 5 meters of the house at any time last night?",
+                "questionKey": "was_there_an_outdoor_fire_burning_smoldering_wit",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 23,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2060,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Was there any outdoor electric, solar, or lamp-based lighting operating within the compound of the house during the trapping period?",
+                "questionKey": "is_there_any_outdoor_electric_solar_or_lamp_base",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 24,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2061,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Were there any animals kept in this house last night?",
+                "questionKey": "were_there_any_animals_kept_in_this_house_last_n",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 25,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2062,
+                        "formId": 51,
+                        "parentId": 2061,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2061
+                                }
+                            ]
+                        },
+                        "label": "Select the animals from the list below",
+                        "questionKey": "select_the_animals_from_the_list_below",
+                        "type": "multi-select",
+                        "required": true,
+                        "options": [
+                            "Cattle",
+                            "Goats",
+                            "Sheep",
+                            "Chicken",
+                            "Pigs",
+                            "Cats",
+                            "Other"
+                        ],
+                        "order": 26,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000,
+                        "subQuestions": [
+                            {
+                                "id": 2063,
+                                "formId": 51,
+                                "parentId": 2062,
+                                "prerequisite": {
+                                    "all": [
+                                        {
+                                            "value": true,
+                                            "operator": "eq",
+                                            "questionId": 2039
+                                        },
+                                        {
+                                            "value": "Other",
+                                            "operator": "contains",
+                                            "questionId": 2062
+                                        }
+                                    ]
+                                },
+                                "label": "Other animals kept in this house at night",
+                                "questionKey": "other_animals_kept_in_this_house_at_night",
+                                "type": "text",
+                                "required": true,
+                                "options": null,
+                                "order": 27,
+                                "answerScope": "SESSION",
+                                "isUnitIdentityComponent": false,
+                                "createdAt": 1792711831000,
+                                "updatedAt": 1792711831000
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2064,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Were there any animals kept within the compound of the house at night?",
+                "questionKey": "were_there_any_animals_kept_within_the_compound",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 28,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2065,
+                        "formId": 51,
+                        "parentId": 2064,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2064
+                                }
+                            ]
+                        },
+                        "label": "Select the animals from the list below",
+                        "questionKey": "select_the_animals_from_the_list_below_2",
+                        "type": "multi-select",
+                        "required": true,
+                        "options": [
+                            "Cattle",
+                            "Goats",
+                            "Sheep",
+                            "Chicken",
+                            "Pigs",
+                            "Cats",
+                            "Other"
+                        ],
+                        "order": 29,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000,
+                        "subQuestions": [
+                            {
+                                "id": 2066,
+                                "formId": 51,
+                                "parentId": 2065,
+                                "prerequisite": {
+                                    "all": [
+                                        {
+                                            "value": true,
+                                            "operator": "eq",
+                                            "questionId": 2039
+                                        },
+                                        {
+                                            "value": "Other",
+                                            "operator": "contains",
+                                            "questionId": 2065
+                                        }
+                                    ]
+                                },
+                                "label": "Other animals kept within the compound of this house at night",
+                                "questionKey": "other_animals_kept_within_the_compound_of_this_h",
+                                "type": "text",
+                                "required": true,
+                                "options": null,
+                                "order": 30,
+                                "answerScope": "SESSION",
+                                "isUnitIdentityComponent": false,
+                                "createdAt": 1792711831000,
+                                "updatedAt": 1792711831000
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2067,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Are there mosquito breeding sites within the compound of this house?",
+                "questionKey": "are_there_mosquito_breeding_sites_within_the_com",
+                "type": "boolean",
+                "required": true,
+                "options": null,
+                "order": 31,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000,
+                "subQuestions": [
+                    {
+                        "id": 2068,
+                        "formId": 51,
+                        "parentId": 2067,
+                        "prerequisite": {
+                            "all": [
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2039
+                                },
+                                {
+                                    "value": true,
+                                    "operator": "eq",
+                                    "questionId": 2067
+                                }
+                            ]
+                        },
+                        "label": "Select the types of breeding sites",
+                        "questionKey": "select_the_types_of_breeding_sites",
+                        "type": "multi-select",
+                        "required": true,
+                        "options": [
+                            "Concrete Tank",
+                            "Abandoned Tyres",
+                            "Open Water Storage Containers",
+                            "Open Plastic Water Tanks",
+                            "Pits",
+                            "Other"
+                        ],
+                        "order": 32,
+                        "answerScope": "SESSION",
+                        "isUnitIdentityComponent": false,
+                        "createdAt": 1792711831000,
+                        "updatedAt": 1792711831000,
+                        "subQuestions": [
+                            {
+                                "id": 2069,
+                                "formId": 51,
+                                "parentId": 2068,
+                                "prerequisite": {
+                                    "all": [
+                                        {
+                                            "value": true,
+                                            "operator": "eq",
+                                            "questionId": 2039
+                                        },
+                                        {
+                                            "value": "Other",
+                                            "operator": "contains",
+                                            "questionId": 2068
+                                        }
+                                    ]
+                                },
+                                "label": "Other types of breeding sites",
+                                "questionKey": "other_types_of_breeding_sites",
+                                "type": "text",
+                                "required": true,
+                                "options": null,
+                                "order": 33,
+                                "answerScope": "SESSION",
+                                "isUnitIdentityComponent": false,
+                                "createdAt": 1792711831000,
+                                "updatedAt": 1792711831000
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2070,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": null,
+                "label": "Where is mosquito collection taking place?",
+                "questionKey": "where_is_mosquito_collection_taking_place_2",
+                "type": "select",
+                "required": true,
+                "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                "order": 34,
+                "answerScope": "SESSION_UNIT",
+                "isUnitIdentityComponent": true,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2071,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": true,
+                    "operator": "eq",
+                    "questionId": 2039
+                },
+                "label": "Where is mosquito collection taking place?",
+                "questionKey": "where_is_mosquito_collection_taking_place",
+                "type": "multi-select",
+                "required": true,
+                "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                "order": 34,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2072,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "all": [
+                        {
+                            "value": true,
+                            "operator": "eq",
+                            "questionId": 2039
+                        },
+                        {
+                            "value": "Indoors",
+                            "operator": "contains",
+                            "questionId": 2071
+                        }
+                    ]
+                },
+                "label": "Scan cup ID for INDOORS",
+                "questionKey": "scan_cup_id_for_indoors_2",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 35,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2073,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "all": [
+                        {
+                            "value": true,
+                            "operator": "eq",
+                            "questionId": 2039
+                        },
+                        {
+                            "value": "Outdoors",
+                            "operator": "contains",
+                            "questionId": 2071
+                        }
+                    ]
+                },
+                "label": "Scan cup ID for OUTDOORS",
+                "questionKey": "scan_cup_id_for_outdoors_2",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 36,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2074,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "all": [
+                        {
+                            "value": true,
+                            "operator": "eq",
+                            "questionId": 2039
+                        },
+                        {
+                            "value": "Animal Shelter",
+                            "operator": "contains",
+                            "questionId": 2071
+                        }
+                    ]
+                },
+                "label": "Scan cup ID for ANIMAL SHELTER",
+                "questionKey": "scan_cup_id_for_animal_shelter_2",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 37,
+                "answerScope": "SESSION",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2075,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": "Indoors",
+                    "operator": "eq",
+                    "questionId": 2070
+                },
+                "label": "Scan cup ID for INDOORS",
+                "questionKey": "scan_cup_id_for_indoors",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 38,
+                "answerScope": "SESSION_UNIT",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2076,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": "Outdoors",
+                    "operator": "eq",
+                    "questionId": 2070
+                },
+                "label": "Scan cup ID for OUTDOORS",
+                "questionKey": "scan_cup_id_for_outdoors",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 39,
+                "answerScope": "SESSION_UNIT",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            },
+            {
+                "id": 2077,
+                "formId": 51,
+                "parentId": null,
+                "prerequisite": {
+                    "value": "Animal Shelter",
+                    "operator": "eq",
+                    "questionId": 2070
+                },
+                "label": "Scan cup ID for ANIMAL SHELTER",
+                "questionKey": "scan_cup_id_for_animal_shelter",
+                "type": "qr",
+                "required": true,
+                "options": null,
+                "order": 40,
+                "answerScope": "SESSION_UNIT",
+                "isUnitIdentityComponent": false,
+                "createdAt": 1792711831000,
+                "updatedAt": 1792711831000
+            }
+        ]
+    },
+    "sessions": [
+        {
+            "sessionId": 3001,
+            "frontendId": "session-3001",
+            "collectorTitle": "Community Health Promoter (CHP)",
+            "collectorName": "collector-1",
+            "collectionDate": 1790345600000,
+            "collectionMethod": "Pyrethrum Spray Catch",
+            "specimenCondition": "Dry",
+            "createdAt": 1791814400000,
+            "completedAt": 1790691200000,
+            "submittedAt": 1791468800000,
+            "notes": "",
+            "siteId": 3500,
+            "deviceId": 1,
+            "collectionCycleId": null,
+            "latitude": null,
+            "longitude": null,
+            "gpsAccuracy": null,
+            "type": "SURVEILLANCE",
+            "collectorLastTrainedOn": 1790950400000,
+            "hardwareId": null,
+            "expectedSpecimens": 8,
+            "state": "NEEDS_REVIEW",
+            "certifiedBy": null,
+            "site": {
+                "id": 418,
+                "siteId": 418,
+                "programId": 10,
+                "name": "GP23",
+                "isActive": true,
+                "latitude": null,
+                "longitude": null,
+                "locationHierarchy": {
+                    "County": "Turkana",
+                    "Subcounty": "Loima",
+                    "Sublocation": "Lorugum",
+                    "Sentinel Site": "GP23"
+                }
+            },
+            "device": {
+                "id": 424,
+                "deviceId": 424,
+                "programId": 10,
+                "model": "motorola moto g play (2021)",
+                "ssaid": null,
+                "registeredAt": 1792683555000,
+                "submittedAt": 1792689400000
+            }
+        },
+        {
+            "sessionId": 3002,
+            "frontendId": "session-3002",
+            "collectorTitle": "Vector Control Officer (VCO)",
+            "collectorName": "collector-2",
+            "collectionDate": 1791123200000,
+            "collectionMethod": "Prokopack Aspirator",
+            "specimenCondition": "Dry",
+            "createdAt": 1791728000000,
+            "completedAt": 1791123200000,
+            "submittedAt": 1791123200000,
+            "notes": "",
+            "siteId": 3500,
+            "deviceId": 1,
+            "collectionCycleId": null,
+            "latitude": null,
+            "longitude": null,
+            "gpsAccuracy": null,
+            "type": "PRACTICE",
+            "collectorLastTrainedOn": 1790950400000,
+            "hardwareId": null,
+            "expectedSpecimens": 6,
+            "state": "NEEDS_REVIEW",
+            "certifiedBy": null,
+            "site": {
+                "id": 444,
+                "siteId": 444,
+                "programId": 10,
+                "name": "GP99",
+                "isActive": true,
+                "latitude": null,
+                "longitude": null,
+                "locationHierarchy": {
+                    "County": "Kisumu",
+                    "Subcounty": "TEST subcounty",
+                    "Sublocation": "TEST sublocation",
+                    "Sentinel Site": "GP99"
+                }
+            },
+            "device": {
+                "id": 425,
+                "deviceId": 425,
+                "programId": 10,
+                "model": "motorola moto g play (2021)",
+                "ssaid": null,
+                "registeredAt": 1792867542000,
+                "submittedAt": 1792870067000
+            }
+        }
+    ],
+    "formAnswersBySessionId": {
+        "3001": {
+            "formId": 51,
+            "formName": "Default Surveillance Form",
+            "formVersion": "1.0.4",
+            "programId": 10,
+            "sessionId": 3001,
+            "answers": [
+                {
+                    "id": 30001,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2037,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Enter the name of the village",
+                    "questionKey": "enter_the_name_of_the_village",
+                    "order": 1,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-1",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30002,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2038,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Assign this household a number",
+                    "questionKey": "assign_this_household_a_number",
+                    "order": 2,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-2",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30003,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2039,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Did the household head or an adult grant the consent to collect mosquitoes?",
+                    "questionKey": "did_the_household_head_or_an_adult_grant_the_con",
+                    "order": 3,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30004,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2040,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Enter the name of the household head",
+                    "questionKey": "enter_the_name_of_the_household_head",
+                    "order": 4,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-4",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30005,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2041,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of roof was used for the construction of this house?",
+                    "questionKey": "what_type_of_roof_was_used_for_the_construction",
+                    "order": 5,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Corrugated Iron Sheets",
+                        "Grass Thatch",
+                        "Tiles",
+                        "Canvas",
+                        "Polythene",
+                        "Other"
+                    ],
+                    "value": "Corrugated Iron Sheets",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30006,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2043,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of wall was used for the indoor construction of this house?",
+                    "questionKey": "what_type_of_wall_was_used_for_the_indoor_constr",
+                    "order": 7,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cement Blocks",
+                        "Painted Cement",
+                        "Mud",
+                        "Plastered Mud",
+                        "Bricks",
+                        "Iron Sheet",
+                        "Sticks",
+                        "Grass",
+                        "Other"
+                    ],
+                    "value": "Other",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30007,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2045,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of wall was used for the outdoor construction of this house?",
+                    "questionKey": "what_type_of_wall_was_used_for_the_outdoor_const",
+                    "order": 9,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cement Blocks",
+                        "Painted Cement",
+                        "Mud",
+                        "Plastered Mud",
+                        "Bricks",
+                        "Iron Sheet",
+                        "Sticks",
+                        "Grass",
+                        "Other"
+                    ],
+                    "value": "Bricks",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30008,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2047,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Are the eaves open or closed?",
+                    "questionKey": "are_the_eaves_open_or_closed",
+                    "order": 11,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Open on all sides",
+                        "Closed on all sides",
+                        "Partially open"
+                    ],
+                    "value": "Closed on all sides",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30009,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2048,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many LLINs are in use in this household?",
+                    "questionKey": "how_many_llins_are_in_use_in_this_household",
+                    "order": 12,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "15",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30010,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2049,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many conventional nets are in use in this household?",
+                    "questionKey": "how_many_conventional_nets_are_in_use_in_this_ho",
+                    "order": 13,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "11",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30011,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2050,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many people slept in this house last night?",
+                    "questionKey": "how_many_people_slept_in_this_house_last_night",
+                    "order": 14,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "15",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30012,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2053,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many people of this house slept outdoors last night?",
+                    "questionKey": "how_many_people_of_this_house_slept_outdoors_las",
+                    "order": 17,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "11",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30013,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2056,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were mosquito coils burned in this house last night?",
+                    "questionKey": "were_mosquito_coils_burned_in_this_house_last_ni",
+                    "order": 20,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30014,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2057,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were insecticide spray cans, e.g. doom, used in this house last night?",
+                    "questionKey": "were_insecticide_spray_cans_e_g_doom_used_in_thi",
+                    "order": 21,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30015,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2058,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there an indoor fire burning/smoldering at any time last night?",
+                    "questionKey": "was_there_an_indoor_fire_burning_smoldering_at_a",
+                    "order": 22,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30016,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2059,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there an outdoor fire burning/smoldering within 5 meters of the house at any time last night?",
+                    "questionKey": "was_there_an_outdoor_fire_burning_smoldering_wit",
+                    "order": 23,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30017,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2060,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there any outdoor electric, solar, or lamp-based lighting operating within the compound of the house during the trapping period?",
+                    "questionKey": "is_there_any_outdoor_electric_solar_or_lamp_base",
+                    "order": 24,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30018,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2061,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were there any animals kept in this house last night?",
+                    "questionKey": "were_there_any_animals_kept_in_this_house_last_n",
+                    "order": 25,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30019,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2062,
+                    "parentId": 2061,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2061
+                            }
+                        ]
+                    },
+                    "label": "Select the animals from the list below",
+                    "questionKey": "select_the_animals_from_the_list_below",
+                    "order": 26,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cattle",
+                        "Goats",
+                        "Sheep",
+                        "Chicken",
+                        "Pigs",
+                        "Cats",
+                        "Other"
+                    ],
+                    "value": ["Sheep"],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30020,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2064,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were there any animals kept within the compound of the house at night?",
+                    "questionKey": "were_there_any_animals_kept_within_the_compound",
+                    "order": 28,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30021,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2065,
+                    "parentId": 2064,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2064
+                            }
+                        ]
+                    },
+                    "label": "Select the animals from the list below",
+                    "questionKey": "select_the_animals_from_the_list_below_2",
+                    "order": 29,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cattle",
+                        "Goats",
+                        "Sheep",
+                        "Chicken",
+                        "Pigs",
+                        "Cats",
+                        "Other"
+                    ],
+                    "value": ["Cats"],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30022,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2067,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Are there mosquito breeding sites within the compound of this house?",
+                    "questionKey": "are_there_mosquito_breeding_sites_within_the_com",
+                    "order": 31,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30023,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2068,
+                    "parentId": 2067,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2067
+                            }
+                        ]
+                    },
+                    "label": "Select the types of breeding sites",
+                    "questionKey": "select_the_types_of_breeding_sites",
+                    "order": 32,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Concrete Tank",
+                        "Abandoned Tyres",
+                        "Open Water Storage Containers",
+                        "Open Plastic Water Tanks",
+                        "Pits",
+                        "Other"
+                    ],
+                    "value": ["Open Plastic Water Tanks", "Other"],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30024,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2069,
+                    "parentId": 2068,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "contains",
+                                "questionId": 2068
+                            }
+                        ]
+                    },
+                    "label": "Other types of breeding sites",
+                    "questionKey": "other_types_of_breeding_sites",
+                    "order": 33,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-24",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30025,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2071,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Where is mosquito collection taking place?",
+                    "questionKey": "where_is_mosquito_collection_taking_place",
+                    "order": 34,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                    "value": ["Animal Shelter", "Outdoors"],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30026,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2072,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Indoors",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for INDOORS",
+                    "questionKey": "scan_cup_id_for_indoors_2",
+                    "order": 35,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-26",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30027,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2073,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Outdoors",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for OUTDOORS",
+                    "questionKey": "scan_cup_id_for_outdoors_2",
+                    "order": 36,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-27",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30028,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2074,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Animal Shelter",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for ANIMAL SHELTER",
+                    "questionKey": "scan_cup_id_for_animal_shelter_2",
+                    "order": 37,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-28",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30029,
+                    "frontendId": null,
+                    "sessionUnitId": 3800,
+                    "sessionUnit": {
+                        "id": 3800,
+                        "frontendId": null,
+                        "sessionId": 3001,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2070,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Where is mosquito collection taking place?",
+                    "questionKey": "where_is_mosquito_collection_taking_place_2",
+                    "order": 34,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": true,
+                    "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                    "value": "Animal Shelter",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30030,
+                    "frontendId": null,
+                    "sessionUnitId": 3800,
+                    "sessionUnit": {
+                        "id": 3800,
+                        "frontendId": null,
+                        "sessionId": 3001,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2075,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": "Indoors",
+                        "operator": "eq",
+                        "questionId": 2070
+                    },
+                    "label": "Scan cup ID for INDOORS",
+                    "questionKey": "scan_cup_id_for_indoors",
+                    "order": 38,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-30",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                }
+            ]
+        },
+        "3002": {
+            "formId": 51,
+            "formName": "Default Surveillance Form",
+            "formVersion": "1.0.4",
+            "programId": 10,
+            "sessionId": 3002,
+            "answers": [
+                {
+                    "id": 30031,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2037,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Enter the name of the village",
+                    "questionKey": "enter_the_name_of_the_village",
+                    "order": 1,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-31",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30032,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2038,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Assign this household a number",
+                    "questionKey": "assign_this_household_a_number",
+                    "order": 2,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-32",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30033,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2039,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Did the household head or an adult grant the consent to collect mosquitoes?",
+                    "questionKey": "did_the_household_head_or_an_adult_grant_the_con",
+                    "order": 3,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30034,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2040,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Enter the name of the household head",
+                    "questionKey": "enter_the_name_of_the_household_head",
+                    "order": 4,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "text-33",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30035,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2041,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of roof was used for the construction of this house?",
+                    "questionKey": "what_type_of_roof_was_used_for_the_construction",
+                    "order": 5,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Corrugated Iron Sheets",
+                        "Grass Thatch",
+                        "Tiles",
+                        "Canvas",
+                        "Polythene",
+                        "Other"
+                    ],
+                    "value": "Canvas",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30036,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2042,
+                    "parentId": 2041,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "eq",
+                                "questionId": 2041
+                            }
+                        ]
+                    },
+                    "label": "Other roof type",
+                    "questionKey": "other_roof_type",
+                    "order": 6,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30037,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2043,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of wall was used for the indoor construction of this house?",
+                    "questionKey": "what_type_of_wall_was_used_for_the_indoor_constr",
+                    "order": 7,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cement Blocks",
+                        "Painted Cement",
+                        "Mud",
+                        "Plastered Mud",
+                        "Bricks",
+                        "Iron Sheet",
+                        "Sticks",
+                        "Grass",
+                        "Other"
+                    ],
+                    "value": "Sticks",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30038,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2044,
+                    "parentId": 2043,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "eq",
+                                "questionId": 2043
+                            }
+                        ]
+                    },
+                    "label": "Other indoor wall type",
+                    "questionKey": "other_indoor_wall_type",
+                    "order": 8,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30039,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2045,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "What type of wall was used for the outdoor construction of this house?",
+                    "questionKey": "what_type_of_wall_was_used_for_the_outdoor_const",
+                    "order": 9,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cement Blocks",
+                        "Painted Cement",
+                        "Mud",
+                        "Plastered Mud",
+                        "Bricks",
+                        "Iron Sheet",
+                        "Sticks",
+                        "Grass",
+                        "Other"
+                    ],
+                    "value": "Sticks",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30040,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2046,
+                    "parentId": 2045,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "eq",
+                                "questionId": 2045
+                            }
+                        ]
+                    },
+                    "label": "Other outdoor wall type",
+                    "questionKey": "other_outdoor_wall_type",
+                    "order": 10,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30041,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2047,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Are the eaves open or closed?",
+                    "questionKey": "are_the_eaves_open_or_closed",
+                    "order": 11,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Open on all sides",
+                        "Closed on all sides",
+                        "Partially open"
+                    ],
+                    "value": "Closed on all sides",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30042,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2048,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many LLINs are in use in this household?",
+                    "questionKey": "how_many_llins_are_in_use_in_this_household",
+                    "order": 12,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "4",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30043,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2049,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many conventional nets are in use in this household?",
+                    "questionKey": "how_many_conventional_nets_are_in_use_in_this_ho",
+                    "order": 13,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "7",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30044,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2050,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many people slept in this house last night?",
+                    "questionKey": "how_many_people_slept_in_this_house_last_night",
+                    "order": 14,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "18",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30045,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2051,
+                    "parentId": 2050,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": 0,
+                                "operator": "gt",
+                                "questionId": 2050
+                            }
+                        ]
+                    },
+                    "label": "How many of the people above slept under LLIN?",
+                    "questionKey": "how_many_of_the_people_above_slept_under_llin",
+                    "order": 15,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "6",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30046,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2052,
+                    "parentId": 2050,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": 0,
+                                "operator": "gt",
+                                "questionId": 2050
+                            }
+                        ]
+                    },
+                    "label": "How many of the people above did NOT sleep under LLIN?",
+                    "questionKey": "how_many_of_the_people_above_did_not_sleep_under",
+                    "order": 16,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "19",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30047,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2053,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "How many people of this house slept outdoors last night?",
+                    "questionKey": "how_many_people_of_this_house_slept_outdoors_las",
+                    "order": 17,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "18",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30048,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2054,
+                    "parentId": 2053,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": 0,
+                                "operator": "gt",
+                                "questionId": 2053
+                            }
+                        ]
+                    },
+                    "label": "How many of the people above slept under LLIN?",
+                    "questionKey": "how_many_of_the_people_above_slept_under_llin_2",
+                    "order": 18,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "13",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30049,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2055,
+                    "parentId": 2053,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": 0,
+                                "operator": "gt",
+                                "questionId": 2053
+                            }
+                        ]
+                    },
+                    "label": "How many of the people above did NOT sleep under LLIN?",
+                    "questionKey": "how_many_of_the_people_above_did_not_sleep_under_2",
+                    "order": 19,
+                    "type": "number",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "17",
+                    "dataType": "number",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30050,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2056,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were mosquito coils burned in this house last night?",
+                    "questionKey": "were_mosquito_coils_burned_in_this_house_last_ni",
+                    "order": 20,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30051,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2057,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were insecticide spray cans, e.g. doom, used in this house last night?",
+                    "questionKey": "were_insecticide_spray_cans_e_g_doom_used_in_thi",
+                    "order": 21,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30052,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2058,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there an indoor fire burning/smoldering at any time last night?",
+                    "questionKey": "was_there_an_indoor_fire_burning_smoldering_at_a",
+                    "order": 22,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30053,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2059,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there an outdoor fire burning/smoldering within 5 meters of the house at any time last night?",
+                    "questionKey": "was_there_an_outdoor_fire_burning_smoldering_wit",
+                    "order": 23,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30054,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2060,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Was there any outdoor electric, solar, or lamp-based lighting operating within the compound of the house during the trapping period?",
+                    "questionKey": "is_there_any_outdoor_electric_solar_or_lamp_base",
+                    "order": 24,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30055,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2061,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were there any animals kept in this house last night?",
+                    "questionKey": "were_there_any_animals_kept_in_this_house_last_n",
+                    "order": 25,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30056,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2062,
+                    "parentId": 2061,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2061
+                            }
+                        ]
+                    },
+                    "label": "Select the animals from the list below",
+                    "questionKey": "select_the_animals_from_the_list_below",
+                    "order": 26,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cattle",
+                        "Goats",
+                        "Sheep",
+                        "Chicken",
+                        "Pigs",
+                        "Cats",
+                        "Other"
+                    ],
+                    "value": [],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30057,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2063,
+                    "parentId": 2062,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "contains",
+                                "questionId": 2062
+                            }
+                        ]
+                    },
+                    "label": "Other animals kept in this house at night",
+                    "questionKey": "other_animals_kept_in_this_house_at_night",
+                    "order": 27,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30058,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2064,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Were there any animals kept within the compound of the house at night?",
+                    "questionKey": "were_there_any_animals_kept_within_the_compound",
+                    "order": 28,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "true",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30059,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2065,
+                    "parentId": 2064,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2064
+                            }
+                        ]
+                    },
+                    "label": "Select the animals from the list below",
+                    "questionKey": "select_the_animals_from_the_list_below_2",
+                    "order": 29,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Cattle",
+                        "Goats",
+                        "Sheep",
+                        "Chicken",
+                        "Pigs",
+                        "Cats",
+                        "Other"
+                    ],
+                    "value": [],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30060,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2066,
+                    "parentId": 2065,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "contains",
+                                "questionId": 2065
+                            }
+                        ]
+                    },
+                    "label": "Other animals kept within the compound of this house at night",
+                    "questionKey": "other_animals_kept_within_the_compound_of_this_h",
+                    "order": 30,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30061,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2067,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Are there mosquito breeding sites within the compound of this house?",
+                    "questionKey": "are_there_mosquito_breeding_sites_within_the_com",
+                    "order": 31,
+                    "type": "boolean",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "false",
+                    "dataType": "boolean",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30062,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2068,
+                    "parentId": 2067,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2067
+                            }
+                        ]
+                    },
+                    "label": "Select the types of breeding sites",
+                    "questionKey": "select_the_types_of_breeding_sites",
+                    "order": 32,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": [
+                        "Concrete Tank",
+                        "Abandoned Tyres",
+                        "Open Water Storage Containers",
+                        "Open Plastic Water Tanks",
+                        "Pits",
+                        "Other"
+                    ],
+                    "value": [],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30063,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2069,
+                    "parentId": 2068,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Other",
+                                "operator": "contains",
+                                "questionId": 2068
+                            }
+                        ]
+                    },
+                    "label": "Other types of breeding sites",
+                    "questionKey": "other_types_of_breeding_sites",
+                    "order": 33,
+                    "type": "text",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "text",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30064,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2071,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": true,
+                        "operator": "eq",
+                        "questionId": 2039
+                    },
+                    "label": "Where is mosquito collection taking place?",
+                    "questionKey": "where_is_mosquito_collection_taking_place",
+                    "order": 34,
+                    "type": "multi-select",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                    "value": ["Outdoors"],
+                    "dataType": "multi-select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30065,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2072,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Indoors",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for INDOORS",
+                    "questionKey": "scan_cup_id_for_indoors_2",
+                    "order": 35,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30066,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2073,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Outdoors",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for OUTDOORS",
+                    "questionKey": "scan_cup_id_for_outdoors_2",
+                    "order": 36,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-54",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30067,
+                    "frontendId": null,
+                    "sessionUnitId": null,
+                    "sessionUnit": null,
+                    "questionId": 2074,
+                    "parentId": null,
+                    "prerequisite": {
+                        "all": [
+                            {
+                                "value": true,
+                                "operator": "eq",
+                                "questionId": 2039
+                            },
+                            {
+                                "value": "Animal Shelter",
+                                "operator": "contains",
+                                "questionId": 2071
+                            }
+                        ]
+                    },
+                    "label": "Scan cup ID for ANIMAL SHELTER",
+                    "questionKey": "scan_cup_id_for_animal_shelter_2",
+                    "order": 37,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30068,
+                    "frontendId": null,
+                    "sessionUnitId": 3801,
+                    "sessionUnit": {
+                        "id": 3801,
+                        "frontendId": null,
+                        "sessionId": 3002,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2070,
+                    "parentId": null,
+                    "prerequisite": null,
+                    "label": "Where is mosquito collection taking place?",
+                    "questionKey": "where_is_mosquito_collection_taking_place_2",
+                    "order": 34,
+                    "type": "select",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": true,
+                    "options": ["Indoors", "Outdoors", "Animal Shelter"],
+                    "value": "Indoors",
+                    "dataType": "select",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30069,
+                    "frontendId": null,
+                    "sessionUnitId": 3801,
+                    "sessionUnit": {
+                        "id": 3801,
+                        "frontendId": null,
+                        "sessionId": 3002,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2075,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": "Indoors",
+                        "operator": "eq",
+                        "questionId": 2070
+                    },
+                    "label": "Scan cup ID for INDOORS",
+                    "questionKey": "scan_cup_id_for_indoors",
+                    "order": 38,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30070,
+                    "frontendId": null,
+                    "sessionUnitId": 3801,
+                    "sessionUnit": {
+                        "id": 3801,
+                        "frontendId": null,
+                        "sessionId": 3002,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2076,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": "Outdoors",
+                        "operator": "eq",
+                        "questionId": 2070
+                    },
+                    "label": "Scan cup ID for OUTDOORS",
+                    "questionKey": "scan_cup_id_for_outdoors",
+                    "order": 39,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "qr-56",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                },
+                {
+                    "id": 30071,
+                    "frontendId": null,
+                    "sessionUnitId": 3801,
+                    "sessionUnit": {
+                        "id": 3801,
+                        "frontendId": null,
+                        "sessionId": 3002,
+                        "unitOrder": 1,
+                        "createdAt": 1790172800000,
+                        "updatedAt": 1790172800000
+                    },
+                    "questionId": 2077,
+                    "parentId": null,
+                    "prerequisite": {
+                        "value": "Animal Shelter",
+                        "operator": "eq",
+                        "questionId": 2070
+                    },
+                    "label": "Scan cup ID for ANIMAL SHELTER",
+                    "questionKey": "scan_cup_id_for_animal_shelter",
+                    "order": 40,
+                    "type": "qr",
+                    "required": true,
+                    "answerScope": "SESSION_UNIT",
+                    "isUnitIdentityComponent": false,
+                    "options": null,
+                    "value": "",
+                    "dataType": "qr",
+                    "submittedAt": 1790172800000,
+                    "createdAt": 1790172800000,
+                    "updatedAt": 1790172800000
+                }
+            ]
+        }
+    },
+    "surveillanceFormBySessionId": {}
+}

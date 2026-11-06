@@ -14,7 +14,7 @@ export const formAnswerSchema = z.object({
     type: z.string().nullable(),
     required: z.boolean().nullable(),
     options: z.array(z.unknown()).nullable(),
-    value: z.string().nullable(),
+    value: z.union([z.string(), z.array(z.string())]).nullable(),
     dataType: z.string(),
     submittedAt: z.number().nullable(),
     createdAt: z.number().nullable(),
