@@ -7,7 +7,7 @@ import {
 
 export function getMetadataReviewBlockers(
     sections: MetadataSection[],
-    resolutionsByMetadataRowId: Map<string, string>,
+    resolutionsByMetadataRowId: Map<string, string | string[]>,
     questionsById: Map<number, FormQuestion>,
     currentFormSessionIds: Set<number> = new Set(),
 ) {
