@@ -9,6 +9,44 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
+function renderMutation() {
+    const queryClient = createTestQueryClient();
+    const { result } = renderHook(() => usePutSpecimenById(), {
+        wrapper: ({ children }) =>
+            createElement(
+                QueryClientProvider,
+                { client: queryClient },
+                children,
+            ),
+    });
+    return { result, queryClient };
+}
+
+test.each([
+    null,
+    [],
+    {},
+    { ok: 'true', data: {} },
+    { ok: true },
+    { ok: true, data: { message: 'Updated' } },
+    { ok: false },
+    { ok: false, error: { kind: 'unsupported' } },
+    { ok: false, error: { kind: 'conflict', status: '409' } },
+    { ok: false, error: { kind: 'client', message: 123 } },
+])('rejects a malformed BFF Result: %j', async body => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json(body)));
+    const { result, queryClient } = renderMutation();
+    await act(async () => {
+        expect(
+            await result.current.mutateAsync({
+                specimenId: 12,
+                requestBody: { specimenId: 'URJ206' },
+            }),
+        ).toEqual({ ok: false, error: { kind: 'client' } });
+    });
+    queryClient.clear();
+});
+
 test.each([
     {
         status: 200,
@@ -43,15 +81,7 @@ test.each([
         .fn()
         .mockResolvedValue(Response.json(body, { status }));
     vi.stubGlobal('fetch', fetchMock);
-    const queryClient = createTestQueryClient();
-    const { result } = renderHook(() => usePutSpecimenById(), {
-        wrapper: ({ children }) =>
-            createElement(
-                QueryClientProvider,
-                { client: queryClient },
-                children,
-            ),
-    });
+    const { result, queryClient } = renderMutation();
 
     await act(async () => {
         expect(

@@ -1,7 +1,8 @@
 import { putSpecimenById } from '@/api/specimen/put-specimen-by-id';
-import type {
-    PutSpecimenByIdRequestBody,
-    PutSpecimenByIdResponseBody,
+import {
+    putSpecimenByIdParamsSchema,
+    putSpecimenByIdRequestSchema,
+    type PutSpecimenByIdResponseBody,
 } from '@/api/specimen/validation/put-specimen-by-id-schema';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { err } from '@/lib/result/result';
@@ -12,9 +13,8 @@ interface RouteParams {
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
-    const { specimenId } = await params;
-    const numericSpecimenId = Number(specimenId);
-    if (!Number.isSafeInteger(numericSpecimenId) || numericSpecimenId <= 0) {
+    const parsedParams = putSpecimenByIdParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
         return NextResponse.json(
             err({
                 kind: 'client',
@@ -25,7 +25,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         );
     }
 
-    let requestBody: PutSpecimenByIdRequestBody;
+    let requestBody: unknown;
     try {
         requestBody = await request.json();
     } catch {
@@ -35,9 +35,26 @@ export async function PUT(request: Request, { params }: RouteParams) {
         );
     }
 
+    const parsedRequestBody =
+        putSpecimenByIdRequestSchema.safeParse(requestBody);
+    if (!parsedRequestBody.success) {
+        return NextResponse.json(
+            err({
+                kind: 'client',
+                status: 400,
+                message: 'Invalid request body',
+            }),
+            { status: 400 },
+        );
+    }
+
     const result = await withAuthSession<PutSpecimenByIdResponseBody>(
         accessToken =>
-            putSpecimenById(accessToken, numericSpecimenId, requestBody),
+            putSpecimenById(
+                accessToken,
+                parsedParams.data.specimenId,
+                parsedRequestBody.data,
+            ),
     );
 
     return NextResponse.json(result, {

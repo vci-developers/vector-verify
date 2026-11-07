@@ -1,15 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import type {
-    PutSpecimenByIdRequestBody,
-    PutSpecimenByIdResponseBody,
+import {
+    putSpecimenByIdResultSchema,
+    type PutSpecimenByIdRequestBody,
+    type PutSpecimenByIdResult,
 } from '@/api/specimen/validation/put-specimen-by-id-schema';
-import type { NetworkError } from '@/lib/network/network-error';
-import type { Result } from '@/lib/result/result';
-
-type PutSpecimenByIdMutationResult = Result<
-    PutSpecimenByIdResponseBody,
-    NetworkError
->;
+import { err } from '@/lib/result/result';
 
 type PutSpecimenByIdVariables = {
     specimenId: number;
@@ -19,7 +14,7 @@ type PutSpecimenByIdVariables = {
 async function updateSpecimenById(
     specimenId: number,
     requestBody: PutSpecimenByIdRequestBody,
-): Promise<PutSpecimenByIdMutationResult> {
+): Promise<PutSpecimenByIdResult> {
     const response = await fetch(`/api/specimens/${specimenId}`, {
         method: 'PUT',
         credentials: 'include',
@@ -29,8 +24,9 @@ async function updateSpecimenById(
         body: JSON.stringify(requestBody),
     });
 
-    const result: PutSpecimenByIdMutationResult = await response.json();
-    return result;
+    const responseBody: unknown = await response.json();
+    const parsedResult = putSpecimenByIdResultSchema.safeParse(responseBody);
+    return parsedResult.success ? parsedResult.data : err({ kind: 'client' });
 }
 
 export function usePutSpecimenById() {

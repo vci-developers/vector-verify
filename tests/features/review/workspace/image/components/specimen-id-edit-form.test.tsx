@@ -151,6 +151,24 @@ test.each(['backend', 'network'])(
     },
 );
 
+test('does not report success or close the form for a malformed success Result', async () => {
+    vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(Response.json({ ok: true })),
+    );
+    const user = userEvent.setup();
+    const { onClose } = renderForm();
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+            'Failed to update Specimen ID.',
+        ),
+    );
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled();
+});
+
 test('blocks repeat submission and Cancel during the save', async () => {
     let finishSave!: (response: Response) => void;
     const response = new Promise<Response>(resolve => {

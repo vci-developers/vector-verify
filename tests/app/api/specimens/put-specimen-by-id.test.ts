@@ -53,6 +53,45 @@ test('forwards a numeric ID and returns the success Result', async () => {
     });
 });
 
+test('validates and trims the body before forwarding it to the server function', async () => {
+    vi.mocked(putSpecimenById).mockResolvedValue({
+        ok: false,
+        error: { kind: 'conflict', status: 409 },
+    });
+    const response = await PUT(
+        updateRequest(
+            JSON.stringify({ specimenId: '  URJ206  ', thumbnailImageId: 99 }),
+        ),
+        {
+            params: Promise.resolve({ specimenId: '12' }),
+        },
+    );
+    expect(response.status).toBe(409);
+    expect(putSpecimenById).toHaveBeenCalledWith('access-token', 12, {
+        specimenId: 'URJ206',
+    });
+});
+
+test.each([
+    null,
+    [],
+    {},
+    { specimenId: '' },
+    { specimenId: ' \t ' },
+    { specimenId: 123 },
+])('rejects an invalid body before accessing the session: %j', async body => {
+    const response = await PUT(updateRequest(JSON.stringify(body)), {
+        params: Promise.resolve({ specimenId: '12' }),
+    });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+        ok: false,
+        error: { kind: 'client', status: 400 },
+    });
+    expect(cookies).not.toHaveBeenCalled();
+    expect(putSpecimenById).not.toHaveBeenCalled();
+});
+
 test('keeps a duplicate error as HTTP 409 with its Result body', async () => {
     const outcome = {
         ok: false as const,
@@ -96,6 +135,7 @@ test.each(['URJ206', '0', '-1', '1.5', '9007199254740992'])(
             params: Promise.resolve({ specimenId }),
         });
         expect(response.status).toBe(400);
+        expect(cookies).not.toHaveBeenCalled();
         expect(putSpecimenById).not.toHaveBeenCalled();
     },
 );
