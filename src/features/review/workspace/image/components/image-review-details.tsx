@@ -20,6 +20,9 @@ import PredictionEditForm from '@/features/review/workspace/image/components/pre
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
+import type { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
+import SpecimenIdEditForm from './specimen-id-edit-form';
 
 type DetailsState =
     | { status: 'loading' }
@@ -29,6 +32,10 @@ type DetailsState =
 interface ImageReviewDetailsProps {
     currentImage: SpecimenImage | null;
     latestEditLog: ReviewLog | undefined;
+    specimenIdEditHistory: ReturnType<typeof getSpecimenIdEditHistory>;
+    imageAvailability: ImageLoadStatus;
+    editingSpecimen: Specimen | null;
+    onEditSpecimenId: (specimen: Specimen | null) => void;
     timezone: string | null;
     readOnly: boolean;
     state: DetailsState;
@@ -37,6 +44,10 @@ interface ImageReviewDetailsProps {
 export default function ImageReviewDetails({
     currentImage,
     latestEditLog,
+    specimenIdEditHistory,
+    imageAvailability,
+    editingSpecimen,
+    onEditSpecimenId,
     timezone,
     readOnly,
     state,
@@ -100,6 +111,9 @@ export default function ImageReviewDetails({
           t('unknownUser', { userId: latestEditLog.performedBy.userId }))
         : null;
     const canEdit = !readOnly && state.status === 'success';
+    const specimenIdEditor =
+        specimenIdEditHistory?.latestEditLog.performedBy?.name ??
+        t('unknownSpecimenIdEditor');
 
     function getPrediction(
         value: string | null | undefined,
@@ -144,11 +158,71 @@ export default function ImageReviewDetails({
 
     return (
         <div className="space-y-4">
-            <div>
-                <p className="text-muted-foreground text-sm uppercase">
-                    {t('specimenId')}
-                </p>
-                {state.status === 'success' ? (
+            <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                    <p className="text-muted-foreground text-sm uppercase">
+                        {t('specimenId')}
+                    </p>
+                    {specimenIdEditHistory && (
+                        <Badge variant="secondary">{t('edited')}</Badge>
+                    )}
+                    {canEdit &&
+                        isCurrentImageThumbnail &&
+                        !editingSpecimen &&
+                        !isEditing && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span
+                                        className="ml-auto"
+                                        tabIndex={
+                                            imageAvailability !== 'loaded'
+                                                ? 0
+                                                : undefined
+                                        }
+                                    >
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            aria-label={t('editSpecimenId')}
+                                            disabled={
+                                                imageAvailability !== 'loaded'
+                                            }
+                                            onClick={() => {
+                                                if (state.status === 'success')
+                                                    onEditSpecimenId(
+                                                        state.specimen,
+                                                    );
+                                            }}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            {t('edit')}
+                                        </Button>
+                                    </span>
+                                </TooltipTrigger>
+                                {imageAvailability !== 'loaded' && (
+                                    <TooltipContent>
+                                        {imageAvailability === 'error'
+                                            ? t('imagesStillUploading')
+                                            : t('checkingImages')}
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        )}
+                </div>
+                {editingSpecimen ? (
+                    <SpecimenIdEditForm
+                        specimen={editingSpecimen}
+                        canSave={
+                            canEdit &&
+                            isCurrentImageThumbnail &&
+                            state.status === 'success' &&
+                            state.specimen.id === editingSpecimen.id &&
+                            imageAvailability === 'loaded'
+                        }
+                        onClose={() => onEditSpecimenId(null)}
+                    />
+                ) : state.status === 'success' ? (
                     <p className="text-lg font-semibold">
                         {state.specimen.specimenId}
                     </p>
@@ -158,6 +232,23 @@ export default function ImageReviewDetails({
                         width="md"
                         variant={skeletonVariant}
                     />
+                )}
+                {editingSpecimen && imageAvailability !== 'loaded' && (
+                    <p className="text-muted-foreground text-xs" role="status">
+                        {imageAvailability === 'error'
+                            ? t('imagesStillUploading')
+                            : t('checkingImages')}
+                    </p>
+                )}
+                {specimenIdEditHistory && (
+                    <div className="text-muted-foreground space-y-1 text-xs">
+                        <p>
+                            {t('originalSpecimenId', {
+                                value: specimenIdEditHistory.originalValue,
+                            })}
+                        </p>
+                        <p>{t('editedBy', { name: specimenIdEditor })}</p>
+                    </div>
                 )}
             </div>
 
@@ -292,7 +383,7 @@ export default function ImageReviewDetails({
                                         </TooltipContent>
                                     </Tooltip>
                                 )}
-                                {canEdit && !isEditing && (
+                                {canEdit && !isEditing && !editingSpecimen && (
                                     <Button
                                         type="button"
                                         variant="outline"

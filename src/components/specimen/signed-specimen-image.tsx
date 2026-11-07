@@ -4,7 +4,9 @@ import { useSignedResourceUrl } from '@/api/resources/hooks/use-signed-resource-
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+export type ImageLoadStatus = 'pending' | 'loaded' | 'error';
 
 interface SignedSpecimenImageProps {
     path: string;
@@ -13,6 +15,7 @@ interface SignedSpecimenImageProps {
     className?: string;
     fill?: boolean;
     style?: React.CSSProperties;
+    onLoadStatusChange?: (path: string, status: ImageLoadStatus) => void;
 }
 
 export default function SignedSpecimenImage({
@@ -22,15 +25,19 @@ export default function SignedSpecimenImage({
     className,
     fill,
     style,
+    onLoadStatusChange,
 }: SignedSpecimenImageProps) {
     const {
         data: signedResourceUrlResult,
         isPending: isSignedResourceUrlResultPending,
+        isFetching,
+        isError,
         refetch: refetchSignedResourceUrl,
     } = useSignedResourceUrl(path);
     const [hasRetried, setHasRetried] = useState(false);
-    const [loadFailed, setLoadFailed] = useState(false);
-    const [isImageLoaded, setIsImageLoaded] = useState(false);
+    const [failedUrl, setFailedUrl] = useState<string | null>(null);
+    const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+    const [isRetrying, setIsRetrying] = useState(false);
 
     const signedResource = signedResourceUrlResult?.ok
         ? signedResourceUrlResult.data
@@ -38,25 +45,53 @@ export default function SignedSpecimenImage({
     const isUrlLive =
         signedResource != null && Date.now() < signedResource.expiresAt * 1000;
 
-    function handleLoadError() {
+    const loadFailed =
+        signedResource !== null && failedUrl === signedResource.url;
+    const isImageLoaded =
+        signedResource !== null && loadedUrl === signedResource.url;
+    const loadStatus: ImageLoadStatus =
+        isError ||
+        (signedResourceUrlResult && !signedResourceUrlResult.ok) ||
+        loadFailed
+            ? 'error'
+            : !isUrlLive || isRetrying || isFetching || !isImageLoaded
+              ? 'pending'
+              : 'loaded';
+
+    useEffect(() => {
+        onLoadStatusChange?.(path, loadStatus);
+    }, [path, loadStatus, onLoadStatusChange]);
+
+    async function handleLoadError() {
         if (hasRetried) {
-            setLoadFailed(true);
+            setFailedUrl(signedResource?.url ?? null);
             return;
         }
         setHasRetried(true);
-        refetchSignedResourceUrl();
+        setLoadedUrl(null);
+        setIsRetrying(true);
+        await refetchSignedResourceUrl();
+        setIsRetrying(false);
     }
 
-    if (!signedResourceUrlResult || isSignedResourceUrlResultPending) {
-        return <Skeleton rounded="none" className="absolute inset-0" />;
-    }
-
-    if (!signedResourceUrlResult.ok || loadFailed) {
+    if (
+        isError ||
+        (signedResourceUrlResult && !signedResourceUrlResult.ok) ||
+        loadFailed
+    ) {
         return (
             <div className="bg-muted text-muted-foreground absolute inset-0 flex items-center justify-center">
                 <p className="px-2 text-center text-sm">Image unavailable</p>
             </div>
         );
+    }
+
+    if (
+        !signedResourceUrlResult ||
+        isSignedResourceUrlResultPending ||
+        isRetrying
+    ) {
+        return <Skeleton rounded="none" className="absolute inset-0" />;
     }
 
     if (!isUrlLive) {
@@ -78,7 +113,8 @@ export default function SignedSpecimenImage({
                 className={className}
                 style={style}
                 onError={handleLoadError}
-                onLoad={() => setIsImageLoaded(true)}
+                onLoad={() => setLoadedUrl(signedResource.url)}
+                loading={onLoadStatusChange ? 'eager' : undefined}
                 draggable={false}
             />
         </React.Fragment>
