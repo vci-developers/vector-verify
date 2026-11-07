@@ -791,13 +791,11 @@ test('combines ID and prediction edits, ignores unrelated changes, and follows n
             }),
         );
     });
-    await userEvent
-        .setup()
-        .click(
-            await screen.findByRole('button', {
-                name: 'View 3 review changes for specimen RENAMED',
-            }),
-        );
+    await userEvent.setup().click(
+        await screen.findByRole('button', {
+            name: 'View 3 review changes for specimen RENAMED',
+        }),
+    );
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByText('Specimen ID')).toBeInTheDocument();
     expect(dialog.getByText('OLD-ID')).toBeInTheDocument();

@@ -80,13 +80,11 @@ test('renders mixed history newest-first with specimen labels and raw ID values'
             },
         ],
     });
-    await userEvent
-        .setup()
-        .click(
-            screen.getByRole('button', {
-                name: 'View 3 review changes for specimen Gravid',
-            }),
-        );
+    await userEvent.setup().click(
+        screen.getByRole('button', {
+            name: 'View 3 review changes for specimen Gravid',
+        }),
+    );
     const dialog = within(screen.getByRole('dialog'));
     expect(
         dialog.getByRole('heading', { name: 'Review changes (3)' }),
