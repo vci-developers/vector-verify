@@ -249,10 +249,12 @@
         "reassignError": "Failed to reassign the session. Please try again."
     },
     "SpecimenChangelog": {
-        "openChanges": "View {count, plural, one {# prediction change} other {# prediction changes}} for specimen {specimenId}",
+        "openChanges": "View {count, plural, one {# review change} other {# review changes}} for specimen {specimenId}",
         "title": "Specimen {specimenId}",
         "context": "Session {sessionId} · {siteDisplayName}",
-        "predictionChanges": "Prediction changes ({count})",
+        "reviewChanges": "Review changes ({count})",
+        "specimenDetails": "Specimen details",
+        "specimenId": "Specimen ID",
         "timezone": "Times shown in {timezone}",
         "image": "Image {number}",
         "species": "Species",
@@ -260,7 +262,7 @@
         "abdomenStatus": "Abdomen",
         "changedTo": "changed to",
         "unknownReviewer": "Unknown reviewer",
-        "noChanges": "No prediction changes",
+        "noChanges": "No review changes",
         "imageId": "Image ID {id}",
         "unknownImage": "Image unavailable",
         "unavailableChanges": "Changed-field details are unavailable for this log entry."
