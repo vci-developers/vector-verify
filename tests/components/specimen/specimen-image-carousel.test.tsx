@@ -57,6 +57,20 @@ test('waits for every image, including an unselected one, and allows recovery', 
     expect(onStatus).toHaveBeenLastCalledWith('loaded');
 });
 
+test('a failed image does not hide pending checks for other images', () => {
+    const onStatus = vi.fn();
+    render(
+        <SpecimenImageCarousel
+            specimen={specimen}
+            onImageAvailabilityChange={onStatus}
+        />,
+    );
+    fireEvent.error(screen.getByTestId('/specimens/12/images/102'));
+    expect(onStatus).toHaveBeenLastCalledWith('pending');
+    fireEvent.load(screen.getByTestId('/specimens/12/images/101'));
+    expect(onStatus).toHaveBeenLastCalledWith('error');
+});
+
 test('new image paths invalidate prior successful availability', () => {
     const onStatus = vi.fn();
     const { rerender } = render(
@@ -94,6 +108,7 @@ test('resets availability when switching keyed specimens', () => {
             onImageAvailabilityChange={onStatus}
         />,
     );
+    fireEvent.load(screen.getByTestId('/specimens/12/images/101'));
     fireEvent.error(screen.getByTestId('/specimens/12/images/102'));
     expect(onStatus).toHaveBeenLastCalledWith('error');
     rerender(

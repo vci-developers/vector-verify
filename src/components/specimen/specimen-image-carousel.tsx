@@ -155,16 +155,19 @@ export default function SpecimenImageCarousel({
         [specimen],
     );
 
-    const imageAvailability: ImageLoadStatus = allImagesForSpecimen.some(
-        image => imageLoadStatuses[image.url] === 'error',
-    )
-        ? 'error'
-        : allImagesForSpecimen.length > 0 &&
-            allImagesForSpecimen.every(
-                image => imageLoadStatuses[image.url] === 'loaded',
+    const hasPendingImages =
+        allImagesForSpecimen.length === 0 ||
+        allImagesForSpecimen.some(image => {
+            const status = imageLoadStatuses[image.url];
+            return status === undefined || status === 'pending';
+        });
+    const imageAvailability: ImageLoadStatus = hasPendingImages
+        ? 'pending'
+        : allImagesForSpecimen.some(
+                image => imageLoadStatuses[image.url] === 'error',
             )
-          ? 'loaded'
-          : 'pending';
+          ? 'error'
+          : 'loaded';
 
     useEffect(() => {
         onImageAvailabilityChange?.(imageAvailability);

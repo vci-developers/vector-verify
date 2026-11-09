@@ -129,24 +129,26 @@ async function openEditor(user: ReturnType<typeof userEvent.setup>) {
     await user.click(screen.getByRole('button', { name: 'Edit Specimen ID' }));
 }
 
-test('blocks editing until images load and explains failures with the upload tooltip', async () => {
+test('blocks editing only while image checks are pending, not after failure', async () => {
     const user = userEvent.setup();
     renderWorkspace();
-    expect(
-        screen.getByRole('button', { name: 'Edit Specimen ID' }),
-    ).toBeDisabled();
-    await user.click(screen.getByRole('button', { name: 'Fail image' }));
     const editButton = screen.getByRole('button', { name: 'Edit Specimen ID' });
     expect(editButton).toBeDisabled();
     await user.hover(editButton.parentElement!);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        'Images still uploading',
+        'Checking image availability…',
     );
     await user.unhover(editButton.parentElement!);
-    await user.click(screen.getByRole('button', { name: 'Images ready' }));
+    await user.click(screen.getByRole('button', { name: 'Fail image' }));
+    expect(editButton).toBeEnabled();
     expect(
-        screen.getByRole('button', { name: 'Edit Specimen ID' }),
-    ).toBeEnabled();
+        screen.queryByText('Images still uploading'),
+    ).not.toBeInTheDocument();
+    await user.click(editButton);
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expectNavigationLocked(true);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expectNavigationLocked(false);
 });
 
 test('locks workflow and specimen/image navigation until Cancel', async () => {
@@ -197,47 +199,61 @@ test('keeps navigation locked for empty input and duplicate errors', async () =>
     expectNavigationLocked(true);
 });
 
-test('unlocks after a successful save and displays the refreshed ID', async () => {
-    const updatedSpecimen = { ...specimen, specimenId: 'NEW-ID' };
-    vi.stubGlobal(
-        'fetch',
-        vi.fn().mockImplementation(async () => {
-            mocks.specimens.mockReturnValue({
-                data: {
+test.each(['Images ready', 'Fail image'])(
+    'saves and unlocks navigation after %s',
+    async imageStatus => {
+        const updatedSpecimen = { ...specimen, specimenId: 'NEW-ID' };
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockImplementation(async () => {
+                mocks.specimens.mockReturnValue({
+                    data: {
+                        ok: true,
+                        data: { specimens: [updatedSpecimen, specimens[1]] },
+                    },
+                    isPending: false,
+                });
+                return Response.json({
                     ok: true,
-                    data: { specimens: [updatedSpecimen, specimens[1]] },
-                },
-                isPending: false,
-            });
-            return Response.json({
-                ok: true,
-                data: { message: 'Updated', specimen: updatedSpecimen },
-            });
-        }),
-    );
-    const user = userEvent.setup();
-    renderWorkspace();
-    await openEditor(user);
-    await user.clear(screen.getByRole('textbox'));
-    await user.type(screen.getByRole('textbox'), 'NEW-ID');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() =>
-        expect(screen.queryByRole('textbox')).not.toBeInTheDocument(),
-    );
-    expectNavigationLocked(false);
-    expect(screen.getByText('NEW-ID')).toBeInTheDocument();
-});
+                    data: { message: 'Updated', specimen: updatedSpecimen },
+                });
+            }),
+        );
+        const user = userEvent.setup();
+        renderWorkspace();
+        await user.click(screen.getByRole('button', { name: imageStatus }));
+        await user.click(
+            screen.getByRole('button', { name: 'Edit Specimen ID' }),
+        );
+        await user.clear(screen.getByRole('textbox'));
+        await user.type(screen.getByRole('textbox'), 'NEW-ID');
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() =>
+            expect(screen.queryByRole('textbox')).not.toBeInTheDocument(),
+        );
+        expectNavigationLocked(false);
+        expect(screen.getByText('NEW-ID')).toBeInTheDocument();
+    },
+);
 
-test('new failures or pending loads disable Save without unlocking navigation', async () => {
+test('image failures allow Save, but pending checks block it without unlocking navigation', async () => {
     const user = userEvent.setup();
     renderWorkspace();
     await openEditor(user);
-    for (const name of ['Fail image', 'Images pending']) {
-        await user.click(screen.getByRole('button', { name }));
-        expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-        expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled();
-        expectNavigationLocked(true);
-    }
+    await user.click(screen.getByRole('button', { name: 'Fail image' }));
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expectNavigationLocked(true);
+    await user.click(screen.getByRole('button', { name: 'Images pending' }));
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled();
+    expect(screen.getByRole('status')).toHaveTextContent(
+        'Checking image availability…',
+    );
+    expectNavigationLocked(true);
+    await user.click(screen.getByRole('button', { name: 'Fail image' }));
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expectNavigationLocked(true);
     await user.click(screen.getByRole('button', { name: 'Images ready' }));
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
 });
@@ -302,25 +318,33 @@ test('blocks previous-specimen navigation when editing the second specimen', asy
     ).toBeEnabled();
 });
 
-test('editing is unavailable on fully reviewed sites', () => {
-    renderWorkspace(true);
-    expect(
-        screen.queryByRole('button', { name: 'Edit Specimen ID' }),
-    ).not.toBeInTheDocument();
-    expect(
-        screen.queryByRole('button', { name: 'Edit' }),
-    ).not.toBeInTheDocument();
-});
+test.each(['Images ready', 'Fail image'])(
+    'editing remains unavailable on fully reviewed sites after %s',
+    async imageStatus => {
+        const user = userEvent.setup();
+        renderWorkspace(true);
+        await user.click(screen.getByRole('button', { name: imageStatus }));
+        expect(
+            screen.queryByRole('button', { name: 'Edit Specimen ID' }),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: 'Edit' }),
+        ).not.toBeInTheDocument();
+    },
+);
 
-test('editing is unavailable for a non-thumbnail image', async () => {
-    const user = userEvent.setup();
-    renderWorkspace();
-    await user.click(screen.getByRole('button', { name: 'Images ready' }));
-    await user.click(screen.getByRole('button', { name: 'Other image' }));
-    expect(
-        screen.queryByRole('button', { name: 'Edit Specimen ID' }),
-    ).not.toBeInTheDocument();
-});
+test.each(['Images ready', 'Fail image'])(
+    'editing remains unavailable for a non-thumbnail image after %s',
+    async imageStatus => {
+        const user = userEvent.setup();
+        renderWorkspace();
+        await user.click(screen.getByRole('button', { name: imageStatus }));
+        await user.click(screen.getByRole('button', { name: 'Other image' }));
+        expect(
+            screen.queryByRole('button', { name: 'Edit Specimen ID' }),
+        ).not.toBeInTheDocument();
+    },
+);
 
 test('the prediction editor and ID editor cannot be open together', async () => {
     const user = userEvent.setup();

@@ -111,6 +111,7 @@ export default function ImageReviewDetails({
           t('unknownUser', { userId: latestEditLog.performedBy.userId }))
         : null;
     const canEdit = !readOnly && state.status === 'success';
+    const isCheckingImages = imageAvailability === 'pending';
     const specimenIdEditor =
         specimenIdEditHistory?.latestEditLog.performedBy?.name ??
         t('unknownSpecimenIdEditor');
@@ -175,9 +176,7 @@ export default function ImageReviewDetails({
                                     <span
                                         className="ml-auto"
                                         tabIndex={
-                                            imageAvailability !== 'loaded'
-                                                ? 0
-                                                : undefined
+                                            isCheckingImages ? 0 : undefined
                                         }
                                     >
                                         <Button
@@ -185,9 +184,7 @@ export default function ImageReviewDetails({
                                             variant="outline"
                                             size="sm"
                                             aria-label={t('editSpecimenId')}
-                                            disabled={
-                                                imageAvailability !== 'loaded'
-                                            }
+                                            disabled={isCheckingImages}
                                             onClick={() => {
                                                 if (state.status === 'success')
                                                     onEditSpecimenId(
@@ -200,11 +197,9 @@ export default function ImageReviewDetails({
                                         </Button>
                                     </span>
                                 </TooltipTrigger>
-                                {imageAvailability !== 'loaded' && (
+                                {isCheckingImages && (
                                     <TooltipContent>
-                                        {imageAvailability === 'error'
-                                            ? t('imagesStillUploading')
-                                            : t('checkingImages')}
+                                        {t('checkingImages')}
                                     </TooltipContent>
                                 )}
                             </Tooltip>
@@ -218,7 +213,7 @@ export default function ImageReviewDetails({
                             isCurrentImageThumbnail &&
                             state.status === 'success' &&
                             state.specimen.id === editingSpecimen.id &&
-                            imageAvailability === 'loaded'
+                            !isCheckingImages
                         }
                         onClose={() => onEditSpecimenId(null)}
                     />
@@ -233,11 +228,9 @@ export default function ImageReviewDetails({
                         variant={skeletonVariant}
                     />
                 )}
-                {editingSpecimen && imageAvailability !== 'loaded' && (
+                {editingSpecimen && isCheckingImages && (
                     <p className="text-muted-foreground text-xs" role="status">
-                        {imageAvailability === 'error'
-                            ? t('imagesStillUploading')
-                            : t('checkingImages')}
+                        {t('checkingImages')}
                     </p>
                 )}
                 {specimenIdEditHistory && (
