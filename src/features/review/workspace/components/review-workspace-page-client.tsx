@@ -120,10 +120,14 @@ export default function ReviewWorkspacePageClient({
 
                         <Separator />
 
-                        {isFullyReviewed && (
+                        {readOnly && (
                             <div className="bg-muted/60 text-muted-foreground flex items-center gap-2 rounded-md p-4 text-sm">
                                 <Lock className="h-4 w-4 shrink-0" />
-                                {t('readOnlyNotice')}
+                                {t('readOnlyNotice', {
+                                    reason: isFullyReviewed
+                                        ? 'fullyReviewed'
+                                        : 'access',
+                                })}
                             </div>
                         )}
 

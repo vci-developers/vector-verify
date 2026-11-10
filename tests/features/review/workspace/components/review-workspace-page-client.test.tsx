@@ -125,10 +125,8 @@ describe('ReviewWorkspacePageClient read-only', () => {
             screen.queryByRole('button', { name: 'Save & Continue' }),
         ).not.toBeInTheDocument();
         expect(
-            screen.queryByText(
-                'This site is fully reviewed and is shown in read-only mode.',
-            ),
-        ).not.toBeInTheDocument();
+            screen.getByText('This review is read-only.'),
+        ).toBeInTheDocument();
     });
 
     test('non-Kenya user keeps an editable workspace with certification', async () => {
@@ -140,5 +138,8 @@ describe('ReviewWorkspacePageClient read-only', () => {
         ).toBeInTheDocument();
         expect(screen.getByText('Value')).toBeInTheDocument();
         expect(screen.getByText('Certification')).toBeInTheDocument();
+        expect(
+            screen.queryByText('This review is read-only.'),
+        ).not.toBeInTheDocument();
     });
 });
