@@ -14,6 +14,7 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 import MissingSpecimensTooltip from './missing-specimens-tooltip';
+import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBanner from '@/components/ui/error-banner';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
@@ -51,6 +52,7 @@ export default function ImageReviewWorkspace({
 }: ImageReviewWorkspaceProps) {
     const t = useTranslations('ReviewImage');
     const tCommon = useTranslations('Common');
+    const isReviewReadOnly = useIsReviewReadOnly();
     const [specimenIndex, setSpecimenIndex] = useState(0);
     const [currentImage, setCurrentImage] = useState<SpecimenImage | null>(
         null,
@@ -130,9 +132,11 @@ export default function ImageReviewWorkspace({
                     <Button variant="outline" onClick={onGoToPreviousStep}>
                         {tCommon('previous')}
                     </Button>
-                    <Button onClick={onGoToNextStep}>
-                        {t('continueToCertification')}
-                    </Button>
+                    {!isReviewReadOnly && (
+                        <Button onClick={onGoToNextStep}>
+                            {t('continueToCertification')}
+                        </Button>
+                    )}
                 </div>
             </div>
         );
@@ -276,12 +280,14 @@ export default function ImageReviewWorkspace({
                 <Button variant="outline" onClick={onGoToPreviousStep}>
                     {tCommon('previous')}
                 </Button>
-                <Button
-                    onClick={onGoToNextStep}
-                    disabled={specimensState.status !== 'success'}
-                >
-                    {t('continueToCertification')}
-                </Button>
+                {!isReviewReadOnly && (
+                    <Button
+                        onClick={onGoToNextStep}
+                        disabled={specimensState.status !== 'success'}
+                    >
+                        {t('continueToCertification')}
+                    </Button>
+                )}
             </div>
         </div>
     );
