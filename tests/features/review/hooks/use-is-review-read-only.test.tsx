@@ -53,6 +53,11 @@ function stubApi({
                             name: 'Kenya ANOSTEP',
                             country: 'Kenya',
                         },
+                        {
+                            programId: UGANDA_PROGRAM_ID,
+                            name: 'National Malaria Elimination Division',
+                            country: 'Uganda',
+                        },
                     ],
                 }),
             );

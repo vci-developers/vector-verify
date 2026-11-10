@@ -44,18 +44,16 @@ function stubWorkspaceApi({ isKenyaUser }: { isKenyaUser: boolean }) {
                     }),
                 );
             }
-            if (path.startsWith('/api/programs?')) {
+            if (path.startsWith('/api/programs')) {
                 return jsonResponse(
                     ok({
-                        programs: isKenyaUser
-                            ? [
-                                  {
-                                      programId: USER_PROGRAM_ID,
-                                      name: 'Kenya ANOSTEP',
-                                      country: 'Kenya',
-                                  },
-                              ]
-                            : [],
+                        programs: [
+                            {
+                                programId: USER_PROGRAM_ID,
+                                name: isKenyaUser ? 'Kenya ANOSTEP' : 'Uganda',
+                                country: isKenyaUser ? 'Kenya' : 'Uganda',
+                            },
+                        ],
                     }),
                 );
             }
