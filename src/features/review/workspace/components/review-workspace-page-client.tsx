@@ -18,6 +18,8 @@ import { isLegacySite } from '@/lib/location/location-query';
 import { ClipboardList, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useReviewImageAccess } from '../hooks/use-review-image-access';
 import ReviewWorkspaceHeader from './layout/review-workspace-header';
 import ImageReviewWorkspace from '../image/components/image-review-workspace';
 import CertificationWorkspace from '../certification/components/certification-workspace';
@@ -45,7 +47,10 @@ export default function ReviewWorkspacePageClient({
     timezone,
 }: ReviewWorkspacePageClientProps) {
     const t = useTranslations('ReviewWorkspace');
-    const [currentStepIndex, setCurrentStepIndex] = useState(0);
+    const searchParams = useSearchParams();
+    const [requestedStepIndex, setCurrentStepIndex] = useState(
+        searchParams.get('step') === 'images' ? 1 : 0,
+    );
 
     const sessionQueryParams: GetAllSessionsQueryParams =
         collectionCycleId !== undefined
@@ -79,6 +84,11 @@ export default function ReviewWorkspacePageClient({
     const isFullyReviewed = isSiteFullyReviewed(sessionSummary);
     const isReviewReadOnly = useIsReviewReadOnly();
     const readOnly = isFullyReviewed || isReviewReadOnly;
+    const imageAccess = useReviewImageAccess(sessions, programId ?? 0);
+    const currentStepIndex =
+        requestedStepIndex === 1 && imageAccess !== 'allowed'
+            ? 0
+            : requestedStepIndex;
 
     const stepLabelKeys = isReviewReadOnly
         ? REVIEW_STEP_LABEL_KEYS.filter(key => key !== 'certificationStep')
@@ -86,12 +96,12 @@ export default function ReviewWorkspacePageClient({
     const stepLabels = stepLabelKeys.map(key => t(key));
 
     function goToPreviousStep() {
-        setCurrentStepIndex(index => Math.max(index - 1, 0));
+        setCurrentStepIndex(Math.max(currentStepIndex - 1, 0));
     }
 
     function goToNextStep() {
-        setCurrentStepIndex(index =>
-            Math.min(index + 1, REVIEW_STEP_LABEL_KEYS.length - 1),
+        setCurrentStepIndex(
+            Math.min(currentStepIndex + 1, REVIEW_STEP_LABEL_KEYS.length - 1),
         );
     }
 
@@ -101,7 +111,9 @@ export default function ReviewWorkspacePageClient({
             description="Review submitted session data by location"
             icon={ClipboardList}
         >
-            {isGetAllSessionsPending || !getAllSessionsResult ? (
+            {isGetAllSessionsPending ||
+            !getAllSessionsResult ||
+            (requestedStepIndex === 1 && imageAccess === 'loading') ? (
                 <SkeletonList count={4} height="xl" width="full" />
             ) : !getAllSessionsResult.ok ? (
                 <ErrorBanner
@@ -149,6 +161,10 @@ export default function ReviewWorkspacePageClient({
                             )
                         ) : currentStepIndex === 1 ? (
                             <ImageReviewWorkspace
+                                initialSpecimenId={
+                                    Number(searchParams.get('specimenId')) ||
+                                    undefined
+                                }
                                 site={site!}
                                 sessions={sessions}
                                 startDate={startDate}

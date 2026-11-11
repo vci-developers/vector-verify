@@ -2,7 +2,7 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
-import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import { REVIEW_STATE_LABEL_KEY } from '@/features/review/utils/review-site-session-summary';
 import { Badge } from '@/components/ui/badge';
