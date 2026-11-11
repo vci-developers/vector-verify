@@ -22,6 +22,7 @@ import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-l
 import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
 
 interface ImageReviewWorkspaceProps {
+    initialSpecimenId?: number;
     site: Site;
     sessions: Session[];
     startDate?: string;
@@ -39,6 +40,7 @@ type SpecimensState =
     | { status: 'success'; specimens: Specimen[] };
 
 export default function ImageReviewWorkspace({
+    initialSpecimenId,
     site,
     sessions,
     startDate,
@@ -51,7 +53,9 @@ export default function ImageReviewWorkspace({
 }: ImageReviewWorkspaceProps) {
     const t = useTranslations('ReviewImage');
     const tCommon = useTranslations('Common');
-    const [specimenIndex, setSpecimenIndex] = useState(0);
+    const [selectedSpecimenIndex, setSpecimenIndex] = useState<number | null>(
+        null,
+    );
     const [currentImage, setCurrentImage] = useState<SpecimenImage | null>(
         null,
     );
@@ -137,6 +141,16 @@ export default function ImageReviewWorkspace({
             </div>
         );
     }
+    const specimenIndex =
+        selectedSpecimenIndex ??
+        (specimensState.status === 'success'
+            ? Math.max(
+                  0,
+                  specimensState.specimens.findIndex(
+                      specimen => specimen.id === initialSpecimenId,
+                  ),
+              )
+            : 0);
     const currentSpecimen =
         specimensState.status === 'success'
             ? specimensState.specimens[specimenIndex]
@@ -177,9 +191,7 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(index =>
-                                    Math.max(index - 1, 0),
-                                )
+                                setSpecimenIndex(Math.max(specimenIndex - 1, 0))
                             }
                             disabled={specimenIndex === 0}
                         >
@@ -191,9 +203,9 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(index =>
+                                setSpecimenIndex(
                                     Math.min(
-                                        index + 1,
+                                        specimenIndex + 1,
                                         specimensState.specimens.length - 1,
                                     ),
                                 )
