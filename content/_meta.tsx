@@ -27,6 +27,7 @@ const meta: MetaRecord = {
         title: 'Developer Reference',
         display: 'hidden',
     },
+    'release-notes': 'Release notes',
 };
 
 export default meta;
