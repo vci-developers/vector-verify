@@ -14,7 +14,7 @@ export interface ReleaseNoteSummary {
 
 const releaseNotesDirectory = path.join(process.cwd(), 'content/release-notes');
 const releaseFilenamePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/;
-const changePattern = /^## (.+)\n+([\s\S]*?)\n+### Details/gm;
+const changePattern = /^## (.+)\n+([^\n]+(?:\n(?!\n|#)[^\n]+)*)/gm;
 
 export function getLatestReleaseNotes(): ReleaseNoteSummary | undefined {
     const releaseId = readdirSync(releaseNotesDirectory)
