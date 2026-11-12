@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import nextra from 'nextra';
+import { getLatestReleaseNotes } from './src/features/release-notes/server/get-release-notes';
 
 const withNextIntl = createNextIntlPlugin();
 const withNextra = nextra({ contentDirBasePath: '/docs' });
@@ -24,6 +25,7 @@ const nextConfig: NextConfig = {
         NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || '',
         API_BASE_URL: process.env.API_BASE_URL || '',
+        RELEASE_NOTES_DATA: JSON.stringify(getLatestReleaseNotes() ?? null),
     },
 };
 

@@ -10,7 +10,7 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import EmailVerificationBanner from '@/components/email-verification-banner/email-verification-banner';
-import { getLatestReleaseNotes } from '@/features/release-notes/server/get-release-notes';
+import type { ReleaseNoteSummary } from '@/features/release-notes/server/get-release-notes';
 import ReleaseNotesDialog from '@/features/release-notes/components/release-notes-dialog';
 
 interface DashboardLayoutProps {
@@ -59,7 +59,9 @@ export default async function DashboardLayout({
     }
 
     const authorizedUserProfile = authorizedGetUserProfileResult.data.user;
-    const latestRelease = getLatestReleaseNotes();
+    const latestRelease = JSON.parse(
+        process.env.RELEASE_NOTES_DATA ?? 'null',
+    ) as ReleaseNoteSummary | null;
 
     return (
         <SidebarProvider>
