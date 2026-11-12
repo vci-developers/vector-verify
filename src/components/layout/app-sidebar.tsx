@@ -45,7 +45,7 @@ import type { UserProfile } from '@/api/user/validation/user-profile-schema';
 import LogoutButton from '../auth-session/logout-button';
 import LocaleSwitcher from './locale-switcher';
 import { Badge } from '../ui/badge';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import RawDataExportDialog from '../raw-export/raw-data-export-dialog';
 import UserAnalyticsDialog from '@/components/user-analytics/user-analytics-dialog';
 
@@ -94,9 +94,13 @@ const SKELETON_TEXT_WIDTHS = ['68%', '82%', '58%', '76%', '91%'] as const;
 
 interface AppSidebarProps {
     userProfile: UserProfile;
+    releaseNotesAction?: ReactNode;
 }
 
-export default function AppSidebar({ userProfile }: AppSidebarProps) {
+export default function AppSidebar({
+    userProfile,
+    releaseNotesAction,
+}: AppSidebarProps) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
     const {
@@ -219,6 +223,7 @@ export default function AppSidebar({ userProfile }: AppSidebarProps) {
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
                                     ))}
+                                {releaseNotesAction}
                             </SidebarMenu>
                         )
                     )}
