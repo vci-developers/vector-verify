@@ -9,13 +9,14 @@ export interface ReleaseNoteSummary {
     title: string;
     changes: {
         id: string;
+        title: string;
         summary: string;
     }[];
 }
 
 const releaseNotesDirectory = path.join(process.cwd(), 'content/release-notes');
 const releaseFilenamePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/;
-const changePattern = /^## (.+)\n+([^#\n][^\n]*)/gm;
+const changePattern = /^## (.+)\n+([\s\S]*?)\n+### Details/gm;
 
 export function getLatestReleaseNotes(): ReleaseNoteSummary | undefined {
     const releaseId = readdirSync(releaseNotesDirectory)
@@ -46,10 +47,16 @@ export function getLatestReleaseNotes(): ReleaseNoteSummary | undefined {
         }
 
         return {
-            id: heading.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-            summary: summary.trim(),
+            id: heading
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, ''),
+            title: heading,
+            summary: summary.trim().replace(/\s+/g, ' '),
         };
-    }).filter((change): change is NonNullable<typeof change> => change !== undefined);
+    }).filter(
+        (change): change is NonNullable<typeof change> => change !== undefined,
+    );
 
     return { id: releaseId, date: releaseId, title, changes };
 }

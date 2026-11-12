@@ -17,7 +17,11 @@
     "Sidebar": {
         "loadErrorTitle": "Couldn't load navigation",
         "loadErrorFallback": "Unable to load navigation. Please try again.",
-        "retrying": "Retrying…"
+        "retrying": "Retrying…",
+        "whatsNew": "What's new"
+    },
+    "ReleaseNotes": {
+        "title": "What's new"
     },
     "Navigation": {
         "dashboard": "Dashboard",

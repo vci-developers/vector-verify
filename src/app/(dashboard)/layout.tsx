@@ -10,6 +10,8 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import EmailVerificationBanner from '@/components/email-verification-banner/email-verification-banner';
+import { getLatestReleaseNotes } from '@/features/release-notes/server/get-release-notes';
+import ReleaseNotesDialog from '@/features/release-notes/components/release-notes-dialog';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -57,10 +59,18 @@ export default async function DashboardLayout({
     }
 
     const authorizedUserProfile = authorizedGetUserProfileResult.data.user;
+    const latestRelease = getLatestReleaseNotes();
 
     return (
         <SidebarProvider>
-            <AppSidebar userProfile={authorizedUserProfile} />
+            <AppSidebar
+                userProfile={authorizedUserProfile}
+                releaseNotesAction={
+                    latestRelease ? (
+                        <ReleaseNotesDialog release={latestRelease} />
+                    ) : undefined
+                }
+            />
             <SidebarInset className="flex min-h-screen flex-col">
                 <main className="flex-1 p-6">{children}</main>
                 {!authorizedUserProfile.emailVerified && (
