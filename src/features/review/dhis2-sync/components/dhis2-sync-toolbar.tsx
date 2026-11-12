@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { RefreshCw, Upload } from 'lucide-react';
 
 interface Dhis2SyncToolbarProps {
@@ -16,7 +16,7 @@ export default function Dhis2SyncToolbar({
     onSubmitSelected,
     onRefresh,
 }: Dhis2SyncToolbarProps) {
-    const isReviewReadOnly = useIsReviewReadOnly();
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
 
     return (
         <div className="flex items-center gap-3">

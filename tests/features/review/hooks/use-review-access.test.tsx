@@ -2,12 +2,13 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { err, ok } from '@/lib/result/result';
 import { createTestQueryClient } from '../../../helpers/create-query-client';
 
 const KENYA_PROGRAM_ID = 10;
 const UGANDA_PROGRAM_ID = 7;
+const UNKNOWN_PROGRAM_ID = 99;
 
 function jsonResponse(body: unknown, status = 200) {
     return new Response(JSON.stringify(body), { status });
@@ -65,7 +66,7 @@ function stubApi({
     );
 }
 
-function renderIsReviewReadOnly() {
+function renderReviewAccess() {
     const queryClient = createTestQueryClient();
     function wrapper({ children }: { children: ReactNode }) {
         return (
@@ -74,7 +75,7 @@ function renderIsReviewReadOnly() {
             </QueryClientProvider>
         );
     }
-    const rendered = renderHook(() => useIsReviewReadOnly(), { wrapper });
+    const rendered = renderHook(() => useReviewAccess(), { wrapper });
     async function waitForSettled() {
         await waitFor(() => expect(queryClient.isFetching()).toBe(0));
     }
@@ -85,28 +86,43 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-describe('useIsReviewReadOnly', () => {
-    test('is true for a Kenya program user', async () => {
+describe('useReviewAccess', () => {
+    test('is loading before the requests settle', () => {
         stubApi({ userProgramId: KENYA_PROGRAM_ID });
-        const { result, waitForSettled } = renderIsReviewReadOnly();
+        const { result } = renderReviewAccess();
 
-        await waitForSettled();
-        expect(result.current).toBe(true);
+        expect(result.current).toBe('loading');
     });
 
-    test('is false for a non-Kenya program user', async () => {
+    test('is read-only for a Kenya program user', async () => {
+        stubApi({ userProgramId: KENYA_PROGRAM_ID });
+        const { result, waitForSettled } = renderReviewAccess();
+
+        await waitForSettled();
+        expect(result.current).toBe('read-only');
+    });
+
+    test('is writable for a non-Kenya program user', async () => {
         stubApi({ userProgramId: UGANDA_PROGRAM_ID });
-        const { result, waitForSettled } = renderIsReviewReadOnly();
+        const { result, waitForSettled } = renderReviewAccess();
 
         await waitForSettled();
-        expect(result.current).toBe(false);
+        expect(result.current).toBe('writable');
     });
 
-    test('is false when the programs request fails', async () => {
+    test('is error when the programs request fails', async () => {
         stubApi({ userProgramId: UGANDA_PROGRAM_ID, programsFail: true });
-        const { result, waitForSettled } = renderIsReviewReadOnly();
+        const { result, waitForSettled } = renderReviewAccess();
 
         await waitForSettled();
-        expect(result.current).toBe(false);
+        expect(result.current).toBe('error');
+    });
+
+    test("is error when the user's program is missing", async () => {
+        stubApi({ userProgramId: UNKNOWN_PROGRAM_ID });
+        const { result, waitForSettled } = renderReviewAccess();
+
+        await waitForSettled();
+        expect(result.current).toBe('error');
     });
 });

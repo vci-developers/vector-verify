@@ -26,7 +26,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { getSiteLabelParts } from '../utils/get-site-label-parts';
 import Dhis2IrsDialog from './dhis2-irs-dialog';
-import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import type { SiteIrsData } from '@/api/dhis2/validation/post-dhis2-sync-task-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
@@ -73,7 +73,7 @@ export default function Dhis2SiteRow({
 }: Dhis2SiteRowProps) {
     const t = useTranslations('Dhis2Submissions');
     const [isSiteIrsDialogOpen, setIsSiteIrsDialogOpen] = useState(false);
-    const isReviewReadOnly = useIsReviewReadOnly();
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
     const dialogSubmissions = useMemo(
         () => [{ site, collectionCycle }],
         [site, collectionCycle],

@@ -7,7 +7,7 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
-import { useIsReviewReadOnly } from '@/features/review/hooks/use-is-review-read-only';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { accumulateSessionSummary } from '@/features/review/utils/accumulate-session-summary';
 import {
     emptySessionSummary,
@@ -82,7 +82,7 @@ export default function ReviewWorkspacePageClient({
         emptySessionSummary(),
     );
     const isFullyReviewed = isSiteFullyReviewed(sessionSummary);
-    const isReviewReadOnly = useIsReviewReadOnly();
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
     const readOnly = isFullyReviewed || isReviewReadOnly;
     const imageAccess = useReviewImageAccess(sessions, programId ?? 0);
     const currentStepIndex =
