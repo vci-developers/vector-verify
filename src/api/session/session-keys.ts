@@ -9,6 +9,6 @@ export const sessionKeys = {
         ['sessions', queryParams] as const,
     allSessions: (queryParams: GetAllSessionsQueryParams) =>
         ['sessions', 'all', queryParams] as const,
-    sessionsMetricsByDistrict: (queryParams: GetSessionsMetricsQueryParams) =>
+    sessionsMetrics: (queryParams: GetSessionsMetricsQueryParams) =>
         ['sessions', 'metrics', queryParams] as const,
 };

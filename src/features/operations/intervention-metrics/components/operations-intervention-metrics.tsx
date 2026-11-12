@@ -1,12 +1,10 @@
 'use client';
 
 import { Fragment } from 'react';
-import type { Site } from '@/api/site/validation/site-schema';
-import { useGetSessionsMetricsByDistricts } from '@/api/session/hooks/use-get-sessions-metrics';
+import { useGetSessionsMetrics } from '@/api/session/hooks/use-get-sessions-metrics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import StatBadge from '@/components/ui/stat-badge';
-import { getUniqueDistricts } from '@/lib/location/site-tree';
 import {
     buildInterventionMetricsTotals,
     formatInterventionPercent,
@@ -19,39 +17,28 @@ import { cn } from '@/utils/cn';
 import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 interface OperationsInterventionMetricsProps {
-    sites: Site[];
+    siteIds: number[];
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsInterventionMetrics({
-    sites,
+    siteIds,
     startDate,
     endDate,
 }: OperationsInterventionMetricsProps) {
     const t = useTranslations('OperationsInterventionMetrics');
 
-    const districts = getUniqueDistricts(sites);
+    const {
+        data: getSessionsMetricsResult,
+        isPending: isGetSessionsMetricsPending,
+    } = useGetSessionsMetrics({ siteIds, startDate, endDate });
 
-    const sessionsMetricsQueries = useGetSessionsMetricsByDistricts(
-        districts,
-        startDate,
-        endDate,
-    );
+    const isLoading = isGetSessionsMetricsPending || !getSessionsMetricsResult;
+    const isError = !isLoading && !getSessionsMetricsResult.ok;
 
-    const isLoading = sessionsMetricsQueries.some(query => query.isPending);
-
-    const failedSessionsMetricsQuery = sessionsMetricsQueries.filter(
-        query => query.data && !query.data.ok,
-    );
-    const isError = !isLoading && failedSessionsMetricsQuery.length > 0;
-
-    const interventionMetricsTotals = !isLoading
-        ? buildInterventionMetricsTotals(
-              sessionsMetricsQueries
-                  .map(query => query.data)
-                  .filter(data => data != null),
-          )
+    const interventionMetricsTotals = getSessionsMetricsResult?.ok
+        ? buildInterventionMetricsTotals(getSessionsMetricsResult.data)
         : undefined;
 
     const netUsageRate = interventionMetricsTotals?.netUsageRatePercent ?? null;
