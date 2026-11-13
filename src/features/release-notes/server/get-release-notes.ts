@@ -1,16 +1,10 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
-export interface ReleaseNoteSummary {
-    id: string;
-    date: string;
-    title: string;
-    changes: {
-        id: string;
-        title: string;
-        summary: string;
-    }[];
-}
+import {
+    releaseNoteSummarySchema,
+    type ReleaseNoteSummary,
+} from '../validation/release-note-summary-schema';
 
 const releaseNotesDirectory = path.join(process.cwd(), 'content/release-notes');
 const releaseFilenamePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/;
@@ -56,5 +50,10 @@ export function getLatestReleaseNotes(): ReleaseNoteSummary | undefined {
         (change): change is NonNullable<typeof change> => change !== undefined,
     );
 
-    return { id: releaseId, date: releaseId, title, changes };
+    return releaseNoteSummarySchema.parse({
+        id: releaseId,
+        date: releaseId,
+        title,
+        changes,
+    });
 }

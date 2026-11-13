@@ -10,7 +10,7 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import EmailVerificationBanner from '@/components/email-verification-banner/email-verification-banner';
-import type { ReleaseNoteSummary } from '@/features/release-notes/server/get-release-notes';
+import { getBuiltReleaseNotes } from '@/features/release-notes/server/get-built-release-notes';
 import ReleaseNotesDialog from '@/features/release-notes/components/release-notes-dialog';
 import ReleaseNotesTrigger from '@/features/release-notes/components/release-notes-trigger';
 
@@ -60,9 +60,7 @@ export default async function DashboardLayout({
     }
 
     const authorizedUserProfile = authorizedGetUserProfileResult.data.user;
-    const latestRelease = JSON.parse(
-        process.env.RELEASE_NOTES_DATA ?? 'null',
-    ) as ReleaseNoteSummary | null;
+    const latestRelease = getBuiltReleaseNotes();
 
     return (
         <SidebarProvider>
