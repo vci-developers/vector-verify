@@ -1,7 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ExternalLink, Sparkles } from 'lucide-react';
+import {
+    createContext,
+    useEffect,
+    useRef,
+    useState,
+    type ReactNode,
+    type RefObject,
+} from 'react';
+import { ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
     Dialog,
@@ -9,33 +16,40 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import type { ReleaseNoteSummary } from '../server/get-release-notes';
-import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+
+export const ReleaseNotesDialogContext = createContext<{
+    openDialog: () => void;
+    triggerRef: RefObject<HTMLButtonElement | null>;
+} | null>(null);
 
 interface ReleaseNotesDialogProps {
-    release: ReleaseNoteSummary;
+    release: ReleaseNoteSummary | null;
+    children: ReactNode;
 }
 
 export default function ReleaseNotesDialog({
     release,
+    children,
 }: ReleaseNotesDialogProps) {
     const [open, setOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const t = useTranslations('ReleaseNotes');
-    const tSidebar = useTranslations('Sidebar');
+    const releaseId = release?.id;
 
     useEffect(() => {
         if (
-            window.localStorage.getItem(`release-notes-seen:${release.id}`) !==
+            releaseId &&
+            window.localStorage.getItem(`release-notes-seen:${releaseId}`) !==
             'true'
         ) {
             setOpen(true);
         }
-    }, [release.id]);
+    }, [releaseId]);
 
     function handleOpenChange(nextOpen: boolean) {
-        if (!nextOpen) {
+        if (!nextOpen && release) {
             window.localStorage.setItem(
                 `release-notes-seen:${release.id}`,
                 'true',
@@ -44,17 +58,26 @@ export default function ReleaseNotesDialog({
         setOpen(nextOpen);
     }
 
+    if (!release) {
+        return children;
+    }
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <SidebarMenuItem>
-                <DialogTrigger asChild>
-                    <SidebarMenuButton>
-                        <Sparkles />
-                        <span>{tSidebar('whatsNew')}</span>
-                    </SidebarMenuButton>
-                </DialogTrigger>
-            </SidebarMenuItem>
-            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+            <ReleaseNotesDialogContext.Provider
+                value={{ openDialog: () => setOpen(true), triggerRef }}
+            >
+                {children}
+            </ReleaseNotesDialogContext.Provider>
+            <DialogContent
+                className="max-h-[85vh] overflow-y-auto sm:max-w-xl"
+                onCloseAutoFocus={event => {
+                    if (triggerRef.current) {
+                        event.preventDefault();
+                        triggerRef.current.focus();
+                    }
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>{release.title}</DialogDescription>
