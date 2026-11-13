@@ -18,6 +18,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import type { ReleaseNoteSummary } from '../server/get-release-notes';
+import { hasSeenRelease, markReleaseSeen } from '../utils/release-notes-storage';
 
 export const ReleaseNotesDialogContext = createContext<{
     openDialog: () => void;
@@ -39,21 +40,14 @@ export default function ReleaseNotesDialog({
     const releaseId = release?.id;
 
     useEffect(() => {
-        if (
-            releaseId &&
-            window.localStorage.getItem(`release-notes-seen:${releaseId}`) !==
-            'true'
-        ) {
+        if (releaseId && !hasSeenRelease(releaseId)) {
             setOpen(true);
         }
     }, [releaseId]);
 
     function handleOpenChange(nextOpen: boolean) {
         if (!nextOpen && release) {
-            window.localStorage.setItem(
-                `release-notes-seen:${release.id}`,
-                'true',
-            );
+            markReleaseSeen(release.id);
         }
         setOpen(nextOpen);
     }

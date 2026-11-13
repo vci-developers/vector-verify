@@ -1,4 +1,4 @@
-import { beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
@@ -30,6 +30,10 @@ const release: ReleaseNoteSummary = {
 
 beforeEach(() => {
     window.localStorage.clear();
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
 });
 
 function renderMobileShell() {
@@ -74,6 +78,46 @@ test('automatically shows an unseen release while the mobile drawer is closed', 
     expect(window.localStorage.getItem('release-notes-seen:2026-11-03')).toBe(
         'true',
     );
+});
+
+test('shows and dismisses the release when access to localStorage is blocked', async () => {
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+        throw new DOMException('Storage is blocked', 'SecurityError');
+    });
+    const user = userEvent.setup();
+    renderMobileShell();
+
+    expect(
+        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+    ).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => {
+        expect(
+            screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+        ).not.toBeInTheDocument();
+    });
+});
+
+test('dismisses the release when storage writes exceed the quota', async () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new DOMException('Storage is full', 'QuotaExceededError');
+    });
+    const user = userEvent.setup();
+    renderMobileShell();
+
+    expect(
+        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: messages.Common.close }));
+
+    await waitFor(() => {
+        expect(
+            screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+        ).not.toBeInTheDocument();
+    });
 });
 
 test('keeps a seen release closed until its mobile sidebar action is clicked', async () => {
