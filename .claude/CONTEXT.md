@@ -90,6 +90,14 @@ or resolve a conflict across more than one Review Unit at a time. Mirrors the
 **Sync Task** key (`collectionCycleId, siteId`). _Avoid_: site-month, period,
 batch, the selected range (as a unit)
 
+**View-Only Access**: A user-level state in which every part of Review is
+visible but no Review write is possible — no certifying, conflict resolution,
+prediction edits, cycle reassignment, or DHIS2 sync. Distinct from a **Fully
+Reviewed** site, which is read-only because the data is finished, not because of
+who is looking. Annotation is unaffected. Currently granted to every user of the
+Kenya program; intended to move to a permission later. _Avoid_: locked, disabled
+review, temporary read-only
+
 ### Core Entities
 
 **Program**: The top-level organizational unit. All sites, users, sessions, and

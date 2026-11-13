@@ -7,6 +7,7 @@ import PageShell from '@/components/layout/page-shell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SkeletonList } from '@/components/ui/skeleton-list';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { accumulateSessionSummary } from '@/features/review/utils/accumulate-session-summary';
 import {
     emptySessionSummary,
@@ -80,14 +81,19 @@ export default function ReviewWorkspacePageClient({
         (summary, session) => accumulateSessionSummary(summary, session),
         emptySessionSummary(),
     );
-    const readOnly = isSiteFullyReviewed(sessionSummary);
+    const isFullyReviewed = isSiteFullyReviewed(sessionSummary);
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
+    const readOnly = isFullyReviewed || isReviewReadOnly;
     const imageAccess = useReviewImageAccess(sessions, programId ?? 0);
     const currentStepIndex =
         requestedStepIndex === 1 && imageAccess !== 'allowed'
             ? 0
             : requestedStepIndex;
 
-    const stepLabels = REVIEW_STEP_LABEL_KEYS.map(key => t(key));
+    const stepLabelKeys = isReviewReadOnly
+        ? REVIEW_STEP_LABEL_KEYS.filter(key => key !== 'certificationStep')
+        : REVIEW_STEP_LABEL_KEYS;
+    const stepLabels = stepLabelKeys.map(key => t(key));
 
     function goToPreviousStep() {
         setCurrentStepIndex(Math.max(currentStepIndex - 1, 0));
@@ -129,7 +135,11 @@ export default function ReviewWorkspacePageClient({
                         {readOnly && (
                             <div className="bg-muted/60 text-muted-foreground flex items-center gap-2 rounded-md p-4 text-sm">
                                 <Lock className="h-4 w-4 shrink-0" />
-                                {t('readOnlyNotice')}
+                                {t('readOnlyNotice', {
+                                    reason: isFullyReviewed
+                                        ? 'fullyReviewed'
+                                        : 'access',
+                                })}
                             </div>
                         )}
 

@@ -1,6 +1,7 @@
 import type { Session } from '@/api/session/validation/session-schema';
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Site } from '@/api/site/validation/site-schema';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 import { formatCollectionCycleLabel } from '@/features/review/utils/format-collection-cycle-label';
 import { REVIEW_STATE_LABEL_KEY } from '@/features/review/utils/review-site-session-summary';
@@ -37,6 +38,7 @@ function SessionsTableRow({
 }: SessionsTableRowProps) {
     const t = useTranslations('ReviewSessionsTable');
     const tSitesList = useTranslations('ReviewSitesList');
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
 
     const timezone = sessionCollectionCycle?.timezone ?? null;
     const reviewUnitHref =
@@ -93,7 +95,11 @@ function SessionsTableRow({
                             : ''
                     }
                     onValueChange={value => onReassign(session, Number(value))}
-                    disabled={isReassigning || allCollectionCycles.length === 0}
+                    disabled={
+                        isReviewReadOnly ||
+                        isReassigning ||
+                        allCollectionCycles.length === 0
+                    }
                 >
                     <SelectTrigger className="w-52">
                         <SelectValue placeholder={t('unassigned')} />
