@@ -39,6 +39,19 @@ test('ignores missing IDs, numeric strings, and display specimen IDs', () => {
     expect(groupReviewLogsBySpecimenId(logs).size).toBe(0);
 });
 
+test('groups prediction and ID edits together by numeric identity after a rename', () => {
+    const prediction = createReviewLog({ id: 1, specimenId: 7 });
+    const rename = createReviewLog({
+        id: 2,
+        action: 'update_specimen_thumbnail_prediction',
+        fields: { specimenId: 7 },
+        changes: { specimenId: { before: 'CMS007', after: 'NEW-ID' } },
+    });
+    const groups = groupReviewLogsBySpecimenId([prediction, rename]);
+    expect(groups.get(7)).toEqual([prediction, rename]);
+    expect(groups.size).toBe(1);
+});
+
 test('returns an empty map for no logs', () => {
     expect(groupReviewLogsBySpecimenId([]).size).toBe(0);
 });

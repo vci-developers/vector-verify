@@ -21,10 +21,19 @@ import {
     RotateCcw,
     Star,
 } from 'lucide-react';
-import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
+import SignedSpecimenImage, {
+    type ImageLoadStatus,
+} from '@/components/specimen/signed-specimen-image';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { getOrderedSpecimenImages } from '@/lib/specimen/get-ordered-specimen-images';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    Fragment,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 const ZOOM_STEP = 0.5;
 const MIN_ZOOM = 1;
@@ -33,17 +42,34 @@ const MAX_ZOOM = 5;
 interface SpecimenImageCarouselProps {
     specimen: Specimen;
     enableKeyboardNavigation?: boolean;
+    navigationDisabled?: boolean;
+    onImageAvailabilityChange?: (status: ImageLoadStatus) => void;
     onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
 export default function SpecimenImageCarousel({
     specimen,
     enableKeyboardNavigation = false,
+    navigationDisabled = false,
+    onImageAvailabilityChange,
     onCurrentImageChange,
 }: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [imageLoadStatuses, setImageLoadStatuses] = useState<
+        Record<string, ImageLoadStatus>
+    >({});
+    const handleImageLoadStatusChange = useCallback(
+        (path: string, status: ImageLoadStatus) => {
+            setImageLoadStatuses(previous =>
+                previous[path] === status
+                    ? previous
+                    : { ...previous, [path]: status },
+            );
+        },
+        [],
+    );
     const [canScrollThumbnailsLeft, setCanScrollThumbnailsLeft] =
         useState(false);
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
@@ -129,8 +155,27 @@ export default function SpecimenImageCarousel({
         [specimen],
     );
 
+    const hasPendingImages =
+        allImagesForSpecimen.length === 0 ||
+        allImagesForSpecimen.some(image => {
+            const status = imageLoadStatuses[image.url];
+            return status === undefined || status === 'pending';
+        });
+    const imageAvailability: ImageLoadStatus = hasPendingImages
+        ? 'pending'
+        : allImagesForSpecimen.some(
+                image => imageLoadStatuses[image.url] === 'error',
+            )
+          ? 'error'
+          : 'loaded';
+
     useEffect(() => {
-        if (!enableKeyboardNavigation || !imageViewerApi) return;
+        onImageAvailabilityChange?.(imageAvailability);
+    }, [imageAvailability, onImageAvailabilityChange]);
+
+    useEffect(() => {
+        if (!enableKeyboardNavigation || navigationDisabled || !imageViewerApi)
+            return;
         const navigate = (event: KeyboardEvent) => {
             if (event.defaultPrevented) return;
             if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
@@ -144,7 +189,7 @@ export default function SpecimenImageCarousel({
         };
         window.addEventListener('keydown', navigate, true);
         return () => window.removeEventListener('keydown', navigate, true);
-    }, [enableKeyboardNavigation, imageViewerApi]);
+    }, [enableKeyboardNavigation, navigationDisabled, imageViewerApi]);
 
     const hasAnyImages = allImagesForSpecimen.length > 0;
     const hasMultipleImages = allImagesForSpecimen.length > 1;
@@ -205,9 +250,9 @@ export default function SpecimenImageCarousel({
 
         imageViewerApi.reInit({
             loop: hasMultipleImages,
-            watchDrag: zoomLevel === 1,
+            watchDrag: !navigationDisabled && zoomLevel === 1,
         });
-    }, [imageViewerApi, hasMultipleImages, zoomLevel]);
+    }, [imageViewerApi, hasMultipleImages, zoomLevel, navigationDisabled]);
 
     if (!hasAnyImages) {
         return (
@@ -220,11 +265,25 @@ export default function SpecimenImageCarousel({
     }
 
     return (
-        <div className="space-y-4">
+        <div
+            className="space-y-4"
+            onKeyDownCapture={event => {
+                if (
+                    navigationDisabled &&
+                    (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+                ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }}
+        >
             <div className="relative">
                 <Carousel
                     setApi={setImageViewerApi}
-                    opts={{ loop: hasMultipleImages }}
+                    opts={{
+                        loop: hasMultipleImages,
+                        watchDrag: !navigationDisabled && zoomLevel === 1,
+                    }}
                     aria-label="Specimen image carousel"
                 >
                     <CarouselContent>
@@ -261,7 +320,13 @@ export default function SpecimenImageCarousel({
                                         }
                                     >
                                         <SignedSpecimenImage
+                                            key={image.url}
                                             path={image.url}
+                                            onLoadStatusChange={
+                                                onImageAvailabilityChange
+                                                    ? handleImageLoadStatusChange
+                                                    : undefined
+                                            }
                                             alt={`Specimen ${specimen.specimenId}`}
                                             fill
                                             sizes="(min-width: 1024px) 60vw, 100vw"
@@ -292,8 +357,20 @@ export default function SpecimenImageCarousel({
 
                     {hasMultipleImages && (
                         <Fragment>
-                            <CarouselPrevious className="left-4" />
-                            <CarouselNext className="right-4" />
+                            <CarouselPrevious
+                                className="left-4"
+                                disabled={
+                                    navigationDisabled ||
+                                    !imageViewerApi?.canScrollPrev()
+                                }
+                            />
+                            <CarouselNext
+                                className="right-4"
+                                disabled={
+                                    navigationDisabled ||
+                                    !imageViewerApi?.canScrollNext()
+                                }
+                            />
                         </Fragment>
                     )}
                 </Carousel>
@@ -356,7 +433,9 @@ export default function SpecimenImageCarousel({
                             variant="outline"
                             size="icon"
                             onClick={() => thumbnailStripApi?.scrollPrev()}
-                            disabled={!canScrollThumbnailsLeft}
+                            disabled={
+                                navigationDisabled || !canScrollThumbnailsLeft
+                            }
                             aria-label="Scroll thumbnails left"
                         >
                             <ChevronLeft className="h-4 w-4" />
@@ -368,6 +447,7 @@ export default function SpecimenImageCarousel({
                         opts={{
                             containScroll: 'keepSnaps',
                             dragFree: true,
+                            watchDrag: !navigationDisabled,
                         }}
                         className="min-w-0 flex-1"
                         aria-label="Image thumbnails"
@@ -385,6 +465,7 @@ export default function SpecimenImageCarousel({
                                         <Button
                                             type="button"
                                             variant="ghost"
+                                            disabled={navigationDisabled}
                                             onClick={() => {
                                                 imageViewerApi?.scrollTo(
                                                     imageIndex,
@@ -408,6 +489,7 @@ export default function SpecimenImageCarousel({
                                             }
                                         >
                                             <SignedSpecimenImage
+                                                key={image.url}
                                                 path={image.url}
                                                 alt=""
                                                 fill
@@ -433,7 +515,9 @@ export default function SpecimenImageCarousel({
                             variant="outline"
                             size="icon"
                             onClick={() => thumbnailStripApi?.scrollNext()}
-                            disabled={!canScrollThumbnailsRight}
+                            disabled={
+                                navigationDisabled || !canScrollThumbnailsRight
+                            }
                             aria-label="Scroll thumbnails right"
                         >
                             <ChevronRight className="h-4 w-4" />

@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { createReviewLog } from '../../../../helpers/create-review-log';
 import { buildSpecimenChangelog } from '@/features/review/specimens-table/utils/build-specimen-changelog';
+import { groupReviewLogsBySpecimenId } from '@/features/review/specimens-table/utils/group-review-logs-by-specimen-id';
 
 const firstImage = {
     id: 99,
@@ -171,6 +172,122 @@ test.each([
         [log],
     );
     expect(result.edits[0]?.imageNumber).toBe(2);
+});
+
+test('combines specimen-level ID changes with existing image edits', () => {
+    const idLog = createReviewLog({
+        id: 9,
+        action: 'update_specimen_thumbnail_prediction',
+        fields: { specimenId: 7, imageId: 99 },
+        changes: { specimenId: { before: 'OLD-ID', after: 'CMS007' } },
+        performedBy: null,
+    });
+    const result = buildSpecimenChangelog(specimen, 89, 'UTC', [log, idLog]);
+    expect(result.edits).toHaveLength(2);
+    expect(result.edits[0]).toMatchObject({ scope: 'image', imageNumber: 1 });
+    expect(result.edits[1]).toEqual({
+        id: 9,
+        scope: 'specimen',
+        imageNumber: null,
+        reviewerName: null,
+        createdAt: 1000,
+        changes: [
+            { field: 'specimenId', previousValue: 'OLD-ID', value: 'CMS007' },
+        ],
+    });
+});
+
+test.each([
+    null,
+    {},
+    { thumbnailImageId: { before: 1, after: 2 } },
+    { sessionUnitId: { before: 1, after: 2 } },
+    { expectedImages: { before: 1, after: 2 } },
+    { specimenId: null },
+    { specimenId: { before: 'OLD-ID' } },
+    { specimenId: { before: null, after: 'CMS007' } },
+    { specimenId: { before: 'OLD-ID', after: 7 } },
+])('does not count unrelated or malformed specimen changes: %j', changes => {
+    const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
+        createReviewLog({
+            action: 'update_specimen_thumbnail_prediction',
+            fields: { specimenId: 7 },
+            changes,
+        }),
+    ]);
+    expect(result.edits).toEqual([]);
+});
+
+test('does not convert other review actions into empty image entries', () => {
+    const result = buildSpecimenChangelog(specimen, 89, 'UTC', [
+        { ...log, action: 'update_session_household_info' },
+    ]);
+    expect(result.edits).toEqual([]);
+});
+
+test('uses numeric identity, not the renamed display ID, for specimen changes', () => {
+    const idLog = createReviewLog({
+        action: 'update_specimen_thumbnail_prediction',
+        specimenId: 7,
+        fields: { specimenId: 8 },
+        changes: { specimenId: { before: 'CMS007', after: 'NEW-ID' } },
+    });
+    expect(
+        buildSpecimenChangelog(
+            { ...specimen, specimenId: 'NEW-ID' },
+            89,
+            'UTC',
+            [idLog],
+        ).edits,
+    ).toHaveLength(1);
+    expect(
+        buildSpecimenChangelog({ ...specimen, id: 8 }, 89, 'UTC', [idLog])
+            .edits,
+    ).toEqual([]);
+});
+
+test('keeps every step of a temporary-value swap attached to the correct specimen', () => {
+    const swapLogs = [
+        { id: 10, numericId: 7, before: 'A', after: 'TEMP' },
+        { id: 11, numericId: 8, before: 'B', after: 'A' },
+        { id: 12, numericId: 7, before: 'TEMP', after: 'B' },
+    ].map(change =>
+        createReviewLog({
+            id: change.id,
+            createdAt: change.id * 1000,
+            action: 'update_specimen_thumbnail_prediction',
+            fields: { specimenId: change.numericId },
+            changes: {
+                specimenId: { before: change.before, after: change.after },
+            },
+        }),
+    );
+    const groups = groupReviewLogsBySpecimenId(swapLogs);
+    const first = buildSpecimenChangelog(
+        { ...specimen, specimenId: 'B' },
+        89,
+        'UTC',
+        groups.get(7) ?? [],
+    );
+    const second = buildSpecimenChangelog(
+        { ...specimen, id: 8, specimenId: 'A' },
+        89,
+        'UTC',
+        groups.get(8) ?? [],
+    );
+    expect(
+        first.edits.flatMap(edit =>
+            edit.scope === 'specimen' ? edit.changes : [],
+        ),
+    ).toEqual([
+        { field: 'specimenId', previousValue: 'A', value: 'TEMP' },
+        { field: 'specimenId', previousValue: 'TEMP', value: 'B' },
+    ]);
+    expect(
+        second.edits.flatMap(edit =>
+            edit.scope === 'specimen' ? edit.changes : [],
+        ),
+    ).toEqual([{ field: 'specimenId', previousValue: 'B', value: 'A' }]);
 });
 
 test('removes thumbnail duplicates by ID or URL before numbering other images', () => {

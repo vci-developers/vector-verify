@@ -16,6 +16,7 @@ import { specimenSchema } from '@/api/specimen/validation/specimen-schema';
 import { collectionCycleSchema } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import { siteSchema } from '@/api/site/validation/site-schema';
 import { reviewLogKeys } from '@/api/review-log/review-log-keys';
+import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import { specimenKeys } from '@/api/specimen/specimen-keys';
 import { createReviewLog } from '../../../../helpers/create-review-log';
 import { ok, err } from '@/lib/result/result';
@@ -78,14 +79,20 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-function renderTable({
-    empty = false,
-    failed = false,
-    pending = false,
-    missingSession = false,
-    total = 60,
-    queryClient = createTestQueryClient(),
-} = {}) {
+function renderTable(
+    {
+        empty = false,
+        failed = false,
+        pending = false,
+        missingSession = false,
+        failedIdLogs = false,
+        pendingIdLogs = false,
+        throwIdLogs = false,
+        total = 60,
+        queryClient = createTestQueryClient(),
+    } = {},
+    specimenIdLogs: ReviewLog[] = [],
+) {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const url = new URL(String(input), 'https://example.test');
         if (url.pathname === '/api/specimens') {
@@ -112,11 +119,19 @@ function renderTable({
             );
         }
         if (url.pathname === '/api/sessions/review/logs/all') {
-            if (pending) return new Promise<Response>(() => {});
+            const isIdAction =
+                url.searchParams.get('action') ===
+                'update_specimen_thumbnail_prediction';
+            if (isIdAction && throwIdLogs) throw new Error('Offline');
+            if (pending || (isIdAction && pendingIdLogs))
+                return new Promise<Response>(() => {});
             return Response.json(
-                failed
+                failed || (isIdAction && failedIdLogs)
                     ? err({ kind: 'server', message: 'Failed' })
-                    : ok({ message: '', logs }),
+                    : ok({
+                          message: '',
+                          logs: isIdAction ? specimenIdLogs : logs,
+                      }),
             );
         }
         throw new Error(`Unexpected request: ${url.pathname}`);
@@ -240,8 +255,13 @@ test('reuses grouped logs while typing and regroups when log data changes', asyn
     expect(groupLogs).not.toHaveBeenCalled();
 
     act(() => {
-        queryClient.setQueriesData(
-            { queryKey: reviewLogKeys.root },
+        queryClient.setQueryData(
+            reviewLogKeys.allReviewLogs({
+                siteId: 89,
+                collectionCycleId: 7,
+                action: 'update_specimen_image_prediction',
+                hasChanges: 'true',
+            }),
             ok({
                 message: '',
                 logs: [...logs, createReviewLog({ id: 6, specimenId: 7 })],
@@ -274,8 +294,16 @@ test('refreshes the shared log cache after a prediction edit when returning with
         action: 'update_specimen_image_prediction',
         hasChanges: 'true',
     });
-    queryClient.setQueryDefaults(logQueryKey, { staleTime: 60_000 });
-    queryClient.setQueryData(logQueryKey, ok({ message: '', logs: [] }));
+    const idLogQueryKey = reviewLogKeys.allReviewLogs({
+        siteId: 89,
+        collectionCycleId: 7,
+        action: 'update_specimen_thumbnail_prediction',
+        hasChanges: 'true',
+    });
+    for (const key of [logQueryKey, idLogQueryKey]) {
+        queryClient.setQueryDefaults(key, { staleTime: 60_000 });
+        queryClient.setQueryData(key, ok({ message: '', logs: [] }));
+    }
     const initialFetch = renderTable({ queryClient });
     expect(
         await screen.findAllByText(messages.SpecimenChangelog.noChanges),
@@ -289,6 +317,7 @@ test('refreshes the shared log cache after a prediction edit when returning with
     cleanup();
     await queryClient.invalidateQueries({ queryKey: reviewLogKeys.root });
     expect(queryClient.getQueryState(logQueryKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(idLogQueryKey)?.isInvalidated).toBe(true);
     const returnFetch = renderTable({ queryClient });
     expect(
         await screen.findByRole('button', { name: /CMS007.*2|2.*CMS007/ }),
@@ -297,7 +326,7 @@ test('refreshes the shared log cache after a prediction edit when returning with
         returnFetch.mock.calls.filter(([url]) =>
             String(url).includes('/review/logs/all'),
         ),
-    ).toHaveLength(1);
+    ).toHaveLength(2);
     expect(queryClient.getQueryData(logQueryKey)).toEqual(
         ok({ message: '', logs }),
     );
@@ -330,7 +359,7 @@ test('shows cycle numbers and default filter labels', async () => {
     }
 });
 
-test('fetches logs once for the table scope and groups numeric specimen IDs including legacy fields', async () => {
+test('fetches each action once for the table scope and groups numeric specimen IDs including legacy fields', async () => {
     const fetchMock = renderTable();
     expect(
         await screen.findByRole('button', { name: /CMS007.*2|2.*CMS007/ }),
@@ -344,15 +373,20 @@ test('fetches logs once for the table scope and groups numeric specimen IDs incl
     const logCalls = fetchMock.mock.calls.filter(([url]) =>
         String(url).includes('/review/logs/all'),
     );
-    expect(logCalls).toHaveLength(1);
-    const url = new URL(String(logCalls[0]?.[0]), 'https://example.test');
-    expect(url.searchParams.get('siteId')).toBe('89');
-    expect(url.searchParams.get('collectionCycleId')).toBe('7');
-    expect(url.searchParams.get('action')).toBe(
-        'update_specimen_image_prediction',
+    expect(logCalls).toHaveLength(2);
+    const urls = logCalls.map(
+        ([input]) => new URL(String(input), 'https://example.test'),
     );
-    expect(url.searchParams.get('hasChanges')).toBe('true');
-    expect(url.searchParams.has('specimenId')).toBe(false);
+    expect(urls.map(url => url.searchParams.get('action')).sort()).toEqual([
+        'update_specimen_image_prediction',
+        'update_specimen_thumbnail_prediction',
+    ]);
+    for (const url of urls) {
+        expect(url.searchParams.get('siteId')).toBe('89');
+        expect(url.searchParams.get('collectionCycleId')).toBe('7');
+        expect(url.searchParams.get('hasChanges')).toBe('true');
+        expect(url.searchParams.has('specimenId')).toBe(false);
+    }
 
     await userEvent
         .setup()
@@ -370,7 +404,7 @@ test('fetches logs once for the table scope and groups numeric specimen IDs incl
         fetchMock.mock.calls.filter(([url]) =>
             String(url).includes('/review/logs/all'),
         ),
-    ).toHaveLength(1);
+    ).toHaveLength(2);
 });
 
 test.each([
@@ -602,7 +636,7 @@ test('resets pagination on sorting and preserves the server sort across pages an
         fetchMock.mock.calls.filter(([url]) =>
             String(url).includes('/review/logs/all'),
         ),
-    ).toHaveLength(1);
+    ).toHaveLength(2);
 });
 
 test('supports direct page links, keyboard navigation, and disabled first/last controls', async () => {
@@ -656,7 +690,7 @@ test('supports direct page links, keyboard navigation, and disabled first/last c
         fetchMock.mock.calls.filter(([url]) =>
             String(url).includes('/review/logs/all'),
         ),
-    ).toHaveLength(1);
+    ).toHaveLength(2);
 });
 
 test('uses ellipses for large page counts and updates neighboring page links', async () => {
@@ -720,6 +754,129 @@ test('does not fetch logs for an empty specimen list', async () => {
         ),
     ).toHaveLength(0);
 });
+
+test('combines ID and prediction edits, ignores unrelated changes, and follows numeric identity after a rename', async () => {
+    const queryClient = createTestQueryClient();
+    const idLog = createReviewLog({
+        id: 10,
+        action: 'update_specimen_thumbnail_prediction',
+        fields: { specimenId: 7 },
+        changes: { specimenId: { before: 'OLD-ID', after: 'CMS007' } },
+    });
+    renderTable({ queryClient }, [
+        idLog,
+        createReviewLog({
+            id: 11,
+            action: 'update_specimen_thumbnail_prediction',
+            fields: { specimenId: 7 },
+            changes: { expectedImages: { before: 1, after: 2 } },
+        }),
+    ]);
+    await screen.findByRole('button', {
+        name: 'View 3 review changes for specimen CMS007',
+    });
+    act(() => {
+        queryClient.setQueriesData(
+            { queryKey: specimenKeys.root },
+            ok({
+                specimens: specimens.map(specimen =>
+                    specimen.id === 7
+                        ? { ...specimen, specimenId: 'RENAMED' }
+                        : specimen,
+                ),
+                total: 60,
+                limit: 20,
+                offset: 0,
+                hasMore: true,
+            }),
+        );
+    });
+    await userEvent.setup().click(
+        await screen.findByRole('button', {
+            name: 'View 3 review changes for specimen RENAMED',
+        }),
+    );
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByText('Specimen ID')).toBeInTheDocument();
+    expect(dialog.getByText('OLD-ID')).toBeInTheDocument();
+    expect(dialog.getByText('CMS007')).toBeInTheDocument();
+});
+
+test('shows ID-only history and refreshes when the ID log cache changes', async () => {
+    const queryClient = createTestQueryClient();
+    const idLog = createReviewLog({
+        id: 10,
+        action: 'update_specimen_thumbnail_prediction',
+        fields: { specimenId: 9 },
+        changes: { specimenId: { before: 'OLD-ID', after: 'CMS009' } },
+    });
+    renderTable({ queryClient }, [idLog]);
+    await screen.findByRole('button', {
+        name: 'View 1 review change for specimen CMS009',
+    });
+    act(() => {
+        queryClient.setQueryData(
+            reviewLogKeys.allReviewLogs({
+                siteId: 89,
+                collectionCycleId: 7,
+                action: 'update_specimen_thumbnail_prediction',
+                hasChanges: 'true',
+            }),
+            ok({
+                message: '',
+                logs: [
+                    idLog,
+                    {
+                        ...idLog,
+                        id: 11,
+                        changes: {
+                            specimenId: { before: 'CMS009', after: 'OLD-ID' },
+                        },
+                    },
+                ],
+            }),
+        );
+    });
+    expect(
+        await screen.findByRole('button', {
+            name: 'View 2 review changes for specimen CMS009',
+        }),
+    ).toBeInTheDocument();
+});
+
+test('does not show partial change counts while only ID logs are pending', async () => {
+    renderTable({ pendingIdLogs: true });
+    await screen.findByText('CMS007');
+    await waitFor(() =>
+        expect(
+            screen.getAllByText(messages.ReviewSpecimens.loading),
+        ).toHaveLength(3),
+    );
+    expect(
+        screen.queryByRole('button', {
+            name: /View .*review changes? for specimen/,
+        }),
+    ).not.toBeInTheDocument();
+});
+
+test.each([false, true])(
+    'shows a translated row error when only ID logs fail (network: %s)',
+    async useNetworkError => {
+        renderTable({
+            failedIdLogs: !useNetworkError,
+            throwIdLogs: useNetworkError,
+        });
+        expect(await screen.findAllByRole('alert')).toHaveLength(3);
+        expect(screen.getByText('CMS007')).toBeInTheDocument();
+        for (const alert of screen.getAllByRole('alert'))
+            expect(alert).toHaveTextContent(messages.ReviewSpecimens.logsError);
+        expect(
+            screen.queryByRole('button', {
+                name: /View .*review changes? for specimen/,
+            }),
+        ).not.toBeInTheDocument();
+    },
+);
 
 test('keeps specimen rows visible while shared logs are loading', async () => {
     renderTable({ pending: true });

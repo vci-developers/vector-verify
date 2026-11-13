@@ -1,20 +1,8 @@
-type NetworkErrorKind =
-    | 'unauthorized'
-    | 'forbidden'
-    | 'not_found'
-    | 'timeout'
-    | 'conflict'
-    | 'rate_limited'
-    | 'client'
-    | 'server'
-    | 'network'
-    | 'unknown';
+import type { NetworkError } from '@/lib/network/validation/network-error-schema';
 
-export type NetworkError = {
-    kind: NetworkErrorKind;
-    status?: number;
-    message?: string;
-};
+export type { NetworkError } from '@/lib/network/validation/network-error-schema';
+
+type NetworkErrorKind = NetworkError['kind'];
 
 export function networkErrorMessage(error: NetworkError): string {
     if (error.message && error.message.trim() !== '') return error.message;
