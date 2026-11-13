@@ -21,7 +21,7 @@ import type { ReleaseNoteSummary } from '../validation/release-note-summary-sche
 import {
     hasSeenRelease,
     markReleaseSeen,
-} from '../utils/release-notes-storage';
+} from '../lib/release-notes-storage';
 
 export const ReleaseNotesDialogContext = createContext<{
     openDialog: () => void;
