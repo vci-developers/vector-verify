@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import ReleaseNotesDialog from '@/features/release-notes/components/release-notes-dialog';
 import ReleaseNotesTrigger from '@/features/release-notes/components/release-notes-trigger';
-import type { ReleaseNoteSummary } from '@/features/release-notes/server/get-release-notes';
+import type { ReleaseNoteSummary } from '@/features/release-notes/validation/release-note-summary-schema';
 import messages from '../../../../messages/en.json';
 
 vi.mock('@/lib/hooks/use-mobile', () => ({ useIsMobile: () => true }));
@@ -58,7 +58,9 @@ test('automatically shows an unseen release while the mobile drawer is closed', 
     renderMobileShell();
 
     expect(
-        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+        await screen.findByRole('dialog', {
+            name: messages.ReleaseNotes.title,
+        }),
     ).toBeInTheDocument();
     expect(
         screen.queryByRole('button', { name: messages.Sidebar.whatsNew }),
@@ -88,7 +90,9 @@ test('shows and dismisses the release when access to localStorage is blocked', a
     renderMobileShell();
 
     expect(
-        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+        await screen.findByRole('dialog', {
+            name: messages.ReleaseNotes.title,
+        }),
     ).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
@@ -108,10 +112,14 @@ test('dismisses the release when storage writes exceed the quota', async () => {
     renderMobileShell();
 
     expect(
-        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+        await screen.findByRole('dialog', {
+            name: messages.ReleaseNotes.title,
+        }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: messages.Common.close }));
+    await user.click(
+        screen.getByRole('button', { name: messages.Common.close }),
+    );
 
     await waitFor(() => {
         expect(
@@ -136,6 +144,8 @@ test('keeps a seen release closed until its mobile sidebar action is clicked', a
     );
 
     expect(
-        await screen.findByRole('dialog', { name: messages.ReleaseNotes.title }),
+        await screen.findByRole('dialog', {
+            name: messages.ReleaseNotes.title,
+        }),
     ).toBeInTheDocument();
 });
