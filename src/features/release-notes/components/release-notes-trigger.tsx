@@ -11,7 +11,9 @@ export default function ReleaseNotesTrigger() {
     const dialog = useContext(ReleaseNotesDialogContext);
 
     if (!dialog) {
-        throw new Error('ReleaseNotesTrigger must be inside ReleaseNotesDialog.');
+        throw new Error(
+            'ReleaseNotesTrigger must be inside ReleaseNotesDialog.',
+        );
     }
 
     return (
