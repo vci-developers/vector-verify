@@ -18,10 +18,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import type { ReleaseNoteSummary } from '../validation/release-note-summary-schema';
-import {
-    hasSeenRelease,
-    markReleaseSeen,
-} from '../lib/release-notes-storage';
+import { hasSeenRelease, markReleaseSeen } from '../lib/release-notes-storage';
 
 export const ReleaseNotesDialogContext = createContext<{
     openDialog: () => void;
