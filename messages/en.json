@@ -270,7 +270,7 @@
         "metadataStep": "Metadata Review",
         "imageStep": "Image Review",
         "certificationStep": "Certification",
-        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode.",
+        "readOnlyNotice": "{reason, select, fullyReviewed {This site is fully reviewed and is shown in read-only mode.} other {This review is read-only.}}",
         "sessionsError": "Failed to load sessions. Please try again."
     },
     "ReviewMetadata": {
