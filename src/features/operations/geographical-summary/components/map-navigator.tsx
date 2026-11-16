@@ -1,6 +1,9 @@
 'use client';
 
 import { useGetGeocode } from '@/api/geocode/hooks/use-get-geocode';
+import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
+import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
 import { useEffect } from 'react';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useMap } from 'react-leaflet';
@@ -12,18 +15,26 @@ const SELECTED_LOCATION_ZOOM = 10;
 
 interface MapNavigatorProps {
     bounds: LatLngBoundsExpression | null;
-    selectedLocations: string[];
 }
 
-export default function MapNavigator({
-    bounds,
-    selectedLocations,
-}: MapNavigatorProps) {
+export default function MapNavigator({ bounds }: MapNavigatorProps) {
     const map = useMap();
     const country = useCountry();
+    const [{ selectedLocations }] = useOperationsFilters();
+    const { data: getUserPermissionsResult } = useGetUserPermissions();
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+        : [];
+    const { siteIdToLocationLabel } = useLocationMultiSelection(
+        accessibleSites,
+        selectedLocations,
+    );
 
     const { data: geocodeResult } = useGetGeocode(
-        { location: selectedLocations[0] ?? '', country },
+        {
+            location: siteIdToLocationLabel.values().next().value ?? '',
+            country,
+        },
         { enabled: !bounds },
     );
 
