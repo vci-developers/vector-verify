@@ -1,3 +1,4 @@
+import type { Site } from '@/api/site/validation/site-schema';
 import { Button } from '@/components/ui/button';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
@@ -9,6 +10,7 @@ import {
     MultiSelectValue,
 } from '@/components/ui/multi-select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import OperationsLocationTreeSelect from '@/features/operations/components/layout/operations-location-tree-select';
 import type { OperationsTab } from '@/features/operations/view-state/use-operations-filters';
 import { ALL_LOCATIONS_OPTION } from '@/lib/location/use-location-multiselection';
 import { Download } from 'lucide-react';
@@ -18,6 +20,8 @@ interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
     activeTab: OperationsTab;
     onTabChange: (tab: OperationsTab) => void;
+    accessibleSites: Site[];
+    usesLegacyStructure: boolean;
     locationTypeName: string;
     locationDropdownOptions: string[];
     selectedLocations: string[];
@@ -33,6 +37,8 @@ export default function OperationsHeader({
     tabs,
     activeTab,
     onTabChange,
+    accessibleSites,
+    usesLegacyStructure,
     locationTypeName,
     locationDropdownOptions,
     selectedLocations,
@@ -48,39 +54,49 @@ export default function OperationsHeader({
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <MultiSelect
-                    values={selectedLocations}
-                    onValuesChange={onLocationsChange}
-                >
-                    <MultiSelectTrigger className="w-52">
-                        <MultiSelectValue
-                            placeholder={t('selectDropdownPlaceholder', {
-                                locationType:
-                                    locationTypeName.toLocaleLowerCase(),
-                            })}
-                            overflowBehavior="cutoff"
-                        />
-                    </MultiSelectTrigger>
-                    <MultiSelectContent
-                        search={{
-                            placeholder: t('searchLocationPlaceholder', {
-                                locationType:
-                                    locationTypeName.toLocaleLowerCase(),
-                            }),
-                            emptyMessage: tCommon('noResults'),
-                        }}
+                {usesLegacyStructure ? (
+                    <MultiSelect
+                        values={selectedLocations}
+                        onValuesChange={onLocationsChange}
                     >
-                        <MultiSelectGroup>
-                            {locationDropdownOptions.map(option => (
-                                <MultiSelectItem key={option} value={option}>
-                                    {option === ALL_LOCATIONS_OPTION
-                                        ? t('allLocations')
-                                        : option}
-                                </MultiSelectItem>
-                            ))}
-                        </MultiSelectGroup>
-                    </MultiSelectContent>
-                </MultiSelect>
+                        <MultiSelectTrigger className="w-52">
+                            <MultiSelectValue
+                                placeholder={t('selectDropdownPlaceholder', {
+                                    locationType:
+                                        locationTypeName.toLocaleLowerCase(),
+                                })}
+                                overflowBehavior="cutoff"
+                            />
+                        </MultiSelectTrigger>
+                        <MultiSelectContent
+                            search={{
+                                placeholder: t('searchLocationPlaceholder', {
+                                    locationType:
+                                        locationTypeName.toLocaleLowerCase(),
+                                }),
+                                emptyMessage: tCommon('noResults'),
+                            }}
+                        >
+                            <MultiSelectGroup>
+                                {locationDropdownOptions.map(option => (
+                                    <MultiSelectItem
+                                        key={option}
+                                        value={option}
+                                    >
+                                        {option === ALL_LOCATIONS_OPTION
+                                            ? t('allLocations')
+                                            : option}
+                                    </MultiSelectItem>
+                                ))}
+                            </MultiSelectGroup>
+                        </MultiSelectContent>
+                    </MultiSelect>
+                ) : (
+                    <OperationsLocationTreeSelect
+                        accessibleSites={accessibleSites}
+                        locationTypeName={locationTypeName}
+                    />
+                )}
 
                 <div className="flex items-center gap-2">
                     <MonthRangePicker

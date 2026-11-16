@@ -86,11 +86,13 @@ export default function OperationsPageClient() {
         : [];
 
     const {
+        usesLegacyStructure,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
+        selectedLocationNames,
     } = useLocationMultiSelection(accessibleSites, selectedLocations);
 
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
@@ -184,6 +186,8 @@ export default function OperationsPageClient() {
                         tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={handleTabChange}
+                        accessibleSites={accessibleSites}
+                        usesLegacyStructure={usesLegacyStructure}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocations={selectedLocations}
@@ -263,9 +267,7 @@ export default function OperationsPageClient() {
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
                 siteIds={selectedSiteIdsParam!}
-                locationName={[...new Set(siteIdToLocationLabel.values())].join(
-                    ', ',
-                )}
+                locationName={selectedLocationNames.join(', ')}
                 startDate={startDate}
                 endDate={endDate}
             />

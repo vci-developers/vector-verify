@@ -22,6 +22,11 @@ export function useLocationMultiSelection(
         [usesLegacyStructure, accessibleSites],
     );
 
+    const siteById = useMemo(
+        () => new Map(accessibleSites.map(site => [site.siteId, site])),
+        [accessibleSites],
+    );
+
     const locationTypeName = usesLegacyStructure
         ? 'District'
         : topLevelSites.length > 0
@@ -38,9 +43,22 @@ export function useLocationMultiSelection(
         [usesLegacyStructure, accessibleSites, topLevelSites],
     );
 
+    const isAllLocationsSelected =
+        selectedLocations.includes(ALL_LOCATIONS_OPTION);
+
+    const selectedTreeSiteIds = useMemo(
+        () =>
+            usesLegacyStructure
+                ? []
+                : selectedLocations
+                      .map(Number)
+                      .filter(siteId => siteById.has(siteId)),
+        [usesLegacyStructure, selectedLocations, siteById],
+    );
+
     const descendantsOfSelectedLocations = useMemo(() => {
         if (selectedLocations.length === 0) return [];
-        if (selectedLocations.includes(ALL_LOCATIONS_OPTION)) {
+        if (isAllLocationsSelected) {
             return usesLegacyStructure
                 ? accessibleSites.filter(site => site.district?.trim())
                 : accessibleSites;
@@ -50,17 +68,22 @@ export function useLocationMultiSelection(
                 selectedLocations.includes(site.district?.trim() ?? ''),
             );
         }
-        const selectedSiteIds = selectedLocations
-            .map(name => topLevelSites.find(s => s.name === name)?.siteId)
-            .filter((id): id is number => id !== undefined);
-        return selectedSiteIds.flatMap(id =>
-            getSiteAndDescendants(accessibleSites, id),
+        const selectedDescendantIds = new Set(
+            selectedTreeSiteIds.flatMap(siteId =>
+                getSiteAndDescendants(accessibleSites, siteId).map(
+                    descendant => descendant.siteId,
+                ),
+            ),
+        );
+        return accessibleSites.filter(site =>
+            selectedDescendantIds.has(site.siteId),
         );
     }, [
         selectedLocations,
+        isAllLocationsSelected,
         usesLegacyStructure,
         accessibleSites,
-        topLevelSites,
+        selectedTreeSiteIds,
     ]);
 
     const selectedSiteIdsParam: number[] | undefined = useMemo(() => {
@@ -75,17 +98,17 @@ export function useLocationMultiSelection(
                 map.set(site.siteId, site.district?.trim() ?? '');
             }
         } else {
+            const selectedDescendantIds = new Set(
+                descendantsOfSelectedLocations.map(site => site.siteId),
+            );
             for (const topSite of topLevelSites) {
-                if (
-                    !selectedLocations.includes(ALL_LOCATIONS_OPTION) &&
-                    !selectedLocations.includes(topSite.name ?? '')
-                )
-                    continue;
                 for (const descendant of getSiteAndDescendants(
                     accessibleSites,
                     topSite.siteId,
                 )) {
-                    map.set(descendant.siteId, topSite.name ?? '');
+                    if (selectedDescendantIds.has(descendant.siteId)) {
+                        map.set(descendant.siteId, topSite.name ?? '');
+                    }
                 }
             }
         }
@@ -94,15 +117,31 @@ export function useLocationMultiSelection(
         usesLegacyStructure,
         descendantsOfSelectedLocations,
         topLevelSites,
-        selectedLocations,
         accessibleSites,
     ]);
 
+    const selectedLocationNames = useMemo(() => {
+        if (usesLegacyStructure || isAllLocationsSelected) {
+            return [...new Set(siteIdToLocationLabel.values())];
+        }
+        return selectedTreeSiteIds.map(
+            siteId => siteById.get(siteId)?.name ?? '',
+        );
+    }, [
+        usesLegacyStructure,
+        isAllLocationsSelected,
+        siteIdToLocationLabel,
+        selectedTreeSiteIds,
+        siteById,
+    ]);
+
     return {
+        usesLegacyStructure,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
+        selectedLocationNames,
     };
 }
