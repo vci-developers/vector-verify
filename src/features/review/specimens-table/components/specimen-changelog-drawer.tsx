@@ -86,7 +86,7 @@ export default function SpecimenChangelogDrawer({
                 <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4">
                     <div className="space-y-1">
                         <h2 className="text-sm font-semibold">
-                            {t('predictionChanges', {
+                            {t('reviewChanges', {
                                 count: editsNewestFirst.length,
                             })}
                         </h2>
@@ -116,15 +116,17 @@ export default function SpecimenChangelogDrawer({
                                         </time>
                                         <span aria-hidden="true">·</span>
                                         <span>
-                                            {edit.imageNumber !== null
-                                                ? t('image', {
-                                                      number: edit.imageNumber,
-                                                  })
-                                                : edit.imageId !== undefined
-                                                  ? t('imageId', {
-                                                        id: edit.imageId,
+                                            {edit.scope === 'specimen'
+                                                ? t('specimenDetails')
+                                                : edit.imageNumber !== null
+                                                  ? t('image', {
+                                                        number: edit.imageNumber,
                                                     })
-                                                  : t('unknownImage')}
+                                                  : edit.imageId !== undefined
+                                                    ? t('imageId', {
+                                                          id: edit.imageId,
+                                                      })
+                                                    : t('unknownImage')}
                                         </span>
                                     </p>
                                 </div>
@@ -144,10 +146,13 @@ export default function SpecimenChangelogDrawer({
                                             </dt>
                                             <dd className="flex flex-wrap items-center gap-2">
                                                 <span className="break-words">
-                                                    {getPredictionLabel(
-                                                        change.field,
-                                                        change.previousValue,
-                                                    )}
+                                                    {change.field ===
+                                                    'specimenId'
+                                                        ? change.previousValue
+                                                        : getPredictionLabel(
+                                                              change.field,
+                                                              change.previousValue,
+                                                          )}
                                                 </span>
                                                 <ArrowRight
                                                     className="text-muted-foreground size-3.5 shrink-0"
@@ -157,10 +162,13 @@ export default function SpecimenChangelogDrawer({
                                                     {t('changedTo')}
                                                 </span>
                                                 <span className="font-medium break-words">
-                                                    {getPredictionLabel(
-                                                        change.field,
-                                                        change.value,
-                                                    )}
+                                                    {change.field ===
+                                                    'specimenId'
+                                                        ? change.value
+                                                        : getPredictionLabel(
+                                                              change.field,
+                                                              change.value,
+                                                          )}
                                                 </span>
                                             </dd>
                                         </div>
