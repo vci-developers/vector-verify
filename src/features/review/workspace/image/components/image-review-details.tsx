@@ -435,19 +435,12 @@ function DetailsContent({
                         <div>
                             <div className="flex items-center gap-2">
                                 <p className="text-sm font-semibold">
-                                    {isEdited
-                                        ? t('editedPredictions')
-                                        : t('modelPredictions')}
+                                    {t('modelPredictions')}
                                 </p>
                                 {isEdited && (
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <AlertCircle className="text-warning h-4 w-4" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {t('editedTooltip')}
-                                        </TooltipContent>
-                                    </Tooltip>
+                                    <Badge variant="secondary">
+                                        {t('edited')}
+                                    </Badge>
                                 )}
                                 {canEdit && !isEditing && !editingSpecimen && (
                                     <Button

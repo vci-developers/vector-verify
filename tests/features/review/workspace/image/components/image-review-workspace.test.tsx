@@ -1,5 +1,5 @@
 import { useEffect, type ComponentProps } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -388,6 +388,44 @@ test('specimen switches reset the upload guard instead of reusing prior success'
     expect(
         screen.getByRole('button', { name: 'Edit Specimen ID' }),
     ).toBeDisabled();
+});
+
+test('marks edited model predictions and credits the reviewer only on the edited image', async () => {
+    mocks.logs.mockImplementation(({ action }) => ({
+        data: {
+            ok: true,
+            data: {
+                logs:
+                    action === 'update_specimen_image_prediction'
+                        ? [
+                              createReviewLog({
+                                  fields: { imageId: 101 },
+                                  changes: {
+                                      image: {
+                                          sex: {
+                                              before: 'Male',
+                                              after: 'Female',
+                                          },
+                                      },
+                                  },
+                              }),
+                          ]
+                        : [],
+            },
+        },
+    }));
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    const predictionHeader = () =>
+        within(screen.getByText('Model Predictions').parentElement!);
+    expect(predictionHeader().getByText('Edited')).toBeInTheDocument();
+    expect(screen.getByText('Edited by Reviewer')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Other image' }));
+
+    expect(predictionHeader().queryByText('Edited')).not.toBeInTheDocument();
+    expect(screen.queryByText('Edited by Reviewer')).not.toBeInTheDocument();
 });
 
 test.each([

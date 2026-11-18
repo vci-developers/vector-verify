@@ -328,8 +328,6 @@
         "abdomenStatus": "Abdomen Status",
         "modelConfidence": "Model Confidence",
         "edited": "Edited",
-        "editedPredictions": "Edited Predictions",
-        "editedTooltip": "This prediction has been edited.",
         "editedBy": "Edited by {name}",
         "unknownUser": "Unknown user (#{userId})",
         "original": "Original",
