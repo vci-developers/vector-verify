@@ -255,6 +255,7 @@
         "reviewChanges": "Review changes ({count})",
         "specimenDetails": "Specimen details",
         "specimenId": "Specimen ID",
+        "predictions": "Predictions",
         "timezone": "Times shown in {timezone}",
         "image": "Image {number}",
         "species": "Species",
