@@ -1,5 +1,5 @@
 import { useEffect, type ComponentProps } from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -441,11 +441,21 @@ test.each([
     },
 );
 
-test('reports thrown history errors with a translated fallback', async () => {
-    mocks.logs.mockReturnValue({ isError: true });
-    renderWorkspace();
-    await act(async () => {});
-    expect(
-        screen.getByText('Failed to load review edits.'),
-    ).toBeInTheDocument();
-});
+test.each([
+    { isError: true },
+    { data: { ok: false, error: { kind: 'server' } }, isError: false },
+])(
+    'warns when a review-log query fails without blocking navigation',
+    result => {
+        mocks.logs.mockImplementation(({ action }) =>
+            action === 'update_specimen_thumbnail_prediction'
+                ? result
+                : { data: { ok: true, data: { logs: [] } }, isError: false },
+        );
+        renderWorkspace();
+        expect(
+            screen.getByText('Failed to load review edits.'),
+        ).toBeInTheDocument();
+        expectNavigationLocked(false);
+    },
+);

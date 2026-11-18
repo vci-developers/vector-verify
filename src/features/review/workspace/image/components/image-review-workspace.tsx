@@ -10,7 +10,6 @@ import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Fragment, useCallback, useState } from 'react';
 import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
-import { getSpecimenIdEditHistory } from '../utils/get-specimen-id-edit-history';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
@@ -21,8 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBanner from '@/components/ui/error-banner';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { NetworkError } from '@/lib/network/network-error';
-import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
-import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
 
 interface ImageReviewWorkspaceProps {
     initialSpecimenId?: number;
@@ -102,27 +99,6 @@ export default function ImageReviewWorkspace({
                     specimens: getAllSpecimensResult.data.specimens,
                 };
 
-    const { data: getAllReviewLogsResult, isError: isPredictionLogsError } =
-        useGetAllReviewLogs({
-            siteId: site.siteId,
-            collectionCycleId,
-            action: 'update_specimen_image_prediction',
-        });
-    const { data: specimenIdLogsResult, isError: isSpecimenIdLogsError } =
-        useGetAllReviewLogs({
-            siteId: site.siteId,
-            collectionCycleId,
-            action: 'update_specimen_thumbnail_prediction',
-        });
-
-    const latestEditLog =
-        currentImage && getAllReviewLogsResult?.ok
-            ? getLatestPredictionEditLog(
-                  getAllReviewLogsResult.data.logs,
-                  currentImage.id,
-              )
-            : undefined;
-
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
@@ -164,18 +140,6 @@ export default function ImageReviewWorkspace({
         imageAvailability?.specimen === currentSpecimen
             ? (imageAvailability?.status ?? 'pending')
             : 'pending';
-    const specimenIdEditHistory =
-        currentSpecimen && specimenIdLogsResult?.ok
-            ? getSpecimenIdEditHistory(
-                  specimenIdLogsResult.data.logs,
-                  currentSpecimen.id,
-              )
-            : undefined;
-    const hasReviewLogsError =
-        isPredictionLogsError ||
-        isSpecimenIdLogsError ||
-        getAllReviewLogsResult?.ok === false ||
-        specimenIdLogsResult?.ok === false;
 
     if (
         specimensState.status === 'success' &&
@@ -285,9 +249,6 @@ export default function ImageReviewWorkspace({
                     }
                 />
             )}
-            {hasReviewLogsError && (
-                <ErrorBanner message={t('reviewLogsError')} />
-            )}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardContent className="space-y-4 p-4">
@@ -322,14 +283,9 @@ export default function ImageReviewWorkspace({
                 <Card className="lg:col-span-2">
                     <CardContent className="p-4">
                         <ImageReviewDetails
-                            key={
-                                editingSpecimen
-                                    ? `editing-${editingSpecimen.id}`
-                                    : currentImage?.id
-                            }
+                            siteId={site.siteId}
+                            collectionCycleId={collectionCycleId}
                             currentImage={currentImage}
-                            latestEditLog={latestEditLog}
-                            specimenIdEditHistory={specimenIdEditHistory}
                             imageAvailability={currentImageAvailability}
                             editingSpecimen={editingSpecimen}
                             onEditSpecimenId={specimen => {

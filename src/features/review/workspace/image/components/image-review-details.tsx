@@ -14,6 +14,8 @@ import { useTranslations } from 'next-intl';
 import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
+import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
+import ErrorBanner from '@/components/ui/error-banner';
 import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import PredictionRow from '@/features/review/workspace/image/components/prediction-row';
 import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
@@ -21,7 +23,8 @@ import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
-import type { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
+import { getLatestPredictionEditLog } from '../utils/get-latest-prediction-edit-log';
+import { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
 import SpecimenIdEditForm from './specimen-id-edit-form';
 
 type DetailsState =
@@ -29,10 +32,8 @@ type DetailsState =
     | { status: 'error' }
     | { status: 'success'; specimen: Specimen };
 
-interface ImageReviewDetailsProps {
+interface DetailsContentProps {
     currentImage: SpecimenImage | null;
-    latestEditLog: ReviewLog | undefined;
-    specimenIdEditHistory: ReturnType<typeof getSpecimenIdEditHistory>;
     imageAvailability: ImageLoadStatus;
     editingSpecimen: Specimen | null;
     onEditSpecimenId: (specimen: Specimen | null) => void;
@@ -41,17 +42,81 @@ interface ImageReviewDetailsProps {
     state: DetailsState;
 }
 
+interface ImageReviewDetailsProps extends DetailsContentProps {
+    siteId: number;
+    collectionCycleId?: number;
+}
+
 export default function ImageReviewDetails({
+    siteId,
+    collectionCycleId,
+    ...contentProps
+}: ImageReviewDetailsProps) {
+    const t = useTranslations('ReviewImage');
+    const { data: predictionResult, isError: isPredictionError } =
+        useGetAllReviewLogs({
+            siteId,
+            collectionCycleId,
+            action: 'update_specimen_image_prediction',
+        });
+    const { data: specimenIdResult, isError: isSpecimenIdError } =
+        useGetAllReviewLogs({
+            siteId,
+            collectionCycleId,
+            action: 'update_specimen_thumbnail_prediction',
+        });
+
+    const hasReviewLogsError =
+        isPredictionError ||
+        isSpecimenIdError ||
+        predictionResult?.ok === false ||
+        specimenIdResult?.ok === false;
+    const { currentImage, editingSpecimen } = contentProps;
+
+    // Reset the editor on image changes without remounting the log queries.
+    return (
+        <>
+            {hasReviewLogsError && (
+                <div className="mb-4">
+                    <ErrorBanner message={t('reviewLogsError')} />
+                </div>
+            )}
+            <DetailsContent
+                key={
+                    editingSpecimen
+                        ? `editing-${editingSpecimen.id}`
+                        : currentImage?.id
+                }
+                {...contentProps}
+                predictionLogs={
+                    predictionResult?.ok
+                        ? predictionResult.data.logs
+                        : undefined
+                }
+                specimenIdLogs={
+                    specimenIdResult?.ok
+                        ? specimenIdResult.data.logs
+                        : undefined
+                }
+            />
+        </>
+    );
+}
+
+function DetailsContent({
     currentImage,
-    latestEditLog,
-    specimenIdEditHistory,
+    predictionLogs,
+    specimenIdLogs,
     imageAvailability,
     editingSpecimen,
     onEditSpecimenId,
     timezone,
     readOnly,
     state,
-}: ImageReviewDetailsProps) {
+}: DetailsContentProps & {
+    predictionLogs: ReviewLog[] | undefined;
+    specimenIdLogs: ReviewLog[] | undefined;
+}) {
     const t = useTranslations('ReviewImage');
     const [isEditing, setIsEditing] = useState(false);
 
@@ -105,6 +170,14 @@ export default function ImageReviewDetails({
         return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
     }
 
+    const latestEditLog =
+        currentImage && predictionLogs
+            ? getLatestPredictionEditLog(predictionLogs, currentImage.id)
+            : undefined;
+    const specimenIdEditHistory =
+        state.status === 'success' && specimenIdLogs
+            ? getSpecimenIdEditHistory(specimenIdLogs, state.specimen.id)
+            : undefined;
     const isEdited = latestEditLog !== undefined;
     const editorName = latestEditLog?.performedBy
         ? (latestEditLog.performedBy.name ??
