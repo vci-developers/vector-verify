@@ -15,10 +15,13 @@ import messages from '../../../../messages/en.json';
 
 vi.mock('@/lib/hooks/use-mobile', () => ({ useIsMobile: () => true }));
 
+const dialogTitle = 'November 3, 2026 update';
+const releaseTheme = 'Metadata Review, Prediction Editing & Clearer Charts';
+
 const release: ReleaseNoteSummary = {
     id: '2026-11-03',
     date: '2026-11-03',
-    title: 'November 3, 2026',
+    title: `November 3, 2026 - ${releaseTheme}`,
     changes: [
         {
             id: 'image-review',
@@ -38,7 +41,11 @@ afterEach(() => {
 
 function renderMobileShell() {
     render(
-        <NextIntlClientProvider locale="en" timeZone="UTC" messages={messages}>
+        <NextIntlClientProvider
+            locale="en"
+            timeZone="America/Los_Angeles"
+            messages={messages}
+        >
             <SidebarProvider>
                 <ReleaseNotesDialog release={release}>
                     <Sidebar collapsible="icon">
@@ -57,24 +64,26 @@ test('automatically shows an unseen release while the mobile drawer is closed', 
     const user = userEvent.setup();
     renderMobileShell();
 
-    expect(
-        await screen.findByRole('dialog', {
-            name: messages.ReleaseNotes.title,
-        }),
-    ).toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog', { name: dialogTitle });
+    expect(dialog).toHaveAccessibleDescription(releaseTheme);
     expect(
         screen.queryByRole('button', { name: messages.Sidebar.whatsNew }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Image review/ })).toHaveAttribute(
+    const link = screen.getByRole('link', { name: 'Image review' });
+    expect(link).toHaveAttribute(
         'href',
         '/docs/release-notes/2026-11-03#image-review',
     );
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(
+        screen.getByText('Correct the predicted species on any thumbnail.'),
+    ).toBeVisible();
 
     await user.keyboard('{Escape}');
 
     await waitFor(() => {
         expect(
-            screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+            screen.queryByRole('dialog', { name: dialogTitle }),
         ).not.toBeInTheDocument();
     });
     expect(window.localStorage.getItem('release-notes-seen:2026-11-03')).toBe(
@@ -90,16 +99,14 @@ test('shows and dismisses the release when access to localStorage is blocked', a
     renderMobileShell();
 
     expect(
-        await screen.findByRole('dialog', {
-            name: messages.ReleaseNotes.title,
-        }),
+        await screen.findByRole('dialog', { name: dialogTitle }),
     ).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
 
     await waitFor(() => {
         expect(
-            screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+            screen.queryByRole('dialog', { name: dialogTitle }),
         ).not.toBeInTheDocument();
     });
 });
@@ -112,9 +119,7 @@ test('dismisses the release when storage writes exceed the quota', async () => {
     renderMobileShell();
 
     expect(
-        await screen.findByRole('dialog', {
-            name: messages.ReleaseNotes.title,
-        }),
+        await screen.findByRole('dialog', { name: dialogTitle }),
     ).toBeInTheDocument();
 
     await user.click(
@@ -123,7 +128,7 @@ test('dismisses the release when storage writes exceed the quota', async () => {
 
     await waitFor(() => {
         expect(
-            screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+            screen.queryByRole('dialog', { name: dialogTitle }),
         ).not.toBeInTheDocument();
     });
 });
@@ -136,7 +141,7 @@ test('keeps a seen release closed until its mobile sidebar action is clicked', a
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Toggle Sidebar' }));
     expect(
-        screen.queryByRole('dialog', { name: messages.ReleaseNotes.title }),
+        screen.queryByRole('dialog', { name: dialogTitle }),
     ).not.toBeInTheDocument();
 
     await user.click(
@@ -144,8 +149,6 @@ test('keeps a seen release closed until its mobile sidebar action is clicked', a
     );
 
     expect(
-        await screen.findByRole('dialog', {
-            name: messages.ReleaseNotes.title,
-        }),
+        await screen.findByRole('dialog', { name: dialogTitle }),
     ).toBeInTheDocument();
 });

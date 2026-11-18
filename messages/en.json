@@ -21,7 +21,7 @@
         "whatsNew": "What's new"
     },
     "ReleaseNotes": {
-        "title": "What's new"
+        "title": "{date} update"
     },
     "Navigation": {
         "dashboard": "Dashboard",

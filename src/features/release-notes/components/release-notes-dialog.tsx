@@ -8,8 +8,7 @@ import {
     type ReactNode,
     type RefObject,
 } from 'react';
-import { ExternalLink } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import {
     Dialog,
     DialogContent,
@@ -37,6 +36,7 @@ export default function ReleaseNotesDialog({
     const [open, setOpen] = useState(false);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const t = useTranslations('ReleaseNotes');
+    const format = useFormatter();
     const releaseId = release?.id;
 
     useEffect(() => {
@@ -56,6 +56,12 @@ export default function ReleaseNotesDialog({
         return children;
     }
 
+    const date = format.dateTime(new Date(release.date), {
+        dateStyle: 'long',
+        timeZone: 'UTC',
+    });
+    const theme = release.title.replace(/^.*? - /, '');
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <ReleaseNotesDialogContext.Provider
@@ -72,32 +78,24 @@ export default function ReleaseNotesDialog({
                     }
                 }}
             >
-                <DialogHeader>
-                    <DialogTitle>{t('title')}</DialogTitle>
-                    <DialogDescription>{release.title}</DialogDescription>
+                <DialogHeader className="pr-6 text-left">
+                    <DialogTitle>{t('title', { date })}</DialogTitle>
+                    <DialogDescription>{theme}</DialogDescription>
                 </DialogHeader>
-                <ul className="space-y-2">
+                <ul className="list-disc space-y-3 pl-5 text-sm leading-relaxed">
                     {release.changes.map(change => (
                         <li key={change.id}>
                             <a
-                                className="text-foreground hover:bg-accent focus-visible:ring-ring flex w-full items-start gap-3 rounded-md p-3 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                                className="text-foreground decoration-muted-foreground/50 hover:decoration-foreground focus-visible:ring-ring rounded-sm font-semibold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                                 href={`/docs/release-notes/${release.id}#${change.id}`}
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                <span className="min-w-0 space-y-1">
-                                    <span className="block font-semibold">
-                                        {change.title}
-                                    </span>
-                                    <span className="text-muted-foreground block text-sm">
-                                        {change.summary}
-                                    </span>
-                                </span>
-                                <ExternalLink
-                                    aria-hidden="true"
-                                    className="text-muted-foreground mt-1 ml-auto size-4 shrink-0"
-                                />
-                            </a>
+                                {change.title}
+                            </a>{' '}
+                            <span className="text-muted-foreground">
+                                {change.summary}
+                            </span>
                         </li>
                     ))}
                 </ul>

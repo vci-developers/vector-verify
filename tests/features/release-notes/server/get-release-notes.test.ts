@@ -27,6 +27,11 @@ test('reads the latest release and its summaries from the MDX page', () => {
                 title: 'Operations',
                 summary: 'Specimen composition charts now show totals and percentages.',
             },
+            {
+                id: 'miscellaneous',
+                title: 'Miscellaneous',
+                summary: 'Smaller fixes across the app.',
+            },
         ],
     });
 });
