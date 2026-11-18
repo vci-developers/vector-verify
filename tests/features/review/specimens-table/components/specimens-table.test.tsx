@@ -797,7 +797,9 @@ test('combines ID and prediction edits, ignores unrelated changes, and follows n
         }),
     );
     const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByText('Specimen ID')).toBeInTheDocument();
+    expect(
+        dialog.getByRole('heading', { name: 'Specimen ID' }),
+    ).toBeInTheDocument();
     expect(dialog.getByText('OLD-ID')).toBeInTheDocument();
     expect(dialog.getByText('CMS007')).toBeInTheDocument();
 });
