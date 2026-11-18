@@ -1,4 +1,5 @@
 import MonthPicker from '@/components/ui/month-picker';
+import { cn } from '@/utils/cn';
 
 interface MonthRangePickerProps {
     startMonth: Date;
@@ -6,6 +7,7 @@ interface MonthRangePickerProps {
     onStartMonthChange: (month: Date) => void;
     onEndMonthChange: (month: Date) => void;
     maxDate?: Date;
+    className?: string;
 }
 
 export default function MonthRangePicker({
@@ -14,6 +16,7 @@ export default function MonthRangePicker({
     onStartMonthChange,
     onEndMonthChange,
     maxDate,
+    className,
 }: MonthRangePickerProps) {
     function handleStartMonthChange(month: Date) {
         onStartMonthChange(month);
@@ -30,7 +33,7 @@ export default function MonthRangePicker({
     }
 
     return (
-        <div className="flex items-center gap-2">
+        <div className={cn('flex items-center gap-2', className)}>
             <MonthPicker
                 selectedMonth={startMonth}
                 onMonthChange={handleStartMonthChange}
