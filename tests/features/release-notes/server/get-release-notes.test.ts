@@ -25,7 +25,8 @@ test('reads the latest release and its summaries from the MDX page', () => {
             {
                 id: 'operations',
                 title: 'Operations',
-                summary: 'Specimen composition charts now show totals and percentages.',
+                summary:
+                    'Specimen composition charts now show totals and percentages.',
             },
             {
                 id: 'miscellaneous',
