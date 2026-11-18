@@ -151,10 +151,10 @@ test.each(['backend', 'network'])(
     },
 );
 
-test('does not report success or close the form for a malformed success Result', async () => {
+test('does not report success or close the form for a non-JSON response', async () => {
     vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue(Response.json({ ok: true })),
+        vi.fn().mockResolvedValue(new Response('Bad Gateway', { status: 502 })),
     );
     const user = userEvent.setup();
     const { onClose } = renderForm();

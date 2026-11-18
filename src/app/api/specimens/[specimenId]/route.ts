@@ -2,7 +2,7 @@ import { putSpecimenById } from '@/api/specimen/put-specimen-by-id';
 import {
     putSpecimenByIdParamsSchema,
     putSpecimenByIdRequestSchema,
-    type PutSpecimenByIdResponseBody,
+    type PutSpecimenByIdSuccessPayload,
 } from '@/api/specimen/validation/put-specimen-by-id-schema';
 import { withAuthSession } from '@/lib/auth-session/with-auth-session';
 import { err } from '@/lib/result/result';
@@ -48,7 +48,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         );
     }
 
-    const result = await withAuthSession<PutSpecimenByIdResponseBody>(
+    const result = await withAuthSession<PutSpecimenByIdSuccessPayload>(
         accessToken =>
             putSpecimenById(
                 accessToken,

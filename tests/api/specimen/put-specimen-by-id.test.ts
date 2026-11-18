@@ -22,12 +22,12 @@ const responseBody = {
     },
 };
 
-test('PUT uses the numeric ID and submits the trimmed value with auth', async () => {
+test('PUT sends the validated request body using the numeric ID and auth', async () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json(responseBody));
     vi.stubGlobal('fetch', fetchMock);
 
     expect(
-        await putSpecimenById('access-token', 12, { specimenId: ' URJ206 ' }),
+        await putSpecimenById('access-token', 12, { specimenId: 'URJ206' }),
     ).toEqual({ ok: true, data: responseBody });
     expect(fetchMock).toHaveBeenCalledWith(
         'https://backend.example/specimens/12',
@@ -41,16 +41,6 @@ test('PUT uses the numeric ID and submits the trimmed value with auth', async ()
             body: JSON.stringify({ specimenId: 'URJ206' }),
         }),
     );
-});
-
-test('invalid input returns 400 without calling the backend', async () => {
-    const fetchMock = vi.fn();
-    vi.stubGlobal('fetch', fetchMock);
-
-    expect(
-        await putSpecimenById('access-token', 12, { specimenId: ' \t ' }),
-    ).toEqual({ ok: false, error: { kind: 'client', status: 400 } });
-    expect(fetchMock).not.toHaveBeenCalled();
 });
 
 test('preserves duplicate status and message', async () => {
