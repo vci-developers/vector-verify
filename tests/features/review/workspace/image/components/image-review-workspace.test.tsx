@@ -12,7 +12,14 @@ import { createReviewLog } from '../../../../../helpers/create-review-log';
 import { createTestQueryClient } from '../../../../../helpers/create-query-client';
 import messages from '../../../../../../messages/en.json';
 
-const mocks = vi.hoisted(() => ({ specimens: vi.fn(), logs: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    specimens: vi.fn(),
+    logs: vi.fn(),
+    reviewAccess: vi.fn(),
+}));
+vi.mock('@/features/review/hooks/use-review-access', () => ({
+    useReviewAccess: mocks.reviewAccess,
+}));
 vi.mock('@/api/specimen/hooks/use-get-all-specimens', () => ({
     useGetAllSpecimens: mocks.specimens,
 }));
@@ -69,6 +76,7 @@ const specimen = createSpecimen();
 const specimens = [specimen, createSpecimen({ id: 13, specimenId: 'URJ207' })];
 
 beforeEach(() => {
+    mocks.reviewAccess.mockReturnValue('writable');
     mocks.specimens.mockReturnValue({
         data: { ok: true, data: { specimens } },
         isPending: false,
@@ -332,6 +340,15 @@ test.each(['Images ready', 'Fail image'])(
         ).not.toBeInTheDocument();
     },
 );
+
+test('hides certification when review access is read-only', () => {
+    mocks.reviewAccess.mockReturnValue('read-only');
+    renderWorkspace(true);
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeEnabled();
+    expect(
+        screen.queryByRole('button', { name: 'Continue to Certification' }),
+    ).not.toBeInTheDocument();
+});
 
 test.each(['Images ready', 'Fail image'])(
     'editing remains unavailable for a non-thumbnail image after %s',

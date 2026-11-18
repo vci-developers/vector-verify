@@ -1,6 +1,4 @@
-import type { GetSessionsMetricsResponseBody } from '@/api/session/validation/get-sessions-metrics-schema';
-import type { NetworkError } from '@/lib/network/network-error';
-import type { Result } from '@/lib/result/result';
+import type { GetSessionsMetricsSuccessPayload } from '@/api/session/validation/get-sessions-metrics-schema';
 
 export interface InterventionMetricsTotals {
     peopleInAllHousesInspected: number | null;
@@ -14,49 +12,18 @@ export interface InterventionMetricsTotals {
     fedAnophelesToPeopleSleptRatio: number | null;
 }
 
-function sumDistrictValues(
-    values: (number | null | undefined)[],
-): number | null {
-    const presentValues = values.filter(
-        (value): value is number => value != null,
-    );
-    if (presentValues.length === 0) return null;
-    return presentValues.reduce((total, value) => total + value, 0);
-}
-
 export function buildInterventionMetricsTotals(
-    districtMetricsResults: Result<
-        GetSessionsMetricsResponseBody,
-        NetworkError
-    >[],
+    sessionsMetrics: GetSessionsMetricsSuccessPayload,
 ): InterventionMetricsTotals {
-    const districtMetrics = districtMetricsResults
-        .filter(result => result.ok)
-        .map(result => result.data);
-
-    const peopleInAllHousesInspected = sumDistrictValues(
-        districtMetrics.map(
-            metrics => metrics.siteInformation.peopleInAllHousesInspected,
-        ),
-    );
-    const housesUsedForCollection = sumDistrictValues(
-        districtMetrics.map(
-            metrics => metrics.siteInformation.housesUsedForCollection,
-        ),
-    );
-    const totalPeopleSleptUnderLlin = sumDistrictValues(
-        districtMetrics.map(
-            metrics => metrics.entomologicalSummary.totalPeopleSleptUnderLlin,
-        ),
-    );
-    const totalLlins = sumDistrictValues(
-        districtMetrics.map(metrics => metrics.entomologicalSummary.totalLlins),
-    );
-    const totalFedAnopheles = sumDistrictValues(
-        districtMetrics.map(
-            metrics => metrics.entomologicalSummary.totalFedAnopheles,
-        ),
-    );
+    const peopleInAllHousesInspected =
+        sessionsMetrics.siteInformation.peopleInAllHousesInspected ?? null;
+    const housesUsedForCollection =
+        sessionsMetrics.siteInformation.housesUsedForCollection ?? null;
+    const totalPeopleSleptUnderLlin =
+        sessionsMetrics.entomologicalSummary.totalPeopleSleptUnderLlin ?? null;
+    const totalLlins = sessionsMetrics.entomologicalSummary.totalLlins ?? null;
+    const totalFedAnopheles =
+        sessionsMetrics.entomologicalSummary.totalFedAnopheles ?? null;
 
     const peopleNotUnderNet =
         peopleInAllHousesInspected != null && totalPeopleSleptUnderLlin != null

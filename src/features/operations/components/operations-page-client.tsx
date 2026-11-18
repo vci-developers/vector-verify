@@ -248,7 +248,7 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'intervention-metrics' && (
                                 <OperationsInterventionMetrics
-                                    sites={descendantsOfSelectedLocations}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />
