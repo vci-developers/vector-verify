@@ -10,6 +10,9 @@ import {
     type NetworkError,
 } from '@/lib/network/network-error';
 import EmailVerificationBanner from '@/components/email-verification-banner/email-verification-banner';
+import { getBuiltReleaseNotes } from '@/features/release-notes/server/get-built-release-notes';
+import ReleaseNotesDialog from '@/features/release-notes/components/release-notes-dialog';
+import ReleaseNotesTrigger from '@/features/release-notes/components/release-notes-trigger';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -57,16 +60,24 @@ export default async function DashboardLayout({
     }
 
     const authorizedUserProfile = authorizedGetUserProfileResult.data.user;
+    const latestRelease = getBuiltReleaseNotes();
 
     return (
         <SidebarProvider>
-            <AppSidebar userProfile={authorizedUserProfile} />
-            <SidebarInset className="flex min-h-screen flex-col">
-                <main className="flex-1 p-6">{children}</main>
-                {!authorizedUserProfile.emailVerified && (
-                    <EmailVerificationBanner />
-                )}
-            </SidebarInset>
+            <ReleaseNotesDialog release={latestRelease}>
+                <AppSidebar
+                    userProfile={authorizedUserProfile}
+                    releaseNotesAction={
+                        latestRelease ? <ReleaseNotesTrigger /> : undefined
+                    }
+                />
+                <SidebarInset className="flex min-h-screen flex-col">
+                    <main className="flex-1 p-6">{children}</main>
+                    {!authorizedUserProfile.emailVerified && (
+                        <EmailVerificationBanner />
+                    )}
+                </SidebarInset>
+            </ReleaseNotesDialog>
         </SidebarProvider>
     );
 }
