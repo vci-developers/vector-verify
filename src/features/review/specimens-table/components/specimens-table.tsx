@@ -216,6 +216,7 @@ function SpecimensTableContent({
         'abdomenStatus',
         'images',
         'changes',
+        'molecularSpecies',
         'review',
     ] as const;
     return (

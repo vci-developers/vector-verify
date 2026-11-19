@@ -14,6 +14,7 @@ import { buildSpecimenChangelog } from '../utils/build-specimen-changelog';
 import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 import { useTranslations } from 'next-intl';
 import { useSpecimenPredictionLabel } from '../hooks/use-specimen-prediction-label';
+import MolecularSpeciesEditor from './molecular-species-editor';
 
 interface SpecimensTableRowProps {
     specimen: Specimen;
@@ -99,6 +100,9 @@ export default function SpecimensTableRow({
                         )}
                     />
                 )}
+            </TableCell>
+            <TableCell>
+                <MolecularSpeciesEditor specimen={specimen} />
             </TableCell>
             <TableCell>
                 {session ? (
