@@ -5,9 +5,18 @@ export const putSpecimenByIdParamsSchema = z.object({
     specimenId: z.coerce.number().int().positive(),
 });
 
-export const putSpecimenByIdRequestSchema = z.object({
-    specimenId: z.string().trim().min(1),
-});
+export const putSpecimenByIdRequestSchema = z
+    .object({
+        specimenId: z.string().trim().min(1),
+        molecularSpecies: z.string().trim().max(255).nullable(),
+    })
+    .partial()
+    .refine(
+        requestBody =>
+            requestBody.specimenId !== undefined ||
+            requestBody.molecularSpecies !== undefined,
+        { message: 'Either specimenId or molecularSpecies must be provided' },
+    );
 
 export const putSpecimenByIdResponseSchema = z.object({
     message: z.string(),

@@ -22,6 +22,28 @@ test.each(['', ' ', '\t\n', null, undefined, 123])(
     },
 );
 
+test.each([
+    [' An. arabiensis ', 'An. arabiensis'],
+    [null, null],
+])(
+    'accepts a trimmed or null molecular species: %j',
+    (molecularSpecies, expected) => {
+        expect(
+            putSpecimenByIdRequestSchema.parse({ molecularSpecies }),
+        ).toEqual({
+            molecularSpecies: expected,
+        });
+    },
+);
+
+test('rejects a molecular species over 255 characters', () => {
+    expect(
+        putSpecimenByIdRequestSchema.safeParse({
+            molecularSpecies: 'a'.repeat(256),
+        }).success,
+    ).toBe(false);
+});
+
 test('validates the documented message and specimen response', () => {
     const response = {
         message: 'Specimen updated',
