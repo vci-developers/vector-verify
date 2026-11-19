@@ -1,4 +1,3 @@
-import type { Site } from '@/api/site/validation/site-schema';
 import { Button } from '@/components/ui/button';
 import MonthRangePicker from '@/components/ui/month-range-picker';
 import {
@@ -20,12 +19,12 @@ interface OperationsHeaderProps {
     tabs: readonly { value: OperationsTab; label: string }[];
     activeTab: OperationsTab;
     onTabChange: (tab: OperationsTab) => void;
-    accessibleSites: Site[];
     usesLegacyStructure: boolean;
     locationTypeName: string;
     locationDropdownOptions: string[];
     selectedLocations: string[];
     onLocationsChange: (locations: string[]) => void;
+    isExportDisabled: boolean;
     startMonth: Date;
     endMonth: Date;
     onStartMonthChange: (month: Date) => void;
@@ -37,12 +36,12 @@ export default function OperationsHeader({
     tabs,
     activeTab,
     onTabChange,
-    accessibleSites,
     usesLegacyStructure,
     locationTypeName,
     locationDropdownOptions,
     selectedLocations,
     onLocationsChange,
+    isExportDisabled,
     startMonth,
     endMonth,
     onStartMonthChange,
@@ -93,7 +92,6 @@ export default function OperationsHeader({
                     </MultiSelect>
                 ) : (
                     <OperationsLocationTreeSelect
-                        accessibleSites={accessibleSites}
                         locationTypeName={locationTypeName}
                     />
                 )}
@@ -109,7 +107,7 @@ export default function OperationsHeader({
 
                     <Button
                         variant="default"
-                        disabled={selectedLocations.length === 0}
+                        disabled={isExportDisabled}
                         onClick={onExportClick}
                     >
                         <Download className="h-4 w-4" />

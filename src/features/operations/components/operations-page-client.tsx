@@ -67,7 +67,13 @@ export default function OperationsPageClient() {
     const t = useTranslations('Operations');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useOperationsFilters();
-    const { activeTab, startMonth, endMonth, selectedLocations } = filters;
+    const {
+        activeTab,
+        startMonth,
+        endMonth,
+        selectedLocations,
+        selectedSiteIds,
+    } = filters;
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
@@ -92,8 +98,11 @@ export default function OperationsPageClient() {
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
-        selectedLocationNames,
-    } = useLocationMultiSelection(accessibleSites, selectedLocations);
+    } = useLocationMultiSelection(
+        accessibleSites,
+        selectedLocations,
+        selectedSiteIds,
+    );
 
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
@@ -101,7 +110,13 @@ export default function OperationsPageClient() {
 
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [selectedLocations, startMonth, endMonth, setSelectedMarkerId]);
+    }, [
+        selectedLocations,
+        selectedSiteIds,
+        startMonth,
+        endMonth,
+        setSelectedMarkerId,
+    ]);
 
     function handleTabChange(tab: OperationsTab) {
         setFilters({ activeTab: tab });
@@ -186,12 +201,12 @@ export default function OperationsPageClient() {
                         tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={handleTabChange}
-                        accessibleSites={accessibleSites}
                         usesLegacyStructure={usesLegacyStructure}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocations={selectedLocations}
                         onLocationsChange={handleLocationsChange}
+                        isExportDisabled={selectedSiteIdsParam === undefined}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={handleStartMonthChange}
@@ -267,7 +282,9 @@ export default function OperationsPageClient() {
                 onOpenChange={setIsExportDialogOpen}
                 programId={getUserPermissionsResult.data.programId}
                 siteIds={selectedSiteIdsParam!}
-                locationName={selectedLocationNames.join(', ')}
+                locationName={[...new Set(siteIdToLocationLabel.values())].join(
+                    ', ',
+                )}
                 startDate={startDate}
                 endDate={endDate}
             />

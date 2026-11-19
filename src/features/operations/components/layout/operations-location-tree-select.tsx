@@ -1,6 +1,7 @@
 'use client';
 
-import type { Site } from '@/api/site/validation/site-schema';
+import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Command,
     CommandEmpty,
@@ -9,159 +10,99 @@ import {
     CommandItem,
     CommandList,
 } from '@/components/ui/command';
-import { MultiSelect, MultiSelectTrigger } from '@/components/ui/multi-select';
+import OperationsLocationTreeNode from '@/features/operations/components/layout/operations-location-tree-node';
+import {
+    MultiSelect,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from '@/components/ui/multi-select';
 import { PopoverContent } from '@/components/ui/popover';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
-import {
-    buildLocationTreeRows,
-    getLocationCheckStates,
-    toggleLocationInSelection,
-    type LocationCheckState,
-} from '@/features/operations/utils/location-tree-selection';
-import { ALL_LOCATIONS_OPTION } from '@/lib/location/use-location-multiselection';
-import {
-    getSiteAndDescendants,
-    getTopLevelSites,
-} from '@/lib/location/site-tree';
-import { cn } from '@/utils/cn';
-import { CheckIcon, ChevronRightIcon, MinusIcon } from 'lucide-react';
+import { getLocationLabel } from '@/lib/location/location-tree';
+import { getTopLevelSites } from '@/lib/location/site-tree';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-function matchesSearch(
-    _value: string,
-    search: string,
-    keywords: string[] = [],
-): number {
-    const normalizedSearch = search.toLocaleLowerCase();
-    return keywords.some(keyword =>
-        keyword.toLocaleLowerCase().includes(normalizedSearch),
-    )
-        ? 1
-        : 0;
-}
-
-function CheckStateIcon({
-    checkState,
-}: {
-    checkState: LocationCheckState | undefined;
-}) {
-    return (
-        <span
-            aria-hidden
-            className={cn(
-                'border-input flex size-4 shrink-0 items-center justify-center rounded-[4px] border shadow-xs',
-                checkState &&
-                    'bg-primary border-primary text-primary-foreground',
-            )}
-        >
-            {checkState === 'checked' && (
-                <CheckIcon className="text-primary-foreground size-3.5" />
-            )}
-            {checkState === 'indeterminate' && (
-                <MinusIcon className="text-primary-foreground size-3.5" />
-            )}
-        </span>
-    );
-}
+const ALL_LOCATIONS_VALUE = 'all';
 
 interface OperationsLocationTreeSelectProps {
-    accessibleSites: Site[];
     locationTypeName: string;
 }
 
 export default function OperationsLocationTreeSelect({
-    accessibleSites,
     locationTypeName,
 }: OperationsLocationTreeSelectProps) {
     const t = useTranslations('Operations');
     const tCommon = useTranslations('Common');
-    const [{ selectedLocations }, setFilters] = useOperationsFilters();
+    const [{ selectedSiteIds }, setFilters] = useOperationsFilters();
     const [search, setSearch] = useState('');
-    const [expandedSiteIds, setExpandedSiteIds] = useState(new Set<number>());
 
+    const { data: getUserPermissionsResult } = useGetUserPermissions();
+    const accessibleSites = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+        : [];
+    const topLevelSites = getTopLevelSites(accessibleSites);
     const isAllLocationsSelected =
-        selectedLocations.includes(ALL_LOCATIONS_OPTION);
-    const selectedSites = useMemo(
-        () =>
-            isAllLocationsSelected
-                ? getTopLevelSites(accessibleSites)
-                : accessibleSites.filter(site =>
-                      selectedLocations.includes(String(site.siteId)),
-                  ),
-        [isAllLocationsSelected, accessibleSites, selectedLocations],
-    );
-    const checkStateBySiteId = useMemo(
-        () =>
-            getLocationCheckStates(
-                accessibleSites,
-                selectedSites.map(site => site.siteId),
-            ),
-        [accessibleSites, selectedSites],
-    );
-    const treeRows = useMemo(
-        () =>
-            buildLocationTreeRows(
-                accessibleSites,
-                search ? 'all' : expandedSiteIds,
-            ),
-        [accessibleSites, search, expandedSiteIds],
-    );
+        topLevelSites.length > 0 &&
+        topLevelSites.every(site => selectedSiteIds.includes(site.siteId));
 
     function handleToggleAllLocations() {
         setFilters({
-            selectedLocations: isAllLocationsSelected
+            selectedSiteIds: isAllLocationsSelected
                 ? []
-                : [ALL_LOCATIONS_OPTION],
+                : topLevelSites.map(site => site.siteId),
         });
     }
 
-    function handleToggleLocation(siteId: number) {
+    const selectedLabelBySiteId = new Map(
+        accessibleSites
+            .filter(site => selectedSiteIds.includes(site.siteId))
+            .map((site): [string, string] => [
+                String(site.siteId),
+                getLocationLabel(accessibleSites, site),
+            ])
+            .sort(([, firstLabel], [, secondLabel]) =>
+                firstLabel.localeCompare(secondLabel),
+            ),
+    );
+
+    function handleSelectedSitesChange(values: string[]) {
         setFilters({
-            selectedLocations: toggleLocationInSelection(
-                accessibleSites,
-                selectedSites.map(site => site.siteId),
-                siteId,
-            ).map(String),
+            selectedSiteIds: values
+                .filter(value => value !== ALL_LOCATIONS_VALUE)
+                .map(Number),
         });
     }
-
-    function handleToggleExpanded(siteId: number) {
-        setExpandedSiteIds(previousExpandedSiteIds => {
-            const nextExpandedSiteIds = new Set(previousExpandedSiteIds);
-            const isExpanding = !nextExpandedSiteIds.has(siteId);
-            for (const site of getSiteAndDescendants(accessibleSites, siteId)) {
-                if (isExpanding) {
-                    nextExpandedSiteIds.add(site.siteId);
-                } else {
-                    nextExpandedSiteIds.delete(site.siteId);
-                }
-            }
-            return nextExpandedSiteIds;
-        });
-    }
-
-    const triggerLabel = isAllLocationsSelected
-        ? t('allLocations')
-        : selectedSites.map(site => site.name).join(', ');
 
     return (
-        <MultiSelect>
+        <MultiSelect
+            values={
+                isAllLocationsSelected
+                    ? [ALL_LOCATIONS_VALUE]
+                    : [...selectedLabelBySiteId.keys()]
+            }
+            onValuesChange={handleSelectedSitesChange}
+        >
             <MultiSelectTrigger className="w-52">
-                <span
-                    className={cn(
-                        'min-w-0 truncate',
-                        !triggerLabel && 'text-muted-foreground font-normal',
-                    )}
-                >
-                    {triggerLabel ||
-                        t('selectDropdownPlaceholder', {
-                            locationType: locationTypeName.toLocaleLowerCase(),
-                        })}
-                </span>
+                <MultiSelectValue
+                    placeholder={t('selectDropdownPlaceholder', {
+                        locationType: locationTypeName.toLocaleLowerCase(),
+                    })}
+                    getLabel={value => {
+                        const label =
+                            value === ALL_LOCATIONS_VALUE
+                                ? t('allLocations')
+                                : selectedLabelBySiteId.get(value);
+                        return (
+                            <span title={label} className="truncate">
+                                {label}
+                            </span>
+                        );
+                    }}
+                />
             </MultiSelectTrigger>
             <PopoverContent className="min-w-(--radix-popover-trigger-width) p-0">
-                <Command filter={matchesSearch}>
+                <Command shouldFilter={false}>
                     <CommandInput
                         value={search}
                         onValueChange={setSearch}
@@ -172,90 +113,26 @@ export default function OperationsLocationTreeSelect({
                     <CommandList>
                         <CommandEmpty>{tCommon('noResults')}</CommandEmpty>
                         <CommandGroup>
-                            <CommandItem
-                                value={ALL_LOCATIONS_OPTION}
-                                keywords={[t('allLocations')]}
-                                onSelect={handleToggleAllLocations}
-                            >
-                                <CheckStateIcon
-                                    checkState={
-                                        isAllLocationsSelected
-                                            ? 'checked'
-                                            : undefined
-                                    }
-                                />
-                                {t('allLocations')}
-                            </CommandItem>
-                            {treeRows.map(
-                                ({
-                                    site,
-                                    depth,
-                                    hasChildren,
-                                    searchKeywords,
-                                }) => (
-                                    <CommandItem
-                                        key={site.siteId}
-                                        value={String(site.siteId)}
-                                        keywords={searchKeywords}
-                                        onSelect={() =>
-                                            handleToggleLocation(site.siteId)
-                                        }
-                                    >
-                                        {Array.from(
-                                            { length: depth },
-                                            (_, guideIndex) => (
-                                                <span
-                                                    key={guideIndex}
-                                                    aria-hidden
-                                                    className="border-border -my-1.5 ml-2 w-2 self-stretch border-l"
-                                                />
-                                            ),
-                                        )}
-                                        {hasChildren && !search ? (
-                                            <button
-                                                type="button"
-                                                aria-label={t(
-                                                    expandedSiteIds.has(
-                                                        site.siteId,
-                                                    )
-                                                        ? 'collapseLocation'
-                                                        : 'expandLocation',
-                                                    { name: site.name ?? '' },
-                                                )}
-                                                onClick={event => {
-                                                    event.stopPropagation();
-                                                    handleToggleExpanded(
-                                                        site.siteId,
-                                                    );
-                                                }}
-                                            >
-                                                <ChevronRightIcon
-                                                    className={cn(
-                                                        'size-4 transition-transform',
-                                                        expandedSiteIds.has(
-                                                            site.siteId,
-                                                        ) && 'rotate-90',
-                                                    )}
-                                                />
-                                            </button>
-                                        ) : (
-                                            <span className="size-4" />
-                                        )}
-                                        <CheckStateIcon
-                                            checkState={checkStateBySiteId.get(
-                                                site.siteId,
-                                            )}
-                                        />
-                                        <span
-                                            className={cn(
-                                                hasChildren && 'font-medium',
-                                            )}
-                                        >
-                                            {site.name}
-                                        </span>
-                                    </CommandItem>
-                                ),
+                            {!search && (
+                                <CommandItem
+                                    value={ALL_LOCATIONS_VALUE}
+                                    onSelect={handleToggleAllLocations}
+                                >
+                                    <Checkbox
+                                        checked={isAllLocationsSelected}
+                                        tabIndex={-1}
+                                        className="pointer-events-none"
+                                    />
+                                    {t('allLocations')}
+                                </CommandItem>
                             )}
+                            {topLevelSites.map(site => (
+                                <OperationsLocationTreeNode
+                                    key={site.siteId}
+                                    site={site}
+                                    search={search}
+                                />
+                            ))}
                         </CommandGroup>
                     </CommandList>
                 </Command>

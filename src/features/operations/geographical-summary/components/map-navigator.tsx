@@ -3,7 +3,6 @@
 import { useGetGeocode } from '@/api/geocode/hooks/use-get-geocode';
 import { useGetUserPermissions } from '@/api/user/hooks/use-get-user-permissions';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
-import { useLocationMultiSelection } from '@/lib/location/use-location-multiselection';
 import { useEffect } from 'react';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useMap } from 'react-leaflet';
@@ -20,19 +19,17 @@ interface MapNavigatorProps {
 export default function MapNavigator({ bounds }: MapNavigatorProps) {
     const map = useMap();
     const country = useCountry();
-    const [{ selectedLocations }] = useOperationsFilters();
+    const [{ selectedLocations, selectedSiteIds }] = useOperationsFilters();
     const { data: getUserPermissionsResult } = useGetUserPermissions();
-    const accessibleSites = getUserPermissionsResult?.ok
-        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
-        : [];
-    const { siteIdToLocationLabel } = useLocationMultiSelection(
-        accessibleSites,
-        selectedLocations,
-    );
+    const selectedSiteName = getUserPermissionsResult?.ok
+        ? getUserPermissionsResult.data.permissions.sites.canAccessSites.find(
+              site => site.siteId === selectedSiteIds[0],
+          )?.name
+        : undefined;
 
     const { data: geocodeResult } = useGetGeocode(
         {
-            location: siteIdToLocationLabel.values().next().value ?? '',
+            location: selectedSiteName ?? selectedLocations[0] ?? '',
             country,
         },
         { enabled: !bounds },

@@ -6,6 +6,7 @@ import {
 } from '@/lib/view-state/month-range';
 import {
     parseAsArrayOf,
+    parseAsInteger,
     parseAsString,
     parseAsStringLiteral,
     useQueryStates,
@@ -25,6 +26,7 @@ const operationsSearchParams = {
     startMonth: parseAsMonth.withDefault(monthDefaults.startMonth),
     endMonth: parseAsMonth.withDefault(monthDefaults.endMonth),
     selectedLocations: parseAsArrayOf(parseAsString).withDefault([]),
+    selectedSiteIds: parseAsArrayOf(parseAsInteger).withDefault([]),
     selectedSpecies: parseAsArrayOf(parseAsString),
 };
 
@@ -35,6 +37,7 @@ export type OperationsTab = inferParserType<
 const operationsUrlKeys = {
     activeTab: 'tab',
     selectedLocations: 'location',
+    selectedSiteIds: 'site',
     selectedSpecies: 'species',
 } as const;
 
