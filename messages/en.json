@@ -311,6 +311,8 @@
         "continueToCertification": "Continue to Certification",
         "specimenId": "Specimen ID",
         "sessionId": "Session ID",
+        "household": "Household",
+        "collectionLocation": "Collection Location",
         "imagesCaptured": "Images Captured",
         "needsFurtherProcessing": "Needs Further Processing",
         "yes": "Yes",
