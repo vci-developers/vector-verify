@@ -283,6 +283,7 @@
         "requiredAnswersRemaining": "{count, plural, one {# required answer left to supply} other {# required answers left to supply}}",
         "editValueLabel": "Edit value",
         "valueColumn": "Value",
+        "household": "Household: ",
         "collectionDate": "Collection Date: ",
         "sessionCreated": "Session Created: ",
         "selectValuePlaceholder": "Select value",
