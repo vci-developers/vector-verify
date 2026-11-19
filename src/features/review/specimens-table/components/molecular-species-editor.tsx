@@ -61,6 +61,7 @@ export default function MolecularSpeciesEditor({
         setIsEditing(false);
     }
 
+    // TODO: remove edit function once Kenya is taken off read-only, read-only views should not be able to add lab results
     if (!isEditing) {
         return (
             <span className="inline-flex items-center gap-1">
