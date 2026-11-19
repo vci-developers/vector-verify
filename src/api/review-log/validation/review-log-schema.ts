@@ -5,6 +5,7 @@ export const reviewLogActionSchema = z.enum([
     'resolve_session_unit_conflicts',
     'update_session_household_info',
     'update_specimen_image_prediction',
+    'update_specimen_thumbnail_prediction',
 ]);
 
 export const reviewLogSchema = z.object({

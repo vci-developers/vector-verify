@@ -371,6 +371,12 @@ classification types recorded per annotation. _Avoid_: Morphological
 inspection of the specimen image. One of two classification types recorded per
 annotation. _Avoid_: Image-based
 
+**Molecular Species**: The species a lab confirms for a specimen by molecular
+test (e.g. PCR). Recorded per specimen in the Specimens view, editable at any
+time, including after Review is complete; editing it never changes review state.
+Free text, since lab results name sibling species finer than the prediction
+species list. Editable under View-Only Access. _Avoid_: PCR result, lab species
+
 **Original Prediction**: The species, sex, and abdomen status the model assigned
 to a specimen image at upload, before any VCO edit. Never changes. Anything that
 measures the model (AI Performance, model confidence) uses the Original

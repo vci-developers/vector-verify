@@ -10,6 +10,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import SpecimensTableRow from '@/features/review/specimens-table/components/specimens-table-row';
 import defaultMessages from '../../../../../messages/en.json';
 import { createReviewLog } from '../../../../helpers/create-review-log';
+import { createTestQueryClient } from '../../../../helpers/create-query-client';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 const messages = {
     ...defaultMessages,
@@ -52,22 +54,24 @@ test.each(['', null, undefined, 'populated'] as const)(
             images: [],
         });
         render(
-            <NextIntlClientProvider
-                locale="en"
-                timeZone="UTC"
-                messages={messages}
-            >
-                <Table>
-                    <TableBody>
-                        <SpecimensTableRow
-                            specimen={specimen}
-                            reviewLogs={[]}
-                            reviewLogsError={false}
-                            hasCollectionCycles={false}
-                        />
-                    </TableBody>
-                </Table>
-            </NextIntlClientProvider>,
+            <QueryClientProvider client={createTestQueryClient()}>
+                <NextIntlClientProvider
+                    locale="en"
+                    timeZone="UTC"
+                    messages={messages}
+                >
+                    <Table>
+                        <TableBody>
+                            <SpecimensTableRow
+                                specimen={specimen}
+                                reviewLogs={[]}
+                                reviewLogsError={false}
+                                hasCollectionCycles={false}
+                            />
+                        </TableBody>
+                    </Table>
+                </NextIntlClientProvider>
+            </QueryClientProvider>,
         );
         const cells = screen.getAllByRole('cell');
         expect(cells[0]).toHaveTextContent(
@@ -81,6 +85,7 @@ test.each(['', null, undefined, 'populated'] as const)(
             populated ? 'Translated unfed' : '—',
         );
         expect(cells[7]).toHaveTextContent('0');
+        expect(cells[9]).toHaveTextContent('—');
         expect(
             screen.queryByRole('link', { name: '1401' }),
         ).not.toBeInTheDocument();
@@ -140,37 +145,41 @@ test.each(['modern', 'legacy', 'missing', 'unnamed'] as const)(
                     ? '90'
                     : '—';
         render(
-            <NextIntlClientProvider
-                locale="en"
-                timeZone="UTC"
-                messages={messages}
-            >
-                <Table>
-                    <TableBody>
-                        <SpecimensTableRow
-                            specimen={specimen}
-                            session={session}
-                            site={site}
-                            reviewLogs={[
-                                createReviewLog({
-                                    specimenId: 7,
-                                    siteId: 90,
-                                    createdAt: 0,
-                                }),
-                            ]}
-                            reviewLogsError={false}
-                            hasCollectionCycles
-                        />
-                    </TableBody>
-                </Table>
-            </NextIntlClientProvider>,
+            <QueryClientProvider client={createTestQueryClient()}>
+                <NextIntlClientProvider
+                    locale="en"
+                    timeZone="UTC"
+                    messages={messages}
+                >
+                    <Table>
+                        <TableBody>
+                            <SpecimensTableRow
+                                specimen={specimen}
+                                session={session}
+                                site={site}
+                                reviewLogs={[
+                                    createReviewLog({
+                                        specimenId: 7,
+                                        siteId: 90,
+                                        createdAt: 0,
+                                    }),
+                                ]}
+                                reviewLogsError={false}
+                                hasCollectionCycles
+                            />
+                        </TableBody>
+                    </Table>
+                </NextIntlClientProvider>
+            </QueryClientProvider>,
         );
         expect(screen.getAllByRole('cell')[3]).toHaveTextContent(
             expectedSiteLabel,
         );
-        await userEvent
-            .setup()
-            .click(screen.getByRole('button', { name: /CMS007/ }));
+        await userEvent.setup().click(
+            screen.getByRole('button', {
+                name: /^View .* for specimen CMS007$/,
+            }),
+        );
         expect(screen.getByRole('dialog')).toHaveAccessibleDescription(
             `Session 1401 · ${expectedSiteLabel}`,
         );
@@ -210,29 +219,31 @@ test.each(['assigned', 'month-based', 'unassigned'] as const)(
             images: [],
         });
         render(
-            <NextIntlClientProvider
-                locale="en"
-                timeZone="UTC"
-                messages={messages}
-            >
-                <TooltipProvider>
-                    <Table>
-                        <TableBody>
-                            <SpecimensTableRow
-                                specimen={specimen}
-                                session={session}
-                                reviewLogs={[]}
-                                reviewLogsError={false}
-                                hasCollectionCycles={kind !== 'month-based'}
-                                cycleNumber={
-                                    kind === 'assigned' ? 8 : undefined
-                                }
-                                timezone="Africa/Kampala"
-                            />
-                        </TableBody>
-                    </Table>
-                </TooltipProvider>
-            </NextIntlClientProvider>,
+            <QueryClientProvider client={createTestQueryClient()}>
+                <NextIntlClientProvider
+                    locale="en"
+                    timeZone="UTC"
+                    messages={messages}
+                >
+                    <TooltipProvider>
+                        <Table>
+                            <TableBody>
+                                <SpecimensTableRow
+                                    specimen={specimen}
+                                    session={session}
+                                    reviewLogs={[]}
+                                    reviewLogsError={false}
+                                    hasCollectionCycles={kind !== 'month-based'}
+                                    cycleNumber={
+                                        kind === 'assigned' ? 8 : undefined
+                                    }
+                                    timezone="Africa/Kampala"
+                                />
+                            </TableBody>
+                        </Table>
+                    </TooltipProvider>
+                </NextIntlClientProvider>
+            </QueryClientProvider>,
         );
         expect(screen.getAllByRole('cell')[0]).toHaveTextContent(
             kind === 'assigned' ? /^Cycle 8$/ : /^Unassigned$/,
@@ -267,3 +278,42 @@ test.each(['assigned', 'month-based', 'unassigned'] as const)(
         }
     },
 );
+
+test('shows the molecular species with an edit button', () => {
+    const specimen = specimenSchema.parse({
+        id: 7,
+        specimenId: 'CMS007',
+        sessionId: 1401,
+        thumbnailUrl: null,
+        thumbnailImageId: null,
+        thumbnailImage: null,
+        molecularSpecies: 'An. arabiensis',
+        images: [],
+    });
+    render(
+        <QueryClientProvider client={createTestQueryClient()}>
+            <NextIntlClientProvider
+                locale="en"
+                timeZone="UTC"
+                messages={messages}
+            >
+                <Table>
+                    <TableBody>
+                        <SpecimensTableRow
+                            specimen={specimen}
+                            reviewLogs={[]}
+                            reviewLogsError={false}
+                            hasCollectionCycles={false}
+                        />
+                    </TableBody>
+                </Table>
+            </NextIntlClientProvider>
+        </QueryClientProvider>,
+    );
+    expect(screen.getAllByRole('cell')[9]).toHaveTextContent('An. arabiensis');
+    expect(
+        screen.getByRole('button', {
+            name: 'Edit molecular species for specimen CMS007',
+        }),
+    ).toBeInTheDocument();
+});

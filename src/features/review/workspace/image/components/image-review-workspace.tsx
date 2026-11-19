@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
+import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
@@ -19,8 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBanner from '@/components/ui/error-banner';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { NetworkError } from '@/lib/network/network-error';
-import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
-import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
 
 interface ImageReviewWorkspaceProps {
     initialSpecimenId?: number;
@@ -55,12 +54,21 @@ export default function ImageReviewWorkspace({
     const t = useTranslations('ReviewImage');
     const tCommon = useTranslations('Common');
     const isReviewReadOnly = useReviewAccess() !== 'writable';
-    const [selectedSpecimenIndex, setSpecimenIndex] = useState<number | null>(
+    const [selectedSpecimenId, setSelectedSpecimenId] = useState<number | null>(
         null,
     );
     const [currentImage, setCurrentImage] = useState<SpecimenImage | null>(
         null,
     );
+
+    const [editingSpecimen, setEditingSpecimen] = useState<Specimen | null>(
+        null,
+    );
+    const [imageAvailability, setImageAvailability] = useState<{
+        specimen: Specimen;
+        status: ImageLoadStatus;
+    } | null>(null);
+    const isNavigationBlocked = editingSpecimen !== null;
 
     const specimenQueryParams: GetAllSpecimensQueryParams =
         collectionCycleId !== undefined
@@ -91,19 +99,6 @@ export default function ImageReviewWorkspace({
                     specimens: getAllSpecimensResult.data.specimens,
                 };
 
-    const { data: getAllReviewLogsResult } = useGetAllReviewLogs({
-        siteId: site.siteId,
-        action: 'update_specimen_image_prediction',
-    });
-
-    const latestEditLog =
-        currentImage && getAllReviewLogsResult?.ok
-            ? getLatestPredictionEditLog(
-                  getAllReviewLogsResult.data.logs,
-                  currentImage.id,
-              )
-            : undefined;
-
     const expectedSpecimensCount = sessions.reduce(
         (total, session) => total + (session.expectedSpecimens ?? 0),
         0,
@@ -114,9 +109,42 @@ export default function ImageReviewWorkspace({
     const skeletonVariant =
         specimensState.status === 'error' ? 'destructive' : 'default';
 
+    const specimenIndex =
+        specimensState.status === 'success'
+            ? Math.max(
+                  0,
+                  specimensState.specimens.findIndex(
+                      specimen =>
+                          specimen.id ===
+                          (selectedSpecimenId ?? initialSpecimenId),
+                  ),
+              )
+            : 0;
+    const currentSpecimen =
+        specimensState.status === 'success'
+            ? specimensState.specimens[specimenIndex]
+            : undefined;
+    const handleImageAvailabilityChange = useCallback(
+        (status: ImageLoadStatus) => {
+            if (!currentSpecimen) return;
+            setImageAvailability(previous =>
+                previous?.specimen === currentSpecimen &&
+                previous.status === status
+                    ? previous
+                    : { specimen: currentSpecimen, status },
+            );
+        },
+        [currentSpecimen],
+    );
+    const currentImageAvailability =
+        imageAvailability?.specimen === currentSpecimen
+            ? (imageAvailability?.status ?? 'pending')
+            : 'pending';
+
     if (
         specimensState.status === 'success' &&
-        specimensState.specimens.length === 0
+        specimensState.specimens.length === 0 &&
+        !isNavigationBlocked
     ) {
         return (
             <div className="space-y-4">
@@ -145,21 +173,6 @@ export default function ImageReviewWorkspace({
             </div>
         );
     }
-    const specimenIndex =
-        selectedSpecimenIndex ??
-        (specimensState.status === 'success'
-            ? Math.max(
-                  0,
-                  specimensState.specimens.findIndex(
-                      specimen => specimen.id === initialSpecimenId,
-                  ),
-              )
-            : 0);
-    const currentSpecimen =
-        specimensState.status === 'success'
-            ? specimensState.specimens[specimenIndex]
-            : undefined;
-
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -195,9 +208,14 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(Math.max(specimenIndex - 1, 0))
+                                setSelectedSpecimenId(
+                                    specimensState.specimens[specimenIndex - 1]
+                                        ?.id ?? null,
+                                )
                             }
-                            disabled={specimenIndex === 0}
+                            disabled={
+                                isNavigationBlocked || specimenIndex === 0
+                            }
                         >
                             <ChevronLeft className="h-4 w-4" />
                             {t('previousSpecimen')}
@@ -207,16 +225,15 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(
-                                    Math.min(
-                                        specimenIndex + 1,
-                                        specimensState.specimens.length - 1,
-                                    ),
+                                setSelectedSpecimenId(
+                                    specimensState.specimens[specimenIndex + 1]
+                                        ?.id ?? null,
                                 )
                             }
                             disabled={
+                                isNavigationBlocked ||
                                 specimenIndex ===
-                                specimensState.specimens.length - 1
+                                    specimensState.specimens.length - 1
                             }
                         >
                             {t('nextSpecimen')}
@@ -232,14 +249,6 @@ export default function ImageReviewWorkspace({
                     }
                 />
             )}
-            {getAllReviewLogsResult && !getAllReviewLogsResult.ok && (
-                <ErrorBanner
-                    message={
-                        getAllReviewLogsResult.error.message ||
-                        t('reviewLogsError')
-                    }
-                />
-            )}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardContent className="space-y-4 p-4">
@@ -249,6 +258,12 @@ export default function ImageReviewWorkspace({
                                 key={currentSpecimen.id}
                                 specimen={currentSpecimen}
                                 onCurrentImageChange={setCurrentImage}
+                                navigationDisabled={isNavigationBlocked}
+                                onImageAvailabilityChange={
+                                    readOnly
+                                        ? undefined
+                                        : handleImageAvailabilityChange
+                                }
                             />
                         ) : (
                             <Fragment>
@@ -268,9 +283,16 @@ export default function ImageReviewWorkspace({
                 <Card className="lg:col-span-2">
                     <CardContent className="p-4">
                         <ImageReviewDetails
-                            key={currentImage?.id}
+                            siteId={site.siteId}
+                            collectionCycleId={collectionCycleId}
                             currentImage={currentImage}
-                            latestEditLog={latestEditLog}
+                            imageAvailability={currentImageAvailability}
+                            editingSpecimen={editingSpecimen}
+                            onEditSpecimenId={specimen => {
+                                if (specimen)
+                                    setSelectedSpecimenId(specimen.id);
+                                setEditingSpecimen(specimen);
+                            }}
                             timezone={timezone ?? null}
                             readOnly={readOnly}
                             state={
@@ -289,13 +311,20 @@ export default function ImageReviewWorkspace({
             </div>
 
             <div className="flex justify-between">
-                <Button variant="outline" onClick={onGoToPreviousStep}>
+                <Button
+                    variant="outline"
+                    onClick={onGoToPreviousStep}
+                    disabled={isNavigationBlocked}
+                >
                     {tCommon('previous')}
                 </Button>
                 {!isReviewReadOnly && (
                     <Button
                         onClick={onGoToNextStep}
-                        disabled={specimensState.status !== 'success'}
+                        disabled={
+                            isNavigationBlocked ||
+                            specimensState.status !== 'success'
+                        }
                     >
                         {t('continueToCertification')}
                     </Button>
