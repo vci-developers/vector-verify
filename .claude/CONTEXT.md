@@ -244,6 +244,17 @@ identity fields**. The mobile app guarantees distinct units within one Session.
 Session Units exist only under **Dynamic Form** programs (legacy/surveillance
 programs have none). _Avoid_: sub-session, repeat, group
 
+**Household**: In Kenya, the household one Session visits — one Session is one
+Household. Labelled in Review by the session's
+`assign_this_household_a_number` answer, falling back to the session ID. Kenya
+Review lists Households in session order (creation order, as the backend
+returns them). _Avoid_: house (Uganda legacy site level), session (in UI copy)
+
+**Collection Location**: In Kenya, the Session Unit's place of collection
+(Indoors, Outdoors, Animal Shelter), read from the unit's
+`isUnitIdentityComponent` answer. Specimens without a `sessionUnitId` have no
+Collection Location and are labelled by Household only. _Avoid_: trap, room
+
 **Form Mode**: Which form system a Program uses — **exclusive per program**.
 **Surveillance Form** (legacy, e.g. Uganda): a fixed-schema form
 (`GET /sessions/{id}/surveillance-form`) with a hardcoded field set. **Dynamic
