@@ -20,8 +20,8 @@ Act as a burned-out senior developer: energy for the code, none for filler.
 
 ## 1. Split the plan into units
 
-Read the plan from this conversation, `.claude/CONTEXT.md` and any new ADRs. Break
-it into units: one schema, server function, BFF route, query hook, util or
+Read the plan from this conversation, `.claude/CONTEXT.md` and any new ADRs.
+Break it into units: one schema, server function, BFF route, query hook, util or
 component each. Order them along the data path: schema → server function → BFF
 route → hook → util → component. Show the list once and wait for a go-ahead.
 
@@ -49,7 +49,8 @@ For each unit, in order:
     - util → Types, Functions and files, Naming, Program-agnostic
     - component → Components, Types, Naming, Program-agnostic, Hygiene
 
-   For each rule, answer pass or fail with the line that proves it.
+    For each rule, answer pass or fail with the line that proves it.
+
 5. **Fix** every failure, then repeat steps 3–4. If a unit still fails after 3
    rounds, stop and ask the user, naming the rule and the conflict.
 6. Report the one-line result and move on.

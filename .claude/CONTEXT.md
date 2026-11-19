@@ -245,10 +245,10 @@ Session Units exist only under **Dynamic Form** programs (legacy/surveillance
 programs have none). _Avoid_: sub-session, repeat, group
 
 **Household**: In Kenya, the household one Session visits — one Session is one
-Household. Labelled in Review by the session's
-`assign_this_household_a_number` answer, falling back to the session ID. Kenya
-Review lists Households in session order (creation order, as the backend
-returns them). _Avoid_: house (Uganda legacy site level), session (in UI copy)
+Household. Labelled in Review by the session's `assign_this_household_a_number`
+answer, falling back to the session ID. Kenya Review lists Households in session
+order (creation order, as the backend returns them). _Avoid_: house (Uganda
+legacy site level), session (in UI copy)
 
 **Collection Location**: In Kenya, the Session Unit's place of collection
 (Indoors, Outdoors, Animal Shelter), read from the unit's
