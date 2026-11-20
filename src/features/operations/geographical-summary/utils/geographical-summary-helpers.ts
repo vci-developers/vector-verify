@@ -2,6 +2,7 @@ import type { GetAllSessionsSuccessPayload } from '@/api/session/validation/get-
 import type { Site } from '@/api/site/validation/site-schema';
 import type { GetSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-specimens-count-schema';
 import { isLegacySite } from '@/lib/location/location-query';
+import { getSiteIdsWithChildren } from '@/lib/location/site-tree';
 
 export const GEOGRAPHICAL_VIEWS = ['specimens', 'devices'] as const;
 
@@ -116,10 +117,8 @@ export function buildSiteMarkers(
         descendantsOfSelectedLocation.map(site => [site.siteId, site]),
     );
 
-    const siteIdsWithChildren = new Set(
-        descendantsOfSelectedLocation
-            .filter(site => site.parentId != null)
-            .map(site => site.parentId!),
+    const siteIdsWithChildren = getSiteIdsWithChildren(
+        descendantsOfSelectedLocation,
     );
 
     const markerNameToSpecimenData = new Map<

@@ -454,6 +454,17 @@ the original bug). Activity is always evaluated **as-of-today** (the current
 cycle), independent of the page's date filter. _Avoid_: Online/offline,
 connected, Lapsing (removed), rolling calendar months (replaced by cycles)
 
+**Site Reporting**: Whether each **Sentinel Site** sent data in each
+**Collection Cycle** (calendar month for programs with no Collection Schedule),
+shown as the Field Team Performance tab: location › site › collector rows. A
+site is **reporting** for a cycle when it has at least one surveillance
+**Session** the backend assigned to that cycle (month fallback: by
+`collectionDate`), in any review state — it tracks VHT collection, not VCO
+review. `submittedAt` is not used. Only active sites (`isActive`) are listed. A
+cycle is **fully reported** for a location when every one of its sites reported.
+A collector is listed only if they have a session in the range. _Avoid_: sent,
+submitted, complete (a cycle can end without full data)
+
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by
 the Operations filters — the raw data for the user's own program (Specimens is
