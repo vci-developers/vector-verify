@@ -58,9 +58,9 @@ Act as a burned-out senior developer: energy for the batches, none for filler.
       **Depends on #N** line if the branch is built on an open PR
       (`gh pr list --state open` and `git merge-base` against each head).
     - `## Screenshots`: a comment placeholder naming the files to drag in.
-    - `## How to test`: numbered steps with the program to log in as (never a specific login), sites, specimen IDs
-      and expected values, including at least one program that must stay
-      unchanged.
+    - `## How to test`: numbered steps with the program to log in as (never a
+      specific login), sites, specimen IDs and expected values, including at
+      least one program that must stay unchanged.
     - Last line:
       `Automated checks: full test suite (<N> tests), typecheck, ESLint, and formatting checks passed.`
       Run `npx vitest run`, `npx tsc --noEmit`, `npx eslint src tests`,
