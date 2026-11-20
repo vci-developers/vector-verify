@@ -8,7 +8,6 @@ import DeviceView from '@/features/operations/geographical-summary/components/de
 import SpecimensView from '@/features/operations/geographical-summary/components/specimens-view';
 import { CountryProvider } from '@/features/operations/geographical-summary/context/country-context';
 import type { Site } from '@/api/site/validation/site-schema';
-import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
 import { useGeographicalView } from '@/features/operations/geographical-summary/view-state/use-geographical-view';
 import {
     GEOGRAPHICAL_VIEWS,
@@ -48,7 +47,6 @@ export default function OperationsGeographicalSummary({
         : undefined;
 
     const t = useTranslations('OperationsGeographicalSummary');
-    const [{ selectedLocations }] = useOperationsFilters();
     const [geographicalView, setGeographicalView] = useGeographicalView();
 
     const tabs = (
@@ -103,7 +101,6 @@ export default function OperationsGeographicalSummary({
                     <DeviceView
                         programId={programId}
                         siteIds={siteIds}
-                        selectedLocations={selectedLocations}
                         descendantsOfSelectedLocations={
                             descendantsOfSelectedLocations
                         }
@@ -116,7 +113,6 @@ export default function OperationsGeographicalSummary({
                         }
                         startDate={startDate}
                         endDate={endDate}
-                        selectedLocations={selectedLocations}
                         selectedMarkerId={selectedMarkerId}
                         setSelectedMarkerId={setSelectedMarkerId}
                     />

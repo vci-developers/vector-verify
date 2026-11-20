@@ -140,11 +140,13 @@ export function MultiSelectValue({
     clickToRemove = true,
     className,
     overflowBehavior = 'wrap-when-open',
+    getLabel,
     ...props
 }: {
     placeholder?: string;
     clickToRemove?: boolean;
     overflowBehavior?: 'wrap' | 'wrap-when-open' | 'cutoff';
+    getLabel?: (value: string) => ReactNode;
 } & Omit<ComponentPropsWithoutRef<'div'>, 'children'>) {
     const { selectedValues, toggleValue, items, open, single } =
         useMultiSelectContext();
@@ -168,7 +170,7 @@ export function MultiSelectValue({
         if (overflowElement != null) overflowElement.style.display = 'none';
         items.forEach(child => child.style.removeProperty('display'));
         let amount = 0;
-        for (let i = items.length - 1; i >= 0; i--) {
+        for (let i = items.length - 1; i >= 1; i--) {
             const child = items[i]!;
             if (containerElement.scrollWidth <= containerElement.clientWidth) {
                 break;
@@ -230,12 +232,12 @@ export function MultiSelectValue({
             )}
         >
             {[...selectedValues]
-                .filter(value => items.has(value))
+                .filter(value => getLabel || items.has(value))
                 .map(value => (
                     <Badge
                         variant="outline"
                         data-selected-item
-                        className="group flex items-center gap-1"
+                        className="group flex max-w-full items-center gap-1 first:min-w-16 first:shrink"
                         key={value}
                         onClick={
                             clickToRemove
@@ -246,7 +248,7 @@ export function MultiSelectValue({
                                 : undefined
                         }
                     >
-                        {items.get(value)}
+                        {getLabel ? getLabel(value) : items.get(value)}
                         {clickToRemove && (
                             <XIcon className="text-muted-foreground group-hover:text-destructive size-2" />
                         )}

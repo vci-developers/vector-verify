@@ -10,14 +10,12 @@ import MarkerInfoPanel from '@/features/operations/geographical-summary/componen
 
 interface DeviceMapProps {
     markers: DeviceMarker[];
-    selectedLocations: string[];
     selectedMarkerId: string | null;
     onMarkerSelect: (id: string | null) => void;
 }
 
 export default function DeviceMap({
     markers,
-    selectedLocations,
     selectedMarkerId,
     onMarkerSelect,
 }: DeviceMapProps) {
@@ -31,7 +29,6 @@ export default function DeviceMap({
     return (
         <GeocodedClusterMap
             markers={markers}
-            selectedLocations={selectedLocations}
             selectedMarkerId={selectedMarkerId}
             onMarkerSelect={onMarkerSelect}
             renderIcon={(markerId, isSelected) => {
