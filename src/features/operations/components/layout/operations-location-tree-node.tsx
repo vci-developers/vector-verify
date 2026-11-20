@@ -25,11 +25,13 @@ import { useState } from 'react';
 interface OperationsLocationTreeNodeProps {
     site: Site;
     search: string;
+    selectedLeafSiteIds: Set<number>;
 }
 
 export default function OperationsLocationTreeNode({
     site,
     search,
+    selectedLeafSiteIds,
 }: OperationsLocationTreeNodeProps) {
     const t = useTranslations('Operations');
     const [{ selectedSiteIds }, setFilters] = useOperationsFilters();
@@ -89,7 +91,7 @@ export default function OperationsLocationTreeNode({
                 <Checkbox
                     checked={getCheckedState(
                         accessibleSites,
-                        selectedSiteIds,
+                        selectedLeafSiteIds,
                         site.siteId,
                     )}
                     tabIndex={-1}
@@ -105,6 +107,7 @@ export default function OperationsLocationTreeNode({
                         key={childSite.siteId}
                         site={childSite}
                         search={search}
+                        selectedLeafSiteIds={selectedLeafSiteIds}
                     />
                 ))}
             </CollapsibleContent>

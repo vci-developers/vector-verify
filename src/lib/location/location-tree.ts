@@ -49,7 +49,7 @@ function getLeafSiteIds(accessibleSites: Site[], siteId: number): number[] {
         .map(descendant => descendant.siteId);
 }
 
-function getSelectedLeafSiteIds(
+export function getSelectedLeafSiteIds(
     accessibleSites: Site[],
     selectedSiteIds: number[],
 ): Set<number> {
@@ -80,13 +80,9 @@ function collapseSelectedSiteIds(
 
 export function getCheckedState(
     accessibleSites: Site[],
-    selectedSiteIds: number[],
+    selectedLeafSiteIds: Set<number>,
     siteId: number,
 ): boolean | 'indeterminate' {
-    const selectedLeafSiteIds = getSelectedLeafSiteIds(
-        accessibleSites,
-        selectedSiteIds,
-    );
     const leafSiteIds = getLeafSiteIds(accessibleSites, siteId);
     const selectedCount = leafSiteIds.filter(leafSiteId =>
         selectedLeafSiteIds.has(leafSiteId),

@@ -4,6 +4,7 @@ import {
     getCheckedState,
     getLocationLabel,
     getLocationRowChildSites,
+    getSelectedLeafSiteIds,
     matchesLocationSearch,
     toggleSiteSelection,
 } from '@/lib/location/location-tree';
@@ -57,11 +58,16 @@ test('ticking every child collapses to the parent, up the tree', () => {
 });
 
 test('ticking some children leaves the parents partial', () => {
-    expect(getCheckedState(sites, [111], 111)).toBe(true);
-    expect(getCheckedState(sites, [111], 11)).toBe('indeterminate');
-    expect(getCheckedState(sites, [111], 1)).toBe('indeterminate');
-    expect(getCheckedState(sites, [111], 112)).toBe(false);
-    expect(getCheckedState(sites, [111], 2)).toBe(false);
+    const selectedLeafSiteIds = getSelectedLeafSiteIds(sites, [111]);
+    expect(getCheckedState(sites, selectedLeafSiteIds, 111)).toBe(true);
+    expect(getCheckedState(sites, selectedLeafSiteIds, 11)).toBe(
+        'indeterminate',
+    );
+    expect(getCheckedState(sites, selectedLeafSiteIds, 1)).toBe(
+        'indeterminate',
+    );
+    expect(getCheckedState(sites, selectedLeafSiteIds, 112)).toBe(false);
+    expect(getCheckedState(sites, selectedLeafSiteIds, 2)).toBe(false);
 });
 
 test('single-child chains collapse into one row', () => {

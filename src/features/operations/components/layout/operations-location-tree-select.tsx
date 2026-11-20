@@ -18,10 +18,13 @@ import {
 } from '@/components/ui/multi-select';
 import { PopoverContent } from '@/components/ui/popover';
 import { useOperationsFilters } from '@/features/operations/view-state/use-operations-filters';
-import { getLocationLabel } from '@/lib/location/location-tree';
+import {
+    getLocationLabel,
+    getSelectedLeafSiteIds,
+} from '@/lib/location/location-tree';
 import { getTopLevelSites } from '@/lib/location/site-tree';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const ALL_LOCATIONS_VALUE = 'all';
 
@@ -38,10 +41,18 @@ export default function OperationsLocationTreeSelect({
     const [search, setSearch] = useState('');
 
     const { data: getUserPermissionsResult } = useGetUserPermissions();
-    const accessibleSites = getUserPermissionsResult?.ok
-        ? getUserPermissionsResult.data.permissions.sites.canAccessSites
-        : [];
+    const accessibleSites = useMemo(
+        () =>
+            getUserPermissionsResult?.ok
+                ? getUserPermissionsResult.data.permissions.sites.canAccessSites
+                : [],
+        [getUserPermissionsResult],
+    );
     const topLevelSites = getTopLevelSites(accessibleSites);
+    const selectedLeafSiteIds = useMemo(
+        () => getSelectedLeafSiteIds(accessibleSites, selectedSiteIds),
+        [accessibleSites, selectedSiteIds],
+    );
     const isAllLocationsSelected =
         topLevelSites.length > 0 &&
         topLevelSites.every(site => selectedSiteIds.includes(site.siteId));
@@ -131,6 +142,7 @@ export default function OperationsLocationTreeSelect({
                                     key={site.siteId}
                                     site={site}
                                     search={search}
+                                    selectedLeafSiteIds={selectedLeafSiteIds}
                                 />
                             ))}
                         </CommandGroup>
