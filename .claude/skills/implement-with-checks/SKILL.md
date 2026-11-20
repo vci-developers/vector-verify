@@ -40,6 +40,8 @@ For each unit, in order:
     - `grep -nE "isLoading|console\.(log|error)|eslint-disable|: any\b|as unknown"`
     - single-letter callback params: `grep -nE "\(\w\) =>|\b\w =>"`
     - hardcoded JSX text in components (should go through `useTranslations`)
+    - `grep -nE "Loader2|<button|<input|<select|<textarea"` — hand-rolled UI
+      that `src/components/ui/` already wraps
     - `npx tsc --noEmit` and `npx eslint <changed files>` with no new errors or
       warnings
 4. **Checklist.** Go through every rule in [CHECKLIST.md](./CHECKLIST.md) whose

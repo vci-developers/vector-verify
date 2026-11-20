@@ -52,6 +52,13 @@ check, then his words. `[saved]` = already in memory; `[new]` = not yet.
 - **Reuse shadcn primitives; don't edit generated shadcn files.** [saved] —
   Legend (#165), Button (#145), Table (#109), "Why did you change this?"
   chart.tsx (#93), skeleton.tsx (#86)
+- **Import the existing `src/components/ui/` component, don't hand-roll it.**
+  Before writing a raw element or icon that does UI work (`Loader2` spinner,
+  `<button>`, `<input>`, `<select>`), `ls src/components/ui` and use the wrapper
+  (`Spinner`, `Button`, `Input`, `Select`). [new] — "Consider making this file
+  using the Skeleton UI component offered by shadcn" (#20), "Use shadcn button"
+  (#145), "Use the shadCn Table component" (#109); VCV-319 hand-rolled `Loader2`
+  instead of `Spinner`.
 - **`<Fragment>`, not `<>`.** [new] — (#72, #80, #93, #148)
 - **Avoid `useMemo` / `useEffect` unless needed.** [new] — "Refrain from using
   useMemo unless absolutely needed" (#72, #119), "this can be handled using
