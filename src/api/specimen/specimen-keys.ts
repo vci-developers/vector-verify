@@ -2,6 +2,7 @@ import type { GetAllSpecimensQueryParams } from '@/api/specimen/validation/get-a
 import type { GetSpecimensCountQueryParams } from '@/api/specimen/validation/get-specimens-count-schema';
 import type { GetSpecimensQueryParams } from '@/api/specimen/validation/get-specimens-schema';
 import type { GetMonthlySpecimensCountQueryParams } from './validation/get-monthly-specimens-count-schema';
+import type { GetSessionSpecimensCountQueryParams } from '@/api/specimen/validation/get-session-specimens-count-schema';
 
 export const specimenKeys = {
     root: ['specimens'] as const,
@@ -12,6 +13,8 @@ export const specimenKeys = {
     monthlySpecimensCount: (
         queryParams?: GetMonthlySpecimensCountQueryParams,
     ) => ['specimens', 'count', 'monthly', queryParams] as const,
+    sessionSpecimensCount: (queryParams: GetSessionSpecimensCountQueryParams) =>
+        ['specimens', 'count', 'sessions', queryParams] as const,
     allSpecimens: (queryParams: GetAllSpecimensQueryParams) =>
         ['specimens', 'all', queryParams] as const,
 };
