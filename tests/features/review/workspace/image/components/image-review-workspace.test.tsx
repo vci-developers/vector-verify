@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
     specimens: vi.fn(),
     logs: vi.fn(),
     reviewAccess: vi.fn(),
+    isKenyaProgram: vi.fn(),
 }));
 vi.mock('@/features/review/hooks/use-review-access', () => ({
     useReviewAccess: mocks.reviewAccess,
@@ -25,6 +26,9 @@ vi.mock('@/api/specimen/hooks/use-get-all-specimens', () => ({
 }));
 vi.mock('@/api/review-log/hooks/use-get-all-review-logs', () => ({
     useGetAllReviewLogs: mocks.logs,
+}));
+vi.mock('@/lib/hooks/use-is-kenya-program', () => ({
+    useIsKenyaProgram: mocks.isKenyaProgram,
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock(
@@ -77,6 +81,7 @@ const specimens = [specimen, createSpecimen({ id: 13, specimenId: 'URJ207' })];
 
 beforeEach(() => {
     mocks.reviewAccess.mockReturnValue('writable');
+    mocks.isKenyaProgram.mockReturnValue(false);
     mocks.specimens.mockReturnValue({
         data: { ok: true, data: { specimens } },
         isPending: false,
