@@ -1,14 +1,13 @@
 'use client';
 
-import { useGetAllSessions } from '@/api/session/hooks/use-get-all-sessions';
+import {
+    useGetAllSessions,
+    useGetAllSessionsByCollectionCycleIds,
+} from '@/api/session/hooks/use-get-all-sessions';
 import { useGetCollectionCycles } from '@/api/collection-cycle/hooks/use-get-collection-cycles';
 import type { Site } from '@/api/site/validation/site-schema';
-import { useMemo } from 'react';
 import { parseISO } from 'date-fns';
-import {
-    buildReportingSegments,
-    getCollectionCyclesDateRange,
-} from '@/features/operations/field-user-compliance/utils/reporting-segment-helpers';
+import { buildReportingSegments } from '@/features/operations/field-user-compliance/utils/reporting-segment-helpers';
 import { buildReportingLocations } from '@/features/operations/field-user-compliance/utils/site-reporting-helpers';
 
 export function useSiteReportingGrid({
@@ -27,42 +26,49 @@ export function useSiteReportingGrid({
         isPending: isGetCollectionCyclesPending,
     } = useGetCollectionCycles(programId, { startDate, endDate });
 
-    const sessionsDateRange = getCollectionCyclesResult?.ok
-        ? (getCollectionCyclesDateRange(
-              getCollectionCyclesResult.data.collectionCycles,
-          ) ?? { startDate, endDate })
+    const collectionCycles = getCollectionCyclesResult?.ok
+        ? getCollectionCyclesResult.data.collectionCycles
         : null;
+    const siteIds = sites.map(site => site.siteId);
 
+    const sessionQueries = useGetAllSessionsByCollectionCycleIds(
+        collectionCycles?.map(cycle => cycle.id) ?? [],
+        { type: 'SURVEILLANCE', siteIds },
+    );
+
+    const isMonthFallback = collectionCycles?.length === 0;
     const { data: getAllSessionsResult, isPending: isGetAllSessionsPending } =
         useGetAllSessions(
-            {
-                startDate: sessionsDateRange?.startDate ?? '',
-                endDate: sessionsDateRange?.endDate ?? '',
-                type: 'SURVEILLANCE',
-                siteIds: sites.map(site => site.siteId),
-            },
-            { enabled: sessionsDateRange !== null },
+            { startDate, endDate, type: 'SURVEILLANCE', siteIds },
+            { enabled: isMonthFallback },
         );
+
+    const sessionsResults = isMonthFallback
+        ? [getAllSessionsResult]
+        : sessionQueries.map(query => query.data);
+    const isSessionsPending = isMonthFallback
+        ? isGetAllSessionsPending
+        : sessionQueries.some(query => query.isPending);
 
     const locations = buildReportingLocations(sites);
 
-    const segments = useMemo(() => {
-        if (!getAllSessionsResult?.ok || !getCollectionCyclesResult?.ok) {
-            return null;
-        }
-        return buildReportingSegments({
-            sessions: getAllSessionsResult.data.sessions,
-            collectionCycles: getCollectionCyclesResult.data.collectionCycles,
-            startMonth: parseISO(startDate),
-            endMonth: parseISO(endDate),
-        });
-    }, [getAllSessionsResult, getCollectionCyclesResult, startDate, endDate]);
+    const segments =
+        collectionCycles !== null && sessionsResults.every(result => result?.ok)
+            ? buildReportingSegments({
+                  sessions: sessionsResults.flatMap(result =>
+                      result?.ok ? result.data.sessions : [],
+                  ),
+                  collectionCycles,
+                  startMonth: parseISO(startDate),
+                  endMonth: parseISO(endDate),
+              })
+            : null;
 
     const isError =
         (!isGetCollectionCyclesPending && !getCollectionCyclesResult?.ok) ||
-        (sessionsDateRange !== null &&
-            !isGetAllSessionsPending &&
-            !getAllSessionsResult?.ok);
+        (collectionCycles !== null &&
+            !isSessionsPending &&
+            !sessionsResults.every(result => result?.ok));
 
     return {
         locations,

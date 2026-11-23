@@ -88,27 +88,3 @@ export function buildReportingSegments({
         },
     );
 }
-
-export function getCollectionCyclesDateRange(
-    collectionCycles: CollectionCycle[],
-): { startDate: string; endDate: string } | null {
-    if (collectionCycles.length === 0) return null;
-    const firstCycle = collectionCycles.reduce((earliest, cycle) =>
-        cycle.startDate < earliest.startDate ? cycle : earliest,
-    );
-    const lastCycle = collectionCycles.reduce((latest, cycle) =>
-        cycle.endDate > latest.endDate ? cycle : latest,
-    );
-    return {
-        startDate: formatDateInTimezone(
-            firstCycle.startDate,
-            firstCycle.timezone,
-            'yyyy-MM-dd',
-        ),
-        endDate: formatDateInTimezone(
-            lastCycle.endDate,
-            lastCycle.timezone,
-            'yyyy-MM-dd',
-        ),
-    };
-}
