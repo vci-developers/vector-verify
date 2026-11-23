@@ -31,6 +31,7 @@ import {
 } from '@/features/review/workspace/metadata/utils/metadata-section';
 import { formatDateAnswer } from '@/features/review/workspace/metadata/utils/format-date-answer';
 import ConflictResolutionControl from './conflict-resolution-control';
+import { HOUSEHOLD_NUMBER_QUESTION_KEY } from '@/features/review/utils/household-specimens';
 
 interface MetadataReviewTableProps {
     sessions: Session[];
@@ -66,6 +67,10 @@ export default function MetadataReviewTable({
         disabledRowIds,
     );
 
+    const householdNumberRow = sections
+        .flatMap(section => section.rows)
+        .find(row => row.questionKey === HOUSEHOLD_NUMBER_QUESTION_KEY);
+
     const showSectionHeaders = sections.length > 1;
     const sectionHeaderColSpan = 1 + sessions.length + (readOnly ? 0 : 1);
 
@@ -80,12 +85,22 @@ export default function MetadataReviewTable({
         >
             <TableHeader className="bg-background sticky top-0 z-30">
                 <TableRow className="h-14">
-                    <TableHead className="border-border w-48 border" />
+                    <TableHead className="border-border min-w-72 border" />
                     {sessions.map(session => (
                         <TableHead
                             key={session.sessionId}
                             className="border-border border p-2"
                         >
+                            {householdNumberRow && (
+                                <div className="font-semibold">
+                                    {t('household')}
+                                    {String(
+                                        householdNumberRow.fieldValueBySessionId.get(
+                                            session.sessionId,
+                                        ) || '—',
+                                    )}
+                                </div>
+                            )}
                             <div>
                                 {t('collectionDate')}
                                 {formatDateInTimezone(
@@ -198,7 +213,7 @@ export default function MetadataReviewTable({
                                 >
                                     <TableCell
                                         className={cn(
-                                            'border-border w-48 border font-medium',
+                                            'border-border min-w-72 border font-medium whitespace-normal',
                                             isUnitRow && 'pl-8',
                                         )}
                                     >

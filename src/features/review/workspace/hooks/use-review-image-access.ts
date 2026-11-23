@@ -11,11 +11,15 @@ import {
     emptySessionSummary,
     isSiteFullyReviewed,
 } from '@/features/review/utils/review-site-session-summary';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 
 export function useReviewImageAccess(sessions: Session[], programId: number) {
-    const readOnly = isSiteFullyReviewed(
-        sessions.reduce(accumulateSessionSummary, emptySessionSummary()),
-    );
+    const isReviewAccessReadOnly = useReviewAccess() === 'read-only';
+    const readOnly =
+        isReviewAccessReadOnly ||
+        isSiteFullyReviewed(
+            sessions.reduce(accumulateSessionSummary, emptySessionSummary()),
+        );
     const {
         data: form,
         isPending,

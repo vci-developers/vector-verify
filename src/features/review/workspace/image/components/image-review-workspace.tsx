@@ -21,6 +21,9 @@ import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
 import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
+import { orderSpecimensByHousehold } from '@/features/review/utils/household-specimens';
+import { useIsKenyaProgram } from '@/lib/hooks/use-is-kenya-program';
+import SpecimenHouseholdRows from '@/features/review/workspace/image/components/specimen-household-rows';
 
 interface ImageReviewWorkspaceProps {
     initialSpecimenId?: number;
@@ -55,6 +58,7 @@ export default function ImageReviewWorkspace({
     const t = useTranslations('ReviewImage');
     const tCommon = useTranslations('Common');
     const isReviewReadOnly = useReviewAccess() !== 'writable';
+    const isKenyaProgram = useIsKenyaProgram(site.programId);
     const [selectedSpecimenIndex, setSpecimenIndex] = useState<number | null>(
         null,
     );
@@ -88,7 +92,12 @@ export default function ImageReviewWorkspace({
               ? { status: 'error', error: getAllSpecimensResult.error }
               : {
                     status: 'success',
-                    specimens: getAllSpecimensResult.data.specimens,
+                    specimens: isKenyaProgram
+                        ? orderSpecimensByHousehold(
+                              getAllSpecimensResult.data.specimens,
+                              sessions,
+                          )
+                        : getAllSpecimensResult.data.specimens,
                 };
 
     const { data: getAllReviewLogsResult } = useGetAllReviewLogs({
@@ -283,7 +292,14 @@ export default function ImageReviewWorkspace({
                                         }
                                       : { status: 'loading' }
                             }
-                        />
+                        >
+                            {isKenyaProgram && currentSpecimen && (
+                                <SpecimenHouseholdRows
+                                    specimen={currentSpecimen}
+                                    programId={site.programId}
+                                />
+                            )}
+                        </ImageReviewDetails>
                     </CardContent>
                 </Card>
             </div>
