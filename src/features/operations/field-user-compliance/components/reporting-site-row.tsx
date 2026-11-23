@@ -7,10 +7,8 @@ import type { Site } from '@/api/site/validation/site-schema';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/utils/cn';
 import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
-import {
-    buildSiteCollectors,
-    sumSessionCounts,
-} from '@/features/operations/field-user-compliance/utils/site-collector-helpers';
+import CollectorSheet from '@/features/operations/field-user-compliance/components/collector-sheet';
+import { buildSiteCollectors } from '@/features/operations/field-user-compliance/utils/site-collector-helpers';
 import type { ReportingSegment } from '@/features/operations/field-user-compliance/utils/reporting-segment-helpers';
 
 interface ReportingSiteRowProps {
@@ -87,24 +85,29 @@ export default function ReportingSiteRow({
                 collectors.map(collector => (
                     <TableRow key={collector.key} className="group">
                         <TableCell className="bg-card group-hover:from-muted/50 group-hover:to-muted/50 sticky left-0 z-10 py-3 pr-4 pl-20 text-sm group-hover:bg-linear-to-r">
-                            {collector.collectorName || t('unknownCollector')}
+                            <CollectorSheet
+                                site={site}
+                                collector={collector}
+                                segments={segments}
+                            />
                             <span className="text-muted-foreground ml-2 text-xs">
                                 {collector.collectorTitle}
                             </span>
                         </TableCell>
-                        {collector.sessionCounts.map((sessionCount, index) => (
-                            <TableCell
-                                key={segments[index]!.key}
-                                className="text-muted-foreground px-3 py-3 text-center text-sm tabular-nums"
-                            >
-                                {sessionCount || '–'}
-                            </TableCell>
-                        ))}
+                        {collector.sessionsBySegment.map(
+                            (segmentSessions, index) => (
+                                <TableCell
+                                    key={segments[index]!.key}
+                                    className="text-muted-foreground px-3 py-3 text-center text-sm tabular-nums"
+                                >
+                                    {segmentSessions.length || '–'}
+                                </TableCell>
+                            ),
+                        )}
                         <TableCell className="bg-card group-hover:from-muted/50 group-hover:to-muted/50 text-muted-foreground sticky right-0 z-10 px-4 py-3 text-center text-sm tabular-nums group-hover:bg-linear-to-r">
                             {t('sessionCount', {
-                                count: sumSessionCounts(
-                                    collector.sessionCounts,
-                                ),
+                                count: collector.sessionsBySegment.flat()
+                                    .length,
                             })}
                         </TableCell>
                     </TableRow>
