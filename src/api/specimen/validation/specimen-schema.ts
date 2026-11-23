@@ -6,6 +6,7 @@ export const specimenSchema = z.object({
     id: z.number(),
     specimenId: z.string(),
     sessionId: z.number(),
+    sessionUnitId: z.number().nullable().optional(),
     thumbnailUrl: z.string().nullable(),
     thumbnailImageId: z.number().nullable(),
     shouldProcessFurther: z.boolean().optional(),

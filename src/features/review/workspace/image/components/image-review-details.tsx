@@ -21,7 +21,7 @@ import PredictionRow from '@/features/review/workspace/image/components/predicti
 import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
 import { getLatestPredictionEditLog } from '../utils/get-latest-prediction-edit-log';
 import { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
@@ -40,6 +40,7 @@ interface DetailsContentProps {
     timezone: string | null;
     readOnly: boolean;
     state: DetailsState;
+    children?: ReactNode;
 }
 
 interface ImageReviewDetailsProps extends DetailsContentProps {
@@ -113,6 +114,7 @@ function DetailsContent({
     timezone,
     readOnly,
     state,
+    children,
 }: DetailsContentProps & {
     predictionLogs: ReviewLog[] | undefined;
     specimenIdLogs: ReviewLog[] | undefined;
@@ -333,6 +335,8 @@ function DetailsContent({
                         />
                     )}
                 </dd>
+
+                {state.status === 'success' && children}
 
                 <dt className="text-muted-foreground">{t('imagesCaptured')}</dt>
                 <dd
