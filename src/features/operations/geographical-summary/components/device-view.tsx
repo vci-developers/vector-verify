@@ -19,14 +19,12 @@ const DeviceMap = dynamic(() => import('./device-map'), { ssr: false });
 interface DeviceViewProps {
     programId: number;
     siteIds: number[];
-    selectedLocations: string[];
     descendantsOfSelectedLocations: Site[];
 }
 
 export default function DeviceView({
     programId,
     siteIds,
-    selectedLocations,
     descendantsOfSelectedLocations,
 }: DeviceViewProps) {
     const t = useTranslations('OperationsGeographicalSummary');
@@ -113,7 +111,6 @@ export default function DeviceView({
                     ) : (
                         <DeviceMap
                             markers={deviceMarkers}
-                            selectedLocations={selectedLocations}
                             selectedMarkerId={selectedMarkerId}
                             onMarkerSelect={setSelectedMarkerId}
                         />

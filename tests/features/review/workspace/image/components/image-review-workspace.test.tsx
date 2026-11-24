@@ -17,6 +17,9 @@ const mocks = vi.hoisted(() => ({
     logs: vi.fn(),
     reviewAccess: vi.fn(),
 }));
+vi.mock('@/lib/hooks/use-is-kenya-program', () => ({
+    useIsKenyaProgram: () => false,
+}));
 vi.mock('@/features/review/hooks/use-review-access', () => ({
     useReviewAccess: mocks.reviewAccess,
 }));

@@ -20,7 +20,6 @@ interface SpecimensViewProps {
     descendantsOfSelectedLocations: Site[];
     startDate: string;
     endDate: string;
-    selectedLocations: string[];
     selectedMarkerId: string | null;
     setSelectedMarkerId: (value: string | null) => void;
 }
@@ -30,7 +29,6 @@ export default function SpecimensView({
     descendantsOfSelectedLocations,
     startDate,
     endDate,
-    selectedLocations,
     selectedMarkerId,
     setSelectedMarkerId,
 }: SpecimensViewProps) {
@@ -72,7 +70,6 @@ export default function SpecimensView({
                     {!isPending && !isError && siteMapMounted.current ? (
                         <SiteMap
                             markers={markers}
-                            selectedLocations={selectedLocations}
                             selectedMarkerId={selectedMarkerId}
                             onMarkerSelect={setSelectedMarkerId}
                         />

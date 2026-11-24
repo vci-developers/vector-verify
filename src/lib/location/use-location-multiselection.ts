@@ -1,5 +1,6 @@
 import type { Site } from '@/api/site/validation/site-schema';
 import { isLegacySite } from '@/lib/location/location-query';
+import { getLocationLabel } from '@/lib/location/location-tree';
 import {
     getLocationTypeName,
     getSiteAndDescendants,
@@ -13,6 +14,7 @@ export const ALL_LOCATIONS_OPTION = 'All locations';
 export function useLocationMultiSelection(
     accessibleSites: Site[],
     selectedLocations: string[],
+    selectedSiteIds: number[],
 ) {
     const usesLegacyStructure =
         accessibleSites.length > 0 && accessibleSites.some(isLegacySite);
@@ -29,38 +31,46 @@ export function useLocationMultiSelection(
           : 'Location';
 
     const locationDropdownOptions = useMemo(
-        () => [
-            ALL_LOCATIONS_OPTION,
-            ...(usesLegacyStructure
-                ? getUniqueDistricts(accessibleSites)
-                : topLevelSites.map(site => site.name ?? 'Unknown')),
-        ],
-        [usesLegacyStructure, accessibleSites, topLevelSites],
+        () => [ALL_LOCATIONS_OPTION, ...getUniqueDistricts(accessibleSites)],
+        [accessibleSites],
     );
 
+    const selectedSites = useMemo(() => {
+        if (usesLegacyStructure) return [];
+        const labelBySiteId = new Map(
+            accessibleSites
+                .filter(site => selectedSiteIds.includes(site.siteId))
+                .map(site => [
+                    site.siteId,
+                    getLocationLabel(accessibleSites, site),
+                ]),
+        );
+        return accessibleSites
+            .filter(site => labelBySiteId.has(site.siteId))
+            .sort((first, second) =>
+                labelBySiteId
+                    .get(first.siteId)!
+                    .localeCompare(labelBySiteId.get(second.siteId)!),
+            );
+    }, [usesLegacyStructure, accessibleSites, selectedSiteIds]);
+
     const descendantsOfSelectedLocations = useMemo(() => {
-        if (selectedLocations.length === 0) return [];
-        if (selectedLocations.includes(ALL_LOCATIONS_OPTION)) {
-            return usesLegacyStructure
-                ? accessibleSites.filter(site => site.district?.trim())
-                : accessibleSites;
-        }
         if (usesLegacyStructure) {
+            if (selectedLocations.includes(ALL_LOCATIONS_OPTION)) {
+                return accessibleSites.filter(site => site.district?.trim());
+            }
             return accessibleSites.filter(site =>
                 selectedLocations.includes(site.district?.trim() ?? ''),
             );
         }
-        const selectedSiteIds = selectedLocations
-            .map(name => topLevelSites.find(s => s.name === name)?.siteId)
-            .filter((id): id is number => id !== undefined);
-        return selectedSiteIds.flatMap(id =>
-            getSiteAndDescendants(accessibleSites, id),
+        return selectedSites.flatMap(site =>
+            getSiteAndDescendants(accessibleSites, site.siteId),
         );
     }, [
-        selectedLocations,
         usesLegacyStructure,
+        selectedLocations,
         accessibleSites,
-        topLevelSites,
+        selectedSites,
     ]);
 
     const selectedSiteIdsParam: number[] | undefined = useMemo(() => {
@@ -75,17 +85,13 @@ export function useLocationMultiSelection(
                 map.set(site.siteId, site.district?.trim() ?? '');
             }
         } else {
-            for (const topSite of topLevelSites) {
-                if (
-                    !selectedLocations.includes(ALL_LOCATIONS_OPTION) &&
-                    !selectedLocations.includes(topSite.name ?? '')
-                )
-                    continue;
+            for (const site of selectedSites) {
+                const label = getLocationLabel(accessibleSites, site);
                 for (const descendant of getSiteAndDescendants(
                     accessibleSites,
-                    topSite.siteId,
+                    site.siteId,
                 )) {
-                    map.set(descendant.siteId, topSite.name ?? '');
+                    map.set(descendant.siteId, label);
                 }
             }
         }
@@ -93,12 +99,12 @@ export function useLocationMultiSelection(
     }, [
         usesLegacyStructure,
         descendantsOfSelectedLocations,
-        topLevelSites,
-        selectedLocations,
+        selectedSites,
         accessibleSites,
     ]);
 
     return {
+        usesLegacyStructure,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
