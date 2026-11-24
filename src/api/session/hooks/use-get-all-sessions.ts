@@ -4,11 +4,7 @@ import {
     type GetAllSessionsSuccessPayload,
 } from '@/api/session/validation/get-all-sessions-schema';
 import type { NetworkError } from '@/lib/network/network-error';
-import {
-    useQueries,
-    useQuery,
-    type UseQueryOptions,
-} from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { sessionKeys } from '@/api/session/session-keys';
 import { constructQueryString } from '@/lib/network/construct-query-string';
 import type { Result } from '@/lib/result/result';
@@ -52,20 +48,5 @@ export function useGetAllSessions(
         queryKey: sessionKeys.allSessions(queryParams),
         queryFn: () => fetchAllSessions(queryParams),
         ...options,
-    });
-}
-
-export function useGetAllSessionsByCollectionCycleIds(
-    collectionCycleIds: number[],
-    queryParams: GetAllSessionsQueryParams,
-) {
-    return useQueries({
-        queries: collectionCycleIds.map(collectionCycleId => {
-            const cycleQueryParams = { ...queryParams, collectionCycleId };
-            return {
-                queryKey: sessionKeys.allSessions(cycleQueryParams),
-                queryFn: () => fetchAllSessions(cycleQueryParams),
-            };
-        }),
     });
 }

@@ -19,32 +19,42 @@ export async function getAllSessions(
     accessToken: string,
     queryParams: GetAllSessionsQueryParams,
 ): Promise<Result<GetAllSessionsResponseBody, NetworkError>> {
+    const { collectionCycleIds, ...sessionsQueryParams } = queryParams;
+    const cycleQueryParamsList = collectionCycleIds
+        ? collectionCycleIds.map(collectionCycleId => ({
+              ...sessionsQueryParams,
+              collectionCycleId: Number(collectionCycleId),
+          }))
+        : [sessionsQueryParams];
     const allSessions: Session[] = [];
-    let offset = 0;
-    let hasMore = true;
 
-    while (hasMore) {
-        const queryString = constructQueryString(
-            { ...queryParams, limit: LIMIT, offset },
-            getSessionsQueryParamsSchema,
-        );
+    for (const cycleQueryParams of cycleQueryParamsList) {
+        let offset = 0;
+        let hasMore = true;
 
-        const result = await safeApiCall<GetSessionsResponseBody>(
-            `/sessions${queryString}`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
+        while (hasMore) {
+            const queryString = constructQueryString(
+                { ...cycleQueryParams, limit: LIMIT, offset },
+                getSessionsQueryParamsSchema,
+            );
+
+            const result = await safeApiCall<GetSessionsResponseBody>(
+                `/sessions${queryString}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
                 },
-            },
-            getSessionsResponseSchema,
-        );
+                getSessionsResponseSchema,
+            );
 
-        if (!result.ok) return result;
+            if (!result.ok) return result;
 
-        allSessions.push(...result.data.sessions);
-        hasMore = result.data.hasMore;
-        offset += LIMIT;
+            allSessions.push(...result.data.sessions);
+            hasMore = result.data.hasMore;
+            offset += LIMIT;
+        }
     }
 
     return ok({
