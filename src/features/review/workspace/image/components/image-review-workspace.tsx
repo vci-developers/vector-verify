@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Fragment, useCallback, useState } from 'react';
-import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
+import { Fragment, useState } from 'react';
 import ImageReviewDetails from './image-review-details';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
@@ -68,10 +67,6 @@ export default function ImageReviewWorkspace({
     const [editingSpecimen, setEditingSpecimen] = useState<Specimen | null>(
         null,
     );
-    const [imageAvailability, setImageAvailability] = useState<{
-        specimen: Specimen;
-        status: ImageLoadStatus;
-    } | null>(null);
     const isNavigationBlocked = editingSpecimen !== null;
 
     const specimenQueryParams: GetAllSpecimensQueryParams =
@@ -133,22 +128,6 @@ export default function ImageReviewWorkspace({
         specimensState.status === 'success'
             ? specimensState.specimens[specimenIndex]
             : undefined;
-    const handleImageAvailabilityChange = useCallback(
-        (status: ImageLoadStatus) => {
-            if (!currentSpecimen) return;
-            setImageAvailability(previous =>
-                previous?.specimen === currentSpecimen &&
-                previous.status === status
-                    ? previous
-                    : { specimen: currentSpecimen, status },
-            );
-        },
-        [currentSpecimen],
-    );
-    const currentImageAvailability =
-        imageAvailability?.specimen === currentSpecimen
-            ? (imageAvailability?.status ?? 'pending')
-            : 'pending';
 
     if (
         specimensState.status === 'success' &&
@@ -268,11 +247,6 @@ export default function ImageReviewWorkspace({
                                 specimen={currentSpecimen}
                                 onCurrentImageChange={setCurrentImage}
                                 navigationDisabled={isNavigationBlocked}
-                                onImageAvailabilityChange={
-                                    readOnly
-                                        ? undefined
-                                        : handleImageAvailabilityChange
-                                }
                             />
                         ) : (
                             <Fragment>
@@ -300,7 +274,6 @@ export default function ImageReviewWorkspace({
                             siteId={site.siteId}
                             collectionCycleId={collectionCycleId}
                             currentImage={currentImage}
-                            imageAvailability={currentImageAvailability}
                             editingSpecimen={editingSpecimen}
                             onEditSpecimenId={specimen => {
                                 if (specimen)

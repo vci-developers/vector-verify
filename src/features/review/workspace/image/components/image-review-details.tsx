@@ -2,11 +2,6 @@ import type { SpecimenImage } from '@/api/specimen-image/validation/specimen-ima
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { cn } from '@/utils/cn';
 import { formatDateInTimezone } from '@/utils/format-date-in-timezone';
 import { AlertCircle, Pencil } from 'lucide-react';
@@ -21,7 +16,6 @@ import PredictionEditForm from '@/features/review/workspace/image/components/pre
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
 import { useState, type ReactNode } from 'react';
-import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
 import { getLatestPredictionEditLog } from '../utils/get-latest-prediction-edit-log';
 import { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
 import SpecimenIdEditForm from './specimen-id-edit-form';
@@ -35,7 +29,6 @@ interface ImageReviewDetailsProps {
     siteId: number;
     collectionCycleId?: number;
     currentImage: SpecimenImage | null;
-    imageAvailability: ImageLoadStatus;
     editingSpecimen: Specimen | null;
     onEditSpecimenId: (specimen: Specimen | null) => void;
     timezone: string | null;
@@ -48,7 +41,6 @@ export default function ImageReviewDetails({
     siteId,
     collectionCycleId,
     currentImage,
-    imageAvailability,
     editingSpecimen,
     onEditSpecimenId,
     timezone,
@@ -147,7 +139,6 @@ export default function ImageReviewDetails({
           t('unknownUser', { userId: latestEditLog.performedBy.userId }))
         : null;
     const canEdit = !readOnly && state.status === 'success';
-    const isCheckingImages = imageAvailability === 'pending';
     const specimenIdEditor =
         specimenIdEditHistory?.latestEditLog.performedBy?.name ??
         t('unknownSpecimenIdEditor');
@@ -210,38 +201,20 @@ export default function ImageReviewDetails({
                         isCurrentImageThumbnail &&
                         !editingSpecimen &&
                         !isEditing && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <span
-                                        className="ml-auto"
-                                        tabIndex={
-                                            isCheckingImages ? 0 : undefined
-                                        }
-                                    >
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            aria-label={t('editSpecimenId')}
-                                            disabled={isCheckingImages}
-                                            onClick={() => {
-                                                if (state.status === 'success')
-                                                    onEditSpecimenId(
-                                                        state.specimen,
-                                                    );
-                                            }}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                            {t('edit')}
-                                        </Button>
-                                    </span>
-                                </TooltipTrigger>
-                                {isCheckingImages && (
-                                    <TooltipContent>
-                                        {t('checkingImages')}
-                                    </TooltipContent>
-                                )}
-                            </Tooltip>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto"
+                                aria-label={t('editSpecimenId')}
+                                onClick={() => {
+                                    if (state.status === 'success')
+                                        onEditSpecimenId(state.specimen);
+                                }}
+                            >
+                                <Pencil className="h-4 w-4" />
+                                {t('edit')}
+                            </Button>
                         )}
                 </div>
                 {editingSpecimen ? (
@@ -251,8 +224,7 @@ export default function ImageReviewDetails({
                             canEdit &&
                             isCurrentImageThumbnail &&
                             state.status === 'success' &&
-                            state.specimen.id === editingSpecimen.id &&
-                            !isCheckingImages
+                            state.specimen.id === editingSpecimen.id
                         }
                         onClose={() => onEditSpecimenId(null)}
                     />
@@ -266,11 +238,6 @@ export default function ImageReviewDetails({
                         width="md"
                         variant={skeletonVariant}
                     />
-                )}
-                {editingSpecimen && isCheckingImages && (
-                    <p className="text-muted-foreground text-xs" role="status">
-                        {t('checkingImages')}
-                    </p>
                 )}
                 {specimenIdEditHistory && (
                     <div className="text-muted-foreground space-y-1 text-xs">

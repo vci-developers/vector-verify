@@ -1,6 +1,6 @@
 import { createElement, type ComponentProps } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
 
 const mocks = vi.hoisted(() => ({ signResource: vi.fn() }));
@@ -23,87 +23,44 @@ beforeEach(() => {
     mocks.signResource.mockReturnValue({
         data: { ok: true, data: signedResource },
         isPending: false,
-        isFetching: false,
         isError: false,
         refetch,
     });
 });
 
-test('reports pending until the file loads and opts tracked images into eager loading', () => {
-    const onStatus = vi.fn();
-    render(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'pending');
-    const image = screen.getByAltText('Specimen');
-    expect(image).toHaveAttribute('loading', 'eager');
-    fireEvent.load(image);
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'loaded');
-});
-
-test('does not change lazy-loading defaults for other consumers', () => {
+test('uses default loading behavior and shows a spinner until the file loads', () => {
     render(<SignedSpecimenImage path="image-path" alt="Specimen" />);
-    expect(screen.getByAltText('Specimen')).not.toHaveAttribute('loading');
+    const image = screen.getByAltText('Specimen');
+    expect(image).not.toHaveAttribute('loading');
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+    fireEvent.load(image);
+    expect(
+        screen.queryByRole('status', { name: 'Loading' }),
+    ).not.toBeInTheDocument();
 });
 
-test.each([
-    { data: undefined, isPending: true, isError: false, expected: 'pending' },
-    { data: undefined, isPending: false, isError: true, expected: 'error' },
-    {
+test('shows an unavailable message when the image lookup fails', () => {
+    mocks.signResource.mockReturnValue({
         data: { ok: false, error: { kind: 'not_found', status: 404 } },
         isPending: false,
         isError: false,
-        expected: 'error',
-    },
-])('reports lookup state $expected', ({ expected, ...query }) => {
-    mocks.signResource.mockReturnValue({ ...query, refetch });
-    const onStatus = vi.fn();
-    render(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', expected);
-    if (expected === 'error')
-        expect(screen.getByText('Image unavailable')).toBeInTheDocument();
+        refetch,
+    });
+    render(<SignedSpecimenImage path="image-path" alt="Specimen" />);
+    expect(screen.getByText('Image unavailable')).toBeInTheDocument();
 });
 
-test('remounts the image for a retry even when the signed URL is unchanged', async () => {
-    const onStatus = vi.fn();
-    render(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
+test('retries an image load once and recovers when a new signed URL arrives', async () => {
+    const image = <SignedSpecimenImage path="image-path" alt="Specimen" />;
+    const { rerender } = render(image);
     const firstImage = screen.getByAltText('Specimen');
     fireEvent.error(firstImage);
     expect(refetch).toHaveBeenCalledOnce();
     const retryImage = await screen.findByAltText('Specimen');
     expect(retryImage).not.toBe(firstImage);
-    fireEvent.load(retryImage);
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'loaded');
-});
+    fireEvent.error(retryImage);
+    expect(screen.getByText('Image unavailable')).toBeInTheDocument();
 
-test('reports a final rendering failure and recovers when a new signed URL loads', async () => {
-    const onStatus = vi.fn();
-    const { rerender } = render(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    fireEvent.error(screen.getByAltText('Specimen'));
-    fireEvent.error(await screen.findByAltText('Specimen'));
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'error');
     mocks.signResource.mockReturnValue({
         data: {
             ok: true,
@@ -113,45 +70,12 @@ test('reports a final rendering failure and recovers when a new signed URL loads
             },
         },
         isPending: false,
-        isFetching: false,
         refetch,
     });
-    rerender(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'pending');
+    rerender(<SignedSpecimenImage path="image-path" alt="Specimen" />);
     fireEvent.load(screen.getByAltText('Specimen'));
-    expect(onStatus).toHaveBeenLastCalledWith('image-path', 'loaded');
-});
-
-test('returns to pending while refreshing a signed URL', async () => {
-    const onStatus = vi.fn();
-    const { rerender } = render(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    fireEvent.load(screen.getByAltText('Specimen'));
-    mocks.signResource.mockReturnValue({
-        data: { ok: true, data: signedResource },
-        isPending: false,
-        isFetching: true,
-        refetch,
-    });
-    rerender(
-        <SignedSpecimenImage
-            path="image-path"
-            alt="Specimen"
-            onLoadStatusChange={onStatus}
-        />,
-    );
-    await waitFor(() =>
-        expect(onStatus).toHaveBeenLastCalledWith('image-path', 'pending'),
-    );
+    expect(screen.queryByText('Image unavailable')).not.toBeInTheDocument();
+    expect(
+        screen.queryByRole('status', { name: 'Loading' }),
+    ).not.toBeInTheDocument();
 });

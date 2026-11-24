@@ -21,19 +21,10 @@ import {
     RotateCcw,
     Star,
 } from 'lucide-react';
-import SignedSpecimenImage, {
-    type ImageLoadStatus,
-} from '@/components/specimen/signed-specimen-image';
+import SignedSpecimenImage from '@/components/specimen/signed-specimen-image';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { getOrderedSpecimenImages } from '@/lib/specimen/get-ordered-specimen-images';
-import React, {
-    Fragment,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 const ZOOM_STEP = 0.5;
 const MIN_ZOOM = 1;
@@ -43,7 +34,6 @@ interface SpecimenImageCarouselProps {
     specimen: Specimen;
     enableKeyboardNavigation?: boolean;
     navigationDisabled?: boolean;
-    onImageAvailabilityChange?: (status: ImageLoadStatus) => void;
     onCurrentImageChange?: (image: SpecimenImage | null) => void;
 }
 
@@ -51,25 +41,11 @@ export default function SpecimenImageCarousel({
     specimen,
     enableKeyboardNavigation = false,
     navigationDisabled = false,
-    onImageAvailabilityChange,
     onCurrentImageChange,
 }: SpecimenImageCarouselProps) {
     const [imageViewerApi, setImageViewerApi] = useState<CarouselApi>();
     const [thumbnailStripApi, setThumbnailStripApi] = useState<CarouselApi>();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [imageLoadStatuses, setImageLoadStatuses] = useState<
-        Record<string, ImageLoadStatus>
-    >({});
-    const handleImageLoadStatusChange = useCallback(
-        (path: string, status: ImageLoadStatus) => {
-            setImageLoadStatuses(previous =>
-                previous[path] === status
-                    ? previous
-                    : { ...previous, [path]: status },
-            );
-        },
-        [],
-    );
     const [canScrollThumbnailsLeft, setCanScrollThumbnailsLeft] =
         useState(false);
     const [canScrollThumbnailsRight, setCanScrollThumbnailsRight] =
@@ -154,24 +130,6 @@ export default function SpecimenImageCarousel({
         () => getOrderedSpecimenImages(specimen),
         [specimen],
     );
-
-    const hasPendingImages =
-        allImagesForSpecimen.length === 0 ||
-        allImagesForSpecimen.some(image => {
-            const status = imageLoadStatuses[image.url];
-            return status === undefined || status === 'pending';
-        });
-    const imageAvailability: ImageLoadStatus = hasPendingImages
-        ? 'pending'
-        : allImagesForSpecimen.some(
-                image => imageLoadStatuses[image.url] === 'error',
-            )
-          ? 'error'
-          : 'loaded';
-
-    useEffect(() => {
-        onImageAvailabilityChange?.(imageAvailability);
-    }, [imageAvailability, onImageAvailabilityChange]);
 
     useEffect(() => {
         if (!enableKeyboardNavigation || navigationDisabled || !imageViewerApi)
@@ -322,11 +280,6 @@ export default function SpecimenImageCarousel({
                                         <SignedSpecimenImage
                                             key={image.url}
                                             path={image.url}
-                                            onLoadStatusChange={
-                                                onImageAvailabilityChange
-                                                    ? handleImageLoadStatusChange
-                                                    : undefined
-                                            }
                                             alt={`Specimen ${specimen.specimenId}`}
                                             fill
                                             sizes="(min-width: 1024px) 60vw, 100vw"

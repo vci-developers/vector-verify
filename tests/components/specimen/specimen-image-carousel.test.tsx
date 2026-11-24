@@ -24,102 +24,12 @@ vi.mock('embla-carousel-react', () => ({
     default: () => [mocks.ref, mocks.api],
 }));
 vi.mock('@/components/specimen/signed-specimen-image', () => ({
-    default: ({
-        path,
-        alt,
-        onLoadStatusChange,
-    }: ComponentProps<typeof SignedSpecimenImage>) =>
-        createElement('img', {
-            alt,
-            'data-testid': onLoadStatusChange ? path : undefined,
-            onLoad: () => onLoadStatusChange?.(path, 'loaded'),
-            onError: () => onLoadStatusChange?.(path, 'error'),
-        }),
+    default: ({ alt }: ComponentProps<typeof SignedSpecimenImage>) =>
+        createElement('img', { alt }),
 }));
 beforeEach(() => vi.clearAllMocks());
 
 const specimen = createSpecimen();
-
-test('waits for every image, including an unselected one, and allows recovery', () => {
-    const onStatus = vi.fn();
-    render(
-        <SpecimenImageCarousel
-            specimen={specimen}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('pending');
-    fireEvent.load(screen.getByTestId('/specimens/12/images/101'));
-    expect(onStatus).toHaveBeenLastCalledWith('pending');
-    fireEvent.error(screen.getByTestId('/specimens/12/images/102'));
-    expect(onStatus).toHaveBeenLastCalledWith('error');
-    fireEvent.load(screen.getByTestId('/specimens/12/images/102'));
-    expect(onStatus).toHaveBeenLastCalledWith('loaded');
-});
-
-test('a failed image does not hide pending checks for other images', () => {
-    const onStatus = vi.fn();
-    render(
-        <SpecimenImageCarousel
-            specimen={specimen}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    fireEvent.error(screen.getByTestId('/specimens/12/images/102'));
-    expect(onStatus).toHaveBeenLastCalledWith('pending');
-    fireEvent.load(screen.getByTestId('/specimens/12/images/101'));
-    expect(onStatus).toHaveBeenLastCalledWith('error');
-});
-
-test('new image paths invalidate prior successful availability', () => {
-    const onStatus = vi.fn();
-    const { rerender } = render(
-        <SpecimenImageCarousel
-            specimen={specimen}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    screen
-        .getAllByAltText('Specimen URJ206')
-        .forEach(image => fireEvent.load(image));
-    expect(onStatus).toHaveBeenLastCalledWith('loaded');
-    const changedSpecimen = {
-        ...specimen,
-        images: specimen.images?.map(image => ({
-            ...image,
-            url: `${image.url}/new`,
-        })),
-    };
-    rerender(
-        <SpecimenImageCarousel
-            specimen={changedSpecimen}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('pending');
-});
-
-test('resets availability when switching keyed specimens', () => {
-    const onStatus = vi.fn();
-    const { rerender } = render(
-        <SpecimenImageCarousel
-            key={12}
-            specimen={specimen}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    fireEvent.load(screen.getByTestId('/specimens/12/images/101'));
-    fireEvent.error(screen.getByTestId('/specimens/12/images/102'));
-    expect(onStatus).toHaveBeenLastCalledWith('error');
-    rerender(
-        <SpecimenImageCarousel
-            key={13}
-            specimen={createSpecimen({ id: 13 })}
-            onImageAvailabilityChange={onStatus}
-        />,
-    );
-    expect(onStatus).toHaveBeenLastCalledWith('pending');
-});
 
 test('preserves the carousel capability gate when navigation is not locked', () => {
     vi.spyOn(mocks.api, 'canScrollPrev').mockReturnValue(false);

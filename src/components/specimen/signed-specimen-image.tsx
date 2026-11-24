@@ -4,9 +4,7 @@ import { useSignedResourceUrl } from '@/api/resources/hooks/use-signed-resource-
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
-
-export type ImageLoadStatus = 'pending' | 'loaded' | 'error';
+import React, { useState } from 'react';
 
 interface SignedSpecimenImageProps {
     path: string;
@@ -15,7 +13,6 @@ interface SignedSpecimenImageProps {
     className?: string;
     fill?: boolean;
     style?: React.CSSProperties;
-    onLoadStatusChange?: (path: string, status: ImageLoadStatus) => void;
 }
 
 export default function SignedSpecimenImage({
@@ -25,12 +22,10 @@ export default function SignedSpecimenImage({
     className,
     fill,
     style,
-    onLoadStatusChange,
 }: SignedSpecimenImageProps) {
     const {
         data: signedResourceUrlResult,
         isPending: isSignedResourceUrlResultPending,
-        isFetching,
         isError,
         refetch: refetchSignedResourceUrl,
     } = useSignedResourceUrl(path);
@@ -49,18 +44,6 @@ export default function SignedSpecimenImage({
         signedResource !== null && failedUrl === signedResource.url;
     const isImageLoaded =
         signedResource !== null && loadedUrl === signedResource.url;
-    const loadStatus: ImageLoadStatus =
-        isError ||
-        (signedResourceUrlResult && !signedResourceUrlResult.ok) ||
-        loadFailed
-            ? 'error'
-            : !isUrlLive || isRetrying || isFetching || !isImageLoaded
-              ? 'pending'
-              : 'loaded';
-
-    useEffect(() => {
-        onLoadStatusChange?.(path, loadStatus);
-    }, [path, loadStatus, onLoadStatusChange]);
 
     async function handleLoadError() {
         if (hasRetried) {
@@ -114,7 +97,6 @@ export default function SignedSpecimenImage({
                 style={style}
                 onError={handleLoadError}
                 onLoad={() => setLoadedUrl(signedResource.url)}
-                loading={onLoadStatusChange ? 'eager' : undefined}
                 draggable={false}
             />
         </React.Fragment>
