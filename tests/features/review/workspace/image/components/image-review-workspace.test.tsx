@@ -366,7 +366,7 @@ test.each(['Images ready', 'Fail image'])(
     },
 );
 
-test('the prediction editor and ID editor cannot be open together', async () => {
+test('the prediction editor hides Specimen ID editing and closes when switching images', async () => {
     const user = userEvent.setup();
     renderWorkspace();
     await user.click(screen.getByRole('button', { name: 'Images ready' }));
@@ -376,6 +376,10 @@ test('the prediction editor and ID editor cannot be open together', async () => 
     ).toBeInTheDocument();
     expect(
         screen.queryByRole('button', { name: 'Edit Specimen ID' }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Other image' }));
+    expect(
+        screen.queryByRole('button', { name: 'Cancel prediction' }),
     ).not.toBeInTheDocument();
 });
 

@@ -292,6 +292,11 @@ export default function ImageReviewWorkspace({
                 <Card className="lg:col-span-2">
                     <CardContent className="p-4">
                         <ImageReviewDetails
+                            key={
+                                editingSpecimen
+                                    ? `editing-${editingSpecimen.id}`
+                                    : currentImage?.id
+                            }
                             siteId={site.siteId}
                             collectionCycleId={collectionCycleId}
                             currentImage={currentImage}

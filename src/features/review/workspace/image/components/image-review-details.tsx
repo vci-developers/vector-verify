@@ -16,7 +16,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
 import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
 import ErrorBanner from '@/components/ui/error-banner';
-import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import PredictionRow from '@/features/review/workspace/image/components/prediction-row';
 import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
@@ -32,7 +31,9 @@ type DetailsState =
     | { status: 'error' }
     | { status: 'success'; specimen: Specimen };
 
-interface DetailsContentProps {
+interface ImageReviewDetailsProps {
+    siteId: number;
+    collectionCycleId?: number;
     currentImage: SpecimenImage | null;
     imageAvailability: ImageLoadStatus;
     editingSpecimen: Specimen | null;
@@ -43,17 +44,20 @@ interface DetailsContentProps {
     children?: ReactNode;
 }
 
-interface ImageReviewDetailsProps extends DetailsContentProps {
-    siteId: number;
-    collectionCycleId?: number;
-}
-
 export default function ImageReviewDetails({
     siteId,
     collectionCycleId,
-    ...contentProps
+    currentImage,
+    imageAvailability,
+    editingSpecimen,
+    onEditSpecimenId,
+    timezone,
+    readOnly,
+    state,
+    children,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
+    const [isEditing, setIsEditing] = useState(false);
     const { data: predictionResult, isError: isPredictionError } =
         useGetAllReviewLogs({
             siteId,
@@ -72,55 +76,6 @@ export default function ImageReviewDetails({
         isSpecimenIdError ||
         predictionResult?.ok === false ||
         specimenIdResult?.ok === false;
-    const { currentImage, editingSpecimen } = contentProps;
-
-    // Reset the editor on image changes without remounting the log queries.
-    return (
-        <>
-            {hasReviewLogsError && (
-                <div className="mb-4">
-                    <ErrorBanner message={t('reviewLogsError')} />
-                </div>
-            )}
-            <DetailsContent
-                key={
-                    editingSpecimen
-                        ? `editing-${editingSpecimen.id}`
-                        : currentImage?.id
-                }
-                {...contentProps}
-                predictionLogs={
-                    predictionResult?.ok
-                        ? predictionResult.data.logs
-                        : undefined
-                }
-                specimenIdLogs={
-                    specimenIdResult?.ok
-                        ? specimenIdResult.data.logs
-                        : undefined
-                }
-            />
-        </>
-    );
-}
-
-function DetailsContent({
-    currentImage,
-    predictionLogs,
-    specimenIdLogs,
-    imageAvailability,
-    editingSpecimen,
-    onEditSpecimenId,
-    timezone,
-    readOnly,
-    state,
-    children,
-}: DetailsContentProps & {
-    predictionLogs: ReviewLog[] | undefined;
-    specimenIdLogs: ReviewLog[] | undefined;
-}) {
-    const t = useTranslations('ReviewImage');
-    const [isEditing, setIsEditing] = useState(false);
 
     const isCurrentImageThumbnail =
         state.status === 'success' &&
@@ -173,12 +128,18 @@ function DetailsContent({
     }
 
     const latestEditLog =
-        currentImage && predictionLogs
-            ? getLatestPredictionEditLog(predictionLogs, currentImage.id)
+        currentImage && predictionResult?.ok
+            ? getLatestPredictionEditLog(
+                  predictionResult.data.logs,
+                  currentImage.id,
+              )
             : undefined;
     const specimenIdEditHistory =
-        state.status === 'success' && specimenIdLogs
-            ? getSpecimenIdEditHistory(specimenIdLogs, state.specimen.id)
+        state.status === 'success' && specimenIdResult?.ok
+            ? getSpecimenIdEditHistory(
+                  specimenIdResult.data.logs,
+                  state.specimen.id,
+              )
             : undefined;
     const isEdited = latestEditLog !== undefined;
     const editorName = latestEditLog?.performedBy
@@ -234,6 +195,9 @@ function DetailsContent({
 
     return (
         <div className="space-y-4">
+            {hasReviewLogsError && (
+                <ErrorBanner message={t('reviewLogsError')} />
+            )}
             <div className="space-y-2">
                 <div className="flex items-center gap-2">
                     <p className="text-muted-foreground text-sm uppercase">
