@@ -10,24 +10,14 @@ export type ReportingSegment = {
     sessionsBySiteId: Map<number, Session[]>;
 } & ({ kind: 'cycle'; cycleNumber: number } | { kind: 'month' });
 
-function groupSessionsBySiteId<PeriodKey>(
-    sessions: Session[],
-    getPeriodKey: (session: Session) => PeriodKey,
-): Map<PeriodKey, Map<number, Session[]>> {
-    const sessionsBySiteIdByPeriodKey = new Map<
-        PeriodKey,
-        Map<number, Session[]>
-    >();
+function groupSessionsBySiteId(sessions: Session[]): Map<number, Session[]> {
+    const sessionsBySiteId = new Map<number, Session[]>();
     for (const session of sessions) {
-        const periodKey = getPeriodKey(session);
-        const sessionsBySiteId =
-            sessionsBySiteIdByPeriodKey.get(periodKey) ?? new Map();
         const siteSessions = sessionsBySiteId.get(session.siteId) ?? [];
         siteSessions.push(session);
         sessionsBySiteId.set(session.siteId, siteSessions);
-        sessionsBySiteIdByPeriodKey.set(periodKey, sessionsBySiteId);
     }
-    return sessionsBySiteIdByPeriodKey;
+    return sessionsBySiteId;
 }
 
 export function buildReportingSegments({
@@ -42,10 +32,6 @@ export function buildReportingSegments({
     endMonth: Date;
 }): ReportingSegment[] {
     if (collectionCycles.length > 0) {
-        const sessionsBySiteIdByCycleId = groupSessionsBySiteId(
-            sessions,
-            session => session.collectionCycleId,
-        );
         return [...collectionCycles]
             .sort(
                 (firstCycle, secondCycle) =>
@@ -65,15 +51,13 @@ export function buildReportingSegments({
                     cycle.timezone,
                     'yyyy-MM-dd',
                 ),
-                sessionsBySiteId:
-                    sessionsBySiteIdByCycleId.get(cycle.id) ?? new Map(),
+                sessionsBySiteId: groupSessionsBySiteId(
+                    sessions.filter(
+                        session => session.collectionCycleId === cycle.id,
+                    ),
+                ),
             }));
     }
-    const sessionsBySiteIdByMonthKey = groupSessionsBySiteId(
-        sessions,
-        session =>
-            formatDateInTimezone(session.collectionDate, 'UTC', 'yyyy-MM'),
-    );
     return eachMonthOfInterval({ start: startMonth, end: endMonth }).map(
         month => {
             const monthKey = format(month, 'yyyy-MM');
@@ -82,8 +66,16 @@ export function buildReportingSegments({
                 key: `month-${monthKey}`,
                 startDate: format(month, 'yyyy-MM-dd'),
                 endDate: format(endOfMonth(month), 'yyyy-MM-dd'),
-                sessionsBySiteId:
-                    sessionsBySiteIdByMonthKey.get(monthKey) ?? new Map(),
+                sessionsBySiteId: groupSessionsBySiteId(
+                    sessions.filter(
+                        session =>
+                            formatDateInTimezone(
+                                session.collectionDate,
+                                'UTC',
+                                'yyyy-MM',
+                            ) === monthKey,
+                    ),
+                ),
             };
         },
     );
