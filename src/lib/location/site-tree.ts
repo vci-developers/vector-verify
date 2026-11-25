@@ -19,6 +19,12 @@ export function getLocationTypeName(site: Site): string {
     return Object.keys(site.locationHierarchy).at(-1) ?? 'Location';
 }
 
+export function getSiteIdsWithChildren(sites: Site[]): Set<number> {
+    return new Set(
+        sites.filter(site => site.parentId != null).map(site => site.parentId!),
+    );
+}
+
 export function getUniqueDistricts(sites: Site[]): string[] {
     const districts = [
         ...new Set(sites.map(site => site.district?.trim()).filter(Boolean)),

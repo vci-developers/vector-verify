@@ -67,7 +67,13 @@ export default function OperationsPageClient() {
     const t = useTranslations('Operations');
     const tCommon = useTranslations('Common');
     const [filters, setFilters] = useOperationsFilters();
-    const { activeTab, startMonth, endMonth, selectedLocations } = filters;
+    const {
+        activeTab,
+        startMonth,
+        endMonth,
+        selectedLocations,
+        selectedSiteIds,
+    } = filters;
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const {
@@ -86,12 +92,17 @@ export default function OperationsPageClient() {
         : [];
 
     const {
+        usesLegacyStructure,
         locationTypeName,
         locationDropdownOptions,
         selectedSiteIdsParam,
         descendantsOfSelectedLocations,
         siteIdToLocationLabel,
-    } = useLocationMultiSelection(accessibleSites, selectedLocations);
+    } = useLocationMultiSelection(
+        accessibleSites,
+        selectedLocations,
+        selectedSiteIds,
+    );
 
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(
         null,
@@ -99,7 +110,13 @@ export default function OperationsPageClient() {
 
     useEffect(() => {
         setSelectedMarkerId(null);
-    }, [selectedLocations, startMonth, endMonth, setSelectedMarkerId]);
+    }, [
+        selectedLocations,
+        selectedSiteIds,
+        startMonth,
+        endMonth,
+        setSelectedMarkerId,
+    ]);
 
     function handleTabChange(tab: OperationsTab) {
         setFilters({ activeTab: tab });
@@ -184,10 +201,12 @@ export default function OperationsPageClient() {
                         tabs={visibleTabs}
                         activeTab={activeTab}
                         onTabChange={handleTabChange}
+                        usesLegacyStructure={usesLegacyStructure}
                         locationTypeName={locationTypeName}
                         locationDropdownOptions={locationDropdownOptions}
                         selectedLocations={selectedLocations}
                         onLocationsChange={handleLocationsChange}
+                        isExportDisabled={selectedSiteIdsParam === undefined}
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={handleStartMonthChange}
@@ -237,9 +256,11 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'field-user-compliance' && (
                                 <OperationsFieldUserCompliance
-                                    siteIds={selectedSiteIdsParam}
-                                    siteIdToLocationLabel={
-                                        siteIdToLocationLabel
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
+                                    descendantsOfSelectedLocations={
+                                        descendantsOfSelectedLocations
                                     }
                                     startDate={startDate}
                                     endDate={endDate}
@@ -248,7 +269,7 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'intervention-metrics' && (
                                 <OperationsInterventionMetrics
-                                    sites={descendantsOfSelectedLocations}
+                                    siteIds={selectedSiteIdsParam}
                                     startDate={startDate}
                                     endDate={endDate}
                                 />

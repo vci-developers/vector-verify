@@ -1,14 +1,13 @@
 'use client';
 
 import { Fragment } from 'react';
-import type { Site } from '@/api/site/validation/site-schema';
-import { useGetSessionsMetricsByDistricts } from '@/api/session/hooks/use-get-sessions-metrics';
+import { useGetSessionsMetrics } from '@/api/session/hooks/use-get-sessions-metrics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import StatBadge from '@/components/ui/stat-badge';
-import { getUniqueDistricts } from '@/lib/location/site-tree';
 import {
     buildInterventionMetricsTotals,
+    formatInterventionCount,
     formatInterventionPercent,
     formatInterventionRatio,
     getCoverageCardStyle,
@@ -19,39 +18,28 @@ import { cn } from '@/utils/cn';
 import { StatCardSkeleton } from '@/components/ui/stat-card-skeleton';
 
 interface OperationsInterventionMetricsProps {
-    sites: Site[];
+    siteIds: number[];
     startDate: string;
     endDate: string;
 }
 
 export default function OperationsInterventionMetrics({
-    sites,
+    siteIds,
     startDate,
     endDate,
 }: OperationsInterventionMetricsProps) {
     const t = useTranslations('OperationsInterventionMetrics');
 
-    const districts = getUniqueDistricts(sites);
+    const {
+        data: getSessionsMetricsResult,
+        isPending: isGetSessionsMetricsPending,
+    } = useGetSessionsMetrics({ siteIds, startDate, endDate });
 
-    const sessionsMetricsQueries = useGetSessionsMetricsByDistricts(
-        districts,
-        startDate,
-        endDate,
-    );
+    const isLoading = isGetSessionsMetricsPending || !getSessionsMetricsResult;
+    const isError = !isLoading && !getSessionsMetricsResult.ok;
 
-    const isLoading = sessionsMetricsQueries.some(query => query.isPending);
-
-    const failedSessionsMetricsQuery = sessionsMetricsQueries.filter(
-        query => query.data && !query.data.ok,
-    );
-    const isError = !isLoading && failedSessionsMetricsQuery.length > 0;
-
-    const interventionMetricsTotals = !isLoading
-        ? buildInterventionMetricsTotals(
-              sessionsMetricsQueries
-                  .map(query => query.data)
-                  .filter(data => data != null),
-          )
+    const interventionMetricsTotals = getSessionsMetricsResult?.ok
+        ? buildInterventionMetricsTotals(getSessionsMetricsResult.data)
         : undefined;
 
     const netUsageRate = interventionMetricsTotals?.netUsageRatePercent ?? null;
@@ -71,6 +59,9 @@ export default function OperationsInterventionMetrics({
 
             {isError && <ErrorBanner message={t('failedToLoad')} />}
 
+            <h3 className="text-sm font-semibold">
+                {t('bednetsSectionTitle')}
+            </h3>
             <div className="grid gap-3 sm:grid-cols-3">
                 <Card
                     className={cn(
@@ -200,6 +191,43 @@ export default function OperationsInterventionMetrics({
                                         label={t('peopleSleptUnderNet')}
                                         value={
                                             interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
+                                            0
+                                        }
+                                    />
+                                </div>
+                            </Fragment>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <h3 className="text-sm font-semibold">{t('irsSectionTitle')}</h3>
+            <div className="grid gap-3 sm:grid-cols-3">
+                <Card className="border-border bg-card gap-0 py-0">
+                    <CardContent className="flex h-full flex-col p-4">
+                        <p className="text-muted-foreground text-sm">
+                            {t('housesSprayedTitle')}
+                        </p>
+                        {isLoading || isError ? (
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
+                        ) : (
+                            <Fragment>
+                                <p className="mt-1 text-5xl font-semibold tracking-tight">
+                                    {formatInterventionCount(
+                                        interventionMetricsTotals?.housesSprayedInLast12Months ??
+                                            null,
+                                    )}
+                                </p>
+                                <p className="text-muted-foreground mt-2 text-sm">
+                                    {t('housesSprayedDescription')}
+                                </p>
+                                <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                                    <StatBadge
+                                        label={t('housesUsedForCollection')}
+                                        value={
+                                            interventionMetricsTotals?.housesUsedForCollection ??
                                             0
                                         }
                                     />

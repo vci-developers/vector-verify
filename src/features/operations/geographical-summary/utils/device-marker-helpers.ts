@@ -1,4 +1,5 @@
 import type { Site } from '@/api/site/validation/site-schema';
+import { getSiteIdsWithChildren } from '@/lib/location/site-tree';
 import type { SiteDeviceActivity } from '@/features/operations/geographical-summary/utils/device-activity-helpers';
 import type { GeocodableMarker } from '@/features/operations/geographical-summary/utils/geographical-summary-helpers';
 import {
@@ -29,10 +30,8 @@ export function buildDeviceMarkers(
         descendantsOfSelectedLocation.map(site => [site.siteId, site]),
     );
 
-    const siteIdsWithChildren = new Set(
-        descendantsOfSelectedLocation
-            .filter(site => site.parentId != null)
-            .map(site => site.parentId!),
+    const siteIdsWithChildren = getSiteIdsWithChildren(
+        descendantsOfSelectedLocation,
     );
 
     const markerNameToDeviceData = new Map<

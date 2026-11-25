@@ -14,14 +14,19 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import { getSiteLabelParts } from '@/features/review/dhis2-sync/utils/get-site-label-parts';
 import MissingSpecimensTooltip from './missing-specimens-tooltip';
+import { useReviewAccess } from '@/features/review/hooks/use-review-access';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBanner from '@/components/ui/error-banner';
 import type { Specimen } from '@/api/specimen/validation/specimen-schema';
 import type { NetworkError } from '@/lib/network/network-error';
 import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
 import { getLatestPredictionEditLog } from '@/features/review/workspace/image/utils/get-latest-prediction-edit-log';
+import { orderSpecimensByHousehold } from '@/features/review/utils/household-specimens';
+import { useIsKenyaProgram } from '@/lib/hooks/use-is-kenya-program';
+import SpecimenHouseholdRows from '@/features/review/workspace/image/components/specimen-household-rows';
 
 interface ImageReviewWorkspaceProps {
+    initialSpecimenId?: number;
     site: Site;
     sessions: Session[];
     startDate?: string;
@@ -39,6 +44,7 @@ type SpecimensState =
     | { status: 'success'; specimens: Specimen[] };
 
 export default function ImageReviewWorkspace({
+    initialSpecimenId,
     site,
     sessions,
     startDate,
@@ -51,7 +57,11 @@ export default function ImageReviewWorkspace({
 }: ImageReviewWorkspaceProps) {
     const t = useTranslations('ReviewImage');
     const tCommon = useTranslations('Common');
-    const [specimenIndex, setSpecimenIndex] = useState(0);
+    const isReviewReadOnly = useReviewAccess() !== 'writable';
+    const isKenyaProgram = useIsKenyaProgram(site.programId);
+    const [selectedSpecimenIndex, setSpecimenIndex] = useState<number | null>(
+        null,
+    );
     const [currentImage, setCurrentImage] = useState<SpecimenImage | null>(
         null,
     );
@@ -82,7 +92,12 @@ export default function ImageReviewWorkspace({
               ? { status: 'error', error: getAllSpecimensResult.error }
               : {
                     status: 'success',
-                    specimens: getAllSpecimensResult.data.specimens,
+                    specimens: isKenyaProgram
+                        ? orderSpecimensByHousehold(
+                              getAllSpecimensResult.data.specimens,
+                              sessions,
+                          )
+                        : getAllSpecimensResult.data.specimens,
                 };
 
     const { data: getAllReviewLogsResult } = useGetAllReviewLogs({
@@ -130,13 +145,25 @@ export default function ImageReviewWorkspace({
                     <Button variant="outline" onClick={onGoToPreviousStep}>
                         {tCommon('previous')}
                     </Button>
-                    <Button onClick={onGoToNextStep}>
-                        {t('continueToCertification')}
-                    </Button>
+                    {!isReviewReadOnly && (
+                        <Button onClick={onGoToNextStep}>
+                            {t('continueToCertification')}
+                        </Button>
+                    )}
                 </div>
             </div>
         );
     }
+    const specimenIndex =
+        selectedSpecimenIndex ??
+        (specimensState.status === 'success'
+            ? Math.max(
+                  0,
+                  specimensState.specimens.findIndex(
+                      specimen => specimen.id === initialSpecimenId,
+                  ),
+              )
+            : 0);
     const currentSpecimen =
         specimensState.status === 'success'
             ? specimensState.specimens[specimenIndex]
@@ -177,9 +204,7 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(index =>
-                                    Math.max(index - 1, 0),
-                                )
+                                setSpecimenIndex(Math.max(specimenIndex - 1, 0))
                             }
                             disabled={specimenIndex === 0}
                         >
@@ -191,9 +216,9 @@ export default function ImageReviewWorkspace({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                setSpecimenIndex(index =>
+                                setSpecimenIndex(
                                     Math.min(
-                                        index + 1,
+                                        specimenIndex + 1,
                                         specimensState.specimens.length - 1,
                                     ),
                                 )
@@ -267,7 +292,14 @@ export default function ImageReviewWorkspace({
                                         }
                                       : { status: 'loading' }
                             }
-                        />
+                        >
+                            {isKenyaProgram && currentSpecimen && (
+                                <SpecimenHouseholdRows
+                                    specimen={currentSpecimen}
+                                    programId={site.programId}
+                                />
+                            )}
+                        </ImageReviewDetails>
                     </CardContent>
                 </Card>
             </div>
@@ -276,12 +308,14 @@ export default function ImageReviewWorkspace({
                 <Button variant="outline" onClick={onGoToPreviousStep}>
                     {tCommon('previous')}
                 </Button>
-                <Button
-                    onClick={onGoToNextStep}
-                    disabled={specimensState.status !== 'success'}
-                >
-                    {t('continueToCertification')}
-                </Button>
+                {!isReviewReadOnly && (
+                    <Button
+                        onClick={onGoToNextStep}
+                        disabled={specimensState.status !== 'success'}
+                    >
+                        {t('continueToCertification')}
+                    </Button>
+                )}
             </div>
         </div>
     );

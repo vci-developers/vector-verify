@@ -4,7 +4,6 @@ import { formAnswerKeys } from '@/api/form-answer/form-answer-keys';
 import { useGetFormAnswersBySessionIds } from '@/api/form-answer/hooks/use-get-form-answers-by-session-id';
 import type { GetFormAnswersBySessionIdSuccessPayload } from '@/api/form-answer/validation/get-form-answers-by-session-id-schema';
 import { useGetCurrentFormByProgramId } from '@/api/form/hooks/use-get-current-form-by-program-id';
-import type { FormQuestion } from '@/api/form-question/validation/form-question-schema';
 import { useResolveSessionConflicts } from '@/api/session/hooks/use-resolve-session-conflicts';
 import { sessionKeys } from '@/api/session/session-keys';
 import type { Session } from '@/api/session/validation/session-schema';
@@ -22,15 +21,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMetadataReviewState } from '../hooks/use-metadata-review-state';
 import { applyConflictResolutions } from '../utils/apply-conflict-resolutions';
-import { buildDynamicFormMetadata } from '@/features/review/workspace/metadata/utils/build-dynamic-form-metadata';
-import {
-    buildSurveillanceSection,
-    type MetadataSection,
-} from '../utils/metadata-section';
-import {
-    evaluateDisabledRowIds,
-    evaluateUnmetRequiredRowIds,
-} from '../utils/evaluate-question-answerability';
+import { buildMetadataReviewSections } from '../utils/build-metadata-review-sections';
+import { getMetadataReviewBlockers } from '../utils/get-metadata-review-blockers';
 import MetadataReviewTable from './metadata-review-table';
 import ErrorBanner from '@/components/ui/error-banner';
 import EmptyBanner from '@/components/ui/empty-banner';
@@ -107,11 +99,7 @@ export default function MetadataReviewWorkspace({
         );
     }
 
-    let sections: MetadataSection[];
-    let resolvableSessions: Session[];
-    let sessionsMissingSurveillanceForm: Session[] = [];
-    let questionsById = new Map<number, FormQuestion>();
-    let currentFormSessionIds = new Set<number>();
+    let metadataReviewSections: ReturnType<typeof buildMetadataReviewSections>;
 
     if (isDynamicFormMode) {
         if (formAnswerQueries.some(query => query.isPending)) {
@@ -147,16 +135,11 @@ export default function MetadataReviewWorkspace({
                 ];
             }),
         );
-        const dynamicFormMetadata = buildDynamicFormMetadata(
-            sessions,
+        metadataReviewSections = buildMetadataReviewSections(sessions, {
+            mode: 'dynamic',
+            currentForm: getCurrentFormByProgramIdResult.data,
             formAnswersResponseBySessionId,
-            getCurrentFormByProgramIdResult.data,
-        );
-
-        resolvableSessions = sessions;
-        sections = dynamicFormMetadata.sections;
-        questionsById = dynamicFormMetadata.questionsById;
-        currentFormSessionIds = dynamicFormMetadata.currentFormSessionIds;
+        });
     } else {
         if (surveillanceFormQueries.some(query => query.isPending)) {
             return <SkeletonList count={6} height="lg" width="full" />;
@@ -198,67 +181,30 @@ export default function MetadataReviewWorkspace({
             }),
         );
 
-        const hasAnySurveillanceForm = [
-            ...surveillanceFormBySessionId.values(),
-        ].some(surveillanceForm => surveillanceForm !== null);
-
-        resolvableSessions = hasAnySurveillanceForm
-            ? sessions.filter(
-                  session =>
-                      surveillanceFormBySessionId.get(session.sessionId) !=
-                      null,
-              )
-            : sessions;
-        sessionsMissingSurveillanceForm = hasAnySurveillanceForm
-            ? sessions.filter(
-                  session =>
-                      surveillanceFormBySessionId.get(session.sessionId) ==
-                      null,
-              )
-            : [];
-
-        sections = [
-            buildSurveillanceSection(
-                resolvableSessions,
-                surveillanceFormBySessionId,
-            ),
-        ];
+        metadataReviewSections = buildMetadataReviewSections(sessions, {
+            mode: 'surveillance',
+            surveillanceFormBySessionId,
+        });
     }
 
-    const disabledRowIds = evaluateDisabledRowIds(
+    const {
         sections,
-        resolutionsByMetadataRowId,
-        questionsById,
-    );
-
-    const unmetRequiredRowIds = evaluateUnmetRequiredRowIds(
-        sections,
-        resolutionsByMetadataRowId,
-        disabledRowIds,
         questionsById,
         currentFormSessionIds,
-    );
+        resolvableSessions,
+        sessionsMissingSurveillanceForm,
+    } = metadataReviewSections;
 
-    const areAllConflictsResolved = sections.every(section =>
-        section.rows.every(
-            row =>
-                (!row.hasConflict ||
-                    resolutionsByMetadataRowId.has(row.id) ||
-                    disabledRowIds.has(row.id)) &&
-                !unmetRequiredRowIds.has(row.id),
-        ),
-    );
-
-    const unresolvedConflictCount = sections.reduce(
-        (count, section) =>
-            count +
-            section.rows.filter(
-                row =>
-                    row.hasConflict &&
-                    !resolutionsByMetadataRowId.has(row.id) &&
-                    !disabledRowIds.has(row.id),
-            ).length,
-        0,
+    const {
+        disabledRowIds,
+        unmetRequiredRowIds,
+        unresolvedConflictCount,
+        areAllConflictsResolved,
+    } = getMetadataReviewBlockers(
+        sections,
+        resolutionsByMetadataRowId,
+        questionsById,
+        currentFormSessionIds,
     );
 
     const unmetRequiredCount = unmetRequiredRowIds.size;
