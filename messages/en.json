@@ -88,7 +88,10 @@
     "CollectionCycle": {
         "allCycles": "All Collection Cycles",
         "cycleLabel": "Cycle {cycleNumber} · {start} – {end}",
-        "badgeLabel": "Cycle {cycleNumber}"
+        "badgeLabel": "Cycle {cycleNumber}",
+        "filterByCycle": "Filter by collection cycle",
+        "searchCycles": "Search collection cycles...",
+        "noCyclesFound": "No matching collection cycles."
     },
     "Operations": {
         "operations": "Operations",
@@ -97,6 +100,8 @@
         "selectDropdownPlaceholder": "Select {locationType}(s)",
         "searchLocationPlaceholder": "Search {locationType}s",
         "allLocations": "All locations",
+        "expandLocation": "Expand {name}",
+        "collapseLocation": "Collapse {name}",
         "exportData": "Export Data"
     },
     "OperationsGeographicalSummary": {
@@ -170,18 +175,27 @@
         "labelExclusionExplanation": "Cannot be Determined specimens, UNKNOWN specimens, and specimens with labels containing 'unknown' were excluded from the sensitivity and specificity calculations due to ambiguity. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded. A label containing 'unknown' indicates annotator uncertainty."
     },
     "OperationsFieldTeamPerformance": {
-        "fieldTeamPerformance": "Field Team Performance",
-        "districtCollectors": "District Collectors",
-        "activeCollectors": "Active Collectors",
-        "submittedThisOrLastMonth": "Submitted this or last month",
-        "noSubmissionsFound": "No submissions found for this location and date range.",
-        "failedToLoad": "Failed to load sessions. Please try again later or contact support.",
-        "collector": "Collector",
-        "session": "session"
+        "reportingError": "Failed to load reporting data. Please try again later or contact support.",
+        "noActiveSites": "No active sites for the selected filters.",
+        "fullyReporting": "Locations fully reporting",
+        "sitesReporting": "Sites reporting",
+        "countOfTotal": "{count} of {total}",
+        "locationColumn": "{locationLevel} / {siteLevel} / Collector",
+        "cycleDateRange": "{start} – {end}",
+        "fullyReportedSegments": "{kind, select, cycle {Cycles fully reported} other {Months fully reported}}",
+        "sessionsReported": "Sessions reported",
+        "nothingReported": "Nothing reported",
+        "village": "Village",
+        "house": "House",
+        "unknownLocation": "Unknown location",
+        "collectorsReporting": "Collectors reporting",
+        "collectorCount": "{count, plural, =0 {No collectors} one {# collector} other {# collectors}}",
+        "unknownCollector": "Unknown collector",
+        "sessionCount": "{count, plural, one {# session} other {# sessions}}"
     },
     "OperationsInterventionMetrics": {
         "interventionMetricsTitle": "Intervention Coverage Metrics",
-        "interventionMetricsDescription": "Bednet coverage across surveyed households for the selected locations and date range.",
+        "interventionMetricsDescription": "Bednet and indoor residual spraying (IRS) coverage across surveyed households for the selected locations and date range.",
         "failedToLoad": "Failed to load intervention metrics. Please try again later or contact support.",
         "netUsageTitle": "Net Usage Rate",
         "netUsageSubtitle": "{peopleUnderNet} of {peopleSurveyed} people surveyed slept under a net",
@@ -194,7 +208,11 @@
         "fedAnophelesRatioTitle": "Fed Anopheles / People Slept Under Net",
         "fedAnophelesRatioDescription": "Fully fed Anopheles mosquitoes collected divided by total people who slept under a net.",
         "totalFedAnopheles": "Fed Anopheles",
-        "peopleSleptUnderNet": "People Slept Under Net"
+        "peopleSleptUnderNet": "People Slept Under Net",
+        "housesSprayedTitle": "Houses Sprayed (Last 12 Months)",
+        "housesSprayedDescription": "Households inspected that received indoor residual spraying (IRS) in the last 12 months.",
+        "bednetsSectionTitle": "Bednets (LLIN)",
+        "irsSectionTitle": "Indoor Residual Spraying (IRS)"
     },
     "Review": {
         "review": "Review",
@@ -203,7 +221,8 @@
         "somethingWentWrong": "Something went wrong loading this page. Please try again later or contact support.",
         "sitesListTab": "SITES LIST",
         "submissionsTab": "SUBMISSIONS",
-        "sessionsTab": "SESSIONS"
+        "sessionsTab": "SESSIONS",
+        "specimensTab": "SPECIMENS"
     },
     "ReviewSitesList": {
         "needsReview": "Needs Review",
@@ -244,12 +263,29 @@
         "reassignResetSuccess": "Session reassigned. The affected Review Unit was reset to Needs Review.",
         "reassignError": "Failed to reassign the session. Please try again."
     },
+    "SpecimenChangelog": {
+        "openChanges": "View {count, plural, one {# prediction change} other {# prediction changes}} for specimen {specimenId}",
+        "title": "Specimen {specimenId}",
+        "context": "Session {sessionId} · {siteDisplayName}",
+        "predictionChanges": "Prediction changes ({count})",
+        "timezone": "Times shown in {timezone}",
+        "image": "Image {number}",
+        "species": "Species",
+        "sex": "Sex",
+        "abdomenStatus": "Abdomen",
+        "changedTo": "changed to",
+        "unknownReviewer": "Unknown reviewer",
+        "noChanges": "No prediction changes",
+        "imageId": "Image ID {id}",
+        "unknownImage": "Image unavailable",
+        "unavailableChanges": "Changed-field details are unavailable for this log entry."
+    },
     "ReviewWorkspace": {
         "backToSites": "Back to Sites",
         "metadataStep": "Metadata Review",
         "imageStep": "Image Review",
         "certificationStep": "Certification",
-        "readOnlyNotice": "This site is fully reviewed and is shown in read-only mode.",
+        "readOnlyNotice": "{reason, select, fullyReviewed {This site is fully reviewed and is shown in read-only mode.} other {This review is read-only.}}",
         "sessionsError": "Failed to load sessions. Please try again."
     },
     "ReviewMetadata": {
@@ -262,6 +298,7 @@
         "requiredAnswersRemaining": "{count, plural, one {# required answer left to supply} other {# required answers left to supply}}",
         "editValueLabel": "Edit value",
         "valueColumn": "Value",
+        "household": "Household: ",
         "collectionDate": "Collection Date: ",
         "sessionCreated": "Session Created: ",
         "selectValuePlaceholder": "Select value",
@@ -290,6 +327,8 @@
         "continueToCertification": "Continue to Certification",
         "specimenId": "Specimen ID",
         "sessionId": "Session ID",
+        "household": "Household",
+        "collectionLocation": "Collection Location",
         "imagesCaptured": "Images Captured",
         "needsFurtherProcessing": "Needs Further Processing",
         "yes": "Yes",
@@ -376,5 +415,59 @@
         "noSpecimenData": "No specimen data",
         "numRemaining": "{count} remaining",
         "pageOfTotal": "{page} of {total}"
+    },
+    "ReviewSpecimens": {
+        "cycle": "Cycle",
+        "specimen": "Specimen",
+        "session": "Session",
+        "site": "Site",
+        "species": "Species",
+        "sex": "Sex",
+        "abdomenStatus": "Abdomen status",
+        "images": "Images",
+        "changes": "Changes",
+        "review": "Review",
+        "search": "Search by specimen ID...",
+        "allSites": "All sites",
+        "filterSearch": {
+            "site": "Search sites...",
+            "species": "Search species...",
+            "sex": "Search sex...",
+            "abdomenStatus": "Search abdomen status..."
+        },
+        "noFilterResults": "No matching options.",
+        "allFilters": {
+            "species": "All species",
+            "sex": "All sexes",
+            "abdomenStatus": "All abdomen statuses"
+        },
+        "preview": "Preview images for specimen {specimenId}",
+        "previewDescription": "Read-only image preview. Use the left and right arrow keys to navigate.",
+        "error": "Unable to load specimens or their sessions.",
+        "logsError": "Unable to load changes.",
+        "empty": "No specimens match these filters.",
+        "conflicts": "Resolve metadata conflicts and required fields in step 1 before reviewing images.",
+        "accessError": "Unable to verify review access.",
+        "missingCycle": "This specimen has no assigned collection cycle.",
+        "checking": "Checking metadata conflicts...",
+        "loading": "Loading...",
+        "total": "{count, plural, one {# specimen} other {# specimens}}",
+        "pageOfTotal": "Page {page} of {total}",
+        "paginationLabel": "Specimens pagination",
+        "goToPage": "Go to page {page}",
+        "previous": "Previous",
+        "next": "Next",
+        "allCycles": "All cycles",
+        "sexValues": {
+            "Female": "Female",
+            "Male": "Male",
+            "Unknown": "Unknown"
+        },
+        "abdomenStatusValues": {
+            "Unfed": "Unfed",
+            "Fully Fed": "Fully Fed",
+            "Gravid": "Gravid",
+            "Unknown": "Unknown"
+        }
     }
 }

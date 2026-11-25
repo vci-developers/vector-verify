@@ -90,6 +90,14 @@ or resolve a conflict across more than one Review Unit at a time. Mirrors the
 **Sync Task** key (`collectionCycleId, siteId`). _Avoid_: site-month, period,
 batch, the selected range (as a unit)
 
+**View-Only Access**: A user-level state in which every part of Review is
+visible but no Review write is possible — no certifying, conflict resolution,
+prediction edits, cycle reassignment, or DHIS2 sync. Distinct from a **Fully
+Reviewed** site, which is read-only because the data is finished, not because of
+who is looking. Annotation is unaffected. Currently granted to every user of the
+Kenya program; intended to move to a permission later. _Avoid_: locked, disabled
+review, temporary read-only
+
 ### Core Entities
 
 **Program**: The top-level organizational unit. All sites, users, sessions, and
@@ -236,6 +244,17 @@ identity fields**. The mobile app guarantees distinct units within one Session.
 Session Units exist only under **Dynamic Form** programs (legacy/surveillance
 programs have none). _Avoid_: sub-session, repeat, group
 
+**Household**: In Kenya, the household one Session visits — one Session is one
+Household. Labelled in Review by the session's `assign_this_household_a_number`
+answer, falling back to the session ID. Kenya Review lists Households in session
+order (creation order, as the backend returns them). _Avoid_: house (Uganda
+legacy site level), session (in UI copy)
+
+**Collection Location**: In Kenya, the Session Unit's place of collection
+(Indoors, Outdoors, Animal Shelter), read from the unit's
+`isUnitIdentityComponent` answer. Specimens without a `sessionUnitId` have no
+Collection Location and are labelled by Household only. _Avoid_: trap, room
+
 **Form Mode**: Which form system a Program uses — **exclusive per program**.
 **Surveillance Form** (legacy, e.g. Uganda): a fixed-schema form
 (`GET /sessions/{id}/surveillance-form`) with a hardcoded field set. **Dynamic
@@ -347,6 +366,11 @@ UX/efficiency measure, not a correctness boundary.
 **Specimen**: A single captured mosquito associated with a session. _Avoid_:
 Sample, mosquito
 
+**Specimen ID**: The field-assigned string identifying a specimen (e.g.
+`URJ206`), distinct from its internal record id. Editable in Review; an edited
+Specimen ID stays marked and keeps its original value visible. _Avoid_: Label,
+tag
+
 **Annotation Task**: A curated set of specimens assigned to a VCO for
 Annotation. _Avoid_: Task (alone, ambiguous)
 
@@ -440,6 +464,17 @@ span several. _Avoid_: per-site classification (double-counts roaming devices �
 the original bug). Activity is always evaluated **as-of-today** (the current
 cycle), independent of the page's date filter. _Avoid_: Online/offline,
 connected, Lapsing (removed), rolling calendar months (replaced by cycles)
+
+**Site Reporting**: Whether each **Sentinel Site** sent data in each
+**Collection Cycle** (calendar month for programs with no Collection Schedule),
+shown as the Field Team Performance tab: location › site › collector rows. A
+site is **reporting** for a cycle when it has at least one surveillance
+**Session** the backend assigned to that cycle (month fallback: by
+`collectionDate`), in any review state — it tracks VHT collection, not VCO
+review. `submittedAt` is not used. Only active sites (`isActive`) are listed. A
+cycle is **fully reported** for a location when every one of its sites reported.
+A collector is listed only if they have a session in the range. _Avoid_: sent,
+submitted, complete (a cycle can end without full data)
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by

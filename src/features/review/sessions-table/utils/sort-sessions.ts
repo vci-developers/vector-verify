@@ -1,7 +1,7 @@
 import type { CollectionCycle } from '@/api/collection-cycle/validation/collection-cycle-schema';
 import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
-import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 
 export type SortColumn =
     | 'collectionCycle'

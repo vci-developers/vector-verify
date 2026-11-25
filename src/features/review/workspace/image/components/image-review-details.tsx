@@ -19,7 +19,7 @@ import PredictionRow from '@/features/review/workspace/image/components/predicti
 import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 type DetailsState =
     | { status: 'loading' }
@@ -32,6 +32,7 @@ interface ImageReviewDetailsProps {
     timezone: string | null;
     readOnly: boolean;
     state: DetailsState;
+    children?: ReactNode;
 }
 
 export default function ImageReviewDetails({
@@ -40,6 +41,7 @@ export default function ImageReviewDetails({
     timezone,
     readOnly,
     state,
+    children,
 }: ImageReviewDetailsProps) {
     const t = useTranslations('ReviewImage');
     const [isEditing, setIsEditing] = useState(false);
@@ -176,6 +178,8 @@ export default function ImageReviewDetails({
                         />
                     )}
                 </dd>
+
+                {state.status === 'success' && children}
 
                 <dt className="text-muted-foreground">{t('imagesCaptured')}</dt>
                 <dd

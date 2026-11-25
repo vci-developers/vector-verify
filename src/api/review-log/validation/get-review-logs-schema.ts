@@ -6,7 +6,10 @@ import {
 
 export const getReviewLogsQueryParamsSchema = z.object({
     siteId: z.coerce.number().optional(),
+    collectionCycleId: z.coerce.number().optional(),
+    specimenId: z.coerce.number().optional(),
     action: reviewLogActionSchema.optional(),
+    hasChanges: z.enum(['true', 'false']).optional(),
     page: z.coerce.number().min(1).optional(),
     size: z.coerce.number().min(1).max(100).optional(),
 });

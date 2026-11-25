@@ -9,6 +9,7 @@ export const reviewLogActionSchema = z.enum([
 
 export const reviewLogSchema = z.object({
     id: z.number(),
+    specimenId: z.number().nullish(),
     siteId: z.number(),
     year: z.number(),
     month: z.number(),

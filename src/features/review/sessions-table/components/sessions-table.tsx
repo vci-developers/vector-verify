@@ -9,7 +9,7 @@ import type {
 import type { Site } from '@/api/site/validation/site-schema';
 import type { LocationQueryParam } from '@/lib/location/location-query';
 import { buildSiteFilter } from '@/lib/location/location-query';
-import { getSiteDisplayName } from '@/features/review/sessions-table/utils/get-site-display-name';
+import { getSiteDisplayName } from '@/lib/location/get-site-display-name';
 import { matchesSearch } from '@/features/review/sessions-table/utils/matches-search';
 import {
     sortSessions,
