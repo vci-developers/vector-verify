@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import StatBadge from '@/components/ui/stat-badge';
 import {
     buildInterventionMetricsTotals,
+    formatInterventionCount,
     formatInterventionPercent,
     formatInterventionRatio,
     getCoverageCardStyle,
@@ -58,6 +59,9 @@ export default function OperationsInterventionMetrics({
 
             {isError && <ErrorBanner message={t('failedToLoad')} />}
 
+            <h3 className="text-sm font-semibold">
+                {t('bednetsSectionTitle')}
+            </h3>
             <div className="grid gap-3 sm:grid-cols-3">
                 <Card
                     className={cn(
@@ -187,6 +191,43 @@ export default function OperationsInterventionMetrics({
                                         label={t('peopleSleptUnderNet')}
                                         value={
                                             interventionMetricsTotals?.totalPeopleSleptUnderLlin ??
+                                            0
+                                        }
+                                    />
+                                </div>
+                            </Fragment>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <h3 className="text-sm font-semibold">{t('irsSectionTitle')}</h3>
+            <div className="grid gap-3 sm:grid-cols-3">
+                <Card className="border-border bg-card gap-0 py-0">
+                    <CardContent className="flex h-full flex-col p-4">
+                        <p className="text-muted-foreground text-sm">
+                            {t('housesSprayedTitle')}
+                        </p>
+                        {isLoading || isError ? (
+                            <StatCardSkeleton
+                                variant={isError ? 'destructive' : 'default'}
+                            />
+                        ) : (
+                            <Fragment>
+                                <p className="mt-1 text-5xl font-semibold tracking-tight">
+                                    {formatInterventionCount(
+                                        interventionMetricsTotals?.housesSprayedInLast12Months ??
+                                            null,
+                                    )}
+                                </p>
+                                <p className="text-muted-foreground mt-2 text-sm">
+                                    {t('housesSprayedDescription')}
+                                </p>
+                                <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                                    <StatBadge
+                                        label={t('housesUsedForCollection')}
+                                        value={
+                                            interventionMetricsTotals?.housesUsedForCollection ??
                                             0
                                         }
                                     />

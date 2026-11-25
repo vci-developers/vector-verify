@@ -11,6 +11,7 @@ export const getSessionsMetricsResponseSchema = z.object({
     siteInformation: z.object({
         housesUsedForCollection: z.number().nullable().optional(),
         peopleInAllHousesInspected: z.number().nullable().optional(),
+        housesSprayedInLast12Months: z.number().nullable().optional(),
     }),
     entomologicalSummary: z.object({
         totalFedAnopheles: z.number().nullable().optional(),
