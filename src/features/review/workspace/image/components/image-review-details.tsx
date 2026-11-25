@@ -14,35 +14,111 @@ import { useTranslations } from 'next-intl';
 import ConfidencePredictionRow from '@/features/review/workspace/image/components/confidence-prediction-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react/jsx-runtime';
+import { useGetAllReviewLogs } from '@/api/review-log/hooks/use-get-all-review-logs';
+import ErrorBanner from '@/components/ui/error-banner';
 import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import PredictionRow from '@/features/review/workspace/image/components/prediction-row';
 import PredictionEditForm from '@/features/review/workspace/image/components/prediction-edit-form';
 import { isThumbnailImage } from '@/lib/specimen/is-thumbnail-image';
 import { Button } from '@/components/ui/button';
 import { useState, type ReactNode } from 'react';
+import type { ImageLoadStatus } from '@/components/specimen/signed-specimen-image';
+import { getLatestPredictionEditLog } from '../utils/get-latest-prediction-edit-log';
+import { getSpecimenIdEditHistory } from '@/features/review/workspace/image/utils/get-specimen-id-edit-history';
+import SpecimenIdEditForm from './specimen-id-edit-form';
 
 type DetailsState =
     | { status: 'loading' }
     | { status: 'error' }
     | { status: 'success'; specimen: Specimen };
 
-interface ImageReviewDetailsProps {
+interface DetailsContentProps {
     currentImage: SpecimenImage | null;
-    latestEditLog: ReviewLog | undefined;
+    imageAvailability: ImageLoadStatus;
+    editingSpecimen: Specimen | null;
+    onEditSpecimenId: (specimen: Specimen | null) => void;
     timezone: string | null;
     readOnly: boolean;
     state: DetailsState;
     children?: ReactNode;
 }
 
+interface ImageReviewDetailsProps extends DetailsContentProps {
+    siteId: number;
+    collectionCycleId?: number;
+}
+
 export default function ImageReviewDetails({
+    siteId,
+    collectionCycleId,
+    ...contentProps
+}: ImageReviewDetailsProps) {
+    const t = useTranslations('ReviewImage');
+    const { data: predictionResult, isError: isPredictionError } =
+        useGetAllReviewLogs({
+            siteId,
+            collectionCycleId,
+            action: 'update_specimen_image_prediction',
+        });
+    const { data: specimenIdResult, isError: isSpecimenIdError } =
+        useGetAllReviewLogs({
+            siteId,
+            collectionCycleId,
+            action: 'update_specimen_thumbnail_prediction',
+        });
+
+    const hasReviewLogsError =
+        isPredictionError ||
+        isSpecimenIdError ||
+        predictionResult?.ok === false ||
+        specimenIdResult?.ok === false;
+    const { currentImage, editingSpecimen } = contentProps;
+
+    // Reset the editor on image changes without remounting the log queries.
+    return (
+        <>
+            {hasReviewLogsError && (
+                <div className="mb-4">
+                    <ErrorBanner message={t('reviewLogsError')} />
+                </div>
+            )}
+            <DetailsContent
+                key={
+                    editingSpecimen
+                        ? `editing-${editingSpecimen.id}`
+                        : currentImage?.id
+                }
+                {...contentProps}
+                predictionLogs={
+                    predictionResult?.ok
+                        ? predictionResult.data.logs
+                        : undefined
+                }
+                specimenIdLogs={
+                    specimenIdResult?.ok
+                        ? specimenIdResult.data.logs
+                        : undefined
+                }
+            />
+        </>
+    );
+}
+
+function DetailsContent({
     currentImage,
-    latestEditLog,
+    predictionLogs,
+    specimenIdLogs,
+    imageAvailability,
+    editingSpecimen,
+    onEditSpecimenId,
     timezone,
     readOnly,
     state,
     children,
-}: ImageReviewDetailsProps) {
+}: DetailsContentProps & {
+    predictionLogs: ReviewLog[] | undefined;
+    specimenIdLogs: ReviewLog[] | undefined;
+}) {
     const t = useTranslations('ReviewImage');
     const [isEditing, setIsEditing] = useState(false);
 
@@ -96,12 +172,24 @@ export default function ImageReviewDetails({
         return Math.round(Math.max(...exps.map(x => x / sumExps)) * 1000) / 10;
     }
 
+    const latestEditLog =
+        currentImage && predictionLogs
+            ? getLatestPredictionEditLog(predictionLogs, currentImage.id)
+            : undefined;
+    const specimenIdEditHistory =
+        state.status === 'success' && specimenIdLogs
+            ? getSpecimenIdEditHistory(specimenIdLogs, state.specimen.id)
+            : undefined;
     const isEdited = latestEditLog !== undefined;
     const editorName = latestEditLog?.performedBy
         ? (latestEditLog.performedBy.name ??
           t('unknownUser', { userId: latestEditLog.performedBy.userId }))
         : null;
     const canEdit = !readOnly && state.status === 'success';
+    const isCheckingImages = imageAvailability === 'pending';
+    const specimenIdEditor =
+        specimenIdEditHistory?.latestEditLog.performedBy?.name ??
+        t('unknownSpecimenIdEditor');
 
     function getPrediction(
         value: string | null | undefined,
@@ -146,11 +234,65 @@ export default function ImageReviewDetails({
 
     return (
         <div className="space-y-4">
-            <div>
-                <p className="text-muted-foreground text-sm uppercase">
-                    {t('specimenId')}
-                </p>
-                {state.status === 'success' ? (
+            <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                    <p className="text-muted-foreground text-sm uppercase">
+                        {t('specimenId')}
+                    </p>
+                    {specimenIdEditHistory && (
+                        <Badge variant="secondary">{t('edited')}</Badge>
+                    )}
+                    {canEdit &&
+                        isCurrentImageThumbnail &&
+                        !editingSpecimen &&
+                        !isEditing && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span
+                                        className="ml-auto"
+                                        tabIndex={
+                                            isCheckingImages ? 0 : undefined
+                                        }
+                                    >
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            aria-label={t('editSpecimenId')}
+                                            disabled={isCheckingImages}
+                                            onClick={() => {
+                                                if (state.status === 'success')
+                                                    onEditSpecimenId(
+                                                        state.specimen,
+                                                    );
+                                            }}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            {t('edit')}
+                                        </Button>
+                                    </span>
+                                </TooltipTrigger>
+                                {isCheckingImages && (
+                                    <TooltipContent>
+                                        {t('checkingImages')}
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        )}
+                </div>
+                {editingSpecimen ? (
+                    <SpecimenIdEditForm
+                        specimen={editingSpecimen}
+                        canSave={
+                            canEdit &&
+                            isCurrentImageThumbnail &&
+                            state.status === 'success' &&
+                            state.specimen.id === editingSpecimen.id &&
+                            !isCheckingImages
+                        }
+                        onClose={() => onEditSpecimenId(null)}
+                    />
+                ) : state.status === 'success' ? (
                     <p className="text-lg font-semibold">
                         {state.specimen.specimenId}
                     </p>
@@ -160,6 +302,21 @@ export default function ImageReviewDetails({
                         width="md"
                         variant={skeletonVariant}
                     />
+                )}
+                {editingSpecimen && isCheckingImages && (
+                    <p className="text-muted-foreground text-xs" role="status">
+                        {t('checkingImages')}
+                    </p>
+                )}
+                {specimenIdEditHistory && (
+                    <div className="text-muted-foreground space-y-1 text-xs">
+                        <p>
+                            {t('originalSpecimenId', {
+                                value: specimenIdEditHistory.originalValue,
+                            })}
+                        </p>
+                        <p>{t('editedBy', { name: specimenIdEditor })}</p>
+                    </div>
                 )}
             </div>
 
@@ -282,21 +439,14 @@ export default function ImageReviewDetails({
                         <div>
                             <div className="flex items-center gap-2">
                                 <p className="text-sm font-semibold">
-                                    {isEdited
-                                        ? t('editedPredictions')
-                                        : t('modelPredictions')}
+                                    {t('modelPredictions')}
                                 </p>
                                 {isEdited && (
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <AlertCircle className="text-warning h-4 w-4" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {t('editedTooltip')}
-                                        </TooltipContent>
-                                    </Tooltip>
+                                    <Badge variant="secondary">
+                                        {t('edited')}
+                                    </Badge>
                                 )}
-                                {canEdit && !isEditing && (
+                                {canEdit && !isEditing && !editingSpecimen && (
                                     <Button
                                         type="button"
                                         variant="outline"

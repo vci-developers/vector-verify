@@ -12,6 +12,7 @@ export const specimenSchema = z.object({
     shouldProcessFurther: z.boolean().optional(),
     images: z.array(specimenImageSchema).optional(),
     expectedImages: z.number().optional(),
+    molecularSpecies: z.string().nullable().optional(),
     thumbnailImage: specimenImageSchema.nullable(),
     session: sessionSchema.optional(),
 });
