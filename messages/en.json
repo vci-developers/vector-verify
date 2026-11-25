@@ -195,7 +195,7 @@
     },
     "OperationsInterventionMetrics": {
         "interventionMetricsTitle": "Intervention Coverage Metrics",
-        "interventionMetricsDescription": "Bednet coverage across surveyed households for the selected locations and date range.",
+        "interventionMetricsDescription": "Bednet and indoor residual spraying (IRS) coverage across surveyed households for the selected locations and date range.",
         "failedToLoad": "Failed to load intervention metrics. Please try again later or contact support.",
         "netUsageTitle": "Net Usage Rate",
         "netUsageSubtitle": "{peopleUnderNet} of {peopleSurveyed} people surveyed slept under a net",
@@ -208,7 +208,11 @@
         "fedAnophelesRatioTitle": "Fed Anopheles / People Slept Under Net",
         "fedAnophelesRatioDescription": "Fully fed Anopheles mosquitoes collected divided by total people who slept under a net.",
         "totalFedAnopheles": "Fed Anopheles",
-        "peopleSleptUnderNet": "People Slept Under Net"
+        "peopleSleptUnderNet": "People Slept Under Net",
+        "housesSprayedTitle": "Houses Sprayed (Last 12 Months)",
+        "housesSprayedDescription": "Households inspected that received indoor residual spraying (IRS) in the last 12 months.",
+        "bednetsSectionTitle": "Bednets (LLIN)",
+        "irsSectionTitle": "Indoor Residual Spraying (IRS)"
     },
     "Review": {
         "review": "Review",

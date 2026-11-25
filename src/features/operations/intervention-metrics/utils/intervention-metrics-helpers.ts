@@ -3,6 +3,7 @@ import type { GetSessionsMetricsSuccessPayload } from '@/api/session/validation/
 export interface InterventionMetricsTotals {
     peopleInAllHousesInspected: number | null;
     housesUsedForCollection: number | null;
+    housesSprayedInLast12Months: number | null;
     totalPeopleSleptUnderLlin: number | null;
     totalLlins: number | null;
     peopleNotUnderNet: number | null;
@@ -19,6 +20,8 @@ export function buildInterventionMetricsTotals(
         sessionsMetrics.siteInformation.peopleInAllHousesInspected ?? null;
     const housesUsedForCollection =
         sessionsMetrics.siteInformation.housesUsedForCollection ?? null;
+    const housesSprayedInLast12Months =
+        sessionsMetrics.siteInformation.housesSprayedInLast12Months ?? null;
     const totalPeopleSleptUnderLlin =
         sessionsMetrics.entomologicalSummary.totalPeopleSleptUnderLlin ?? null;
     const totalLlins = sessionsMetrics.entomologicalSummary.totalLlins ?? null;
@@ -57,6 +60,7 @@ export function buildInterventionMetricsTotals(
     return {
         peopleInAllHousesInspected,
         housesUsedForCollection,
+        housesSprayedInLast12Months,
         totalPeopleSleptUnderLlin,
         totalLlins,
         peopleNotUnderNet,
@@ -100,6 +104,10 @@ const UNAVAILABLE_PLACEHOLDER = '—';
 
 export function formatInterventionPercent(value: number | null): string {
     return value != null ? `${value.toFixed(1)}%` : UNAVAILABLE_PLACEHOLDER;
+}
+
+export function formatInterventionCount(value: number | null): string {
+    return value != null ? String(value) : UNAVAILABLE_PLACEHOLDER;
 }
 
 export function formatInterventionRatio(value: number | null): string {
