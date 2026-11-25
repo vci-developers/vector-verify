@@ -256,9 +256,11 @@ export default function OperationsPageClient() {
 
                             {activeTab === 'field-user-compliance' && (
                                 <OperationsFieldUserCompliance
-                                    siteIds={selectedSiteIdsParam}
-                                    siteIdToLocationLabel={
-                                        siteIdToLocationLabel
+                                    programId={
+                                        getUserPermissionsResult.data.programId
+                                    }
+                                    descendantsOfSelectedLocations={
+                                        descendantsOfSelectedLocations
                                     }
                                     startDate={startDate}
                                     endDate={endDate}

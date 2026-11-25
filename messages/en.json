@@ -175,14 +175,23 @@
         "labelExclusionExplanation": "Cannot be Determined specimens, UNKNOWN specimens, and specimens with labels containing 'unknown' were excluded from the sensitivity and specificity calculations due to ambiguity. An UNKNOWN VectorCam Prediction means that a specimen image was not uploaded. A label containing 'unknown' indicates annotator uncertainty."
     },
     "OperationsFieldTeamPerformance": {
-        "fieldTeamPerformance": "Field Team Performance",
-        "districtCollectors": "District Collectors",
-        "activeCollectors": "Active Collectors",
-        "submittedThisOrLastMonth": "Submitted this or last month",
-        "noSubmissionsFound": "No submissions found for this location and date range.",
-        "failedToLoad": "Failed to load sessions. Please try again later or contact support.",
-        "collector": "Collector",
-        "session": "session"
+        "reportingError": "Failed to load reporting data. Please try again later or contact support.",
+        "noActiveSites": "No active sites for the selected filters.",
+        "fullyReporting": "Locations fully reporting",
+        "sitesReporting": "Sites reporting",
+        "countOfTotal": "{count} of {total}",
+        "locationColumn": "{locationLevel} / {siteLevel} / Collector",
+        "cycleDateRange": "{start} – {end}",
+        "fullyReportedSegments": "{kind, select, cycle {Cycles fully reported} other {Months fully reported}}",
+        "sessionsReported": "Sessions reported",
+        "nothingReported": "Nothing reported",
+        "village": "Village",
+        "house": "House",
+        "unknownLocation": "Unknown location",
+        "collectorsReporting": "Collectors reporting",
+        "collectorCount": "{count, plural, =0 {No collectors} one {# collector} other {# collectors}}",
+        "unknownCollector": "Unknown collector",
+        "sessionCount": "{count, plural, one {# session} other {# sessions}}"
     },
     "OperationsInterventionMetrics": {
         "interventionMetricsTitle": "Intervention Coverage Metrics",
