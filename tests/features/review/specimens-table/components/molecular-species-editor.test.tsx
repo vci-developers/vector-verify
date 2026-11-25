@@ -133,9 +133,9 @@ test.each([
             ),
         );
         expect(fetchMock).toHaveBeenCalledTimes(1);
-        expect(
-            screen.getByRole('textbox', { name: editLabel }),
-        ).toHaveValue('An. funestus');
+        expect(screen.getByRole('textbox', { name: editLabel })).toHaveValue(
+            'An. funestus',
+        );
         expect(
             screen.getByRole('button', { name: messages.Common.save }),
         ).toBeEnabled();
