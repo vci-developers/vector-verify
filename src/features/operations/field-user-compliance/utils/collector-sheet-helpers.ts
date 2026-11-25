@@ -1,7 +1,7 @@
 import type { GetSessionSpecimensCountSuccessPayload } from '@/api/specimen/validation/get-session-specimens-count-schema';
 import type { SpecimenClassificationAxis } from '@/api/specimen/validation/specimen-schema';
 
-const UNKNOWN_SPECIMEN_CLASS = 'UNKNOWN';
+const UNKNOWN_SPECIMEN_CLASS = 'Unknown';
 
 export function sumSessionSpecimenCountsByClass(
     specimenClassificationAxis: SpecimenClassificationAxis,

@@ -98,7 +98,7 @@
         "operationsDescription": "Monitor field operations by location",
         "selectALocation": "Select a location to view data.",
         "selectDropdownPlaceholder": "Select {locationType}(s)",
-        "searchLocationPlaceholder": "Search {locationType}s",
+        "searchLocationPlaceholder": "Search by {locationType}",
         "allLocations": "All locations",
         "expandLocation": "Expand {name}",
         "collapseLocation": "Collapse {name}",
