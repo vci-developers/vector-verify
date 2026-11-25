@@ -7,6 +7,7 @@ export type ReportingSegment = {
     key: string;
     startDate: string;
     endDate: string;
+    timezone: string | null;
     sessionsBySiteId: Map<number, Session[]>;
 } & ({ kind: 'cycle'; cycleNumber: number } | { kind: 'month' });
 
@@ -51,6 +52,7 @@ export function buildReportingSegments({
                     cycle.timezone,
                     'yyyy-MM-dd',
                 ),
+                timezone: cycle.timezone,
                 sessionsBySiteId: groupSessionsBySiteId(
                     sessions.filter(
                         session => session.collectionCycleId === cycle.id,
@@ -66,6 +68,7 @@ export function buildReportingSegments({
                 key: `month-${monthKey}`,
                 startDate: format(month, 'yyyy-MM-dd'),
                 endDate: format(endOfMonth(month), 'yyyy-MM-dd'),
+                timezone: null,
                 sessionsBySiteId: groupSessionsBySiteId(
                     sessions.filter(
                         session =>

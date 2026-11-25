@@ -9,7 +9,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
-import { buildReviewUnitHref } from '../utils/build-review-unit-href';
+import { buildReviewUnitHref } from '@/lib/review/build-review-unit-href';
 
 interface SpecimenReviewLinkProps {
     session: Session;

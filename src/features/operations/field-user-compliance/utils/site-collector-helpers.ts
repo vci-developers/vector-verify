@@ -2,11 +2,11 @@ import type { Session } from '@/api/session/validation/session-schema';
 import type { Site } from '@/api/site/validation/site-schema';
 import type { ReportingSegment } from '@/features/operations/field-user-compliance/utils/reporting-segment-helpers';
 
-interface SiteCollector {
+export interface SiteCollector {
     key: string;
     collectorName: string;
     collectorTitle: string;
-    sessionCounts: number[];
+    sessionsBySegment: Session[][];
 }
 
 function getCollectorKey(session: Session): string {
@@ -25,10 +25,9 @@ export function buildSiteCollectors(
                 key: collectorKey,
                 collectorName: session.collectorName.trim(),
                 collectorTitle: session.collectorTitle.trim(),
-                sessionCounts: segments.map(() => 0),
+                sessionsBySegment: segments.map(() => []),
             };
-            collector.sessionCounts[segmentIndex] =
-                (collector.sessionCounts[segmentIndex] ?? 0) + 1;
+            collector.sessionsBySegment[segmentIndex]?.push(session);
             collectorByKey.set(collectorKey, collector);
         }
     });
@@ -37,13 +36,6 @@ export function buildSiteCollectors(
             firstCollector.collectorName.localeCompare(
                 secondCollector.collectorName,
             ),
-    );
-}
-
-export function sumSessionCounts(sessionCounts: number[]): number {
-    return sessionCounts.reduce(
-        (total, sessionCount) => total + sessionCount,
-        0,
     );
 }
 

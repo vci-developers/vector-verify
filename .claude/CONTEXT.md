@@ -11,7 +11,7 @@ national health systems.
 
 **VHT (Village Health Team)**: A field data collector who captures mosquito
 specimens and household survey data using the VectorCam mobile app. VHTs do not
-access VectorVerify directly. _Avoid_: Collector, field worker, field team
+access VectorVerify directly. _Avoid_: field worker, field team
 
 **VCO (Vector Control Officer)**: An authorized expert (Access Level 3) who
 performs both the Annotation and Review workflows in VectorVerify. _Avoid_:
@@ -475,6 +475,11 @@ review. `submittedAt` is not used. Only active sites (`isActive`) are listed. A
 cycle is **fully reported** for a location when every one of its sites reported.
 A collector is listed only if they have a session in the range. _Avoid_: sent,
 submitted, complete (a cycle can end without full data)
+
+**Collector**: The person named on a **Session** (`collectorName` +
+`collectorTitle`, free text from the phone) at one **Sentinel Site**. There is
+no user ID behind it, so the same name at two sites is two collectors. In Uganda
+a collector is a **VHT**. _Avoid_: user, field worker
 
 **Raw Data Export**: A `devMode`-gated download of unprocessed CSVs straight
 from the backend (specimens, surveillance forms, annotations), not affected by

@@ -6,7 +6,7 @@ import type { Site } from '@/api/site/validation/site-schema';
 import type { ReviewLog } from '@/api/review-log/validation/review-log-schema';
 import { TableCell, TableRow } from '@/components/ui/table';
 import Link from 'next/link';
-import { buildReviewUnitHref } from '../utils/build-review-unit-href';
+import { buildReviewUnitHref } from '@/lib/review/build-review-unit-href';
 import SpecimenImagePreview from './specimen-image-preview';
 import SpecimenReviewLink from './specimen-review-link';
 import SpecimenChangelogDrawer from './specimen-changelog-drawer';

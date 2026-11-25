@@ -13,6 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import ErrorBanner from '@/components/ui/error-banner';
+import ReportingSegmentLabel from '@/features/operations/field-user-compliance/components/reporting-segment-label';
 import ReportingLocationRow from '@/features/operations/field-user-compliance/components/reporting-location-row';
 import { useSiteReportingGrid } from '@/features/operations/field-user-compliance/hooks/use-site-reporting-grid';
 import {
@@ -36,7 +37,6 @@ export default function OperationsFieldUserCompliance({
     endDate,
 }: OperationsFieldUserComplianceProps) {
     const t = useTranslations('OperationsFieldTeamPerformance');
-    const tCollectionCycle = useTranslations('CollectionCycle');
     const { locations, segments, isPending, isError } = useSiteReportingGrid({
         programId,
         sites: descendantsOfSelectedLocations,
@@ -49,14 +49,6 @@ export default function OperationsFieldUserCompliance({
             start: format(parseISO(segment.startDate), 'MMM d'),
             end: format(parseISO(segment.endDate), 'MMM d'),
         });
-    }
-
-    function getSegmentLabel(segment: ReportingSegment): string {
-        return segment.kind === 'cycle'
-            ? tCollectionCycle('badgeLabel', {
-                  cycleNumber: segment.cycleNumber,
-              })
-            : format(parseISO(segment.startDate), 'MMM yy');
     }
 
     if (isPending) {
@@ -156,7 +148,11 @@ export default function OperationsFieldUserCompliance({
                                         key={segment.key}
                                         className="px-3 py-3 text-center"
                                     >
-                                        <p>{getSegmentLabel(segment)}</p>
+                                        <p>
+                                            <ReportingSegmentLabel
+                                                segment={segment}
+                                            />
+                                        </p>
                                         {segment.kind === 'cycle' && (
                                             <p className="text-muted-foreground text-xs font-normal">
                                                 {getCycleDateRange(segment)}

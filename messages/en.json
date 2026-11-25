@@ -98,7 +98,7 @@
         "operationsDescription": "Monitor field operations by location",
         "selectALocation": "Select a location to view data.",
         "selectDropdownPlaceholder": "Select {locationType}(s)",
-        "searchLocationPlaceholder": "Search {locationType}s",
+        "searchLocationPlaceholder": "Search by {locationType}",
         "allLocations": "All locations",
         "expandLocation": "Expand {name}",
         "collapseLocation": "Collapse {name}",
@@ -191,7 +191,15 @@
         "collectorsReporting": "Collectors reporting",
         "collectorCount": "{count, plural, =0 {No collectors} one {# collector} other {# collectors}}",
         "unknownCollector": "Unknown collector",
-        "sessionCount": "{count, plural, one {# session} other {# sessions}}"
+        "sessionCount": "{count, plural, one {# session} other {# sessions}}",
+        "collectorSheetContext": "{collectorTitle} · {siteName} · {start} – {end}",
+        "collectorSheetError": "Failed to load this collector's specimen counts. Please try again later or contact support.",
+        "sessions": "Sessions",
+        "specimens": "Specimens",
+        "reported": "Reported",
+        "classificationAxis": "{axis, select, species {Species} sex {Sex} other {Abdomen status}}",
+        "specimenCount": "{count, plural, one {# specimen} other {# specimens}}",
+        "openInReview": "Review →"
     },
     "OperationsInterventionMetrics": {
         "interventionMetricsTitle": "Intervention Coverage Metrics",
