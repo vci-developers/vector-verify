@@ -28,12 +28,14 @@ export default function MolecularSpeciesEditor({
     const tCommon = useTranslations('Common');
     const queryClient = useQueryClient();
     const [isEditing, setIsEditing] = useState(false);
-    const { mutateAsync: putSpecimenByIdAsync } = usePutSpecimenById();
+    const { mutate: putSpecimenById, isPending: isPutSpecimenByIdPending } =
+        usePutSpecimenById();
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const molecularSpeciesForm = useForm<MolecularSpeciesFormInput>({
         resolver: zodResolver(molecularSpeciesFormSchema),
         defaultValues: { molecularSpecies: specimen.molecularSpecies ?? '' },
     });
-    const isSaving = molecularSpeciesForm.formState.isSubmitting;
+    const isSaving = isPutSpecimenByIdPending || isRefreshing;
     const isMolecularSpeciesInvalid =
         molecularSpeciesForm.formState.errors.molecularSpecies !== undefined;
     const editLabel = t('editMolecularSpecies', {
@@ -47,18 +49,29 @@ export default function MolecularSpeciesEditor({
         setIsEditing(true);
     }
 
-    async function handleSave({ molecularSpecies }: MolecularSpeciesFormInput) {
-        const putSpecimenByIdResult = await putSpecimenByIdAsync({
-            specimenId: specimen.id,
-            requestBody: { molecularSpecies: molecularSpecies || null },
-        });
-        if (!putSpecimenByIdResult.ok) {
-            toast.error(t('molecularSpeciesSaveError'));
-            return;
-        }
-        await queryClient.invalidateQueries({ queryKey: specimenKeys.root });
-        toast.success(t('molecularSpeciesSaveSuccess'));
-        setIsEditing(false);
+    function handleSave({ molecularSpecies }: MolecularSpeciesFormInput) {
+        putSpecimenById(
+            {
+                specimenId: specimen.id,
+                requestBody: { molecularSpecies: molecularSpecies || null },
+            },
+            {
+                onSuccess: async putSpecimenByIdResult => {
+                    if (!putSpecimenByIdResult.ok) {
+                        toast.error(t('molecularSpeciesSaveError'));
+                        return;
+                    }
+                    setIsRefreshing(true);
+                    await queryClient.invalidateQueries({
+                        queryKey: specimenKeys.root,
+                    });
+                    setIsRefreshing(false);
+                    toast.success(t('molecularSpeciesSaveSuccess'));
+                    setIsEditing(false);
+                },
+                onError: () => toast.error(t('molecularSpeciesSaveError')),
+            },
+        );
     }
 
     // TODO: remove edit function once Kenya is taken off read-only, read-only views should not be able to add lab results
