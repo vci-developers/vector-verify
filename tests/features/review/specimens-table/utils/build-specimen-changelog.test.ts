@@ -141,7 +141,7 @@ test('uses the same thumbnail-first image numbering as the preview carousel', ()
         'UTC',
         [log],
     );
-    expect(result.edits[0]?.imageNumber).toBe(2);
+    expect(result.edits[0]).toMatchObject({ scope: 'image', imageNumber: 2 });
 });
 
 test.each([
@@ -171,7 +171,7 @@ test.each([
         'UTC',
         [log],
     );
-    expect(result.edits[0]?.imageNumber).toBe(2);
+    expect(result.edits[0]).toMatchObject({ scope: 'image', imageNumber: 2 });
 });
 
 test('combines specimen-level ID changes with existing image edits', () => {
@@ -188,7 +188,6 @@ test('combines specimen-level ID changes with existing image edits', () => {
     expect(result.edits[1]).toEqual({
         id: 9,
         scope: 'specimen',
-        imageNumber: null,
         reviewerName: null,
         createdAt: 1000,
         changes: [
@@ -311,5 +310,5 @@ test('removes thumbnail duplicates by ID or URL before numbering other images', 
         'UTC',
         [log],
     );
-    expect(result.edits[0]?.imageNumber).toBe(2);
+    expect(result.edits[0]).toMatchObject({ scope: 'image', imageNumber: 2 });
 });

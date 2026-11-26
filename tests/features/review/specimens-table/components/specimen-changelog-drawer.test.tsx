@@ -55,7 +55,6 @@ test('renders mixed history newest-first with specimen labels and raw ID values'
                 scope: 'specimen',
                 reviewerName: null,
                 createdAt: 1000,
-                imageNumber: null,
                 changes: [
                     {
                         field: 'specimenId',
@@ -69,7 +68,6 @@ test('renders mixed history newest-first with specimen labels and raw ID values'
                 scope: 'specimen',
                 reviewerName: 'Latest reviewer',
                 createdAt: 1000,
-                imageNumber: null,
                 changes: [
                     {
                         field: 'specimenId',

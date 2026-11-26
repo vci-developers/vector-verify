@@ -43,7 +43,6 @@ export function buildSpecimenChangelog(
                     {
                         ...entry,
                         scope: 'specimen',
-                        imageNumber: null,
                         changes: [
                             {
                                 field: 'specimenId',

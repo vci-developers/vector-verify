@@ -19,8 +19,6 @@ type SpecimenEdit = {
       }
     | {
           scope: 'specimen';
-          imageNumber: null;
-          imageId?: never;
           changes: {
               field: 'specimenId';
               previousValue: string;
