@@ -29,7 +29,7 @@ function renderChangelog(changelog: SpecimenChangelog) {
     );
 }
 
-test('renders mixed history newest-first with specimen labels and raw ID values', async () => {
+test('groups mixed history, counts events, and sorts entries newest-first', async () => {
     renderChangelog({
         specimenId: 'Gravid',
         sessionId: 1401,
@@ -47,6 +47,11 @@ test('renders mixed history newest-first with specimen labels and raw ID values'
                         field: 'abdomenStatus',
                         previousValue: 'Gravid',
                         value: 'Unfed',
+                    },
+                    {
+                        field: 'sex',
+                        previousValue: 'Male',
+                        value: 'Female',
                     },
                 ],
             },
@@ -89,9 +94,24 @@ test('renders mixed history newest-first with specimen labels and raw ID values'
     ).toBeInTheDocument();
     const entries = dialog.getAllByRole('listitem');
     expect(
-        entries.map(entry => within(entry).getByRole('heading').textContent),
+        entries.map(entry => within(entry).getByText(/reviewer/i).textContent),
     ).toEqual(['Latest reviewer', 'Unknown reviewer', 'Image reviewer']);
-    expect(dialog.getAllByText('Specimen details')).toHaveLength(2);
+    expect(
+        dialog.getByRole('heading', { name: 'Specimen ID' }),
+    ).toBeInTheDocument();
+    expect(
+        dialog.getByRole('heading', { name: 'Predictions' }),
+    ).toBeInTheDocument();
+    expect(dialog.getAllByRole('list')).toHaveLength(2);
+    const specimenGroup = dialog
+        .getByRole('heading', { name: 'Specimen ID' })
+        .closest('section');
+    const predictionGroup = dialog
+        .getByRole('heading', { name: 'Predictions' })
+        .closest('section');
+    expect(within(specimenGroup!).getByText('2')).toBeInTheDocument();
+    expect(within(predictionGroup!).getByText('1')).toBeInTheDocument();
+    expect(within(entries[2]!).getAllByRole('definition')).toHaveLength(2);
     expect(dialog.queryByText('Image unavailable')).not.toBeInTheDocument();
     expect(dialog.getByText('Image 1')).toBeInTheDocument();
     const newest = within(entries[0]!).getByRole('definition');

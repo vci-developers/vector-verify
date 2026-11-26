@@ -65,7 +65,7 @@ export default function ReviewSitesListHeader({
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <Select
                     value={
                         showAllLocationsOption
@@ -76,7 +76,7 @@ export default function ReviewSitesListHeader({
                         onLocationChange(value === 'ALL' ? '' : value)
                     }
                 >
-                    <SelectTrigger className="w-52">
+                    <SelectTrigger className="w-52 max-w-full">
                         <SelectValue
                             placeholder={`Select a ${locationTypeName.toLowerCase()}`}
                         />
@@ -98,7 +98,7 @@ export default function ReviewSitesListHeader({
                     </SelectContent>
                 </Select>
 
-                <div className="flex items-center gap-3">
+                <div className="flex max-w-full min-w-0 flex-wrap items-center gap-3">
                     {activeTab !== 'specimens' && (
                         <ReviewStatePicker
                             selectedReviewStates={selectedReviewStates}
@@ -116,6 +116,7 @@ export default function ReviewSitesListHeader({
                         single={activeTab === 'specimens'}
                     />
                     <MonthRangePicker
+                        className="min-w-0 flex-wrap"
                         startMonth={startMonth}
                         endMonth={endMonth}
                         onStartMonthChange={onStartMonthChange}
@@ -129,18 +130,18 @@ export default function ReviewSitesListHeader({
                 value={activeTab}
                 onValueChange={value => onTabChange(value as ReviewTab)}
             >
-                <TabsList className="bg-muted/50 rounded-full p-1">
+                <TabsList className="bg-muted/50 max-w-full flex-wrap rounded-full p-1 group-data-[orientation=horizontal]/tabs:h-auto">
                     {tabs.map(tab => (
                         <Fragment key={tab.value}>
                             {tab.value === 'sessions' && (
                                 <Separator
                                     orientation="vertical"
-                                    className="bg-muted-foreground/40 mx-1 h-6 w-px shrink-0 self-center"
+                                    className="bg-muted-foreground/40 mx-1 hidden h-6 w-px shrink-0 self-center sm:block"
                                 />
                             )}
                             <TabsTrigger
                                 value={tab.value}
-                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 text-sm font-medium"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-auto rounded-full px-4 py-2 text-sm font-medium"
                             >
                                 {tab.label}
                             </TabsTrigger>
