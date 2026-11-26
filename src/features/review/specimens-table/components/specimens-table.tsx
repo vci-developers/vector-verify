@@ -172,13 +172,35 @@ function SpecimensTableContent({
                     result?.ok === true && result.data.specimens.length > 0,
             },
         );
-    const reviewLogsError = isReviewLogsError || reviewLogsResult?.ok === false;
+    const { data: specimenIdLogsResult, isError: isSpecimenIdLogsError } =
+        useGetAllReviewLogs(
+            {
+                siteId: selectedSiteId,
+                collectionCycleId,
+                action: 'update_specimen_thumbnail_prediction',
+                hasChanges: 'true',
+            },
+            {
+                enabled:
+                    result?.ok === true && result.data.specimens.length > 0,
+            },
+        );
+    const reviewLogsError =
+        isReviewLogsError ||
+        isSpecimenIdLogsError ||
+        reviewLogsResult?.ok === false ||
+        specimenIdLogsResult?.ok === false;
+    const areReviewLogsLoaded =
+        reviewLogsResult?.ok === true && specimenIdLogsResult?.ok === true;
     const reviewLogsBySpecimenId = useMemo(
         () =>
-            groupReviewLogsBySpecimenId(
-                reviewLogsResult?.ok ? reviewLogsResult.data.logs : [],
-            ),
-        [reviewLogsResult],
+            groupReviewLogsBySpecimenId([
+                ...(reviewLogsResult?.ok ? reviewLogsResult.data.logs : []),
+                ...(specimenIdLogsResult?.ok
+                    ? specimenIdLogsResult.data.logs
+                    : []),
+            ]),
+        [reviewLogsResult, specimenIdLogsResult],
     );
     const totalPages = result?.ok
         ? Math.max(1, Math.ceil(result.data.total / PAGE_SIZE))
@@ -324,7 +346,7 @@ function SpecimensTableContent({
                                             key={specimen.id}
                                             specimen={specimen}
                                             reviewLogs={
-                                                reviewLogsResult?.ok
+                                                areReviewLogsLoaded
                                                     ? (reviewLogsBySpecimenId.get(
                                                           specimen.id,
                                                       ) ?? [])
