@@ -278,7 +278,6 @@ export default function SpecimenImageCarousel({
                                         }
                                     >
                                         <SignedSpecimenImage
-                                            key={image.url}
                                             path={image.url}
                                             alt={`Specimen ${specimen.specimenId}`}
                                             fill
@@ -442,7 +441,6 @@ export default function SpecimenImageCarousel({
                                             }
                                         >
                                             <SignedSpecimenImage
-                                                key={image.url}
                                                 path={image.url}
                                                 alt=""
                                                 fill
